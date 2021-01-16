@@ -8,8 +8,84 @@
 namespace Invader::BitmapEncode {
     static std::vector<ColorPlatePixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height);
     
-    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height) {
+    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
         auto as_32_bit = decode_to_32_bit(input_data, input_format, width, height);
+        auto first_pixel = as_32_bit.data();
+        auto last_pixel = first_pixel + as_32_bit.size();
+        
+        bool dithering = dither_alpha || dither_red || dither_green || dither_blue;
+
+        // Do dithering based on https://en.wikipedia.org/wiki/Floyd–Steinberg_dithering
+        auto dither_do = [&dither_alpha, &dither_red, &dither_green, &dither_blue](auto to_palette_fn, auto from_palette_fn, auto *from_pixels, auto *to_pixels, std::uint32_t width, std::uint32_t height) {
+            for(std::uint32_t y = 0; y < height; y++) {
+                for(std::uint32_t x = 0; x < width; x++) {
+                    // Get our pixels
+                    auto &pixel = from_pixels[x + y * width];
+                    auto &pixel_output = to_pixels[x + y * width];
+
+                    // Convert
+                    pixel_output = (pixel.*to_palette_fn)();
+
+                    // Get the error
+                    ColorPlatePixel p8_return = from_palette_fn(pixel_output);
+                    float alpha_error = static_cast<std::int16_t>(pixel.alpha) - p8_return.alpha;
+                    float red_error = static_cast<std::int16_t>(pixel.red) - p8_return.red;
+                    float green_error = static_cast<std::int16_t>(pixel.green) - p8_return.green;
+                    float blue_error = static_cast<std::int16_t>(pixel.blue) - p8_return.blue;
+
+                    if(x > 0 && x < width - 1 && y < height - 1) {
+                        // Apply the error
+                        #define APPLY_ERROR(pixel, channel, error, multiply) {\
+                            float delta = (error * multiply / 16);\
+                            std::int16_t value = static_cast<std::int16_t>(pixel.channel) + delta;\
+                            if(value < 0) {\
+                                value = 0;\
+                            }\
+                            else if(value > UINT8_MAX) {\
+                                value = UINT8_MAX;\
+                            }\
+                            pixel.channel = static_cast<std::uint8_t>(value);\
+                        }
+
+                        auto &pixel_right = from_pixels[x + y * width + 1];
+                        auto &pixel_below_left = from_pixels[x + (y + 1) * width - 1];
+                        auto &pixel_below_middle = from_pixels[x + (y + 1) * width];
+                        auto &pixel_below_right = from_pixels[x + (y + 1) * width + 1];
+
+                        if(dither_alpha) {
+                            APPLY_ERROR(pixel_right, alpha, alpha_error, 7);
+                            APPLY_ERROR(pixel_below_left, alpha, alpha_error, 3);
+                            APPLY_ERROR(pixel_below_middle, alpha, alpha_error, 5);
+                            APPLY_ERROR(pixel_below_right, alpha, alpha_error, 1);
+                        }
+
+                        if(dither_red) {
+                            APPLY_ERROR(pixel_right, red, red_error, 7);
+                            APPLY_ERROR(pixel_below_left, red, red_error, 3);
+                            APPLY_ERROR(pixel_below_middle, red, red_error, 5);
+                            APPLY_ERROR(pixel_below_right, red, red_error, 1);
+                        }
+
+                        if(dither_green) {
+                            APPLY_ERROR(pixel_right, green, green_error, 7);
+                            APPLY_ERROR(pixel_below_left, green, green_error, 3);
+                            APPLY_ERROR(pixel_below_middle, green, green_error, 5);
+                            APPLY_ERROR(pixel_below_right, green, green_error, 1);
+                        }
+
+                        if(dither_blue) {
+                            APPLY_ERROR(pixel_right, blue, blue_error, 7);
+                            APPLY_ERROR(pixel_below_left, blue, blue_error, 3);
+                            APPLY_ERROR(pixel_below_middle, blue, blue_error, 5);
+                            APPLY_ERROR(pixel_below_right, blue, blue_error, 1);
+                        }
+
+                        #undef APPLY_ERROR
+                    }
+                }
+            }
+        };
+
         
         switch(output_format) {
             // Straight copy
@@ -28,12 +104,93 @@ namespace Invader::BitmapEncode {
                 return;
             }
             
+            // If it's 16-bit, there is stuff we will need to do
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5: {
+                // Figure out what we'll be doing
+                std::uint16_t (ColorPlatePixel::*conversion_function)();
+                ColorPlatePixel (*deconversion_function)(std::uint16_t);
+
+                switch(output_format) {
+                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+                        conversion_function = &ColorPlatePixel::convert_to_16_bit<1,5,5,5>;
+                        deconversion_function = ColorPlatePixel::convert_from_16_bit<1,5,5,5>;
+                        break;
+                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+                        conversion_function = &ColorPlatePixel::convert_to_16_bit<4,4,4,4>;
+                        deconversion_function = ColorPlatePixel::convert_from_16_bit<4,4,4,4>;
+                        break;
+                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
+                        conversion_function = &ColorPlatePixel::convert_to_16_bit<0,5,6,5>;
+                        deconversion_function = ColorPlatePixel::convert_from_16_bit<0,5,6,5>;
+                        break;
+                    default:
+                        std::terminate();
+                        break;
+                }
+
+                // Begin
+                if(dithering) {
+                    dither_do(conversion_function, deconversion_function, as_32_bit.data(), reinterpret_cast<HEK::LittleEndian<std::int16_t> *>(output_data), width, height);
+                }
+                else {
+                    auto *pixel_16_bit = reinterpret_cast<HEK::LittleEndian<std::int16_t> *>(output_data);
+                    
+                    for(ColorPlatePixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
+                        *pixel_32_bit = deconversion_function((pixel_32_bit->*conversion_function)());
+                        *pixel_16_bit = (pixel_32_bit->*conversion_function)();
+                    }
+                }
+
+                return;
+            }
+
+            // If it's monochrome, it depends
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8: {
+                auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(output_data);
+                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
+                    *pixel_8_bit = pixel->alpha;
+                }
+                
+                break;
+            }
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8: {
+                auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(output_data);
+                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
+                    *pixel_8_bit = pixel->convert_to_y8();
+                }
+                break;
+            }
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8: {
+                auto *pixel_16_bit = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(output_data);
+                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_16_bit++) {
+                    *pixel_16_bit = pixel->convert_to_a8y8();
+                }
+                break;
+            }
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP: {
+                auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(output_data);
+
+                // If we're dithering, do dithering things
+                if(dithering) {
+                    dither_do(&ColorPlatePixel::convert_to_p8, ColorPlatePixel::convert_from_p8, as_32_bit.data(), pixel_8_bit, width, height);
+                }
+                else {
+                    for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
+                        *pixel_8_bit = pixel->convert_to_p8();
+                    }
+                }
+                
+                break;
+            }
+            
             // Use libsquish
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5: {
                 int flags = squish::kColourIterativeClusterFit | squish::kSourceBGRA;
-                    
                 switch(output_format) {
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
                         flags |= squish::kDxt1;
@@ -63,12 +220,12 @@ namespace Invader::BitmapEncode {
         }
     }
     
-    std::vector<std::byte> encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height) {
+    std::vector<std::byte> encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
         // Get our output buffer
-        std::vector<std::byte> output(bitmap_data_size(input_format, width, height));
+        std::vector<std::byte> output(bitmap_data_size(output_format, width, height));
         
         // Do it
-        encode_bitmap(input_data, input_format, output.data(), output_format, width, height);
+        encode_bitmap(input_data, input_format, output.data(), output_format, width, height, dither_alpha, dither_red, dither_green, dither_blue);
 
         // Done
         return output;
