@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [0.41.0] - 2020-01-16
 ### Added
 - New tool: invader-convert - Converts between various tag types (gbxmodel to
   model, model to gbxmodel, shader_transparent_chicago_extended to
