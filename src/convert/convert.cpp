@@ -34,9 +34,9 @@ int main(int argc, const char **argv) {
     options.emplace_back("all", 'a', 0, "Convert all tags. This cannot be used with -s.");
     options.emplace_back("single-tag", 's', 1, "Convert a specific tag. This can be specified multiple times for multiple tags, but cannot be used with -a.");
     options.emplace_back("overwrite", 'O', 0, "Overwrite any output tags if they exist.");
-    options.emplace_back("tags", 't', 1, "Set the input tags directory.");
-    options.emplace_back("output-tags", 'o', 1, "Set the output tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of conversion. Can be: gbxmodel-to-model, model-to-gbxmodel, chicago-extended-to-chicago");
+    options.emplace_back("tags", 't', 1, "Set the input tags directory.", "<dir>");
+    options.emplace_back("output-tags", 'o', 1, "Set the output tags directory.", "<dir>");
+    options.emplace_back("type", 'T', 1, "Type of conversion. Can be: gbxmodel-to-model, model-to-gbxmodel, chicago-extended-to-chicago", "<type>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
 
     static constexpr char DESCRIPTION[] = "Convert from one tag type to another.";
