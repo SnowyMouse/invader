@@ -9,6 +9,8 @@ This is used for recording Invader's changes. This changelog is based on
   and shader_transparent_chicago maps
 - invader-edit-qt: Fixed tag_collection tags not being editable if fast listing
   mode is on
+- invader-edit-qt: Disabled Insert New if there are no items in an array (fixes
+  a crash)
 
 ## [0.41.1] - 2021-01-20
 ### Fixed

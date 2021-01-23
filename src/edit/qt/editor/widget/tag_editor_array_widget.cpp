@@ -380,7 +380,7 @@ namespace Invader::EditQt {
         this->shift_down_button->setEnabled(selection && index_unsigned > 0);
         this->shift_up_button->setEnabled(selection && index_unsigned + 1 < count);
         this->add_button->setEnabled(count < max);
-        this->insert_button->setEnabled(count < max);
+        this->insert_button->setEnabled(count < max && count > 0);
         this->duplicate_button->setEnabled(index >= 0 && this->add_button->isEnabled());
         this->clear_button->setEnabled(index >= 0);
     }
