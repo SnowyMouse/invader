@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-bitmap: Fixed an issue where some sprites would have a black border
+
 ## [0.41.1] - 2021-01-20
 ### Fixed
 - invader-convert: Fixed missing parameters in `-h`
