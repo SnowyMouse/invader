@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Fixed
 - invader-bitmap: Fixed an issue where some sprites would have a black border
+- invader-build: Fixed defaulting map u/v scaling for shader_transparent_generic
+  and shader_transparent_chicago maps
 
 ## [0.41.1] - 2021-01-20
 ### Fixed

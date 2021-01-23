@@ -13,6 +13,21 @@ namespace Invader::Parser {
         }
     }
     
+    template<typename T> static void default_maps(T &maps) {
+        for(auto &i : maps) {
+            if(i.map_u_scale == 0.0F && i.map_v_scale == 0.0F) {
+                i.map_u_scale = 1.0F;
+                i.map_v_scale = 1.0F;
+            }
+            else if(i.map_u_scale == 0.0F) {
+                i.map_u_scale = i.map_v_scale;
+            }
+            else if(i.map_v_scale == 0.0F) {
+                i.map_v_scale = i.map_u_scale;
+            }
+        }
+    }
+    
     void ShaderEnvironment::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_ENVIRONMENT);
         this->bump_map_scale_xy.x = this->bump_map_scale;
@@ -36,6 +51,7 @@ namespace Invader::Parser {
     
     void ShaderTransparentChicago::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO);
+        default_maps(this->maps);
     }
     void ShaderTransparentChicagoExtended::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Error if the target engine can't use it
@@ -46,6 +62,8 @@ namespace Invader::Parser {
         
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED);
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
+        default_maps(this->maps_4_stage);
+        default_maps(this->maps_2_stage);
     }
     
     void ShaderTransparentWater::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
@@ -70,6 +88,7 @@ namespace Invader::Parser {
                 break;
             default: break;
         }
+        default_maps(this->maps);
         
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC);
     }
