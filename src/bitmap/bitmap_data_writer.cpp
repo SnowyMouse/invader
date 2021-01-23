@@ -91,7 +91,7 @@ namespace Invader {
             }
 
             // Set the format
-            bool compressed = (format == BitmapFormat::BITMAP_FORMAT_DXT1 || format == BitmapFormat::BITMAP_FORMAT_DXT3 || format == BitmapFormat::BITMAP_FORMAT_DXT3);
+            bool compressed = (format == BitmapFormat::BITMAP_FORMAT_DXT1 || format == BitmapFormat::BITMAP_FORMAT_DXT3 || format == BitmapFormat::BITMAP_FORMAT_DXT5);
 
             // If the bitmap length or height isn't divisible by 4, use 32-bit color
             if(compressed && ((bitmap.height % 4) != 0 || (bitmap.width % 4) != 0)) {
