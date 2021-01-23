@@ -279,7 +279,7 @@ namespace Invader::EditQt {
                     new_item->setIcon(0, file_icon);
                     new_item->setData(0, Qt::UserRole, QVariant::fromValue(QString(relative.string().c_str())));
                     
-                    if(this->filter.has_value()) {
+                    if(this->filter.has_value() && this->filter->size() > 0) {
                         new_item->setDisabled(true);
                         for(auto &i : *this->filter) {
                             if(i == path_split->class_int) {
