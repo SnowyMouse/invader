@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.41.2] - 2021-01-24
 ### Fixed
 - invader-bitmap: Fixed an issue where some sprites would have a black border
 - invader-bitmap: Fixed compressed flag not being set for DXT5 bitmaps
@@ -1767,3 +1767,5 @@ image as one bitmap
 [0.40.0]: https://github.com/SnowyMouse/invader/compare/0.39.0...0.40.0
 [0.40.1]: https://github.com/SnowyMouse/invader/compare/0.40.0...0.40.1
 [0.41.0]: https://github.com/SnowyMouse/invader/compare/0.40.1...0.41.0
+[0.41.1]: https://github.com/SnowyMouse/invader/compare/0.41.0...0.41.1
+[0.41.2]: https://github.com/SnowyMouse/invader/compare/0.41.1...0.41.2
