@@ -126,12 +126,12 @@ namespace Invader {
             
             return actual_max_length;
         }
-        std::vector<Invader::ColorPlatePixel> bake_sprite_sheet(std::size_t &length, const GeneratedBitmapData &bitmap, BitmapSpriteUsage sprite_usage) {
+        std::vector<Invader::Pixel> bake_sprite_sheet(std::size_t &length, const GeneratedBitmapData &bitmap, BitmapSpriteUsage sprite_usage) {
             // Store length
             length = this->length();
         
             // Figure out the background color, too
-            ColorPlatePixel background_color;
+            Pixel background_color;
             
             switch(sprite_usage) {
                 case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX:
@@ -157,10 +157,10 @@ namespace Invader {
             }
             
             // Store this
-            std::vector<Invader::ColorPlatePixel> baked_sheet(length * length, background_color);
+            std::vector<Invader::Pixel> baked_sheet(length * length, background_color);
             
             // If we're doing multiply, do alpha blend. Otherwise do a simple replace.
-            auto blend_function = sprite_usage == BitmapSpriteUsage::BITMAP_SPRITE_USAGE_MULTIPLY_MIN ? &ColorPlatePixel::alpha_blend : &ColorPlatePixel::replace;
+            auto blend_function = sprite_usage == BitmapSpriteUsage::BITMAP_SPRITE_USAGE_MULTIPLY_MIN ? &Pixel::alpha_blend : &Pixel::replace;
             
             // Go through each sprite
             for(auto &sprite : this->sprites) {

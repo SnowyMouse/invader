@@ -2,11 +2,11 @@
 
 #include <invader/bitmap/bitmap_encode.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
-#include <invader/bitmap/color_plate_pixel.hpp>
+#include <invader/bitmap/pixel.hpp>
 #include <squish.h>
 
 namespace Invader::BitmapEncode {
-    static std::vector<ColorPlatePixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height);
+    static std::vector<Pixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height);
     
     void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) noexcept {
         auto as_32_bit = decode_to_32_bit(input_data, input_format, width, height);
@@ -27,7 +27,7 @@ namespace Invader::BitmapEncode {
                     pixel_output = (pixel.*to_palette_fn)();
 
                     // Get the error
-                    ColorPlatePixel p8_return = from_palette_fn(pixel_output);
+                    Pixel p8_return = from_palette_fn(pixel_output);
                     float alpha_error = static_cast<std::int16_t>(pixel.alpha) - p8_return.alpha;
                     float red_error = static_cast<std::int16_t>(pixel.red) - p8_return.red;
                     float green_error = static_cast<std::int16_t>(pixel.green) - p8_return.green;
@@ -89,14 +89,14 @@ namespace Invader::BitmapEncode {
         switch(output_format) {
             // Straight copy
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-                std::memcpy(output_data, as_32_bit.data(), as_32_bit.size() * sizeof(ColorPlatePixel));
+                std::memcpy(output_data, as_32_bit.data(), as_32_bit.size() * sizeof(Pixel));
                 return;
             
             // Copy, but then set alpha to 0xFF
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8: {
-                std::memcpy(output_data, as_32_bit.data(), as_32_bit.size() * sizeof(ColorPlatePixel));
-                auto *start = reinterpret_cast<ColorPlatePixel *>(output_data);
-                auto *end = reinterpret_cast<ColorPlatePixel *>(output_data + as_32_bit.size());
+                std::memcpy(output_data, as_32_bit.data(), as_32_bit.size() * sizeof(Pixel));
+                auto *start = reinterpret_cast<Pixel *>(output_data);
+                auto *end = reinterpret_cast<Pixel *>(output_data + as_32_bit.size());
                 for(auto *i = start; i < end; i++) {
                     i->alpha = 0xFF;
                 }
@@ -108,21 +108,21 @@ namespace Invader::BitmapEncode {
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5: {
                 // Figure out what we'll be doing
-                std::uint16_t (ColorPlatePixel::*conversion_function)() const;
-                ColorPlatePixel (*deconversion_function)(std::uint16_t);
+                std::uint16_t (Pixel::*conversion_function)() const;
+                Pixel (*deconversion_function)(std::uint16_t);
 
                 switch(output_format) {
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-                        conversion_function = &ColorPlatePixel::convert_to_16_bit<1,5,5,5>;
-                        deconversion_function = ColorPlatePixel::convert_from_16_bit<1,5,5,5>;
+                        conversion_function = &Pixel::convert_to_16_bit<1,5,5,5>;
+                        deconversion_function = Pixel::convert_from_16_bit<1,5,5,5>;
                         break;
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-                        conversion_function = &ColorPlatePixel::convert_to_16_bit<4,4,4,4>;
-                        deconversion_function = ColorPlatePixel::convert_from_16_bit<4,4,4,4>;
+                        conversion_function = &Pixel::convert_to_16_bit<4,4,4,4>;
+                        deconversion_function = Pixel::convert_from_16_bit<4,4,4,4>;
                         break;
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-                        conversion_function = &ColorPlatePixel::convert_to_16_bit<0,5,6,5>;
-                        deconversion_function = ColorPlatePixel::convert_from_16_bit<0,5,6,5>;
+                        conversion_function = &Pixel::convert_to_16_bit<0,5,6,5>;
+                        deconversion_function = Pixel::convert_from_16_bit<0,5,6,5>;
                         break;
                     default:
                         std::terminate();
@@ -136,7 +136,7 @@ namespace Invader::BitmapEncode {
                 else {
                     auto *pixel_16_bit = reinterpret_cast<HEK::LittleEndian<std::int16_t> *>(output_data);
                     
-                    for(ColorPlatePixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
+                    for(Pixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
                         *pixel_32_bit = deconversion_function((pixel_32_bit->*conversion_function)());
                         *pixel_16_bit = (pixel_32_bit->*conversion_function)();
                     }
@@ -174,7 +174,7 @@ namespace Invader::BitmapEncode {
 
                 // If we're dithering, do dithering things
                 if(dithering) {
-                    dither_do(&ColorPlatePixel::convert_to_p8, ColorPlatePixel::convert_from_p8, as_32_bit.data(), pixel_8_bit, width, height);
+                    dither_do(&Pixel::convert_to_p8, Pixel::convert_from_p8, as_32_bit.data(), pixel_8_bit, width, height);
                 }
                 else {
                     for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
@@ -204,7 +204,7 @@ namespace Invader::BitmapEncode {
                         std::terminate();
                 }
                 
-                std::vector<ColorPlatePixel> data_to_compress(as_32_bit.data(), as_32_bit.data() + width * height);
+                std::vector<Pixel> data_to_compress(as_32_bit.data(), as_32_bit.data() + width * height);
                 for(auto &i : data_to_compress) {
                     std::swap(i.blue, i.red);
                 }
@@ -253,12 +253,12 @@ namespace Invader::BitmapEncode {
         return (container_width * container_height * output_bits_per_pixel) / 8;
     }
     
-    static std::vector<ColorPlatePixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height) {
+    static std::vector<Pixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height) {
         // First, decode it to 32-bit A8R8G8B8 if necessary
         std::size_t pixel_count = width * height;
-        std::vector<ColorPlatePixel> data(pixel_count);
+        std::vector<Pixel> data(pixel_count);
         
-        auto decode_8_bit = [&pixel_count, &input_data, &data](ColorPlatePixel (*with_what)(std::uint8_t)) {
+        auto decode_8_bit = [&pixel_count, &input_data, &data](Pixel (*with_what)(std::uint8_t)) {
             auto pixels_left = pixel_count;
             auto *bytes_to_add = input_data;
             auto *bytes_to_write = data.data();
@@ -273,7 +273,7 @@ namespace Invader::BitmapEncode {
             }
         };
 
-        auto decode_16_bit = [&pixel_count, &input_data, &data](ColorPlatePixel (*with_what)(std::uint16_t)) {
+        auto decode_16_bit = [&pixel_count, &input_data, &data](Pixel (*with_what)(std::uint16_t)) {
             auto pixels_left = pixel_count;
             auto *bytes_to_add = input_data;
             auto *bytes_to_write = data.data();
@@ -335,32 +335,32 @@ namespace Invader::BitmapEncode {
 
             // 16-bit color
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-                decode_16_bit(ColorPlatePixel::convert_from_16_bit<1,5,5,5>);
+                decode_16_bit(Pixel::convert_from_16_bit<1,5,5,5>);
                 break;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-                decode_16_bit(ColorPlatePixel::convert_from_16_bit<0,5,6,5>);
+                decode_16_bit(Pixel::convert_from_16_bit<0,5,6,5>);
                 break;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-                decode_16_bit(ColorPlatePixel::convert_from_16_bit<4,4,4,4>);
+                decode_16_bit(Pixel::convert_from_16_bit<4,4,4,4>);
                 break;
 
             // Monochrome
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                decode_16_bit(ColorPlatePixel::convert_from_a8y8);
+                decode_16_bit(Pixel::convert_from_a8y8);
                 break;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-                decode_8_bit(ColorPlatePixel::convert_from_a8);
+                decode_8_bit(Pixel::convert_from_a8);
                 break;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-                decode_8_bit(ColorPlatePixel::convert_from_y8);
+                decode_8_bit(Pixel::convert_from_y8);
                 break;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-                decode_8_bit(ColorPlatePixel::convert_from_ay8);
+                decode_8_bit(Pixel::convert_from_ay8);
                 break;
 
             // p8
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-                decode_8_bit(ColorPlatePixel::convert_from_p8);
+                decode_8_bit(Pixel::convert_from_p8);
                 break;
                 
             default:
@@ -386,7 +386,7 @@ namespace Invader::BitmapEncode {
         bool luminosity_equals_alpha = true;
         
         // Analyze each pixel
-        auto *starting_pixel = reinterpret_cast<const ColorPlatePixel *>(input_data);
+        auto *starting_pixel = reinterpret_cast<const Pixel *>(input_data);
         for(std::size_t i = 0; i < pixel_count; i++, starting_pixel++) {
             if(starting_pixel->alpha == 0x00 && alpha_present == AlphaPresent::ALPHA_PRESENT_NONE) {
                 alpha_present = AlphaPresent::ALPHA_PRESENT_ONE_BIT;
@@ -446,6 +446,6 @@ namespace Invader::BitmapEncode {
     }
     
     HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapFormat category, HEK::BitmapDataType type, std::size_t mipmap_count) noexcept {
-        return most_efficient_format(input_data, size_of_bitmap(width, height, depth, mipmap_count, HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, type) / sizeof(ColorPlatePixel), category);
+        return most_efficient_format(input_data, size_of_bitmap(width, height, depth, mipmap_count, HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, type) / sizeof(Pixel), category);
     }
 }

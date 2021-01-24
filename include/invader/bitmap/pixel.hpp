@@ -1,16 +1,26 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef INVADER__BITMAP__COLOR_PLATE_PIXEL_HPP
-#define INVADER__BITMAP__COLOR_PLATE_PIXEL_HPP
+#ifndef INVADER__BITMAP__PIXEL_HPP
+#define INVADER__BITMAP__PIXEL_HPP
 
 #include <cstdint>
 #include <optional>
 
 namespace Invader {
-    struct ColorPlatePixel {
+    /**
+     * This represents an uncompressed BGRA (A8R8G8B8) pixel and provides functionality for manipulating it or converting it to a different format.
+     */
+    struct Pixel {
+        /** Blue channel */
         std::uint8_t blue;
+        
+        /** Green channel */
         std::uint8_t green;
+        
+        /** Red channel */
         std::uint8_t red;
+        
+        /** Alpha channel */
         std::uint8_t alpha;
 
         /**
@@ -18,7 +28,7 @@ namespace Invader {
          * @param  source color to compare with
          * @return        true if the colors are equal
          */
-        bool operator==(const ColorPlatePixel &other) const noexcept {
+        bool operator==(const Pixel &other) const noexcept {
             return this->blue == other.blue && this->green == other.green && this->red == other.red && this->alpha == other.alpha;
         }
 
@@ -27,7 +37,7 @@ namespace Invader {
          * @param  source color to compare with
          * @return        true if the colors are not equal
          */
-        bool operator!=(const ColorPlatePixel &other) const noexcept {
+        bool operator!=(const Pixel &other) const noexcept {
             return !(*this == other);
         }
 
@@ -36,7 +46,7 @@ namespace Invader {
          * @param  source source color
          * @return        source color
          */
-        ColorPlatePixel replace(const ColorPlatePixel &source) const noexcept {
+        Pixel replace(const Pixel &source) const noexcept {
             return source;
         };
 
@@ -45,8 +55,8 @@ namespace Invader {
          * @param  source color to alpha blend with
          * @return        alpha-blended color
          */
-        ColorPlatePixel alpha_blend(const ColorPlatePixel &source) const noexcept {
-            ColorPlatePixel output;
+        Pixel alpha_blend(const Pixel &source) const noexcept {
+            Pixel output;
 
             if(source.alpha == 0.0F) {
                 return *this;
@@ -114,9 +124,9 @@ namespace Invader {
          * @param  p8 p8 index
          * @return    color plate pixel
          */
-        static ColorPlatePixel convert_from_p8(std::uint8_t p8) noexcept {
+        static Pixel convert_from_p8(std::uint8_t p8) noexcept {
             extern void p8_convert_to_rgba(std::uint8_t p8, std::uint8_t &red, std::uint8_t &green, std::uint8_t &blue, std::uint8_t &alpha);
-            ColorPlatePixel color;
+            Pixel color;
             p8_convert_to_rgba(p8, color.red, color.green, color.blue, color.alpha);
             return color;
         }
@@ -126,8 +136,8 @@ namespace Invader {
          * @param  color alpha and luminosity value
          * @return       color
          */
-        static ColorPlatePixel convert_from_ay8(std::uint8_t color) noexcept {
-            return ColorPlatePixel { color, color, color, color };
+        static Pixel convert_from_ay8(std::uint8_t color) noexcept {
+            return Pixel { color, color, color, color };
         }
 
         /**
@@ -135,8 +145,8 @@ namespace Invader {
          * @param  color luminosity value
          * @return       color
          */
-        static ColorPlatePixel convert_from_y8(std::uint8_t color) noexcept {
-            return ColorPlatePixel { color, color, color, 0xFF };
+        static Pixel convert_from_y8(std::uint8_t color) noexcept {
+            return Pixel { color, color, color, 0xFF };
         }
 
         /**
@@ -144,8 +154,8 @@ namespace Invader {
          * @param  color color
          * @return       color
          */
-        static ColorPlatePixel convert_from_32_bit(std::uint32_t color) noexcept {
-            return ColorPlatePixel { static_cast<std::uint8_t>(color & 0xFF), static_cast<std::uint8_t>((color >> 8) & 0xFF), static_cast<std::uint8_t>((color >> 16) & 0xFF), static_cast<std::uint8_t>((color >> 24) & 0xFF) };
+        static Pixel convert_from_32_bit(std::uint32_t color) noexcept {
+            return Pixel { static_cast<std::uint8_t>(color & 0xFF), static_cast<std::uint8_t>((color >> 8) & 0xFF), static_cast<std::uint8_t>((color >> 16) & 0xFF), static_cast<std::uint8_t>((color >> 24) & 0xFF) };
         }
 
         /**
@@ -161,7 +171,7 @@ namespace Invader {
          * @param  code color code
          * @return      color
          */
-        static std::optional<ColorPlatePixel> convert_from_color_code(std::int16_t code) noexcept {
+        static std::optional<Pixel> convert_from_color_code(std::int16_t code) noexcept {
             extern std::optional<std::uint32_t> color_from_color_code(std::int16_t);
             auto color_maybe = color_from_color_code(code);
             if(color_maybe.has_value()) {
@@ -185,8 +195,8 @@ namespace Invader {
          * @param  color alpha value
          * @return       color
          */
-        static ColorPlatePixel convert_from_a8(std::uint8_t color) noexcept {
-            return ColorPlatePixel { 0x00, 0x00, 0x00, color };
+        static Pixel convert_from_a8(std::uint8_t color) noexcept {
+            return Pixel { 0x00, 0x00, 0x00, color };
         }
 
         /**
@@ -202,9 +212,9 @@ namespace Invader {
          * @param  color A8Y8 color pixel
          * @return       color
          */
-        static ColorPlatePixel convert_from_a8y8(std::uint16_t color) noexcept {
+        static Pixel convert_from_a8y8(std::uint16_t color) noexcept {
             auto luminosity = static_cast<std::uint8_t>(color);
-            return ColorPlatePixel { luminosity, luminosity, luminosity, static_cast<std::uint8_t>(color >> 8) };
+            return Pixel { luminosity, luminosity, luminosity, static_cast<std::uint8_t>(color >> 8) };
         }
 
         /**
@@ -238,10 +248,10 @@ namespace Invader {
          * @return      color
          */
         template<std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue>
-        static ColorPlatePixel convert_from_16_bit(std::uint16_t color) noexcept {
+        static Pixel convert_from_16_bit(std::uint16_t color) noexcept {
             static_assert(alpha + red + green + blue == 16, "alpha + red + green + blue must equal 16");
 
-            ColorPlatePixel color_output;
+            Pixel color_output;
 
             int shift_amount = 0;
 
@@ -263,7 +273,7 @@ namespace Invader {
             return color_output;
         }
     };
-    static_assert(sizeof(ColorPlatePixel) == 4);
+    static_assert(sizeof(Pixel) == 4);
 }
 
 #endif

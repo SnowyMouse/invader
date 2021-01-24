@@ -3,7 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/bitmap/swizzle.hpp>
-#include <invader/bitmap/color_plate_pixel.hpp>
+#include <invader/bitmap/pixel.hpp>
 
 namespace Invader::Parser {
     template <typename T> static void do_post_cache_parse(T *bitmap, const Invader::Tag &tag) {
@@ -211,8 +211,8 @@ namespace Invader::Parser {
                                 // If usage is detail map, do fade-to-gray (copied from color_plate_scanner.cpp)
                                 // TODODILE: refactor this maybe?
                                 if(bitmap->usage == HEK::BitmapUsage::BITMAP_USAGE_DETAIL_MAP && bitmap->detail_fade_factor > 0.0F) {
-                                    auto color_a = ColorPlatePixel::convert_from_16_bit<0,5,6,5>(first_color);
-                                    auto color_b = ColorPlatePixel::convert_from_16_bit<0,5,6,5>(second_color);
+                                    auto color_a = Pixel::convert_from_16_bit<0,5,6,5>(first_color);
+                                    auto color_b = Pixel::convert_from_16_bit<0,5,6,5>(second_color);
                                     
                                     auto mipmap_count_plus_one = bitmap_data.mipmap_count + 1;
                                     float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(bitmap->detail_fade_factor) * (mipmap_count_plus_one - 1.0F + (1.0F - bitmap->detail_fade_factor));
@@ -243,7 +243,7 @@ namespace Invader::Parser {
                                         }
                                     }
 
-                                    ColorPlatePixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
+                                    Pixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
                                     first_color = color_a.alpha_blend(FADE_TO_GRAY).convert_to_16_bit<0,5,6,5>();
                                     second_color = color_b.alpha_blend(FADE_TO_GRAY).convert_to_16_bit<0,5,6,5>();
                                 }

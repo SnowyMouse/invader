@@ -17,7 +17,7 @@
 #include "tag_editor_edit_widget.hpp"
 #include "../../tree/tag_tree_window.hpp"
 #include "../../tree/tag_tree_dialog.hpp"
-#include <invader/bitmap/color_plate_pixel.hpp>
+#include <invader/bitmap/pixel.hpp>
 #include "tag_editor_array_widget.hpp"
 
 #define INTERNAL_VALUE "internal-value"
@@ -612,7 +612,7 @@ namespace Invader::EditQt {
                 value->get_values(numbers.data());
 
                 // Make the pixel colors
-                ColorPlatePixel pixel = { 255, 255, 255, 255 };
+                Pixel pixel = { 255, 255, 255, 255 };
                 switch(value->get_type()) {
                     case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
                         pixel.alpha = static_cast<int>(std::get<std::int64_t>(numbers[0]));
@@ -639,8 +639,8 @@ namespace Invader::EditQt {
                     pixel.alpha = 255;
                 }
 
-                ColorPlatePixel triangle_up = (ColorPlatePixel { 255, 255, 255, 255 }).alpha_blend(pixel);
-                ColorPlatePixel triangle_down = (ColorPlatePixel { 0, 0, 0, 255 }).alpha_blend(pixel);
+                Pixel triangle_up = (Pixel { 255, 255, 255, 255 }).alpha_blend(pixel);
+                Pixel triangle_down = (Pixel { 0, 0, 0, 255 }).alpha_blend(pixel);
                 std::uint32_t color_up = static_cast<std::uint32_t>(triangle_up.alpha) << 24 | static_cast<std::uint32_t>(triangle_up.red) << 16 | static_cast<std::uint32_t>(triangle_up.green) << 8 | triangle_up.blue;
                 std::uint32_t color_down = static_cast<std::uint32_t>(triangle_down.alpha) << 24 | static_cast<std::uint32_t>(triangle_down.red) << 16 | static_cast<std::uint32_t>(triangle_down.green) << 8 | triangle_down.blue;
 

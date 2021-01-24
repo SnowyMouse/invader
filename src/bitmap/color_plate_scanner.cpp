@@ -24,7 +24,7 @@ namespace Invader {
         return log2_value;
     }
 
-    static inline bool same_color_ignore_opacity(const ColorPlatePixel &color_a, const ColorPlatePixel &color_b) {
+    static inline bool same_color_ignore_opacity(const Pixel &color_a, const Pixel &color_b) {
         return color_a.red == color_b.red && color_a.blue == color_b.blue && color_a.green == color_b.green;
     }
 
@@ -39,7 +39,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
         // We don't support this yet
         if(usage == BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
             eprintf_error("Vector maps are not supported at this time");
@@ -82,7 +82,7 @@ namespace Invader {
                 }
                 
                 // If there's no sequence divider color, check if we're blue. If not, we're not a valid key (treat as one bitmap)
-                else if(!scanner.is_transparency_color(ColorPlatePixel { 0xFF, 0x00, 0x00, 0xFF } )) {
+                else if(!scanner.is_transparency_color(Pixel { 0xFF, 0x00, 0x00, 0xFF } )) {
                     valid_color_plate_key = false;
                 }
                 
@@ -122,7 +122,7 @@ namespace Invader {
                     
                     break_off_sequence(height);
                     
-                    scanner.spacing_color = ColorPlatePixel { 0xFF, 0xFF, 0x00, 0xFF };
+                    scanner.spacing_color = Pixel { 0xFF, 0xFF, 0x00, 0xFF };
                     
                     if(!scanner.is_transparency_color(spacing_candidate) && !scanner.is_spacing_color(spacing_candidate)) {
                         eprintf_error("Error: Spacing color, if set, can only be #00FFFF if sequence divider is not set");
@@ -241,7 +241,7 @@ namespace Invader {
         return generated_bitmap;
     }
 
-    void ColorPlateScanner::read_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width) const {
+    void ColorPlateScanner::read_color_plate(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width) const {
         for(auto &sequence : generated_bitmap.sequences) {
             sequence.first_bitmap = generated_bitmap.bitmaps.size();
             sequence.bitmap_count = 0;
@@ -381,7 +381,7 @@ namespace Invader {
                         for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
                             auto &pixel = GET_PIXEL(bx, by);
                             if(this->is_ignored(pixel)) {
-                                bitmap.pixels.push_back(ColorPlatePixel {});
+                                bitmap.pixels.push_back(Pixel {});
                             }
                             else {
                                 bitmap.pixels.push_back(pixel);
@@ -399,7 +399,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+    void ColorPlateScanner::read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const {
         // Make sure the height and width of each face is the same
         std::uint32_t face_width = width / 4;
         std::uint32_t face_height = height / 3;
@@ -461,7 +461,7 @@ namespace Invader {
         generated_bitmap.sequences[0].bitmap_count = 6;
     }
 
-    void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+    void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const {
         if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
             if(!is_power_of_two(width)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
@@ -485,19 +485,19 @@ namespace Invader {
         generated_bitmap.sequences[0].bitmap_count = 1;
     }
 
-    bool ColorPlateScanner::is_transparency_color(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_transparency_color(const Pixel &color) const {
         return this->transparency_color.has_value() && same_color_ignore_opacity(*this->transparency_color, color);
     }
 
-    bool ColorPlateScanner::is_sequence_divider_color(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_sequence_divider_color(const Pixel &color) const {
         return this->sequence_divider_color.has_value() && same_color_ignore_opacity(*this->sequence_divider_color, color);
     }
 
-    bool ColorPlateScanner::is_spacing_color(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_spacing_color(const Pixel &color) const {
         return this->spacing_color.has_value() && same_color_ignore_opacity(*this->spacing_color, color);
     }
 
-    bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_ignored(const Pixel &color) const {
         return this->is_transparency_color(color) || this->is_spacing_color(color) || this->is_sequence_divider_color(color);
     }
 
@@ -513,7 +513,7 @@ namespace Invader {
         }
 
         for(auto &bitmap : generated_bitmap.bitmaps) {
-            std::vector<ColorPlatePixel> bitmap_pixels_copy = bitmap.pixels;
+            std::vector<Pixel> bitmap_pixels_copy = bitmap.pixels;
 
             auto largest_dimension = bitmap.width > bitmap.height ? bitmap.height : bitmap.width;
             float bump_scale = 1.5F / (largest_dimension / 256.0F);
@@ -622,12 +622,12 @@ namespace Invader {
             std::uint32_t blur_pixels = static_cast<std::uint32_t>(blur.value_or(0.0F) + 0.5F);
             if(blur_pixels > 0) {
                 auto *pixel_data = bitmap.pixels.data();
-                std::vector<ColorPlatePixel> unblurred(pixel_data, pixel_data + mipmap_width * mipmap_height);
+                std::vector<Pixel> unblurred(pixel_data, pixel_data + mipmap_width * mipmap_height);
 
                 std::uint32_t blur_size = (blur_pixels * 2);
 
                 // Allocate a filter of the correct size
-                std::vector<ColorPlatePixel *> pixel_filter(blur_size * blur_size);
+                std::vector<Pixel *> pixel_filter(blur_size * blur_size);
 
                 for(std::int64_t y = 0; y < mipmap_height; y++) {
                     for(std::int64_t x = 0; x < mipmap_width; x++) {
@@ -669,13 +669,13 @@ namespace Invader {
             auto last_mipmap_height = mipmap_height;
             auto last_mipmap_width = mipmap_width;
             
-            auto sharpen_pixels = [&mipmap_height, &mipmap_width, &sharpen, &bitmap](ColorPlatePixel *pixel_data) {
+            auto sharpen_pixels = [&mipmap_height, &mipmap_width, &sharpen, &bitmap](Pixel *pixel_data) {
                 // Apply a sharpen filter? https://en.wikipedia.org/wiki/Unsharp_masking
                 if(sharpen.has_value() && sharpen.value() > 0.0F) {
                     auto sharpen_value = sharpen.value() / (2.0F * (bitmap.mipmaps.size() + 1));
 
                     // Make a copy of the mipmap to work off of
-                    std::vector<ColorPlatePixel> unsharpened_pixels(pixel_data, pixel_data + mipmap_width * mipmap_height);
+                    std::vector<Pixel> unsharpened_pixels(pixel_data, pixel_data + mipmap_width * mipmap_height);
 
                     // Go through each pixel and apply the sharpening filter
                     for(std::uint32_t y = 0; y < mipmap_height; y++) {
@@ -725,7 +725,7 @@ namespace Invader {
                 next_mipmap.mipmap_width = mipmap_width;
 
                 // Insert all the pixels needed for the mipmap
-                bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, ColorPlatePixel {});
+                bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, Pixel {});
                 auto *last_mipmap_data = bitmap.pixels.data() + last_mipmap_offset;
                 auto *this_mipmap_data = bitmap.pixels.data() + next_mipmap.first_pixel;
                 
@@ -737,7 +737,7 @@ namespace Invader {
                         auto &pixel = this_mipmap_data[x + y * mipmap_width];
                         
                         // Start getting our pixels for mipmaps
-                        ColorPlatePixel last_a, last_b, last_c, last_d;
+                        Pixel last_a, last_b, last_c, last_d;
                         last_a = last_mipmap_data[x * 2 + y * 2 * last_mipmap_width];
                         
                         // If we went down a dimension, use the pixel from the last mipmap. Otherwise, just use last_a so we don't go out-of-bounds
@@ -835,7 +835,7 @@ namespace Invader {
                     auto &mipmap = bitmap.mipmaps[m];
 
                     // Iterate through each pixel
-                    ColorPlatePixel *first = bitmap.pixels.data() + mipmap.first_pixel;
+                    Pixel *first = bitmap.pixels.data() + mipmap.first_pixel;
                     auto *last = first + mipmap.pixel_count;
 
                     while(first < last) {
@@ -865,7 +865,7 @@ namespace Invader {
                             }
                         }
 
-                        ColorPlatePixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
+                        Pixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
                         *first = first->alpha_blend(FADE_TO_GRAY);
 
                         first++;
@@ -943,7 +943,7 @@ namespace Invader {
                     mipmap.mipmap_depth = FACES;
                 }
 
-                new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, ColorPlatePixel {});
+                new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, Pixel {});
 
                 mipmap_width /= 2;
                 mipmap_height /= 2;
@@ -968,8 +968,8 @@ namespace Invader {
                 // One of the only do/while loops I will ever do in Invader while writing it.
                 std::optional<std::uint32_t> m;
                 do {
-                    ColorPlatePixel *destination_buffer;
-                    const ColorPlatePixel *source_buffer;
+                    Pixel *destination_buffer;
+                    const Pixel *source_buffer;
                     std::size_t pixel_count;
 
                     // Determine things
@@ -1002,7 +1002,7 @@ namespace Invader {
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t bitmaps_to_merge = 2;
             std::uint32_t bitmap_pixel_count = bitmap.height * bitmap.width;
-            std::vector<ColorPlatePixel> new_pixels(bitmap.pixels.data(), bitmap.pixels.data() + bitmap_pixel_count * bitmap.depth);
+            std::vector<Pixel> new_pixels(bitmap.pixels.data(), bitmap.pixels.data() + bitmap_pixel_count * bitmap.depth);
             std::vector<GeneratedBitmapDataBitmapMipmap> new_mipmaps;
             for(auto &mipmap : bitmap.mipmaps) {
                 if(bitmaps_to_merge > bitmap.depth) {

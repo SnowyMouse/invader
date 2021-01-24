@@ -397,9 +397,9 @@ namespace Invader::EditQt {
                     for(std::size_t x = 0; x < real_width; x++) {
                         // Blend with checkerboard
                         auto luminosity = static_cast<std::uint8_t>(((x / 4) % 2) ^ !((y / 4) % 2) ? 0x5F : 0x3F);
-                        ColorPlatePixel checkerboard = { luminosity, luminosity, luminosity, 0xFF };
+                        Pixel checkerboard = { luminosity, luminosity, luminosity, 0xFF };
                         auto &pixel_output = data[x + y * real_width];
-                        pixel_output = checkerboard.alpha_blend(ColorPlatePixel::convert_from_32_bit(pixel_output)).convert_to_32_bit();
+                        pixel_output = checkerboard.alpha_blend(Pixel::convert_from_32_bit(pixel_output)).convert_to_32_bit();
                     }
                 }
                 break;
@@ -515,11 +515,11 @@ namespace Invader::EditQt {
                     }
 
                     // Blend the sprite with a transparent shade of red
-                    static constexpr const ColorPlatePixel red = { 0, 0, 0xFF, 0x1F };
+                    static constexpr const Pixel red = { 0, 0, 0xFF, 0x1F };
                     for(int y = top; y < bottom; y++) {
                         for(int x = left; x < right; x++) {
                             auto &pixel_output = data[GET_PIXEL(x,y)];
-                            pixel_output = ColorPlatePixel::convert_from_32_bit(pixel_output).alpha_blend(red).convert_to_32_bit();
+                            pixel_output = Pixel::convert_from_32_bit(pixel_output).alpha_blend(red).convert_to_32_bit();
                         }
                     }
                 }
@@ -613,7 +613,7 @@ namespace Invader::EditQt {
                             std::uint8_t average_blue = total_blue / total_pixel;
                             std::uint8_t average_alpha = total_alpha / total_pixel;
 
-                            scaled[xs + ys * new_width] = (ColorPlatePixel { average_blue, average_green, average_red, average_alpha }).convert_to_32_bit();
+                            scaled[xs + ys * new_width] = (Pixel { average_blue, average_green, average_red, average_alpha }).convert_to_32_bit();
                         }
                     }
                 }

@@ -140,8 +140,8 @@ namespace Invader::Parser {
         std::int32_t horizontal_advance = 0;
         const auto *font_bitmap_data = reinterpret_cast<const std::uint8_t *>(font_data.pixels.data());
         std::size_t font_bitmap_data_length = font_data.pixels.size();
-        auto font_pixel = ColorPlatePixel::convert_from_32_bit(color);
-        auto original_color = ColorPlatePixel::convert_from_32_bit(color);
+        auto font_pixel = Pixel::convert_from_32_bit(color);
+        auto original_color = Pixel::convert_from_32_bit(color);
         bool last_character_was_color_thing = false;
         
         // Go through each character
@@ -157,7 +157,7 @@ namespace Invader::Parser {
             }
             else if(last_character_was_color_thing) {
                 last_character_was_color_thing = false;
-                auto new_color_maybe = ColorPlatePixel::convert_from_color_code(*t);
+                auto new_color_maybe = Pixel::convert_from_color_code(*t);
                 if(new_color_maybe.has_value()) {
                     font_pixel = *new_color_maybe;
                 }
@@ -201,7 +201,7 @@ namespace Invader::Parser {
                     for(std::int32_t x = start_x; x < bxw && x < width; x++) {
                         auto &resulting_pixel = pixels[x + y * width];
                         font_pixel.alpha = font_bitmap_data[x - bx + (y - by) * bitmap_width + pixels_start];
-                        resulting_pixel = ColorPlatePixel::convert_from_32_bit(resulting_pixel).alpha_blend(font_pixel).convert_to_32_bit();
+                        resulting_pixel = Pixel::convert_from_32_bit(resulting_pixel).alpha_blend(font_pixel).convert_to_32_bit();
                     }
                 }
             }

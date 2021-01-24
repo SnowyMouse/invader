@@ -38,7 +38,7 @@ namespace Invader {
 
             // Get the data
             std::vector<std::byte> current_bitmap_pixels(reinterpret_cast<const std::byte *>(bitmap_color_plate.pixels.data()), reinterpret_cast<const std::byte *>(bitmap_color_plate.pixels.data() + bitmap_color_plate.pixels.size()));
-            auto *first_pixel = reinterpret_cast<ColorPlatePixel *>(current_bitmap_pixels.data());
+            auto *first_pixel = reinterpret_cast<Pixel *>(current_bitmap_pixels.data());
             bitmap.format = BitmapEncode::most_efficient_format(current_bitmap_pixels.data(), bitmap.width, bitmap.height, bitmap.depth, format, bitmap.type);
 
             // Set the format

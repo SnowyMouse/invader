@@ -207,7 +207,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Have these variables handy
     std::uint32_t image_width = 0, image_height = 0;
     std::size_t image_size = 0;
-    ColorPlatePixel *image_pixels = nullptr;
+    Pixel *image_pixels = nullptr;
 
     // If we're regenerating, our color plate data is in the tag
     if(bitmap_options.regenerate) {
@@ -223,12 +223,12 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         // Get the size of the data we're going to decompress
         auto *data = bitmap_tag_data.compressed_color_plate_data.data();
         image_size = reinterpret_cast<HEK::BigEndian<std::uint32_t> *>(data)->read();
-        if((image_size % sizeof(ColorPlatePixel)) != 0) {
+        if((image_size % sizeof(Pixel)) != 0) {
             invalid_color_plate_data_size_spaghetti_code:
             eprintf_error("Cannot regenerate due the compressed color plate data size being wrong");
             return EXIT_FAILURE;
         }
-        image_pixels = new ColorPlatePixel[image_size / sizeof(ColorPlatePixel)];
+        image_pixels = new Pixel[image_size / sizeof(Pixel)];
         
         data += sizeof(std::uint32_t);
         size -= sizeof(std::uint32_t);
@@ -306,7 +306,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Do it!
     auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
         try {
-            return ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
+            return ColorPlateScanner::scan_color_plate(reinterpret_cast<const Pixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
         }
         catch (std::exception &e) {
             eprintf_error("Failed to process the image: %s", e.what());
