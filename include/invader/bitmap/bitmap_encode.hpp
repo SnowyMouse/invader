@@ -37,7 +37,7 @@ namespace Invader::BitmapEncode {
      * @param dither_blue   dither blue channel
      * @output              encoded data
      */
-    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
+    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false) noexcept;
     
     /**
      * Calculate the number of bytes required to hold the given bitmap

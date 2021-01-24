@@ -8,7 +8,7 @@
 namespace Invader::BitmapEncode {
     static std::vector<ColorPlatePixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height);
     
-    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
+    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) noexcept {
         auto as_32_bit = decode_to_32_bit(input_data, input_format, width, height);
         auto first_pixel = as_32_bit.data();
         auto last_pixel = first_pixel + as_32_bit.size();
@@ -109,7 +109,7 @@ namespace Invader::BitmapEncode {
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5: {
                 // Figure out what we'll be doing
-                std::uint16_t (ColorPlatePixel::*conversion_function)();
+                std::uint16_t (ColorPlatePixel::*conversion_function)() const;
                 ColorPlatePixel (*deconversion_function)(std::uint16_t);
 
                 switch(output_format) {
@@ -231,13 +231,9 @@ namespace Invader::BitmapEncode {
         return output;
     }
     
-    std::size_t bitmap_data_size(HEK::BitmapDataFormat format, std::size_t width, std::size_t height) {
+    std::size_t bitmap_data_size(HEK::BitmapDataFormat format, std::size_t width, std::size_t height) noexcept {
         // Determine the number of bits per pixel
         auto output_bits_per_pixel = HEK::calculate_bits_per_pixel(format);
-        if(output_bits_per_pixel == 0) {
-            eprintf_error("Invalid output format");
-            throw std::exception();
-        }
         
         // DXT stuff is stored in 4x4 blocks
         std::size_t container_width, container_height;
