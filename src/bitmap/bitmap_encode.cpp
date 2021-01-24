@@ -8,10 +8,10 @@
 namespace Invader::BitmapEncode {
     static std::vector<Pixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height);
     
-    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) noexcept {
-        auto as_32_bit = decode_to_32_bit(input_data, input_format, width, height);
-        auto first_pixel = as_32_bit.data();
-        auto last_pixel = first_pixel + as_32_bit.size();
+    static void encode_bitmap(Pixel *input_data, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
+        auto pixel_count = width * height;
+        auto first_pixel = input_data;
+        auto last_pixel = first_pixel + width * height;
         
         bool dithering = dither_alpha || dither_red || dither_green || dither_blue;
 
@@ -89,14 +89,14 @@ namespace Invader::BitmapEncode {
         switch(output_format) {
             // Straight copy
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-                std::memcpy(output_data, as_32_bit.data(), as_32_bit.size() * sizeof(Pixel));
+                std::memcpy(output_data, first_pixel, pixel_count * sizeof(Pixel));
                 return;
             
             // Copy, but then set alpha to 0xFF
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8: {
-                std::memcpy(output_data, as_32_bit.data(), as_32_bit.size() * sizeof(Pixel));
+                std::memcpy(output_data, first_pixel, pixel_count * sizeof(Pixel));
                 auto *start = reinterpret_cast<Pixel *>(output_data);
-                auto *end = reinterpret_cast<Pixel *>(output_data + as_32_bit.size());
+                auto *end = reinterpret_cast<Pixel *>(output_data + pixel_count);
                 for(auto *i = start; i < end; i++) {
                     i->alpha = 0xFF;
                 }
@@ -131,14 +131,13 @@ namespace Invader::BitmapEncode {
 
                 // Begin
                 if(dithering) {
-                    dither_do(conversion_function, deconversion_function, as_32_bit.data(), reinterpret_cast<HEK::LittleEndian<std::int16_t> *>(output_data), width, height);
+                    dither_do(conversion_function, deconversion_function, input_data, reinterpret_cast<HEK::LittleEndian<std::int16_t> *>(output_data), width, height);
                 }
                 else {
                     auto *pixel_16_bit = reinterpret_cast<HEK::LittleEndian<std::int16_t> *>(output_data);
                     
-                    for(Pixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
-                        *pixel_32_bit = deconversion_function((pixel_32_bit->*conversion_function)());
-                        *pixel_16_bit = (pixel_32_bit->*conversion_function)();
+                    for(const Pixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
+                        *pixel_16_bit = ((deconversion_function((pixel_32_bit->*conversion_function)())).*conversion_function)();
                     }
                 }
 
@@ -174,7 +173,7 @@ namespace Invader::BitmapEncode {
 
                 // If we're dithering, do dithering things
                 if(dithering) {
-                    dither_do(&Pixel::convert_to_p8, Pixel::convert_from_p8, as_32_bit.data(), pixel_8_bit, width, height);
+                    dither_do(&Pixel::convert_to_p8, Pixel::convert_from_p8, first_pixel, pixel_8_bit, width, height);
                 }
                 else {
                     for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
@@ -204,7 +203,7 @@ namespace Invader::BitmapEncode {
                         std::terminate();
                 }
                 
-                std::vector<Pixel> data_to_compress(as_32_bit.data(), as_32_bit.data() + width * height);
+                std::vector<Pixel> data_to_compress(first_pixel, first_pixel + pixel_count);
                 for(auto &i : data_to_compress) {
                     std::swap(i.blue, i.red);
                 }
@@ -219,6 +218,26 @@ namespace Invader::BitmapEncode {
         }
     }
     
+    static void loop_through_each_face(const std::byte *data, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapDataFormat format, HEK::BitmapDataType type, std::size_t mipmap_count, void *user_data, void (*on_face)(const std::byte *data, std::size_t width, std::size_t height, std::size_t depth, void *user_data)) {
+        std::size_t face_count = type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
+        std::size_t min_dimension = 1;
+        
+        for(std::size_t m = 0; m <= mipmap_count; m++) {
+            for(std::size_t i = 0; i < face_count; i++) {
+                on_face(data, width, height, depth, user_data);
+                data += bitmap_data_size(width, height, depth, 0, format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE);
+            }
+            
+            width = std::max(width / 2, min_dimension);
+            height = std::max(height / 2, min_dimension);
+            depth = std::max(depth / 2, min_dimension);
+        }
+    }
+    
+    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
+        encode_bitmap(decode_to_32_bit(input_data, input_format, width, height).data(), output_data, output_format, width, height, dither_alpha, dither_red, dither_green, dither_blue);
+    }
+    
     std::vector<std::byte> encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
         // Get our output buffer
         std::vector<std::byte> output(bitmap_data_size(width, height, 1, 0, output_format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE));
@@ -230,27 +249,35 @@ namespace Invader::BitmapEncode {
         return output;
     }
     
-    std::size_t bitmap_data_size(HEK::BitmapDataFormat format, std::size_t width, std::size_t height) noexcept {
-        // Determine the number of bits per pixel
-        auto output_bits_per_pixel = HEK::calculate_bits_per_pixel(format);
+    std::vector<std::byte> encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapDataType type, std::size_t mipmap_count, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
+        // Get our output buffer
+        std::vector<std::byte> output(bitmap_data_size(width, height, depth, mipmap_count, output_format, type));
         
-        // DXT stuff is stored in 4x4 blocks
-        std::size_t container_width, container_height;
-        switch(format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-                container_width = std::max(width, static_cast<std::size_t>(4));
-                container_height = std::max(height, static_cast<std::size_t>(4));
-                break;
-            default:
-                container_width = width;
-                container_height = height;
-                break;
-        }
+        // Do it
+        encode_bitmap(input_data, input_format, output.data(), output_format, width, height, depth, type, mipmap_count, dither_alpha, dither_red, dither_green, dither_blue);
         
         // Done
-        return (container_width * container_height * output_bits_per_pixel) / 8;
+        return output;
+    }
+    
+    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapDataType type, std::size_t mipmap_count, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
+        struct UserData {
+            HEK::BitmapDataFormat input_format;
+            std::byte *output_data;
+            HEK::BitmapDataFormat output_format;
+            bool dither_alpha;
+            bool dither_red;
+            bool dither_green;
+            bool dither_blue;
+        } data = { input_format, output_data, output_format, dither_alpha, dither_red, dither_green, dither_blue };
+        
+        auto do_the_thing = [](const std::byte *data, std::size_t width, std::size_t height, std::size_t depth, void *output) {
+            auto *output_actual = reinterpret_cast<UserData *>(output);
+            encode_bitmap(data, output_actual->input_format, output_actual->output_data, output_actual->output_format, width, height, output_actual->dither_alpha, output_actual->dither_red, output_actual->dither_green, output_actual->dither_blue);
+            output_actual->output_data += bitmap_data_size(width, height, depth, 0, output_actual->output_format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE);
+        };
+        
+        loop_through_each_face(reinterpret_cast<const std::byte *>(input_data), width, height, depth, HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, type, mipmap_count, &data, do_the_thing);
     }
     
     static std::vector<Pixel> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height) {
@@ -453,6 +480,9 @@ namespace Invader::BitmapEncode {
         bool should_be_compressed = format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
         std::size_t multiplier = type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
         std::size_t block_length = should_be_compressed ? 4 : 1;
+        
+        width = std::max(width, block_length);
+        height = std::max(height, block_length);
 
         // Do it
         for(std::size_t i = 0; i <= mipmap_count; i++) {

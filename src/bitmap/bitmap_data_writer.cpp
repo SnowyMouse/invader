@@ -61,24 +61,8 @@ namespace Invader {
             }
 
             // Go through each mipmap; compress
-            std::size_t minimum_dimension = 1;
-            std::size_t mipmap_width = bitmap.width;
-            std::size_t mipmap_height = bitmap.height;
-            std::size_t total_size = 0;
-            
-            for(std::size_t i = 0; i <= mipmap_count; i++) {
-                auto new_data = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, mipmap_width, mipmap_height, dither_alpha, dither_red, dither_green, dither_blue);
-                
-                bitmap_data_pixels.insert(bitmap_data_pixels.end(), new_data.begin(), new_data.end());
-                total_size += new_data.size();
-                
-                first_pixel += mipmap_width * mipmap_height;
-                
-                mipmap_width = std::max(mipmap_width / 2, minimum_dimension);
-                mipmap_height = std::max(mipmap_height / 2, minimum_dimension);
-            }
-
             bitmap.mipmap_count = mipmap_count;
+            bitmap_data_pixels = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, bitmap.width, bitmap.height, bitmap.depth, bitmap.type, bitmap.mipmap_count, dither_alpha, dither_red, dither_green, dither_blue);
 
             BitmapDataFlags flags = {};
             if(compressed) {
@@ -101,7 +85,7 @@ namespace Invader {
 
             #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-            oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(total_size));
+            oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(bitmap_data_pixels.size()));
         }
     }
 }

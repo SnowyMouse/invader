@@ -26,18 +26,6 @@ namespace Invader::HEK {
     
     /**
      * Calculate the size of a bitmap
-     * @param width        width of the bitmap
-     * @param height       height of the bitmap
-     * @param depth        depth of the bitmap
-     * @param mipmap_count number of mipmaps
-     * @param format       format of the bitmap
-     * @param type         type of the bitmap
-     * @return             size in bytes
-     */
-    std::size_t size_of_bitmap(std::size_t width, std::size_t height, std::size_t depth, std::size_t mipmap_count, HEK::BitmapDataFormat format, HEK::BitmapDataType type) noexcept;
-    
-    /**
-     * Calculate the size of a bitmap
      * @param data bitmap data
      * @return     size in bytes
      */
