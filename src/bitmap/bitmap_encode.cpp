@@ -85,7 +85,6 @@ namespace Invader::BitmapEncode {
                 }
             }
         };
-
         
         switch(output_format) {
             // Straight copy
@@ -369,5 +368,84 @@ namespace Invader::BitmapEncode {
         }
         
         return data;
+    }
+    
+    static HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t pixel_count, HEK::BitmapFormat category) noexcept {
+        // No need to check anything here
+        if(category == HEK::BitmapFormat::BITMAP_FORMAT_DXT1) {
+            return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
+        }
+        
+        enum AlphaPresent {
+            ALPHA_PRESENT_NONE = 0,
+            ALPHA_PRESENT_ONE_BIT = 1,
+            ALPHA_PRESENT_MULTI_BIT = 2
+        } alpha_present = AlphaPresent::ALPHA_PRESENT_NONE;
+        
+        bool all_black = true;
+        bool luminosity_equals_alpha = true;
+        
+        // Analyze each pixel
+        auto *starting_pixel = reinterpret_cast<const ColorPlatePixel *>(input_data);
+        for(std::size_t i = 0; i < pixel_count; i++, starting_pixel++) {
+            if(starting_pixel->alpha == 0x00 && alpha_present == AlphaPresent::ALPHA_PRESENT_NONE) {
+                alpha_present = AlphaPresent::ALPHA_PRESENT_ONE_BIT;
+            }
+            else if(starting_pixel->alpha != 0x00 && starting_pixel->alpha != 0xFF) {
+                alpha_present = AlphaPresent::ALPHA_PRESENT_MULTI_BIT;
+            }
+            
+            if(starting_pixel->convert_to_y8() != starting_pixel->alpha) {
+                luminosity_equals_alpha = false;
+            }
+            
+            if(starting_pixel->red != 0 || starting_pixel->green != 0 || starting_pixel->blue != 0) {
+                all_black = false;
+            }
+        }
+        
+        switch(category) {
+            case HEK::BitmapFormat::BITMAP_FORMAT_DXT3:
+                return alpha_present ? HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3 : HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
+                
+            case HEK::BitmapFormat::BITMAP_FORMAT_DXT5:
+                return alpha_present ? HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5 : HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
+                
+            case HEK::BitmapFormat::BITMAP_FORMAT_16_BIT:
+                return alpha_present ? (
+                        alpha_present == AlphaPresent::ALPHA_PRESENT_MULTI_BIT ? HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4 : HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5
+                    ) : HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5;
+                    
+            case HEK::BitmapFormat::BITMAP_FORMAT_32_BIT:
+                return alpha_present ? HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8 : HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8;
+                
+            case HEK::BitmapFormat::BITMAP_FORMAT_MONOCHROME:
+                if(alpha_present == AlphaPresent::ALPHA_PRESENT_NONE) {
+                    return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8;
+                }
+                else if(all_black) {
+                    return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8;
+                }
+                else if(luminosity_equals_alpha) {
+                    return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8;
+                }
+                else {
+                    return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8;
+                }
+                
+            case HEK::BitmapFormat::BITMAP_FORMAT_ENUM_COUNT:
+            case HEK::BitmapFormat::BITMAP_FORMAT_DXT1:
+                std::terminate(); // we just checked
+        }
+        
+        std::terminate(); // this shouldn't be reached
+    }
+    
+    HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, HEK::BitmapFormat category) noexcept {
+        return most_efficient_format(input_data, width * height, category);
+    }
+    
+    HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapFormat category, HEK::BitmapDataType type, std::size_t mipmap_count) noexcept {
+        return most_efficient_format(input_data, size_of_bitmap(width, height, depth, mipmap_count, HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, type) / sizeof(ColorPlatePixel), category);
     }
 }

@@ -46,7 +46,28 @@ namespace Invader::BitmapEncode {
      * @param height height of bitmap
      * @output       output size
      */
-    std::size_t bitmap_data_size(HEK::BitmapDataFormat format, std::size_t width, std::size_t height);
+    std::size_t bitmap_data_size(HEK::BitmapDataFormat format, std::size_t width, std::size_t height) noexcept;
+    
+    /**
+     * Find the most efficient format without any loss in data. The input bitmap MUST be in 32-bit BGRA (A8R8G8B8) format.
+     * @param input_data pixel data
+     * @param width      width of the bitmap
+     * @param height     height of the bitmap
+     * @param category   category of formats to use
+     */
+    HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, HEK::BitmapFormat category) noexcept;
+    
+    /**
+     * Find the most efficient format without any loss in data. The input bitmap MUST be in 32-bit BGRA (A8R8G8B8) format.
+     * @param input_data   pixel data
+     * @param width        width of the bitmap
+     * @param height       height of the bitmap
+     * @param depth        depth of the bitmap (must be 1 for 2D textures)
+     * @param category     category of formats to use
+     * @param type         type of bitmap
+     * @param mipmap_count number of mipmaps (by default, just check the base bitmap)
+     */
+    HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapFormat category, HEK::BitmapDataType type, std::size_t mipmap_count = 0) noexcept;
 }
 
 #endif

@@ -186,7 +186,7 @@ namespace Invader {
          * @return       color
          */
         static ColorPlatePixel convert_from_a8(std::uint8_t color) noexcept {
-            return ColorPlatePixel { 0xFF, 0xFF, 0xFF, color };
+            return ColorPlatePixel { 0x00, 0x00, 0x00, color };
         }
 
         /**

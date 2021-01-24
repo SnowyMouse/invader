@@ -6,12 +6,15 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-bitmap: Fixed an issue where some sprites would have a black border
 - invader-bitmap: Fixed compressed flag not being set for DXT5 bitmaps
+- invader-bitmap: Fixed encoding A8 - bitmap should be all black, not all white
 - invader-build: Fixed defaulting map u/v scaling for shader_transparent_generic
   and shader_transparent_chicago maps
 - invader-edit-qt: Fixed tag_collection tags not being editable if fast listing
   mode is on
 - invader-edit-qt: Disabled Insert New if there are no items in an array (fixes
   a crash)
+- invader-edit-qt: Fixed A8 bitmaps being displayed as an alpha blend of white
+  instead of black
 
 ## [0.41.1] - 2021-01-20
 ### Fixed
