@@ -273,8 +273,11 @@ namespace Invader::BitmapEncode {
         
         auto do_the_thing = [](const std::byte *data, std::size_t width, std::size_t height, std::size_t depth, void *output) {
             auto *output_actual = reinterpret_cast<UserData *>(output);
-            encode_bitmap(data, output_actual->input_format, output_actual->output_data, output_actual->output_format, width, height, output_actual->dither_alpha, output_actual->dither_red, output_actual->dither_green, output_actual->dither_blue);
-            output_actual->output_data += bitmap_data_size(width, height, depth, 0, output_actual->output_format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE);
+            for(std::size_t i = 0; i < depth; i++) {
+                encode_bitmap(data, output_actual->input_format, output_actual->output_data, output_actual->output_format, width, height, output_actual->dither_alpha, output_actual->dither_red, output_actual->dither_green, output_actual->dither_blue);
+                data += bitmap_data_size(width, height, 1, 0, output_actual->input_format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE);
+                output_actual->output_data += bitmap_data_size(width, height, 1, 0, output_actual->output_format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE);
+            }
         };
         
         loop_through_each_face(reinterpret_cast<const std::byte *>(input_data), width, height, depth, HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, type, mipmap_count, &data, do_the_thing);
