@@ -221,7 +221,7 @@ namespace Invader::BitmapEncode {
     
     std::vector<std::byte> encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
         // Get our output buffer
-        std::vector<std::byte> output(bitmap_data_size(output_format, width, height));
+        std::vector<std::byte> output(bitmap_data_size(width, height, 1, 0, output_format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE));
         
         // Do it
         encode_bitmap(input_data, input_format, output.data(), output_format, width, height, dither_alpha, dither_red, dither_green, dither_blue);
@@ -441,11 +441,37 @@ namespace Invader::BitmapEncode {
         std::terminate(); // this shouldn't be reached
     }
     
+    std::size_t bitmap_data_size(std::size_t width, std::size_t height, std::size_t depth, std::size_t mipmap_count, HEK::BitmapDataFormat format, HEK::BitmapDataType type) noexcept {
+        std::size_t size = 0;
+        std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(format);
+
+        // Is this a meme?
+        if(bits_per_pixel == 0) {
+            return 0;
+        }
+
+        bool should_be_compressed = format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
+        std::size_t multiplier = type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
+        std::size_t block_length = should_be_compressed ? 4 : 1;
+
+        // Do it
+        for(std::size_t i = 0; i <= mipmap_count; i++) {
+            size += width * height * depth * multiplier * bits_per_pixel / 8;
+            
+            // Divide by 2, resetting back to 1 when needed, but make sure we don't go below the block length (4x4 if DXT, else 1x1)
+            width = std::max(width / 2, block_length);
+            height = std::max(height / 2, block_length);
+            depth = std::max(depth / 2, static_cast<std::size_t>(1));
+        }
+
+        return size;
+    }
+    
     HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, HEK::BitmapFormat category) noexcept {
         return most_efficient_format(input_data, width * height, category);
     }
     
     HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapFormat category, HEK::BitmapDataType type, std::size_t mipmap_count) noexcept {
-        return most_efficient_format(input_data, size_of_bitmap(width, height, depth, mipmap_count, HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, type) / sizeof(Pixel), category);
+        return most_efficient_format(input_data, bitmap_data_size(width, height, depth, mipmap_count, HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, type) / sizeof(Pixel), category);
     }
 }
