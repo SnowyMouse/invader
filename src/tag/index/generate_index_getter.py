@@ -9,7 +9,7 @@ if len(args) < 3:
 name = args[2]
 
 with open(args[1], "w") as cpp:
-    cpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .tag_indices files and rerun the generator script, instead.\n\n")
+    cpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .txt files and rerun the generator script, instead.\n\n")
     cpp.write("#include <cstddef>\n")
     cpp.write("#include <cstring>\n")
     cpp.write("#include <invader/tag/index/index.hpp>\n")
