@@ -34,6 +34,7 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
 static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count, bool fit_adpcm_block_size);
 
 template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
+    static constexpr std::size_t XBOX_ADPCM_SPLIT_SIZE = 65520;
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
     static constexpr std::size_t MAX_PERMUTATIONS = UINT16_MAX - 1;
 
@@ -451,9 +452,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     
     // Make sure we don't completely blow things up
     std::mutex encoding_mutex;
-    
-    // Block size
-    std::size_t adpcm_block_size = SoundEncoder::calculate_adpcm_pcm_block_size(highest_channel_count);
 
     // Encode this
     for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
@@ -638,14 +636,9 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 (*thread_count)--;
             };
 
-            // Split if requested
-            if(split) {
+            // If doing Ogg Vorbis, split and then encode since we can't trivially do this losslessly
+            if(split && format == SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
                 std::size_t max_split_size = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
-                
-                // If ADPCM, also take block size into account
-                if(format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM) {
-                    max_split_size = max_split_size - (max_split_size % (bytes_per_sample_all_channels * adpcm_block_size));
-                }
                 
                 std::size_t digested = 0;
                 while(permutation.pcm.size() > 0) {
@@ -705,6 +698,38 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     
     // Wait until we have 0 threads left
     wait_until_threads_are_done();
+    
+    // Next, if we can split losslessly, do it
+    if(split && format != SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
+        auto split_size = format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM ? XBOX_ADPCM_SPLIT_SIZE : SPLIT_BUFFER_SIZE;
+        
+        for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+            auto &pitch_range = sound_tag.pitch_ranges[pr];
+            for(std::size_t ap = 0; ap < pitch_range.actual_permutation_count; ap++) {
+                auto *next_permutation = &pitch_range.permutations[ap];
+                auto samples = std::move(next_permutation->samples);
+                next_permutation->samples.clear();
+                auto permutation_template = *next_permutation;
+                permutation_template.next_permutation_index = NULL_INDEX;
+                std::size_t samples_offset = 0;
+                
+                while(true) {
+                    auto subpermutation_size = std::min(split_size, samples.size() - samples_offset);
+                    next_permutation->samples = std::vector<std::byte>(samples.data() + samples_offset, samples.data() + samples_offset + subpermutation_size);
+                    samples_offset += subpermutation_size;
+                    
+                    // If we've hit the end, we're done
+                    if(samples_offset == samples.size()) {
+                        break;
+                    }
+                    
+                    // Add the next permutation
+                    next_permutation->next_permutation_index = pitch_range.permutations.size();
+                    next_permutation = &pitch_range.permutations.emplace_back(permutation_template);
+                }
+            }
+        }
+    }
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_INVADER_SOUND, true);
     

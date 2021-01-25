@@ -2,6 +2,9 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+- invader-sound: Fixed popping in split Xbox ADPCM sounds
+
 ## [0.41.3] - 2021-01-24
 ### Fixed
 - invader-bitmap: Fixed sprite generation failing if no mipmap count is set
