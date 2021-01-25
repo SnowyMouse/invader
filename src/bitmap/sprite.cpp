@@ -22,7 +22,7 @@ namespace Invader {
             }
             
             // Are we on the right of it?
-            if(x >= this->x + this->width + this->half_spacing) {
+            if(x > this->x + this->width + this->half_spacing) {
                 return false;
             }
             
@@ -32,7 +32,7 @@ namespace Invader {
             }
             
             // Are we below it?
-            if(y >= this->y + this->half_spacing + this->height) {
+            if(y > this->y + this->half_spacing + this->height) {
                 return false;
             }
             
