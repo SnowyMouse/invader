@@ -43,31 +43,7 @@ namespace Invader {
     struct SpriteSheet {
         std::vector<SpriteReference> sprites;
         
-        bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, std::size_t max_length, bool ordered_x) {
-            // Out of bounds?
-            if(x + sprite.width + sprite.half_spacing > max_length) {
-                if(!ordered_x) {
-                    x = sprite.half_spacing;
-                    y++;
-                }
-                return false;
-            }
-            if(y + sprite.height + sprite.half_spacing > max_length) {
-                if(ordered_x) {
-                    x++;
-                    y = sprite.half_spacing;
-                }
-                return false;
-            }
-            if(x < sprite.half_spacing) {
-                x = sprite.half_spacing;
-                return false;
-            }
-            if(y < sprite.half_spacing) {
-                y = sprite.half_spacing;
-                return false;
-            }
-            
+        bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, bool ordered_x) {
             // Go through each pixel with each sprite
             for(auto &sprite_to_check : sprites) {
                 for(std::size_t y_in_sprite_to_add = 0; y_in_sprite_to_add < sprite.height; y_in_sprite_to_add++) {
@@ -89,9 +65,15 @@ namespace Invader {
         }
         
         bool place_sprite(const SpriteReference &sprite, bool ordered_x, std::size_t max_length) {
+            if(sprite.half_spacing > max_length) {
+                return false;
+            }
+            
+            auto length_minus_spacing = max_length - sprite.half_spacing;
+            
             // Go through each pixel
-            for(std::size_t a = 0; a < max_length; a++) {
-                for(std::size_t b = 0; b < max_length && a < max_length; b++) {
+            for(std::size_t a = sprite.half_spacing; a < length_minus_spacing; a++) {
+                for(std::size_t b = sprite.half_spacing; b < length_minus_spacing && a < length_minus_spacing; b++) {
                     std::size_t *x;
                     std::size_t *y;
                     
@@ -104,7 +86,7 @@ namespace Invader {
                         y = &a;
                     }
                     
-                    if(sprite_fits_at_location(sprite, *x, *y, max_length, ordered_x)) {
+                    if(sprite_fits_at_location(sprite, *x, *y, ordered_x)) {
                         auto &new_sprite = sprites.emplace_back(sprite);
                         new_sprite.x = *x;
                         new_sprite.y = *y;
@@ -462,16 +444,16 @@ namespace Invader {
                 if(i.sprites.size() == 1) {
                     auto &sprite = i.sprites[0];
                     auto length_before = i.length();
-                    sprite.x -= sprite.half_spacing;
-                    sprite.y -= sprite.half_spacing;
+                    auto half_spacing_before = sprite.half_spacing;
+                    sprite.x -= half_spacing_before;
+                    sprite.y -= half_spacing_before;
+                    sprite.half_spacing = 0;
                     
                     auto length_after = i.length();
-                    if(length_after < length_before) {
-                        sprite.half_spacing = 0;
-                    }
-                    else {
-                        sprite.x += sprite.half_spacing;
-                        sprite.y += sprite.half_spacing;
+                    if(length_after >= length_before) {
+                        sprite.x += half_spacing_before;
+                        sprite.y += half_spacing_before;
+                        sprite.half_spacing = half_spacing_before;
                     }
                 }
             }
