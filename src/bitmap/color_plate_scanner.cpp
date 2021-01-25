@@ -215,6 +215,9 @@ namespace Invader {
 
         // If we are doing sprites, we need to handle those now
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+            if(mipmaps > 2) {
+                mipmaps = 2;
+            }
             process_sprites(generated_bitmap, sprite_parameters.value(), mipmaps);
         }
 
