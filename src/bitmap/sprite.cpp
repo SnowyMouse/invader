@@ -168,7 +168,7 @@ namespace Invader {
         std::vector<Invader::Pixel> bake_sprite_sheet(std::size_t &length, const GeneratedBitmapData &bitmap, BitmapSpriteUsage sprite_usage) {
             // Store length
             length = this->length();
-        
+            
             // Figure out the background color, too
             Pixel background_color;
             
@@ -600,14 +600,16 @@ namespace Invader {
             new_bitmap.height = length;
             new_bitmap.width = length;
             
+            std::size_t margins = i.sprites.size() > 1 ? 1 : 0; // add margins if we have multiple sprites in the sheets... for no reason because this is completely stupid
+            
             // Store this information
             for(auto &j : i.sprites) {
                 auto &sprite = generated_bitmap.sequences[j.sequence].sprites[j.sprite];
                 sprite.bitmap_index = new_bitmap_index;
-                sprite.left = j.x;
-                sprite.right = j.x + j.width;
-                sprite.top = j.y;
-                sprite.bottom = j.y + j.height;
+                sprite.left = j.x - margins;
+                sprite.right = j.x + j.width + margins;
+                sprite.top = j.y - margins;
+                sprite.bottom = j.y + j.height + margins;
             }
         }
         

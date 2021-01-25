@@ -5,10 +5,14 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Changed
 - invader-bitmap: Optimized sprite placement if no budgeting is used
+- invader-bitmap: Sprite sheets with multiple sprites in it now add margins to
+  the sprites. We recognize that this is completely and utterly stupid due to
+  how unreliable it is, but not having it breaks stock tags.
 - invader-collection: Changed input format from .tag_indices to .txt
 
 ### Fixed
 - invader-bitmap: Fixed size being inaccurate in output
+- invader-bitmap: Fixed sprites with double multiply usage having black borders
 
 ## [0.41.4] - 2021-01-24
 ### Fixed
