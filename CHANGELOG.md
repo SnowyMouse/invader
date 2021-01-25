@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.41.3] - 2021-01-24
+### Fixed
+- invader-bitmap: Fixed sprite generation failing if no mipmap count is set
+- invader-bitmap: Fixed sprite generation resulting in large sprites
+
 ## [0.41.2] - 2021-01-24
 ### Fixed
 - invader-bitmap: Fixed an issue where some sprites would have a black border

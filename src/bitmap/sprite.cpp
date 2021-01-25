@@ -73,7 +73,6 @@ namespace Invader {
                 for(std::size_t y_in_sprite_to_add = 0; y_in_sprite_to_add < sprite.height; y_in_sprite_to_add++) {
                     for(std::size_t x_in_sprite_to_add = 0; x_in_sprite_to_add < sprite.width; x_in_sprite_to_add++) {
                         if(sprite_to_check.inside_sprite(x_in_sprite_to_add + x, y_in_sprite_to_add + y)) {
-                           // std::printf("X,Y is inside a sprite\n");
                             if(!ordered_x) {
                                 x = sprite_to_check.x + sprite_to_check.width + sprite_to_check.half_spacing;
                             }
