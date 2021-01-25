@@ -10,7 +10,7 @@
 #include <invader/file/file.hpp>
 #include <fstream>
 
-#define INDEX_EXTENSION ".tag_indices"
+#define INDEX_EXTENSION ".txt"
 
 int main(int argc, char * const *argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
@@ -50,7 +50,7 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
-    
+
     if(!collection_options.tags.has_value()) {
         collection_options.tags = "tags";
     }
