@@ -43,12 +43,28 @@ namespace Invader {
     struct SpriteSheet {
         std::vector<SpriteReference> sprites;
         
-        bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t x, std::size_t y, std::size_t max_length) {
+        bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, std::size_t max_length, bool ordered_x) {
             // Out of bounds?
-            if(x + sprite.width + sprite.half_spacing > max_length || y + sprite.height + sprite.half_spacing > max_length) {
+            if(x + sprite.width + sprite.half_spacing > max_length) {
+                if(!ordered_x) {
+                    x = sprite.half_spacing;
+                    y++;
+                }
                 return false;
             }
-            if(x < sprite.half_spacing || y < sprite.half_spacing) {
+            if(y + sprite.height + sprite.half_spacing > max_length) {
+                if(ordered_x) {
+                    x++;
+                    y = sprite.half_spacing;
+                }
+                return false;
+            }
+            if(x < sprite.half_spacing) {
+                x = sprite.half_spacing;
+                return false;
+            }
+            if(y < sprite.half_spacing) {
+                y = sprite.half_spacing;
                 return false;
             }
             
@@ -57,6 +73,13 @@ namespace Invader {
                 for(std::size_t y_in_sprite_to_add = 0; y_in_sprite_to_add < sprite.height; y_in_sprite_to_add++) {
                     for(std::size_t x_in_sprite_to_add = 0; x_in_sprite_to_add < sprite.width; x_in_sprite_to_add++) {
                         if(sprite_to_check.inside_sprite(x_in_sprite_to_add + x, y_in_sprite_to_add + y)) {
+                           // std::printf("X,Y is inside a sprite\n");
+                            if(!ordered_x) {
+                                x = sprite_to_check.x + sprite_to_check.width + sprite_to_check.half_spacing;
+                            }
+                            else {
+                                y = sprite_to_check.y + sprite_to_check.height + sprite_to_check.half_spacing;
+                            }
                             return false;
                         }
                     }
@@ -69,23 +92,24 @@ namespace Invader {
         bool place_sprite(const SpriteReference &sprite, bool ordered_x, std::size_t max_length) {
             // Go through each pixel
             for(std::size_t a = 0; a < max_length; a++) {
-                for(std::size_t b = 0; b < max_length; b++) {
-                    // If ordered_x, then a = x and b = y. Otherwise a = y and b = x.
+                for(std::size_t b = 0; b < max_length && a < max_length; b++) {
+                    std::size_t *x;
+                    std::size_t *y;
+                    
                     if(ordered_x) {
-                        if(sprite_fits_at_location(sprite, a, b, max_length)) {
-                            auto &new_sprite = sprites.emplace_back(sprite);
-                            new_sprite.x = a;
-                            new_sprite.y = b;
-                            return true;
-                        }
+                        x = &a;
+                        y = &b;
                     }
                     else {
-                        if(sprite_fits_at_location(sprite, b, a, max_length)) {
-                            auto &new_sprite = sprites.emplace_back(sprite);
-                            new_sprite.x = b;
-                            new_sprite.y = a;
-                            return true;
-                        }
+                        x = &b;
+                        y = &a;
+                    }
+                    
+                    if(sprite_fits_at_location(sprite, *x, *y, max_length, ordered_x)) {
+                        auto &new_sprite = sprites.emplace_back(sprite);
+                        new_sprite.x = *x;
+                        new_sprite.y = *y;
+                        return true;
                     }
                 }
             }
@@ -369,8 +393,37 @@ namespace Invader {
                 return std::nullopt;
             }
             
-            auto sheets_vertical = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, variable_sized_sheets, max_sheet_length, sequence_count);
-            auto sheets_horizontal = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, variable_sized_sheets, max_sheet_length, sequence_count);
+            std::size_t length_generate = max_sheet_length;
+            std::optional<std::vector<SpriteSheet>> sheets_vertical, sheets_horizontal;
+            
+            // If we just have one sheet, brute force a good size then
+            if(variable_sized_sheets == 1 && max_sheet_count == 1) {
+                while(true) {
+                    auto sheets_vertical_maybe = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
+                    auto sheets_horizontal_maybe = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
+                    
+                    if(!sheets_vertical_maybe.has_value() && !sheets_horizontal_maybe.has_value()) {
+                        break;
+                    }
+                    
+                    sheets_vertical = sheets_vertical_maybe;
+                    sheets_horizontal = sheets_horizontal_maybe;
+                    
+                    if(sheets_horizontal.has_value()) {
+                        length_generate = std::min(length_generate, (*sheets_horizontal)[0].length());
+                    }
+                    
+                    if(sheets_vertical.has_value()) {
+                        length_generate = std::min(length_generate, (*sheets_vertical)[0].length());
+                    }
+                    
+                    length_generate /= 2;
+                }
+            }
+            else {
+                sheets_vertical = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
+                sheets_horizontal = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
+            }
             
             // Find the most efficient set of sprite sheets... if we have both. Otherwise just take whichever one was successful. Or return nothing if none were.
             if(sheets_horizontal.has_value() && sheets_vertical.has_value()) {
@@ -452,7 +505,9 @@ namespace Invader {
     
     void ColorPlateScanner::process_sprites(GeneratedBitmapData &generated_bitmap, ColorPlateScannerSpriteParameters &parameters, std::int16_t &mipmap_count) {
         // Get our parameters
-        unsigned int half_spacing = std::min(1 << (mipmap_count), 4);
+        unsigned int half_spacing = 1 << mipmap_count;
+        parameters.sprite_spacing = half_spacing;
+        
         unsigned int max_sheet_length;
         unsigned int max_sheet_count;
         
