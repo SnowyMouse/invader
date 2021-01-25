@@ -180,7 +180,7 @@ namespace Invader {
                     background_color.blue = 0;
                     break;
                 case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_DOUBLE_MULTIPLY:
-                    background_color.alpha = 255;
+                    background_color.alpha = 127;
                     background_color.red = 127;
                     background_color.green = 127;
                     background_color.blue = 127;
