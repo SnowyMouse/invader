@@ -62,7 +62,9 @@ namespace Invader {
 
             // Go through each mipmap; compress
             bitmap.mipmap_count = mipmap_count;
-            bitmap_data_pixels = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, bitmap.width, bitmap.height, bitmap.depth, bitmap.type, bitmap.mipmap_count, dither_alpha, dither_red, dither_green, dither_blue);
+            auto encoded_pixels = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, bitmap.width, bitmap.height, bitmap.depth, bitmap.type, bitmap.mipmap_count, dither_alpha, dither_red, dither_green, dither_blue);
+            
+            bitmap_data_pixels.insert(bitmap_data_pixels.end(), encoded_pixels.begin(), encoded_pixels.end());
 
             BitmapDataFlags flags = {};
             if(compressed) {

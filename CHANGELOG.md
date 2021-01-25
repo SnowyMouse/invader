@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 - invader-bitmap: Fixed single sprites sometimes resulting in too large of page
   sizes
+- invader-bitmap: Fixed bitmap tags with multiple bitmaps breaking
 - invader-sound: Fixed popping in split Xbox ADPCM sounds
 
 ## [0.41.3] - 2021-01-24
