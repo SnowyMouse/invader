@@ -55,7 +55,7 @@ namespace Invader::HEK {
      * @param value value to check
      * @return      true if the value is power-of-two; false if not
      */
-    template <typename T> [[maybe_unused]] static inline bool is_power_of_two(T value) {
+    template <typename T> [[maybe_unused]] static constexpr inline bool is_power_of_two(T value) noexcept {
         while(value > 1) {
             if(value & 1) {
                 return false;

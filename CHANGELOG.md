@@ -2,7 +2,15 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-bitmap: Optimized sprite placement if no budgeting is used
+
+### Fixed
+- invader-bitmap: Fixed size being inaccurate in output
+
 ## [0.41.4] - 2021-01-24
+### Fixed
 - invader-bitmap: Fixed single sprites sometimes resulting in too large of page
   sizes
 - invader-bitmap: Fixed bitmap tags with multiple bitmaps breaking

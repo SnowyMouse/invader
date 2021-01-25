@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "color_plate_scanner.hpp"
+#include <invader/hek/data_type.hpp>
 
 namespace Invader {
     struct SpriteReference {
@@ -43,7 +44,39 @@ namespace Invader {
     struct SpriteSheet {
         std::vector<SpriteReference> sprites;
         
-        bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, bool ordered_x) {
+        bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, bool ordered_x, std::size_t max_length) {
+            // Is the sprite too far to the top or left?
+            if(x < sprite.half_spacing) {
+                if(!ordered_x) {
+                    x = sprite.half_spacing;
+                }
+                return false;
+            }
+            
+            if(y < sprite.half_spacing) {
+                if(ordered_x) {
+                    y = sprite.half_spacing;
+                }
+                return false;
+            }
+            
+            // Is the sprite too far to the bottom or right?
+            if(x + sprite.width + sprite.half_spacing > max_length) {
+                if(!ordered_x) {
+                    x = sprite.half_spacing;
+                    y++;
+                }
+                return false;
+            }
+            
+            if(y + sprite.height + sprite.half_spacing > max_length) {
+                if(ordered_x) {
+                    y = sprite.half_spacing;
+                    x++;
+                }
+                return false;
+            }
+            
             // Go through each pixel with each sprite
             for(auto &sprite_to_check : sprites) {
                 for(std::size_t y_in_sprite_to_add = 0; y_in_sprite_to_add < sprite.height; y_in_sprite_to_add++) {
@@ -86,7 +119,7 @@ namespace Invader {
                         y = &a;
                     }
                     
-                    if(sprite_fits_at_location(sprite, *x, *y, ordered_x)) {
+                    if(sprite_fits_at_location(sprite, *x, *y, ordered_x, max_length)) {
                         auto &new_sprite = sprites.emplace_back(sprite);
                         new_sprite.x = *x;
                         new_sprite.y = *y;
@@ -131,6 +164,7 @@ namespace Invader {
             
             return actual_max_length;
         }
+        
         std::vector<Invader::Pixel> bake_sprite_sheet(std::size_t &length, const GeneratedBitmapData &bitmap, BitmapSpriteUsage sprite_usage) {
             // Store length
             length = this->length();
@@ -184,13 +218,13 @@ namespace Invader {
         }
     };
     
-    static std::optional<std::vector<SpriteSheet>> generate_sheets_with_direction(const std::vector<SpriteReference> &sprites_to_add, bool ordered_x, bool sprites_in_sequences_must_coexist, std::size_t max_sheets, std::size_t max_length, std::size_t sequence_count) {
+    static std::optional<std::vector<SpriteSheet>> generate_sheets_with_direction(const std::vector<SpriteReference> &sprites_to_add, bool ordered_x, bool sprites_in_sequences_must_coexist, bool bypass_limits_for_sequences, ::size_t max_sheets, std::size_t max_length, std::size_t sequence_count) {
         std::vector<SpriteSheet> sheets;
         sheets.reserve(max_sheets); // o.o
         
         // Add by sequence
         if(sprites_in_sequences_must_coexist) {
-            auto add_all_sprites_of_sequence_to_sheet = [&sprites_to_add, &ordered_x, &max_length](std::size_t sequence, auto &sheet) -> bool {
+            auto add_all_sprites_of_sequence_to_sheet = [&sprites_to_add, &ordered_x](std::size_t sequence, auto &sheet, std::size_t max_length) -> bool {
                 for(auto &sprite : sprites_to_add) {
                     // If the sprite is in the sequence, let's do the thing
                     if(sprite.sequence == sequence) {
@@ -207,7 +241,7 @@ namespace Invader {
                 bool added = false;
                 for(auto &sheet : sheets) {
                     auto sheet_copy = sheet;
-                    if((added = add_all_sprites_of_sequence_to_sheet(seq, sheet_copy))) {
+                    if((added = add_all_sprites_of_sequence_to_sheet(seq, sheet_copy, max_length))) {
                         sheet = sheet_copy;
                         break;
                     }
@@ -221,8 +255,17 @@ namespace Invader {
                     }
                     
                     auto &sheet = sheets.emplace_back();
-                    if(!add_all_sprites_of_sequence_to_sheet(seq, sheet)) {
-                        return std::nullopt;
+                    
+                    if(bypass_limits_for_sequences) {
+                        if(!add_all_sprites_of_sequence_to_sheet(seq, sheet, max_length)) {
+                            return std::nullopt;
+                        }
+                    }
+                    else {
+                        std::size_t temp_max_length = max_length;
+                        while(!add_all_sprites_of_sequence_to_sheet(seq, sheet, temp_max_length)) {
+                            temp_max_length *= 2;
+                        }
                     }
                 }
             };
@@ -256,11 +299,11 @@ namespace Invader {
         return sheets;
     }
     
-    static std::optional<std::vector<SpriteSheet>> generate_sheets(bool sprites_in_sequences_must_coexist, unsigned int max_sheet_length, unsigned int max_sheet_count, int half_spacing, const GeneratedBitmapData &bitmap) {
+    static std::optional<std::vector<SpriteSheet>> generate_sheets(bool sprites_in_sequences_must_coexist, bool bypass_limits_for_sequences, unsigned int max_sheet_length, unsigned int max_sheet_count, int half_spacing, const GeneratedBitmapData &bitmap) {
         std::vector<SpriteSheet> sheets_single_sprite;
         auto sequence_count = bitmap.sequences.size();
         
-        // First, go through each sprite and find sprites that can't fit or can only fit if spricing is ignored
+        // First, go through each sprite and find sprites that can't fit or can only fit if spacing is ignored
         for(std::size_t se = 0; se < sequence_count; se++) {
             auto &sequence = bitmap.sequences[se];
             auto sprite_count = sequence.sprites.size();
@@ -377,11 +420,11 @@ namespace Invader {
             std::size_t length_generate = max_sheet_length;
             std::optional<std::vector<SpriteSheet>> sheets_vertical, sheets_horizontal;
             
-            // If we just have one sheet, brute force a good size then
-            if(variable_sized_sheets == 1 && max_sheet_count == 1) {
+            // If we have no limits for sequences or we have just one sheet, we can brute force then
+            if((variable_sized_sheets == 1 && max_sheet_count == 1) || bypass_limits_for_sequences) {
                 while(true) {
-                    auto sheets_vertical_maybe = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
-                    auto sheets_horizontal_maybe = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
+                    auto sheets_vertical_maybe = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
+                    auto sheets_horizontal_maybe = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
                     
                     if(!sheets_vertical_maybe.has_value() && !sheets_horizontal_maybe.has_value()) {
                         break;
@@ -399,11 +442,16 @@ namespace Invader {
                     }
                     
                     length_generate /= 2;
+                    
+                    // If we cannot go any further, we're done
+                    if(length_generate == 0) {
+                        break;
+                    }
                 }
             }
             else {
-                sheets_vertical = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
-                sheets_horizontal = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, variable_sized_sheets, length_generate, sequence_count);
+                sheets_vertical = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
+                sheets_horizontal = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
             }
             
             // Find the most efficient set of sprite sheets... if we have both. Otherwise just take whichever one was successful. Or return nothing if none were.
@@ -464,19 +512,21 @@ namespace Invader {
         return sheets;
     }
     
-    static std::vector<SpriteSheet> generate_sheets(int max_sheet_length, int max_sheet_count, int half_spacing, const GeneratedBitmapData &bitmap) {
+    static std::vector<SpriteSheet> generate_sheets(int max_sheet_length, int max_sheet_count, int half_spacing, const GeneratedBitmapData &bitmap, bool bypass_limits_for_sequences) {
         std::vector<SpriteSheet> sheets;
         
         // Try forcing sprites in sequences to be in the same bitmap
-        auto attempt1 = generate_sheets(true, max_sheet_length, max_sheet_count, half_spacing, bitmap);
+        auto attempt1 = generate_sheets(true, bypass_limits_for_sequences, max_sheet_length, max_sheet_count, half_spacing, bitmap);
         if(attempt1.has_value()) {
             return attempt1.value();
         }
         
         // Allow sprites in sequences to be in different bitmaps
-        auto attempt2 = generate_sheets(false, max_sheet_length, max_sheet_count, half_spacing, bitmap);
-        if(attempt2.has_value()) {
-            return attempt2.value();
+        if(!bypass_limits_for_sequences) {
+            auto attempt2 = generate_sheets(false, bypass_limits_for_sequences, max_sheet_length, max_sheet_count, half_spacing, bitmap);
+            if(attempt2.has_value()) {
+                return attempt2.value();
+            }
         }
         
         // Nope
@@ -491,14 +541,37 @@ namespace Invader {
         
         unsigned int max_sheet_length;
         unsigned int max_sheet_count;
+        bool bypass_limits_for_sequences;
         
         if(parameters.sprite_budget_count == 0) {
-            max_sheet_length = 16384;
-            max_sheet_count = 1;
+            max_sheet_length = 512;
+            max_sheet_count = 32767;
+            bypass_limits_for_sequences = true;
+            
+            // If a sprite is bigger than a sheet, change the sheet size
+            for(auto &i : generated_bitmap.bitmaps) {
+                if(i.height > max_sheet_length) {
+                    max_sheet_length = i.height;
+                }
+                if(i.width > max_sheet_length) {
+                    max_sheet_length = i.width;
+                }
+            }
+            
+            // If sheet length isn't power of two, round up to the next power of two then
+            if(!HEK::is_power_of_two(max_sheet_length)) {
+                std::size_t n = 0;
+                while(max_sheet_length) {
+                    max_sheet_length >>= 1;
+                    n++;
+                }
+                max_sheet_length = 1 << n;
+            }
         }
         else {
             max_sheet_length = parameters.sprite_budget;
             max_sheet_count = parameters.sprite_budget_count;
+            bypass_limits_for_sequences = false;
         }
         
         for(auto &i : generated_bitmap.sequences) {
@@ -512,7 +585,7 @@ namespace Invader {
             }
         }
         
-        auto sheets = generate_sheets(max_sheet_length, max_sheet_count, half_spacing, generated_bitmap);
+        auto sheets = generate_sheets(max_sheet_length, max_sheet_count, half_spacing, generated_bitmap, bypass_limits_for_sequences);
         std::vector<GeneratedBitmapDataBitmap> new_bitmaps;
         
         // Add new bitmaps
