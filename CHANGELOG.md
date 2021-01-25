@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Changed
 - invader-bitmap: Optimized sprite placement if no budgeting is used
+- invader-collection: Changed input format from .tag_indices to .txt
 
 ### Fixed
 - invader-bitmap: Fixed size being inaccurate in output
