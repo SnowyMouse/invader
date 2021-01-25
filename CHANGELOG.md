@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.41.4] - 2021-01-24
 - invader-bitmap: Fixed single sprites sometimes resulting in too large of page
   sizes
 - invader-bitmap: Fixed bitmap tags with multiple bitmaps breaking
@@ -1781,5 +1781,6 @@ image as one bitmap
 [0.41.1]: https://github.com/SnowyMouse/invader/compare/0.41.0...0.41.1
 [0.41.2]: https://github.com/SnowyMouse/invader/compare/0.41.1...0.41.2
 [0.41.3]: https://github.com/SnowyMouse/invader/compare/0.41.2...0.41.3
+[0.41.4]: https://github.com/SnowyMouse/invader/compare/0.41.3...0.41.4
 
-[Unreleased]: https://github.com/SnowyMouse/invader/compare/0.41.3...master
+[Unreleased]: https://github.com/SnowyMouse/invader/compare/0.41.4...master
