@@ -114,7 +114,7 @@ namespace Invader::Parser {
                     lightmaps_present = true;
                     auto bitmap = static_cast<std::size_t>(lm.bitmap);
                     if(bitmap >= lightmap_bitmap_count) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap #%zu has an invalid bitmap index (%zu > %zu)", i, bitmap, lightmap_bitmap_count);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap #%zu has an invalid bitmap index (%zu >= %zu)", i, bitmap, lightmap_bitmap_count);
                         invalid_bitmap = true;
                     }
                 }
