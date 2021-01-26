@@ -16,28 +16,13 @@ namespace Invader {
         SpriteReference &operator =(const SpriteReference &) = default;
         
         bool inside_sprite(std::size_t x, std::size_t y) {
-            // Are we on the left of it?
-            if(x + this->half_spacing < this->x) {
-                return false;
-            }
+            std::size_t left = this->x - this->half_spacing;
+            std::size_t top = this->y - this->half_spacing;
             
-            // Are we on the right of it?
-            if(x > this->x + this->width + this->half_spacing) {
-                return false;
-            }
+            std::size_t right = this->x + this->width + this->half_spacing;
+            std::size_t bottom = this->y + this->height + this->half_spacing;
             
-            // Are we above it?
-            if(y + this->half_spacing < this->y) {
-                return false;
-            }
-            
-            // Are we below it?
-            if(y > this->y + this->half_spacing + this->height) {
-                return false;
-            }
-            
-            // We're inside it
-            return true;
+            return x >= left && x <= right && y >= top && y <= bottom;
         }
     };
 
@@ -46,7 +31,7 @@ namespace Invader {
         
         bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, bool ordered_x, std::size_t max_length) {
             // Is the sprite too far to the top or left?
-            if(x < sprite.half_spacing) {
+            if(x <= sprite.half_spacing) {
                 if(!ordered_x) {
                     x = sprite.half_spacing;
                 }
@@ -79,8 +64,8 @@ namespace Invader {
             
             // Go through each pixel with each sprite
             for(auto &sprite_to_check : sprites) {
-                for(std::size_t y_in_sprite_to_add = 0; y_in_sprite_to_add < sprite.height; y_in_sprite_to_add++) {
-                    for(std::size_t x_in_sprite_to_add = 0; x_in_sprite_to_add < sprite.width; x_in_sprite_to_add++) {
+                for(std::size_t y_in_sprite_to_add = 0; y_in_sprite_to_add < sprite.height + sprite.half_spacing * 2; y_in_sprite_to_add++) {
+                    for(std::size_t x_in_sprite_to_add = 0; x_in_sprite_to_add < sprite.width + sprite.half_spacing * 2; x_in_sprite_to_add++) {
                         if(sprite_to_check.inside_sprite(x_in_sprite_to_add + x, y_in_sprite_to_add + y)) {
                             if(!ordered_x) {
                                 x = sprite_to_check.x + sprite_to_check.width + sprite_to_check.half_spacing;
