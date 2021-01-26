@@ -61,7 +61,6 @@ namespace Invader::EditQt {
         // And the combo box
         *box = new QComboBox();
         l->addWidget(*box);
-        l->addStretch();
 
         // Done
         return w;
@@ -122,7 +121,10 @@ namespace Invader::EditQt {
             sprite->setEnabled(false);
             auto sequence_count = bitmap_data->bitmap_group_sequence.size();
             for(std::size_t i = 0; i < sequence_count; i++) {
-                sequence->addItem(QString::number(i));
+                char text[64];
+                auto sprite_count = bitmap_data->bitmap_group_sequence[i].sprites.size();
+                std::snprintf(text, sizeof(text), "%zu (%zu sprite%s)", i, sprite_count, sprite_count == 1 ? "" : "s");
+                sequence->addItem(text);
             }
         }
 
@@ -749,9 +751,44 @@ namespace Invader::EditQt {
             std::size_t current_sequence_index_unsigned = static_cast<std::size_t>(current_sequence_index - 1);
             this->sprite->blockSignals(true);
             this->sprite->clear();
-            auto sprite_count = (*this->all_sequences)[current_sequence_index_unsigned].sprites.size();
+            auto &sequence = (*this->all_sequences)[current_sequence_index_unsigned];
+            auto sprite_count = sequence.sprites.size();
+            
             for(std::size_t i = 0; i < sprite_count; i++) {
-                this->sprite->addItem(QString::number(i));
+                char sprite_info[64];
+                
+                // Determine height and width of sprite (requires getting its bitmap and multiplying that with memes)
+                std::size_t height = 0;
+                std::size_t width = 0;
+                auto &sprite = sequence.sprites[i];
+                std::vector<Parser::BitmapData> *bitmap_data;
+                auto *parent_window = this->get_parent_window();
+                switch(parent_window->get_file().tag_class_int) {
+                    case TagClassInt::TAG_CLASS_BITMAP:
+                        bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data;
+                        break;
+                    case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                        bitmap_data = &dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->bitmap_data;
+                        break;
+                    default:
+                        std::terminate();
+                }
+                
+                // If we have it, we have it
+                if(sprite.bitmap_index < bitmap_data->size()) {
+                    auto &bitmap = (*bitmap_data)[sprite.bitmap_index];
+                    height = (sprite.bottom - sprite.top) * bitmap.height;
+                    width = (sprite.right - sprite.left) * bitmap.width;
+                    std::snprintf(sprite_info, sizeof(sprite_info), "%zu (%zu x %zu)", i, width, height);
+                }
+                
+                // Otherwise oh well
+                else {
+                    std::snprintf(sprite_info, sizeof(sprite_info), "%zu (unknown size)", i);
+                }
+                
+                
+                this->sprite->addItem(sprite_info);
             }
             this->sprite->setCurrentIndex(0);
             this->sprite->blockSignals(false);

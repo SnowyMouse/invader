@@ -9,6 +9,8 @@ This is used for recording Invader's changes. This changelog is based on
   the sprites. We recognize that this is completely and utterly stupid due to
   how unreliable it is, but not having it breaks stock tags.
 - invader-collection: Changed input format from .tag_indices to .txt
+- invader-edit-qt: Sprite count is now shown when viewing sprite sequences
+- invader-edit-qt: Sprite size is now shown when viewing sprites
 
 ### Fixed
 - invader-bitmap: Fixed size being inaccurate in output
