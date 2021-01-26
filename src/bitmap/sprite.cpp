@@ -31,7 +31,7 @@ namespace Invader {
         
         bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, bool ordered_x, std::size_t max_length) {
             // Is the sprite too far to the top or left?
-            if(x <= sprite.half_spacing) {
+            if(x < sprite.half_spacing) {
                 if(!ordered_x) {
                     x = sprite.half_spacing;
                 }
