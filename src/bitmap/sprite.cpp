@@ -510,7 +510,7 @@ namespace Invader {
         if(!bypass_limits_for_sequences) {
             auto attempt2 = generate_sheets(false, bypass_limits_for_sequences, max_sheet_length, max_sheet_count, half_spacing, bitmap);
             if(attempt2.has_value()) {
-                eprintf_warn("Sequences were split across multiple sprite sheets to meet the budget.\nThis is valid but may cause issues. Consider using a higher budget size.");
+                eprintf_warn("Sequences were split across multiple sprite sheets to meet the sprite budget.\nThis is valid but may cause issues. Consider using a higher budget or no budget.");
                 return attempt2.value();
             }
         }

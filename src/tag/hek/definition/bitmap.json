@@ -313,6 +313,16 @@
                 "name": "usage",
                 "first": "usage",
                 "description": "Usage affects how the bitmap is generated.\n\n\"alpha blend\" is the same as \"default\" except pixels with 0% alpha are discarded when generating mipmaps.\n\n\"default\" generates mipmaps using linear downscaling.\n\n\"height map\" generates bumpmaps, and if height map compression is enabled, converts it to a palettized format. Palettized bitmaps do not work on the Gearbox version of Halo without a mod, so it is recommended to set \"disable height map compression\" if using this.\n\n\"detail map\" is \"default\" except mipmap colors fade to gray based on the \"detail fade factor\" value\n\n\"light map\" does not generate mipmaps\n\n\"vector map\" generates a vector map. Pixels are normalized in post processing."
+            },
+            {
+                "name": "sprite usage",
+                "first": "sprite usage",
+                "description": "Sprite usage affects how sprite sheets are generated if making a sprites bitmap by controlling the background of the sprite sheet.\n\n\"blend add subtract max\" uses a transparent black background and replaces pixels with the sprites\n\n\"multiply max\" uses a 50% gray and 50% alpha background and replaces pixels with the sprites\n\n\"double multiply\" uses a white background and alpha blends the sprites over white"
+            },
+            {
+                "name": "sprite budget",
+                "first": "sprite budget size",
+                "description": "Sprite budget affects the sprite sheets that are generated.\n\n\"sprite budget size\" determines the maximum size of a sprite sheet. This value is ignored if sprite budget count is set to 0.\n\n\"sprite budget count\" determines the maximum number of sprite sheets allowed.\n\nNote that invader-bitmap will try to ensure all sprites in each sprite sequence are in the same sprite sheet, but if the budget is set too low, it may have to split them across multiple sprite sheets. If this happens, you may, in some instances, experience graphical or performance issues.\n\nIf the budget count is set to 0, then invader-bitmap will default to budget of 32767 sprite sheets with no hard limit. This will also guarantee that all sprites in a sequeence share a sprite sheet."
             }
         ],
         "fields": [
