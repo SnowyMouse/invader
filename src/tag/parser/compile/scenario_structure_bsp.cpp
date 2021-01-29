@@ -84,7 +84,7 @@ namespace Invader::Parser {
             }
             
             // Check lightmaps to see if they're valid
-            bool invalid_bitmap = false;
+            std::size_t invalid_lightmap_bitmap_indices = 0;
             bool lightmaps_present = false;
             for(std::size_t i = 0; i < lightmap_count; i++) {
                 auto &lm = this->lightmaps[i];
@@ -114,12 +114,21 @@ namespace Invader::Parser {
                     lightmaps_present = true;
                     auto bitmap = static_cast<std::size_t>(lm.bitmap);
                     if(bitmap >= lightmap_bitmap_count) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap #%zu has an invalid bitmap index (%zu >= %zu)", i, bitmap, lightmap_bitmap_count);
-                        invalid_bitmap = true;
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "BSP lightmap #%zu has an invalid bitmap index (%zu >= %zu)", i, bitmap, lightmap_bitmap_count);
+                        invalid_lightmap_bitmap_indices++;
                     }
                 }
             }
-            if(invalid_bitmap) {
+            
+            // If we have invalid lightmap indices, error
+            if(invalid_lightmap_bitmap_indices) {
+                if(lightmap_bitmap.is_null()) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "No BSP lightmp bitmap is referenced, but %zu lightmap%s a non-null bitmap index", invalid_lightmap_bitmap_indices, invalid_lightmap_bitmap_indices == 1 ? " has" : "s have");
+                }
+                else {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "A BSP lightmp bitmap is referenced, but %zu lightmap%s an invalid bitmap index", invalid_lightmap_bitmap_indices, invalid_lightmap_bitmap_indices == 1 ? " has" : "s have");
+                }
+                eprintf_warn("Rebake your lightmaps to fix this error.");
                 throw InvalidTagDataException();
             }
 
