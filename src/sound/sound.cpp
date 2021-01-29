@@ -410,15 +410,19 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     // Make the sound tag
     const char *output_name = nullptr;
+    bool enable_threading_split_permutation_encoding = true;
     switch(format) {
         case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
             output_name = "16-bit PCM";
+            enable_threading_split_permutation_encoding = false;
             break;
         case SoundFormat::SOUND_FORMAT_IMA_ADPCM:
             output_name = "IMA ADPCM";
+            enable_threading_split_permutation_encoding = false;
             break;
         case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
             output_name = "Xbox ADPCM";
+            enable_threading_split_permutation_encoding = false;
             break;
         case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
             output_name = "Ogg Vorbis";
@@ -636,8 +640,8 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 (*thread_count)--;
             };
 
-            // If doing Ogg Vorbis, split and then encode since we can't trivially do this losslessly
-            if(split && format == SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
+            // Split things we can't trivially split losslessly
+            if(split && enable_threading_split_permutation_encoding) {
                 std::size_t max_split_size = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
                 
                 std::size_t digested = 0;
@@ -700,7 +704,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     wait_until_threads_are_done();
     
     // Next, if we can split losslessly, do it
-    if(split && format != SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
+    if(split && !enable_threading_split_permutation_encoding) {
         auto split_size = format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM ? XBOX_ADPCM_SPLIT_SIZE : SPLIT_BUFFER_SIZE;
         
         for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
