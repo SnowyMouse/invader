@@ -468,6 +468,8 @@ namespace Invader {
             else {
                 header.crc32 = UINT32_MAX;
             }
+            
+            header.decompressed_file_size = final_data.size();
 
             // Copy it again, this time with the new CRC32
             if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
@@ -476,8 +478,6 @@ namespace Invader {
             else {
                 std::memcpy(final_data.data(), &header, sizeof(header));
             }
-            
-            header.decompressed_file_size = final_data.size();
 
             // Compress if needed
             if(workload.parameters->details.build_compress) {
