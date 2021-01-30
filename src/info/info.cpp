@@ -67,7 +67,7 @@ namespace Invader::Info {
         if(engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             // CRC32
             if(crc_matches) {
-                PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches)", crc);
+                PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches header)", crc);
             }
             else {
                 PRINT_LINE(oprintf_success_warn, "CRC32:", "0x%08X (mismatched)", crc);
@@ -206,22 +206,30 @@ namespace Invader::Info {
             default:
                 break;
         }
+        
+        bool size_mismatched = map.get_data_length() != map.get_header_decompressed_file_size();
+        
         if(max_uncompressed_size.has_value()) {
             auto num = BYTES_TO_MiB(map.get_data_length());
             auto den = BYTES_TO_MiB(*max_uncompressed_size);
             
             char uncompressed_size[128];
-            std::snprintf(uncompressed_size, sizeof(uncompressed_size), "%.02f / %.02f MiB (%.02f %%)", num, den, 100.0 * num / den);
+            std::snprintf(uncompressed_size, sizeof(uncompressed_size), "%.02f / %.02f MiB (%.02f %%)%s", num, den, 100.0 * num / den, size_mismatched ? " (mismatched)" : " (matches header)");
             
-            if(num > den) {
+            if(num > den || size_mismatched) {
                 PRINT_LINE(oprintf_success_warn, "Uncompressed size:", "%s", uncompressed_size);
             }
             else {
-                PRINT_LINE(oprintf, "Uncompressed size:", "%s\n", uncompressed_size);
+                PRINT_LINE(oprintf_success, "Uncompressed size:", "%s", uncompressed_size);
             }
         }
         else {
-            PRINT_LINE(oprintf, "Uncompressed size:", "%.02f MiB\n", BYTES_TO_MiB(map.get_data_length()));
+            if(size_mismatched) {
+                PRINT_LINE(oprintf_success_warn, "Uncompressed size:", "%.02f MiB (mismatched)", BYTES_TO_MiB(map.get_data_length()));
+            }
+            else {
+                PRINT_LINE(oprintf_success, "Uncompressed size:", "%.02f MiB (matches header)", BYTES_TO_MiB(map.get_data_length()));
+            }
         }
         
         #undef PRINT_LINE

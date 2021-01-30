@@ -109,7 +109,15 @@ namespace Invader {
         }
 
         /**
-         * Get the header's precomputed CRC32
+         * Get the header's precomputed file size. This may not be indicative of the actual file size.
+         * @return header's precomputed file size
+         */
+        std::uint64_t get_header_decompressed_file_size() const noexcept {
+            return this->header_decompressed_file_size;
+        }
+
+        /**
+         * Get the header's precomputed CRC32. This may not be indicative of the actual CRC32.
          * @return header's precomputed CRC32
          */
         std::uint32_t get_header_crc32() const noexcept {
@@ -360,6 +368,9 @@ namespace Invader {
 
         /** Asset indices offset */
         std::uint64_t asset_indices_offset;
+        
+        /** Header file size */
+        std::uint64_t header_decompressed_file_size;
         
 
         /** Load the map now */

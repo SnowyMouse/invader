@@ -284,7 +284,7 @@ namespace Invader {
             map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
             map.scenario_name = header.name;
             map.build = header.build;
-            
+            map.header_decompressed_file_size = header.decompressed_file_size;
             map.header_crc32 = header.crc32;
         };
 
@@ -626,7 +626,7 @@ namespace Invader {
     }
     
     bool Map::is_clean() const noexcept {
-        if(this->get_crc32() != this->get_header_crc32() || this->is_protected()) {
+        if(this->get_crc32() != this->get_header_crc32() || this->is_protected() || this->data.size() != this->get_header_decompressed_file_size()) {
             return false;
         }
         else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
