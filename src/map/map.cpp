@@ -236,7 +236,7 @@ namespace Invader {
         auto continue_loading_map = [&data_length](Map &map, auto &header) {
             // Set the engine and type
             map.engine = header.engine;
-            map.type = header.map_type;
+            map.header_type = header.map_type;
 
             // If we don't know the type of engine, bail
             switch(map.engine) {
@@ -315,6 +315,7 @@ namespace Invader {
         using namespace Invader::HEK;
 
         auto &map = *this;
+        map.type = CacheFileType::SCENARIO_TYPE_SINGLEPLAYER;
 
         // Preallocate tags
         const auto &header = *reinterpret_cast<const CacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeader)));
@@ -352,6 +353,11 @@ namespace Invader {
                 tag.tag_class_int = tags[i].primary_class;
                 tag.tag_data_index_offset = reinterpret_cast<const std::byte *>(tags + i) - map.tag_data;
                 tag.tag_index = i;
+                
+                // Set the map type
+                if(i == map.scenario_tag_id) {
+                    map.type = reinterpret_cast<Scenario<LittleEndian> *>(map.resolve_tag_data_pointer(tags[i].tag_data, sizeof(Scenario<LittleEndian>)))->type;
+                }
 
                 try {
                     const auto *path = reinterpret_cast<const char *>(map.resolve_tag_data_pointer(tags[i].tag_path));
@@ -604,11 +610,6 @@ namespace Invader {
         this->loc_data = std::move(move.loc_data);
         this->sound_data = std::move(move.sound_data);
         this->engine = move.engine;
-        this->type = move.type;
-        this->model_data_offset = move.model_data_offset;
-        this->model_index_offset = move.model_index_offset;
-        this->model_data_size = move.model_data_size;
-        this->asset_indices_offset = move.asset_indices_offset;
         this->load_map();
         this->compressed = move.compressed;
         
@@ -626,7 +627,7 @@ namespace Invader {
     }
     
     bool Map::is_clean() const noexcept {
-        if(this->get_crc32() != this->get_header_crc32() || this->is_protected() || this->data.size() != this->get_header_decompressed_file_size()) {
+        if(this->get_crc32() != this->get_header_crc32() || this->is_protected() || this->data.size() != this->get_header_decompressed_file_size() || this->get_type() != this->get_header_type()) {
             return false;
         }
         else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {

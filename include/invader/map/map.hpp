@@ -123,6 +123,14 @@ namespace Invader {
         std::uint32_t get_header_crc32() const noexcept {
             return this->header_crc32;
         }
+
+        /**
+         * Get the header's precomputed cache file type. This may not be indicative of the actual cache file type.
+         * @return header's precomputed cache file type
+         */
+        HEK::CacheFileType get_header_type() const noexcept {
+            return this->header_type;
+        }
         
         /**
          * Calculate the map's CRC32
@@ -371,6 +379,9 @@ namespace Invader {
         
         /** Header file size */
         std::uint64_t header_decompressed_file_size;
+        
+        /** Header type */
+        HEK::CacheFileType header_type;
         
 
         /** Load the map now */

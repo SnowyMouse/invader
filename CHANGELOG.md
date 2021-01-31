@@ -11,12 +11,14 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-collection: Changed input format from .tag_indices to .txt
 - invader-edit-qt: Sprite count is now shown when viewing sprite sequences
 - invader-edit-qt: Sprite size is now shown when viewing sprites
+- invader-extract: Now uses the map type in the scenario tag for determining if
+  a map is singleplayer, multiplayer, etc.
 
 ### Fixed
 - invader-bitmap: Fixed size being inaccurate in output
 - invader-bitmap: Fixed sprites with double multiply usage having black borders
 - invader-build: Fixed file size not being saved in the header
-- invader-info: Extended dirty check to check file size mismatching
+- invader-info: Extended dirty check to check file size and type mismatching
 
 ## [0.41.4] - 2021-01-24
 ### Fixed

@@ -57,7 +57,13 @@ namespace Invader::Info {
         }
         
         auto map_type = map.get_type();
-        PRINT_LINE(oprintf, "Map type:", "%s\n", type_name(map_type));
+        
+        if(map_type == map.get_header_type()) {
+            PRINT_LINE(oprintf_success, "Map type:", "%s (matches header)", type_name(map_type));
+        }
+        else {
+            PRINT_LINE(oprintf_success_warn, "Map type:", "%s (mismatched)", type_name(map_type));
+        }
         PRINT_LINE(oprintf, "Tags:", "%zu / %zu (%.02f MiB)\n", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
         
         auto crc = map.get_crc32();
