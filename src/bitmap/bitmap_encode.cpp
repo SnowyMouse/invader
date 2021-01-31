@@ -168,7 +168,7 @@ namespace Invader::BitmapEncode {
                 }
                 break;
             }
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP: {
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8: {
                 auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(output_data);
 
                 // If we're dithering, do dithering things
@@ -389,7 +389,7 @@ namespace Invader::BitmapEncode {
                 break;
 
             // p8
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8:
                 decode_8_bit(Pixel::convert_from_p8);
                 break;
                 

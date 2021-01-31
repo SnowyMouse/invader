@@ -281,7 +281,7 @@ namespace Invader::EditQt {
                 // fallthrough
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
                 bits_per_pixel = 8;
                 break;

@@ -57,7 +57,7 @@ namespace Invader {
             bool should_p8 = (usage == BitmapUsage::BITMAP_USAGE_HEIGHT_MAP || usage == BitmapUsage::BITMAP_USAGE_VECTOR_MAP) && palettize;
             if(should_p8) {
                 compressed = false;
-                bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP;
+                bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_P8;
             }
 
             // Go through each mipmap; compress
