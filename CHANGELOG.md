@@ -8,6 +8,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Sprite sheets with multiple sprites in it now add margins to
   the sprites. We recognize that this is completely and utterly stupid due to
   how unreliable it is, but not having it breaks stock tags.
+- invader-build: Bitmaps are now checked if they are supported by the target
+  engine
 - invader-collection: Changed input format from .tag_indices to .txt
 - invader-edit-qt: Sprite count is now shown when viewing sprite sequences
 - invader-edit-qt: Sprite size is now shown when viewing sprites
