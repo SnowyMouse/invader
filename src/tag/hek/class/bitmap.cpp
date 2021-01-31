@@ -40,7 +40,7 @@ namespace Invader::HEK {
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                 return 16;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:

@@ -29,7 +29,7 @@
             "dxt1",
             "dxt3",
             "dxt5",
-            "p8"
+            "p8 bump"
         ],
         "exclude": [
             { "option": "unused1" },

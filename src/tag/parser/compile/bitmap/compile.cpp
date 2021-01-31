@@ -69,26 +69,6 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as swizzled which is unsupported for compiling maps", b);
                 throw InvalidTagDataException();
             }
-            
-            if(
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
-            ) {
-                switch(data.format) {
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu is monochrome which is not supported by the target engine", b);
-                        break;
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8:
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu uses height map compression which is not supported by the target engine", b);
-                        break;
-                    default:
-                        break;
-                }
-            }
 
             std::size_t data_index = &data - bitmap->bitmap_data.data();
             auto format = data.format;
