@@ -432,16 +432,17 @@ Options:
   -a --all                     Convert all tags. This cannot be used with -s.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -o --output-tags             Set the output tags directory.
+  -o --output-tags <dir>       Set the output tags directory.
   -O --overwrite               Overwrite any output tags if they exist.
   -P --fs-path                 Use a filesystem path for the tag path if
                                specifying a tag.
   -s --single-tag              Convert a specific tag. This can be specified
                                multiple times for multiple tags, but cannot be
                                used with -a.
-  -t --tags                    Set the input tags directory.
-  -T --type                    Type of conversion. Can be: gbxmodel-to-model,
-                               model-to-gbxmodel, chicago-extended-to-chicago
+  -t --tags <dir>              Set the input tags directory.
+  -T --type <type>             Type of conversion. Can be: gbxmodel-to-model
+                               (g2m), model-to-gbxmodel (m2g),
+                               chicago-extended-to-chicago (x2c)
 ```
 
 ### invader-dependency
