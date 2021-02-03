@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 def make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare):
-    hpp.write("        bool compare(const ParserStruct *what, bool precision = false, bool ignore_volatile = false) const override;\n")
-    cpp_compare.write("    bool {}::compare(const ParserStruct *what, [[maybe_unused]] bool precision, [[maybe_unused]] bool ignore_volatile) const {{\n".format(struct_name))
+    hpp.write("        bool compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const override;\n")
+    cpp_compare.write("    bool {}::compare(const ParserStruct *what, [[maybe_unused]] bool precision, [[maybe_unused]] bool ignore_volatile, [[maybe_unused]] bool verbose, [[maybe_unused]] std::size_t depth) const {{\n".format(struct_name))
     cpp_compare.write("        auto *what_value = dynamic_cast<const {} *>(what);\n".format(struct_name))
+    cpp_compare.write("        auto result = true;\n".format(struct_name))
     cpp_compare.write("        if(!what_value) {\n")
     cpp_compare.write("            return false;\n")
     cpp_compare.write("        }\n")
@@ -15,17 +16,38 @@ def make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
         
         def write_float_check(what):
             cpp_compare.write("        if({}this->{} != what_value->{} && (!precision || std::fabs(this->{}) - std::fabs(what_value->{}) > 0.000001)) {{\n".format("!ignore_volatile && " if volatile else "", what,what,what,what))
-            cpp_compare.write("            return false;\n");
+            cpp_compare.write("            if(verbose) {\n")
+            cpp_compare.write("                for(std::size_t k = 0; k < depth * 2; k++) { oprintf(\" \"); }\n")
+            cpp_compare.write("                oprintf_success_warn(\"{}::{} is different\");\n".format(struct_name, name))
+            cpp_compare.write("            }\n")
+            cpp_compare.write("            else {\n")
+            cpp_compare.write("                return false;\n")
+            cpp_compare.write("            }\n")
+            cpp_compare.write("            result = false;\n");
             cpp_compare.write("        }\n")
             
         def write_regular_check(what):
             cpp_compare.write("        if({}this->{} != what_value->{}) {{\n".format("!ignore_volatile && " if volatile else "", what,what))
-            cpp_compare.write("            return false;\n");
+            cpp_compare.write("            if(verbose) {\n")
+            cpp_compare.write("                for(std::size_t k = 0; k < depth * 2; k++) { oprintf(\" \"); }\n")
+            cpp_compare.write("                oprintf_success_warn(\"{}::{} is different\");\n".format(struct_name, name))
+            cpp_compare.write("            }\n")
+            cpp_compare.write("            else {\n")
+            cpp_compare.write("                return false;\n")
+            cpp_compare.write("            }\n")
+            cpp_compare.write("            result = false;\n");
             cpp_compare.write("        }\n")
              
         def write_memcmp_check(what):
             cpp_compare.write("        if({}std::memcmp(&this->{}, &what_value->{}, sizeof(this->{})) != 0) {{\n".format("!ignore_volatile && " if volatile else "", what,what,what))
-            cpp_compare.write("            return false;\n");
+            cpp_compare.write("            if(verbose) {\n")
+            cpp_compare.write("                for(std::size_t k = 0; k < depth * 2; k++) { oprintf(\" \"); }\n")
+            cpp_compare.write("                oprintf_success_warn(\"{}::{} is different\");\n".format(struct_name, name))
+            cpp_compare.write("            }\n")
+            cpp_compare.write("            else {\n")
+            cpp_compare.write("                return false;\n")
+            cpp_compare.write("            }\n")
+            cpp_compare.write("            result = false;\n");
             cpp_compare.write("        }\n")
         
         if "count" in struct:
@@ -35,11 +57,20 @@ def make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
             cpp_compare.write("        auto this_{}_count = this->{}.size();\n".format(name,name))
             cpp_compare.write("        auto other_{}_count = what_value->{}.size();\n".format(name,name))
             cpp_compare.write("        if(this_{}_count != other_{}_count) {{\n".format(name,name))
-            cpp_compare.write("            return false;\n")
+            cpp_compare.write("            result = false;\n")
             cpp_compare.write("        }\n")
-            cpp_compare.write("        for(std::size_t i = 0; i < this_{}_count; i++) {{\n".format(name))
-            cpp_compare.write("            if(!this->{}[i].compare(&what_value->{}[i], precision, ignore_volatile)) {{\n".format(name, name))
-            cpp_compare.write("                return false;\n")
+            cpp_compare.write("        else {")
+            cpp_compare.write("            for(std::size_t i = 0; i < this_{}_count; i++) {{\n".format(name))
+            cpp_compare.write("                if(!this->{}[i].compare(&what_value->{}[i], precision, ignore_volatile, verbose, depth + 1)) {{\n".format(name, name))
+            cpp_compare.write("                    if(verbose) {\n")
+            cpp_compare.write("                        for(std::size_t k = 0; k < depth * 2; k++) { oprintf(\" \"); }\n")
+            cpp_compare.write("                        oprintf_success_warn(\"{}::{}#%zu is different\", i);\n".format(struct_name, name))
+            cpp_compare.write("                    }\n")
+            cpp_compare.write("                    else {\n")
+            cpp_compare.write("                        return false;\n")
+            cpp_compare.write("                    }\n")
+            cpp_compare.write("                    result = false;\n")
+            cpp_compare.write("                }\n")
             cpp_compare.write("            }\n")
             cpp_compare.write("        }\n")
             
@@ -121,5 +152,5 @@ def make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
                 else:
                     writer(name)
         
-    cpp_compare.write("        return true;\n")
+    cpp_compare.write("        return result;\n")
     cpp_compare.write("    }\n")

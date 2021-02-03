@@ -47,7 +47,7 @@ enum ByPath {
     BY_PATH_DIFFERENT = 2
 };
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path);
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose);
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
@@ -60,6 +60,7 @@ int main(int argc, const char **argv) {
         bool precision = false;
         bool match_all = false;
         bool functional = false;
+        bool verbose = false;
         ByPath by_path = ByPath::BY_PATH_SAME;
         Show show = Show::SHOW_ALL;
     } compare_options;
@@ -76,6 +77,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input.");
+    options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with -f");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
     static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
@@ -125,6 +127,10 @@ int main(int argc, const char **argv) {
             case 'I':
                 close_input(compare_options);
                 compare_options.top_input = &compare_options.inputs.emplace_back();
+                break;
+                
+            case 'v':
+                compare_options.verbose = true;
                 break;
                 
             case 'm':
@@ -323,10 +329,10 @@ int main(int argc, const char **argv) {
         i.tag_paths.shrink_to_fit();
     }
     
-    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path);
+    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path, compare_options.verbose);
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path) {
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose) {
     // Find all tags we have in common first
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
@@ -574,7 +580,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         }
         else {
             for(std::size_t i = 1; i < found_count; i++) {
-                match_log(first_struct->compare(structs[i].get(), precision, true), i);
+                match_log(first_struct->compare(structs[i].get(), precision, true, true), i);
             }
         }
     }
