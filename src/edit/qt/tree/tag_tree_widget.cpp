@@ -493,7 +493,7 @@ namespace Invader::EditQt {
     
     std::optional<std::string> TagTreeWidget::get_selected_directory() const noexcept {
         // If we have a tag selected, do nothing
-        if(!this->get_selected_tag().has_value()) {
+        if(this->get_selected_tag().has_value()) {
             return std::nullopt;
         }
         
@@ -502,8 +502,13 @@ namespace Invader::EditQt {
             auto *item = selected_items[0];
             std::string path;
             while(item) {
-                path = (item->text(0) + INVADER_PREFERRED_PATH_SEPARATOR).toStdString() + path;
+                path = item->text(0).toStdString() + path;
                 item = item->parent();
+                
+                // Don't have a trailing path separator.
+                if(item) {
+                    path = INVADER_PREFERRED_PATH_SEPARATOR + path;
+                }
             }
             return path;
         }
