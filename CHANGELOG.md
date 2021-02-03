@@ -3,6 +3,11 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-compare: Added shorthand for the conversion types. g2m can be used in
+  place of gbxmodel-to-model, m2g in place of model-to-gbxmodel, and x2c in
+  place of chicago-extended-to-chicago
+
 ### Changed
 - invader-bitmap: Optimized sprite placement if no budgeting is used
 - invader-bitmap: Sprite sheets with multiple sprites in it now add margins to

@@ -36,7 +36,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("overwrite", 'O', 0, "Overwrite any output tags if they exist.");
     options.emplace_back("tags", 't', 1, "Set the input tags directory.", "<dir>");
     options.emplace_back("output-tags", 'o', 1, "Set the output tags directory.", "<dir>");
-    options.emplace_back("type", 'T', 1, "Type of conversion. Can be: gbxmodel-to-model, model-to-gbxmodel, chicago-extended-to-chicago", "<type>");
+    options.emplace_back("type", 'T', 1, "Type of conversion. Can be: gbxmodel-to-model (g2m), model-to-gbxmodel (m2g), chicago-extended-to-chicago (x2c)", "<type>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
 
     static constexpr char DESCRIPTION[] = "Convert from one tag type to another.";
@@ -53,13 +53,13 @@ int main(int argc, const char **argv) {
                 break;
                 
             case 'T':
-                if(std::strcmp(args[0], "gbxmodel-to-model") == 0) {
+                if(std::strcmp(args[0], "gbxmodel-to-model") == 0 || std::strcmp(args[0], "g2m") == 0) {
                     compare_options.conversion = Conversion::GBXMODEL_TO_MODEL;
                 }
-                else if(std::strcmp(args[0], "model-to-gbxmodel") == 0) {
+                else if(std::strcmp(args[0], "model-to-gbxmodel") == 0 || std::strcmp(args[0], "m2g") == 0) {
                     compare_options.conversion = Conversion::MODEL_TO_GBXMODEL;
                 }
-                else if(std::strcmp(args[0], "chicago-extended-to-chicago") == 0) {
+                else if(std::strcmp(args[0], "chicago-extended-to-chicago") == 0 || std::strcmp(args[0], "x2c") == 0) {
                     compare_options.conversion = Conversion::CHICAGO_EXTENDED_TO_CHICAGO;
                 }
                 else {

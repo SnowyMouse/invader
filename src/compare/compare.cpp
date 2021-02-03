@@ -81,7 +81,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
     static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
-    static constexpr char USAGE[] = "[options] <-I <options>> <-I <options>> [<-I <options>> ...]";
+    static constexpr char USAGE[] = "[options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]";
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CompareOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, compare_options, [](char opt, const auto &args, CompareOptions &compare_options) {
         static const char *CAN_ONLY_BE_USED_WITH_TAG_INPUT = "This option can only be used with a tag input.";
@@ -580,7 +580,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         }
         else {
             for(std::size_t i = 1; i < found_count; i++) {
-                match_log(first_struct->compare(structs[i].get(), precision, true, true), i);
+                match_log(first_struct->compare(structs[i].get(), precision, true, verbose), i);
             }
         }
     }

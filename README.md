@@ -358,7 +358,7 @@ This program compares tags against maps, maps against maps, and tags against
 tags.
 
 ```
-Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <options>> ...]
+Usage: invader-compare [options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]
 
 Compare tags against other tags.
 
@@ -393,6 +393,9 @@ Options:
   -t --tags                    Add a tags directory to the input. Specify
                                multiple tag directories in order of precedence
                                for the input.
+  -v --verbose                 Output more information on the differences
+                               between tags to standard output. This will not
+                               work with -f
 ```
 
 ### invader-compress
