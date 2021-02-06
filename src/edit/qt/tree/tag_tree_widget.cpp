@@ -507,7 +507,7 @@ namespace Invader::EditQt {
                 
                 // Don't have a trailing path separator.
                 if(item) {
-                    path = INVADER_PREFERRED_PATH_SEPARATOR + path;
+                    path = std::string { INVADER_PREFERRED_PATH_SEPARATOR } + path;
                 }
             }
             return path;
