@@ -2,6 +2,7 @@
 
 #include <invader/compress/compression.hpp>
 #include <invader/map/map.hpp>
+#include <invader/file/file.hpp>
 #include <zstd.h>
 #include <cstdio>
 #include <thread>
@@ -120,6 +121,12 @@ namespace Invader::Compression {
             if(new_engine_version == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 header_output_s.foot_literal = HEK::CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
                 header_output_s.head_literal = HEK::CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
+                
+                // Ensure it's the demo version
+                if(!T::IS_DEMO) {
+                    auto header_copy = *reinterpret_cast<HEK::CacheFileHeader *>(&header_output_s);
+                    *reinterpret_cast<HEK::CacheFileDemoHeader *>(header_output) = header_copy;
+                }
             }
         }
     }
