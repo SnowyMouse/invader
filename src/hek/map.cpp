@@ -63,20 +63,14 @@ namespace Invader::HEK {
         if(this->name.overflows() || this->build.overflows()) {
             return false;
         }
-
+        
         // Make sure the head/foot things are valid
         if(this->engine == CacheFileEngine::CACHE_FILE_DEMO) {
-            if(this->head_literal != CacheFileLiteral::CACHE_FILE_HEAD_DEMO || this->foot_literal != CacheFileLiteral::CACHE_FILE_FOOT_DEMO) {
-                return false;
-            }
+            return this->head_literal == CacheFileLiteral::CACHE_FILE_HEAD_DEMO && this->foot_literal == CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
         }
         else {
-            if(this->head_literal != CacheFileLiteral::CACHE_FILE_HEAD || this->foot_literal != CacheFileLiteral::CACHE_FILE_FOOT) {
-                return false;
-            }
+            return this->head_literal == CacheFileLiteral::CACHE_FILE_HEAD && this->foot_literal == CacheFileLiteral::CACHE_FILE_FOOT;
         }
-
-        return true;
     }
 
     bool NativeCacheFileHeader::valid() const noexcept {
