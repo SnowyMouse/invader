@@ -22,6 +22,7 @@ This is used for recording Invader's changes. This changelog is based on
   a map is singleplayer, multiplayer, etc.
 
 ### Fixed
+- invader: Fixed an exception error on some Windows shells
 - invader-bitmap: Fixed size being inaccurate in output
 - invader-bitmap: Fixed sprites with double multiply usage having black borders
 - invader-bitmap: Fixed regeneration error implying a bitmap tag exists if one
