@@ -263,7 +263,7 @@ int main(int argc, char * const *argv) {
         tag.tag_path = single_tag_maybe->path + "." + tag_class_to_extension(single_tag_maybe->class_int);
 
         // Find it
-        auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags, true);
+        auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags);
         if(!file_path_maybe.has_value()) {
             eprintf_error("Error: %s was not found in any tags directory", refactor_options.single_tag);
             return EXIT_FAILURE;

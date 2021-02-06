@@ -83,77 +83,52 @@ namespace Invader::File {
         std::fclose(f);
         return true;
     }
-
-    std::optional<std::filesystem::path> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, bool must_exist) {
-        // if it's an absolute path, we can't do anything about this
-        std::filesystem::path tag_path_path(tag_path);
-        if(tag_path_path.is_absolute()) {
-            return std::nullopt;
-        }
-
-        for(auto &tags_directory_string : tags) {
-            std::filesystem::path tags_directory(tags_directory_string);
-            auto file_path = tags_directory / tag_path_path;
-            if(!must_exist || std::filesystem::exists(file_path)) {
-                return file_path.string();
+    
+    std::optional<std::filesystem::path> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::filesystem::path> &tags) {
+        for(auto &i : tags) {
+            auto path = tag_path_to_file_path(tag_path, i);
+            if(std::filesystem::exists(path)) {
+                return path;
             }
         }
         return std::nullopt;
     }
 
-    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags, bool must_exist) {
-        // Get the absolute file path. It doesn't matter if it exists.
-        auto absolute_file_path = std::filesystem::absolute(file_path);
-        if(must_exist && !std::filesystem::exists(absolute_file_path)) {
+    std::filesystem::path tag_path_to_file_path(const std::string &tag_path, const std::filesystem::path &tags) {
+        return tags / halo_path_to_preferred_path(tag_path);
+    }
+
+    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::filesystem::path &tags) {
+        std::error_code ec;
+        auto relative_path = std::filesystem::relative(file_path, tags, ec);
+        
+        // Nope?
+        if(ec) {
             return std::nullopt;
         }
         
-        // Find it
-        for(auto &tags_directory : tags) {
-            auto absolute_path = std::filesystem::absolute(tags_directory);
-            try {
-                auto relative = std::filesystem::relative(absolute_file_path, absolute_path);
-                return relative.string();
-            }
-            catch(std::exception &) {
-                continue;
-            }
+        // Get the top level directory
+        auto relative_test = relative_path;
+        while(relative_test.has_parent_path()) {
+            relative_test = relative_test.parent_path();
+        }
+        
+        // If we get this, then it isn't inside the actual directory
+        if(relative_test == "..") {
+            return std::nullopt;
         }
         
         // Done
-        return std::nullopt;
+        return relative_path;
     }
-
-    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, const std::string &expected_extension) {
-        std::size_t EXTENSION_LENGTH = expected_extension.size();
-        std::size_t TAG_PATH_LENGTH = tag_path.size();
-
-        // If the path is too small to have the extension, no dice
-        if(EXTENSION_LENGTH >= tag_path.size()) {
-            return std::nullopt;
-        }
-
-        // Otherwise, check if we have the extension
-        if(TAG_PATH_LENGTH > EXTENSION_LENGTH && std::strcmp(tag_path.c_str() + TAG_PATH_LENGTH - EXTENSION_LENGTH, expected_extension.c_str()) == 0) {
-            // If the user simply put ".scenario" at the end, remove it
-            if(Invader::File::tag_path_to_file_path(tag_path, tags, true).has_value()) {
-                return tag_path.substr(0, TAG_PATH_LENGTH - EXTENSION_LENGTH);
-            }
-
-            // Otherwise see if we can find it
-            else {
-                auto tag_maybe = Invader::File::file_path_to_tag_path(tag_path, tags, true);
-                if(tag_maybe.has_value()) {
-                    auto &tag = tag_maybe.value();
-                    return tag.substr(0, tag.size() - EXTENSION_LENGTH);
-                }
-                else {
-                    return std::nullopt;
-                }
+    
+    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags) {
+        for(auto &i : tags) {
+            auto v = file_path_to_tag_path(file_path, i);
+            if(v.has_value()) {
+                return v;
             }
         }
-
-        // We don't? Give up.
         return std::nullopt;
     }
 
@@ -321,7 +296,7 @@ namespace Invader::File {
                         file.full_path = file_path;
                         file.tag_class_int = tag_class_int;
                         file.tag_directory = priority;
-                        file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir, false).value();
+                        file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir).value();
                         all_tags.emplace_back(std::move(file));
                         
                         tags_found++;
@@ -367,7 +342,7 @@ namespace Invader::File {
                     file.full_path = file_path;
                     file.tag_class_int = tag_class_int;
                     file.tag_directory = priority;
-                    file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir, false).value();
+                    file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir).value();
                     all_tags.emplace_back(std::move(file));
                     tags_found++;
                 }

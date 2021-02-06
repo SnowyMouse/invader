@@ -57,14 +57,14 @@ int main(int argc, char * const *argv) {
     // Require a tag
     std::optional<std::string> tag_path;
     if(dependency_options.use_filesystem_path) { 
-        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags, true);
+        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags);
         if(tag_path_maybe.has_value()) {
             tag_path = Invader::File::preferred_path_to_halo_path(*tag_path_maybe);
         }
     }
     else {
-        auto file_path_maybe = Invader::File::tag_path_to_file_path(remaining_arguments[0], dependency_options.tags, true);
-        if(file_path_maybe.has_value()) {
+        auto file_path_maybe = Invader::File::tag_path_to_file_path(remaining_arguments[0], dependency_options.tags);
+        if(file_path_maybe.has_value() && std::filesystem::exists(*file_path_maybe)) {
             tag_path = remaining_arguments[0];
         }
     }

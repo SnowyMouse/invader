@@ -41,10 +41,10 @@ using namespace Invader::HEK;
 
 struct BitmapOptions {
     // Data directory
-    const char *data = "data/";
-
+    std::filesystem::path data = "data";
+    
     // Tags directory
-    std::optional<const char *> tags;
+    std::filesystem::path tags = "tags";
 
     // Scale type?
     std::optional<InvaderBitmapMipmapScaling> mipmap_scale_type;
@@ -289,7 +289,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         }
 
         if(image_pixels == nullptr) {
-            eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data);
+            eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data.string().c_str());
             eprintf("Valid formats are:\n");
             for(auto *format : SUPPORTED_FORMATS) {
                 eprintf("    %s\n", format);
@@ -519,10 +519,6 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 't':
-                if(bitmap_options.tags.has_value()) {
-                    eprintf_error("This tool does not support multiple tags directories.");
-                    std::exit(EXIT_FAILURE);
-                }
                 bitmap_options.tags = arguments[0];
                 break;
 
@@ -661,79 +657,50 @@ int main(int argc, char *argv[]) {
                 break;
         }
     });
-    
-    // Default
-    if(!bitmap_options.tags.has_value()) {
-        bitmap_options.tags = "tags";
-    }
 
-    // See if we can figure out the bitmap tag using extensions
-    std::string bitmap_tag = remaining_arguments[0];
+    // Resolve the bitmap tag
+    std::string bitmap_tag;
     SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
-    
-    // Remember what kind of tag class we're using, if we're using -P with -R
-    std::optional<TagClassInt> tag_class_to_use;
-
     if(bitmap_options.filesystem_path) {
-        // Check for a ".bitmap" and ".extended_bitmap"
-        if(bitmap_options.regenerate) {
-            std::vector<std::filesystem::path> tags_v(&*bitmap_options.tags, &*bitmap_options.tags + 1);
-            auto try_it_and_buy_it = [&tags_v, &bitmap_tag, &tag_class_to_use](HEK::TagClassInt tag_class_int) -> bool {
-                auto p = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, tags_v, std::string(".") + HEK::tag_class_to_extension(tag_class_int));
-                if(!p.has_value()) {
-                    return false;
+        auto bitmap_tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], bitmap_options.tags);
+        if(bitmap_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+            bitmap_tag = std::filesystem::path(*bitmap_tag_maybe).replace_extension().string();
+        }
+        else if(!bitmap_options.regenerate) {
+            auto bitmap_file_maybe = File::file_path_to_tag_path(remaining_arguments[0], bitmap_options.data);
+            if(bitmap_file_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+                SupportedFormatsInt i;
+                auto path_test = std::filesystem::path(*bitmap_file_maybe);
+                auto extension = path_test.extension();
+                bitmap_tag = std::filesystem::path(*bitmap_file_maybe).replace_extension().string();
+                for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+                    if(extension == SUPPORTED_FORMATS[i]) {
+                        found_format = i;
+                        break;
+                    }
                 }
-                bitmap_tag = *p;
-                tag_class_to_use = tag_class_int;
-                return true;
-            };
-            
-            if(!try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_INVADER_BITMAP) && !try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_BITMAP)) {
-                eprintf_error("Failed to find a valid bitmap %s in the tags directory.", remaining_arguments[0]);
-                return EXIT_FAILURE;
+            }
+            else {
+                eprintf_error("Failed to find a valid bitmap %s in the data or tags directories.", remaining_arguments[0]);
             }
         }
-        
-        // Iterate through all the possible extensions
         else {
-            std::vector<std::filesystem::path> data_v(&bitmap_options.data, &bitmap_options.data + 1);
-            SupportedFormatsInt i;
-            for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
-                auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
-                if(bitmap_tag_maybe.has_value()) {
-                    bitmap_tag = *bitmap_tag_maybe;
-                    found_format = i;
-                    break;
-                }
-            }
-            if(i == SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT) {
-                eprintf_error("Failed to find a valid bitmap %s in the data directory.", remaining_arguments[0]);
-                return EXIT_FAILURE;
-            }
-        }
-    }
-
-    // Ensure it's lowercase
-    for(char &c : bitmap_tag) {
-        if(c >= 'A' && c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", bitmap_tag.c_str());
+            eprintf_error("Failed to find a valid bitmap %s in the tags directory.", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }
+    
+    else {
+        bitmap_tag = remaining_arguments[0];
+    }
 
     // Check if the tags directory exists
-    std::filesystem::path tags_path(*bitmap_options.tags);
-    if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*bitmap_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *bitmap_options.tags);
-        }
+    if(!std::filesystem::is_directory(bitmap_options.tags)) {
+        eprintf_error("Directory %s was not found or is not a directory", bitmap_options.tags.string().c_str());
         return EXIT_FAILURE;
     }
 
-    auto tag_path = tags_path / bitmap_tag;
-    auto final_path_bitmap = tag_path.string() + std::string(".bitmap");
+    auto tag_path = bitmap_options.tags / bitmap_tag;
+    auto final_path_bitmap = std::filesystem::path(tag_path) += ".bitmap";
     return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_BITMAP);
 }

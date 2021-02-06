@@ -144,7 +144,7 @@ int main(int argc, const char **argv) {
     else if(convert_options.use_filesystem_path) {
         for(auto &i : convert_options.tags_to_convert) {
             try {
-                paths.emplace_back(File::split_tag_class_extension(File::halo_path_to_preferred_path(File::file_path_to_tag_path(i, tags_vector, false).value())).value());
+                paths.emplace_back(File::split_tag_class_extension(File::halo_path_to_preferred_path(File::file_path_to_tag_path(i, tags_vector).value())).value());
             }
             catch(std::exception &) {
                 eprintf_error("Invalid tag path %s", i.c_str());

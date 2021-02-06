@@ -754,7 +754,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
     options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, or xbox-adpcm.", "<fmt>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data or tag.");
     options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
     options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
     options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
@@ -872,13 +872,12 @@ int main(int argc, const char **argv) {
     // Get our paths and make sure a data directory exists
     std::string halo_tag_path;
     if(sound_options.fs_path) {
-        std::vector<std::filesystem::path> data;
-        data.emplace_back(sound_options.data);
-        try {
-            halo_tag_path = Invader::File::file_path_to_tag_path(remaining_arguments[0], data, false).value();
+        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], sound_options.data);
+        if(!tag_path_maybe.has_value()) {
+            tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], sound_options.tags);
         }
-        catch(std::exception &) {
-            eprintf_error("Cannot find %s in %s", remaining_arguments[0], sound_options.data);
+        if(!tag_path_maybe.has_value()) {
+            eprintf_error("Cannot find %s in %s or %s", remaining_arguments[0], sound_options.data, sound_options.tags);
             return EXIT_FAILURE;
         }
     }

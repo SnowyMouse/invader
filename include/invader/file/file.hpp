@@ -34,30 +34,36 @@ namespace Invader::File {
     bool save_file(const std::filesystem::path &path, const std::vector<std::byte> &data);
 
     /**
-     * Convert a tag path to a file path
+     * Convert a tag path to a file path for one tags directory. The file MUST exist.
+     * @param  tag_path   tag path to use
+     * @param  tags       tags directories to use
+     * @return            file path or std::nullopt on failure
+     */
+    std::optional<std::filesystem::path> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::filesystem::path> &tags);
+
+    /**
+     * Convert a tag path to a file path for one tags directory. The file does not have to exist.
      * @param  tag_path   tag path to use
      * @param  tags       tags directory to use
-     * @param  must_exist ensure the path exists
-     * @return            file path to use if exists, or std::nullopt on failure
+     * @return            file path or std::nullopt on failure
      */
-    std::optional<std::filesystem::path> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, bool must_exist);
+    std::filesystem::path tag_path_to_file_path(const std::string &tag_path, const std::filesystem::path &tags);
 
     /**
-     * Convert a file path to a tag path
+     * Convert a file path to a tag path relative to any of the tags directories. The file does not have to exist, but it must be relative to at least one tags directory.
+     * @param  tag_path   tag file path to use
+     * @param  tags       tags directories to use
+     * @return            tag path or std::nullopt on failure
+     */
+    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags);
+
+    /**
+     * Convert a file path to a tag path relative to one tags directory. The file does not have to exist, but it must be relative to the tags directory.
      * @param  tag_path   tag file path to use
      * @param  tags       tags directory to use
-     * @param  must_exist ensure the path exists
-     * @return            tag path to use if exists, or std::nullopt on failure
+     * @return            tag path or std::nullopt on failure
      */
-    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags, bool must_exist);
-
-    /**
-     * Attempt to resolve a file path to a tag path using an extension
-     * @param tag_path           tag path to use
-     * @param tags               tags directory to use
-     * @param expected_extension extension to use and remove from the path, if found
-     */
-    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, const std::string &expected_extension);
+    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::filesystem::path &tags);
 
     /**
      * File path holder

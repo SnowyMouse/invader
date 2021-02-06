@@ -152,9 +152,9 @@ int main(int argc, char * const *argv) {
     std::string string_tag;
     if(string_options.use_filesystem_path) {
         std::vector<std::filesystem::path> data(&string_options.data, &string_options.data + 1);
-        auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
-        if(string_tag_maybe.has_value()) {
-            string_tag = string_tag_maybe.value();
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
+        if(string_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+            string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
         }
         else {
             eprintf_error("Failed to find a valid %s file %s in the data directory", valid_extension, remaining_arguments[0]);

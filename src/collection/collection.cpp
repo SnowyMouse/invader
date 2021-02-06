@@ -59,9 +59,9 @@ int main(int argc, char * const *argv) {
     std::string string_tag;
     if(collection_options.use_filesystem_path) {
         std::vector<std::filesystem::path> data(&collection_options.data, &collection_options.data + 1);
-        auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, INDEX_EXTENSION);
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
         if(string_tag_maybe.has_value()) {
-            string_tag = string_tag_maybe.value();
+            string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
         }
         else {
             eprintf_error("Failed to find a valid %s file %s in the data directory", INDEX_EXTENSION, remaining_arguments[0]);
@@ -70,14 +70,6 @@ int main(int argc, char * const *argv) {
     }
     else {
         string_tag = remaining_arguments[0];
-    }
-
-    // Ensure it's lowercase
-    for(const char *c = string_tag.c_str(); *c; c++) {
-        if(*c >= 'A' && *c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", string_tag.c_str());
-            return EXIT_FAILURE;
-        }
     }
 
     std::filesystem::path tags_path(*collection_options.tags);

@@ -882,18 +882,25 @@ namespace Invader {
         auto &tags_directories = this->parameters->tags_directories;
 
         // Find it
-        char formatted_path[256];
+        char formatted_path[512];
         std::optional<std::filesystem::path> new_path;
         if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
             std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
             Invader::File::halo_path_to_preferred_path_chars(formatted_path);
-            new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories, true);
+            
+            // Only set the new path if it exists
+            if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) {
+                new_path = std::nullopt;
+            }
         }
         else {
             #define TRY_THIS(new_int) if(!new_path.has_value()) { \
                 std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(new_int)); \
                 Invader::File::halo_path_to_preferred_path_chars(formatted_path); \
-                new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories, true); \
+                new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories); \
+                if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) { /* only set the new path if it exists */ \
+                    new_path = std::nullopt; \
+                } \
                 tag_class_int = new_int; \
             }
             TRY_THIS(TagClassInt::TAG_CLASS_BIPED);

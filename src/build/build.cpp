@@ -218,9 +218,10 @@ int main(int argc, const char **argv) {
     }
 
     if(build_options.use_filesystem_path) {
-        auto scenario_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], build_options.tags, ".scenario");
-        if(scenario_maybe.has_value()) {
-            scenario = scenario_maybe.value();
+        auto scenario_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], build_options.tags);
+        if(scenario_maybe.has_value()) std::printf("%s\n", scenario_maybe->c_str());
+        if(scenario_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+            scenario = std::filesystem::path(*scenario_maybe).replace_extension().string();
         }
         else {
             eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);

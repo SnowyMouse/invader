@@ -102,33 +102,35 @@ int main(int argc, const char **argv) {
     }
 
     // Require a tag
-    std::vector<char> base_tag;
+    std::string base_tag;
     if(archive_options.use_filesystem_path) {
         // See if the tag path is valid
         std::optional<std::string> base_tag_maybe;
-        if(archive_options.single_tag) {
-            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true);
-        }
-        else {
-            base_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], archive_options.tags, std::string(".scenario"));
+        if(std::filesystem::exists(remaining_arguments[0])) {
+            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags);
         }
         if(base_tag_maybe.has_value()) {
-            const char *str = (*base_tag_maybe).c_str();
-            base_tag.insert(base_tag.end(), str, str + (*base_tag_maybe).size());
+            base_tag = *base_tag_maybe;
+            
+            // Remove extension if necessary
+            if(!archive_options.single_tag) {
+                auto path_test = std::filesystem::path(base_tag);
+                if(path_test.extension() != ".scenario") {
+                    eprintf_error("This function only accepts scenario tags. To use other tags, use -s");
+                    return EXIT_FAILURE;
+                }
+                base_tag = path_test.replace_extension().string();
+            }
         }
         else {
             eprintf_error("Failed to find a valid%stag %s in the tags directory", archive_options.single_tag ? " " : " scenario ", remaining_arguments[0]);
-            if(!archive_options.single_tag && Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true).has_value()) {
-                eprintf_error("A file was detected there, but it isn't a .scenario tag, so you need to use -s");
-            }
             return EXIT_FAILURE;
         }
     }
     else {
         base_tag.insert(base_tag.end(), remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
-    base_tag.emplace_back();
-
+    
     // Variables to hold this
     std::vector<std::pair<std::filesystem::path, std::string>> archive_list;
 
@@ -167,7 +169,7 @@ int main(int argc, const char **argv) {
 
         try {
             Invader::BuildWorkload::BuildParameters parameters(*archive_options.engine);
-            parameters.scenario = base_tag.data();
+            parameters.scenario = base_tag;
             parameters.tags_directories = archive_options.tags;
             if(archive_options.engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 parameters.details.build_compress = true;
