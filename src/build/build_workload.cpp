@@ -400,6 +400,7 @@ namespace Invader {
             // Lastly, do the header
             header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
             header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
+            header.decompressed_file_size = final_data.size();
             if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
                 header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
@@ -444,6 +445,7 @@ namespace Invader {
             // If we can calculate the CRC32, do it
             std::uint32_t new_crc = 0;
             bool can_calculate_crc = engine_target != CacheFileEngine::CACHE_FILE_XBOX;
+            
             if(can_calculate_crc) {
                 if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf("Calculating CRC32...");
@@ -468,8 +470,6 @@ namespace Invader {
             else {
                 header.crc32 = UINT32_MAX;
             }
-            
-            header.decompressed_file_size = final_data.size();
 
             // Copy it again, this time with the new CRC32
             if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {

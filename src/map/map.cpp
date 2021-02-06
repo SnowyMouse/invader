@@ -66,7 +66,7 @@ namespace Invader {
                     }
                     
                     // If we aren't compressed, then the file size in the header *must* match for native maps.
-                    if(!compression_type && header->decompressed_file_size.read() != data_size) {
+                    if(!compression_type && header_native->decompressed_file_size.read() != data_size) {
                         eprintf_error("decompressed file size in the header is wrong");
                         throw InvalidMapException();
                     }
