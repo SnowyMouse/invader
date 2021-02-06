@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
             eprintf_error("Failed to find %s in the tags or data directories", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
-        font_tag = std::filesystem::path(font_tag).replace_extension();
+        font_tag = std::filesystem::path(font_tag).replace_extension().string();
     }
     else {
         font_tag = remaining_arguments[0];
