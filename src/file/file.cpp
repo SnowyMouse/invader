@@ -119,7 +119,7 @@ namespace Invader::File {
         }
         
         // Done
-        return relative_path;
+        return relative_path.string();
     }
     
     std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags) {
