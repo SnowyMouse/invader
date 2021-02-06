@@ -30,8 +30,8 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
+    options.emplace_back("maps", 'm', 1, "Use the specified maps directory to find bitmaps.map, sounds.map, and/or loc.map.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory to save tags.", "<dir>");
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps.");
