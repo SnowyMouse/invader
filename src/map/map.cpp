@@ -47,88 +47,77 @@ namespace Invader {
 
     bool Map::decompress_if_needed(const std::byte *data, std::size_t data_size) {
         using namespace Invader::HEK;
+        
         const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(data);
+        const auto *potential_header_demo = reinterpret_cast<const CacheFileDemoHeader *>(data);
         CompressionType compression_type = CompressionType::COMPRESSION_TYPE_NONE;
         
-        if(data_size > sizeof(*potential_header)) {
-            // Check if it needs decompressed based on header
-            if(potential_header->valid()) {
-                switch(potential_header->engine.read()) {
-                    case CacheFileEngine::CACHE_FILE_NATIVE: {
-                        auto *header = reinterpret_cast<const NativeCacheFileHeader *>(&potential_header);
-                        switch(header->compression_type) {
-                            case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED:
-                                compression_type = CompressionType::COMPRESSION_TYPE_NONE;
-                                break;
-                            case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_ZSTD:
-                                compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
-                                break;
-                        }
-                        
-                        // If we aren't compressed, then the file size in the header *must* match for native maps.
-                        if(!compression_type && header->decompressed_file_size.read() != data_size) {
-                            eprintf_error("decompressed file size in the header is wrong");
-                            throw InvalidMapException();
-                        }
-                        
-                        break;
+        auto do_decompress_if_needed = [&compression_type, &data, &data_size](Map *map, auto *header) {
+            switch(header->engine) {
+                case CacheFileEngine::CACHE_FILE_NATIVE: {
+                    auto *header_native = reinterpret_cast<const NativeCacheFileHeader *>(header);
+                    switch(header_native->compression_type) {
+                        case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED:
+                            compression_type = CompressionType::COMPRESSION_TYPE_NONE;
+                            break;
+                        case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_ZSTD:
+                            compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
+                            break;
                     }
-                    case CacheFileEngine::CACHE_FILE_XBOX:
-                        compression_type = CompressionType::COMPRESSION_TYPE_DEFLATE;
-                        break;
-                    case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
-                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
-                    case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                        compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
-                    default:
-                        break;
-                }
-                
-                // If so, decompress it
-                if(compression_type) {
-                    // Uh... deja vu?
-                    if(this->get_compression_algorithm()) {
-                        eprintf_error("map was double-compressed");
+                    
+                    // If we aren't compressed, then the file size in the header *must* match for native maps.
+                    if(!compression_type && header->decompressed_file_size.read() != data_size) {
+                        eprintf_error("decompressed file size in the header is wrong");
                         throw InvalidMapException();
                     }
                     
-                    // Okay we're good
-                    this->data = Compression::decompress_map_data(data, data_size);
-                    this->compressed = compression_type;
+                    break;
                 }
+                case CacheFileEngine::CACHE_FILE_XBOX:
+                    compression_type = CompressionType::COMPRESSION_TYPE_DEFLATE;
+                    break;
+                case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
+                    compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
+                default:
+                    break;
             }
             
-            // If not, is it demo?
-            else if(reinterpret_cast<const CacheFileDemoHeader *>(potential_header)->valid()) {
-                return false;
-            }
-            
-            // If not, maybe it's MCC?
-            else if(Compression::ceaflate_compression_size(data, data_size).has_value()) {
-                this->compressed = CompressionType::COMPRESSION_TYPE_MCC_DEFLATE;
-                this->data = Compression::ceaflate_decompress(data, data_size);
-                
-                // Okay... check the header
-                const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(this->data.data());
-                if(this->data.size() < sizeof(*potential_header) || !potential_header->valid()) {
-                    eprintf_error("mcc-compressed map did not have a valid retail/custom edition header");
+            // If so, decompress it
+            if(compression_type) {
+                // Uh... deja vu?
+                if(map->get_compression_algorithm()) {
+                    eprintf_error("map was double-compressed");
                     throw InvalidMapException();
                 }
                 
-                // Don't support it if we can't
-                switch(potential_header->engine) {
-                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    case CacheFileEngine::CACHE_FILE_RETAIL:
-                        break;
-                    default:
-                        eprintf_error("mcc-compressed map has an unsupported engine");
-                        throw InvalidMapException();
-                }
-                
-                return this->decompress_if_needed(this->data.data(), this->data.size()) || true;
+                // Okay we're good
+                map->data = Compression::decompress_map_data(data, data_size);
+                map->compressed = compression_type;
+            }
+        };
+        
+        if(potential_header->valid()) {
+            do_decompress_if_needed(this, potential_header);
+        }
+        else if(potential_header_demo->valid()) {
+            switch(potential_header_demo->engine) {
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
+                    do_decompress_if_needed(this, potential_header_demo);
+                    break;
+                default:
+                    eprintf_error("engine version and map header mismatch");
+                    throw InvalidMapException();
             }
         }
-
+        else if(Compression::ceaflate_compression_size(data, data_size).has_value()) {
+            this->compressed = CompressionType::COMPRESSION_TYPE_MCC_DEFLATE;
+            this->data = Compression::ceaflate_decompress(data, data_size);
+            return this->decompress_if_needed(this->data.data(), this->data.size());
+        }
+        
         return compression_type;
     }
 
@@ -289,10 +278,10 @@ namespace Invader {
         };
 
         // Check if the literals are invalid
-        if(header_maybe->head_literal != CACHE_FILE_HEAD || header_maybe->foot_literal != CACHE_FILE_FOOT) {
+        if(!header_maybe->valid()) {
             // Maybe it's a demo map?
-            auto *demo_header_maybe = reinterpret_cast<const CacheFileDemoHeader *>(this->get_data_at_offset(0, sizeof(CacheFileDemoHeader)));
-            if(demo_header_maybe->head_literal != CACHE_FILE_HEAD_DEMO || demo_header_maybe->foot_literal != CACHE_FILE_FOOT_DEMO) {
+            auto *demo_header_maybe = reinterpret_cast<const CacheFileDemoHeader *>(header_maybe);
+            if(!demo_header_maybe->valid()) {
                 throw InvalidMapException();
             }
             continue_loading_map(*this, *demo_header_maybe);
