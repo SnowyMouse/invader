@@ -31,10 +31,11 @@ namespace Invader {
         
         #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO w;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &w);
-        std::size_t new_width = w.srWindow.Right - w.srWindow.Left + 1;
-        if(terminal_width < new_width) {
-            terminal_width = new_width;
+        if(GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &w)) {
+            std::size_t new_width = w.srWindow.Right - w.srWindow.Left + 1;
+            if(terminal_width < new_width) {
+                terminal_width = new_width;
+            }
         }
         #endif
         
