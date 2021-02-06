@@ -24,6 +24,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-bitmap: Fixed size being inaccurate in output
 - invader-bitmap: Fixed sprites with double multiply usage having black borders
+- invader-bitmap: Fixed regeneration error implying a bitmap tag exists if one
+  does not
 - invader-build: Fixed file size not being saved in the header
 - invader-edit-qt: Fixed "Copy virtual path" not appearing for directories
 - invader-info: Extended dirty check to check file size and type mismatching

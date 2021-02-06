@@ -172,6 +172,11 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         // TODO: Handle converting between extended and non-extended
         source_is_extended = sizeof(T) == sizeof(Parser::InvaderBitmap);
     }
+    
+    else if(bitmap_options.regenerate) {
+        eprintf_error("Cannot regenerate. No bitmap tag exists at %s", final_path.string().c_str());
+        std::exit(EXIT_FAILURE);
+    }
 
     // If these values weren't set, set them
     #define DEFAULT_VALUE(what, default) if(!what.has_value()) { what = default; }
