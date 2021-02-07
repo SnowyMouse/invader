@@ -162,4 +162,53 @@ namespace Invader::Bludgeoner {
     bool broken_strings(Parser::ParserStruct *s, bool fix) {
         return broken_strings(dynamic_cast<Parser::StringList *>(s), fix) || broken_strings(dynamic_cast<Parser::UnicodeStringList *>(s), fix);
     }
+    
+    bool uppercase_references(Parser::ParserStruct *s, bool fix) {
+        bool rval = false;
+        
+        // Go through all the values. Fix the stuff.
+        for(auto &i : s->get_values()) {
+            switch(i.get_type()) {
+                case Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto count = i.get_array_size();
+                    for(std::size_t j = 0; j < count; j++) {
+                        if((rval = rval || uppercase_references(&i.get_object_in_array(j), fix)) && !fix) {
+                            return rval;
+                        }
+                    }
+                    break;
+                }
+                case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+                    auto value = i.get_dependency();
+                    for(auto &i : value.path) {
+                        if(std::tolower(i) != i) {
+                            i = std::tolower(i);
+                            rval = true;
+                        }
+                    }
+                    if(fix) {
+                        i.get_dependency() = value;
+                    }
+                    else if(rval) {
+                        return true;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        
+        return rval;
+    }
+    
+    bool excessive_script_nodes(Parser::ParserStruct *s, bool fix) {
+        auto attempt_fix = [&fix](auto *s) -> bool {
+            if(s) {
+                return fix_excessive_script_nodes(*s, fix);
+            }
+            return false;
+        };
+        return attempt_fix(dynamic_cast<Invader::Parser::Scenario *>(s));
+    }
 }

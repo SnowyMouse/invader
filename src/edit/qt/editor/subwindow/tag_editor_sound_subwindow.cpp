@@ -25,7 +25,7 @@ namespace Invader::EditQt {
         QWidget *widget = new QWidget();
         QVBoxLayout *layout = new QVBoxLayout();
         layout->setSpacing(4);
-        layout->setMargin(4);
+        layout->setContentsMargins(4, 4, 4, 4);
         widget->setLayout(layout);
         this->setCentralWidget(widget);
 
@@ -33,7 +33,7 @@ namespace Invader::EditQt {
         auto add_option = [&layout](const char *label_text, auto *what, double width_multiplier) -> QLayout * {
             auto *option_widget = new QWidget();
             auto *option_layout = new QHBoxLayout();
-            option_layout->setMargin(0);
+            option_layout->setContentsMargins(0, 0, 0, 0);
             option_layout->setSpacing(8);
             auto *option_label = new QLabel(label_text);
             option_layout->addWidget(option_label);
@@ -87,7 +87,7 @@ namespace Invader::EditQt {
         // Add playback
         auto *playback_widget = new QWidget();
         auto *playback_layout = new QHBoxLayout();
-        playback_layout->setMargin(0);
+        playback_layout->setContentsMargins(0, 0, 0, 0);
         playback_layout->setSpacing(4);
         playback_widget->setLayout(playback_layout);
         this->play_button = new QPushButton("Play");

@@ -30,8 +30,8 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
+    options.emplace_back("maps", 'm', 1, "Use the specified maps directory to find bitmaps.map, sounds.map, and/or loc.map.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory to save tags.", "<dir>");
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps.");
@@ -109,8 +109,7 @@ int main(int argc, const char **argv) {
     if(extract_options.maps_directory.has_value() && !extract_options.ignore_resource_maps) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map, const char *map_alt, auto &open_map_possibly) -> std::vector<std::byte> {
-            auto potential_map_path = (maps_directory / map).string();
-            auto potential_map = Invader::File::open_file(potential_map_path.c_str());
+            auto potential_map = Invader::File::open_file(maps_directory / map);
             if(potential_map.has_value()) {
                 return *potential_map;
             }

@@ -40,8 +40,13 @@
         "groups": [
             {
                 "name": "model shader",
-                "description": "Shader Model attributes",
-                "first": "shader model flags"
+                "first": "shader model flags",
+                "description": "The shader_model class is typically used as an non-transparent texture for models, and it features support for multipurpose maps."
+            },
+            {
+                "name": "multipurpose map",
+                "first": "multipurpose map",
+                "description": "A multipurpose map is not actually a visible texture but rather a composite four-channel monochrome map used for shading the texture mapped to the UVs of the model.\n\nThe classic channel order (used for the Xbox version of the game) is the following:\n- alpha is the auxiliary channel (unused by the shader)\n- red is specular and detail mapping\n- green is self illumination\n- blue is color change\n\nThe swapped channel order (used for the PC releases of the game) is the following:\n- alpha is color change\n- red is the auxiliary channel (unused by the shader)\n- green is self illumination\n- blue is specular and detail mapping"
             }
         ],
         "fields": [

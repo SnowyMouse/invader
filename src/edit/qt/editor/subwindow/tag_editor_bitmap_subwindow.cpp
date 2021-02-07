@@ -46,7 +46,7 @@ namespace Invader::EditQt {
         // Create the widget
         QWidget *w = new QWidget();
         QHBoxLayout *l = new QHBoxLayout();
-        l->setMargin(0);
+        l->setContentsMargins(0, 0, 0, 0);
         l->setSpacing(0);
         w->setLayout(l);
 
@@ -61,7 +61,6 @@ namespace Invader::EditQt {
         // And the combo box
         *box = new QComboBox();
         l->addWidget(*box);
-        l->addStretch();
 
         // Done
         return w;
@@ -105,7 +104,7 @@ namespace Invader::EditQt {
         // Add the header
         QComboBox *bitmaps, *mipmaps, *colors, *scale, *sequence = nullptr, *sprite = nullptr;
         main_layout->setSpacing(4);
-        main_layout->setMargin(4);
+        main_layout->setContentsMargins(4, 4, 4, 4);
         main_layout->addWidget(generate_text_widget("Bitmap:", &bitmaps));
         main_layout->addWidget(generate_text_widget("Mipmap:", &mipmaps));
         main_layout->addWidget(generate_text_widget("Channels:", &colors));
@@ -122,7 +121,10 @@ namespace Invader::EditQt {
             sprite->setEnabled(false);
             auto sequence_count = bitmap_data->bitmap_group_sequence.size();
             for(std::size_t i = 0; i < sequence_count; i++) {
-                sequence->addItem(QString::number(i));
+                char text[64];
+                auto sprite_count = bitmap_data->bitmap_group_sequence[i].sprites.size();
+                std::snprintf(text, sizeof(text), "%zu (%zu sprite%s)", i, sprite_count, sprite_count == 1 ? "" : "s");
+                sequence->addItem(text);
             }
         }
 
@@ -349,12 +351,6 @@ namespace Invader::EditQt {
         std::vector<std::uint32_t> data(real_width * real_height);
         std::fill(data.begin(), data.end(), 0xFFFF00FF);
         BitmapEncode::encode_bitmap(bytes, bitmap_data->format, reinterpret_cast<std::byte *>(data.data()), HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, real_width, real_height);
-        
-        // Deswizzle if necessary
-        if(bitmap_data->flags & Invader::HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED) {
-            auto deswizzled = Invader::Swizzle::swizzle(reinterpret_cast<std::byte *>(data.data()), 32, real_width, real_height, true);
-            std::memcpy(data.data(), deswizzled.data(), deswizzled.size());
-        }
 
         // Scale if needed
         if(scale != 0) {
@@ -403,9 +399,9 @@ namespace Invader::EditQt {
                     for(std::size_t x = 0; x < real_width; x++) {
                         // Blend with checkerboard
                         auto luminosity = static_cast<std::uint8_t>(((x / 4) % 2) ^ !((y / 4) % 2) ? 0x5F : 0x3F);
-                        ColorPlatePixel checkerboard = { luminosity, luminosity, luminosity, 0xFF };
+                        Pixel checkerboard = { luminosity, luminosity, luminosity, 0xFF };
                         auto &pixel_output = data[x + y * real_width];
-                        pixel_output = checkerboard.alpha_blend(ColorPlatePixel::convert_from_32_bit(pixel_output)).convert_to_32_bit();
+                        pixel_output = checkerboard.alpha_blend(Pixel::convert_from_32_bit(pixel_output)).convert_to_32_bit();
                     }
                 }
                 break;
@@ -521,11 +517,11 @@ namespace Invader::EditQt {
                     }
 
                     // Blend the sprite with a transparent shade of red
-                    static constexpr const ColorPlatePixel red = { 0, 0, 0xFF, 0x1F };
+                    static constexpr const Pixel red = { 0, 0, 0xFF, 0x1F };
                     for(int y = top; y < bottom; y++) {
                         for(int x = left; x < right; x++) {
                             auto &pixel_output = data[GET_PIXEL(x,y)];
-                            pixel_output = ColorPlatePixel::convert_from_32_bit(pixel_output).alpha_blend(red).convert_to_32_bit();
+                            pixel_output = Pixel::convert_from_32_bit(pixel_output).alpha_blend(red).convert_to_32_bit();
                         }
                     }
                 }
@@ -619,7 +615,7 @@ namespace Invader::EditQt {
                             std::uint8_t average_blue = total_blue / total_pixel;
                             std::uint8_t average_alpha = total_alpha / total_pixel;
 
-                            scaled[xs + ys * new_width] = (ColorPlatePixel { average_blue, average_green, average_red, average_alpha }).convert_to_32_bit();
+                            scaled[xs + ys * new_width] = (Pixel { average_blue, average_green, average_red, average_alpha }).convert_to_32_bit();
                         }
                     }
                 }
@@ -715,7 +711,7 @@ namespace Invader::EditQt {
                 row_layout->addWidget(widget);
             }
             row_layout->addStretch();
-            row_layout->setMargin(4);
+            row_layout->setContentsMargins(4, 4, 4, 4);
             row_layout->setSpacing(4);
             layout->addWidget(row);
         };
@@ -731,7 +727,7 @@ namespace Invader::EditQt {
         }
 
         layout->addStretch();
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
         scroll_widget->setLayout(layout);
 
@@ -755,9 +751,44 @@ namespace Invader::EditQt {
             std::size_t current_sequence_index_unsigned = static_cast<std::size_t>(current_sequence_index - 1);
             this->sprite->blockSignals(true);
             this->sprite->clear();
-            auto sprite_count = (*this->all_sequences)[current_sequence_index_unsigned].sprites.size();
+            auto &sequence = (*this->all_sequences)[current_sequence_index_unsigned];
+            auto sprite_count = sequence.sprites.size();
+            
             for(std::size_t i = 0; i < sprite_count; i++) {
-                this->sprite->addItem(QString::number(i));
+                char sprite_info[64];
+                
+                // Determine height and width of sprite (requires getting its bitmap and multiplying that with memes)
+                std::size_t height = 0;
+                std::size_t width = 0;
+                auto &sprite = sequence.sprites[i];
+                std::vector<Parser::BitmapData> *bitmap_data;
+                auto *parent_window = this->get_parent_window();
+                switch(parent_window->get_file().tag_class_int) {
+                    case TagClassInt::TAG_CLASS_BITMAP:
+                        bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data;
+                        break;
+                    case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                        bitmap_data = &dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->bitmap_data;
+                        break;
+                    default:
+                        std::terminate();
+                }
+                
+                // If we have it, we have it
+                if(sprite.bitmap_index < bitmap_data->size()) {
+                    auto &bitmap = (*bitmap_data)[sprite.bitmap_index];
+                    height = (sprite.bottom - sprite.top) * bitmap.height;
+                    width = (sprite.right - sprite.left) * bitmap.width;
+                    std::snprintf(sprite_info, sizeof(sprite_info), "%zu (%zu x %zu)", i, width, height);
+                }
+                
+                // Otherwise oh well
+                else {
+                    std::snprintf(sprite_info, sizeof(sprite_info), "%zu (unknown size)", i);
+                }
+                
+                
+                this->sprite->addItem(sprite_info);
             }
             this->sprite->setCurrentIndex(0);
             this->sprite->blockSignals(false);

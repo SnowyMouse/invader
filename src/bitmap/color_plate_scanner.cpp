@@ -24,7 +24,7 @@ namespace Invader {
         return log2_value;
     }
 
-    static inline bool same_color_ignore_opacity(const ColorPlatePixel &color_a, const ColorPlatePixel &color_b) {
+    static inline bool same_color_ignore_opacity(const Pixel &color_a, const Pixel &color_b) {
         return color_a.red == color_b.red && color_a.blue == color_b.blue && color_a.green == color_b.green;
     }
 
@@ -39,7 +39,13 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
+        // We don't support this yet
+        if(usage == BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
+            eprintf_error("Vector maps are not supported at this time");
+            throw std::exception();
+        }
+        
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
@@ -76,7 +82,7 @@ namespace Invader {
                 }
                 
                 // If there's no sequence divider color, check if we're blue. If not, we're not a valid key (treat as one bitmap)
-                else if(!scanner.is_transparency_color(ColorPlatePixel { 0xFF, 0x00, 0x00, 0xFF } )) {
+                else if(!scanner.is_transparency_color(Pixel { 0xFF, 0x00, 0x00, 0xFF } )) {
                     valid_color_plate_key = false;
                 }
                 
@@ -116,7 +122,7 @@ namespace Invader {
                     
                     break_off_sequence(height);
                     
-                    scanner.spacing_color = ColorPlatePixel { 0xFF, 0xFF, 0x00, 0xFF };
+                    scanner.spacing_color = Pixel { 0xFF, 0xFF, 0x00, 0xFF };
                     
                     if(!scanner.is_transparency_color(spacing_candidate) && !scanner.is_spacing_color(spacing_candidate)) {
                         eprintf_error("Error: Spacing color, if set, can only be #00FFFF if sequence divider is not set");
@@ -209,6 +215,9 @@ namespace Invader {
 
         // If we are doing sprites, we need to handle those now
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+            if(mipmaps > 2) {
+                mipmaps = 2;
+            }
             process_sprites(generated_bitmap, sprite_parameters.value(), mipmaps);
         }
 
@@ -235,7 +244,7 @@ namespace Invader {
         return generated_bitmap;
     }
 
-    void ColorPlateScanner::read_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width) const {
+    void ColorPlateScanner::read_color_plate(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width) const {
         for(auto &sequence : generated_bitmap.sequences) {
             sequence.first_bitmap = generated_bitmap.bitmaps.size();
             sequence.bitmap_count = 0;
@@ -375,7 +384,7 @@ namespace Invader {
                         for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
                             auto &pixel = GET_PIXEL(bx, by);
                             if(this->is_ignored(pixel)) {
-                                bitmap.pixels.push_back(ColorPlatePixel {});
+                                bitmap.pixels.push_back(Pixel {});
                             }
                             else {
                                 bitmap.pixels.push_back(pixel);
@@ -393,7 +402,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+    void ColorPlateScanner::read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const {
         // Make sure the height and width of each face is the same
         std::uint32_t face_width = width / 4;
         std::uint32_t face_height = height / 3;
@@ -455,7 +464,7 @@ namespace Invader {
         generated_bitmap.sequences[0].bitmap_count = 6;
     }
 
-    void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+    void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const {
         if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
             if(!is_power_of_two(width)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
@@ -479,19 +488,19 @@ namespace Invader {
         generated_bitmap.sequences[0].bitmap_count = 1;
     }
 
-    bool ColorPlateScanner::is_transparency_color(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_transparency_color(const Pixel &color) const {
         return this->transparency_color.has_value() && same_color_ignore_opacity(*this->transparency_color, color);
     }
 
-    bool ColorPlateScanner::is_sequence_divider_color(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_sequence_divider_color(const Pixel &color) const {
         return this->sequence_divider_color.has_value() && same_color_ignore_opacity(*this->sequence_divider_color, color);
     }
 
-    bool ColorPlateScanner::is_spacing_color(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_spacing_color(const Pixel &color) const {
         return this->spacing_color.has_value() && same_color_ignore_opacity(*this->spacing_color, color);
     }
 
-    bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
+    bool ColorPlateScanner::is_ignored(const Pixel &color) const {
         return this->is_transparency_color(color) || this->is_spacing_color(color) || this->is_sequence_divider_color(color);
     }
 
@@ -507,7 +516,7 @@ namespace Invader {
         }
 
         for(auto &bitmap : generated_bitmap.bitmaps) {
-            std::vector<ColorPlatePixel> bitmap_pixels_copy = bitmap.pixels;
+            std::vector<Pixel> bitmap_pixels_copy = bitmap.pixels;
 
             auto largest_dimension = bitmap.width > bitmap.height ? bitmap.height : bitmap.width;
             float bump_scale = 1.5F / (largest_dimension / 256.0F);
@@ -564,6 +573,8 @@ namespace Invader {
     void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
+        
+        bool warn_on_zero_alpha = false;
 
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
@@ -610,56 +621,16 @@ namespace Invader {
                 mipmap_height = last_mipmap.mipmap_height;
             }
 
-            // Apply a sharpen filter? https://en.wikipedia.org/wiki/Unsharp_masking
-            if(sharpen.has_value() && sharpen.value() > 0.0F) {
-                const float &SHARPEN_VALUE = sharpen.value();
-
-                // Make a copy of the mipmap to work off of
-                auto *pixel_data = bitmap.pixels.data();
-                std::vector<ColorPlatePixel> unsharpened_pixels(pixel_data, pixel_data + mipmap_width * mipmap_height);
-
-                // Go through each pixel and apply the sharpening filter
-                for(std::uint32_t y = 0; y < mipmap_height; y++) {
-                    for(std::uint32_t x = 0; x < mipmap_width; x++) {
-                        auto &center = unsharpened_pixels[x + y * mipmap_width];
-                        auto &left = (x == 0) ? center : unsharpened_pixels[x + y * mipmap_width - 1];
-                        auto &right = (x + 1 == mipmap_width) ? center : unsharpened_pixels[x + y * mipmap_width + 1];
-                        auto &top = (y == 0) ? center : unsharpened_pixels[x + (y - 1) * mipmap_width];
-                        auto &bottom = (y + 1 == mipmap_height) ? center : unsharpened_pixels[x + (y + 1) * mipmap_width];
-                        auto &this_pixel = pixel_data[x + y * mipmap_width];
-
-                        #define APPLY_SHARPEN(channel) { \
-                            std::int32_t modification = static_cast<std::int32_t>(center.channel) * (1.0 + 4.0F * SHARPEN_VALUE) - (static_cast<std::int32_t>(top.channel) + left.channel + bottom.channel + right.channel) * SHARPEN_VALUE; \
-                            if(modification > 0xFF) { \
-                                this_pixel.channel = 0xFF; \
-                            } \
-                            else if(modification < 0x00) { \
-                                this_pixel.channel = 0x00; \
-                            } \
-                            else { \
-                                this_pixel.channel = static_cast<std::uint8_t>(modification); \
-                            } \
-                        }
-
-                        APPLY_SHARPEN(red);
-                        APPLY_SHARPEN(green);
-                        APPLY_SHARPEN(blue);
-
-                        #undef APPLY_SHARPEN
-                    }
-                }
-            }
-
             // Get blur radius
             std::uint32_t blur_pixels = static_cast<std::uint32_t>(blur.value_or(0.0F) + 0.5F);
             if(blur_pixels > 0) {
                 auto *pixel_data = bitmap.pixels.data();
-                std::vector<ColorPlatePixel> unblurred(pixel_data, pixel_data + mipmap_width * mipmap_height);
+                std::vector<Pixel> unblurred(pixel_data, pixel_data + mipmap_width * mipmap_height);
 
-                std::uint32_t blur_size = blur_pixels * 2 + 1;
+                std::uint32_t blur_size = (blur_pixels * 2);
 
                 // Allocate a filter of the correct size
-                std::vector<ColorPlatePixel *> pixel_filter(blur_size * blur_size);
+                std::vector<Pixel *> pixel_filter(blur_size * blur_size);
 
                 for(std::int64_t y = 0; y < mipmap_height; y++) {
                     for(std::int64_t x = 0; x < mipmap_width; x++) {
@@ -701,6 +672,49 @@ namespace Invader {
             auto last_mipmap_height = mipmap_height;
             auto last_mipmap_width = mipmap_width;
             
+            auto sharpen_pixels = [&mipmap_height, &mipmap_width, &sharpen, &bitmap](Pixel *pixel_data) {
+                // Apply a sharpen filter? https://en.wikipedia.org/wiki/Unsharp_masking
+                if(sharpen.has_value() && sharpen.value() > 0.0F) {
+                    auto sharpen_value = sharpen.value() / (2.0F * (bitmap.mipmaps.size() + 1));
+
+                    // Make a copy of the mipmap to work off of
+                    std::vector<Pixel> unsharpened_pixels(pixel_data, pixel_data + mipmap_width * mipmap_height);
+
+                    // Go through each pixel and apply the sharpening filter
+                    for(std::uint32_t y = 0; y < mipmap_height; y++) {
+                        for(std::uint32_t x = 0; x < mipmap_width; x++) {
+                            auto &center = unsharpened_pixels[x + y * mipmap_width];
+                            auto &left = (x == 0) ? center : unsharpened_pixels[x + y * mipmap_width - 1];
+                            auto &right = (x + 1 == mipmap_width) ? center : unsharpened_pixels[x + y * mipmap_width + 1];
+                            auto &top = (y == 0) ? center : unsharpened_pixels[x + (y - 1) * mipmap_width];
+                            auto &bottom = (y + 1 == mipmap_height) ? center : unsharpened_pixels[x + (y + 1) * mipmap_width];
+                            auto &this_pixel = pixel_data[x + y * mipmap_width];
+
+                            #define APPLY_SHARPEN(channel) { \
+                                std::int32_t modification = static_cast<std::int32_t>(center.channel) * (1.0 + 4.0F * sharpen_value) - (static_cast<std::int32_t>(top.channel) + left.channel + bottom.channel + right.channel) * sharpen_value; \
+                                if(modification > 0xFF) { \
+                                    this_pixel.channel = 0xFF; \
+                                } \
+                                else if(modification < 0x00) { \
+                                    this_pixel.channel = 0x00; \
+                                } \
+                                else { \
+                                    this_pixel.channel = static_cast<std::uint8_t>(modification); \
+                                } \
+                            }
+
+                            APPLY_SHARPEN(red);
+                            APPLY_SHARPEN(green);
+                            APPLY_SHARPEN(blue);
+
+                            #undef APPLY_SHARPEN
+                        }
+                    }
+                }
+            };
+            
+            sharpen_pixels(bitmap.pixels.data());
+            
             mipmap_height = std::max(static_cast<std::size_t>(mipmap_height / 2), static_cast<std::size_t>(1));
             mipmap_width = std::max(static_cast<std::size_t>(mipmap_width / 2), static_cast<std::size_t>(1));
 
@@ -714,9 +728,11 @@ namespace Invader {
                 next_mipmap.mipmap_width = mipmap_width;
 
                 // Insert all the pixels needed for the mipmap
-                bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, ColorPlatePixel {});
+                bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, Pixel {});
                 auto *last_mipmap_data = bitmap.pixels.data() + last_mipmap_offset;
                 auto *this_mipmap_data = bitmap.pixels.data() + next_mipmap.first_pixel;
+                
+                bool has_zero_alpha_and_alpha_blend_usage = usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND;
 
                 // Combine each 2x2 block based on the given algorithm
                 for(std::uint32_t y = 0; y < mipmap_height; y++) {
@@ -724,7 +740,7 @@ namespace Invader {
                         auto &pixel = this_mipmap_data[x + y * mipmap_width];
                         
                         // Start getting our pixels for mipmaps
-                        ColorPlatePixel last_a, last_b, last_c, last_d;
+                        Pixel last_a, last_b, last_c, last_d;
                         last_a = last_mipmap_data[x * 2 + y * 2 * last_mipmap_width];
                         
                         // If we went down a dimension, use the pixel from the last mipmap. Otherwise, just use last_a so we don't go out-of-bounds
@@ -766,7 +782,7 @@ namespace Invader {
                         pixel = last_a;
 
                         #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / 4)
-                        #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; }
+                        #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; } else { has_zero_alpha_and_alpha_blend_usage = false; }
                         
                         // If alpha blend, discard anything with 0 alpha
                         if(usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND) {
@@ -798,6 +814,9 @@ namespace Invader {
                         #undef INTERPOLATE_CHANNEL
                     }
                 }
+                
+                // Sharpen if need be
+                sharpen_pixels(this_mipmap_data);
 
                 // Set the values for the next mipmap
                 last_mipmap_height = mipmap_height;
@@ -805,6 +824,8 @@ namespace Invader {
                 mipmap_height = std::max(static_cast<std::size_t>(mipmap_height / 2), static_cast<std::size_t>(1));
                 mipmap_width = std::max(static_cast<std::size_t>(mipmap_width / 2), static_cast<std::size_t>(1));
                 last_mipmap_offset = this_mipmap_offset;
+                
+                warn_on_zero_alpha = warn_on_zero_alpha || has_zero_alpha_and_alpha_blend_usage;
             }
 
             // Do fade-to-gray for each mipmap
@@ -817,7 +838,7 @@ namespace Invader {
                     auto &mipmap = bitmap.mipmaps[m];
 
                     // Iterate through each pixel
-                    ColorPlatePixel *first = bitmap.pixels.data() + mipmap.first_pixel;
+                    Pixel *first = bitmap.pixels.data() + mipmap.first_pixel;
                     auto *last = first + mipmap.pixel_count;
 
                     while(first < last) {
@@ -847,13 +868,17 @@ namespace Invader {
                             }
                         }
 
-                        ColorPlatePixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
+                        Pixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
                         *first = first->alpha_blend(FADE_TO_GRAY);
 
                         first++;
                     }
                 }
             }
+        }
+        
+        if(warn_on_zero_alpha) {
+            eprintf_warn("Usage is alpha blend, and a bitmap has zero alpha; its mipmaps will be black.");
         }
     }
 
@@ -921,7 +946,7 @@ namespace Invader {
                     mipmap.mipmap_depth = FACES;
                 }
 
-                new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, ColorPlatePixel {});
+                new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, Pixel {});
 
                 mipmap_width /= 2;
                 mipmap_height /= 2;
@@ -946,8 +971,8 @@ namespace Invader {
                 // One of the only do/while loops I will ever do in Invader while writing it.
                 std::optional<std::uint32_t> m;
                 do {
-                    ColorPlatePixel *destination_buffer;
-                    const ColorPlatePixel *source_buffer;
+                    Pixel *destination_buffer;
+                    const Pixel *source_buffer;
                     std::size_t pixel_count;
 
                     // Determine things
@@ -980,7 +1005,7 @@ namespace Invader {
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t bitmaps_to_merge = 2;
             std::uint32_t bitmap_pixel_count = bitmap.height * bitmap.width;
-            std::vector<ColorPlatePixel> new_pixels(bitmap.pixels.data(), bitmap.pixels.data() + bitmap_pixel_count * bitmap.depth);
+            std::vector<Pixel> new_pixels(bitmap.pixels.data(), bitmap.pixels.data() + bitmap_pixel_count * bitmap.depth);
             std::vector<GeneratedBitmapDataBitmapMipmap> new_mipmaps;
             for(auto &mipmap : bitmap.mipmaps) {
                 if(bitmaps_to_merge > bitmap.depth) {
@@ -1024,438 +1049,5 @@ namespace Invader {
             bitmap.mipmaps = new_mipmaps;
             bitmap.pixels = new_pixels;
         }
-    }
-
-    static std::uint32_t number_of_sprite_sheets(const std::vector<GeneratedBitmapDataSequence> &sequences) {
-        std::uint32_t highest = 0;
-        for(auto &sequence : sequences) {
-            for(auto &sprite : sequence.sprites) {
-                std::uint32_t count = sprite.bitmap_index + 1;
-                if(count > highest) {
-                    highest = count;
-                }
-            }
-        }
-        return highest;
-    }
-
-    static std::uint32_t length_of_sprite_sheet(const std::vector<GeneratedBitmapDataSequence> &sequences, std::uint32_t bitmap_index) {
-        std::uint32_t max_width = 0;
-        std::uint32_t max_height = 0;
-
-        // Go through each sprite of the bitmap index
-        for(auto &sequence : sequences) {
-            for(auto &sprite : sequence.sprites) {
-                if(sprite.bitmap_index != bitmap_index) {
-                    continue;
-                }
-                if(sprite.right > max_width) {
-                    max_width = sprite.right;
-                }
-                if(sprite.bottom > max_height) {
-                    max_height = sprite.bottom;
-                }
-            }
-        }
-
-        // Find the lowest power of two that is greater than or equal, doing this for width and height
-        auto power_of_twoafy = [](auto number) {
-            for(std::uint32_t p = 0; p < sizeof(number)*4-1; p++) {
-                std::uint32_t powered = static_cast<std::uint32_t>(1 << p);
-                if(powered >= number) {
-                    return powered;
-                }
-            }
-            std::terminate();
-        };
-
-        max_width = power_of_twoafy(max_width);
-        max_height = power_of_twoafy(max_height);
-
-        if(max_width > max_height) {
-            return max_width;
-        }
-        else {
-            return max_height;
-        }
-    }
-
-    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_sprite_sheet(std::uint32_t length, const GeneratedBitmapData &generated_bitmap, std::uint32_t half_spacing, std::uint32_t maximum_sprite_sheets, bool horizontal) {
-        // Effectively, all sprites are this many pixels apart
-        std::uint32_t effective_sprite_spacing = half_spacing * 2;
-
-        // If it's impossible to fit even a single pixel, give up
-        if(length <= effective_sprite_spacing) {
-            return std::nullopt;
-        }
-
-        // First see if all sprites can even fit by themselves. If not, there is no point in continuing.
-        std::size_t total_pixels = 0;
-        for(auto &bitmap : generated_bitmap.bitmaps) {
-            if(bitmap.height + effective_sprite_spacing > length || bitmap.width + effective_sprite_spacing > length) {
-                return std::nullopt;
-            }
-            total_pixels += (bitmap.height + effective_sprite_spacing) * (bitmap.width + effective_sprite_spacing);
-        }
-
-        // Also, if the number of pixels is greater than length^2, there is no way we could fit everything in here
-        if(total_pixels > length * length * maximum_sprite_sheets) {
-            return std::nullopt;
-        }
-
-        std::uint32_t sheet_count = 1;
-        std::vector<GeneratedBitmapDataSequence> new_sequences;
-
-        struct SortedSprite {
-            std::uint32_t sheet_index;
-            std::uint32_t bitmap_index;
-            std::uint32_t sequence_index;
-            std::uint32_t sequence_sprite_index;
-            std::uint32_t length;
-
-            std::uint32_t width;
-            std::uint32_t height;
-
-            std::uint32_t top;
-            std::uint32_t left;
-            std::uint32_t bottom;
-            std::uint32_t right;
-
-            std::uint32_t registration_point_x;
-            std::uint32_t registration_point_y;
-        };
-
-        // Sort each sprite by height or width depending on if sorting horizontally or vertically. The first element of the pair is the bitmap index and the second element is the length
-        std::vector<SortedSprite> sprites_sorted;
-        const auto *bitmaps = generated_bitmap.bitmaps.data();
-        for(std::uint32_t s = 0; s < generated_bitmap.sequences.size(); s++) {
-            // Go through each bitmap in the sequence
-            auto &sequence = generated_bitmap.sequences[s];
-            const auto FIRST_BITMAP = sequence.first_bitmap;
-            const auto END_BITMAP = FIRST_BITMAP + sequence.bitmap_count;
-            for(std::uint32_t b = FIRST_BITMAP; b < END_BITMAP; b++) {
-                auto &bitmap = bitmaps[b];
-                std::uint32_t length;
-                length = horizontal ? bitmap.height : bitmap.width;
-
-                // Create it!
-                SortedSprite sprite_to_add = {};
-                sprite_to_add.bitmap_index = b;
-                sprite_to_add.length = length;
-                sprite_to_add.sequence_sprite_index = b - FIRST_BITMAP;
-                sprite_to_add.sequence_index = s;
-
-                sprite_to_add.width = bitmap.width;
-                sprite_to_add.height = bitmap.height;
-                sprite_to_add.registration_point_x = bitmap.registration_point_x;
-                sprite_to_add.registration_point_y = bitmap.registration_point_y;
-
-                // Find a sprite that's smaller and add it before that, stopping when we reach the end of the array
-                auto sprite_iter = sprites_sorted.begin();
-                for(; sprite_iter < sprites_sorted.end(); sprite_iter++) {
-                    if(sprite_iter->length < length) {
-                        break;
-                    }
-                }
-                sprites_sorted.insert(sprite_iter, sprite_to_add);
-            }
-        }
-
-        // Now that it's all sorted, begin placing things. If sorting by height, then scan vertically. Otherwise scan horizontally
-        for(std::size_t sprite = 0; sprite < sprites_sorted.size(); sprite++) {
-            auto &sprite_fitting = sprites_sorted[sprite];
-
-            for(std::uint32_t sheet = 0; sheet < sheet_count; sheet++) {
-                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sheet, &half_spacing, &length](std::uint32_t x, std::uint32_t y) -> bool {
-                    // Calculate the top/left/bottom-1/right-1, factoring in spacing
-                    std::uint32_t potential_top = y - half_spacing;
-                    std::uint32_t potential_left = x - half_spacing;
-                    std::uint32_t potential_bottom = y + sprite_fitting.height + half_spacing - 1;
-                    std::uint32_t potential_right = x + sprite_fitting.width + half_spacing - 1;
-
-                    // If we're outside the bitmap, fail
-                    if(length <= potential_right || length <= potential_bottom) {
-                        return false;
-                    }
-
-                    for(std::uint32_t sprite_test = 0; sprite_test < sprite; sprite_test++) {
-                        auto sprite_test_value = sprites_sorted[sprite_test];
-
-                        // If we aren't even on the same bitmap, ignore
-                        if(sheet != sprite_test_value.sheet_index) {
-                            continue;
-                        }
-
-                        // Get the sprite we're comparing's top/left/bottom-1/right-1, also factoring in spacing
-                        std::uint32_t compare_top = sprite_test_value.top - half_spacing;
-                        std::uint32_t compare_left = sprite_test_value.left - half_spacing;
-                        std::uint32_t compare_bottom = sprite_test_value.bottom + half_spacing - 1;
-                        std::uint32_t compare_right = sprite_test_value.right + half_spacing - 1;
-
-                        auto box_intersects_box = [](
-                            std::uint32_t box_a_top,
-                            std::uint32_t box_a_left,
-                            std::uint32_t box_a_bottom,
-                            std::uint32_t box_a_right,
-                            std::uint32_t box_b_top,
-                            std::uint32_t box_b_left,
-                            std::uint32_t box_b_bottom,
-                            std::uint32_t box_b_right
-                        ) {
-                            bool top_inside = box_a_top >= box_b_top && box_a_top <= box_b_bottom;
-                            bool bottom_inside = box_a_bottom >= box_b_top && box_a_bottom <= box_b_bottom;
-
-                            bool left_inside = box_a_left >= box_b_left && box_a_left <= box_b_right;
-                            bool right_inside = box_a_right >= box_b_left && box_a_right <= box_b_right;
-
-                            bool wider = box_a_left <= box_b_left && box_a_right >= box_b_right;
-                            bool taller = box_a_top <= box_b_top && box_a_bottom >= box_b_bottom;
-
-                            // If two perpendicular sides are inside, then that means a corner is inside, which means it's banned
-                            if((top_inside && left_inside) || (bottom_inside && left_inside) || (top_inside && right_inside) || (bottom_inside && right_inside)) {
-                                return true;
-                            }
-
-                            // If the box is wider or taller and the adjacent side is inside, then that means it's banned.
-                            if((wider && top_inside) || (wider && bottom_inside) || (taller & left_inside) || (taller && right_inside)) {
-                                return true;
-                            }
-
-                            return false;
-                        };
-
-                        if(box_intersects_box(potential_top, potential_left, potential_bottom, potential_right, compare_top, compare_left, compare_bottom, compare_right) || box_intersects_box(compare_top, compare_left, compare_bottom, compare_right, potential_top, potential_left, potential_bottom, potential_right)) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                };
-
-                // Coordinates
-                std::optional<std::pair<std::uint32_t,std::uint32_t>> coordinates;
-
-                std::uint32_t max_x = length - sprite_fitting.width - half_spacing;
-                std::uint32_t max_y = length - sprite_fitting.height - half_spacing;
-
-                if(horizontal) {
-                    for(std::uint32_t y = half_spacing; y <= max_y && !coordinates.has_value(); y++) {
-                        for(std::uint32_t x = half_spacing; x <= max_x && !coordinates.has_value(); x++) {
-                            if(fits(x,y)) {
-                                coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y);
-                            }
-                        }
-                    }
-                }
-                else {
-                    for(std::uint32_t x = half_spacing; x <= max_x && !coordinates.has_value(); x++) {
-                        for(std::uint32_t y = half_spacing; y <= max_y && !coordinates.has_value(); y++) {
-                            if(fits(x,y)) {
-                                coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y);
-                            }
-                        }
-                    }
-                }
-
-                // Did we do it?
-                if(coordinates.has_value()) {
-                    sprite_fitting.sheet_index = sheet;
-
-                    auto &x = coordinates.value().first;
-                    auto &y = coordinates.value().second;
-
-                    sprite_fitting.left = x;
-                    sprite_fitting.top = y;
-                    sprite_fitting.bottom = y + sprite_fitting.height;
-                    sprite_fitting.right = x + sprite_fitting.width;
-
-                    break;
-                }
-
-                // Try making a new sprite sheet. If we hit the maximum sprite sheets, give up.
-                if(sheet + 1 == sheet_count) {
-                    if(++sheet_count > maximum_sprite_sheets) {
-                        return std::nullopt;
-                    }
-                }
-            }
-        }
-
-        // Put it all together
-        for(std::size_t s = 0; s < generated_bitmap.sequences.size(); s++) {
-            auto &sequence = generated_bitmap.sequences[s];
-            auto &new_sequence = new_sequences.emplace_back();
-            new_sequence.bitmap_count = 0;
-            new_sequence.first_bitmap = 0;
-            new_sequence.y_end = sequence.y_end;
-            new_sequence.y_start = sequence.y_start;
-
-            // Find the sprite
-            for(std::uint32_t b = 0; b < sequence.bitmap_count; b++) {
-                for(auto &sprite : sprites_sorted) {
-                    if(sprite.sequence_index == s && sprite.sequence_sprite_index == b) {
-                        auto &new_sprite = new_sequence.sprites.emplace_back();
-                        new_sprite.original_bitmap_index = sprite.bitmap_index;
-                        new_sprite.bitmap_index = sprite.sheet_index;
-                        new_sprite.top = sprite.top - half_spacing;
-                        new_sprite.left = sprite.left - half_spacing;
-                        new_sprite.bottom = sprite.bottom + half_spacing;
-                        new_sprite.right = sprite.right + half_spacing;
-                        new_sprite.registration_point_x = sprite.registration_point_x + half_spacing;
-                        new_sprite.registration_point_y = sprite.registration_point_y + half_spacing;
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Done!
-        return new_sequences;
-    }
-
-    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t length, const GeneratedBitmapData &generated_bitmap, std::uint32_t half_spacing, std::uint32_t maximum_sprite_sheets) {
-        auto fit_sprites_vertical = fit_sprites_into_sprite_sheet(length, generated_bitmap, half_spacing, maximum_sprite_sheets, false);
-        auto fit_sprites_horizontal = fit_sprites_into_sprite_sheet(length, generated_bitmap, half_spacing, maximum_sprite_sheets, true);
-        std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites;
-        if(fit_sprites_vertical.has_value()) {
-            fit_sprites = fit_sprites_vertical;
-        }
-        else if(fit_sprites_horizontal.has_value()) {
-            fit_sprites = fit_sprites_horizontal;
-        }
-        else {
-            return std::nullopt;
-        }
-
-        auto fit_sprites_half = fit_sprites_into_maximum_sprite_sheet(length / 2, generated_bitmap, half_spacing, maximum_sprite_sheets);
-        if(fit_sprites_half) {
-            return fit_sprites_half;
-        }
-        else {
-            return fit_sprites;
-        }
-    }
-
-    void ColorPlateScanner::process_sprites(GeneratedBitmapData &generated_bitmap, ColorPlateScannerSpriteParameters &parameters, std::int16_t &mipmap) {
-        // Pick the background color of the sprite sheet
-        ColorPlatePixel background_color;
-        switch(parameters.sprite_usage) {
-            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX:
-                background_color.alpha = 0;
-                background_color.red = 0;
-                background_color.green = 0;
-                background_color.blue = 0;
-                break;
-            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_DOUBLE_MULTIPLY:
-                background_color.alpha = 255;
-                background_color.red = 127;
-                background_color.green = 127;
-                background_color.blue = 127;
-                break;
-            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_MULTIPLY_MIN:
-                background_color.alpha = 255;
-                background_color.red = 255;
-                background_color.green = 255;
-                background_color.blue = 255;
-                break;
-            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_ENUM_COUNT:
-                std::terminate();
-        }
-
-        // Get the max budget of the sprite sheet. If none is given, automatically choose a large budget
-        std::uint32_t max_budget = parameters.sprite_budget;
-        std::uint32_t max_sheet_count = parameters.sprite_budget_count;
-        if(max_sheet_count == 0) {
-            max_budget = 16384;
-            max_sheet_count = 1;
-        }
-
-        // Set the spacing based on the mipmap count
-        std::uint32_t half_spacing;
-        switch(mipmap) {
-            case 1:
-                half_spacing = 2;
-                break;
-
-            case 0:
-                half_spacing = 1;
-                break;
-
-            default:
-                mipmap = 2;
-                // fallthrough
-
-            case 2:
-                half_spacing = 4;
-                break;
-        }
-
-        // First see if we can even fit things into this
-        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, generated_bitmap, half_spacing, max_sheet_count);
-        if(!fit_sprites.has_value()) {
-            eprintf_error("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
-            throw InvalidInputBitmapException();
-        }
-        parameters.sprite_spacing = half_spacing;
-
-        auto &sprites_fit = fit_sprites.value();
-        std::uint32_t sheet_count = number_of_sprite_sheets(sprites_fit);
-        std::vector<GeneratedBitmapDataBitmap> new_bitmaps;
-
-        for(std::uint32_t s = 0; s < sheet_count; s++) {
-            auto sheet_length = length_of_sprite_sheet(sprites_fit, s);
-
-            // Initialize the new bitmap
-            const std::uint32_t SHEET_WIDTH = sheet_length;
-            const std::uint32_t SHEET_HEIGHT = sheet_length;
-            auto &new_bitmap = new_bitmaps.emplace_back();
-            new_bitmap.color_plate_x = 0;
-            new_bitmap.color_plate_y = 0;
-            new_bitmap.registration_point_x = 0;
-            new_bitmap.registration_point_y = 0;
-            new_bitmap.width = SHEET_WIDTH;
-            new_bitmap.height = SHEET_HEIGHT;
-            new_bitmap.pixels.insert(new_bitmap.pixels.begin(), SHEET_WIDTH * SHEET_HEIGHT, background_color);
-
-            // Put the sprites on the bitmap
-            for(std::uint32_t sequence_index = 0; sequence_index < generated_bitmap.sequences.size(); sequence_index++) {
-                auto &color_plate_sequence = generated_bitmap.sequences[sequence_index];
-                auto &sprite_sequence = sprites_fit[sequence_index];
-
-                if(color_plate_sequence.bitmap_count != sprite_sequence.sprites.size()) {
-                    eprintf_error("Error: Color plate sequence bitmap count (%u) doesn't match up with sprite sequence (%zu).\n", color_plate_sequence.bitmap_count, sprite_sequence.sprites.size());
-                    throw InvalidInputBitmapException();
-                }
-
-                // Go through each sprite and bake it in
-                #define BAKE_SPRITE(fn) \
-                for(auto &sprite : sprite_sequence.sprites) { \
-                    if(sprite.bitmap_index == s) { \
-                        auto &bitmap = generated_bitmap.bitmaps[sprite.original_bitmap_index]; \
-                        const std::uint32_t SPRITE_WIDTH = bitmap.width; \
-                        const std::uint32_t SPRITE_HEIGHT = bitmap.height; \
-                        for(std::uint32_t y = 0; y < SPRITE_HEIGHT; y++) { \
-                            for(std::uint32_t x = 0; x < SPRITE_WIDTH; x++) { \
-                                const auto &input = bitmap.pixels[y * SPRITE_WIDTH + x]; \
-                                auto &output = new_bitmap.pixels[(y + sprite.top + half_spacing) * SHEET_WIDTH + (x + sprite.left + half_spacing)]; \
-                                output = output.fn(input); \
-                            } \
-                        } \
-                    } \
-                }
-
-                // If it's multiply, do an alpha blend. Otherwise it just replaces the pixel.
-                if(parameters.sprite_usage == BitmapSpriteUsage::BITMAP_SPRITE_USAGE_MULTIPLY_MIN) {
-                    BAKE_SPRITE(alpha_blend);
-                }
-                else {
-                    BAKE_SPRITE(replace);
-                }
-            }
-        }
-
-        generated_bitmap.bitmaps = std::move(new_bitmaps);
-        generated_bitmap.sequences = std::move(sprites_fit);
     }
 }

@@ -21,6 +21,20 @@ namespace Invader::Parser {
     enum MaxCompressedModelNodeIndex : std::uint8_t {
         MAX_COMPRESSED_MODEL_NODE_INDEX = static_cast<std::int8_t>(INT8_MAX / 3)
     };
+    
+    /**
+     * Convert a model tag into a gbxmodel tag.
+     * @param  model model tag to convert
+     * @return       converted tag
+     */
+    GBXModel convert_model_to_gbxmodel(const Model &model);
+    
+    /**
+     * Convert a gbxmodel tag into a model tag.
+     * @param  model gbxmodel tag to convert
+     * @return       converted tag
+     */
+    Model convert_gbxmodel_to_model(const GBXModel &model);
 }
 
 #endif

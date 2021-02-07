@@ -13,11 +13,11 @@
 
 using namespace Invader::File;
 
-std::size_t refactor_tags(const char *file_path, const std::vector<std::pair<TagFilePath, TagFilePath>> &replacements, bool check_only, bool dry_run) {
+std::size_t refactor_tags(const std::filesystem::path &file_path, const std::vector<std::pair<TagFilePath, TagFilePath>> &replacements, bool check_only, bool dry_run) {
     // Open the tag
     auto tag = open_file(file_path);
     if(!tag.has_value()) {
-        eprintf_error("Failed to open %s", file_path);
+        eprintf_error("Failed to open %s", file_path.string().c_str());
         std::exit(EXIT_FAILURE);
     }
 
@@ -39,16 +39,16 @@ std::size_t refactor_tags(const char *file_path, const std::vector<std::pair<Tag
         }
     }
     catch(std::exception &e) {
-        eprintf_error("Error: Failed to refactor in %s", file_path);
+        eprintf_error("Error: Failed to refactor in %s", file_path.string().c_str());
         std::exit(EXIT_FAILURE);
     }
 
     if(!check_only) {
         if(!dry_run && !save_file(file_path, file_data)) {
-            eprintf_error("Error: Failed to write to %s. This tag will need to be manually edited.", file_path);
+            eprintf_error("Error: Failed to write to %s. This tag will need to be manually edited.", file_path.string().c_str());
             return 0;
         }
-        oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path);
+        oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path.string().c_str());
     }
 
     return count;
@@ -78,7 +78,7 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "<-M <mode>> [options]";
 
     struct RefactorOptions {
-        std::vector<std::string> tags;
+        std::vector<std::filesystem::path> tags;
         bool dry_run = false;
         std::optional<RefactorMode> mode;
         const char *single_tag = nullptr;
@@ -263,7 +263,7 @@ int main(int argc, char * const *argv) {
         tag.tag_path = single_tag_maybe->path + "." + tag_class_to_extension(single_tag_maybe->class_int);
 
         // Find it
-        auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags, true);
+        auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags);
         if(!file_path_maybe.has_value()) {
             eprintf_error("Error: %s was not found in any tags directory", refactor_options.single_tag);
             return EXIT_FAILURE;
@@ -352,10 +352,8 @@ int main(int argc, char * const *argv) {
                 auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.class_int));
 
                 // Create directories. If this fails, it probably matters, but it's not critical in and of itself
-                try {
-                    std::filesystem::create_directories(new_path.parent_path());
-                }
-                catch(std::exception &) {}
+                std::error_code ec;
+                std::filesystem::create_directories(new_path.parent_path(), ec);
 
                 // Rename, copying as a last resort
                 bool renamed = false;

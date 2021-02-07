@@ -35,7 +35,7 @@ int main(int argc, const char **argv) {
 
     struct ResourceOption {
         // Tags directory
-        std::vector<std::string> tags;
+        std::vector<std::filesystem::path> tags;
 
         // Maps directory
         const char *maps = "maps";
@@ -154,7 +154,7 @@ int main(int argc, const char **argv) {
                 // Open the map first
                 auto map_file = File::open_file(index.first);
                 if(map_file.has_value()) {
-                    auto map = Map::map_with_pointer(map_file->data(), map_file->size());
+                    auto map = Map::map_with_move(std::move(*map_file));
                     auto tag_count = map.get_tag_count();
                     for(std::size_t t = 0; t < tag_count; t++) {
                         auto &tag = map.get_tag(t);
@@ -284,8 +284,8 @@ int main(int argc, const char **argv) {
         }
 
         for(auto &tags_folder : resource_options.tags) {
-            auto tag_path_str = (std::filesystem::path(tags_folder) / tag_path).string();
-            tag_data = Invader::File::open_file(tag_path_str.c_str()).value_or(std::vector<std::byte>());
+            auto tag_path_path = std::filesystem::path(tags_folder) / tag_path;
+            tag_data = Invader::File::open_file(tag_path_path).value_or(std::vector<std::byte>());
             if(tag_data.size()) {
                 break;
             }
@@ -526,4 +526,6 @@ int main(int argc, const char **argv) {
 
     // Done!
     std::fclose(f);
+    
+    oprintf("Created a resource map file at %s\n", map_path.string().c_str());
 }

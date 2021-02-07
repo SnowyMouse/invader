@@ -105,8 +105,8 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <tag>";
 
     struct StringOptions {
-        const char *data = "data";
-        std::optional<const char *> tags;
+        std::filesystem::path data = "data";
+        std::optional<std::filesystem::path> tags;
         std::optional<Format> format;
         bool use_filesystem_path = false;
     } string_options;
@@ -151,10 +151,10 @@ int main(int argc, char * const *argv) {
     // Check if there's a string tag
     std::string string_tag;
     if(string_options.use_filesystem_path) {
-        std::vector<std::string> data(&string_options.data, &string_options.data + 1);
-        auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
-        if(string_tag_maybe.has_value()) {
-            string_tag = string_tag_maybe.value();
+        std::vector<std::filesystem::path> data(&string_options.data, &string_options.data + 1);
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
+        if(string_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+            string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
         }
         else {
             eprintf_error("Failed to find a valid %s file %s in the data directory", valid_extension, remaining_arguments[0]);
@@ -176,12 +176,7 @@ int main(int argc, char * const *argv) {
     // Make sure we have a tags directory
     std::filesystem::path tags_path(*string_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*string_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *string_options.tags);
-        }
+        eprintf_error("Directory %s was not found or is not a directory", string_options.tags->string().c_str());
         return EXIT_FAILURE;
     }
     
@@ -295,16 +290,10 @@ int main(int argc, char * const *argv) {
     std::filesystem::path tag_path(output_path);
 
     // Create missing directories if needed
-    try {
-        if(!std::filesystem::exists(tag_path.parent_path())) {
-            std::filesystem::create_directories(tag_path.parent_path());
-        }
-    }
-    catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s", e.what());
-        return EXIT_FAILURE;
-    }
-
+    std::error_code ec;
+    std::filesystem::create_directories(tag_path.parent_path(), ec);
+    
+    // Save
     if(!Invader::File::save_file(output_path.c_str(), final_data)) {
         eprintf_error("Error: Failed to write to %s.", output_path.c_str());
         return EXIT_FAILURE;

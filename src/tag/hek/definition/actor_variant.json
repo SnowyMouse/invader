@@ -61,6 +61,56 @@
         "width": 32
     },
     {
+        "name": "MCCActorType",
+        "type": "enum",
+        "options": [
+            "brute",
+            "grunt",
+            "jackal",
+            "skirmisher",
+            "marine",
+            "spartan",
+            "drone",
+            "hunter",
+            "flood infection",
+            "flood carrier",
+            "flood combat",
+            "flood pure",
+            "sentinel",
+            "elite",
+            "huragok",
+            "mule",
+            "turret",
+            "mongoose",
+            "warthog",
+            "scorpion",
+            "hornet",
+            "pelican",
+            "revenant",
+            "seraph",
+            "shade",
+            "watchtower",
+            "ghost",
+            "chopper",
+            "prowler",
+            "wraith",
+            "banshee",
+            "phantom",
+            "scarab",
+            "guntower",
+            "spirit",
+            "broadsword",
+            "mammoth",
+            "lich",
+            "mantis",
+            "wasp",
+            "phaeton",
+            "watcher",
+            "knight",
+            "crawler"
+        ]
+    },
+    {
         "name": "ActorVariantChangeColors",
         "fields": [
             {
@@ -113,8 +163,13 @@
                 "compound": true
             },
             {
+                "name": "mcc actor type",
+                "type": "MCCActorType",
+                "comment": "only used for scoring in Halo: CE Anniversary (MCC only)"
+            },
+            {
                 "type": "pad",
-                "size": 24
+                "size": 22
             },
             {
                 "name": "movement type",
@@ -537,7 +592,8 @@
                 "name": "change colors",
                 "type": "TagReflexive",
                 "struct": "ActorVariantChangeColors",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 4
             }
         ],
         "type": "struct",

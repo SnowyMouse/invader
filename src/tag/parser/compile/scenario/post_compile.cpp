@@ -16,8 +16,8 @@ namespace Invader::Parser {
     
     // Functions for finding stuff
     static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload);
-    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
-    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
     static void find_decals(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data);
     static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data);
 
@@ -25,6 +25,8 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return; // if recursion is disabled, doing any of this will be a meme
         }
+        
+        bool show_warnings = workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_WARNINGS;
 
         // Get the struct information here
         auto &scenario_struct = workload.structs[struct_index];
@@ -94,12 +96,12 @@ namespace Invader::Parser {
 
         // Find what we need
         std::size_t bsp_find_warnings = 0;
-        find_encounters(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings);
-        find_command_lists(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings);
+        find_encounters(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings, show_warnings);
+        find_command_lists(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings, show_warnings);
         find_decals(*this, workload, bsp_data);
         find_conversations(*this, workload, tag_index, scenario_struct, scenario_data);
         
-        if(bsp_find_warnings) {
+        if(bsp_find_warnings && workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BUILD_VERBOSITY_HIDE_WARNINGS) {
             eprintf_warn_lesser("Use manual BSP indices to silence %s.", bsp_find_warnings == 1 ? "this warning" : "these warnings");
         }
     }
@@ -118,7 +120,7 @@ namespace Invader::Parser {
             auto *bsp_tag_struct = &workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()];
             
             // If we're not on native, we need to read the pointer at the beginning of the struct
-            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
             }
 
@@ -174,7 +176,7 @@ namespace Invader::Parser {
     
     
     
-    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings) {
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
         // Determine which BSP the encounters fall in
         std::size_t encounter_list_count = scenario.encounters.size();
         if(encounter_list_count != 0) {
@@ -191,14 +193,18 @@ namespace Invader::Parser {
 
                 // If we have a manual BSP index, set this stuff here
                 std::size_t start_bsp = 0;
+                std::size_t best_bsp;
                 bool manual_bsp_index_specified = encounter.flags & HEK::ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG_MANUAL_BSP_INDEX_SPECIFIED;
                 if(manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
                     start_bsp = encounter_data.manual_bsp_index;
+                    best_bsp = start_bsp;
+                }
+                else {
+                    best_bsp = NULL_INDEX;
                 }
 
                 // Otherwise, we need to look for the best BSP
-                std::size_t best_bsp = NULL_INDEX;
                 std::size_t best_bsp_firing_position_hits = 0;
                 std::size_t best_bsp_squad_hits = 0;
                 std::size_t best_bsp_total_hits = 0;
@@ -325,6 +331,8 @@ namespace Invader::Parser {
                         best_bsp = b;
                         total_best_bsps = 1;
                     }
+                    
+                    // It's tied with some other BSP?
                     else if(total_hits && total_hits == best_bsp_total_hits) {
                         total_best_bsps++;
                     }
@@ -336,10 +344,8 @@ namespace Invader::Parser {
                     }
                 }
 
-                // Are we doing the thing?
-                if(!manual_bsp_index_specified) {
-                    encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
-                }
+                // Set our best BSP
+                encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
                 
                 auto best_possible_hits = squad_position_count + firing_position_count;
                 
@@ -354,11 +360,16 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
                 }
                 else if(best_bsp_total_hits != best_possible_hits) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP #%zu", i, encounter.name.string, best_bsp);
+                    if(best_bsp_total_hits == 0) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is completely outside of BSP #%zu", i, encounter.name.string, best_bsp);
+                    }
+                    else {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP #%zu", i, encounter.name.string, best_bsp);
+                    }
                     
                     // Show the firing positions and squad positions that are missing
                     auto missing_firing_positions = firing_position_count - best_bsp_firing_position_hits;
-                    if(missing_firing_positions) {
+                    if(missing_firing_positions && show_warnings) {
                         int offset = 0;
                         char missing_firing_positions_list[256] = {};
                         unsigned int listed = 0;
@@ -381,7 +392,7 @@ namespace Invader::Parser {
                     }
                     
                     auto missing_squad_positions = squad_position_count - best_bsp_squad_hits;
-                    if(missing_squad_positions) {
+                    if(missing_squad_positions && show_warnings) {
                         int offset = 0;
                         char missing_squad_positions_list[256] = {};
                         unsigned int listed = 0;
@@ -423,7 +434,9 @@ namespace Invader::Parser {
                     auto &squad_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.squads.pointer)];
                     auto *squad_data = reinterpret_cast<Parser::ScenarioSquad::struct_little *>(squad_struct.data.data());
                     
-                    auto *found_bsp = total_best_bsps > 0 ? (bsp_data.data() + best_bsp) : nullptr; 
+                    auto *found_bsp = total_best_bsps > 0 ? (bsp_data.data() + best_bsp) : nullptr;
+                    std::vector<std::vector<std::size_t>> missing_squad_positions(squad_count);
+                    std::size_t out_of_bounds = 0;
                     
                     for(std::size_t s = 0; s < squad_count; s++) {
                         auto &squad = squad_data[s];
@@ -469,6 +482,8 @@ namespace Invader::Parser {
                                 }
                                 else {
                                     cluster_index = NULL_INDEX;
+                                    missing_squad_positions[s].emplace_back(p);
+                                    out_of_bounds++;
                                 }
                                 
                                 // Set surface and cluster index
@@ -477,12 +492,38 @@ namespace Invader::Parser {
                             }
                         }
                     }
+                    
+                    if(out_of_bounds && show_warnings) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) has %zu squad move position%s that fall out of BSP #%zu", i, encounter.name.string, out_of_bounds, out_of_bounds == 1 ? "" : "s", best_bsp);
+                        
+                        int offset = 0;
+                        char missing_move_positions_list[256] = {};
+                        std::size_t listed = 0;
+                        for(std::size_t i = 0; i < squad_count; i++) {
+                            // Look for anything we didn't find
+                            if(missing_squad_positions[i].size() > 0) {
+                                for(auto msp : missing_squad_positions[i]) {
+                                    offset += std::snprintf(missing_move_positions_list + offset, sizeof(missing_move_positions_list) - offset, "%s%zu-%zu", listed == 0 ? "" : " ", i, msp);
+                                
+                                    // If we're going past 5, we shouldn't list anymore as it's a bit spammy
+                                    if(++listed == 5) {
+                                        if(out_of_bounds > listed) {
+                                            std::snprintf(missing_move_positions_list + offset, sizeof(missing_move_positions_list) - offset, " ...");
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        eprintf_warn_lesser("    - %zu move position%s fell out: [%s]", out_of_bounds, out_of_bounds == 1 ? "" : "s", missing_move_positions_list);
+                    }
                 }
             }
         }
     }
     
-    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings) {
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
         std::size_t command_list_count = scenario.command_lists.size();
         if(command_list_count != 0) {
             auto &command_list_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.command_lists.pointer)];
@@ -499,16 +540,19 @@ namespace Invader::Parser {
                 }
 
                 // Go through each BSP
-                std::size_t best_bsp = NULL_INDEX;
+                std::size_t best_bsp;
                 std::size_t best_bsp_hits = 0;
                 std::size_t total_best_bsps = 0;
-                std::size_t max_hits = 0;
                 std::size_t start = 0;
                 bool manual_bsp_index_specified = command_list.flags & HEK::ScenarioCommandListFlagsFlag::SCENARIO_COMMAND_LIST_FLAGS_FLAG_MANUAL_BSP_INDEX;
 
                 // If manually specifying a BSP, don't bother checking every BSP
                 if(manual_bsp_index_specified) {
                     start = command_list.manual_bsp_index;
+                    best_bsp = start;
+                }
+                else {
+                    best_bsp = NULL_INDEX;
                 }
                 
                 auto point_count = command_list.points.size();
@@ -542,7 +586,6 @@ namespace Invader::Parser {
                         best_bsp_hits = hits;
                         best_bsp = b;
                         total_best_bsps = 1;
-                        max_hits = total_hits;
                         best_surface_indices = surface_indices;
                     }
                     else if(hits && hits == best_bsp_hits) {
@@ -566,45 +609,51 @@ namespace Invader::Parser {
                 }
                 
                 // Command lists are all-or-nothing here
-                if(manual_bsp_index_specified || max_hits == best_bsp_hits) {
+                if(manual_bsp_index_specified || point_count == best_bsp_hits) {
                     command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
                 }
                 else {
                     command_list_data.precomputed_bsp_index = NULL_INDEX;
                 }
                 
-                // Show warnings if needed
-                if(total_best_bsps == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
-                }
-                else if(best_bsp_hits != max_hits) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
-                    
-                    auto missing_points = max_hits - best_bsp_hits;
-                    int offset = 0;
-                    char missing_points_list[256] = {};
-                    unsigned int listed = 0;
-                    for(std::size_t p = 0; p < point_count; p++) {
-                        // Look for anything we didn't find
-                        if(!best_surface_indices[p].has_value()) {
-                            offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : " ", p);
+                // Show warnings if needed (only warn if we have more than 0 points, since 0 point encounters can't technically be in any BSP)
+                if(show_warnings && point_count > 0) {
+                    if(total_best_bsps == 0) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
+                    }
+                    else if(best_bsp_hits != point_count) {
+                        if(best_bsp_hits == 0) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is completely outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, point_count, point_count == 1 ? "" : "s");
+                        }
+                        else {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, point_count, point_count == 1 ? "" : "s");
+                        }
                             
-                            // If we're going past 7, we shouldn't list anymore as it's a bit spammy
-                            if(++listed == 7) {
-                                if(missing_points > listed) {
-                                    std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, " ...");
+                        auto missing_points = point_count - best_bsp_hits;
+                        int offset = 0;
+                        char missing_points_list[256] = {};
+                        unsigned int listed = 0;
+                        for(std::size_t p = 0; p < point_count; p++) {
+                            // Look for anything we didn't find
+                            if(!best_surface_indices[p].has_value()) {
+                                offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : " ", p);
+                                
+                                // If we're going past 7, we shouldn't list anymore as it's a bit spammy
+                                if(++listed == 7) {
+                                    if(missing_points > listed) {
+                                        std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, " ...");
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
+                        
+                        eprintf_warn_lesser("    - %zu point%s fell out: [%s]", missing_points, missing_points == 1 ? "" : "s", missing_points_list);
                     }
-                    
-                    eprintf_warn_lesser("    - %zu point%s fell out: [%s]", missing_points, missing_points == 1 ? "" : "s", missing_points_list);
-                    
-                }
-                else if(total_best_bsps > 1) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
-                    bsp_find_warnings++;
+                    else if(total_best_bsps > 1) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
+                        bsp_find_warnings++;
+                    }
                 }
             }
         }
@@ -621,7 +670,7 @@ namespace Invader::Parser {
                     auto *bsp_tag_struct = &workload.structs[workload.tags[bsp_id.index].base_struct.value()];
                     
                     // If we're not on native, we need to read the pointer at the beginning of the struct
-                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
                     }
                     
@@ -723,8 +772,9 @@ namespace Invader::Parser {
                                     break;
                                 }
                             }
-                            if(!encounter_index.has_value()) {
-                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Participant #%zu of conversation #%zu (%s) references a nonexistent encounter (%s)", p, aic, convo.name.string, participant.encounter_name.string);
+                            if(!encounter_index.has_value() && !workload.disable_error_checking) {
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Participant #%zu of conversation #%zu (%s) references a nonexistent encounter (%s)", p, aic, convo.name.string, participant.encounter_name.string);
+                                throw InvalidTagDataException();
                             }
                         }
                         participant.encounter_index = encounter_index.value_or(0xFFFFFFFF);

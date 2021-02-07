@@ -15,11 +15,18 @@
 #include "../printf.hpp"
 
 /**
+ * Calculate the required amount of padding to make a size divisible by a set number of bytes
+ * @param  size size
+ * @return      padding required
+ */
+#define REQUIRED_PADDING_N_BYTES(size, n) static_cast<std::size_t>((~(size - 1)) & (n - 1))
+
+/**
  * Calculate the required amount of padding to make a size divisible by 32 bits
  * @param  size size
  * @return      padding required
  */
-#define REQUIRED_PADDING_32_BIT(size) static_cast<std::size_t>((~(size - 1)) & 3)
+#define REQUIRED_PADDING_32_BIT(size) REQUIRED_PADDING_N_BYTES(size, 4)
 
 /**
  * Convert degrees to radians
@@ -42,6 +49,21 @@ namespace Invader::HEK {
     using Angle = float;
     using Fraction = float;
     using Index = std::uint16_t;
+    
+    /**
+     * Check if the number is power-of-two
+     * @param value value to check
+     * @return      true if the value is power-of-two; false if not
+     */
+    template <typename T> [[maybe_unused]] static constexpr inline bool is_power_of_two(T value) noexcept {
+        while(value > 1) {
+            if(value & 1) {
+                return false;
+            }
+            value >>= 1;
+        }
+        return value & 1;
+    }
 
     #define NULL_INDEX (0xFFFF)
 

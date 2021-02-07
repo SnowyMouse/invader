@@ -22,7 +22,8 @@ namespace Invader::Parser {
 
         // Animate what?
         if(tag.model.path.size() == 0 && tag.animation_graph.path.size() != 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Object tag has a model tag but no animation graph", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Object tag has an animation graph but no model tag", tag_index);
+            throw InvalidTagDataException();
         }
     }
 
@@ -171,10 +172,12 @@ namespace Invader::Parser {
     void Weapon::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
         compile_object(*this, workload, tag_index);
+        
+        auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
 
         // Jason jones autoaim for the rocket warthog
         if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\rwarthog\\rwarthog_gun")) {
-            bool native_or_custom_edition = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+            bool native_or_custom_edition = engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE;
             float new_autoaim_angle = native_or_custom_edition ? DEGREES_TO_RADIANS(6.0F) : DEGREES_TO_RADIANS(1.0F);
             float new_deviation_angle = native_or_custom_edition ? DEGREES_TO_RADIANS(12.0F) : DEGREES_TO_RADIANS(1.0F);
 
@@ -233,6 +236,9 @@ namespace Invader::Parser {
             this->inverse_step = 1.0f / (this->step_count - 1);
         }
         this->inverse_period = 1.0f / this->period;
+        if(this->sawtooth_count > 1) {
+            this->inverse_sawtooth = 1.0f / (this->sawtooth_count - 1);
+        }
     }
 
     void WeaponTrigger::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
@@ -445,10 +451,10 @@ namespace Invader::Parser {
         }
 
         auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
-        auto &head_index = struct_val.head_model_node_index;
         auto &model_id = this->model.tag_id;
 
-        this->head_model_node_index = NULL_INDEX;
+        struct_val.head_model_node_index = NULL_INDEX;
+        struct_val.pelvis_model_node_index = NULL_INDEX;
 
         if(struct_val.animation_graph.tag_id.read().is_null()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
@@ -463,18 +469,17 @@ namespace Invader::Parser {
                 for(std::size_t n = 0; n < node_count; n++) {
                     auto &node = nodes[n];
                     if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {
-                        this->head_model_node_index = static_cast<HEK::Index>(n);
+                        struct_val.head_model_node_index = static_cast<HEK::Index>(n);
                     }
                     if(std::strncmp(node.name.string, "bip01 pelvis", sizeof(node.name.string) - 1) == 0) {
-                        this->pelvis_model_node_index = static_cast<HEK::Index>(n);
+                        struct_val.pelvis_model_node_index = static_cast<HEK::Index>(n);
                     }
                 }
             }
         }
 
-        head_index = this->head_model_node_index;
         calculate_object_predicted_resources(workload, struct_index);
-        set_pathfinding_spheres(workload, struct_index, this->collision_radius);
+        set_pathfinding_spheres(workload, struct_index, struct_val.collision_radius);
     }
     void Vehicle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
@@ -487,7 +492,7 @@ namespace Invader::Parser {
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         // Make sure zoom levels aren't too high for the HUD interface
-        if(this->magnification_levels && !this->hud_interface.tag_id.is_null()) {
+        if(this->zoom_levels && !this->hud_interface.tag_id.is_null()) {
             auto &weapon_hud_interface_tag = workload.tags[this->hud_interface.tag_id.index];
             auto &weapon_hud_interface_struct = workload.structs[*weapon_hud_interface_tag.base_struct];
             auto &weapon_hud_interface = *reinterpret_cast<const WeaponHUDInterface::struct_little *>(weapon_hud_interface_struct.data.data());
@@ -497,7 +502,7 @@ namespace Invader::Parser {
                 auto *crosshairs = reinterpret_cast<const WeaponHUDInterfaceCrosshair::struct_little *>(crosshairs_struct.data.data());
                 for(std::size_t c = 0; c < crosshair_count; c++) {
                     auto &crosshair = crosshairs[c];
-                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM) {
+                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM_LEVEL) {
                         continue;
                     }
 
@@ -522,7 +527,7 @@ namespace Invader::Parser {
                                 auto &sequence = sequences[overlay.sequence_index];
                                 bool not_a_sprite = overlay.flags.read() & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_NOT_A_SPRITE;
                                 std::size_t max_zoom_levels = not_a_sprite ? sequence.bitmap_count.read() : sequence.sprites.count.read();
-                                if(this->magnification_levels > max_zoom_levels) {
+                                if(this->zoom_levels > max_zoom_levels) {
                                     const char *noun;
                                     if(not_a_sprite) {
                                         noun = "bitmap";
@@ -530,7 +535,8 @@ namespace Invader::Parser {
                                     else {
                                         noun = "sprite";
                                     }
-                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Weapon has %zu magnification level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->magnification_levels), this->magnification_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
+                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Weapon has %zu zoom level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->zoom_levels), this->zoom_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
+                                    throw InvalidTagDataException();
                                 }
                             }
                         }

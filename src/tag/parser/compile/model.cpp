@@ -3,7 +3,6 @@
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/model.hpp>
-#include <map>
 
 namespace Invader::Parser {
     template<typename M> static void postprocess_hek_data_model(M &what) {
@@ -334,8 +333,8 @@ namespace Invader::Parser {
         if(vertex_count > 0) {
             // Xbox maps use compressed vertices at a given address
             if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                const auto *vertex_pointer = reinterpret_cast<const HEK::LittleEndian<HEK::Pointer> *>(tag.data(what.vertex_offset, sizeof(HEK::LittleEndian<HEK::Pointer>) * 2) + sizeof(HEK::LittleEndian<HEK::Pointer>));
-                const auto *vertices = reinterpret_cast<const ModelVertexCompressed::struct_little *>(tag.data(*vertex_pointer, sizeof(ModelVertexCompressed::struct_little) * vertex_count));
+                const auto vertex_pointer = reinterpret_cast<const HEK::CacheFileModelPartVerticesXbox *>(tag.data(what.vertex_offset, sizeof(HEK::CacheFileModelPartVerticesXbox)))->vertices;
+                const auto *vertices = reinterpret_cast<const ModelVertexCompressed::struct_little *>(tag.data(vertex_pointer, sizeof(ModelVertexCompressed::struct_little) * vertex_count));
                 for(std::size_t v = 0; v < vertex_count; v++) {
                     std::size_t data_read;
                     ModelVertexCompressed::struct_big vertex_compressed = vertices[v];
@@ -439,7 +438,8 @@ namespace Invader::Parser {
             
             // Do we have anything?
             if(positions.size() == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Unable to blend shared normals due to missing uncompressed vertices");
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Unable to blend shared normals due to missing uncompressed vertices");
+                throw InvalidTagDataException();
             }
             else {
                 // Add all the stuff (idk why it does this but lol)
@@ -623,11 +623,11 @@ namespace Invader::Parser {
             for(auto &i : m.instances) {
                 if(i.node_index >= node_count) {
                     if(++errors_given != MAX_ERRORS) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Instance #%zu of marker #%zu has an invalid node index (%zu >= %zu)", &m - what.markers.data(), &i - m.instances.data(), static_cast<std::size_t>(i.node_index), node_count);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Instance #%zu of marker #%zu has an invalid node index (%zu >= %zu)", &m - what.markers.data(), &i - m.instances.data(), static_cast<std::size_t>(i.node_index), node_count);
                         errors_given++;
                     }
                     else {
-                        eprintf_error("... and more errors. Suffice it to say, the model needs recompiled");
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "... and more errors");
                         break;
                     }
                 }
@@ -636,8 +636,9 @@ namespace Invader::Parser {
                 break;
             }
         }
-        if(errors_given > 0 && errors_given < MAX_ERRORS) {
+        if(errors_given > 0) {
             eprintf("This can be fixed by recompiling the model");
+            throw InvalidTagDataException();
         }
 
         // Set node stuff
@@ -723,31 +724,31 @@ namespace Invader::Parser {
     }
 
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Gearbox model tags do not exist on the target engine", tag_index);
+        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Gearbox model tags do not exist on the target engine", tag_index);
+            throw InvalidTagDataException();
         }
         
         pre_compile_model(*this, workload, tag_index);
     }
 
     void Model::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        switch(workload.engine_target) {
+        switch(workload.get_build_parameters()->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Non-Gearbox model tags do not work on the target engine", tag_index);
-                break;
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Non-Gearbox model tags do not work on the target engine", tag_index);
+                throw InvalidTagDataException();
             default: break;
         }
         
         pre_compile_model(*this, workload, tag_index);
     }
     
-    template<class P> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index) {
+    template<class P, class PartVertex, class CacheVertex> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset, const std::vector<PartVertex> &part_vertices, std::vector<CacheVertex> &workload_vertices) {
+        auto uncompressed_vertices = sizeof(CacheVertex) == sizeof(Parser::ModelVertexUncompressed::struct_little);
+        
         std::vector<HEK::Index> triangle_indices;
-
-        // Add 1 to this
-        workload.part_count++;
 
         // Add it all
         triangle_indices.reserve(what.triangles.size() * 3);
@@ -781,10 +782,10 @@ namespace Invader::Parser {
         what.triangle_count = triangle_indices_size - 2;
 
         // Make sure every triangle is valid
-        std::size_t uncompressed_vertices_count = what.uncompressed_vertices.size();
+        std::size_t part_vertices_count = part_vertices.size();
         for(auto &t : triangle_indices) {
-            if(t >= uncompressed_vertices_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index #%zu in triangle indices is invalid (%zu >= %zu)", &t - triangle_indices.data(), static_cast<std::size_t>(t), uncompressed_vertices_count);
+            if(t >= part_vertices_count) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index #%zu in triangle indices is invalid (%zu >= %zu)", &t - triangle_indices.data(), static_cast<std::size_t>(t), part_vertices_count);
                 throw InvalidTagDataException();
             }
         }
@@ -822,11 +823,12 @@ namespace Invader::Parser {
         }
         what.triangle_offset_2 = what.triangle_offset;
 
-        // Add the vertices, next
-        what.vertex_count = what.uncompressed_vertices.size();
-        std::vector<ModelVertexUncompressed::struct_little> vertices_of_fun;
+        // Add the vertices next
+        what.vertex_count = part_vertices.size();
+        std::vector<CacheVertex> vertices_of_fun;
         vertices_of_fun.reserve(what.vertex_count);
-        for(auto &v : what.uncompressed_vertices) {
+        
+        for(auto &v : part_vertices) {
             auto &mv = vertices_of_fun.emplace_back();
             mv.binormal = v.binormal;
             mv.node0_index = v.node0_index;
@@ -837,45 +839,64 @@ namespace Invader::Parser {
                 mv.node1_index = v.node1_index;
             }
             mv.node0_weight = v.node0_weight;
-            mv.node1_weight = v.node1_weight;
             mv.normal = v.normal;
             mv.position = v.position;
             mv.tangent = v.tangent;
-            mv.texture_coords = v.texture_coords;
+            
+            if(uncompressed_vertices) {
+                auto &uncompressed_cache_vertex = *reinterpret_cast<Parser::ModelVertexUncompressed::struct_little *>(&mv);
+                const auto &uncompressed_parser_vertex = *reinterpret_cast<const Parser::ModelVertexUncompressed *>(&v);
+                uncompressed_cache_vertex.node1_weight = uncompressed_parser_vertex.node1_weight;
+                uncompressed_cache_vertex.texture_coords = uncompressed_parser_vertex.texture_coords;
+            }
+            else {
+                auto &compressed_cache_vertex = *reinterpret_cast<Parser::ModelVertexCompressed::struct_little *>(&mv);
+                const auto &compressed_parser_vertex = *reinterpret_cast<const Parser::ModelVertexCompressed *>(&v);
+                compressed_cache_vertex.texture_coordinate_u = compressed_parser_vertex.texture_coordinate_u;
+                compressed_cache_vertex.texture_coordinate_v = compressed_parser_vertex.texture_coordinate_v;
+            }
         }
+        
+        // Part thingy
+        workload.model_parts.emplace_back(BuildWorkload::BuildWorkloadModelPart { struct_index, struct_offset });
 
         // Let's see if we can also dedupe this
         std::size_t this_vertices_count = vertices_of_fun.size();
-        std::size_t vertices_count = workload.model_vertices.size();
+        std::size_t vertices_count = workload_vertices.size();
         found = false;
 
         if(vertices_count >= this_vertices_count) {
             for(std::size_t i = 0; i <= vertices_count - this_vertices_count; i++) {
                 // If vertices match, set the vertices offset to this instead
-                if(std::memcmp(workload.model_vertices.data() + i, vertices_of_fun.data(), sizeof(workload.model_vertices[0]) * this_vertices_count) == 0) {
+                if(std::memcmp(workload_vertices.data() + i, vertices_of_fun.data(), sizeof(CacheVertex) * this_vertices_count) == 0) {
                     found = true;
-                    what.vertex_offset = i * sizeof(workload.model_vertices[0]);
+                    what.vertex_offset = i * sizeof(workload_vertices[0]);
                     break;
                 }
             }
         }
 
         if(!found) {
-            what.vertex_offset = vertices_count * sizeof(workload.model_vertices[0]);
-            workload.model_vertices.insert(workload.model_vertices.end(), vertices_of_fun.begin(), vertices_of_fun.end());
+            what.vertex_offset = vertices_count * sizeof(CacheVertex);
+            workload_vertices.insert(workload_vertices.end(), vertices_of_fun.begin(), vertices_of_fun.end());
         }
 
         // Don't forget to set these memes
         what.do_not_crash_the_game = 1;
-        what.do_not_screw_up_the_model = 4;
+        what.do_not_screw_up_the_model = uncompressed_vertices ? 4 : 5;
     }
 
-    void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        pre_compile_model_geometry_part(*this, workload, tag_index);
+    void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, offset, this->uncompressed_vertices, workload.uncompressed_model_vertices);
     }
 
-    void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        pre_compile_model_geometry_part(*this, workload, tag_index);
+    void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, offset, this->compressed_vertices, workload.compressed_model_vertices);
+        }
+        else {
+            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, offset, this->uncompressed_vertices, workload.uncompressed_model_vertices);
+        }
     }
 
     void ModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -1003,5 +1024,97 @@ namespace Invader::Parser {
 
     bool uncache_model_markers(Model &model, bool fix) {
         return uncache_model_markers_model(model, fix);
+    }
+    
+    template <class MFrom, class MTo> static MTo begin_converting_model(const MFrom &model) {
+        MTo output = {};
+        
+        output.flags = model.flags;
+        output.node_list_checksum = model.node_list_checksum;
+        
+        output.super_high_detail_cutoff = model.super_high_detail_cutoff;
+        output.high_detail_cutoff = model.high_detail_cutoff;
+        output.medium_detail_cutoff = model.medium_detail_cutoff;
+        output.low_detail_cutoff = model.low_detail_cutoff;
+        output.super_low_detail_cutoff = model.super_low_detail_cutoff;
+        
+        output.super_high_detail_node_count = model.super_high_detail_node_count;
+        output.high_detail_node_count = model.high_detail_node_count;
+        output.medium_detail_node_count = model.medium_detail_node_count;
+        output.low_detail_node_count = model.low_detail_node_count;
+        output.super_low_detail_node_count = model.super_low_detail_node_count;
+        
+        output.base_map_u_scale = model.base_map_u_scale;
+        output.base_map_v_scale = model.base_map_v_scale;
+        output.markers = model.markers;
+        output.nodes = model.nodes;
+        output.regions = model.regions;
+        output.shaders = model.shaders;
+        
+        return output;
+    }
+    
+    template <class PFrom, class PTo> static PTo begin_converting_part(const PFrom &part) {
+        PTo output = {};
+        
+        output.flags = part.flags;
+        output.shader_index = part.shader_index;
+        output.prev_filthy_part_index = part.prev_filthy_part_index;
+        output.next_filthy_part_index = part.next_filthy_part_index;
+        output.centroid = part.centroid;
+        output.uncompressed_vertices = part.uncompressed_vertices;
+        output.compressed_vertices = part.compressed_vertices;
+        output.triangles = part.triangles;
+        
+        return output;
+    }
+    
+    GBXModel convert_model_to_gbxmodel(const Model &model) {
+        auto output = begin_converting_model<Model, GBXModel>(model);
+        
+        for(auto &gi : model.geometries) {
+            auto &go = output.geometries.emplace_back();
+            go.flags = gi.flags;
+            for(auto &pi : gi.parts) {
+                go.parts.emplace_back(begin_converting_part<ModelGeometryPart, GBXModelGeometryPart>(pi));
+            }
+        }
+        
+        return output;
+    }
+    
+    Model convert_gbxmodel_to_model(const GBXModel &model) {
+        auto output = begin_converting_model<GBXModel, Model>(model);
+        
+        // Check if we have local nodes
+        auto local_nodes = model.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        if(local_nodes) {
+            // Local nodes don't exist on model tags
+            output.flags = output.flags & ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        }
+        
+        // Do this
+        for(auto &gi : model.geometries) {
+            auto &go = output.geometries.emplace_back();
+            go.flags = gi.flags;
+            for(auto &pi : gi.parts) {
+                auto &po = go.parts.emplace_back(begin_converting_part<GBXModelGeometryPart, ModelGeometryPart>(pi));
+                
+                auto node_count = sizeof(pi.local_node_indices) / sizeof(*pi.local_node_indices);
+                
+                if(local_nodes) {
+                    for(auto &v : po.uncompressed_vertices) {
+                        if(v.node0_index != NULL_INDEX) {
+                            v.node0_index = pi.local_node_indices[v.node0_index % node_count];
+                        }
+                        if(v.node1_index != NULL_INDEX) {
+                            v.node1_index = pi.local_node_indices[v.node1_index % node_count];
+                        }
+                    }
+                }
+            }
+        }
+        
+        return output;
     }
 }

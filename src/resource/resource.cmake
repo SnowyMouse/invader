@@ -11,4 +11,5 @@ if(${INVADER_RESOURCE})
     target_link_libraries(invader-resource invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-resource)
+    do_windows_rc(invader-resource invader-resource.exe "Invader resource map generation tool")
 endif()

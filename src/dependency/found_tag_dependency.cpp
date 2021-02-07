@@ -8,8 +8,8 @@
 #include <filesystem>
 
 namespace Invader {
-    static std::vector<std::pair<std::string, TagClassInt>> get_dependencies(const BuildWorkload &tag_compiled) {
-        std::vector<std::pair<std::string, TagClassInt>> dependencies;
+    static std::vector<File::TagFilePath> get_dependencies(const BuildWorkload &tag_compiled) {
+        std::vector<File::TagFilePath> dependencies;
         for(auto &s : tag_compiled.structs) {
             for(auto &d : s.dependencies) {
                 // Skip anything referencing ourselves
@@ -25,7 +25,7 @@ namespace Invader {
         return dependencies;
     }
 
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
 
@@ -37,28 +37,19 @@ namespace Invader {
                 bool found = false;
                 for(auto &tags_directory : tags) {
                     std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_class_to_extension(tag_int_to_find));
-                    std::FILE *f = std::fopen(tag_path.string().c_str(), "rb");
-                    if(!f) {
+                    auto tag_data = File::open_file(tag_path);
+                    if(!tag_data.has_value()) {
+                        eprintf_error("Failed to read tag %s", tag_path.string().c_str());
                         continue;
                     }
-                    std::fseek(f, 0, SEEK_END);
-                    long file_size = std::ftell(f);
-                    std::fseek(f, 0, SEEK_SET);
-                    auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
-                    if(!std::fread(tag_data.get(), file_size, 1, f)) {
-                        std::fclose(f);
-                        eprintf_error("Failed to read file %s", tag_path.string().c_str());
-                        continue;
-                    }
-                    std::fclose(f);
 
                     try {
-                        auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data.get(), file_size));
+                        auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
                         for(auto &dependency : dependencies) {
                             // Make sure it's not in found_tags
                             bool dupe = false;
                             for(auto &tag : found_tags) {
-                                if(tag.path == dependency.first && tag.class_int == dependency.second) {
+                                if(tag.path == dependency.path && tag.class_int == dependency.class_int) {
                                     dupe = true;
                                     break;
                                 }
@@ -67,24 +58,24 @@ namespace Invader {
                                 continue;
                             }
 
-                            auto class_to_use = dependency.second;
-                            std::string path_copy = File::halo_path_to_preferred_path(dependency.first + "." + tag_class_to_extension(class_to_use));
+                            auto class_to_use = dependency.class_int;
+                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
                                 auto complete_tag_path = std::filesystem::path(tags_directory) / path_copy;
                                 if(std::filesystem::is_regular_file(complete_tag_path)) {
-                                    found_tags.emplace_back(dependency.first, class_to_use, false, complete_tag_path.string());
+                                    found_tags.emplace_back(dependency.path, class_to_use, false, complete_tag_path);
                                     found = true;
                                     break;
                                 }
                             }
 
                             if(!found) {
-                                found_tags.emplace_back(dependency.first, class_to_use, true, "");
+                                found_tags.emplace_back(dependency.path, class_to_use, true, std::nullopt);
                             }
                             else if(recursive) {
-                                recursion(dependency.first.c_str(), class_to_use, recursion);
+                                recursion(dependency.path.c_str(), class_to_use, recursion);
                             }
                         }
                         found = true;
@@ -146,31 +137,21 @@ namespace Invader {
                             if(skip) {
                                 break;
                             }
-
-                            // Attempt to open and read the tag
-                            std::FILE *f = std::fopen(file.path().string().c_str(), "rb");
-                            if(!f) {
-                                eprintf_error("Failed to open tag %s.", file.path().string().c_str());
+                            
+                            // Open it
+                            auto fp = file.path();
+                            auto tag_data = File::open_file(fp);
+                            if(!tag_data.has_value()) {
+                                eprintf_error("Failed to read tag %s", fp.string().c_str());
                                 continue;
                             }
-
-                            std::fseek(f, 0, SEEK_END);
-                            long file_size = std::ftell(f);
-                            std::fseek(f, 0, SEEK_SET);
-                            auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
-                            if(!std::fread(tag_data.get(), file_size, 1, f)) {
-                                std::fclose(f);
-                                eprintf_error("Failed to read file %s", file.path().string().c_str());
-                                continue;
-                            }
-                            std::fclose(f);
 
                             // Attempt to parse
                             try {
-                                auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data.get(), file_size));
+                                auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
                                 for(auto &dependency : dependencies) {
-                                    if(dependency.first == tag_path_to_find && dependency.second == tag_int_to_find) {
-                                        found_tags.emplace_back(dir_tag_path, class_int, false, file.path().string());
+                                    if(dependency.path == tag_path_to_find && dependency.class_int == tag_int_to_find) {
+                                        found_tags.emplace_back(dir_tag_path, class_int, false, file.path());
                                         break;
                                     }
                                 }

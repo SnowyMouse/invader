@@ -10,7 +10,7 @@
 #include <invader/file/file.hpp>
 #include <fstream>
 
-#define INDEX_EXTENSION ".tag_indices"
+#define INDEX_EXTENSION ".txt"
 
 int main(int argc, char * const *argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
@@ -25,8 +25,8 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <tag>";
 
     struct CollectionOptions {
-        const char *data = "data";
-        std::optional<const char *> tags;
+        std::filesystem::path data = "data";
+        std::optional<std::filesystem::path> tags;
         bool use_filesystem_path = false;
     } collection_options;
 
@@ -50,7 +50,7 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
-    
+
     if(!collection_options.tags.has_value()) {
         collection_options.tags = "tags";
     }
@@ -58,10 +58,10 @@ int main(int argc, char * const *argv) {
     // Check if there's a string tag
     std::string string_tag;
     if(collection_options.use_filesystem_path) {
-        std::vector<std::string> data(&collection_options.data, &collection_options.data + 1);
-        auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, INDEX_EXTENSION);
+        std::vector<std::filesystem::path> data(&collection_options.data, &collection_options.data + 1);
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
         if(string_tag_maybe.has_value()) {
-            string_tag = string_tag_maybe.value();
+            string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
         }
         else {
             eprintf_error("Failed to find a valid %s file %s in the data directory", INDEX_EXTENSION, remaining_arguments[0]);
@@ -72,22 +72,9 @@ int main(int argc, char * const *argv) {
         string_tag = remaining_arguments[0];
     }
 
-    // Ensure it's lowercase
-    for(const char *c = string_tag.c_str(); *c; c++) {
-        if(*c >= 'A' && *c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", string_tag.c_str());
-            return EXIT_FAILURE;
-        }
-    }
-
     std::filesystem::path tags_path(*collection_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*collection_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *collection_options.tags);
-        }
+        eprintf_error("Directory %s was not found or is not a directory", collection_options.tags->string().c_str());
         return EXIT_FAILURE;
     }
     std::filesystem::path data_path(collection_options.data);
@@ -123,15 +110,8 @@ int main(int argc, char * const *argv) {
     std::filesystem::path tag_path(output_path);
 
     // Create missing directories if needed
-    try {
-        if(!std::filesystem::exists(tag_path.parent_path())) {
-            std::filesystem::create_directories(tag_path.parent_path());
-        }
-    }
-    catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s", e.what());
-        return EXIT_FAILURE;
-    }
+    std::error_code ec;
+    std::filesystem::create_directories(tag_path.parent_path(), ec);
 
     if(!Invader::File::save_file(output_path.c_str(), final_data)) {
         eprintf_error("Error: Failed to write to %s.", output_path.c_str());

@@ -20,7 +20,7 @@ namespace Invader {
                "This program is licensed under the GNU General Public License v3.0.\n"
                "\n"
                "Credits:\n"
-               "  Snowy                        - Lead developer, project owner\n"
+               "  Snowy Mouse                  - Lead developer, project owner\n"
                "  Vaporeon                     - Testing & QA, AUR maintainer, development\n"
                "  ST34MF0X                     - Icon design\n"
                "\n"

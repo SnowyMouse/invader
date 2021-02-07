@@ -23,7 +23,7 @@ namespace Invader::EditQt {
     class TagFetcherThread : public QThread {
         Q_OBJECT
     public:
-        TagFetcherThread(QObject *parent, const std::vector<std::string> &all_paths);
+        TagFetcherThread(QObject *parent, const std::vector<std::filesystem::path> &all_paths);
 
     signals:
         void tag_count_changed(std::pair<std::mutex, std::size_t> *new_count);
@@ -31,7 +31,7 @@ namespace Invader::EditQt {
 
     private:
         void run() override;
-        std::vector<std::string> all_paths;
+        std::vector<std::filesystem::path> all_paths;
         std::vector<File::TagFile> all_tags;
         std::pair<std::mutex, std::size_t> statuser;
         std::size_t last_tag_count;
@@ -98,6 +98,20 @@ namespace Invader::EditQt {
          * @param full_path this is the full path
          */
         void open_tag(const char *path, bool full_path);
+        
+        /**
+         * Set whether or not to do fast listing
+         * @param mode true to enable, false to disable
+         */
+        void set_fast_listing_mode(bool mode);
+        
+        /**
+         * Get whether or not to do fast listing
+         * @return true if fast listing mode is enabled
+         */
+        bool fast_listing_mode() const noexcept {
+            return this->fast_listing;
+        }
 
         virtual void closeEvent(QCloseEvent *event);
         virtual void paintEvent(QPaintEvent *event);
@@ -107,7 +121,7 @@ namespace Invader::EditQt {
 
     private:
         /** Reload the tags in the tag array */
-        void reload_tags();
+        void reload_tags(bool reiterate_directories);
 
         /** Show the about window */
         void show_about_window();
@@ -197,6 +211,8 @@ namespace Invader::EditQt {
         QLineEdit *filter_textbox;
         
         std::size_t listing_errors = 0;
+        
+        bool fast_listing = false;
         
         void set_filter(const QString &filter);
         void toggle_filter_visible();

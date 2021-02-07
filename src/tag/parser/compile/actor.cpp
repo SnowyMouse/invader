@@ -13,7 +13,7 @@ namespace Invader::Parser {
         SET_INVERTED_VALUE(actor->guard_perception_time, actor->inverse_guard_perception_time);
         SET_INVERTED_VALUE(actor->non_combat_perception_time, actor->inverse_non_combat_perception_time);
 
-        actor->cosine_begin_moving_angle = std::cos(actor->begin_moving_angle);
+        actor->cosine_begin_moving_angle = actor->begin_moving_angle != 0.0F ? std::cos(actor->begin_moving_angle) : 0.0F;
         actor->cosine_maximum_aiming_deviation.i = std::cos(actor->maximum_aiming_deviation.i);
         actor->cosine_maximum_aiming_deviation.j = std::cos(actor->maximum_aiming_deviation.j);
         actor->cosine_maximum_looking_deviation.i = std::cos(actor->maximum_looking_deviation.i);

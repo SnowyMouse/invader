@@ -20,10 +20,10 @@
 #define output_colored(color, fn, ...) { \
     CONSOLE_SCREEN_BUFFER_INFO info = {}; \
     auto stdouthandle = GetStdHandle(STD_OUTPUT_HANDLE); \
-    GetConsoleScreenBufferInfo(stdouthandle, &info); \
-    SetConsoleTextAttribute(stdouthandle, color); \
+    bool got_info = GetConsoleScreenBufferInfo(stdouthandle, &info); \
+    if(got_info) { SetConsoleTextAttribute(stdouthandle, color); } \
     fn(__VA_ARGS__); \
-    SetConsoleTextAttribute(stdouthandle, info.wAttributes); \
+    if(got_info) { SetConsoleTextAttribute(stdouthandle, info.wAttributes); } \
     fn("\n"); \
 }
 

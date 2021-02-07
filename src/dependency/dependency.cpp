@@ -25,8 +25,7 @@ int main(int argc, char * const *argv) {
     struct DependencyOption {
         bool reverse = false;
         bool recursive = false;
-        std::vector<std::string> tags;
-        std::string output;
+        std::vector<std::filesystem::path> tags;
         bool use_filesystem_path = false;
     } dependency_options;
 
@@ -56,52 +55,32 @@ int main(int argc, char * const *argv) {
     }
 
     // Require a tag
-    std::vector<char> tag_path_to_find_data;
-    if(dependency_options.use_filesystem_path) {
-        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags, true);
-
+    std::optional<std::string> tag_path;
+    if(dependency_options.use_filesystem_path) { 
+        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags);
         if(tag_path_maybe.has_value()) {
-            auto &file_path = tag_path_maybe.value();
-            tag_path_to_find_data = std::vector<char>(file_path.begin(), file_path.end());
-        }
-        else {
-            eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
-            return EXIT_FAILURE;
+            tag_path = Invader::File::preferred_path_to_halo_path(*tag_path_maybe);
         }
     }
     else {
-        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + strlen(remaining_arguments[0]));
-    }
-
-    // Add a null terminator
-    tag_path_to_find_data.emplace_back(0);
-
-    char *tag_path_to_find = tag_path_to_find_data.data();
-
-    // Get the tag path and extension
-    char *c = nullptr;
-    for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
-        if(tag_path_to_find[i] == '.') {
-            c = tag_path_to_find + i + 1;
+        auto file_path_maybe = Invader::File::tag_path_to_file_path(remaining_arguments[0], dependency_options.tags);
+        if(file_path_maybe.has_value() && std::filesystem::exists(*file_path_maybe)) {
+            tag_path = remaining_arguments[0];
         }
     }
-
-    auto tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
-    if(c == nullptr) {
-        eprintf_error("Invalid tag path %s. Missing extension.", tag_path_to_find);
+    if(!tag_path.has_value()) {
+        eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
         return EXIT_FAILURE;
     }
-    else if(tag_int_to_find == Invader::HEK::TAG_CLASS_NULL) {
-        eprintf_error("Invalid tag path %s. Unknown tag class %s.", tag_path_to_find, c);
+    auto tag_path_split = Invader::File::split_tag_class_extension(*tag_path);
+    if(!tag_path_split.has_value()) {
+        eprintf_error("%s is not a valid font tag", remaining_arguments[0]);
         return EXIT_FAILURE;
     }
-
-    // Split the tag extension
-    *(c - 1) = 0;
 
     // Here's an array we can use to hold what we got
     bool success;
-    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, dependency_options.tags, dependency_options.reverse, dependency_options.recursive, success);
+    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_split->path.c_str(), tag_path_split->class_int, dependency_options.tags, dependency_options.reverse, dependency_options.recursive, success);
 
     if(!success) {
         return EXIT_FAILURE;

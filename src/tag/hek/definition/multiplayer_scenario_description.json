@@ -38,6 +38,7 @@
                 "name": "multiplayer scenarios",
                 "type": "TagReflexive",
                 "struct": "MultiplayerScenarioDescriptionScenarioDescription",
+                "hek_maximum": 32,
                 "compound": true
             }
         ],

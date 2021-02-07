@@ -19,6 +19,7 @@
                 "name": "strings",
                 "type": "TagReflexive",
                 "struct": "UnicodeStringListString",
+                "hek_maximum": 800,
                 "compound": true,
                 "read_only": true
             }

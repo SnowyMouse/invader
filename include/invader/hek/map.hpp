@@ -33,27 +33,31 @@ namespace Invader::HEK {
         CACHE_FILE_FOOT_DEMO = 0x47666F74
     };
 
-    enum CacheFileTagDataBaseMemoryAddress : HEK::Pointer64 {
+    enum CacheFileTagDataBaseMemoryAddress : Pointer64 {
         CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
         CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
         CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS = 0x00000000,
-
-        CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS = 0x40448000,
-        CACHE_FILE_ANNIVERSARY_BSP_MEMORY_ADDRESS = 0x41448000,
-
         CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS = 0x803A6000,
 
-        CACHE_FILE_STUB_MEMORY_ADDRESS = 0xFFFFFFFF,
-        CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE = 0xFFFFFFFFFFFFFFFF
+        CACHE_FILE_STUB_MEMORY_ADDRESS = UINT32_MAX,
+        CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE = UINT64_MAX
+    };
+    
+    enum CacheFileXboxConstants : std::uint32_t {
+        CACHE_FILE_XBOX_SECTOR_SIZE = 512,
+        CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY = 128
     };
 
-    enum CacheFileLimits : HEK::Pointer64 {
-        CACHE_FILE_MEMORY_LENGTH = 0x1700000,
-        CACHE_FILE_MAXIMUM_FILE_LENGTH = 0xFFFFFFFF,
-        CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX = 0x18000000,
-
-        CACHE_FILE_MEMORY_LENGTH_NATIVE = 0xFFFFFFFFFFFFFFFF,
-        CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE = 0xFFFFFFFFFFFFFFFF,
+    enum CacheFileLimits : Pointer64 {
+        CACHE_FILE_MEMORY_LENGTH_PC = 0x1700000,
+        CACHE_FILE_MEMORY_LENGTH_XBOX = 0x1600000,
+        CACHE_FILE_MEMORY_LENGTH_NATIVE = UINT64_MAX,
+        
+        CACHE_FILE_MAXIMUM_FILE_LENGTH_PC = 0x18000000,
+        CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE = 0x2300000,
+        CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER = 0x11600000,
+        CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER = 0x2F00000,
+        CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE = UINT64_MAX,
 
         CACHE_FILE_MAX_TAG_COUNT = 65535
     };
@@ -61,6 +65,8 @@ namespace Invader::HEK {
     struct CacheFileDemoHeader;
 
     struct CacheFileHeader {
+        constexpr const static bool IS_DEMO = false;
+        
         LittleEndian<CacheFileLiteral> head_literal;
         LittleEndian<CacheFileEngine> engine;
         LittleEndian<std::uint32_t> decompressed_file_size;
@@ -86,6 +92,8 @@ namespace Invader::HEK {
     static_assert(sizeof(CacheFileHeader) == 0x800);
 
     struct NativeCacheFileHeader {
+        constexpr const static bool IS_DEMO = false;
+        
         enum NativeCacheFileCompressionType : TagEnum {
             NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED = 0,
             NATIVE_CACHE_FILE_COMPRESSION_ZSTD = 1
@@ -111,6 +119,8 @@ namespace Invader::HEK {
     static_assert(sizeof(NativeCacheFileHeader) == 0x800);
 
     struct CacheFileDemoHeader {
+        constexpr const static bool IS_DEMO = true;
+        
         PAD(0x2);
         LittleEndian<CacheFileType> map_type;
         PAD(0x2BC);
@@ -138,7 +148,7 @@ namespace Invader::HEK {
     static_assert(sizeof(CacheFileDemoHeader) == 0x800);
 
     struct CacheFileTagDataHeader {
-        LittleEndian<HEK::Pointer> tag_array_address;
+        LittleEndian<Pointer> tag_array_address;
         LittleEndian<TagID> scenario_tag;
         LittleEndian<std::uint32_t> tag_file_checksums;
         LittleEndian<std::uint32_t> tag_count;
@@ -154,6 +164,30 @@ namespace Invader::HEK {
         LittleEndian<CacheFileLiteral> tags_literal;
     };
     static_assert(sizeof(CacheFileTagDataHeaderPC) == 0x28);
+    
+    // The Xbox version accesses vertices indirectly for some reason. Not 100% sure what for yet.
+    struct CacheFileModelPartVerticesXbox {
+        LittleEndian<std::uint32_t> unknown1;
+        LittleEndian<Pointer> vertices;
+        LittleEndian<std::uint32_t> unknown2;
+    };
+    static_assert(sizeof(CacheFileModelPartVerticesXbox) == 0xC);
+    
+    // I don't know what this is used for. It uses indices directly unlike with vertices.
+    struct CacheFileModelPartIndicesXbox {
+        LittleEndian<std::uint32_t> unknown1;
+        LittleEndian<Pointer> indices;
+        LittleEndian<std::uint32_t> unknown2;
+    };
+    static_assert(sizeof(CacheFileModelPartIndicesXbox) == 0xC);
+
+    struct CacheFileTagDataHeaderXbox : CacheFileTagDataHeader {
+        LittleEndian<Pointer> model_part_vertices_address;
+        LittleEndian<std::uint32_t> model_part_count_again;
+        LittleEndian<Pointer> model_part_indices_address;
+        LittleEndian<CacheFileLiteral> tags_literal;
+    };
+    static_assert(sizeof(CacheFileTagDataHeaderXbox) == 0x24);
 
     struct NativeCacheFileTagDataHeader : CacheFileTagDataHeader {
         LittleEndian<std::uint64_t> model_data_file_offset;
@@ -169,8 +203,8 @@ namespace Invader::HEK {
         LittleEndian<TagClassInt> secondary_class;
         LittleEndian<TagClassInt> tertiary_class;
         LittleEndian<TagID> tag_id;
-        LittleEndian<HEK::Pointer> tag_path;
-        LittleEndian<HEK::Pointer> tag_data;
+        LittleEndian<Pointer> tag_path;
+        LittleEndian<Pointer> tag_data;
         LittleEndian<std::uint32_t> indexed;
         PAD(0x4);
     };
@@ -181,8 +215,8 @@ namespace Invader::HEK {
         LittleEndian<TagClassInt> secondary_class;
         LittleEndian<TagClassInt> tertiary_class;
         LittleEndian<TagID> tag_id;
-        LittleEndian<HEK::Pointer64> tag_path;
-        LittleEndian<HEK::Pointer64> tag_data;
+        LittleEndian<Pointer64> tag_path;
+        LittleEndian<Pointer64> tag_data;
     };
     static_assert(sizeof(NativeCacheFileTagDataTag) == 0x20);
 }

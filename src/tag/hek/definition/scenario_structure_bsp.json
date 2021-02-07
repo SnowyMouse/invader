@@ -333,8 +333,11 @@
                 "size": 2
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "do not screw up the model",
+                "type": "uint32",
+                "comment": "(Xbox only) if this isn't set to 1, then the world ends",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "rendered vertices count",
@@ -346,11 +349,22 @@
             },
             {
                 "type": "pad",
-                "size": 8
+                "size": 4,
+                "comment": "on PC, this gets changed to a pointer to something when the BSP is loaded in-game"
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "rendered vertices index pointer",
+                "type": "Pointer",
+                "cache_only": true,
+                "comment": "(Xbox only) an indirect pointer to the rendered vertices",
+                "endian": "little"
+            },
+            {
+                "name": "set this or die",
+                "type": "uint32",
+                "endian": "little",
+                "comment": "(Xbox only) if this isn't set to 3, then the visible lightmap UVs do not work",
+                "cache_only": true
             },
             {
                 "name": "lightmap vertices count",
@@ -362,7 +376,14 @@
             },
             {
                 "type": "pad",
-                "size": 8
+                "size": 4
+            },
+            {
+                "name": "lightmap vertices index pointer",
+                "type": "Pointer",
+                "cache_only": true,
+                "comment": "(Xbox only) an indirect pointer to the lightmap vertices",
+                "endian": "little"
             },
             {
                 "name": "uncompressed vertices",
@@ -374,7 +395,6 @@
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
                 "compound": true,
-                "non_cached": true,
                 "ignore_cached": true
             }
         ],
@@ -404,6 +424,7 @@
                 "name": "materials",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMaterial",
+                "hek_maximum": 2048,
                 "compound": true
             }
         ],
@@ -550,6 +571,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirrorVertex",
+                "hek_maximum": 512,
                 "compound": true
             }
         ],
@@ -622,6 +644,7 @@
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "hek_maximum": 1024,
                 "cache_only": true,
                 "compound": true
             },
@@ -629,6 +652,7 @@
                 "name": "subclusters",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSubcluster",
+                "hek_maximum": 4096,
                 "compound": true
             },
             {
@@ -643,18 +667,21 @@
                 "name": "surface indices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterSurfaceIndex",
+                "hek_maximum": 32768,
                 "compound": true
             },
             {
                 "name": "mirrors",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirror",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalIndex",
+                "hek_maximum": 128,
                 "compound": true
             }
         ],
@@ -711,6 +738,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalVertex",
+                "hek_maximum": 128,
                 "compound": true
             }
         ],
@@ -778,6 +806,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlaneVertex",
+                "hek_maximum": 2048,
                 "compound": true
             }
         ],
@@ -942,6 +971,7 @@
                 "name": "planes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedronPlane",
+                "hek_maximum": 16,
                 "compound": true
             }
         ],
@@ -1165,24 +1195,28 @@
                 "name": "cells",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCell",
+                "hek_maximum": 262144,
                 "compound": true
             },
             {
                 "name": "instances",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObject",
+                "hek_maximum": 2097152,
                 "compound": true
             },
             {
                 "name": "counts",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCount",
+                "hek_maximum": 8388608,
                 "compound": true
             },
             {
                 "name": "z reference vectors",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalZReferenceVector",
+                "hek_maximum": 262144,
                 "compound": true
             },
             {
@@ -1255,6 +1289,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFaceVertex",
+                "hek_maximum": 64,
                 "compound": true
             }
         ],
@@ -1281,12 +1316,14 @@
                 "name": "faces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFace",
+                "hek_maximum": 256,
                 "compound": true
             },
             {
                 "name": "portal indices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafPortalIndex",
+                "hek_maximum": 256,
                 "compound": true
             }
         ],
@@ -1424,18 +1461,21 @@
                 "name": "collision materials",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCollisionMaterial",
+                "hek_maximum": 512,
                 "compound": true
             },
             {
                 "name": "collision bsp",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
+                "hek_maximum": 1,
                 "compound": true
             },
             {
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPNode",
+                "hek_maximum": 131072,
                 "compound": true
             },
             {
@@ -1457,24 +1497,28 @@
                 "name": "leaves",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLeaf",
+                "hek_maximum": 65536,
                 "compound": true
             },
             {
                 "name": "leaf surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurfaceReference",
+                "hek_maximum": 262144,
                 "compound": true
             },
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurface",
+                "hek_maximum": 131072,
                 "compound": true
             },
             {
                 "name": "lightmaps",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLightmap",
+                "hek_maximum": 128,
                 "compound": true
             },
             {
@@ -1485,18 +1529,21 @@
                 "name": "lens flares",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlare",
+                "hek_maximum": 256,
                 "compound": true
             },
             {
                 "name": "lens flare markers",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlareMarker",
+                "hek_maximum": 65536,
                 "compound": true
             },
             {
                 "name": "clusters",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCluster",
+                "hek_maximum": 8192,
                 "compound": true
             },
             {
@@ -1508,6 +1555,7 @@
                 "name": "cluster portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortal",
+                "hek_maximum": 512,
                 "compound": true
             },
             {
@@ -1518,24 +1566,28 @@
                 "name": "breakable surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBreakableSurface",
+                "hek_maximum": 256,
                 "compound": true
             },
             {
                 "name": "fog planes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlane",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
                 "name": "fog regions",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogRegion",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
                 "name": "fog palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPalette",
+                "hek_maximum": 32,
                 "read_only": false,
                 "compound": true,
                 "maximum": 65534
@@ -1548,6 +1600,7 @@
                 "name": "weather palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPalette",
+                "hek_maximum": 32,
                 "read_only": false,
                 "compound": true
             },
@@ -1555,6 +1608,7 @@
                 "name": "weather polyhedra",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedron",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
@@ -1565,18 +1619,21 @@
                 "name": "pathfinding surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingSurface",
+                "hek_maximum": 131072,
                 "compound": true
             },
             {
                 "name": "pathfinding edges",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingEdge",
+                "hek_maximum": 262144,
                 "compound": true
             },
             {
                 "name": "background sound palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBackgroundSoundPalette",
+                "hek_maximum": 64,
                 "read_only": false,
                 "compound": true
             },
@@ -1584,6 +1641,7 @@
                 "name": "sound environment palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSoundEnvironmentPalette",
+                "hek_maximum": 64,
                 "read_only": false,
                 "compound": true
             },
@@ -1600,12 +1658,14 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMarker",
+                "hek_maximum": 1024,
                 "compound": true
             },
             {
                 "name": "detail objects",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPDetailObjectData",
+                "hek_maximum": 1,
                 "read_only": false,
                 "compound": true
             },
@@ -1613,6 +1673,7 @@
                 "name": "runtime decals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPRuntimeDecal",
+                "hek_maximum": 6144,
                 "compound": true,
                 "cache_only": true
             },
@@ -1628,12 +1689,14 @@
                 "name": "leaf map leaves",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalMapLeaf",
+                "hek_maximum": 65536,
                 "compound": true
             },
             {
                 "name": "leaf map portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalLeafPortal",
+                "hek_maximum": 524288,
                 "compound": true
             }
         ],
@@ -1654,8 +1717,28 @@
                 "endian": "little"
             },
             {
-                "type": "pad",
-                "size": 16
+                "name": "lightmap material count",
+                "type": "uint32",
+                "comment": "(Xbox only): number of lightmap materials",
+                "cache_only": true
+            },
+            {
+                "name": "rendered vertices",
+                "type": "Pointer",
+                "comment": "(Xbox only): pointer to array of rendered vertices",
+                "cache_only": true
+            },
+            {
+                "name": "lightmap material count again",
+                "type": "uint32",
+                "comment": "(Xbox only): number of lightmap materials (again)",
+                "cache_only": true
+            },
+            {
+                "name": "lightmap vertices",
+                "type": "Pointer",
+                "comment": "(Xbox only): pointer to array of lightmap vertices",
+                "cache_only": true
             },
             {
                 "name": "signature",

@@ -10,6 +10,8 @@
 #include <invader/command_line_option.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
+#include <thread>
+#include <mutex>
 
 #include "bludgeoner.hpp"
 
@@ -56,8 +58,14 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation) */
     INVALID_VERTICES                    = 1ull << 11,
 
-    /** Fix sound permutations not being valid (caused by old versions of Refinery when safe mode is enabled) */
+    /** Fix sound permutations not being valid (caused by old versions of Refinery when safe mode is enabled; this cannot be fixed, but it can at least be turned into something technically valid) */
     INVALID_SOUND_PERMUTATIONS          = 1ull << 12,
+    
+    /** Fix uppercase references */
+    INVALID_UPPERCASE_REFERENCES        = 1ull << 13,
+    
+    /** Fix excessive script node count (typically caused by Open Sauce) */
+    EXCESSIVE_SCRIPT_NODES              = 1ull << 13,
     
     /** Attempt to unfuck anything that can be unfucked (CAUTION: you can unscrew a lightbulb; you can't unscrew a Halo tag) */
     EVERYTHING                          = ~0ull
@@ -67,6 +75,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define INVALID_COLOR_CHANGE_FIX "broken-color-change"
 #define BROKEN_ENUMS_FIX "invalid-enums"
 #define BROKEN_REFERENCE_CLASSES_FIX "invalid-reference-classes"
+#define INVALID_UPPERCASE_REFERENCES_FIX "invalid-uppercase-references"
 #define BROKEN_SOUND_FORMAT_FIX "invalid-sound-format"
 #define INVALID_MODEL_MARKERS_FIX "invalid-model-markers"
 #define INVALID_VERTICES_FIX "missing-vertices"
@@ -76,10 +85,17 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define INVALID_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define INVALID_INDICES_FIX "invalid-indices"
 #define INVALID_NORMALS_FIX "nonnormal-vectors"
+#define EXCESSIVE_SCRIPT_NODES_FIX "excessive-script-nodes"
 #define BROKEN_STRINGS_FIX "invalid-strings"
 #define EVERYTHING_FIX "everything"
 
-static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
+// Singleton the printf!
+static std::mutex bad_code_design_mutex;
+#define badly_designed_printf(function, ...) bad_code_design_mutex.lock(); \
+                                             function(__VA_ARGS__); \
+                                             bad_code_design_mutex.unlock();
+
+static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fixes, bool &bludgeoned) {
     using namespace Invader::Bludgeoner;
     using namespace Invader::HEK;
     using namespace Invader::File;
@@ -89,7 +105,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
     // Open the tag
     auto tag = open_file(file_path);
     if(!tag.has_value()) {
-        eprintf_error("Failed to open %s", file_path);
+        badly_designed_printf(eprintf_error, "Failed to open %s", file_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -104,7 +120,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         bool issues_present = false;
         if(fixes == WaysToFuckUpTheTag::NO_FIXES) {
             #define check_fix(fix, fix_message) if(fix(parsed_data.get(), false)) { \
-                oprintf_success_warn("%s: " fix_message, file_path); \
+                badly_designed_printf(oprintf_success_warn, "%s: " fix_message, file_path.string().c_str()); \
                 issues_present = true; \
             }
             
@@ -118,12 +134,14 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             check_fix(broken_indices_fix, "indices are out of bounds; fix with " INVALID_INDICES_FIX);
             check_fix(broken_normals, "problematic nonnormal vectors detected; fix with " INVALID_NORMALS_FIX);
             check_fix(broken_strings, "problematic strings detected; fix with " BROKEN_STRINGS_FIX);
+            check_fix(uppercase_references, "uppercase references detected; fix with " INVALID_UPPERCASE_REFERENCES_FIX);
+            check_fix(excessive_script_nodes, "excessive script nodes detected; fix with " EXCESSIVE_SCRIPT_NODES_FIX);
             
             #undef check_fix
         }
         else {
             #define apply_fix(fix, fix_enum, fix_name) if((fixes & fix_enum) && fix(parsed_data.get(), true)) { \
-                oprintf_success("%s: Fixed " fix_name, file_path); \
+                badly_designed_printf(oprintf_success, "%s: Fixed " fix_name, file_path.string().c_str()); \
                 issues_present = true; \
             }
             
@@ -137,6 +155,8 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             apply_fix(broken_indices_fix, INVALID_INDICES, INVALID_INDICES_FIX);
             apply_fix(broken_normals, INVALID_NORMALS, INVALID_NORMALS_FIX);
             apply_fix(broken_strings, BROKEN_STRINGS, BROKEN_STRINGS_FIX);
+            apply_fix(uppercase_references, INVALID_UPPERCASE_REFERENCES, INVALID_UPPERCASE_REFERENCES_FIX);
+            apply_fix(excessive_script_nodes, EXCESSIVE_SCRIPT_NODES, EXCESSIVE_SCRIPT_NODES_FIX);
             
             #undef apply_fix
         }
@@ -156,14 +176,14 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         // Do it!
         file_data = parsed_data->generate_hek_tag_data(header->tag_class_int, true);
         if(!Invader::File::save_file(file_path, file_data)) {
-            eprintf_error("Error: Failed to write to %s.", file_path);
+            badly_designed_printf(eprintf_error, "Error: Failed to write to %s.", file_path.string().c_str());
             return EXIT_FAILURE;
         }
 
         return EXIT_SUCCESS;
     }
     catch(std::exception &e) {
-        eprintf_error("Error: Failed to bludgeon %s: %s", file_path, e.what());
+        badly_designed_printf(eprintf_error, "Error: Failed to bludgeon %s: %s", file_path.string().c_str(), e.what());
         return EXIT_FAILURE;
     }
 }
@@ -176,16 +196,18 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " INVALID_NORMALS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " INVALID_NORMALS_FIX ", " INVALID_UPPERCASE_REFERENCES_FIX ", " EXCESSIVE_SCRIPT_NODES_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
 
     struct BludgeonOptions {
-        std::optional<const char *> tags;
+        std::optional<std::filesystem::path> tags;
         bool use_filesystem_path = false;
         bool all = false;
         std::uint64_t fixes = WaysToFuckUpTheTag::NO_FIXES;
+        std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
     } bludgeon_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
@@ -205,6 +227,19 @@ int main(int argc, char * const *argv) {
                 break;
             case 'a':
                 bludgeon_options.all = true;
+                break;
+            case 'j':
+                try {
+                    bludgeon_options.max_threads = std::stoi(arguments[0]);
+                    if(bludgeon_options.max_threads < 1) {
+                        throw std::exception();
+                    }
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid number of threads %s\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
                 break;
             case 'T':
                 if(std::strcmp(arguments[0], NO_FIXES_FIX) == 0) {
@@ -254,6 +289,12 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], BROKEN_STRINGS_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_STRINGS;
                 }
+                else if(std::strcmp(arguments[0], INVALID_UPPERCASE_REFERENCES_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_UPPERCASE_REFERENCES;
+                }
+                else if(std::strcmp(arguments[0], EXCESSIVE_SCRIPT_NODES_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::EXCESSIVE_SCRIPT_NODES;
+                }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;
                 }
@@ -278,25 +319,46 @@ int main(int argc, char * const *argv) {
         }
 
         std::size_t success = 0;
-        std::size_t total = 0;
-
-        auto recursively_bludgeon_dir = [&total, &success, &fixes](const std::filesystem::path &dir, auto &recursively_bludgeon_dir) -> void {
-            for(auto i : std::filesystem::directory_iterator(dir)) {
-                if(i.is_directory()) {
-                    recursively_bludgeon_dir(i, recursively_bludgeon_dir);
+        
+        auto all_tags = Invader::File::load_virtual_tag_folder(std::vector<std::filesystem::path>(&*bludgeon_options.tags, &*bludgeon_options.tags + 1));
+        std::mutex thread_mutex;
+        std::vector<std::thread> threads;
+        std::size_t tag_index = 0;
+        threads.reserve(bludgeon_options.max_threads);
+        
+        auto bludgeon_worker = [](auto *all_tags, std::size_t *tag_index, std::mutex *thread_mutex, std::size_t *success, auto *fixes) {
+            while(true) {
+                thread_mutex->lock();
+                std::size_t this_index = *tag_index;
+                if(this_index == all_tags->size()) {
+                    thread_mutex->unlock();
+                    return;
                 }
-                else if(i.is_regular_file()) {
-                    total++;
-                    bool bludgeoned;
-                    bludgeon_tag(i.path().string().c_str(), fixes, bludgeoned);
-                    success += bludgeoned;
-                }
+                (*tag_index)++;
+                thread_mutex->unlock();
+                
+                // Bludgeon
+                bool bludgeoned;
+                bludgeon_tag(all_tags->data()[this_index].full_path, *fixes, bludgeoned);
+                
+                // Increment
+                thread_mutex->lock();
+                (*success) += bludgeoned;
+                thread_mutex->unlock();
             }
         };
+        
+        // Go through each tag
+        for(std::size_t i = 0; i < bludgeon_options.max_threads; i++) {
+            threads.emplace_back(bludgeon_worker, &all_tags, &tag_index, &thread_mutex, &success, &fixes);
+        }
+        
+        // Wait for all threads to end
+        for(auto &i : threads) {
+            i.join();
+        }
 
-        recursively_bludgeon_dir(std::filesystem::path(*bludgeon_options.tags), recursively_bludgeon_dir);
-
-        oprintf("Bludgeoned %zu out of %zu tag%s\n", success, total, total == 1 ? "" : "s");
+        oprintf("Bludgeoned %zu out of %zu tag%s\n", success, tag_index, tag_index == 1 ? "" : "s");
 
         return EXIT_SUCCESS;
     }

@@ -764,4 +764,8 @@ namespace Invader::Parser {
         }
         return total;
     }
+    
+    bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose) const {
+        return this->compare(what, precision, ignore_volatile, verbose, 0);
+    }
 }

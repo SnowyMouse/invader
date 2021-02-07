@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-# Check if we can build invader-bitmap
-if(${FREETYPE_FOUND})
-    set(INVADER_FONT true)
-else()
+# Check if we can build invader-font
+if(NOT ${FREETYPE_FOUND})
     set(INVADER_FONT false)
-    message(WARNING "Unable to automatically find freetype; invader-archive will be disabled")
+    message(WARNING "Unable to automatically find freetype; invader-font will be disabled")
 endif()
 
-set(INVADER_FONT ${INVADER_FONT} CACHE BOOL "Build invader-font (requires freetype)")
+if(NOT DEFINED ${INVADER_FONT})
+    set(INVADER_FONT ${INVADER_FONT} true CACHE BOOL "Build invader-font (requires freetype; makes font tags)")
+endif()
 
 if(${INVADER_FONT})
     add_executable(invader-font
@@ -29,5 +29,7 @@ if(${INVADER_FONT})
             PROPERTIES COMPILE_FLAGS -Wno-old-style-cast
         )
     endif()
+    
+    do_windows_rc(invader-font invader-font.exe "Invader font tag generation tool")
 
 endif()

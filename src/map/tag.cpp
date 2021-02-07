@@ -12,11 +12,11 @@ namespace Invader {
         if(this->is_indexed()) {
             switch(this->tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP:
-                    return this->map.bitmap_data != nullptr;
+                    return this->map.bitmap_data.size() > 0;
                 case TagClassInt::TAG_CLASS_SOUND:
-                    return this->map.sound_data != nullptr;
+                    return this->map.sound_data.size() > 0;
                 default:
-                    return this->map.loc_data != nullptr;
+                    return this->map.loc_data.size() > 0;
             }
         }
 

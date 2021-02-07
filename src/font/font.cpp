@@ -46,8 +46,8 @@ int main(int argc, char *argv[]) {
 
     // Options struct
     struct FontOptions {
-        const char *data = "data/";
-        std::optional<const char *>tags;
+        std::filesystem::path data = "data/";
+        std::filesystem::path tags = "tags";
         int pixel_size = 14;
         bool use_filesystem_path = false;
         bool use_latin1 = false;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("font-size", 's', 1, "Set the font size in pixels.", "<px>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font file.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file.");
     options.emplace_back("latin1", 'l', 0, "Use 256 characters only (smaller)");
 
     static constexpr char DESCRIPTION[] = "Create font tags from OTF/TTF files.";
@@ -73,10 +73,6 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 't':
-                if(font_options.tags.has_value()) {
-                    eprintf_error("This tool does not support multiple tags directories.");
-                    std::exit(EXIT_FAILURE);
-                }
                 font_options.tags = args[0];
                 break;
 
@@ -102,45 +98,47 @@ int main(int argc, char *argv[]) {
                 break;
         }
     });
-    if(!font_options.tags.has_value()) {
-        font_options.tags = "tags";
-    }
 
     // Do it!
     std::string font_tag;
     FontExtension found_format = static_cast<FontExtension>(0);
     if(font_options.use_filesystem_path) {
-        std::vector<std::string> data(&font_options.data, &font_options.data + 1);
-        for(FontExtension i = found_format; i < FontExtension::FONT_EXTENSION_COUNT; i = static_cast<FontExtension>(i + 1)) {
-            auto font_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, FONT_EXTENSION_STR[i]);
-            if(font_tag_maybe.has_value()) {
-                font_tag = font_tag_maybe.value();
-                found_format = i;
-                break;
+        auto path = std::filesystem::path(remaining_arguments[0]);
+        auto font_tag_maybe = Invader::File::file_path_to_tag_path(path, font_options.tags);
+        auto font_data_maybe = Invader::File::file_path_to_tag_path(path, font_options.data);
+        if(font_tag_maybe.has_value()) {
+            if(std::filesystem::path(*font_tag_maybe).extension() == ".font") {
+                font_tag = *font_tag_maybe;
+            }
+            else {
+                eprintf_error("This tool only works with font tags.");
+                return EXIT_FAILURE;
             }
         }
+        else if(font_data_maybe) {
+            for(FontExtension i = found_format; i < FontExtension::FONT_EXTENSION_COUNT; i = static_cast<FontExtension>(i + 1)) {
+                if(FONT_EXTENSION_STR[i] == path.extension()) {
+                    font_tag = font_tag_maybe.value();
+                    found_format = i;
+                    break;
+                }
+            }
+        }
+        
+        if(font_tag.size() == 0) {
+            eprintf_error("Failed to find %s in the tags or data directories", remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
+        font_tag = std::filesystem::path(font_tag).replace_extension().string();
     }
     else {
         font_tag = remaining_arguments[0];
     }
 
-    // Ensure it's lowercase
-    for(const char *c = font_tag.c_str(); *c; c++) {
-        if(*c >= 'A' && *c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", font_tag.c_str());
-            return EXIT_FAILURE;
-        }
-    }
-
     // Font tag path
-    std::filesystem::path tags_path(*font_options.tags);
+    std::filesystem::path tags_path(font_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*font_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *font_options.tags);
-        }
+        eprintf_error("Directory %s was not found or is not a directory", font_options.tags.string().c_str());
         return EXIT_FAILURE;
     }
     auto tag_path = tags_path / font_tag;
@@ -293,16 +291,8 @@ int main(int argc, char *argv[]) {
     font.descending_height = max_descending_height;
 
     // Write
-    try {
-        if(!std::filesystem::exists(tag_path.parent_path())) {
-            std::filesystem::create_directories(tag_path.parent_path());
-        }
-    }
-    catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
-        return EXIT_FAILURE;
-    }
-
+    std::error_code ec;
+    std::filesystem::create_directories(tag_path.parent_path(), ec);
     if(!Invader::File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(Invader::TagClassInt::TAG_CLASS_FONT, true))) {
         eprintf_error("Failed to save %s.", final_tag_path.c_str());
         return EXIT_FAILURE;

@@ -62,12 +62,14 @@
                 "name": "message elements",
                 "type": "TagReflexive",
                 "struct": "HUDMessageTextElement",
+                "hek_maximum": 8192,
                 "compound": true
             },
             {
                 "name": "messages",
                 "type": "TagReflexive",
                 "struct": "HUDMessageTextMessage",
+                "hek_maximum": 1024,
                 "compound": true
             },
             {

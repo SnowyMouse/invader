@@ -238,9 +238,10 @@
                 "size": 2
             },
             {
-                "name": "background multitex overlay",
+                "name": "background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
+                "hek_maximum": 30,
                 "compound": true
             },
             {
@@ -327,9 +328,10 @@
                 "size": 2
             },
             {
-                "name": "total grenades background multitex overlay",
+                "name": "total grenades background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
+                "hek_maximum": 30,
                 "compound": true
             },
             {
@@ -442,12 +444,14 @@
                 "name": "total grenades overlays",
                 "type": "TagReflexive",
                 "struct": "GrenadeHUDInterfaceOverlay",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "total grenades warning sounds",
                 "type": "TagReflexive",
                 "struct": "GrenadeHUDInterfaceSound",
+                "hek_maximum": 12,
                 "compound": true
             },
             {

@@ -3,7 +3,7 @@
 import sys
 
 if len(sys.argv) != 5:
-    print("Usage: {} <bitmaps.tag_indices> <sounds.tag_indices> <loc.tag_indices> <output.cpp>".format(sys.argv[0]))
+    print("Usage: {} <bitmaps.txt> <sounds.txt> <loc.txt> <output.cpp>".format(sys.argv[0]))
     exit(1)
 
 def read_indices(fname):

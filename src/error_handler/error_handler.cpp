@@ -20,20 +20,22 @@ namespace Invader {
         
         // Resize based on console width
         #ifdef __linux__
-        struct winsize w;
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);   
-        std::size_t new_width = static_cast<std::size_t>(w.ws_col);
-        if(terminal_width < new_width) {
-            terminal_width = new_width;
+        struct winsize w = {};
+        if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1) {
+            std::size_t new_width = static_cast<std::size_t>(w.ws_col);
+            if(terminal_width < new_width) {
+                terminal_width = new_width;
+            }
         }
         #endif
         
         #ifdef _WIN32
         CONSOLE_SCREEN_BUFFER_INFO w;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &w);
-        std::size_t new_width = w.srWindow.Right - w.srWindow.Left + 1;
-        if(terminal_width < new_width) {
-            terminal_width = new_width;
+        if(GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &w)) {
+            std::size_t new_width = w.srWindow.Right - w.srWindow.Left + 1;
+            if(terminal_width < new_width) {
+                terminal_width = new_width;
+            }
         }
         #endif
         
@@ -72,14 +74,14 @@ namespace Invader {
                     std::size_t word_len = (word_end - word_offset) + 1; \
                      \
                     /* if we have characters in the line, and we're at the end of the line, empty the line */ \
-                    if(word_len + line_offset > terminal_width && line_offset > 0) { \
+                    if(word_len + line_offset >= terminal_width && line_offset > 0) { \
                         call("%s", line); \
                         line_offset = 0; \
                         line[0] = 0; \
                     } \
                      \
                     /* if the length is longer than the terminal width, just print it */ \
-                    if(word_len > terminal_width) { \
+                    if(word_len >= terminal_width) { \
                         std::snprintf(line, sizeof(line) > word_len ? word_len : sizeof(line), "%s", text_to_output + offset); \
                         call("%s", line); \
                         line[0] = 0; \

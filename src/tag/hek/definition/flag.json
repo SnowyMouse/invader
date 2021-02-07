@@ -124,7 +124,8 @@
                 "name": "attachment points",
                 "type": "TagReflexive",
                 "struct": "FlagAttachmentPoint",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 4
             }
         ],
         "type": "struct",

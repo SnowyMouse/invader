@@ -16,10 +16,14 @@
 int main(int argc, const char **argv) {
     struct ArchiveOptions {
         bool single_tag = false;
-        std::vector<std::string> tags;
+        std::vector<std::filesystem::path> tags;
+        std::vector<std::filesystem::path> tags_excluded;
+        std::vector<std::filesystem::path> tags_excluded_same;
         std::string output;
         bool use_filesystem_path = false;
         bool copy = false;
+        bool overwrite = false;
+        std::optional<Invader::HEK::CacheFileEngine> engine;
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
@@ -29,17 +33,30 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("exclude-matched", 'E', 1, "Exclude copying any tags that are also located in the specified directory and are functionally the same. Use multiple times to exclude multiple directories.", "<dir>");
+    options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist if using --copy");
+    options.emplace_back("exclude", 'e', 1, "Exclude copying any tags that share a path with a tag in specified directory. Use multiple times to exclude multiple directories.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required if -s is not specified. Valid engines are: custom, demo, retail, xbox, native", "<id>");
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
             case 't':
                 archive_options.tags.push_back(arguments[0]);
                 break;
+            case 'e':
+                archive_options.tags_excluded.push_back(arguments[0]);
+                break;
+            case 'E':
+                archive_options.tags_excluded_same.push_back(arguments[0]);
+                break;
             case 'o':
                 archive_options.output = arguments[0];
+                break;
+            case 'O':
+                archive_options.overwrite = true;
                 break;
             case 'i':
                 Invader::show_version_info();
@@ -50,11 +67,34 @@ int main(int argc, const char **argv) {
             case 'P':
                 archive_options.use_filesystem_path = true;
                 break;
+            case 'g':
+                if(std::strcmp(arguments[0], "custom") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                }
+                else if(std::strcmp(arguments[0], "retail") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                }
+                else if(std::strcmp(arguments[0], "demo") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                }
+                else if(std::strcmp(arguments[0], "native") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+                }
+                else if(std::strcmp(arguments[0], "xbox") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                }
+                break;
             case 'C':
                 archive_options.copy = true;
                 break;
         }
     });
+
+    // Figure out our engine target
+    if(!archive_options.engine.has_value() && !archive_options.single_tag) {
+        eprintf_error("No engine target specified for map archival. Use -h for more information.");
+        return EXIT_FAILURE;
+    }
 
     // No tags folder? Use tags in current directory
     if(archive_options.tags.size() == 0) {
@@ -62,35 +102,37 @@ int main(int argc, const char **argv) {
     }
 
     // Require a tag
-    std::vector<char> base_tag;
+    std::string base_tag;
     if(archive_options.use_filesystem_path) {
         // See if the tag path is valid
         std::optional<std::string> base_tag_maybe;
-        if(archive_options.single_tag) {
-            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true);
-        }
-        else {
-            base_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], archive_options.tags, std::string(".scenario"));
+        if(std::filesystem::exists(remaining_arguments[0])) {
+            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags);
         }
         if(base_tag_maybe.has_value()) {
-            const char *str = (*base_tag_maybe).c_str();
-            base_tag.insert(base_tag.end(), str, str + (*base_tag_maybe).size());
+            base_tag = *base_tag_maybe;
+            
+            // Remove extension if necessary
+            if(!archive_options.single_tag) {
+                auto path_test = std::filesystem::path(base_tag);
+                if(path_test.extension() != ".scenario") {
+                    eprintf_error("This function only accepts scenario tags. To use other tags, use -s");
+                    return EXIT_FAILURE;
+                }
+                base_tag = path_test.replace_extension().string();
+            }
         }
         else {
             eprintf_error("Failed to find a valid%stag %s in the tags directory", archive_options.single_tag ? " " : " scenario ", remaining_arguments[0]);
-            if(!archive_options.single_tag && Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true).has_value()) {
-                eprintf_error("A file was detected there, but it isn't a .scenario tag, so you need to use -s");
-            }
             return EXIT_FAILURE;
         }
     }
     else {
         base_tag.insert(base_tag.end(), remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
-    base_tag.emplace_back();
-
+    
     // Variables to hold this
-    std::vector<std::pair<std::string, std::string>> archive_list;
+    std::vector<std::pair<std::filesystem::path, std::string>> archive_list;
 
     // If no output filename was given, make one
     static const char extension[] = ".tar.xz";
@@ -126,20 +168,35 @@ int main(int argc, const char **argv) {
         std::vector<std::byte> map;
 
         try {
-            map = Invader::BuildWorkload::compile_map(base_tag.data(), archive_options.tags);
+            Invader::BuildWorkload::BuildParameters parameters(*archive_options.engine);
+            parameters.scenario = base_tag;
+            parameters.tags_directories = archive_options.tags;
+            if(archive_options.engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                parameters.details.build_compress = true;
+                parameters.details.build_compression_level = 0;
+            }
+            else {
+                parameters.details.build_compress = false;
+            }
+            if(archive_options.engine != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                parameters.details.build_maximum_cache_file_size = UINT32_MAX;
+            }
+            parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
+            
+            map = Invader::BuildWorkload::compile_map(parameters);
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile scenario %s into a map\n", base_tag.data());
+            eprintf_error("Failed to compile scenario %s into a map", base_tag.data());
             return EXIT_FAILURE;
         }
 
         // Parse the map
         std::unique_ptr<Invader::Map> parsed_map;
         try {
-            parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_pointer(map.data(), map.size()));
+            parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_move(std::move(map)));
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to parse the map file generated with scenario %s\n", base_tag.data());
+            eprintf_error("Failed to parse the map file generated with scenario %s: %s", base_tag.data(), e.what());
             return EXIT_FAILURE;
         }
         auto tag_count = parsed_map->get_tag_count();
@@ -163,7 +220,7 @@ int main(int argc, const char **argv) {
             }
 
             if(!exists) {
-                eprintf_error("Failed to find %s. Archive could not be made.\n", full_tag_path.c_str());
+                eprintf_error("Failed to find %s. Archive could not be made.", full_tag_path.c_str());
                 return EXIT_FAILURE;
             }
         }
@@ -174,7 +231,7 @@ int main(int argc, const char **argv) {
 
         // Split the extension
         if(!base_tag_split_maybe.has_value()) {
-            eprintf_error("%s is not a valid tag. Archive could not be made.\n", base_tag.data());
+            eprintf_error("%s is not a valid tag. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
         }
 
@@ -190,7 +247,7 @@ int main(int argc, const char **argv) {
         }
 
         if(!exists) {
-            eprintf_error("Failed to find %s. Archive could not be made.\n", base_tag.data());
+            eprintf_error("Failed to find %s. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
         }
 
@@ -199,19 +256,61 @@ int main(int argc, const char **argv) {
         auto &base_tag_split = base_tag_split_maybe.value();
         auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_split.path.c_str(), base_tag_split.class_int, archive_options.tags, false, true, success);
         if(!success) {
-            eprintf_error("Failed to find dependencies for %s. Archive could not be made.\n", base_tag.data());
+            eprintf_error("Failed to find dependencies for %s. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
         }
 
         // Make sure there aren't any broken dependencies
         for(auto &dependency : dependencies) {
             if(dependency.broken) {
-                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.\n", dependency.path.c_str(), tag_class_to_extension(dependency.class_int));
+                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.", dependency.path.c_str(), tag_class_to_extension(dependency.class_int));
                 return EXIT_FAILURE;
             }
 
             std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(dependency.class_int));
-            archive_list.emplace_back(dependency.file_path, path_copy);
+            archive_list.emplace_back(*dependency.file_path, path_copy);
+        }
+    }
+    
+    // Don't archive anything that is in an excluded directory
+    for(auto &i : archive_options.tags_excluded) {
+        for(std::size_t t = 0; t < archive_list.size(); t++) {
+            // First check if it exists
+            auto path_to_test = i / Invader::File::halo_path_to_preferred_path(archive_list[t].second);
+            if(std::filesystem::exists(path_to_test)) {
+                // Exclude
+                archive_list.erase(archive_list.begin() + t);
+                t--;
+            }
+        }
+    }
+    for(auto &i : archive_options.tags_excluded_same) {
+        for(std::size_t t = 0; t < archive_list.size(); t++) {
+            // First check if it exists
+            auto path_to_test = i / Invader::File::halo_path_to_preferred_path(archive_list[t].second);
+            if(std::filesystem::exists(path_to_test)) {
+                // Okay it exists. Open both then
+                try {
+                    auto tag_archive_data = Invader::File::open_file(archive_list[t].first).value();
+                    auto tag_archive = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_archive_data.data(), tag_archive_data.size(), true);
+                    
+                    auto tag_exclude_data = Invader::File::open_file(path_to_test).value();
+                    auto tag_exclude = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_exclude_data.data(), tag_exclude_data.size(), true);
+                    
+                    // Do a functional comparison
+                    if(!tag_archive->compare(tag_exclude.get(), true, true)) {
+                        continue;
+                    }
+                }
+                catch (std::exception &) {
+                    eprintf_error("Failed to do a functional comparison of %s and %s\n", archive_list[t].first.string().c_str(), path_to_test.string().c_str());
+                    std::exit(EXIT_FAILURE);
+                }
+            
+                // Exclude
+                archive_list.erase(archive_list.begin() + t);
+                t--;
+            }
         }
     }
     
@@ -225,7 +324,8 @@ int main(int argc, const char **argv) {
 
         // Go through each tag path we got
         for(std::size_t i = 0; i < archive_list.size(); i++) {
-            const char *path = archive_list[i].first.c_str();
+            auto str_path = archive_list[i].first.string();
+            const char *path = str_path.c_str();
 
             // Begin
             auto *entry = archive_entry_new();
@@ -266,6 +366,8 @@ int main(int argc, const char **argv) {
         // Save and close
         archive_write_close(archive);
         archive_write_free(archive);
+        
+        oprintf("Saved %s\n", archive_options.output.c_str());
     }
     // Copy
     else {
@@ -287,9 +389,9 @@ int main(int argc, const char **argv) {
             auto new_path = base_path / std::filesystem::path(archive_list[i].second.c_str());
             
             // Copy function
-            auto place_if_possible = [&new_path, &old_path]() -> bool {
+            auto place_if_possible = [&new_path, &old_path, &archive_options]() -> bool {
                 // If it exists, continue
-                if(std::filesystem::exists(new_path)) {
+                if(!archive_options.overwrite && std::filesystem::exists(new_path)) {
                     return false;
                 }
                 
@@ -307,7 +409,7 @@ int main(int argc, const char **argv) {
                 
                 // Now copy
                 try {
-                    std::filesystem::copy_file(old_path, new_path);
+                    std::filesystem::copy_file(old_path, new_path, std::filesystem::copy_options::overwrite_existing);
                 }
                 catch(std::exception &e) {
                     eprintf_error("Failed to create copy %s to %s: %s", old_path.string().c_str(), new_path.string().c_str(), e.what());

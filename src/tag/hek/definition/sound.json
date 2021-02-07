@@ -268,6 +268,7 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "SoundPermutation",
+                "hek_maximum": 256,
                 "compound": true,
                 "read_only": true
             }
@@ -387,10 +388,6 @@
                     {
                         "option": "FLAC",
                         "struct": ["Sound"]
-                    },
-                    {
-                        "option": "IMA ADPCM",
-                        "struct": null
                     }
                 ]
             },
@@ -439,6 +436,7 @@
                 "struct": "SoundPitchRange",
                 "compound": true,
                 "read_only": true,
+                "hek_maximum": 8,
                 "zero_on_index": true
             }
         ],

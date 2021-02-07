@@ -322,7 +322,8 @@
                 "name": "point states",
                 "type": "TagReflexive",
                 "struct": "ContrailPointState",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 16
             }
         ],
         "type": "struct",

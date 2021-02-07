@@ -18,4 +18,6 @@ if(${INVADER_ARCHIVE})
     target_link_libraries(invader-archive invader ${LibArchive_LIBRARIES})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-archive)
+    
+    do_windows_rc(invader-archive invader-archive.exe "Invader tag archival tool")
 endif()

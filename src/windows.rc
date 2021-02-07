@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#include "version.h"
+
+1 VERSIONINFO
+FILEVERSION      INVADER_VERSION_MAJOR,INVADER_VERSION_MINOR,INVADER_VERSION_PATCH,INVADER_VERSION_COMMIT_COUNT
+PRODUCTVERSION   INVADER_VERSION_MAJOR,INVADER_VERSION_MINOR,INVADER_VERSION_PATCH,INVADER_VERSION_COMMIT_COUNT
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "Comments",         INVADER_BINARY_DESCRIPTION
+            VALUE "CompanyName",      "Snowy Mouse"
+            VALUE "FileDescription",  INVADER_BINARY_DESCRIPTION
+            VALUE "FileVersion",      INVADER_FULL_VERSION_STRING
+            VALUE "InternalName",     INVADER_BINARY_NAME
+            VALUE "OriginalFilename", INVADER_BINARY_FILE_NAME
+            VALUE "ProductName",      INVADER_BINARY_NAME
+            VALUE "ProductVersion",   INVADER_FULL_VERSION_STRING
+            VALUE "LegalCopyright",   "'20 Snowy Mouse"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

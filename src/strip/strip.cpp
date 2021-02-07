@@ -11,11 +11,11 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
 
-int strip_tag(const char *file_path, bool preprocess) {
+int strip_tag(const std::filesystem::path &file_path, bool preprocess) {
     // Open the tag
     auto tag = Invader::File::open_file(file_path);
     if(!tag.has_value()) {
-        eprintf_error("Failed to open %s", file_path);
+        eprintf_error("Failed to open %s", file_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -27,16 +27,16 @@ int strip_tag(const char *file_path, bool preprocess) {
         file_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size(), preprocess)->generate_hek_tag_data(header->tag_class_int, true);
     }
     catch(std::exception &e) {
-        eprintf_error("Error: Failed to strip %s: %s", file_path, e.what());
+        eprintf_error("Error: Failed to strip %s: %s", file_path.string().c_str(), e.what());
         return EXIT_FAILURE;
     }
 
     if(!Invader::File::save_file(file_path, file_data)) {
-        eprintf_error("Error: Failed to write to %s.", file_path);
+        eprintf_error("Error: Failed to write to %s.", file_path.string().c_str());
         return EXIT_FAILURE;
     }
 
-    oprintf_success("Stripped %s", file_path);
+    oprintf_success("Stripped %s", file_path.string().c_str());
 
     return EXIT_SUCCESS;
 }
@@ -55,7 +55,7 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
 
     struct StripOptions {
-        std::optional<const char *> tags;
+        std::optional<std::filesystem::path> tags;
         bool use_filesystem_path = false;
         bool all = false;
         bool preprocess = false;

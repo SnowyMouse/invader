@@ -23,8 +23,16 @@
 #include <invader/tag/parser/parser.hpp>
 #include <QScreen>
 
+#ifdef _WIN32
+#include "../theme.hpp"
+#endif
+
 namespace Invader::EditQt {
     TagTreeWindow::TagTreeWindow() {
+        #ifdef _WIN32
+        SixShooter::Theme::set_win32_theme();
+        #endif
+        
         // Set some window stuff
         this->setWindowTitle("invader-edit-qt");
         this->setMinimumSize(800, 600);
@@ -95,12 +103,12 @@ namespace Invader::EditQt {
         this->tag_view->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(this->tag_view, &TagTreeWidget::customContextMenuRequested, this, &TagTreeWindow::show_context_menu);
         vbox_layout->addWidget(this->tag_view);
-        vbox_layout->setMargin(2);
+        vbox_layout->setContentsMargins(2, 2, 2, 2);
         
         // Add a filter thing
         this->filter_widget = new QWidget(this);
         auto *filter_layout = new QHBoxLayout(filter_widget);
-        filter_layout->setMargin(0);
+        filter_layout->setContentsMargins(0, 0, 0, 0);
         this->filter_widget->setVisible(false);
         this->filter_widget->setLayout(filter_layout);
         auto *filter_text = new QLabel("Filter:");
@@ -160,7 +168,7 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::refresh_view() {
-        this->reload_tags();
+        this->reload_tags(true);
     }
 
     void TagTreeWindow::show_about_window() {
@@ -238,7 +246,7 @@ namespace Invader::EditQt {
     void TagFetcherThread::run() {
         // Function for loading it
         std::size_t error_count;
-        auto load_it = [&error_count](std::vector<File::TagFile> *to, std::vector<std::string> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
+        auto load_it = [&error_count](std::vector<File::TagFile> *to, std::vector<std::filesystem::path> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
             *to = Invader::File::load_virtual_tag_folder(*all_paths, statuser, &error_count);
         };
 
@@ -250,7 +258,8 @@ namespace Invader::EditQt {
             this->statuser.first.lock();
             std::size_t new_count = this->statuser.second;
             this->statuser.first.unlock();
-            if(new_count > last_tag_count) {
+            if(new_count > last_tag_count + 100) {
+                last_tag_count = new_count;
                 emit tag_count_changed(&this->statuser);
             }
         }
@@ -260,40 +269,54 @@ namespace Invader::EditQt {
         emit fetch_finished(&this->all_tags, static_cast<int>(error_count));
     }
 
-    TagFetcherThread::TagFetcherThread(QObject *parent, const std::vector<std::string> &all_paths) : QThread(parent), all_paths(all_paths) {}
+    TagFetcherThread::TagFetcherThread(QObject *parent, const std::vector<std::filesystem::path> &all_paths) : QThread(parent), all_paths(all_paths) {}
 
-    void TagTreeWindow::reload_tags() {
+    void TagTreeWindow::reload_tags(bool reiterate_directories) {
         // Ensure we only reload once
         if(this->tags_reloading_queued) {
             return;
         }
+        
+        // If we have fast listing mode, we don't need to do much
+        if(this->fast_listing) {
+            this->tags_reloaded_finished(nullptr, 0);
+            return;
+        }
+        
         this->tags_reloading_queued = true;
         this->tag_loading_label->setText("Listing tags...");
         this->tag_loading_label->setStyleSheet("");
         this->tag_loading_label->show();
 
         // Clear all tags
-        this->all_tags.clear();
-        emit tags_reloaded(this);
-
-        // Load 'em
-        std::vector<std::string> all_paths;
-        for(auto &p : this->paths) {
-            all_paths.emplace_back(p.string());
+        if(reiterate_directories) {
+            // Now... let's do this
+            this->fetcher_thread = new TagFetcherThread(this, this->paths);
+            connect(this->fetcher_thread, &TagFetcherThread::tag_count_changed, this, &TagTreeWindow::tag_count_changed);
+            connect(this->fetcher_thread, &TagFetcherThread::fetch_finished, this, &TagTreeWindow::tags_reloaded_finished);
+            connect(this->fetcher_thread, &TagFetcherThread::finished, this->fetcher_thread, &TagFetcherThread::deleteLater);
+            this->fetcher_thread->start();
         }
-
-        // Now... let's do this
-        this->fetcher_thread = new TagFetcherThread(this, all_paths);
-        connect(this->fetcher_thread, &TagFetcherThread::tag_count_changed, this, &TagTreeWindow::tag_count_changed);
-        connect(this->fetcher_thread, &TagFetcherThread::fetch_finished, this, &TagTreeWindow::tags_reloaded_finished);
-        connect(this->fetcher_thread, &TagFetcherThread::finished, this->fetcher_thread, &TagFetcherThread::deleteLater);
-        this->fetcher_thread->start();
+        
+        // Just a simple refresh
+        else {
+            auto all_tags_copy = this->all_tags;
+            this->tags_reloaded_finished(&all_tags_copy, 0);
+        }
     }
 
     void TagTreeWindow::tags_reloaded_finished(const std::vector<File::TagFile> *result, int error_count) {
         this->tags_reloading_queued = false;
-        this->set_count_label(result->size());
-        all_tags = *result;
+        
+        if(result) {
+            this->set_count_label(result->size());
+            all_tags = *result;
+        }
+        else {
+            this->set_count_label(0);
+            all_tags.clear();
+        }
+        
         if(error_count) {
             char error_message[256];
             std::snprintf(error_message,sizeof(error_message),"Failed to list %i subdirector%s. Check stderr for more information.", error_count, error_count == 1 ? "y" : "ies");
@@ -304,12 +327,16 @@ namespace Invader::EditQt {
         else {
             this->tag_loading_label->hide();
         }
+        
+        // If we have to open some tags, do it
         if(this->tags_to_open.size()) {
             for(auto &t : this->tags_to_open) {
                 this->open_tag(t.c_str(), this->tags_to_open_full_path);
             }
             this->tags_to_open.clear();
         }
+        
+        // Done
         emit tags_reloaded(this);
     }
 
@@ -357,22 +384,22 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::perform_open() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             this->open_tag(tag->full_path.string().c_str(), true);
         }
     }
 
     void TagTreeWindow::perform_copy_virtual_path() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             QGuiApplication::clipboard()->setText(Invader::File::halo_path_to_preferred_path(tag->tag_path).c_str());
         }
     }
 
     void TagTreeWindow::perform_copy_virtual_path_without_extension() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             QGuiApplication::clipboard()->setText(Invader::File::split_tag_class_extension(File::halo_path_to_preferred_path(tag->tag_path).c_str()).value().path.c_str());
         }
     }
@@ -385,8 +412,8 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::perform_copy_file_path() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             QGuiApplication::clipboard()->setText(std::filesystem::absolute(tag->full_path).string().c_str());
         }
     }
@@ -395,22 +422,66 @@ namespace Invader::EditQt {
         // See if we can figure out this path
         File::TagFile tag;
         bool found = false;
-        if(full_path) {
-            for(auto &t : this->get_all_tags()) {
-                if(t.full_path == path) {
-                    tag = t;
-                    found = true;
-                    break;
+        
+        // If fast listing mode is disabled (which is default), we don't need to query the filesystem since we already did that
+        if(!this->fast_listing) {
+            if(full_path) {
+                for(auto &t : this->get_all_tags()) {
+                    if(t.full_path == path) {
+                        tag = t;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            else {
+                auto preferred_path = File::halo_path_to_preferred_path(path);
+                for(auto &t : this->get_all_tags()) {
+                    if(File::halo_path_to_preferred_path(t.tag_path) == path) {
+                        tag = t;
+                        found = true;
+                        break;
+                    }
                 }
             }
         }
+        
+        // But if fast listing mode is enabled, we have to do that
         else {
-            auto preferred_path = File::halo_path_to_preferred_path(path);
-            for(auto &t : this->get_all_tags()) {
-                if(File::halo_path_to_preferred_path(t.tag_path) == path) {
-                    tag = t;
-                    found = true;
-                    break;
+            if(full_path) {
+                for(auto &i : paths) {
+                    // Find a relative path
+                    std::error_code ec;
+                    auto relative = std::filesystem::relative(path, i, ec);
+                    if(ec) {
+                        continue;
+                    }
+                    
+                    auto split = File::split_tag_class_extension(relative.string());
+                    if(std::filesystem::exists(path)) {
+                        tag.full_path = path;
+                        tag.tag_directory = &i - paths.data();
+                        tag.tag_class_int = split->class_int;
+                        tag.tag_path = split->path;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            else {
+                auto preferred_path = File::halo_path_to_preferred_path(path);
+                auto split = File::split_tag_class_extension(preferred_path);
+                
+                for(auto &i : paths) {
+                    auto test_full_path = i / preferred_path;
+                    if(std::filesystem::exists(test_full_path)) {
+                        tag.full_path = test_full_path;
+                        tag.tag_directory = &i - paths.data();
+                        tag.tag_class_int = split->class_int;
+                        tag.tag_path = split->path;
+                        found = true;
+                        break;
+                    }
                 }
             }
         }
@@ -447,7 +518,7 @@ namespace Invader::EditQt {
         this->tag_opening_label->setText(open_label);
         this->opening_tag = true;
         QCoreApplication::processEvents();
-        auto document = std::make_unique<TagEditorWindow>(this, this, tag);
+        auto document = std::make_unique<TagEditorWindow>(nullptr, this, tag);
         this->opening_tag = false;
         this->tag_opening_label->setText("");
         auto *window = document.get();
@@ -498,8 +569,8 @@ namespace Invader::EditQt {
     }
 
     bool TagTreeWindow::perform_delete() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(!tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(!tag.has_value()) {
             return false;
         }
 
@@ -509,8 +580,19 @@ namespace Invader::EditQt {
         QMessageBox are_you_sure(QMessageBox::Icon::Warning, "Delete tag", message_entire_text, QMessageBox::Yes | QMessageBox::Cancel);
         switch(are_you_sure.exec()) {
             case QMessageBox::Yes:
+                // Remove from file system
                 std::filesystem::remove(tag->full_path);
-                this->reload_tags();
+                
+                // Remove from array
+                for(auto &i : this->all_tags) {
+                    if(i.full_path == tag->full_path) {
+                        this->all_tags.erase(this->all_tags.begin() + (&i - this->all_tags.data()));
+                        break;
+                    }
+                }
+                
+                // Quickly refresh
+                this->reload_tags(false);
                 return true;
             case QMessageBox::Cancel:
                 return false;
@@ -531,7 +613,7 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::show_context_menu(const QPoint &point) {
-        if(this->tag_view->get_selected_tag()) {
+        if(this->tag_view->get_selected_tag().has_value()) {
             QMenu right_click_menu;
 
             auto *copy_virtual_path = right_click_menu.addAction("Copy virtual path");
@@ -609,10 +691,29 @@ namespace Invader::EditQt {
     }
     
     void TagTreeWindow::toggle_filter_visible() {
+        if(this->fast_listing) {
+            QMessageBox mb;
+            mb.setWindowTitle("Recursive listing mode is currently disabled");
+            mb.setText("Recursive listing mode needs to be enabled in order to use filtering. Enable recursive listing mode?");
+            mb.setIcon(QMessageBox::Icon::Question);
+            mb.addButton(QMessageBox::Button::Yes);
+            mb.addButton(QMessageBox::Button::Cancel);
+            if(mb.exec() == QMessageBox::Button::Cancel) {
+                return;
+            }
+            this->set_fast_listing_mode(false);
+        }
+        
         this->filter_widget->setVisible(!this->filter_widget->isVisible());
         this->filter_textbox->setText("");
         if(this->filter_widget->isVisible()) {
             this->filter_textbox->setFocus();
         }
+    }
+    
+    void TagTreeWindow::set_fast_listing_mode(bool mode) {
+        this->fast_listing = mode;
+        this->tag_count_label->setVisible(!mode);
+        this->reload_tags(true);
     }
 }

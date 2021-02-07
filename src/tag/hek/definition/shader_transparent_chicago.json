@@ -48,13 +48,11 @@
             },
             {
                 "name": "map u scale",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "map v scale",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "map u offset",
@@ -224,6 +222,7 @@
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
+                "hek_maximum": 4,
                 "compound": true
             },
             {
@@ -231,6 +230,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
                 "compound": true,
+                "hek_maximum": 4,
                 "maximum": 4
             },
             {

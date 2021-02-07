@@ -45,7 +45,7 @@ namespace Invader::EditQt {
         // If we're loading an existing tag, open it and parse it
         if(tag_file.tag_path.size() != 0) {
             this->make_dirty(false);
-            auto open_file = File::open_file(tag_file.full_path.string().c_str());
+            auto open_file = File::open_file(tag_file.full_path);
             if(!open_file.has_value()) {
                 char formatted_error[1024];
                 std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s.\n\nMake sure it exists and you have permission to open it.", tag_file.full_path.string().c_str());
@@ -167,7 +167,7 @@ namespace Invader::EditQt {
             QHBoxLayout *extra_layout = new QHBoxLayout();
             extra_widget_panel->setLayout(extra_layout);
             extra_layout->addWidget(extra_widget);
-            extra_layout->setMargin(4);
+            extra_layout->setContentsMargins(4, 4, 4, 4);
             connect(extra_widget, &QPushButton::clicked, this, &TagEditorWindow::show_subwindow);
         }
 
@@ -306,16 +306,16 @@ namespace Invader::EditQt {
         TagTreeDialog d(nullptr, this->parent_window, this->file.tag_class_int);
         if(d.exec() == QMessageBox::Accepted) {
             this->file = *d.get_tag();
-            try {
-                if(!std::filesystem::exists(this->file.full_path.parent_path())) {
-                    std::filesystem::create_directories(this->file.full_path.parent_path());
-                }
-            }
-            catch(std::exception &e) {
-                eprintf_error("Failed to create directories: %s", e.what());
-            }
+            
+            std::error_code ec;
+            std::filesystem::create_directories(this->file.full_path.parent_path(), ec);
+            
+            // Save it!
             auto result = this->perform_save();
-            this->parent_window->reload_tags();
+            this->file = this->parent_window->all_tags.emplace_back(this->file);
+            this->parent_window->reload_tags(false);
+            
+            // Done
             return result;
         }
 

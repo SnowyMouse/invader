@@ -11,4 +11,6 @@ if(${INVADER_COMPARE})
     target_link_libraries(invader-compare invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-compare)
+    
+    do_windows_rc(invader-compare invader-compare.exe "Invader tag comparison tool")
 endif()

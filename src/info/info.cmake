@@ -12,4 +12,6 @@ if(${INVADER_INFO})
     target_link_libraries(invader-info invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-info)
+    
+    do_windows_rc(invader-info invader-info.exe "Invader map information tool")
 endif()

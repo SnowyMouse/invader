@@ -1,11 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#ifdef INVADER_WIN32_EXE_STATIC_LINK
+#include <QtPlugin>
+#endif
+
 #include <QApplication>
 #include <QMessageBox>
 #include <invader/command_line_option.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include "tree/tag_tree_window.hpp"
+
+#ifdef INVADER_WIN32_EXE_STATIC_LINK
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
+Q_IMPORT_PLUGIN(QWindowsAudioPlugin)
+#endif
 
 int main(int argc, char **argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
@@ -17,6 +27,7 @@ int main(int argc, char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
+    options.emplace_back("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: fast on win32, recursive otherwise)");
 
     static constexpr char DESCRIPTION[] = "Edit tag files.";
     static constexpr char USAGE[] = "[options] [<tag1> [tag2] [...]]";
@@ -26,6 +37,11 @@ int main(int argc, char **argv) {
         bool void_warranty = false;
         bool disable_safeguards = false;
         bool fs_path = false;
+        #ifdef _WIN32
+        bool fast_listing = true;
+        #else
+        bool fast_listing = false;
+        #endif
     } edit_qt_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<EditQtOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 65535, edit_qt_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_qt_options) {
@@ -44,6 +60,19 @@ int main(int argc, char **argv) {
 
             case 'P':
                 edit_qt_options.fs_path = true;
+                break;
+
+            case 'L':
+                if(std::strcmp(arguments[0], "fast") == 0) {
+                    edit_qt_options.fast_listing = true;
+                }
+                else if(std::strcmp(arguments[0], "recursive") == 0) {
+                    edit_qt_options.fast_listing = false;
+                }
+                else {
+                    eprintf_error("Unknown listing mode %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
         }
     });
@@ -68,6 +97,10 @@ int main(int argc, char **argv) {
     // Instantiate the window
     Invader::EditQt::TagTreeWindow w;
     w.set_tag_directories(edit_qt_options.tags);
+    
+    if(edit_qt_options.fast_listing) {
+        w.set_fast_listing_mode(true);
+    }
 
     // Give a spiel
     if(edit_qt_options.disable_safeguards) {

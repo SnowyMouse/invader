@@ -202,7 +202,8 @@
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSprite",
                 "compound": true,
-                "maximum": 65534
+                "maximum": 65534,
+                "hek_maximum": 64
             }
         ],
         "type": "struct",
@@ -285,7 +286,8 @@
             },
             {
                 "type": "pad",
-                "size": 4
+                "size": 4,
+                "comment": "this appears to be a pointer specific to the tool editing it; it gets changed whenever the tag is opened in any of the HEK tools (guerilla.exe, tool.exe, etc.)"
             }
         ],
         "type": "struct",
@@ -305,12 +307,22 @@
             {
                 "name": "encoding format",
                 "first": "encoding format",
-                "description": "Encoding format determines the maximum format of the bitmap. If \"disable height map compression\" is not set and usage is set to \"height map\", then this will be ignored.\n\n\"dxt1\" (4 bits per pixel) compression encodes pixels into 4x4 blocks interpolated between two colors. Alpha from the color plate is discarded.\n\n\"dxt3\" (8 bits per pixel) compression is dxt1, using alpha from the color plate which is reduced to 4 bits per pixel. This is bad for alpha gradients but good for noisy alpha or when a definite shape is needed. If alpha isn't used, dxt1 is used automatically.\n\n\"dxt5\" (8 bits per pixel) compression is dxt1, but also compressing and interpolating the alpha. This is better for alpha gradients, but not as good for noisy alpha or definite shapes. If alpha isn't used, dxt1 is used automatically.\n\n\"16-bit\" (16 bits per pixel) reduces pixels to 16-bits per pixel. Alpha can optionally be present, but depending on the depth of the alpha, the depth of the colors is affected (no alpha = 5-bit red/blue and 6-bit green; 1-bit alpha = 5-bit red/green/blue, 4-bit alpha = 4-bit red/green/blue). This will look really bad with gradients and pretty much anything else.\n\n\"32-bit\" (32 bits per pixel) outputs the original color from the color plate with no loss in quality.\n\n\"monochrome\" (8 or 16 bits per pixel) allows for signficantly reducing the size of the bitmap data losslessly if the original input is monochrome/grayscale. Monochrome bitmaps do not work on the Gearbox version of Halo without a mod."
+                "description": "Encoding format determines the maximum format of the bitmap. If \"disable height map compression\" is not set and usage is set to \"height map\" or \"vector map\", then this will be ignored.\n\n\"dxt1\" (4 bits per pixel) compression encodes pixels into 4x4 blocks interpolated between two colors. Alpha from the color plate is reduced to 1-bit alpha, though using alpha may result in even worse quality.\n\n\"dxt3\" (8 bits per pixel) compression uses dxt1 for the color and explicit alpha from the color plate, reduced to 4 bits per pixel. This can cause banding for alpha gradients, but it may be better for noise and shapes. If alpha isn't used, dxt1 is used automatically.\n\n\"dxt5\" (8 bits per pixel) compression uses dxt1 for the color while also compressing and interpolating the alpha similar. This is better than dxt3 for alpha gradients, but not as good for noisy alpha or definite shapes. If alpha isn't used, dxt1 is used automatically.\n\n\"16-bit\" (16 bits per pixel) reduces pixels to 16-bits per pixel. Alpha can optionally be present, but depending on the depth of the alpha, the depth of the colors is affected (no alpha = 5-bit red/blue and 6-bit green; 1-bit alpha = 5-bit red/green/blue, 4-bit alpha = 4-bit red/green/blue). This may cause heavy banding, but dithering can somewhat mitigate this at the cost of added noise.\n\n\"32-bit\" (32 bits per pixel) outputs the original color from the color plate with no loss in quality. Alpha may or may not be used, but it does not affect the size of the bitmap.\n\n\"monochrome\" (8 or 16 bits per pixel) signficantly reduces the size of the bitmap data losslessly if the original input is monochrome/grayscale. This can be especially useful for monochrome HUDs and noise maps. However, monochrome bitmaps do not work on the Gearbox version of Halo without a mod."
             },
             {
                 "name": "usage",
                 "first": "usage",
                 "description": "Usage affects how the bitmap is generated.\n\n\"alpha blend\" is the same as \"default\" except pixels with 0% alpha are discarded when generating mipmaps.\n\n\"default\" generates mipmaps using linear downscaling.\n\n\"height map\" generates bumpmaps, and if height map compression is enabled, converts it to a palettized format. Palettized bitmaps do not work on the Gearbox version of Halo without a mod, so it is recommended to set \"disable height map compression\" if using this.\n\n\"detail map\" is \"default\" except mipmap colors fade to gray based on the \"detail fade factor\" value\n\n\"light map\" does not generate mipmaps\n\n\"vector map\" generates a vector map. Pixels are normalized in post processing."
+            },
+            {
+                "name": "sprite usage",
+                "first": "sprite usage",
+                "description": "Sprite usage affects how sprite sheets are generated if making a sprites bitmap by controlling the background of the sprite sheet.\n\n\"blend add subtract max\" uses a transparent black background and replaces pixels with the sprites\n\n\"multiply max\" uses a 50% gray and 50% alpha background and replaces pixels with the sprites\n\n\"double multiply\" uses a white background and alpha blends the sprites over white"
+            },
+            {
+                "name": "sprite budget",
+                "first": "sprite budget size",
+                "description": "Sprite budget affects the sprite sheets that are generated.\n\n\"sprite budget size\" determines the maximum size of a sprite sheet. This value is ignored if sprite budget count is set to 0.\n\n\"sprite budget count\" determines the maximum number of sprite sheets allowed.\n\nNote that invader-bitmap will try to ensure all sprites in each sprite sequence are in the same sprite sheet, but if the budget is set too low, it may have to split them across multiple sprite sheets. If this happens, you may, in some instances, experience graphical or performance issues.\n\nIf the budget count is set to 0, then invader-bitmap will default to budget of 32767 sprite sheets with no hard limit. This will also guarantee that all sprites in a sequeence share a sprite sheet."
             }
         ],
         "fields": [
@@ -433,7 +445,8 @@
                 "struct": "BitmapGroupSequence",
                 "compound": true,
                 "maximum": 65534,
-                "read_only": true
+                "read_only": true,
+                "hek_maximum": 256
             },
             {
                 "name": "bitmap data",
@@ -441,7 +454,8 @@
                 "struct": "BitmapData",
                 "compound": true,
                 "maximum": 65534,
-                "read_only": true
+                "read_only": true,
+                "hek_maximum": 2048
             }
         ],
         "type": "struct",

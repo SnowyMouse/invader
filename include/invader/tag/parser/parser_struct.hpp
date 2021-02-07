@@ -1000,8 +1000,9 @@ namespace Invader::Parser {
          * @param what            struct to compare against
          * @param precision       allow small differences for floats (can account for minor precision differences but may slightly increase false positives)
          * @param ignore_volatile ignore data that can be added or removed when a map is compiled
+         * @param verbose         print differences and other information to stdout
          */
-        virtual bool compare(const ParserStruct *what, bool precision = false, bool ignore_volatile = false) const = 0;
+        bool compare(const ParserStruct *what, bool precision = false, bool ignore_volatile = false, bool verbose = false) const;
         
         bool operator==(const ParserStruct &other) const {
             return this->compare(&other);
@@ -1014,6 +1015,7 @@ namespace Invader::Parser {
         virtual ~ParserStruct() = default;
     protected:
         bool cache_formatted = false;
+        virtual bool compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const = 0;
     };
 }
 

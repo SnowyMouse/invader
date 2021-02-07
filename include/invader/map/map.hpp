@@ -26,6 +26,13 @@ namespace Invader {
             DATA_MAP_SOUND,
             DATA_MAP_LOC
         };
+    
+        enum CompressionType {
+            COMPRESSION_TYPE_NONE,
+            COMPRESSION_TYPE_ZSTANDARD,
+            COMPRESSION_TYPE_DEFLATE,
+            COMPRESSION_TYPE_MCC_DEFLATE
+        };
 
         /**
          * Get the internal bitmap or sound asset
@@ -102,11 +109,27 @@ namespace Invader {
         }
 
         /**
-         * Get the header's precomputed CRC32
+         * Get the header's precomputed file size. This may not be indicative of the actual file size.
+         * @return header's precomputed file size
+         */
+        std::uint64_t get_header_decompressed_file_size() const noexcept {
+            return this->header_decompressed_file_size;
+        }
+
+        /**
+         * Get the header's precomputed CRC32. This may not be indicative of the actual CRC32.
          * @return header's precomputed CRC32
          */
         std::uint32_t get_header_crc32() const noexcept {
             return this->header_crc32;
+        }
+
+        /**
+         * Get the header's precomputed cache file type. This may not be indicative of the actual cache file type.
+         * @return header's precomputed cache file type
+         */
+        HEK::CacheFileType get_header_type() const noexcept {
+            return this->header_type;
         }
         
         /**
@@ -154,26 +177,6 @@ namespace Invader {
                                  std::vector<std::byte> &&bitmaps_data = std::vector<std::byte>(),
                                  std::vector<std::byte> &&loc_data = std::vector<std::byte>(),
                                  std::vector<std::byte> &&sounds_data = std::vector<std::byte>());
-
-        /**
-         * Create a Map by using the pointers to the given data, bitmaps, loc, and sound data. The caller is
-         * responsible for ensuring that these pointers are valid for the lifespan of the Map. Compressed maps cannot
-         * be loaded this way.
-         *
-         * @param data              pointer to map data
-         * @param data_size         length of map data
-         * @param bitmaps_data      pointer to bitmaps data
-         * @param bitmaps_data_size length of bitmaps data
-         * @param loc_data          pointer to loc data
-         * @param loc_data_size     length of loc data
-         * @param sounds_data       pointer to sounds data
-         * @param sounds_data_size  length of sounds data
-         * @return                  map
-         */
-        static Map map_with_pointer(std::byte *data, std::size_t data_size,
-                                    std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
-                                    std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
-                                    std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
 
         /**
          * Get the data at the specified offset
@@ -287,10 +290,10 @@ namespace Invader {
         std::size_t get_scenario_tag_id() const noexcept;
 
         /**
-         * Get whether the map was originally compressed
-         * @return true if the map was compressed
+         * Get whether the map was originally compressed and, if so, the compression algorithm
+         * @return compression algorithm
          */
-        bool is_compressed() const noexcept;
+        CompressionType get_compression_algorithm() const noexcept;
 
         /**
          * Get whether the map is obviously protected
@@ -307,43 +310,19 @@ namespace Invader {
         Map(Map &&);
     private:
         /** Map data if managed */
-        std::vector<std::byte> data_m;
-
-        /** Map data */
-        std::byte *data = nullptr;
-
-        /** Map data length */
-        std::size_t data_length = 0;
+        std::vector<std::byte> data;
 
 
         /** Bitmaps data if managed */
-        std::vector<std::byte> bitmap_data_m;
-
-        /** Bitmaps data */
-        std::byte *bitmap_data = nullptr;
-
-        /** Bitmaps data length */
-        std::size_t bitmap_data_length = 0;
+        std::vector<std::byte> bitmap_data;
 
 
         /** Loc data if managed */
-        std::vector<std::byte> loc_data_m;
-
-        /** Loc data */
-        std::byte *loc_data = nullptr;
-
-        /** Loc data length */
-        std::size_t loc_data_length = 0;
+        std::vector<std::byte> loc_data;
 
 
         /** Sounds data if managed */
-        std::vector<std::byte> sound_data_m;
-
-        /** Sounds data */
-        std::byte *sound_data = nullptr;
-
-        /** Sounds data length */
-        std::size_t sound_data_length = 0;
+        std::vector<std::byte> sound_data;
         
 
         /** Model data offset */
@@ -370,9 +349,12 @@ namespace Invader {
 
         /** Base memory address */
         std::uint32_t base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+        
+        /** Invalid paths? */
+        bool invalid_paths_detected = false;
 
         /** Map is compressed */
-        bool compressed = false;
+        CompressionType compressed = CompressionType::COMPRESSION_TYPE_NONE;
 
         /** Engine */
         HEK::CacheFileEngine engine;
@@ -394,6 +376,13 @@ namespace Invader {
 
         /** Asset indices offset */
         std::uint64_t asset_indices_offset;
+        
+        /** Header file size */
+        std::uint64_t header_decompressed_file_size;
+        
+        /** Header type */
+        HEK::CacheFileType header_type;
+        
 
         /** Load the map now */
         void load_map();

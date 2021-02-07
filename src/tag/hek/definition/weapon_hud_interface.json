@@ -14,11 +14,11 @@
         "type": "enum"
     },
     {
-        "name": "WeaponHUDInterfaceCanUseOnMapType",
+        "name": "WeaponHUDInterfaceViewType",
         "options": [
             "any",
             "solo",
-            "multiplayer"
+            "split screen"
         ],
         "type": "enum"
     },
@@ -26,7 +26,7 @@
         "name": "WeaponHUDInterfaceCrosshairType",
         "options": [
             "aim",
-            "zoom",
+            "zoom level",
             "charge",
             "should reload",
             "flash heat",
@@ -51,7 +51,7 @@
         "name": "WeaponHUDInterfaceCrosshairTypeFlags",
         "fields": [
             "aim",
-            "zoom",
+            "zoom level",
             "charge",
             "should reload",
             "flash heat",
@@ -156,8 +156,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -249,9 +249,10 @@
                 "size": 2
             },
             {
-                "name": "multitex overlay",
+                "name": "multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
+                "hek_maximum": 30,
                 "compound": true
             },
             {
@@ -279,8 +280,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -408,8 +409,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -618,8 +619,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -641,6 +642,7 @@
                 "name": "crosshair overlays",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceCrosshairOverlay",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
@@ -765,8 +767,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -788,6 +790,7 @@
                 "name": "overlays",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceOverlay",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
@@ -961,30 +964,35 @@
                 "name": "static elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceStaticElement",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "meter elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceMeter",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "number elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceNumber",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "crosshairs",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceCrosshair",
+                "hek_maximum": 19,
                 "compound": true
             },
             {
                 "name": "overlay elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceOverlayElement",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
@@ -1001,6 +1009,7 @@
                 "name": "screen effect",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceScreenEffect",
+                "hek_maximum": 1,
                 "compound": true
             },
             {

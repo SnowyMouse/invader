@@ -4,11 +4,200 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader-compare: Added shorthand for the conversion types. g2m can be used in
+  place of gbxmodel-to-model, m2g in place of model-to-gbxmodel, and x2c in
+  place of chicago-extended-to-chicago
+
+### Changed
+- invader-bitmap: Optimized sprite placement if no budgeting is used
+- invader-bitmap: Sprite sheets with multiple sprites in it now add margins to
+  the sprites. We recognize that this is completely and utterly stupid due to
+  how unreliable it is, but not having it breaks stock tags.
+- invader-build: Bitmaps are now checked if they are supported by the target
+  engine
+- invader-collection: Changed input format from .tag_indices to .txt
+- invader-edit-qt: Sprite count is now shown when viewing sprite sequences
+- invader-edit-qt: Sprite size is now shown when viewing sprites
+- invader-extract: Now uses the map type in the scenario tag for determining if
+  a map is singleplayer, multiplayer, etc.
+
+### Fixed
+- invader: Fixed an exception error on some Windows shells
+- invader: Fixed an issue with `-P` not working with multiple tags directories
+  for tools with this option
+- invader: Fixed compressed demo maps not working
+- invader-bitmap: Fixed size being inaccurate in output
+- invader-bitmap: Fixed sprites with double multiply usage having black borders
+- invader-bitmap: Fixed regeneration error implying a bitmap tag exists if one
+  does not
+- invader-build: Fixed file size not being saved in the header
+- invader-edit-qt: Fixed "Copy virtual path" not appearing for directories
+- invader-info: Extended dirty check to check file size and type mismatching
+
+## [0.41.4] - 2021-01-24
+### Fixed
+- invader-bitmap: Fixed single sprites sometimes resulting in too large of page
+  sizes
+- invader-bitmap: Fixed bitmap tags with multiple bitmaps breaking
+- invader-sound: Fixed popping in split Xbox ADPCM sounds
+
+## [0.41.3] - 2021-01-24
+### Fixed
+- invader-bitmap: Fixed sprite generation failing if no mipmap count is set
+- invader-bitmap: Fixed sprite generation resulting in large sprites
+
+## [0.41.2] - 2021-01-24
+### Fixed
+- invader-bitmap: Fixed an issue where some sprites would have a black border
+- invader-bitmap: Fixed compressed flag not being set for DXT5 bitmaps
+- invader-bitmap: Fixed encoding A8 - bitmap should be all black, not all white
+- invader-build: Fixed defaulting map u/v scaling for shader_transparent_generic
+  and shader_transparent_chicago maps
+- invader-edit-qt: Fixed tag_collection tags not being editable if fast listing
+  mode is on
+- invader-edit-qt: Disabled Insert New if there are no items in an array (fixes
+  a crash)
+- invader-edit-qt: Fixed A8 bitmaps being displayed as an alpha blend of white
+  instead of black
+
+## [0.41.1] - 2021-01-20
+### Fixed
+- invader-convert: Fixed missing parameters in `-h`
+
+## [0.41.0] - 2021-01-16
+### Added
+- New tool: invader-convert - Converts between various tag types (gbxmodel to
+  model, model to gbxmodel, shader_transparent_chicago_extended to
+  shader_transparent_chicago)
+- invader-archive: Added `-e` and `-E` which check if a tag exists in a
+  a specified directory (multiple directories can be specified). Using `-E`
+  instead of `-e` does a functional comparison, too.
+- invader-archive: Added `-O` to overwrite existing tags if `--copy` is used
+- invader-build: Added `-g mcc-retail` which targets retail MCC (intended for
+  CEA).
+- invader-build: Added `-g xbox-tw` and `-g xbox-jp` which targets the Taiwanese
+  and Japanese versions, respectively. These have a slightly higher tag space
+  than the original English version and use a different build string by default.
+  They also use fewer hardcoded strings.
+- invader-edit-qt: Added `-L` which lets you specify `recursive` or `fast` list
+  modes. Recursive listing is the old behavior which recursively scans all tags
+  directories for tags, while fast listing results in the tag tree only listing
+  tags when a directory is opened. The default setting is `recursive` unless you
+  are on win32, which then it is `fast`. Also, filtering is only enabled while
+  recursive listing is enabled.
+- invader-edit-qt: Added alpha support to DXT1 decoding
+
+### Changed
+- invader: Switched DXT compression/decompression to libsquish. DXTn quality
+  should be a bit better now!
+- invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
+  Take care that if your version of the game does not support your map's file
+  size, it will crash if you try to load it.
+- invader-build: Invalid text indices for item pickups and unit names/seats are
+  now checked and reported as an error if invalid.
+- invader-build: Using `-g mcc-retail` or `-g mcc-custom` targets 31 MiB of tag
+  space
+- invader-edit-qt: Optimized filtering a bit
+
+### Fixed
+- invader-archived: Fixed a segmentation fault when passing either `-g retail`
+  or `-g demo`
+
+## [0.40.1] - 2020-12-31
+### Added
+- invader-build: Added support for `uses demo ui`
+
+### Changed
+- invader-bitmap: Uses a new compression library for DXT compression, which adds
+  color key transparency for DXT1 bitmaps
+- invader-extract: Now generates mipmaps for dropped mipmaps from Xbox-extracted
+  DXTn bitmap tags
+
+### Fixed
+- invader-bitmap: Fixed sub-4x4 mipmaps not being generated
+- invader-build: Fixed sawtooth count (affects the strobing effect of the doors
+in the levels "Truth and Reconciliation" and "Keyes")
+
+### Removed
+- invader-bitmap: Removed dithering for DXTn bitmaps (the compression library
+  doesn't support it sadly!)
+
+## [0.40.0] - 2020-12-31
+### Added
+- invader-archive: Added `-g` to specify game target (now required if not
+  archiving single tags)
+- invader-build: Added `-g xbox` engine target
+- invader-build: Added `-E` to use the maximum theoretical size for the given
+  cache file (4 GiB for PC, 278 MiB for Xbox due to cache partition sizes).
+  Doing so may result in the cache file requiring a mod to be loaded.
+- invader-build: Added `-b` to set the build version (used for Xbox maps).
+- invader-bludgeon: Added `-j` for specifying thread count when using `--all`.
+  On an AMD Ryzen 5 2600 with a tags directory of over 10000 tags, this reduced
+  the bludgeon time from 29 seconds to 4 seconds, making it over 7x faster.
+- invader-bludgeon: Added `-T invalid-uppercase-references` which detects and
+  lowercases all references that contain uppercase characters
+- invader-bludgeon: Added `-T excessive-script-nodes` which detects and removes
+  script node tables that exceed 19001 (tags that do this potentially crash
+  stock Halo PC)
+- invader-extract: Added support for 3D and cube map Xbox bitmap tag extraction
+- invader-index: Added feedback for if the command was successful
+- invader-resource: Added feedback for if the command was successful
+
+### Changed
+- invader: Fixed segfault when querying dependencies for various tools
+- invader-archive: Error checking is now (mostly) disabled when archiving a map
+- invader-bitmap: Dithering can now be used on regular bitmap tags, and so can
+  sprite budgets above 512x512, but you will be warned that they will not save.
+- invader-build: Font tags with alternative styles references will no longer be
+  indexed
+- invader-build: CRC32s must now start with `0x`
+- invader-build: All errors with tag data are reported as fatal errors now
+- invader-build: All stock HEK limits are checked when building for all PC
+  versions of Halo
+- invader-build: All original file size limits are now checked when building for
+  all PC versions of Halo (except MCC). Use `-E` to use the old behavior's
+  higher limits.
+- invader-compress: Changed compression level minimum to 0. On Deflate, this
+  effectively stores the original data uncompressed and simply adds a zlib
+  header, so it will always be larger than the original size, but it's nearly
+  instant.
+- invader-info: CRC32s are now output starting with `0x`
+- invader-sound: Now uses CPU thread count by default instead of 1
+
+### Fixed
+- invader: Removed the upper bound from heat loss per second in weapon triggers;
+  this will allow weapons that take less than a second to cool down to build
+- invader: Fixed error reporting not checking the result on ioctl on Linux-based
+  operating systems (this resulted in the line length being undefined if it
+  failed)
+- invader: Dropped support for uncompressed Xbox maps
+- invader-bitmap: Fixed the sharpening filter being twice as powerful
+- invader-bitmap: Fixed blurring being slightly more powerful than it should be
+- invader-archive: Fixed errors regarding maps not being able to be read when
+  not using single tag archival
+- invader-build: Fixed `-n` not working as expected
+- invader-build: Fixed word wrapping using the wrong length
+- invader-build: Fixed manually specified BSPs for command lists and encounters
+  being warned as BSP #65535 if they are completely outside of the BSP
+- invader-build: Fixed warning on command lists that have zero points being
+  outside of the BSP
+- invader-edit-qt: Fixed subwindows always being above of the main window
+- invader-info: Fixed `-h` not listing every option correctly
+
+### Removed
+- invader-bitmap: Removed `-x`
+- invader-sound: Removed `-x`
+
+## [0.39.0] - 2020-12-07
+### Added
+- invader-build: Added `-g mcc-custom` which builds a Custom Edition map but
+  compressed and indexed for MCC while generating a .fmeta file alongside it
 - invader-refactor: Added --unsafe (-U) which can be used to do a no-move
   refactor where the destination tags do not exist. This does not affect class
   refactoring.
 
 ### Changed
+- invader-build: Script node count is now limited to 19001
 - invader-compare: Reverted the fix from 0.38.1 because it actually broke things
 - invader-edit-qt: Surface indices are now marked as `cache_only` (hidden) for
   move positions since these are calculated at build time
@@ -16,6 +205,9 @@ This is used for recording Invader's changes. This changelog is based on
   when doing a no-move refactor.
 
 ### Fixed
+- invader: Fixed treating Latin-1 characters as protected
+- invader-build: Fixed allowing null scenario palettes (this actually crashes
+  Halo!)
 - invader-build: Fixed an ellipsis when too many squad positions are shown that
   aren't in the BSP
 - invader-build: Fixed an issue where the wrong death animation would play
@@ -30,6 +222,11 @@ This is used for recording Invader's changes. This changelog is based on
   detail_object_collection tags
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
+- invader-sound: Fixed "Processing sounds" hang on some systems
+
+### Removed
+- invader-build: Removed `-d` as it isn't necessary, and it produces invalid
+  files anyway
 
 ## [0.38.1] - 2020-10-27
 ### Changed
@@ -1517,3 +1714,106 @@ image as one bitmap
 - New tool: invader-indexer - Outputs the list of tags in a cache file to a
   text file to be used with Invader
 - New tool: invader-resource - Builds resource map files
+
+[0.2.0]: https://github.com/SnowyMouse/invader/compare/0.1.0...0.2.0
+[0.2.1]: https://github.com/SnowyMouse/invader/compare/0.2.0...0.2.1
+[0.3.0]: https://github.com/SnowyMouse/invader/compare/0.2.1...0.3.0
+[0.3.1]: https://github.com/SnowyMouse/invader/compare/0.3.0...0.3.1
+[0.3.2]: https://github.com/SnowyMouse/invader/compare/0.3.1...0.3.2
+[0.4.0]: https://github.com/SnowyMouse/invader/compare/0.3.2...0.4.0
+[0.4.1]: https://github.com/SnowyMouse/invader/compare/0.4.0...0.4.1
+[0.4.2]: https://github.com/SnowyMouse/invader/compare/0.4.1...0.4.2
+[0.4.3]: https://github.com/SnowyMouse/invader/compare/0.4.2...0.4.3
+[0.5.0]: https://github.com/SnowyMouse/invader/compare/0.4.3...0.5.0
+[0.6.0]: https://github.com/SnowyMouse/invader/compare/0.5.0...0.6.0
+[0.7.0]: https://github.com/SnowyMouse/invader/compare/0.6.0...0.7.0
+[0.7.1]: https://github.com/SnowyMouse/invader/compare/0.7.0...0.7.1
+[0.7.2]: https://github.com/SnowyMouse/invader/compare/0.7.1...0.7.2
+[0.7.3]: https://github.com/SnowyMouse/invader/compare/0.7.2...0.7.3
+[0.8.0]: https://github.com/SnowyMouse/invader/compare/0.7.3...0.8.0
+[0.8.1]: https://github.com/SnowyMouse/invader/compare/0.8.0...0.8.1
+[0.8.2]: https://github.com/SnowyMouse/invader/compare/0.8.1...0.8.2
+[0.9.0]: https://github.com/SnowyMouse/invader/compare/0.8.2...0.9.0
+[0.10.0]: https://github.com/SnowyMouse/invader/compare/0.9.0...0.10.0
+[0.10.1]: https://github.com/SnowyMouse/invader/compare/0.10.0...0.10.1
+[0.11.0]: https://github.com/SnowyMouse/invader/compare/0.10.1...0.11.0
+[0.12.0]: https://github.com/SnowyMouse/invader/compare/0.11.0...0.12.0
+[0.13.0]: https://github.com/SnowyMouse/invader/compare/0.12.0...0.13.0
+[0.14.0]: https://github.com/SnowyMouse/invader/compare/0.13.0...0.14.0
+[0.14.1]: https://github.com/SnowyMouse/invader/compare/0.14.0...0.14.1
+[0.15.0]: https://github.com/SnowyMouse/invader/compare/0.14.1...0.15.0
+[0.15.1]: https://github.com/SnowyMouse/invader/compare/0.15.0...0.15.1
+[0.15.2]: https://github.com/SnowyMouse/invader/compare/0.15.1...0.15.2
+[0.16.0]: https://github.com/SnowyMouse/invader/compare/0.15.2...0.16.0
+[0.16.1]: https://github.com/SnowyMouse/invader/compare/0.16.0...0.16.1
+[0.17.0]: https://github.com/SnowyMouse/invader/compare/0.16.1...0.17.0
+[0.18.0]: https://github.com/SnowyMouse/invader/compare/0.17.0...0.18.0
+[0.19.0]: https://github.com/SnowyMouse/invader/compare/0.18.0...0.19.0
+[0.19.1]: https://github.com/SnowyMouse/invader/compare/0.19.0...0.19.1
+[0.19.2]: https://github.com/SnowyMouse/invader/compare/0.19.1...0.19.2
+[0.20.0]: https://github.com/SnowyMouse/invader/compare/0.19.2...0.20.0
+[0.20.1]: https://github.com/SnowyMouse/invader/compare/0.20.0...0.20.1
+[0.20.2]: https://github.com/SnowyMouse/invader/compare/0.20.1...0.20.2
+[0.21.0]: https://github.com/SnowyMouse/invader/compare/0.20.2...0.21.0
+[0.21.1]: https://github.com/SnowyMouse/invader/compare/0.21.0...0.21.1
+[0.21.2]: https://github.com/SnowyMouse/invader/compare/0.21.1...0.21.2
+[0.21.3]: https://github.com/SnowyMouse/invader/compare/0.21.2...0.21.3
+[0.21.4]: https://github.com/SnowyMouse/invader/compare/0.21.3...0.21.4
+[0.22.0]: https://github.com/SnowyMouse/invader/compare/0.21.4...0.22.0
+[0.22.1]: https://github.com/SnowyMouse/invader/compare/0.22.0...0.22.1
+[0.22.2]: https://github.com/SnowyMouse/invader/compare/0.22.1...0.22.2
+[0.22.3]: https://github.com/SnowyMouse/invader/compare/0.22.2...0.22.3
+[0.22.4]: https://github.com/SnowyMouse/invader/compare/0.22.3...0.22.4
+[0.23.0]: https://github.com/SnowyMouse/invader/compare/0.22.4...0.23.0
+[0.23.1]: https://github.com/SnowyMouse/invader/compare/0.23.0...0.23.1
+[0.23.2]: https://github.com/SnowyMouse/invader/compare/0.23.1...0.23.2
+[0.23.3]: https://github.com/SnowyMouse/invader/compare/0.23.2...0.23.3
+[0.23.4]: https://github.com/SnowyMouse/invader/compare/0.23.3...0.23.4
+[0.23.5]: https://github.com/SnowyMouse/invader/compare/0.23.4...0.23.5
+[0.24.0]: https://github.com/SnowyMouse/invader/compare/0.23.5...0.24.0
+[0.24.1]: https://github.com/SnowyMouse/invader/compare/0.24.0...0.24.1
+[0.24.2]: https://github.com/SnowyMouse/invader/compare/0.24.1...0.24.2
+[0.25.0]: https://github.com/SnowyMouse/invader/compare/0.24.2...0.25.0
+[0.25.1]: https://github.com/SnowyMouse/invader/compare/0.25.0...0.25.1
+[0.25.2]: https://github.com/SnowyMouse/invader/compare/0.25.1...0.25.2
+[0.26.0]: https://github.com/SnowyMouse/invader/compare/0.25.2...0.26.0
+[0.26.1]: https://github.com/SnowyMouse/invader/compare/0.26.0...0.26.1
+[0.27.0]: https://github.com/SnowyMouse/invader/compare/0.26.1...0.27.0
+[0.27.1]: https://github.com/SnowyMouse/invader/compare/0.27.0...0.27.1
+[0.28.0]: https://github.com/SnowyMouse/invader/compare/0.27.1...0.28.0
+[0.28.1]: https://github.com/SnowyMouse/invader/compare/0.28.0...0.28.1
+[0.29.0]: https://github.com/SnowyMouse/invader/compare/0.28.1...0.29.0
+[0.30.0]: https://github.com/SnowyMouse/invader/compare/0.29.0...0.30.0
+[0.30.1]: https://github.com/SnowyMouse/invader/compare/0.30.0...0.30.1
+[0.31.0]: https://github.com/SnowyMouse/invader/compare/0.30.1...0.31.0
+[0.32.0]: https://github.com/SnowyMouse/invader/compare/0.31.0...0.32.0
+[0.32.1]: https://github.com/SnowyMouse/invader/compare/0.32.0...0.32.1
+[0.32.2]: https://github.com/SnowyMouse/invader/compare/0.32.1...0.32.2
+[0.32.3]: https://github.com/SnowyMouse/invader/compare/0.32.2...0.32.3
+[0.32.4]: https://github.com/SnowyMouse/invader/compare/0.32.3...0.32.4
+[0.32.5]: https://github.com/SnowyMouse/invader/compare/0.32.4...0.32.5
+[0.33.0]: https://github.com/SnowyMouse/invader/compare/0.32.5...0.33.0
+[0.33.1]: https://github.com/SnowyMouse/invader/compare/0.33.0...0.33.1
+[0.33.2]: https://github.com/SnowyMouse/invader/compare/0.33.1...0.33.2
+[0.33.3]: https://github.com/SnowyMouse/invader/compare/0.33.2...0.33.3
+[0.33.4]: https://github.com/SnowyMouse/invader/compare/0.33.3...0.33.4
+[0.34.0]: https://github.com/SnowyMouse/invader/compare/0.33.4...0.34.0
+[0.34.1]: https://github.com/SnowyMouse/invader/compare/0.34.0...0.34.1
+[0.35.0]: https://github.com/SnowyMouse/invader/compare/0.34.1...0.35.0
+[0.35.1]: https://github.com/SnowyMouse/invader/compare/0.35.0...0.35.1
+[0.36.0]: https://github.com/SnowyMouse/invader/compare/0.35.1...0.36.0
+[0.36.1]: https://github.com/SnowyMouse/invader/compare/0.36.0...0.36.1
+[0.37.0]: https://github.com/SnowyMouse/invader/compare/0.36.1...0.37.0
+[0.37.1]: https://github.com/SnowyMouse/invader/compare/0.37.0...0.37.1
+[0.38.0]: https://github.com/SnowyMouse/invader/compare/0.37.1...0.38.0
+[0.38.1]: https://github.com/SnowyMouse/invader/compare/0.38.0...0.38.1
+[0.39.0]: https://github.com/SnowyMouse/invader/compare/0.38.1...0.39.0
+[0.40.0]: https://github.com/SnowyMouse/invader/compare/0.39.0...0.40.0
+[0.40.1]: https://github.com/SnowyMouse/invader/compare/0.40.0...0.40.1
+[0.41.0]: https://github.com/SnowyMouse/invader/compare/0.40.1...0.41.0
+[0.41.1]: https://github.com/SnowyMouse/invader/compare/0.41.0...0.41.1
+[0.41.2]: https://github.com/SnowyMouse/invader/compare/0.41.1...0.41.2
+[0.41.3]: https://github.com/SnowyMouse/invader/compare/0.41.2...0.41.3
+[0.41.4]: https://github.com/SnowyMouse/invader/compare/0.41.3...0.41.4
+
+[Unreleased]: https://github.com/SnowyMouse/invader/compare/0.41.4...master

@@ -17,7 +17,7 @@
 #include "tag_editor_edit_widget.hpp"
 #include "../../tree/tag_tree_window.hpp"
 #include "../../tree/tag_tree_dialog.hpp"
-#include <invader/bitmap/color_plate_pixel.hpp>
+#include <invader/bitmap/pixel.hpp>
 #include "tag_editor_array_widget.hpp"
 
 #define INTERNAL_VALUE "internal-value"
@@ -587,7 +587,7 @@ namespace Invader::EditQt {
         if(value->get_type() != Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
             layout->addStretch(1);
         }
-        layout->setMargin(6);
+        layout->setContentsMargins(6, 6, 6, 6);
     }
 
     void TagEditorEditWidget::update_auxiliary_widget() {
@@ -612,7 +612,7 @@ namespace Invader::EditQt {
                 value->get_values(numbers.data());
 
                 // Make the pixel colors
-                ColorPlatePixel pixel = { 255, 255, 255, 255 };
+                Pixel pixel = { 255, 255, 255, 255 };
                 switch(value->get_type()) {
                     case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
                         pixel.alpha = static_cast<int>(std::get<std::int64_t>(numbers[0]));
@@ -639,8 +639,8 @@ namespace Invader::EditQt {
                     pixel.alpha = 255;
                 }
 
-                ColorPlatePixel triangle_up = (ColorPlatePixel { 255, 255, 255, 255 }).alpha_blend(pixel);
-                ColorPlatePixel triangle_down = (ColorPlatePixel { 0, 0, 0, 255 }).alpha_blend(pixel);
+                Pixel triangle_up = (Pixel { 255, 255, 255, 255 }).alpha_blend(pixel);
+                Pixel triangle_down = (Pixel { 0, 0, 0, 255 }).alpha_blend(pixel);
                 std::uint32_t color_up = static_cast<std::uint32_t>(triangle_up.alpha) << 24 | static_cast<std::uint32_t>(triangle_up.red) << 16 | static_cast<std::uint32_t>(triangle_up.green) << 8 | triangle_up.blue;
                 std::uint32_t color_down = static_cast<std::uint32_t>(triangle_down.alpha) << 24 | static_cast<std::uint32_t>(triangle_down.red) << 16 | static_cast<std::uint32_t>(triangle_down.green) << 8 | triangle_down.blue;
 
@@ -855,7 +855,9 @@ namespace Invader::EditQt {
         if(preferred_path == "") {
             found = true;
         }
-        else {
+        
+        // If fast listing mode is disabled, check if it exists
+        else if(!this->get_editor_window()->get_parent_window()->fast_listing_mode()) {
             // First pass: Check to see if the exact path exists
             for(auto &t : this->get_editor_window()->get_parent_window()->get_all_tags()) {
                 if(t.tag_class_int == dependency.tag_class_int && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == preferred_path) {
@@ -899,6 +901,17 @@ namespace Invader::EditQt {
                             }
                         }
                     }
+                }
+            }
+        }
+        
+        // If fast listing mode is enabled, query the filesystem
+        else {
+            auto path_with_extension = preferred_path + "." + HEK::tag_class_to_extension(dependency.tag_class_int);
+            for(auto &i : this->get_editor_window()->get_parent_window()->get_tag_directories()) {
+                if(std::filesystem::exists(i / path_with_extension)) {
+                    found = true;
+                    break;
                 }
             }
         }

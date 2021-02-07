@@ -23,9 +23,9 @@ enum Show : std::uint8_t {
 };
 
 struct Input {
-    std::optional<const char *> map;
+    std::optional<std::filesystem::path> map;
     std::optional<std::filesystem::path> maps;
-    std::vector<std::string> tags;
+    std::vector<std::filesystem::path> tags;
     bool ignore_resource_maps = false;
     
     std::vector<File::TagFilePath> tag_paths;
@@ -47,7 +47,7 @@ enum ByPath {
     BY_PATH_DIFFERENT = 2
 };
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path);
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose);
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
@@ -60,6 +60,7 @@ int main(int argc, const char **argv) {
         bool precision = false;
         bool match_all = false;
         bool functional = false;
+        bool verbose = false;
         ByPath by_path = ByPath::BY_PATH_SAME;
         Show show = Show::SHOW_ALL;
     } compare_options;
@@ -76,10 +77,11 @@ int main(int argc, const char **argv) {
     options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input.");
+    options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with -f");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
     static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
-    static constexpr char USAGE[] = "[options] <-I <options>> <-I <options>> [<-I <options>> ...]";
+    static constexpr char USAGE[] = "[options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]";
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CompareOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, compare_options, [](char opt, const auto &args, CompareOptions &compare_options) {
         static const char *CAN_ONLY_BE_USED_WITH_TAG_INPUT = "This option can only be used with a tag input.";
@@ -125,6 +127,10 @@ int main(int argc, const char **argv) {
             case 'I':
                 close_input(compare_options);
                 compare_options.top_input = &compare_options.inputs.emplace_back();
+                break;
+                
+            case 'v':
+                compare_options.verbose = true;
                 break;
                 
             case 'm':
@@ -229,21 +235,21 @@ int main(int argc, const char **argv) {
     // Automatically make up maps directories for any map when necessary, then open their respective resources
     for(auto &i : compare_options.inputs) {
         if(i.map.has_value() && !i.maps.has_value()) {
-            i.maps = std::filesystem::absolute(std::filesystem::path(*i.map)).parent_path();
+            i.maps = std::filesystem::absolute(*i.map).parent_path();
         }
             
         if(i.map.has_value()) {
             // Load resource maps
             std::vector<std::byte> loc, bitmaps, sounds;
             if(i.maps.has_value() && !i.ignore_resource_maps) {
-                loc = File::open_file((*i.maps / "loc.map").string().c_str()).value_or(std::vector<std::byte>());
-                bitmaps = File::open_file((*i.maps / "bitmaps.map").string().c_str()).value_or(std::vector<std::byte>());
-                sounds = File::open_file((*i.maps / "sounds.map").string().c_str()).value_or(std::vector<std::byte>());
+                loc = File::open_file(*i.maps / "loc.map").value_or(std::vector<std::byte>());
+                bitmaps = File::open_file(*i.maps / "bitmaps.map").value_or(std::vector<std::byte>());
+                sounds = File::open_file(*i.maps / "sounds.map").value_or(std::vector<std::byte>());
             }
         
             auto data = File::open_file(*i.map);
             if(!data.has_value()) {
-                eprintf_error("Failed to read %s", *i.map);
+                eprintf_error("Failed to read %s", i.map->string().c_str());
                 return EXIT_FAILURE;
             }
             
@@ -323,10 +329,10 @@ int main(int argc, const char **argv) {
         i.tag_paths.shrink_to_fit();
     }
     
-    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path);
+    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path, compare_options.verbose);
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path) {
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose) {
     // Find all tags we have in common first
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
@@ -449,7 +455,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
                     if(vd.tag_class_int == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, other_path)) {
                         // Open it
-                        auto file = Invader::File::open_file(vd.full_path.string().c_str()).value();
+                        auto file = Invader::File::open_file(vd.full_path).value();
                         
                         // Parse it
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
@@ -574,7 +580,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         }
         else {
             for(std::size_t i = 1; i < found_count; i++) {
-                match_log(first_struct->compare(structs[i].get(), precision, true), i);
+                match_log(first_struct->compare(structs[i].get(), precision, true, verbose), i);
             }
         }
     }

@@ -261,18 +261,21 @@
                 "compound": true,
                 "minimum": 2,
                 "maximum": 2,
+                "hek_maximum": 2,
                 "volatile": true
             },
             {
                 "name": "powered mass points",
                 "type": "TagReflexive",
                 "struct": "PhysicsPoweredMassPoint",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
                 "name": "mass points",
                 "type": "TagReflexive",
                 "struct": "PhysicsMassPoint",
+                "hek_maximum": 32,
                 "compound": true
             }
         ],

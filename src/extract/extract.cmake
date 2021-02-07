@@ -11,4 +11,6 @@ if(${INVADER_EXTRACT})
     target_link_libraries(invader-extract invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-extract)
+    
+    do_windows_rc(invader-extract invader-extract.exe "Invader tag extraction tool")
 endif()

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/hek/definition.hpp>
+#include <invader/tag/parser/parser.hpp>
+#include <invader/bitmap/bitmap_encode.hpp>
 
 namespace Invader::HEK {
     const char *BITMAP_DATA_FORMAT_NAMES[] = {
@@ -50,5 +52,9 @@ namespace Invader::HEK {
             default:
                 return 0; // unknown
         }
+    }
+
+    std::size_t size_of_bitmap(const Parser::BitmapData &data) noexcept {
+        return BitmapEncode::bitmap_data_size(data.width, data.height, data.depth, data.mipmap_count, data.format, data.type);
     }
 }

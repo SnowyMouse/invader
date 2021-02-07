@@ -133,6 +133,7 @@ this project is split into different programs.
 - [invader-build]
 - [invader-compare]
 - [invader-compress]
+- [invader-convert]
 - [invader-dependency]
 - [invader-edit-qt]
 - [invader-extract]
@@ -155,10 +156,22 @@ Usage: invader-archive [options] <scenario | -s tag.class>
 Generate .tar.xz archives of the tags required to build a cache file.
 
 Options:
+  -C --copy                    Copy instead of making an archive.
+  -e --exclude <dir>           Exclude copying any tags that share a path with
+                               a tag in specified directory. Use multiple times
+                               to exclude multiple directories.
+  -E --exclude-matched <dir>   Exclude copying any tags that are also located
+                               in the specified directory and are functionally
+                               the same. Use multiple times to exclude multiple
+                               directories.
+  -g --game-engine <id>        Specify the game engine. This option is required
+                               if -s is not specified. Valid engines are:
+                               custom, demo, retail, xbox, native
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -o --output <file>           Output to a specific file. Extension must be
-                               .tar.xz.
+                               .tar.xz unless using --copy which then it's a
+                               directory.
   -P --fs-path                 Use a filesystem path for the tag.
   -s --single-tag              Archive a tag tree instead of a cache file.
   -t --tags <dir>              Use the specified tags directory. Use multiple
@@ -168,8 +181,10 @@ Options:
 
 ### invader-bitmap
 This program generates bitmap tags from images. For source images, .tif, .tiff,
-.png, .tga, and .bmp extensions are
-supported.
+.png, .tga, and .bmp extensions are supported.
+
+Note that image sharpening and blurring, while supported, are not recommended,
+and output may not exactly match the Halo Editing Kit's output.
 
 ```
 Usage: invader-bitmap [options] <bitmap-tag>
@@ -184,9 +199,9 @@ Options:
                                this to 0 disables budgeting. Default (new tag):
                                0
   -d --data <dir>              Use the specified data directory.
-  -D --dithering <channels>    [REQUIRES --extended] Apply dithering to 16-bit,
-                               dxtn, or p8 bitmaps. Can be: a, rgb, or argb.
-                               Default: none
+  -D --dithering <channels>    Apply dithering to 16-bit or p8 bitmaps. This
+                               does not save in .bitmap tags. Can be: a, rgb,
+                               or argb. Default: none
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, or dxt1. Default (new
@@ -200,10 +215,11 @@ Options:
   -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
                                off or on. Default (new tag): off
   -P --fs-path                 Use a filesystem path for the data.
-  -R --regenerate              Use the bitmap tag's color plate as data.
-  -s --mipmap-scale <type>     [REQUIRES --extended] Mipmap scale type. Can be:
-                               linear, nearest-alpha, nearest. Default (new
-                               tag): linear
+  -R --regenerate              Use the bitmap tag's compressed color plate data
+                               as data.
+  -s --mipmap-scale <type>     Mipmap scale type. This does not save in .bitmap
+                               tags. Can be: linear, nearest-alpha, nearest.
+                               Default (new tag): linear
   -t --tags <dir>              Use the specified tags directory.
   -T --type <type>             Set the type of bitmap. Can be: 2d-textures,
                                3d-textures, cube-maps, interface-bitmaps, or
@@ -211,8 +227,6 @@ Options:
   -u --usage <usage>           Set the bitmap usage. Can be: alpha-blend,
                                default, height-map, detail-map, light-map,
                                vector-map. Default: default
-  -x --extended                Create an invader_bitmap tag (required for some
-                               features).
 ```
 
 Refer to [Creating a bitmap] for information on how to create bitmap tags.
@@ -231,6 +245,9 @@ Options:
   -a --all                     Bludgeon all tags in the tags directory.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
+  -j --threads                 Set the number of threads to use for parallel
+                               bludgeoning when using --all. Default: CPU
+                               thread count
   -P --fs-path                 Use a filesystem path for the tag path if
                                specifying a tag.
   -t --tags <dir>              Use the specified tags directory.
@@ -239,8 +256,9 @@ Options:
                                invalid-reference-classes,
                                invalid-model-markers, missing-script-source,
                                incorrect-sound-buffer, missing-vertices,
-                               nonnormal-vectors, none, everything (default:
-                               none)
+                               nonnormal-vectors, invalid-uppercase-references,
+                               excessive-script-nodes, none, everything
+                               (default: none)
 ```
 
 ### invader-build
@@ -254,18 +272,27 @@ Build a cache file for a version of Halo: Combat Evolved.
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
+  -b --build-version           Set the build version. This is used on the Xbox
+                               version of the game (by default it's
+                               01.10.12.2276 on Xbox and the Invader version on
+                               other engines)
   -c --compress                Compress the cache file.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
-  -d --discard                 Discard all raw data. This will result in a map
-                               that is invalid for use with game clients and
-                               tag extractors.
+  -E --extend-file-limits      Extend file size limits beyond what is allowed
+                               by the target engine to its theoretical maximum
+                               size. This may create a map that will not work
+                               without a mod.
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: custom, demo,
-                               retail, dark
+                               native, retail, xbox, xbox-tw, xbox-jp,
+                               mcc-custom, mcc-retail
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
+  -l --level <level>           Set the compression level. Must be between 0 and
+                               19. If compressing an Xbox or MCC map, this will
+                               be clamped from 0 to 9. Default: 19
   -m --maps <dir>              Use the specified maps directory.
   -n --no-external-tags        Do not use external tags. This can speed up
                                build time at a cost of a much larger file size.
@@ -331,22 +358,25 @@ This program compares tags against maps, maps against maps, and tags against
 tags.
 
 ```
-Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <options>> ...]
+Usage: invader-compare [options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]
 
 Compare tags against other tags.
 
 Options:
   -a --all                     Only match if tags are in all inputs
+  -B --by-path <path-type>     Set what tags get compared against other tags.
+                               By default, only tags with the same relative
+                               path are checked. Using "any" ignores paths
+                               completely (useful for finding duplicates when
+                               both inputs are different) while "different"
+                               only checks tags with different paths (useful
+                               for finding duplicates when both inputs are the
+                               same). Can be: any, different, or same (default)
   -c --class                   Add a tag class to check. If no tag classes are
                                specified, all tag classes will be checked.
-  -C --by-class <path-type>    Compare tags against tags of the same class
-                               rather than the same path. Using "any" ignores
-                               paths completely (useful when both inputs are
-                               different) while "different" only checks tags
-                               with different paths (useful when both inputs
-                               are the same). Can be: any or different
   -f --functional              Precompile the tags before comparison to check
                                for only functional differences.
+  -G --ignore-resources        Ignore resource maps for the current map input.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -I --input                   Add an input directory
@@ -363,6 +393,9 @@ Options:
   -t --tags                    Add a tags directory to the input. Specify
                                multiple tag directories in order of precedence
                                for the input.
+  -v --verbose                 Output more information on the differences
+                               between tags to standard output. This will not
+                               work with -f
 ```
 
 ### invader-compress
@@ -377,11 +410,39 @@ Options:
   -d --decompress              Decompress instead of compress.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -l --level <level>           Set the compression level. Must be between 1 and
-                               19. If compressing an Xbox map, this will be
-                               clamped from 1 to 9. Default: 19
+  -l --level <level>           Set the compression level. Must be between 0 and
+                               19. If compressing an MCC map, this will be
+                               clamped from 0 to 9. Default: 19
+  -M --mcc                     Use MCC-style (de)compression
   -o --output <file>           Emit the resulting map at the given path. By
                                default, this is the map path (overwrite).
+```
+
+### invader-convert
+This program converts tags from one type to another. This is especially useful
+in conjunction with [invader-refactor] for porting maps between different
+versions of the game.
+
+```
+Usage: invader-convert [options] <--all | -s <tag>>
+
+Convert from one tag type to another.
+
+Options:
+  -a --all                     Convert all tags. This cannot be used with -s.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -o --output-tags <dir>       Set the output tags directory.
+  -O --overwrite               Overwrite any output tags if they exist.
+  -P --fs-path                 Use a filesystem path for the tag path if
+                               specifying a tag.
+  -s --single-tag              Convert a specific tag. This can be specified
+                               multiple times for multiple tags, but cannot be
+                               used with -a.
+  -t --tags <dir>              Set the input tags directory.
+  -T --type <type>             Type of conversion. Can be: gbxmodel-to-model
+                               (g2m), model-to-gbxmodel (m2g),
+                               chicago-extended-to-chicago (x2c)
 ```
 
 ### invader-dependency
@@ -432,15 +493,16 @@ Usage: invader-extract [options] <map>
 Extract data from cache files.
 
 Options:
+  -G --ignore-resources        Ignore resource maps.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info
-  -m --maps <dir>              Set the maps directory
+  -m --maps <dir>              Use the specified maps directory.
   -n --non-mp-globals          Enable extraction of non-multiplayer .globals
   -O --overwrite               Overwrite tags if they already exist
   -r --recursive               Extract tag dependencies
   -s --search <expr>           Search for tags (* and ? are wildcards); use
                                multiple times for multiple queries
-  -t --tags <dir>              Set the tags directory
+  -t --tags <dir>              Use the specified tags directory.
 ```
 
 ### invader-font
@@ -486,19 +548,19 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -T --type <type>             Set the type of data to show. Can be overview
-                               (default), build, compressed, compression-ratio,
-                               crc32, crc32-mismatched, dirty, engine,
-                               external-bitmap-indices, external-bitmaps,
-                               external-indices, external-loc,
-                               external-loc-indices, external-pointers,
-                               external-sound-indices, external-sounds,
-                               external-tags, language, map-types, protected,
-                               scenario, scenario-path, stub-count, tag-count,
-                               tags, tags-external-bitmap-indices,
-                               tags-external-indices,
-                               tags-external-loc-indices,
-                               tags-external-pointers,
-                               tags-external-sound-indices
+                               (default), build, compressed, compression_ratio,
+                               crc32, crc32_mismatched, dirty, engine,
+                               external_bitmap_indices, external_bitmaps,
+                               external_indices, external_loc_indices,
+                               external_pointers, external_sound_indices,
+                               external_sounds, external_tags, languages,
+                               map_type, protection, scenario, scenario_path,
+                               tag_count, stub_count, tags,
+                               tags_external_bitmap_indices,
+                               tags_external_loc_indices,
+                               tags_external_pointers,
+                               tags_external_sound_indices,
+                               tags_external_indices, uncompressed_size
 ```
 
 ### invader-refactor
@@ -525,26 +587,29 @@ Options:
                                must exist on the filesystem) while also
                                changing all references to the tag to the new
                                path. If using no-move, then the tag is not
-                               moved (the tag does not have to exist on the
-                               filesystem) while also changing all references
-                               to the tag to the new path. If using copy, then
-                               the tag is copied (the tag must exist on the
-                               filesystem) and references to the tag are not
-                               changed except for other tags copied by this
-                               command. Can be: copy, move, no-move
+                               moved (the destination tag must exist on the
+                               filesystem unless you use --unsafe) while also
+                               changing all references to the tag to the new
+                               path. If using copy, then the tag is copied (the
+                               tag must exist on the filesystem) and references
+                               to the tag are not changed except for other tags
+                               copied by this command. Can be: copy, move,
+                               no-move
   -r --recursive <f> <t>       Recursively move all tags in a directory. This
                                will fail if a tag is present in both the old
                                and new directories, it cannot be used with
                                no-move. This can only be specified once per
                                operation and cannot be used with --tag.
   -s --single-tag <path>       Make changes to a single tag, only, rather than
-                               the whole tag directory.
+                               the whole tags directory.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
   -T --tag <f> <t>             Refactor an individual tag. This can be
                                specified multiple times but cannot be used with
                                --recursive.
+  -U --unsafe                  Do not require the destination tags to exist if
+                               using no-move
 ```
 
 ### invader-resource
@@ -618,19 +683,17 @@ Options:
                                vehicle-engine, weapon-charge, weapon-empty,
                                weapon-fire, weapon-idle, weapon-overheat,
                                weapon-ready, weapon-reload
-  -C --channel-count <#>       [REQUIRES --extended] Set the channel count. Can
-                               be: mono, stereo. By default, this is determined
-                               based on the input audio.
+  -C --channel-count <#>       Set the channel count. Can be: mono, stereo. By
+                               default, this is determined based on the input
+                               audio.
   -d --data <dir>              Use the specified data directory.
   -F --format <fmt>            Set the format. Can be: 16-bit-pcm, ogg-vorbis,
-                               or xbox-adpcm. Using flac requires --extended.
-                               Setting this is required unless creating an
-                               extended tag, in which case it defaults to
-                               16-bit-pcm.
+                               or xbox-adpcm.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -j --threads                 Set the number of threads to use for resampling.
-                               Default: 1
+  -j --threads                 Set the number of threads to use for parallel
+                               resampling and encoding. Default: CPU thread
+                               count
   -l --compress-level <lvl>    Set the compression level. This can be between
                                0.0 and 1.0. For Ogg Vorbis, higher levels
                                result in better quality but worse sizes. For
@@ -638,9 +701,9 @@ Options:
                                longer compression time, clamping from 0.0 to
                                0.8 (FLAC 0 to FLAC 8). Default: 1.0
   -P --fs-path                 Use a filesystem path for the data.
-  -r --sample-rate <Hz>        [REQUIRES --extended] Set the sample rate in Hz.
-                               Halo supports 22050 and 44100. By default, this
-                               is determined based on the input audio.
+  -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
+                               and 44100. By default, this is determined based
+                               on the input audio.
   -s --split                   Split permutations into 227.5 KiB chunks. This
                                is necessary for longer sounds (e.g. music) when
                                being played in the original Halo engine.
@@ -648,8 +711,6 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
-  -x --extended                Create an invader_sound tag (required for some
-                               features).
 ```
 
 Refer to [Creating a sound] for a guide on how to create sound tags.
@@ -728,9 +789,9 @@ tags instead of gbxmodel. The Halo Editing Kit automatically changes these on
 tag load, likely because Gearbox developers felt it would be better to just do
 this than fix their tags (since their engine only supports gbxmodel tags).
 
-Invader supports multiple engines, with Xbox support being planned, so we cannot
-just do this. Fortunately, there is a command you can run that will actually fix
-the tags for you:
+Invader supports multiple engines INCLUDING the Xbox version, so we cannot just
+do this. Fortunately, there is a command you can run that will actually fix the
+tags for you:
 
 ```
 invader-refactor -Nc model gbxmodel
@@ -830,36 +891,16 @@ General Public License. We will not provide exception to anyone - not even
 Bungie, Microsoft, or our own mothers.
 
 In order to get Invader under a different license, you will need to write to
-*both* [Snowy] and [Vaporeon], and you will need *unanimous* approval.
+*both* [Snowy Mouse] and [Vaporeon], and you will need *unanimous* approval.
 
-[Snowy]: https://github.com/SnowyMouse
+[Snowy Mouse]: https://github.com/SnowyMouse
 [Vaporeon]: https://github.com/Vaporeon
 
 ### Are there any GUI tools?
 Officially, only one of these tools has a graphical user interface,
-invader-edit-qt. Some people have offered to make GUI versions of these tools,
-and it probably isn't difficult to make a GUI wrapper for these tools due to
-the simple nature of them.
-
-There are a few reasons why Invader officially has mostly command-line tools:
-- Command-line tools require significantly less time to write and test.
-- Command-line tools require fewer dependencies (e.g. no Qt or GTK).
-- Command-line tools work well with scripts and shell commands.
-- Command-line shells are very optimized at quick and precise execution,
-  providing features such as tab completion and command history.
-- Invader tools usually perform exactly one task: take a small amount of input
-  and turn it into an output. A GUI will likely make such a simple task slower.
-
-Basically, for most functions, a command-line interface is enough, while a GUI
-may add overhead to such a task (e.g. mouse usage, file navigation, etc.) while
-not getting any of the benefits of a command-line shell such as tab completion,
-command history, scriptability, etc.
-
-Even so, there are some functions where a graphical user interface is better.
-Tasks that require a large amount of user interaction such as direct editing of
-HEK tag files or scenario editing are tasks that are better suited to a GUI
-than the command line as opposed to simple tasks such as building a cache file
-which requires a small amount of input to perform the entire task.
+invader-edit-qt. However, there is a program you can optionally download called
+[six-shooter](https://github.com/SnowyMouse/six-shooter) which provides a
+graphical interface for some of Invader's other tools.
 
 ### Are 32-bit Windows builds available?
 Only 64-bit builds are uploaded to [Nightly Builds]. You can compile Invader
@@ -879,14 +920,7 @@ this does not mean that you can't make a fork of Invader that supports it, and
 there are people who have said they were willing to do this.
 
 ### Can invader-build create Xbox maps?
-Xbox support is **planned** but not yet implemented.
-
-Previously, we decided to not do Xbox map compilation because there are enough
-differences to make supporting the Xbox version non-trivial. However, we have
-changed our stance as the Xbox version is an accurate baseline for reverse
-engineering Halo's graphics and sound engine compared to Halo PC which suffers
-from numerous regressions in both departments. Being able to build maps for Xbox
-would be extremely helpful for progress on this front.
+Yes. Pass `-g xbox` into invader-build. A guide for making Xbox maps is planned.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this
@@ -953,6 +987,7 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-build]: #invader-build
 [invader-compare]: #invader-compare
 [invader-compress]: #invader-compress
+[invader-convert]: #invader-convert
 [invader-dependency]: #invader-dependency
 [invader-edit-qt]: #invader-edit-qt
 [invader-extract]: #invader-extract

@@ -189,12 +189,14 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "LightningMarker",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "shader",
                 "type": "TagReflexive",
                 "struct": "LightningShader",
+                "hek_maximum": 1,
                 "compound": true
             },
             {

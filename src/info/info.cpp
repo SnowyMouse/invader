@@ -8,6 +8,7 @@
 #include <invader/version.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/hek/map.hpp>
+#include <invader/compress/compression.hpp>
 
 #include "language/language.hpp"
 #include "info_def.hpp"
@@ -55,26 +56,36 @@ namespace Invader::Info {
             PRINT_LINE(oprintf, "Timestamp:", "%s\n", reinterpret_cast<Invader::HEK::NativeCacheFileHeader *>(header_cache)->timestamp.string);
         }
         
-        PRINT_LINE(oprintf, "Map type:", "%s\n", type_name(map.get_type()));
+        auto map_type = map.get_type();
+        
+        if(map_type == map.get_header_type()) {
+            PRINT_LINE(oprintf_success, "Map type:", "%s (matches header)", type_name(map_type));
+        }
+        else {
+            PRINT_LINE(oprintf_success_warn, "Map type:", "%s (mismatched)", type_name(map_type));
+        }
         PRINT_LINE(oprintf, "Tags:", "%zu / %zu (%.02f MiB)\n", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
         
         auto crc = map.get_crc32();
         auto crc_matches = map.get_header_crc32() == crc;
         
-        // CRC32
-        if(crc_matches) {
-            PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches)", crc);
-        }
-        else {
-            PRINT_LINE(oprintf_success_warn, "CRC32:", "0x%08X (mismatched)", crc);
-        }
-        
-        // Dirty?
-        if(map.is_clean()) {
-            PRINT_LINE(oprintf_success, "Integrity:", "%s", "Clean");
-        }
-        else {
-            PRINT_LINE(oprintf_success_warn, "Integrity:", "%s", "Dirty (map may be corrupted or modified)");
+        // TODODILE: Figure out how to check an Xbox map's integrity
+        if(engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            // CRC32
+            if(crc_matches) {
+                PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches header)", crc);
+            }
+            else {
+                PRINT_LINE(oprintf_success_warn, "CRC32:", "0x%08X (mismatched)", crc);
+            }
+            
+            // Dirty?
+            if(map.is_clean()) {
+                PRINT_LINE(oprintf_success, "Integrity:", "%s", "Clean");
+            }
+            else {
+                PRINT_LINE(oprintf_success_warn, "Integrity:", "%s", "Dirty (map may be corrupted or modified)");
+            }
         }
         
         // Protected?
@@ -117,43 +128,55 @@ namespace Invader::Info {
         }
         
         // Languages?
-        switch(engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL: {
-                bool any;
-                auto languages = find_languages_for_map(map, any);
-                if(any) {
-                    PRINT_LINE(oprintf_success, "Valid languages:", "%s", "Any (map will work on all original releases of the game)");
-                }
-                else if(languages.size() == 0) {
-                    if(!check_if_valid_indexed_tags_for_stock_custom_edition(map)) {
-                        PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map contains invalid indices for stock resource maps)");
-                    }
-                    else {
-                        PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map was built against custom resource maps)");
-                    }
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            bool any;
+            auto languages = find_languages_for_map(map, any);
+            if(any) {
+                PRINT_LINE(oprintf_success, "Valid languages:", "%s", "Any (map will work on all original releases of the game)");
+            }
+            else if(languages.size() == 0) {
+                if(!check_if_valid_indexed_tags_for_stock_custom_edition(map)) {
+                    PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map contains invalid indices for stock resource maps)");
                 }
                 else {
-                    std::string list;
-                    for(auto &i : languages) {
-                        if(list.size() == 0) {
-                            list = i;
-                        }
-                        else {
-                            list += ", ";
-                            list += i;
-                        }
-                    }
-                    PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", list.c_str());
+                    PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map was built against custom resource maps)");
                 }
             }
-            default:
-                break;
+            else {
+                std::string list;
+                for(auto &i : languages) {
+                    if(list.size() == 0) {
+                        list = i;
+                    }
+                    else {
+                        list += ", ";
+                        list += i;
+                    }
+                }
+                PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", list.c_str());
+            }
         }
         
         // Compressed?
-        if(map.is_compressed()) {
-            PRINT_LINE(oprintf, "Compressed:", "Yes (%.02f %%)\n", calculate_compression_ratio(map) * 100.0);
+        Map::CompressionType compression_type;
+        if((compression_type = map.get_compression_algorithm())) {
+            const char *compression_algorithm = "";
+            
+            switch(compression_type) {
+                case Map::CompressionType::COMPRESSION_TYPE_NONE:
+                    std::terminate();
+                case Map::CompressionType::COMPRESSION_TYPE_DEFLATE:
+                    compression_algorithm = "Deflate";
+                    break;
+                case Map::CompressionType::COMPRESSION_TYPE_ZSTANDARD:
+                    compression_algorithm = "Zstandard";
+                    break;
+                case Map::CompressionType::COMPRESSION_TYPE_MCC_DEFLATE:
+                    compression_algorithm = "MCC-Deflate";
+                    break;
+            }
+            
+            PRINT_LINE(oprintf, "Compressed:", "Yes (%.02f %%) via %s\n", calculate_compression_ratio(map) * 100.0, compression_algorithm);
         }
         else {
             PRINT_LINE(oprintf, "Compressed:", "%s\n", "No");
@@ -165,10 +188,22 @@ namespace Invader::Info {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
+                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_PC;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX;
+                switch(map_type) {
+                    case HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
+                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER;
+                        break;
+                    case HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
+                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER;
+                        break;
+                    case HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
+                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE;
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 // pretty much useless to show max file size
@@ -177,13 +212,30 @@ namespace Invader::Info {
             default:
                 break;
         }
+        
+        bool size_mismatched = map.get_data_length() != map.get_header_decompressed_file_size();
+        
         if(max_uncompressed_size.has_value()) {
             auto num = BYTES_TO_MiB(map.get_data_length());
             auto den = BYTES_TO_MiB(*max_uncompressed_size);
-            PRINT_LINE(oprintf, "Uncompressed size:", "%.02f / %.02f MiB (%.02f %%)\n", num, den, 100.0 * num / den);
+            
+            char uncompressed_size[128];
+            std::snprintf(uncompressed_size, sizeof(uncompressed_size), "%.02f / %.02f MiB (%.02f %%)%s", num, den, 100.0 * num / den, size_mismatched ? " (mismatched)" : " (matches header)");
+            
+            if(num > den || size_mismatched) {
+                PRINT_LINE(oprintf_success_warn, "Uncompressed size:", "%s", uncompressed_size);
+            }
+            else {
+                PRINT_LINE(oprintf_success, "Uncompressed size:", "%s", uncompressed_size);
+            }
         }
         else {
-            PRINT_LINE(oprintf, "Uncompressed size:", "%.02f MiB\n", BYTES_TO_MiB(map.get_data_length()));
+            if(size_mismatched) {
+                PRINT_LINE(oprintf_success_warn, "Uncompressed size:", "%.02f MiB (mismatched)", BYTES_TO_MiB(map.get_data_length()));
+            }
+            else {
+                PRINT_LINE(oprintf_success, "Uncompressed size:", "%.02f MiB (matches header)", BYTES_TO_MiB(map.get_data_length()));
+            }
         }
         
         #undef PRINT_LINE
@@ -237,6 +289,7 @@ int main(int argc, const char **argv) {
     for(auto &i : all_values) {
         if(!overview_added) {
             options_list += "Set the type of data to show. Can be overview (default)";
+            overview_added = true;
         }
         else {
             options_list += ", ";

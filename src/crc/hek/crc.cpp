@@ -8,7 +8,7 @@
 #include <invader/map/map.hpp>
 
 namespace Invader {
-    std::uint32_t calculate_map_crc(Invader::Map &map, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
+    std::uint32_t calculate_map_crc(const Invader::Map &map, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
         // Reassign variables if needed
         auto *data = map.get_data();
         auto size = map.get_data_length();
@@ -75,7 +75,7 @@ namespace Invader {
         }
 
         // Find out where we're going to be doing CRC32 stuff
-        auto *tag_file_checksums = &reinterpret_cast<HEK::CacheFileTagDataHeader *>(map.get_tag_data_at_offset(0, sizeof(HEK::CacheFileTagDataHeader)))->tag_file_checksums;
+        auto *tag_file_checksums = &reinterpret_cast<const HEK::CacheFileTagDataHeader *>(map.get_tag_data_at_offset(0, sizeof(HEK::CacheFileTagDataHeader)))->tag_file_checksums;
         const std::byte *tag_file_checksums_ptr = reinterpret_cast<const std::byte *>(tag_file_checksums);
         std::size_t tag_file_checksums_offset_in_memory = tag_file_checksums_ptr - tag_data + data_crc.size();
         CRC_DATA(tag_data_start, tag_data_end);
@@ -103,9 +103,7 @@ namespace Invader {
         }
     }
     
-    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty, bool allow_compressed) {
-        // Parse the map
-        Map map = allow_compressed ? Map::map_with_copy(data, size) : Map::map_with_pointer(const_cast<std::byte *>(data), size);
-        return calculate_map_crc(map, new_crc, new_random, check_dirty);
+    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
+        return calculate_map_crc(Map::map_with_copy(data, size), new_crc, new_random, check_dirty);
     }
 }

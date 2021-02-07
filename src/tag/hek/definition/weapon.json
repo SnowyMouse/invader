@@ -227,6 +227,7 @@
                 "name": "magazine objects",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazineObject",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],
@@ -314,7 +315,7 @@
                 "name": "maximum rate of fire",
                 "bounds": true,
                 "type": "float",
-                "unit": "per second",
+                "unit": "shots per second",
                 "comment": "This determines the maximum number of times this trigger can be fired per second.\nThe first value is initial rate of fire and the second value is the final rate of fire.\nWeapons cannot fire faster than once per tick, and non-positive (0 or less) rate of fire results in firing once per tick.\nBecause weapons cannot fire in between ticks, fire rate is also effectively rounded down to the nearest tickrate/n for any positive integer n (so at 30 ticks per second: 30, 15, 10, 7.5, 6, 5, 4.288, 3.75, 3.333, 3, etc.)"
             },
             {
@@ -546,6 +547,7 @@
                 "name": "firing effects",
                 "type": "TagReflexive",
                 "struct": "WeaponTriggerFiringEffect",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],
@@ -558,8 +560,13 @@
         "groups": [
             {
                 "name": "weapon",
-                "description": "Weapon attributes",
-                "first": "weapon flags"
+                "first": "weapon flags",
+                "description": "These are the weapon attributes of this weapon.\n\nThe flags are as follows:\n- \"Mutually exclusive triggers\" prevent both triggers from firing at the same time.\n- \"Must be readied\" is used for indicating that a weapon is used as a gametype objective for CTF or Oddball.\n- \"Doesn't count towards maximum\" allows the weapon to bypass the 3 weapon limit, but note that only four weapons can be held at once.\n- \"Aim assists only when zoomed\" prevents the weapon from engaging aim assist unless the player is zoomed in.\n- \"Prevents grenade throwing\" prevents the player from throwing grenades while the weapon is held.\n- \"Must be picked up\" forces the player to pick up the weapon rather than giving the option to do so.\n- \"Prevents melee attack\" prevents the player from performing a melee attack while the weapon is out.\n- \"Detonates when dropped\" causes the weapon to perform its detonation effect as indicated in the Item attributes.\n- \"Cannot fire at max age\" prevents the weapon from firing at all when it hits maximum age.\n- \"Secondary trigger overrides grenades\" results in the grenade button firing the second trigger instead.\n- \"Does not depower active camo in multiplayer\" prevents the weapon from revealing the player upon being fired, though this flag is made obsolete by the fact that there is an \"active camo ding\" field.\n\"Enables integrated night vision\" allows the weapon to have night vision when activating the flash light while zoomed in.\n- \"AIs use weapon melee damage\" has the weapon's melee damage override the actors when performing a melee attack.\n\nFor a unit to pick up the weapon, they must have animations available for this weapon that match the label tag."
+            }, 
+            {
+                "name": "zoom levels",
+                "first": "zoom levels",
+                "description": "These attributes are used for determining magnification levels of the weapon. The minimum zoom level is used for the first zoom level, and the maximum zoom level is used for the final zoom level. Zoom levels in between the minimum and maximum are interpolated. For example, if you have four zoom levels and the minimum was 2 with the maximum being 8, then the second and third zoom levels will be 4x and 6x, respectively.\n\nWhen zoomed in, if the weapon's HUD has a zoom reticle, it will appear. If there are multiple zoom levels, then it will changed to the next bitmap or sprite in its sequence every time the player zooms in. Note that if there are not enough bitmaps in the sequence, the game may crash (invader-build will check this)."
             }
         ],
         "fields": [
@@ -570,6 +577,7 @@
             {
                 "name": "label",
                 "type": "TagString",
+                "comment": "Units that have this label in their animations will be able to pick up the weapon",
                 "endian": null
             },
             {
@@ -634,9 +642,9 @@
                 "type": "Fraction"
             },
             {
-                "name": "heat loss per second",
+                "name": "heat loss rate",
                 "minimum": 0.0,
-                "maximum": 1.0,
+                "unit": "per second",
                 "type": "Fraction"
             },
             {
@@ -659,12 +667,13 @@
                 "compound": true
             },
             {
-                "name": "detonation",
+                "name": "overheat detonation",
                 "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
                 ],
+                "comment": "This effect is played when the weapon overheats and is set to detonate as a result",
                 "compound": true
             },
             {
@@ -714,13 +723,13 @@
                 "size": 2
             },
             {
-                "name": "magnification levels",
+                "name": "zoom levels",
                 "type": "uint16"
             },
             {
-                "name": "magnification range",
+                "name": "zoom magnification range",
                 "bounds": true,
-                "unit": "world units",
+                "comment": "Minimum is the magnification amount for the first zoom level, and maximum is the magnification amount for the final zoom level",
                 "type": "float"
             },
             {
@@ -913,6 +922,7 @@
                 "name": "more predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "hek_maximum": 1024,
                 "cache_only": true,
                 "compound": true
             },
@@ -920,12 +930,14 @@
                 "name": "magazines",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazine",
+                "hek_maximum": 2,
                 "compound": true
             },
             {
                 "name": "triggers",
                 "type": "TagReflexive",
                 "struct": "WeaponTrigger",
+                "hek_maximum": 2,
                 "compound": true
             }
         ],

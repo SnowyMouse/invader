@@ -23,7 +23,8 @@
                 "name": "colors",
                 "type": "TagReflexive",
                 "struct": "ColorTableColor",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 512
             }
         ],
         "type": "struct",

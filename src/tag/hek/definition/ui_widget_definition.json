@@ -619,18 +619,21 @@
                 "name": "game data inputs",
                 "type": "TagReflexive",
                 "struct": "GameDataInputReference",
+                "hek_maximum": 64,
                 "compound": true
             },
             {
                 "name": "event handlers",
                 "type": "TagReflexive",
                 "struct": "EventHandlerReference",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
                 "name": "search and replace functions",
                 "type": "TagReflexive",
                 "struct": "SearchAndReplaceReference",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
@@ -744,6 +747,7 @@
                 "name": "conditional widgets",
                 "type": "TagReflexive",
                 "struct": "ConditionalWidgetReference",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
@@ -758,6 +762,7 @@
                 "name": "child widgets",
                 "type": "TagReflexive",
                 "struct": "ChildWidgetReference",
+                "hek_maximum": 32,
                 "compound": true
             }
         ],

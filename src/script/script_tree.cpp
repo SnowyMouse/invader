@@ -365,7 +365,7 @@ namespace Invader::ScriptTree {
                     global_type.raw_value = HEK::ScenarioScriptValueType_to_string(global.global_type);
                     for(char &c : global_type.raw_value) {
                         if(c == '-') {
-                            c = ' ';
+                            c = '_';
                         }
                     }
                     global_type.value = global_type.raw_value;
@@ -414,7 +414,7 @@ namespace Invader::ScriptTree {
                         script_return_type.raw_value = HEK::ScenarioScriptValueType_to_string(script.script_return_type);
                         for(char &c : script_return_type.raw_value) {
                             if(c == '-') {
-                                c = ' ';
+                                c = '_';
                             }
                         }
                         script_return_type.value = script_return_type.raw_value;

@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 3.12)
 
 # Project name - You should change this if you're making a fork
 project(Invader
-    VERSION 0.38.1
-    DESCRIPTION "Modding toolkit for Halo Combat Evolved on the PC"
+    VERSION 0.41.4
+    DESCRIPTION "Modding toolkit for Halo Combat Evolved"
     LANGUAGES C CXX
 )
 
@@ -25,17 +25,17 @@ set(TARGETS_LIST invader)
 # If we have Git, try to see if we are in a git repo
 if(${GIT_FOUND})
     execute_process(
-        COMMAND ${GIT_EXECUTABLE} --git-dir '${CMAKE_CURRENT_SOURCE_DIR}/.git' rev-parse --short HEAD
+        COMMAND ${GIT_EXECUTABLE} --git-dir "${CMAKE_CURRENT_SOURCE_DIR}/.git" rev-parse --short HEAD
         OUTPUT_VARIABLE GIT_COMMIT_F
         ERROR_QUIET
     )
     if("${GIT_COMMIT_F}" STREQUAL "")
-        set(IN_GIT_REPO TRUE)
-    else()
         set(IN_GIT_REPO FALSE)
+    else()
+        set(IN_GIT_REPO TRUE)
     endif()
 else()
-    set(IN_GIT_REPO TRUE)
+    set(IN_GIT_REPO FALSE)
 endif()
 
 # Do stuff depending on the compiler
@@ -61,6 +61,15 @@ if(WIN32)
     add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
 endif()
 
+function(do_windows_rc target file_name description)
+    if(WIN32)
+        target_sources(${target} PRIVATE src/windows.rc)
+        target_compile_definitions(${target} PRIVATE "-DINVADER_BINARY_NAME=\\\"${target}\\\"")
+        target_compile_definitions(${target} PRIVATE "-DINVADER_BINARY_FILE_NAME=\\\"${file_name}\\\"")
+        target_compile_definitions(${target} PRIVATE "-DINVADER_BINARY_DESCRIPTION=\\\"${description}\\\"")
+    endif()
+endfunction()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(src/invader.cmake)
 include(src/build/build.cmake)
@@ -82,6 +91,7 @@ include(src/collection/collection.cmake)
 include(src/bludgeon/bludgeon.cmake)
 include(src/compare/compare.cmake)
 include(src/scan/scan.cmake)
+include(src/convert/convert.cmake)
 
 # Qt stuff
 include(src/edit/qt/qt.cmake)

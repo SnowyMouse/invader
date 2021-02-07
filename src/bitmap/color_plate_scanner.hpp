@@ -7,7 +7,7 @@
 #include <vector>
 #include <optional>
 #include <invader/tag/hek/definition.hpp>
-#include <invader/bitmap/color_plate_pixel.hpp>
+#include <invader/bitmap/pixel.hpp>
 
 namespace Invader {
     using BitmapType = HEK::BitmapType;
@@ -30,7 +30,7 @@ namespace Invader {
         std::int32_t registration_point_x;
         std::int32_t registration_point_y;
         std::uint32_t depth = 1;
-        std::vector<ColorPlatePixel> pixels;
+        std::vector<Pixel> pixels;
         std::vector<GeneratedBitmapDataBitmapMipmap> mipmaps;
     };
 
@@ -84,48 +84,61 @@ namespace Invader {
          * @param  blur               blur filter
          * @return                    scanned color plate data
          */
-        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur);
+        static GeneratedBitmapData scan_color_plate(
+            const Pixel *pixels,
+            std::uint32_t width,
+            std::uint32_t height,
+            BitmapType type,
+            BitmapUsage usage,
+            float bump_height,
+            std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters,
+            std::int16_t mipmaps,
+            HEK::InvaderBitmapMipmapScaling mipmap_type,
+            std::optional<float> mipmap_fade_factor,
+            std::optional<float> sharpen,
+            std::optional<float> blur
+        );
 
     private:
         /** Is power of two required */
         bool power_of_two = true;
 
         /** Transparency color */
-        std::optional<ColorPlatePixel> transparency_color;
+        std::optional<Pixel> transparency_color;
 
         /** Sequence divider color */
-        std::optional<ColorPlatePixel> sequence_divider_color;
+        std::optional<Pixel> sequence_divider_color;
 
         /** Spacing color */
-        std::optional<ColorPlatePixel> spacing_color;
+        std::optional<Pixel> spacing_color;
 
         /**
          * Check if the color is blue
          * @param  color color to check
          * @return       true if blue
          */
-        bool is_transparency_color(const ColorPlatePixel &color) const;
+        bool is_transparency_color(const Pixel &color) const;
 
         /**
          * Check if the color is magenta
          * @param  color color to check
          * @return       true if magenta
          */
-        bool is_sequence_divider_color(const ColorPlatePixel &color) const;
+        bool is_sequence_divider_color(const Pixel &color) const;
 
         /**
          * Check if the color is cyan
          * @param  color color to check
          * @return       true if cyan
          */
-        bool is_spacing_color(const ColorPlatePixel &color) const;
+        bool is_spacing_color(const Pixel &color) const;
 
         /**
          * Check if the color is ignored
          * @param  color color to check
          * @return       true if ignored
          */
-        bool is_ignored(const ColorPlatePixel &color) const;
+        bool is_ignored(const Pixel &color) const;
 
         /**
          * Read the color plate data bitmap data
@@ -133,7 +146,7 @@ namespace Invader {
          * @param pixels           pixel input
          * @param width            width of input
          */
-        void read_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width) const;
+        void read_color_plate(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width) const;
 
         /**
          * Read an unrolled cubemap
@@ -142,7 +155,7 @@ namespace Invader {
          * @param width            width of input
          * @param height           height of input
          */
-        void read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+        void read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
          * Read a single bitmap.
@@ -151,7 +164,7 @@ namespace Invader {
          * @param width            width of input
          * @param height           height of input
          */
-        void read_single_bitmap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+        void read_single_bitmap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
          * Process height maps for the bitmap

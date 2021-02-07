@@ -21,7 +21,7 @@ namespace Invader::EditQt {
     
     TagEditorEditWidgetView::TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary, QWidget *extra_widget) : QFrame(parent), values(values), editor_window(editor_window) {
         auto *vbox_layout = new QVBoxLayout();
-        vbox_layout->setMargin(0);
+        vbox_layout->setContentsMargins(0, 0, 0, 0);
         vbox_layout->setSpacing(0);
 
         // Set the layout

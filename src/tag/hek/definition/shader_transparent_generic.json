@@ -158,13 +158,11 @@
             },
             {
                 "name": "map u scale",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "map v scale",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "map u offset",
@@ -292,7 +290,7 @@
             },
             {
                 "name": "color0 animation function",
-                "type": "FunctionOut"
+                "type": "WaveFunction"
             },
             {
                 "name": "color0 animation period",
@@ -480,6 +478,7 @@
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
+                "hek_maximum": 4,
                 "compound": true
             },
             {
@@ -487,6 +486,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericMap",
                 "compound": true,
+                "hek_maximum": 4,
                 "maximum": 4
             },
             {
@@ -494,6 +494,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericStage",
                 "compound": true,
+                "hek_maximum": 7,
                 "maximum": 7
             }
         ],

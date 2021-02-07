@@ -88,7 +88,8 @@
                 "name": "instances",
                 "type": "TagReflexive",
                 "struct": "ModelMarkerInstance",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 32
             }
         ],
         "type": "struct",
@@ -276,7 +277,8 @@
                 "type": "TagReflexive",
                 "struct": "ModelRegionPermutationMarker",
                 "compound": true,
-                "compile_ignore": true
+                "compile_ignore": true,
+                "hek_maximum": 64
             }
         ],
         "type": "struct",
@@ -302,7 +304,8 @@
                 "type": "TagReflexive",
                 "struct": "ModelRegionPermutation",
                 "compound": true,
-                "maximum": 255
+                "maximum": 255,
+                "hek_maximum": 32
             }
         ],
         "type": "struct",
@@ -487,21 +490,24 @@
                 "type": "TagReflexive",
                 "struct": "ModelVertexUncompressed",
                 "compound": true,
-                "non_cached": true
+                "non_cached": true,
+                "hek_maximum": 65535
             },
             {
                 "name": "compressed vertices",
                 "type": "TagReflexive",
                 "struct": "ModelVertexCompressed",
                 "compound": true,
-                "non_cached": true
+                "non_cached": true,
+                "hek_maximum": 65535
             },
             {
                 "name": "triangles",
                 "type": "TagReflexive",
                 "struct": "ModelTriangle",
                 "compound": true,
-                "non_cached": true
+                "non_cached": true,
+                "hek_maximum": 65535
             },
             {
                 "name": "do not crash the game",
@@ -520,6 +526,7 @@
                 "endian": "little",
                 "type": "uint32",
                 "cache_only": true,
+                "comment": "On Xbox: pointer to the triangle indices. On PC: offset to triangles relative to the end of the map's vertex data.",
                 "drop_on_extract_hidden": true
             },
             {
@@ -527,6 +534,7 @@
                 "endian": "little",
                 "type": "uint32",
                 "cache_only": true,
+                "comment": "On Xbox: pointer to the entry in the second parts list which points to the triangle indices. On PC: same value as the first triangle offset",
                 "drop_on_extract_hidden": true
             },
             {
@@ -555,7 +563,9 @@
             {
                 "name": "vertex offset",
                 "type": "uint32",
-                "drop_on_extract_hidden": true
+                "comment": "On Xbox: pointer to the entry in the second parts list which points to the triangle indices. On PC: offset to first vertex relative to the map's vertex data.",
+                "drop_on_extract_hidden": true,
+                "cache_only": true
             }
         ],
         "type": "struct",
@@ -580,7 +590,8 @@
                 "name": "parts",
                 "type": "TagReflexive",
                 "struct": "ModelGeometryPart",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 32
             }
         ],
         "type": "struct",
@@ -721,41 +732,45 @@
             {
                 "type": "pad",
                 "size": 116
-            },
-            {
+            },{
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "ModelMarker",
                 "compound": true,
                 "maximum": 0,
-                "hidden": true
+                "hidden": true,
+                "hek_maximum": 256
             },
             {
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelNode",
                 "compound": true,
-                "maximum": 255
+                "maximum": 255,
+                "hek_maximum": 64
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelRegion",
                 "compound": true,
-                "maximum": 255
+                "maximum": 255,
+                "hek_maximum": 32
             },
             {
                 "name": "geometries",
                 "type": "TagReflexive",
                 "struct": "ModelGeometry",
                 "compound": true,
-                "maximum": 65535
+                "maximum": 65535,
+                "hek_maximum": 256
             },
             {
                 "name": "shaders",
                 "type": "TagReflexive",
                 "struct": "ModelShaderReference",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 32
             }
         ],
         "type": "struct",

@@ -41,10 +41,10 @@ using namespace Invader::HEK;
 
 struct BitmapOptions {
     // Data directory
-    const char *data = "data/";
-
+    std::filesystem::path data = "data";
+    
     // Tags directory
-    std::optional<const char *> tags;
+    std::filesystem::path tags = "tags";
 
     // Scale type?
     std::optional<InvaderBitmapMipmapScaling> mipmap_scale_type;
@@ -95,7 +95,7 @@ struct BitmapOptions {
     bool regenerate = false;
 };
 
-template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::string &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagClassInt tag_class_int) {
+template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagClassInt tag_class_int) {
     // Let's begin
     std::filesystem::path data_path = bitmap_options.data;
 
@@ -105,7 +105,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     // See if we can get anything out of this
     if(!bitmap_options.ignore_tag_data && std::filesystem::exists(final_path)) {
-        auto tag_data = Invader::File::open_file(final_path.c_str()).value();
+        auto tag_data = Invader::File::open_file(final_path).value();
         bitmap_tag_data = T::parse_hek_tag_file(tag_data.data(), tag_data.size());
 
         // Set some default values
@@ -172,6 +172,11 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         // TODO: Handle converting between extended and non-extended
         source_is_extended = sizeof(T) == sizeof(Parser::InvaderBitmap);
     }
+    
+    else if(bitmap_options.regenerate) {
+        eprintf_error("Cannot regenerate. No bitmap tag exists at %s", final_path.string().c_str());
+        std::exit(EXIT_FAILURE);
+    }
 
     // If these values weren't set, set them
     #define DEFAULT_VALUE(what, default) if(!what.has_value()) { what = default; }
@@ -194,26 +199,20 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     #undef DEFAULT_VALUE
 
-    // Make sure we're using features that are allowed
+    // If it doesn't save, it doesn't save
     if(sizeof(T) != sizeof(Parser::InvaderBitmap)) {
-        if(bitmap_options.use_extended) {
-            eprintf_error("Extended is enabled. Apparently I screwed up when trying to handle that.");
-            return EXIT_FAILURE;
-        }
         if(*bitmap_options.sprite_budget > 512) {
-            eprintf_error("Sprite budget exceeds 512x512. This is only allowed with --extended.");
-            return EXIT_FAILURE;
+            eprintf_warn("Sprite budget exceeds 512x512. This setting will not save.");
         }
         if(*bitmap_options.dithering) {
-            eprintf_error("Dithering is enabled. This is only allowed with --extended.");
-            return EXIT_FAILURE;
+            eprintf_warn("Dithering is enabled. This setting will not save.");
         }
     }
 
     // Have these variables handy
     std::uint32_t image_width = 0, image_height = 0;
     std::size_t image_size = 0;
-    ColorPlatePixel *image_pixels = nullptr;
+    Pixel *image_pixels = nullptr;
 
     // If we're regenerating, our color plate data is in the tag
     if(bitmap_options.regenerate) {
@@ -229,12 +228,12 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         // Get the size of the data we're going to decompress
         auto *data = bitmap_tag_data.compressed_color_plate_data.data();
         image_size = reinterpret_cast<HEK::BigEndian<std::uint32_t> *>(data)->read();
-        if((image_size % sizeof(ColorPlatePixel)) != 0) {
+        if((image_size % sizeof(Pixel)) != 0) {
             invalid_color_plate_data_size_spaghetti_code:
-            eprintf_error("Cannot regenerate due the compressed color plate data size being wrong)");
+            eprintf_error("Cannot regenerate due the compressed color plate data size being wrong");
             return EXIT_FAILURE;
         }
-        image_pixels = new ColorPlatePixel[image_size / sizeof(ColorPlatePixel)];
+        image_pixels = new Pixel[image_size / sizeof(Pixel)];
         
         data += sizeof(std::uint32_t);
         size -= sizeof(std::uint32_t);
@@ -290,7 +289,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         }
 
         if(image_pixels == nullptr) {
-            eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data);
+            eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data.string().c_str());
             eprintf("Valid formats are:\n");
             for(auto *format : SUPPORTED_FORMATS) {
                 eprintf("    %s\n", format);
@@ -312,7 +311,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Do it!
     auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
         try {
-            return ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
+            return ColorPlateScanner::scan_color_plate(reinterpret_cast<const Pixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
         }
         catch (std::exception &e) {
             eprintf_error("Failed to process the image: %s", e.what());
@@ -474,17 +473,11 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     }
 
     // Write it all
-    try {
-        if(!std::filesystem::exists(tag_path.parent_path())) {
-            std::filesystem::create_directories(tag_path.parent_path());
-        }
-    }
-    catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
-        return EXIT_FAILURE;
-    }
+    std::error_code ec;
+    std::filesystem::create_directories(tag_path.parent_path(), ec);
+    
     if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(tag_class_int, true))) {
-        eprintf_error("Error: Failed to write to %s.", final_path.c_str());
+        eprintf_error("Error: Failed to write to %s.", final_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -499,22 +492,21 @@ int main(int argc, char *argv[]) {
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists.");
-    options.emplace_back("dithering", 'D', 1, "[REQUIRES --extended] Apply dithering to 16-bit, dxtn, or p8 bitmaps. Can be: a, rgb, or argb. Default: none", "<channels>");
+    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit", "<type>");
     options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d-textures, 3d-textures, cube-maps, interface-bitmaps, or sprites. Default (new tag): 2d", "<type>");
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
-    options.emplace_back("mipmap-scale", 's', 1, "[REQUIRES --extended] Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
+    options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. This does not save in .bitmap tags. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
     options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
-    options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, or 512. If --extended, then 1024 or 2048 can be used, too. Default (new tag): 32", "<length>");
+    options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, or 512. Default (new tag): 32", "<length>");
     options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
     options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha-blend, default, height-map, detail-map, light-map, vector-map. Default: default", "<usage>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data.");
-    options.emplace_back("extended", 'x', 0, "Create an invader_bitmap tag (required for some features).");
 
     static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
     static constexpr char USAGE[] = "[options] <bitmap-tag>";
@@ -527,10 +519,6 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 't':
-                if(bitmap_options.tags.has_value()) {
-                    eprintf_error("This tool does not support multiple tags directories.");
-                    std::exit(EXIT_FAILURE);
-                }
                 bitmap_options.tags = arguments[0];
                 break;
 
@@ -667,115 +655,52 @@ int main(int argc, char *argv[]) {
             case 'P':
                 bitmap_options.filesystem_path = true;
                 break;
-
-            case 'x':
-                bitmap_options.use_extended = true;
-                break;
         }
     });
-    
-    // Default
-    if(!bitmap_options.tags.has_value()) {
-        bitmap_options.tags = "tags";
-    }
 
-    // See if we can figure out the bitmap tag using extensions
-    std::string bitmap_tag = remaining_arguments[0];
+    // Resolve the bitmap tag
+    std::string bitmap_tag;
     SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
-    
-    // Remember what kind of tag class we're using, if we're using -P with -R
-    std::optional<TagClassInt> tag_class_to_use;
-
     if(bitmap_options.filesystem_path) {
-        // Check for a ".bitmap" and ".extended_bitmap"
-        if(bitmap_options.regenerate) {
-            std::vector<std::string> tags_v(&*bitmap_options.tags, &*bitmap_options.tags + 1);
-            auto try_it_and_buy_it = [&tags_v, &bitmap_tag, &tag_class_to_use](HEK::TagClassInt tag_class_int) -> bool {
-                auto p = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, tags_v, std::string(".") + HEK::tag_class_to_extension(tag_class_int));
-                if(!p.has_value()) {
-                    return false;
+        auto bitmap_tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], bitmap_options.tags);
+        if(bitmap_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+            bitmap_tag = std::filesystem::path(*bitmap_tag_maybe).replace_extension().string();
+        }
+        else if(!bitmap_options.regenerate) {
+            auto bitmap_file_maybe = File::file_path_to_tag_path(remaining_arguments[0], bitmap_options.data);
+            if(bitmap_file_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+                SupportedFormatsInt i;
+                auto path_test = std::filesystem::path(*bitmap_file_maybe);
+                auto extension = path_test.extension();
+                bitmap_tag = std::filesystem::path(*bitmap_file_maybe).replace_extension().string();
+                for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+                    if(extension == SUPPORTED_FORMATS[i]) {
+                        found_format = i;
+                        break;
+                    }
                 }
-                bitmap_tag = *p;
-                tag_class_to_use = tag_class_int;
-                return true;
-            };
-            
-            if(!try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_INVADER_BITMAP) && !try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_BITMAP)) {
-                eprintf_error("Failed to find a valid bitmap %s in the tags directory.", remaining_arguments[0]);
-                return EXIT_FAILURE;
+            }
+            else {
+                eprintf_error("Failed to find a valid bitmap %s in the data or tags directories.", remaining_arguments[0]);
             }
         }
-        
-        // Iterate through all the possible extensions
         else {
-            std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
-            SupportedFormatsInt i;
-            for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
-                auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
-                if(bitmap_tag_maybe.has_value()) {
-                    bitmap_tag = *bitmap_tag_maybe;
-                    found_format = i;
-                    break;
-                }
-            }
-            if(i == SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT) {
-                eprintf_error("Failed to find a valid bitmap %s in the data directory.", remaining_arguments[0]);
-                return EXIT_FAILURE;
-            }
-        }
-    }
-
-    // Ensure it's lowercase
-    for(char &c : bitmap_tag) {
-        if(c >= 'A' && c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", bitmap_tag.c_str());
+            eprintf_error("Failed to find a valid bitmap %s in the tags directory.", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }
+    
+    else {
+        bitmap_tag = remaining_arguments[0];
+    }
 
     // Check if the tags directory exists
-    std::filesystem::path tags_path(*bitmap_options.tags);
-    if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*bitmap_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *bitmap_options.tags);
-        }
+    if(!std::filesystem::is_directory(bitmap_options.tags)) {
+        eprintf_error("Directory %s was not found or is not a directory", bitmap_options.tags.string().c_str());
         return EXIT_FAILURE;
     }
 
-    auto tag_path = tags_path / bitmap_tag;
-
-    auto final_path_bitmap = tag_path.string() + ".bitmap";
-    auto final_path_invader_bitmap = tag_path.string() + ".invader_bitmap";
-    
-    // Determine if we're using extended or not
-    if(tag_class_to_use.has_value()) { // if -P and -R is used
-        switch(tag_class_to_use.value()) {
-            case HEK::TagClassInt::TAG_CLASS_BITMAP:
-                if(bitmap_options.use_extended) {
-                    eprintf_error("Using --extended while regenerating a non-extended bitmap is not yet supported");
-                    return EXIT_FAILURE;
-                }
-                break;
-            
-            case HEK::TagClassInt::TAG_CLASS_INVADER_BITMAP:
-                bitmap_options.use_extended = true;
-                break;
-            
-            default:
-                std::terminate();
-        }
-    }
-    else if(bitmap_options.use_extended || (!bitmap_options.use_extended && std::filesystem::exists(final_path_invader_bitmap))) { // if .invader_bitmap exists or we're using extended
-        bitmap_options.use_extended = true;
-    }
-
-    if(bitmap_options.use_extended) {
-        return perform_the_ritual<Invader::Parser::InvaderBitmap>(bitmap_tag, tag_path, final_path_invader_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_INVADER_BITMAP);
-    }
-    else {
-        return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_BITMAP);
-    }
+    auto tag_path = bitmap_options.tags / bitmap_tag;
+    auto final_path_bitmap = std::filesystem::path(tag_path) += ".bitmap";
+    return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_BITMAP);
 }

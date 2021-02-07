@@ -23,18 +23,18 @@ struct SoundOptions {
     std::optional<SoundFormat> format;
     bool fs_path = false;
     std::optional<float> compression_level;
-    bool extended = false;
     std::optional<std::size_t> channel_count;
     std::optional<SoundClass> sound_class;
     std::optional<std::uint32_t> sample_rate;
     std::optional<std::uint16_t> bitrate;
-    std::size_t max_threads = 1;
+    std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
 };
 
-static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *invader_sound);
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count);
 static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count, bool fit_adpcm_block_size);
 
 template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
+    static constexpr std::size_t XBOX_ADPCM_SPLIT_SIZE = 65520;
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
     static constexpr std::size_t MAX_PERMUTATIONS = UINT16_MAX - 1;
 
@@ -47,7 +47,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             eprintf_error("A directory exists at %s where a file was expected", tag_path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
-        auto sound_file = File::open_file(tag_path.string().c_str());
+        auto sound_file = File::open_file(tag_path);
         if(sound_file.has_value()) {
             auto &sound_data = *sound_file;
             try {
@@ -162,8 +162,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         else {
             sound_options.compression_level = invader_sound->compression_level;
         }
-
-        invader_sound->source_FLACs.clear();
     }
 
     // Hold onto this
@@ -182,12 +180,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
         case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
         case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
-            break;
-        case SoundFormat::SOUND_FORMAT_FLAC:
-            if(!invader_sound) {
-                eprintf_error("FLAC cannot be used without --extended");
-                std::exit(EXIT_FAILURE);
-            }
             break;
         case SoundFormat::SOUND_FORMAT_IMA_ADPCM:
             eprintf_error("IMA ADPCM is unsupported");
@@ -215,9 +207,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         for(auto &permutation : old_pitch_range.permutations) {
             permutation.samples = std::vector<std::byte>();
         }
-    }
-    if(invader_sound) {
-        invader_sound->source_FLACs.clear();
     }
 
     // Same with whether to split
@@ -263,7 +252,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     // Load the sounds
     if(contains_files) {
         auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), "default");
-        populate_pitch_range(pitch_range.first, data_path, highest_sample_rate, highest_channel_count, 0, invader_sound);
+        populate_pitch_range(pitch_range.first, data_path, highest_sample_rate, highest_channel_count);
     }
     else if(contains_directories) {
         std::size_t i = 0;
@@ -274,7 +263,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 std::exit(EXIT_FAILURE);
             }
             auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), path.filename().string());
-            populate_pitch_range(pitch_range.first, path, highest_sample_rate, highest_channel_count, i++, invader_sound);
+            populate_pitch_range(pitch_range.first, path, highest_sample_rate, highest_channel_count);
             if(i == NULL_INDEX) {
                 eprintf_error("%u or more pitch ranges are present", NULL_INDEX);
                 std::exit(EXIT_FAILURE);
@@ -336,7 +325,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     oprintf("Processing sounds... ");
     oflush();
     std::size_t total_sound_count = 0;
-    std::atomic<std::size_t> thread_count;
+    std::atomic<std::size_t> thread_count = 0;
     
     // Wait until we have 0 threads working
     auto wait_until_threads_are_done = [&thread_count]() {
@@ -421,15 +410,19 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     // Make the sound tag
     const char *output_name = nullptr;
+    bool enable_threading_split_permutation_encoding = true;
     switch(format) {
         case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
             output_name = "16-bit PCM";
+            enable_threading_split_permutation_encoding = false;
             break;
         case SoundFormat::SOUND_FORMAT_IMA_ADPCM:
             output_name = "IMA ADPCM";
+            enable_threading_split_permutation_encoding = false;
             break;
         case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
             output_name = "Xbox ADPCM";
+            enable_threading_split_permutation_encoding = false;
             break;
         case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
             output_name = "Ogg Vorbis";
@@ -463,9 +456,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     
     // Make sure we don't completely blow things up
     std::mutex encoding_mutex;
-    
-    // Block size
-    std::size_t adpcm_block_size = SoundEncoder::calculate_adpcm_pcm_block_size(highest_channel_count);
 
     // Encode this
     for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
@@ -650,14 +640,9 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 (*thread_count)--;
             };
 
-            // Split if requested
-            if(split) {
+            // Split things we can't trivially split losslessly
+            if(split && enable_threading_split_permutation_encoding) {
                 std::size_t max_split_size = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
-                
-                // If ADPCM, also take block size into account
-                if(format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM) {
-                    max_split_size = max_split_size - (max_split_size % (bytes_per_sample_all_channels * adpcm_block_size));
-                }
                 
                 std::size_t digested = 0;
                 while(permutation.pcm.size() > 0) {
@@ -717,8 +702,41 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     
     // Wait until we have 0 threads left
     wait_until_threads_are_done();
+    
+    // Next, if we can split losslessly, do it
+    if(split && !enable_threading_split_permutation_encoding) {
+        auto split_size = format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM ? XBOX_ADPCM_SPLIT_SIZE : SPLIT_BUFFER_SIZE;
+        
+        for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+            auto &pitch_range = sound_tag.pitch_ranges[pr];
+            for(std::size_t ap = 0; ap < pitch_range.actual_permutation_count; ap++) {
+                auto *next_permutation = &pitch_range.permutations[ap];
+                auto samples = std::move(next_permutation->samples);
+                next_permutation->samples.clear();
+                auto permutation_template = *next_permutation;
+                permutation_template.next_permutation_index = NULL_INDEX;
+                std::size_t samples_offset = 0;
+                
+                while(true) {
+                    auto subpermutation_size = std::min(split_size, samples.size() - samples_offset);
+                    next_permutation->samples = std::vector<std::byte>(samples.data() + samples_offset, samples.data() + samples_offset + subpermutation_size);
+                    samples_offset += subpermutation_size;
+                    
+                    // If we've hit the end, we're done
+                    if(samples_offset == samples.size()) {
+                        break;
+                    }
+                    
+                    // Add the next permutation
+                    next_permutation->next_permutation_index = pitch_range.permutations.size();
+                    next_permutation = &pitch_range.permutations.emplace_back(permutation_template);
+                }
+            }
+        }
+    }
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_INVADER_SOUND, true);
+    
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, invader_sound == nullptr ? "" : " [--extended]");
 
     return sound_tag_data;
@@ -735,15 +753,14 @@ int main(int argc, const char **argv) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("extended", 'x', 0, "Create an invader_sound tag (required for some features).");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, or xbox-adpcm. Using flac requires --extended. Setting this is required unless creating an extended tag, in which case it defaults to 16-bit-pcm.", "<fmt>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
-    options.emplace_back("channel-count", 'C', 1, "[REQUIRES --extended] Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
-    options.emplace_back("sample-rate", 'r', 1, "[REQUIRES --extended] Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, or xbox-adpcm.", "<fmt>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data or tag.");
+    options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
+    options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
     options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
     options.emplace_back("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
-    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: 1");
+    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: CPU thread count");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
@@ -821,10 +838,6 @@ int main(int argc, const char **argv) {
                 sound_options.fs_path = true;
                 break;
 
-            case 'x':
-                sound_options.extended = true;
-                break;
-
             case 'r':
                 try {
                     sound_options.sample_rate = static_cast<std::uint32_t>(std::stol(arguments[0]));
@@ -859,13 +872,12 @@ int main(int argc, const char **argv) {
     // Get our paths and make sure a data directory exists
     std::string halo_tag_path;
     if(sound_options.fs_path) {
-        std::vector<std::string> data;
-        data.emplace_back(std::string(sound_options.data));
-        try {
-            halo_tag_path = Invader::File::file_path_to_tag_path(remaining_arguments[0], data, false).value();
+        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], sound_options.data);
+        if(!tag_path_maybe.has_value()) {
+            tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], sound_options.tags);
         }
-        catch(std::exception &) {
-            eprintf_error("Cannot find %s in %s", remaining_arguments[0], sound_options.data);
+        if(!tag_path_maybe.has_value()) {
+            eprintf_error("Cannot find %s in %s or %s", remaining_arguments[0], sound_options.data, sound_options.tags);
             return EXIT_FAILURE;
         }
     }
@@ -881,29 +893,18 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
-    // Find it!
-    auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".invader_sound");
-    if(std::filesystem::exists(tag_path)) {
-        sound_options.extended = true;
+    // Make sure format was set (invader_sound tags won't need this)
+    if(!sound_options.format.has_value()) {
+        eprintf_error("No sound format set. Use -h for more information.");
+        return EXIT_FAILURE;
     }
 
     // Generate sound tag
     std::vector<std::byte> sound_tag_data;
+    auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
+    
     try {
-        if(!sound_options.extended) {
-            tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
-
-            // Make sure format was set
-            if(!sound_options.format.has_value()) {
-                eprintf_error("No sound format set (required for .sound tags). Use -h for more information.");
-                return EXIT_FAILURE;
-            }
-
-            sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
-        }
-        else {
-            sound_tag_data = make_sound_tag<Parser::InvaderSound>(tag_path, data_path, sound_options);
-        }
+        sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
     }
     catch(std::exception &e) {
         eprintf_error("Failed to create sound tag due to an exception error: %s", e.what());
@@ -911,15 +912,8 @@ int main(int argc, const char **argv) {
     }
 
     // Create missing directories if needed
-    try {
-        if(!std::filesystem::exists(tag_path.parent_path())) {
-            std::filesystem::create_directories(tag_path.parent_path());
-        }
-    }
-    catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
-        return EXIT_FAILURE;
-    }
+    std::error_code ec;
+    std::filesystem::create_directories(tag_path.parent_path(), ec);
 
     // Save
     if(!Invader::File::save_file(tag_path.string().c_str(), sound_tag_data)) {
@@ -928,14 +922,12 @@ int main(int argc, const char **argv) {
     }
 }
 
-static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *invader_sound) {
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count) {
     for(auto &wav : std::filesystem::directory_iterator(directory)) {
         // Skip directories
         auto path = wav.path();
-        auto path_str = path.string();
-        auto *path_str_cstr = path_str.c_str();
         if(wav.is_directory()) {
-            eprintf_error("Unexpected directory %s", path_str_cstr);
+            eprintf_error("Unexpected directory %s", path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
         auto extension = path.extension().string();
@@ -944,18 +936,18 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
         SoundReader::Sound sound = {};
         try {
             if(extension == ".wav") {
-                sound = SoundReader::sound_from_wav_file(path_str_cstr);
+                sound = SoundReader::sound_from_wav_file(path);
             }
             else if(extension == ".flac") {
-                sound = SoundReader::sound_from_flac_file(path_str_cstr);
+                sound = SoundReader::sound_from_flac_file(path);
             }
             else {
-                eprintf_error("Unknown file format for %s", path_str_cstr);
+                eprintf_error("Unknown file format for %s", path.string().c_str());
                 std::exit(EXIT_FAILURE);
             }
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to load %s: %s", path_str_cstr, e.what());
+            eprintf_error("Failed to load %s: %s", path.string().c_str(), e.what());
             std::exit(EXIT_FAILURE);
         }
 
@@ -972,20 +964,6 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
             c = std::tolower(c);
         }
 
-        // Add it to the source list
-        if(invader_sound) {
-            auto &source = invader_sound->source_FLACs.emplace_back();
-            std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
-            std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
-            if(extension == ".flac") {
-                source.compressed_audio_data = *File::open_file(path_str_cstr);
-            }
-            else {
-                source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
-            }
-            source.pitch_range = pitch_range_index;
-        }
-
         // Use the highest channel count and sample rate
         if(highest_channel_count < sound.channel_count) {
             highest_channel_count = sound.channel_count;
@@ -996,11 +974,11 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
 
         // Make sure we can actually work with this
         if(sound.channel_count > 2 || sound.channel_count < 1) {
-            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.c_str());
+            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
         if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 24) {
-            eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
+            eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
 

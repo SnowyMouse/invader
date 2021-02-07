@@ -80,7 +80,6 @@ set(INVADER_SOURCE_FILES
     src/map/tag.cpp
     src/file/file.cpp
     src/build/build_workload.cpp
-    src/bitmap/s3tc/s3tc.cpp
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
     src/error_handler/error_handler.cpp
@@ -97,7 +96,8 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/post_cache_deformat.cpp
     src/tag/parser/compile/actor.cpp
     src/tag/parser/compile/antenna.cpp
-    src/tag/parser/compile/bitmap.cpp
+    src/tag/parser/compile/bitmap/compile.cpp
+    src/tag/parser/compile/bitmap/decompile.cpp
     src/tag/parser/compile/contrail.cpp
     src/tag/parser/compile/damage_effect.cpp
     src/tag/parser/compile/decal.cpp
@@ -135,10 +135,6 @@ set(INVADER_SOURCE_FILES
     src/version.cpp
 )
 
-if(NOT DEFINED ${INVADER_STATIC_BUILD})
-    set(INVADER_STATIC_BUILD false CACHE BOOL "Create a static build of libinvader.a (NOTE: Does not remove external dependencies)")
-endif()
-
 # If static build, build as static
 if(${INVADER_STATIC_BUILD})
     add_library(invader STATIC
@@ -149,6 +145,7 @@ else()
     add_library(invader SHARED
         ${INVADER_SOURCE_FILES}
     )
+    do_windows_rc(invader libinvader.dll "Invader library")
 endif()
 
 # Set our alternative Invader library (the one we aren't linking)
@@ -218,12 +215,20 @@ add_custom_command(
 )
 
 # Include version script
-add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
-    COMMAND "${CMAKE_COMMAND}" "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}" "-DGIT_DIR=${CMAKE_CURRENT_SOURCE_DIR}/.git" "-DOUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" -DPROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} -DPROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR} -DPROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH} -DPROJECT_NAME=${PROJECT_NAME} -DIN_GIT_REPO=${IN_GIT_REPO} -P ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/.git/refs/heads/${INVADER_GIT_BRANCH}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake"
-)
+if(${IN_GIT_REPO})
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
+        COMMAND "${CMAKE_COMMAND}" "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}" "-DGIT_DIR=${CMAKE_CURRENT_SOURCE_DIR}/.git" "-DOUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" -DPROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} -DPROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR} -DPROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH} -DPROJECT_NAME=${PROJECT_NAME} -DIN_GIT_REPO=${IN_GIT_REPO} -P ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/.git/refs/heads/${INVADER_GIT_BRANCH}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake"
+    )
+else()
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
+        COMMAND "${CMAKE_COMMAND}" "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}" "-DGIT_DIR=${CMAKE_CURRENT_SOURCE_DIR}/.git" "-DOUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" -DPROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} -DPROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR} -DPROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH} -DPROJECT_NAME=${PROJECT_NAME} -DIN_GIT_REPO=${IN_GIT_REPO} -P ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake"
+    )
+endif()
 
 # Make the language.cpp file
 add_custom_command(
@@ -251,4 +256,4 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS})
 
 # Link against everything
-target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})
+target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES} ${SQUISH_LIBRARIES})

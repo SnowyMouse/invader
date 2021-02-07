@@ -177,6 +177,7 @@
                 "name": "frames",
                 "type": "TagReflexive",
                 "struct": "LightVolumeFrame",
+                "hek_maximum": 2,
                 "compound": true
             },
             {

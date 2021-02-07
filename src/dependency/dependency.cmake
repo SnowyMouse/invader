@@ -11,4 +11,6 @@ if(${INVADER_DEPENDENCY})
     target_link_libraries(invader-dependency invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-dependency)
+    
+    do_windows_rc(invader-dependency invader-dependency.exe "Invader tag dependency query tool")
 endif()
