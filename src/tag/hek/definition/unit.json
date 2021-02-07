@@ -548,8 +548,13 @@
                 "size": 2
             },
             {
+                "name": "mcc actor type",
+                "type": "MCCActorType",
+                "comment": "only used for scoring in Halo: CE Anniversary (MCC only); overridden by actor_variant if unit is an actor"
+            },
+            {
                 "type": "pad",
-                "size": 12
+                "size": 10
             },
             {
                 "name": "new hud interfaces",
