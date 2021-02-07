@@ -11,13 +11,12 @@ from refactor_reference import make_refactor_reference
 from parser_struct import make_parser_struct
 from check_broken_enums import make_check_broken_enums
 from check_invalid_references import make_check_invalid_references
-from check_uppercase_references import make_check_uppercase_references
 from check_invalid_ranges import make_check_invalid_ranges
 from check_invalid_indices import make_check_invalid_indices
 from check_normalize import make_normalize
 from compare import make_compare
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare, cpp_normalize, cpp_read_hek_file, cpp_check_uppercase_references):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare, cpp_normalize, cpp_read_hek_file):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -33,7 +32,6 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_compare.write(what)
         cpp_normalize.write(what)
         cpp_read_hek_file.write(what)
-        cpp_check_uppercase_references.write(what)
 
     hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -196,7 +194,6 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, all_used_groups, hpp, struct_name, extract_hidden, read_only, title)
         make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
         make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_invalid_references)
-        make_check_uppercase_references(all_used_structs, struct_name, hpp, cpp_check_uppercase_references)
         make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_invalid_ranges)
         make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_invalid_indices, all_structs_arranged)
         make_normalize(all_used_structs, struct_name, hpp, cpp_normalize, normalize)
