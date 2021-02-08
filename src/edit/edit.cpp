@@ -31,7 +31,7 @@ static std::string get_top_member_name(const std::string &key, std::string &afte
         std::exit(EXIT_FAILURE);
     }
     
-    auto return_value = std::string(key_str, c);;
+    auto return_value = std::string(key_str, c);
     after_member = std::string(c);
     return return_value;
 }
@@ -431,10 +431,10 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file.");
-    options.emplace_back("get", 'g', 1, "Get the value with the given key.", "<key>");
-    options.emplace_back("set", 's', 2, "Set the value at the given key to the given value.", "<key> <val>");
-    options.emplace_back("count", 'c', 1, "Get the number of elements in the array at the given key.", "<key>");
-    options.emplace_back("list", 'l', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
+    options.emplace_back("get", 'G', 1, "Get the value with the given key.", "<key>");
+    options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
+    options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
+    options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
 
     static constexpr char DESCRIPTION[] = "Edit tags via command-line. This is intended for scripting.";
     static constexpr char USAGE[] = "[options] <tag.class>";
@@ -456,16 +456,16 @@ int main(int argc, char * const *argv) {
             case 'P':
                 edit_options.use_filesystem_path = true;
                 break;
-            case 'g':
+            case 'G':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_GET, arguments[0], {} });
                 break;
-            case 'c':
+            case 'C':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {} });
                 break;
-            case 'l':
+            case 'L':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST, arguments[0], {} });
                 break;
-            case 's':
+            case 'S':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_SET, arguments[0], arguments[1] });
                 break;
         }
