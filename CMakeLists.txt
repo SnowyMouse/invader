@@ -91,6 +91,7 @@ include(src/collection/collection.cmake)
 include(src/bludgeon/bludgeon.cmake)
 include(src/compare/compare.cmake)
 include(src/convert/convert.cmake)
+include(src/edit/edit.cmake)
 
 # Qt stuff
 include(src/edit/qt/qt.cmake)

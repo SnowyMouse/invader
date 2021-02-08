@@ -260,6 +260,14 @@ namespace Invader::Parser {
         }
 
         /**
+         * Get the member name of the value in the definitions struct
+         * @return member name of the value
+         */
+        const char *get_member_name() const noexcept {
+            return this->member_name;
+        }
+
+        /**
          * Get the string value
          * @return string value
          */
