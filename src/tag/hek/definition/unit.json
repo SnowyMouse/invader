@@ -155,6 +155,56 @@
         "size": 48
     },
     {
+        "name": "MCCUnitType",
+        "type": "enum",
+        "options": [
+            "brute",
+            "grunt",
+            "jackal",
+            "skirmisher",
+            "marine",
+            "spartan",
+            "drone",
+            "hunter",
+            "flood infection",
+            "flood carrier",
+            "flood combat",
+            "flood pure",
+            "sentinel",
+            "elite",
+            "huragok",
+            "mule",
+            "turret",
+            "mongoose",
+            "warthog",
+            "scorpion",
+            "hornet",
+            "pelican",
+            "revenant",
+            "seraph",
+            "shade",
+            "watchtower",
+            "ghost",
+            "chopper",
+            "prowler",
+            "wraith",
+            "banshee",
+            "phantom",
+            "scarab",
+            "guntower",
+            "spirit",
+            "broadsword",
+            "mammoth",
+            "lich",
+            "mantis",
+            "wasp",
+            "phaeton",
+            "watcher",
+            "knight",
+            "crawler"
+        ]
+    },
+    {
         "name": "UnitSeat",
         "fields": [
             {
@@ -548,9 +598,9 @@
                 "size": 2
             },
             {
-                "name": "mcc actor type",
-                "type": "MCCActorType",
-                "comment": "only used for scoring in Halo: CE Anniversary (MCC only); overridden by actor_variant if unit is an actor"
+                "name": "mcc unit type",
+                "type": "MCCUnitType",
+                "comment": "only used for scoring in Halo: CE Anniversary (MCC only); overridden by actor_variant's unit type if unit is an actor"
             },
             {
                 "type": "pad",
