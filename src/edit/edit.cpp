@@ -231,6 +231,48 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_in_array_for_k
     std::exit(EXIT_FAILURE);
 }
 
+static std::string get_value(const Invader::Parser::ParserStructValue &value) {
+    auto values = value.get_values();
+    std::string str;
+    
+    switch(value.get_number_format()) {
+        case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+            for(auto &i : values) {
+                if(str.size() > 0) {
+                    str += " ";
+                }
+                str += std::to_string(std::get<std::int64_t>(i));
+            }
+            break;
+        case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
+            for(auto &i : values) {
+                if(str.size() > 0) {
+                    str += " ";
+                }
+                str += std::to_string(std::get<double>(i));
+            }
+            break;
+        case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE:
+            switch(value.get_type()) {
+                case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+                    return value.get_string();
+                case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+                    return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_class_to_extension(value.get_dependency().tag_class_int);
+                default:
+                    eprintf_error("Unsupported value type");
+                    std::exit(EXIT_FAILURE);
+            }
+            break;
+    }
+    
+    return str;
+}
+
+static void set_value(const Invader::Parser::ParserStructValue &value, const std::string &new_value) {
+    eprintf_error("Unimplemented");
+    std::exit(EXIT_FAILURE);
+}
+
 int main(int argc, char * const *argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
 
@@ -325,6 +367,22 @@ int main(int argc, char * const *argv) {
                         std::exit(EXIT_FAILURE);
                     }
                 }
+                break;
+            }
+            case ActionType::ACTION_TYPE_GET: {
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
+                for(auto &k : arr) {
+                    output.emplace_back(get_value(k));
+                }
+                break;
+            }
+            case ActionType::ACTION_TYPE_SET: {
+                should_save = true;
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
+                for(auto &k : arr) {
+                    set_value(k, i.value);
+                }
+                std::exit(EXIT_FAILURE); // unimplemented
                 break;
             }
             default:

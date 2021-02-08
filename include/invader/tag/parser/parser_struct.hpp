@@ -239,6 +239,14 @@ namespace Invader::Parser {
          * Get the dependency
          * @return dependency
          */
+        const Dependency &get_dependency() const noexcept {
+            return *reinterpret_cast<const Dependency *>(this->address);
+        }
+
+        /**
+         * Get the dependency
+         * @return dependency
+         */
         Dependency &get_dependency() noexcept {
             return *reinterpret_cast<Dependency *>(this->address);
         }
