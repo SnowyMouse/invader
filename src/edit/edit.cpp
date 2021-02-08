@@ -311,8 +311,8 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
         std::vector<Invader::Parser::ParserStructValue::Number> values;
         while(*start) {
             auto *current_path = start;
-            if(*start < '0' || *start > '9') {
-                eprintf_error("Invalid input value %s", new_value.c_str());
+            if(*start != '-' && *start != '.' && (*start < '0' || *start > '9')) {
+                eprintf_error("Invalid input value %s", current_path);
                 std::exit(EXIT_FAILURE);
             }
             switch(format) {
@@ -353,7 +353,7 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
 
 int main(int argc, char * const *argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
-
+    
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
