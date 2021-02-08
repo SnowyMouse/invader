@@ -22,7 +22,7 @@ extract_hidden = True if sys.argv[bitfield_cpp+2].lower() == "on" else False
 
 for i in range(bitfield_cpp+3, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
-        name = name.replace(" ", "_").replace("'", "").replace("-","_").replace("(","").replace(")","")
+        name = name.replace(" ", "_").replace("'", "").replace("(","").replace(")","")
         if not ignore_numbers and name[0].isnumeric():
             name = "_{}".format(name)
         return name
@@ -51,7 +51,7 @@ for i in range(bitfield_cpp+3, len(sys.argv)):
                     print("{}::{} - default AND cache_only cannot be used together in a field since they may be unexpectedly modified".format(s["name"],f["name"]), file=sys.stderr)
                     sys.exit(1)
                 if f["type"] != "pad":
-                    f["member_name"] = make_name_fun(f["name"], False)
+                    f["member_name"] = make_name_fun(f["name"], False).replace("-", "_")
                 if f["type"] == "TagDependency":
                     # Superclasses
                     def expand_superclass(arr, superclass, subclass):
