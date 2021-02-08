@@ -12,13 +12,16 @@ enum ActionType {
     ACTION_TYPE_GET,
     ACTION_TYPE_SET,
     ACTION_TYPE_COUNT,
-    ACTION_TYPE_LIST
+    ACTION_TYPE_LIST,
+    ACTION_TYPE_NEW
 };
 
 struct Actions {
     ActionType type;
     std::string key;
     std::string value;
+    std::size_t count = 0;
+    std::size_t position = 0;
 };
 
 static std::string get_top_member_name(const std::string &key, std::string &after_member) {
@@ -113,7 +116,7 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
     return { min, max };
 }
 
-static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std::vector<Invader::Parser::ParserStructValue> &array, std::string &bitfield) {
+static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std::vector<Invader::Parser::ParserStructValue> &array, std::string *bitfield, std::pair<std::size_t, std::size_t> *range) {
     if(key == "") {
         eprintf_error("Expected value name");
         std::exit(EXIT_FAILURE);
@@ -148,23 +151,23 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
                 }
                 
                 auto count = i.get_array_size();
-                auto range = get_range(key, key);
+                auto access_range = get_range(key, key);
                 
-                if(range.first == 0 && range.second == SIZE_MAX) {
+                if(access_range.first == 0 && access_range.second == SIZE_MAX) {
                     if(count == 0) {
                         return; // nothing to see here
                     }
                     
-                    range.second = count - 1;
+                    access_range.second = count - 1;
                 }
                 
-                if(count < range.first || count <= range.second) {
-                    eprintf_error("%zu-%zu is out of bounds for %s::%s (%zu element%s)", range.first, range.second, ps->struct_name(), member.c_str(), count, count == 1 ? "" : "s");
+                if(count < access_range.first || count <= access_range.second) {
+                    eprintf_error("%zu-%zu is out of bounds for %s::%s (%zu element%s)", access_range.first, access_range.second, ps->struct_name(), member.c_str(), count, count == 1 ? "" : "s");
                     std::exit(EXIT_FAILURE);
                 }
                 
-                for(std::size_t k = range.first; k <= range.second; k++) {
-                    build_array(&i.get_object_in_array(k), key, array, bitfield);
+                for(std::size_t k = access_range.first; k <= access_range.second; k++) {
+                    build_array(&i.get_object_in_array(k), key, array, bitfield, range);
                 }
                 
                 return;
@@ -182,7 +185,7 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
                         eprintf_error("Expected bitfield but got %s", key.c_str());
                         std::exit(EXIT_FAILURE);
                     }
-                    bitfield = key.substr(1);
+                    *bitfield = key.substr(1);
                 }
                 else if(key.size() != 0) {
                     eprintf_error("Expected end of key but got %s", key.c_str());
@@ -200,7 +203,19 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
 
 static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::string &bitfield) {
     std::vector<Invader::Parser::ParserStructValue> values;
-    build_array(ps, key, values, bitfield);
+    build_array(ps, key, values, &bitfield, nullptr);
+    return values;
+}
+
+static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::pair<std::size_t, std::size_t> &range) {
+    std::vector<Invader::Parser::ParserStructValue> values;
+    build_array(ps, key, values, nullptr, &range);
+    return values;
+}
+
+static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key) {
+    std::vector<Invader::Parser::ParserStructValue> values;
+    build_array(ps, key, values, nullptr, nullptr);
     return values;
 }
 
@@ -435,6 +450,8 @@ int main(int argc, char * const *argv) {
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
     options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
+    options.emplace_back("new", 'N', 2, "Add # structs to the end of the array", "<key> <#>");
+    options.emplace_back("insert", 'I', 3, "Add # structs to the end of the array", "<key> <#> <pos>");
 
     static constexpr char DESCRIPTION[] = "Edit tags via command-line. This is intended for scripting.";
     static constexpr char USAGE[] = "[options] <tag.class>";
@@ -457,16 +474,34 @@ int main(int argc, char * const *argv) {
                 edit_options.use_filesystem_path = true;
                 break;
             case 'G':
-                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_GET, arguments[0], {} });
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_GET, arguments[0], {}, 0, 0 });
                 break;
             case 'C':
-                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {} });
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {}, 0, 0 });
                 break;
             case 'L':
-                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST, arguments[0], {} });
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST, arguments[0], {}, 0, 0 });
                 break;
             case 'S':
-                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_SET, arguments[0], arguments[1] });
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_SET, arguments[0], arguments[1], 0, 0 });
+                break;
+            case 'N':
+                try {
+                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_NEW, arguments[0], {}, std::stoul(arguments[1]), SIZE_MAX });
+                }
+                catch(std::exception &) {
+                    eprintf_error("Expected a valid count");
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+            case 'I':
+                try {
+                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_NEW, arguments[0], {}, std::stoul(arguments[1]), std::stoul(arguments[2]) });
+                }
+                catch(std::exception &) {
+                    eprintf_error("Expected a valid count");
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
         }
     });
@@ -497,7 +532,6 @@ int main(int argc, char * const *argv) {
     
     std::vector<std::string> output;
     bool should_save = false;
-    std::string bitfield;
     
     for(auto &i : edit_options.actions) {
         switch(i.type) {
@@ -509,7 +543,7 @@ int main(int argc, char * const *argv) {
                 break;
             }
             case ActionType::ACTION_TYPE_COUNT: {
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
                 for(auto &k : arr) {
                     if(k.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         output.emplace_back(std::to_string(k.get_array_size()));
@@ -522,6 +556,7 @@ int main(int argc, char * const *argv) {
                 break;
             }
             case ActionType::ACTION_TYPE_GET: {
+                std::string bitfield;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield);
                 for(auto &k : arr) {
                     output.emplace_back(get_value(k, bitfield));
@@ -529,10 +564,28 @@ int main(int argc, char * const *argv) {
                 break;
             }
             case ActionType::ACTION_TYPE_SET: {
+                std::string bitfield;
                 should_save = true;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield);
                 for(auto &k : arr) {
                     set_value(k, i.value, bitfield);
+                }
+                break;
+            }
+            case ActionType::ACTION_TYPE_NEW: {
+                should_save = true;
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
+                for(auto &k : arr) {
+                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                        eprintf_error("%s is not an array", k.get_member_name());
+                        std::exit(EXIT_FAILURE);
+                    }
+                    try {
+                        k.insert_objects_in_array(i.position == SIZE_MAX ? k.get_array_size() : i.position, i.count);
+                    }
+                    catch(std::exception &) {
+                        std::exit(EXIT_FAILURE);
+                    }
                 }
                 break;
             }
