@@ -204,7 +204,7 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_in_array_for_k
     auto member = get_top_member_name(key, key);
     auto range = get_range(key, key);
     
-    if(range.second != range.first + 1) {
+    if(range.second != range.first) {
         eprintf_error("Unable to enumerate multiple arrays");
         std::exit(EXIT_FAILURE);
     }
