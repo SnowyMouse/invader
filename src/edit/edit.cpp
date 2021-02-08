@@ -136,7 +136,9 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
     
     // Do it!
     for(auto &i : values) {
-        if(i.get_member_name() == member) {
+        auto *member_name = i.get_member_name();
+        
+        if(member_name && member_name == member) {
             if(i.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                 // End of key?
                 if(key.size() == 0) {
@@ -211,7 +213,9 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_in_array_for_k
     
     auto values = ps->get_values();
     for(auto &i : values) {
-        if(i.get_member_name() == member) {
+        auto *member_name = i.get_member_name();
+        
+        if(member_name && member_name == member) {
             if(i.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                 auto count = i.get_array_size();
                 if(count <= range.first) {
@@ -239,6 +243,8 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value) {
                 return value.read_string();
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
                 return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_class_to_extension(value.get_dependency().tag_class_int);
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
+                return value.read_enum();
             default:
                 eprintf_error("Unsupported value type");
                 std::exit(EXIT_FAILURE);

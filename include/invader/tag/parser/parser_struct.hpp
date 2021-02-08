@@ -821,9 +821,9 @@ namespace Invader::Parser {
         );
 
     private:
-        const char *name;
-        const char *member_name;
-        const char *comment;
+        const char *name = nullptr;
+        const char *member_name = nullptr;
+        const char *comment = nullptr;
         ValueType type;
         void *address;
         std::vector<TagClassInt> allowed_classes;
