@@ -203,6 +203,7 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_in_array_for_k
         std::exit(EXIT_FAILURE);
     }
 
+    // Get the member name and range
     auto member = get_top_member_name(key, key);
     auto range = get_range(key, key);
     
@@ -211,6 +212,7 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_in_array_for_k
         std::exit(EXIT_FAILURE);
     }
     
+    // Find it!
     auto values = ps->get_values();
     for(auto &i : values) {
         auto *member_name = i.get_member_name();
@@ -436,7 +438,10 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_LIST: {
                 auto arr = get_values_in_array_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
                 for(auto &k : arr) {
-                    output.emplace_back(k.get_member_name());
+                    auto *member_name = k.get_member_name();
+                    if(member_name) {
+                        output.emplace_back(member_name);
+                    }
                 }
                 break;
             }
