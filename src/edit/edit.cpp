@@ -232,43 +232,121 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_in_array_for_k
 }
 
 static std::string get_value(const Invader::Parser::ParserStructValue &value) {
-    auto values = value.get_values();
-    std::string str;
-    
-    switch(value.get_number_format()) {
-        case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
-            for(auto &i : values) {
-                if(str.size() > 0) {
-                    str += " ";
-                }
-                str += std::to_string(std::get<std::int64_t>(i));
-            }
-            break;
-        case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
-            for(auto &i : values) {
-                if(str.size() > 0) {
-                    str += " ";
-                }
-                str += std::to_string(std::get<double>(i));
-            }
-            break;
-        case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE:
-            switch(value.get_type()) {
-                case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
-                    return value.get_string();
-                case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
-                    return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_class_to_extension(value.get_dependency().tag_class_int);
-                default:
-                    eprintf_error("Unsupported value type");
-                    std::exit(EXIT_FAILURE);
-            }
-            break;
+    auto format = value.get_number_format();
+    if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
+        switch(value.get_type()) {
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+                return value.read_string();
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+                return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_class_to_extension(value.get_dependency().tag_class_int);
+            default:
+                eprintf_error("Unsupported value type");
+                std::exit(EXIT_FAILURE);
+        }
     }
     
-    return str;
+    else {
+        std::string str;
+        auto values = value.get_values();
+        
+        switch(format) {
+            case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+                for(auto &i : values) {
+                    if(str.size() > 0) {
+                        str += " ";
+                    }
+                    str += std::to_string(std::get<std::int64_t>(i));
+                }
+                break;
+            case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
+                for(auto &i : values) {
+                    if(str.size() > 0) {
+                        str += " ";
+                    }
+                    str += std::to_string(std::get<double>(i));
+                }
+                break;
+            default:
+                std::terminate();
+        }
+    
+        return str;
+    }
 }
 
-static void set_value(const Invader::Parser::ParserStructValue &value, const std::string &new_value) {
+static void set_value(Invader::Parser::ParserStructValue &value, const std::string &new_value) {
+    auto format = value.get_number_format();
+    
+    // Something special?
+    if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
+        switch(value.get_type()) {
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+                if(new_value.size() > 31) {
+                    eprintf_error("String exceeds maximum length (%zu > 31)", new_value.size());
+                    std::exit(EXIT_FAILURE);
+                }
+                return value.set_string(new_value.c_str());
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+                try {
+                    auto &dep = value.get_dependency();
+                    auto new_path = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(new_value)).value();
+                    dep.path = new_path.path;
+                    dep.tag_class_int = new_path.class_int;
+                    return;
+                }
+                catch (std::exception &) {
+                    eprintf_error("Invalid tag path %s", new_value.c_str());
+                    std::exit(EXIT_FAILURE);
+                }
+            default:
+                eprintf_error("Unsupported value type");
+                std::exit(EXIT_FAILURE);
+        }
+    }
+    
+    // Basic numerical value?
+    else {
+        const char *start = new_value.c_str();
+        char *c;
+        std::vector<Invader::Parser::ParserStructValue::Number> values;
+        while(*start) {
+            auto *current_path = start;
+            if(*start < '0' || *start > '9') {
+                eprintf_error("Invalid input value %s", new_value.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+            switch(format) {
+                case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+                    values.emplace_back(std::strtol(current_path, &c, 10));
+                    break;
+                case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
+                    values.emplace_back(std::strtod(current_path, &c));
+                    break;
+                default: std::terminate();
+            }
+            start = c;
+            if(*start == ' ') {
+                start++;
+            }
+            else if(*start == 0) {
+                break;
+            }
+            else {
+                eprintf_error("Invalid input value %s", new_value.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        
+        if(values.size() == value.get_value_count()) {
+            value.set_values(values);
+            return;
+        }
+        else {
+            eprintf_error("Incorrect number of inputs for the value (got %zu, expected %zu)", values.size(), value.get_value_count());
+            std::exit(EXIT_FAILURE);
+        }
+    }
+    
     eprintf_error("Unimplemented");
     std::exit(EXIT_FAILURE);
 }
@@ -382,7 +460,6 @@ int main(int argc, char * const *argv) {
                 for(auto &k : arr) {
                     set_value(k, i.value);
                 }
-                std::exit(EXIT_FAILURE); // unimplemented
                 break;
             }
             default:
