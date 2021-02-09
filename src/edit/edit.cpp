@@ -13,7 +13,10 @@ enum ActionType {
     ACTION_TYPE_SET,
     ACTION_TYPE_COUNT,
     ACTION_TYPE_LIST,
-    ACTION_TYPE_NEW
+    ACTION_TYPE_INSERT,
+    ACTION_TYPE_COPY,
+    ACTION_TYPE_DELETE,
+    ACTION_TYPE_SHIFT
 };
 
 struct Actions {
@@ -450,8 +453,10 @@ int main(int argc, char * const *argv) {
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
     options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
-    options.emplace_back("new", 'N', 2, "Add # structs to the end of the array", "<key> <#>");
-    options.emplace_back("insert", 'I', 3, "Add # structs to the end of the array", "<key> <#> <pos>");
+    options.emplace_back("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>");
+    options.emplace_back("move", 'M', 2, "Shift the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
+    options.emplace_back("erase", 'E', 1, "Delete the selected struct(s).", "<key>");
+    options.emplace_back("duplicate", 'D', 2, "Copy the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
 
     static constexpr char DESCRIPTION[] = "Edit tags via command-line. This is intended for scripting.";
     static constexpr char USAGE[] = "[options] <tag.class>";
@@ -485,21 +490,33 @@ int main(int argc, char * const *argv) {
             case 'S':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_SET, arguments[0], arguments[1], 0, 0 });
                 break;
-            case 'N':
+            case 'I':
                 try {
-                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_NEW, arguments[0], {}, std::stoul(arguments[1]), SIZE_MAX });
+                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_INSERT, arguments[0], {}, std::stoul(arguments[1]), std::strcmp(arguments[2], "end") == 0 ? SIZE_MAX : std::stoul(arguments[2]) });
                 }
                 catch(std::exception &) {
-                    eprintf_error("Expected a valid count");
+                    eprintf_error("Expected a valid count/position");
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-            case 'I':
+            case 'M':
                 try {
-                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_NEW, arguments[0], {}, std::stoul(arguments[1]), std::stoul(arguments[2]) });
+                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_SHIFT, arguments[0], {}, 0, std::strcmp(arguments[1], "end") == 0 ? SIZE_MAX : std::stoul(arguments[1]) });
                 }
                 catch(std::exception &) {
-                    eprintf_error("Expected a valid count");
+                    eprintf_error("Expected a valid position");
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+            case 'E':
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_DELETE, arguments[0], {}, 0, 0 });
+                break;
+            case 'D':
+                try {
+                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COPY, arguments[0], {}, 0, std::strcmp(arguments[1], "end") == 0 ? SIZE_MAX : std::stoul(arguments[1]) });
+                }
+                catch(std::exception &) {
+                    eprintf_error("Expected a valid position");
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -572,7 +589,7 @@ int main(int argc, char * const *argv) {
                 }
                 break;
             }
-            case ActionType::ACTION_TYPE_NEW: {
+            case ActionType::ACTION_TYPE_INSERT: {
                 should_save = true;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
                 for(auto &k : arr) {
@@ -590,6 +607,7 @@ int main(int argc, char * const *argv) {
                 break;
             }
             default:
+                eprintf_error("Unimplemented");
                 std::exit(EXIT_FAILURE);
         }
     }
