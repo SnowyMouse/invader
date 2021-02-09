@@ -495,6 +495,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
     options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
+    options.emplace_back("new", 'N', 0, "Create a new tag");
     
     options.emplace_back("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>");
     options.emplace_back("move", 'M', 2, "Shift the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
@@ -508,6 +509,7 @@ int main(int argc, char * const *argv) {
         std::filesystem::path tags = "tags";
         bool use_filesystem_path = false;
         std::vector<Actions> actions;
+        bool new_tag = false;
     } edit_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
@@ -554,6 +556,9 @@ int main(int argc, char * const *argv) {
             case 'E':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_DELETE, arguments[0], {}, 0, 0 });
                 break;
+            case 'N':
+                edit_options.new_tag = true;
+                break;
             case 'c':
                 try {
                     edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COPY, arguments[0], {}, 0, std::strcmp(arguments[1], "end") == 0 ? SIZE_MAX : std::stoul(arguments[1]) });
@@ -574,20 +579,32 @@ int main(int argc, char * const *argv) {
         file_path = std::filesystem::path(edit_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
     }
     
-    auto value = Invader::File::open_file(file_path);
-    if(!value.has_value()) {
-        eprintf_error("Failed to read %s", file_path.string().c_str());
-        return EXIT_FAILURE;
-    }
-    
     std::unique_ptr<Invader::Parser::ParserStruct> tag_struct;
     
-    try {
-        tag_struct = Invader::Parser::ParserStruct::parse_hek_tag_file(value->data(), value->size());
+    // Make a new tag... or don't
+    if(edit_options.new_tag) {
+        try {
+            tag_struct = Invader::Parser::ParserStruct::generate_base_struct(Invader::File::split_tag_class_extension(file_path.string()).value().class_int);
+        }
+        catch (std::exception &) {
+            eprintf_error("Failed to create a new tag %s. Make sure the extension is correct.", file_path.string().c_str());
+            return EXIT_FAILURE;
+        }
     }
-    catch (std::exception &e) {
-        eprintf_error("Failed to parse %s: %s", file_path.string().c_str(), e.what());
-        return EXIT_FAILURE;
+    else {
+        auto value = Invader::File::open_file(file_path);
+        if(!value.has_value()) {
+            eprintf_error("Failed to read %s", file_path.string().c_str());
+            return EXIT_FAILURE;
+        }
+        
+        try {
+            tag_struct = Invader::Parser::ParserStruct::parse_hek_tag_file(value->data(), value->size());
+        }
+        catch (std::exception &e) {
+            eprintf_error("Failed to parse %s: %s", file_path.string().c_str(), e.what());
+            return EXIT_FAILURE;
+        }
     }
     
     std::vector<std::string> output;
