@@ -16,7 +16,7 @@ enum ActionType {
     ACTION_TYPE_INSERT,
     ACTION_TYPE_COPY,
     ACTION_TYPE_DELETE,
-    ACTION_TYPE_SHIFT
+    ACTION_TYPE_MOVE
 };
 
 struct Actions {
@@ -71,24 +71,23 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
     if(range_str == "*") {
         return { 0, SIZE_MAX };
     }
+    else if(range_str == "end") {
+        return { SIZE_MAX, SIZE_MAX };
+    }
     
-    std::size_t min, max;
+    std::size_t min = 0, max = 0;
     std::size_t hyphens = 0;
     
-    // Make sure it's valid
+    // Find hyphens
     for(auto &c : range_str) {
         if(c == '-') {
             hyphens++;
-        }
-        else if(c < '0' || c > '9') {
-            eprintf_error("Invalid range in key %s", key.c_str());
-            std::exit(EXIT_FAILURE);
         }
     }
     
     // Okay
     if(hyphens > 1) {
-        eprintf_error("Invalid range in key %s", key.c_str());
+        eprintf_error("Invalid range %s", range_str.c_str());
         std::exit(EXIT_FAILURE);
     }
     
@@ -97,22 +96,34 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
         max = min;
     }
     else {
-        char *v;
-        min = std::strtoul(range_str.c_str(), &v, 10);
-        
-        // Make sure the hyphen went somewhere
-        v++;
-        if(*v == 0) {
-            eprintf_error("Invalid range in key %s", key.c_str());
-            std::exit(EXIT_FAILURE);
+        try {
+            std::size_t v;
+            
+            if(std::strncmp(range_str.c_str(), "end-", 4) == 0) {
+                min = SIZE_MAX;
+                v = 3;
+            }
+            else {
+                min = std::stoul(range_str.c_str(), &v, 10);
+            }
+            
+            v++;
+            
+            if(std::strcmp(range_str.c_str() + v, "end") == 0) {
+                max = SIZE_MAX;
+            }
+            else {
+                max = std::stoul(range_str.c_str() + v, nullptr, 10);
+            }
         }
-        
-        max = std::strtoul(v, nullptr, 10);
+        catch (std::exception &) {
+            eprintf_error("Invalid range %s", range_str.c_str());
+        }
     }
     
     // Did we exceed things?
     if(min > max) {
-        eprintf_error("Invalid range in key %s", key.c_str());
+        eprintf_error("Invalid range %s", range_str.c_str());
         std::exit(EXIT_FAILURE);
     }
     
@@ -154,19 +165,31 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
                 }
                 
                 auto count = i.get_array_size();
+                
+                if(count == 0) {
+                    eprintf_error("%s::%s is empty", ps->struct_name(), member.c_str());
+                }
+                
                 auto access_range = get_range(key, key);
                 
-                if(access_range.first == 0 && access_range.second == SIZE_MAX) {
-                    if(count == 0) {
-                        return; // nothing to see here
-                    }
-                    
+                if(access_range.first == SIZE_MAX) {
+                    access_range.first = count - 1;
+                }
+                
+                if(access_range.second == SIZE_MAX) {
                     access_range.second = count - 1;
                 }
                 
                 if(count < access_range.first || count <= access_range.second) {
                     eprintf_error("%zu-%zu is out of bounds for %s::%s (%zu element%s)", access_range.first, access_range.second, ps->struct_name(), member.c_str(), count, count == 1 ? "" : "s");
                     std::exit(EXIT_FAILURE);
+                }
+                
+                // Are we returning a range?
+                if(key.size() == 0 && range) {
+                    *range = access_range;
+                    array.emplace_back(i);
+                    return;
                 }
                 
                 for(std::size_t k = access_range.first; k <= access_range.second; k++) {
@@ -254,14 +277,33 @@ static std::vector<std::string> get_value_names_for_key(Invader::Parser::ParserS
         if(member_name && member_name == member) {
             switch(i.get_type()) {
                 case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto count = i.get_array_size();
+                    
+                    if(count == 0) {
+                        eprintf_error("%s::%s is empty", ps->struct_name(), member.c_str());
+                    }
+                    
                     auto range = get_range(key, key);
+                    auto access_range = get_range(key, key);
+                    
+                    if(access_range.first == SIZE_MAX) {
+                        access_range.first = count - 1;
+                    }
+                    
+                    if(access_range.second == SIZE_MAX) {
+                        access_range.second = count - 1;
+                    }
+                    
+                    if(count < access_range.first || count <= access_range.second) {
+                        eprintf_error("%zu-%zu is out of bounds for %s::%s (%zu element%s)", access_range.first, access_range.second, ps->struct_name(), member.c_str(), count, count == 1 ? "" : "s");
+                        std::exit(EXIT_FAILURE);
+                    }
                 
                     if(range.second != range.first) {
                         eprintf_error("Unable to enumerate multiple arrays");
                         std::exit(EXIT_FAILURE);
                     }
                     
-                    auto count = i.get_array_size();
                     if(count <= range.first) {
                         eprintf_error("%zu is out of bounds for array %s", range.first, member.c_str());
                         std::exit(EXIT_FAILURE);
@@ -453,12 +495,13 @@ int main(int argc, char * const *argv) {
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
     options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
+    
     options.emplace_back("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>");
     options.emplace_back("move", 'M', 2, "Shift the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
     options.emplace_back("erase", 'E', 1, "Delete the selected struct(s).", "<key>");
-    options.emplace_back("duplicate", 'D', 2, "Copy the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
+    options.emplace_back("copy", 'c', 2, "Copy the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
 
-    static constexpr char DESCRIPTION[] = "Edit tags via command-line. This is intended for scripting.";
+    static constexpr char DESCRIPTION[] = "Edit tags via command-line.";
     static constexpr char USAGE[] = "[options] <tag.class>";
 
     struct EditOptions {
@@ -501,7 +544,7 @@ int main(int argc, char * const *argv) {
                 break;
             case 'M':
                 try {
-                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_SHIFT, arguments[0], {}, 0, std::strcmp(arguments[1], "end") == 0 ? SIZE_MAX : std::stoul(arguments[1]) });
+                    edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_MOVE, arguments[0], {}, 0, std::strcmp(arguments[1], "end") == 0 ? SIZE_MAX : std::stoul(arguments[1]) });
                 }
                 catch(std::exception &) {
                     eprintf_error("Expected a valid position");
@@ -511,7 +554,7 @@ int main(int argc, char * const *argv) {
             case 'E':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_DELETE, arguments[0], {}, 0, 0 });
                 break;
-            case 'D':
+            case 'c':
                 try {
                     edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COPY, arguments[0], {}, 0, std::strcmp(arguments[1], "end") == 0 ? SIZE_MAX : std::stoul(arguments[1]) });
                 }
@@ -559,19 +602,6 @@ int main(int argc, char * const *argv) {
                 }
                 break;
             }
-            case ActionType::ACTION_TYPE_COUNT: {
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
-                for(auto &k : arr) {
-                    if(k.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
-                        output.emplace_back(std::to_string(k.get_array_size()));
-                    }
-                    else {
-                        eprintf_error("%s is not an array", k.get_member_name());
-                        std::exit(EXIT_FAILURE);
-                    }
-                }
-                break;
-            }
             case ActionType::ACTION_TYPE_GET: {
                 std::string bitfield;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield);
@@ -589,6 +619,19 @@ int main(int argc, char * const *argv) {
                 }
                 break;
             }
+            case ActionType::ACTION_TYPE_COUNT: {
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
+                for(auto &k : arr) {
+                    if(k.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                        output.emplace_back(std::to_string(k.get_array_size()));
+                    }
+                    else {
+                        eprintf_error("%s is not an array", k.get_member_name());
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                break;
+            }
             case ActionType::ACTION_TYPE_INSERT: {
                 should_save = true;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
@@ -599,6 +642,71 @@ int main(int argc, char * const *argv) {
                     }
                     try {
                         k.insert_objects_in_array(i.position == SIZE_MAX ? k.get_array_size() : i.position, i.count);
+                    }
+                    catch(std::exception &) {
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                break;
+            }
+            case ActionType::ACTION_TYPE_DELETE: {
+                should_save = true;
+                std::pair<std::size_t, std::size_t> range;
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range);
+                for(auto &k : arr) {
+                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                        eprintf_error("%s is not an array", k.get_member_name());
+                        std::exit(EXIT_FAILURE);
+                    }
+                    try {
+                        std::size_t iterations = range.second - range.first + 1;
+                        k.delete_objects_in_array(range.first, iterations);
+                    }
+                    catch(std::exception &) {
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                break;
+            }
+            case ActionType::ACTION_TYPE_MOVE: {
+                should_save = true;
+                std::pair<std::size_t, std::size_t> range;
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range);
+                for(auto &k : arr) {
+                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                        eprintf_error("%s is not an array", k.get_member_name());
+                        std::exit(EXIT_FAILURE);
+                    }
+                    try {
+                        std::size_t to = i.position == SIZE_MAX ? k.get_array_size() : i.position;
+                        for(std::size_t n = range.first; n <= range.second; n++) {
+                            k.duplicate_objects_in_array(n, to, 1);
+                            if(n >= to) {
+                                n++;
+                                range.second++;
+                            }
+                            k.delete_objects_in_array(n, 1);
+                        }
+                    }
+                    catch(std::exception &) {
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                break;
+            }
+            case ActionType::ACTION_TYPE_COPY: {
+                should_save = true;
+                std::pair<std::size_t, std::size_t> range;
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range);
+                for(auto &k : arr) {
+                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                        eprintf_error("%s is not an array", k.get_member_name());
+                        std::exit(EXIT_FAILURE);
+                    }
+                    try {
+                        std::size_t to = i.position == SIZE_MAX ? k.get_array_size() : i.position;
+                        std::size_t iterations = range.second - range.first + 1;
+                        k.duplicate_objects_in_array(range.first, to, iterations);
                     }
                     catch(std::exception &) {
                         std::exit(EXIT_FAILURE);
