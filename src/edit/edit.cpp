@@ -582,9 +582,11 @@ int main(int argc, char * const *argv) {
     std::unique_ptr<Invader::Parser::ParserStruct> tag_struct;
     
     // Make a new tag... or don't
+    Invader::HEK::TagClassInt tag_class;
     if(edit_options.new_tag) {
         try {
-            tag_struct = Invader::Parser::ParserStruct::generate_base_struct(Invader::File::split_tag_class_extension(file_path.string()).value().class_int);
+            tag_class = Invader::File::split_tag_class_extension(file_path.string()).value().class_int;
+            tag_struct = Invader::Parser::ParserStruct::generate_base_struct(tag_class);
         }
         catch (std::exception &) {
             eprintf_error("Failed to create a new tag %s. Make sure the extension is correct.", file_path.string().c_str());
@@ -605,6 +607,8 @@ int main(int argc, char * const *argv) {
             eprintf_error("Failed to parse %s: %s", file_path.string().c_str(), e.what());
             return EXIT_FAILURE;
         }
+        
+        tag_class = reinterpret_cast<const Invader::HEK::TagFileHeader *>(value->data())->tag_class_int;
     }
     
     std::vector<std::string> output;
@@ -742,7 +746,7 @@ int main(int argc, char * const *argv) {
     }
     
     if(should_save) {
-        return Invader::File::save_file(file_path, tag_struct->generate_hek_tag_data(reinterpret_cast<const Invader::HEK::TagFileHeader *>(value->data())->tag_class_int)) ? EXIT_SUCCESS : EXIT_FAILURE;
+        return Invader::File::save_file(file_path, tag_struct->generate_hek_tag_data(tag_class)) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     else {
         return EXIT_SUCCESS;
