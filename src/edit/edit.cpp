@@ -524,7 +524,7 @@ int main(int argc, char * const *argv) {
         bool use_filesystem_path = false;
         std::vector<Actions> actions;
         bool new_tag = false;
-        bool ignore_read_only = false;
+        bool check_read_only = true;
     } edit_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
@@ -649,7 +649,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_SET: {
                 std::string bitfield;
                 should_save = true;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, edit_options.ignore_read_only);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, edit_options.check_read_only);
                 for(auto &k : arr) {
                     set_value(k, i.value, bitfield);
                 }
@@ -670,7 +670,7 @@ int main(int argc, char * const *argv) {
             }
             case ActionType::ACTION_TYPE_INSERT: {
                 should_save = true;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), edit_options.ignore_read_only);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), edit_options.check_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
@@ -688,7 +688,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_DELETE: {
                 should_save = true;
                 std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.ignore_read_only);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
@@ -707,7 +707,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_MOVE: {
                 should_save = true;
                 std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.ignore_read_only);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
@@ -733,7 +733,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_COPY: {
                 should_save = true;
                 std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.ignore_read_only);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
