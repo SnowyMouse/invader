@@ -227,21 +227,35 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
     std::exit(EXIT_FAILURE);
 }
 
-static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::string &bitfield) {
+static void require_writable_only(const std::vector<Invader::Parser::ParserStructValue> &values, bool writable_only) {
+    if(writable_only) {
+        for(auto &i : values) {
+            if(i.is_read_only()) {
+                eprintf_error("%s is read-only", i.get_member_name());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+    }
+}
+
+static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::string &bitfield, bool writable_only) {
     std::vector<Invader::Parser::ParserStructValue> values;
     build_array(ps, key, values, &bitfield, nullptr);
+    require_writable_only(values, writable_only);
     return values;
 }
 
-static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::pair<std::size_t, std::size_t> &range) {
+static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::pair<std::size_t, std::size_t> &range, bool writable_only) {
     std::vector<Invader::Parser::ParserStructValue> values;
     build_array(ps, key, values, nullptr, &range);
+    require_writable_only(values, writable_only);
     return values;
 }
 
-static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key) {
+static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, bool writable_only) {
     std::vector<Invader::Parser::ParserStructValue> values;
     build_array(ps, key, values, nullptr, nullptr);
+    require_writable_only(values, writable_only);
     return values;
 }
 
@@ -510,6 +524,7 @@ int main(int argc, char * const *argv) {
         bool use_filesystem_path = false;
         std::vector<Actions> actions;
         bool new_tag = false;
+        bool ignore_read_only = false;
     } edit_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
@@ -625,7 +640,7 @@ int main(int argc, char * const *argv) {
             }
             case ActionType::ACTION_TYPE_GET: {
                 std::string bitfield;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, false);
                 for(auto &k : arr) {
                     output.emplace_back(get_value(k, bitfield));
                 }
@@ -634,14 +649,14 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_SET: {
                 std::string bitfield;
                 should_save = true;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, edit_options.ignore_read_only);
                 for(auto &k : arr) {
                     set_value(k, i.value, bitfield);
                 }
                 break;
             }
             case ActionType::ACTION_TYPE_COUNT: {
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), false);
                 for(auto &k : arr) {
                     if(k.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         output.emplace_back(std::to_string(k.get_array_size()));
@@ -655,7 +670,7 @@ int main(int argc, char * const *argv) {
             }
             case ActionType::ACTION_TYPE_INSERT: {
                 should_save = true;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), edit_options.ignore_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
@@ -673,7 +688,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_DELETE: {
                 should_save = true;
                 std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.ignore_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
@@ -692,7 +707,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_MOVE: {
                 should_save = true;
                 std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.ignore_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
