@@ -733,7 +733,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_COPY: {
                 should_save = true;
                 std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range);
+                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.ignore_read_only);
                 for(auto &k : arr) {
                     if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
