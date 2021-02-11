@@ -1742,7 +1742,7 @@
             },
             {
                 "name": "signature",
-                "type": "TagClassInt",
+                "type": "TagFourCC",
                 "cache_only": true,
                 "endian": "little"
             }

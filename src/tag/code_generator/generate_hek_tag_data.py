@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data):
-    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false) override;\n")
-    cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class, bool clear_on_save) {{\n".format(struct_name))
+    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagFourCC> generate_header_class = std::nullopt, bool clear_on_save = false) override;\n")
+    cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagFourCC> generate_header_class, bool clear_on_save) {{\n".format(struct_name))
     cpp_save_hek_data.write("        this->cache_deformat();\n")
     cpp_save_hek_data.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
     cpp_save_hek_data.write("        std::size_t tag_header_offset = 0;\n")
@@ -34,8 +34,8 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
                 cpp_save_hek_data.write("            }\n")
                 cpp_save_hek_data.write("        }\n")
                 if struct["classes"][0] != "*":
-                    cpp_save_hek_data.write("        else if(this->{}.tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
-                    cpp_save_hek_data.write("            b.{}.tag_fourcc = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_save_hek_data.write("        else if(this->{}.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL) {{\n".format(name))
+                    cpp_save_hek_data.write("            b.{}.tag_fourcc = HEK::TagFourCC::TAG_FOURCC_{};\n".format(name, struct["classes"][0].upper()))
                     cpp_save_hek_data.write("        }\n")
                     
             elif struct["type"] == "TagReflexive":

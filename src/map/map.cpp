@@ -396,14 +396,14 @@ namespace Invader {
                     tag.path = new_path;
                 }
 
-                if(tag.tag_fourcc == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     continue;
                 }
                 else if(sizeof(tags->tag_data) == sizeof(HEK::Pointer) && reinterpret_cast<const CacheFileTagDataTag *>(tags)[i].indexed) {
                     tag.indexed = true;
 
                     // Indexed sound tags still use tag data (until you use reflexives)
-                    if(tag.tag_fourcc == TagClassInt::TAG_CLASS_SOUND) {
+                    if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SOUND) {
                         tag.base_struct_pointer = tags[i].tag_data;
                     }
                     else {
@@ -414,10 +414,10 @@ namespace Invader {
                     // Find where it's located
                     DataMapType type;
                     switch(tag.tag_fourcc) {
-                        case TagClassInt::TAG_CLASS_BITMAP:
+                        case TagFourCC::TAG_FOURCC_BITMAP:
                             type = DataMapType::DATA_MAP_BITMAP;
                             break;
-                        case TagClassInt::TAG_CLASS_SOUND:
+                        case TagFourCC::TAG_FOURCC_SOUND:
                             type = DataMapType::DATA_MAP_SOUND;
                             break;
                         default:
@@ -468,7 +468,7 @@ namespace Invader {
                     // Set it all
                     auto &index = indices[*tag.resource_index];
                     tag.tag_data_size = index.size;
-                    if(tag.tag_fourcc == TagClassInt::TAG_CLASS_SOUND) {
+                    if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SOUND) {
                         tag.base_struct_offset = index.data_offset + sizeof(HEK::Sound<HEK::LittleEndian>);
                     }
                     else {
@@ -544,7 +544,7 @@ namespace Invader {
         }
 
         // We can get this right off the bat
-        if(this->get_tag(this->get_scenario_tag_id()).get_tag_fourcc() != TagClassInt::TAG_CLASS_SCENARIO) {
+        if(this->get_tag(this->get_scenario_tag_id()).get_tag_fourcc() != TagFourCC::TAG_FOURCC_SCENARIO) {
             return true;
         }
 
@@ -561,7 +561,7 @@ namespace Invader {
             }
 
             // If the extension is invalid, return true
-            if(tag_class == TagClassInt::TAG_CLASS_NULL || tag_class == TagClassInt::TAG_CLASS_NONE || tag_extension_to_fourcc(tag_fourcc_to_extension(tag_class)) != tag_class) {
+            if(tag_class == TagFourCC::TAG_FOURCC_NULL || tag_class == TagFourCC::TAG_FOURCC_NONE || tag_extension_to_fourcc(tag_fourcc_to_extension(tag_class)) != tag_class) {
                 return true;
             }
 
@@ -584,7 +584,7 @@ namespace Invader {
         return false;
     }
 
-    std::optional<std::size_t> Map::find_tag(const char *tag_path, TagClassInt tag_fourcc) const noexcept {
+    std::optional<std::size_t> Map::find_tag(const char *tag_path, TagFourCC tag_fourcc) const noexcept {
         for(auto &tag : tags) {
             if(tag.get_tag_fourcc() == tag_fourcc && tag.get_path() == tag_path) {
                 return &tag - tags.data();
@@ -626,7 +626,7 @@ namespace Invader {
                 auto &index = tag.get_tag_data_index();
                 
                 // BSP tags are NOT supposed to have this set
-                if(tag.get_tag_fourcc() == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && index.tag_data != 0) {
+                if(tag.get_tag_fourcc() == HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && index.tag_data != 0) {
                     return false;
                 }
             }

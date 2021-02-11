@@ -9,8 +9,8 @@ def make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_ref
     hpp.write("         * @param to_class   Class to replace with\n")
     hpp.write("         * @return           number of references replaced\n")
     hpp.write("         */\n")
-    hpp.write("        std::size_t refactor_reference(const char *from_path, TagClassInt from_class, const char *to_path, TagClassInt to_class) override;\n".format(struct_name))
-    cpp_refactor_reference.write("    std::size_t {}::refactor_reference([[maybe_unused]] const char *from_path, [[maybe_unused]] TagClassInt from_class, [[maybe_unused]] const char *to_path, [[maybe_unused]] TagClassInt to_class) {{\n".format(struct_name))
+    hpp.write("        std::size_t refactor_reference(const char *from_path, TagFourCC from_class, const char *to_path, TagFourCC to_class) override;\n".format(struct_name))
+    cpp_refactor_reference.write("    std::size_t {}::refactor_reference([[maybe_unused]] const char *from_path, [[maybe_unused]] TagFourCC from_class, [[maybe_unused]] const char *to_path, [[maybe_unused]] TagFourCC to_class) {{\n".format(struct_name))
     cpp_refactor_reference.write("        std::size_t replaced = 0;\n")
     for struct in all_used_structs:
         name = struct["member_name"]
@@ -26,7 +26,7 @@ def make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_ref
                 for c in range(0, classes_len):
                     if c != 0:
                         test_line = " && " + test_line
-                    test_line = "to_class != TagClassInt::TAG_CLASS_{}".format(classes[c].upper()) + test_line
+                    test_line = "to_class != TagFourCC::TAG_FOURCC_{}".format(classes[c].upper()) + test_line
                 if classes_len == 1:
                     error_line = " {}".format(classes[0])
                 elif classes_len == 2:

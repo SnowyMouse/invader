@@ -59,8 +59,8 @@ def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, al
                 cpp_read_hek_data.write("            data += h_{}_expected_length + 1;\n".format(name))
                 cpp_read_hek_data.write("        }\n")
                 if struct["classes"][0] != "*":
-                    cpp_read_hek_data.write("        else if(r.{}.tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
-                    cpp_read_hek_data.write("            r.{}.tag_fourcc = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_read_hek_data.write("        else if(r.{}.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL) {{\n".format(name))
+                    cpp_read_hek_data.write("            r.{}.tag_fourcc = HEK::TagFourCC::TAG_FOURCC_{};\n".format(name, struct["classes"][0].upper()))
                     cpp_read_hek_data.write("        }\n")
             elif struct["type"] == "TagReflexive":
                 cpp_read_hek_data.write("        std::size_t h_{}_count = h.{}.count;\n".format(name,name))

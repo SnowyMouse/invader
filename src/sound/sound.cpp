@@ -735,7 +735,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
     }
 
-    auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_INVADER_SOUND, true);
+    auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagFourCC::TAG_FOURCC_SOUND : TagFourCC::TAG_FOURCC_INVADER_SOUND, true);
     
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, invader_sound == nullptr ? "" : " [--extended]");
 

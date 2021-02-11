@@ -31,16 +31,16 @@ namespace Invader::Parser {
                         if(!part_id.is_null()) {
                             auto r = part.type.tag_fourcc.read();
                             if(IS_OBJECT_TAG(r)) {
-                                part.type_class = TagClassInt::TAG_CLASS_OBJECT;
+                                part.type_class = TagFourCC::TAG_FOURCC_OBJECT;
                             }
                             else {
                                 part.type_class = r;
-                                if(r == TagClassInt::TAG_CLASS_DAMAGE_EFFECT || r == TagClassInt::TAG_CLASS_LIGHT) {
+                                if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT || r == TagFourCC::TAG_FOURCC_LIGHT) {
                                     do_not_cull = true;
                                 }
                                 
                                 // Find the maximum radius
-                                if(r == TagClassInt::TAG_CLASS_DAMAGE_EFFECT) {
+                                if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
                                     float max_radius = reinterpret_cast<DamageEffect::struct_little *>(workload.structs[*workload.tags[part_id.index].base_struct].data.data())->radius.to;
                                     if(max_radius > effect.maximum_damage_radius.read()) {
                                         effect.maximum_damage_radius = max_radius;

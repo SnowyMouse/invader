@@ -53,7 +53,7 @@ int main(int argc, const char **argv) {
     using namespace Invader::HEK;
 
     struct CompareOptions {
-        std::vector<HEK::TagClassInt> class_to_check;
+        std::vector<HEK::TagFourCC> class_to_check;
         Input *top_input = nullptr;
         std::vector<Input> inputs;
         bool exhaustive = false;
@@ -189,7 +189,7 @@ int main(int argc, const char **argv) {
                         std::exit(EXIT_FAILURE);
                     }
                 }
-                if(class_to_check == TagClassInt::TAG_CLASS_NULL || class_to_check == TagClassInt::TAG_CLASS_NONE) {
+                if(class_to_check == TagFourCC::TAG_FOURCC_NULL || class_to_check == TagFourCC::TAG_FOURCC_NONE) {
                     eprintf_error("Class %s is not a valid class", args[0]);
                     std::exit(EXIT_FAILURE);
                 }

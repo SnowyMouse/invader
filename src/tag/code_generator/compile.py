@@ -53,7 +53,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 for c in range(0, classes_len):
                     if c != 0:
                         test_line = " && " + test_line
-                    test_line = "this->{}.tag_fourcc != TagClassInt::TAG_CLASS_{}".format(name, classes[c].upper()) + test_line
+                    test_line = "this->{}.tag_fourcc != TagFourCC::TAG_FOURCC_{}".format(name, classes[c].upper()) + test_line
                 if classes_len == 1:
                     error_line = " {}".format(classes[0])
                 elif classes_len == 2:

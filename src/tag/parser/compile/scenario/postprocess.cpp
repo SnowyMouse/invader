@@ -19,41 +19,41 @@ namespace Invader::Parser {
 
             for(std::uint16_t i = 0; i < element_count; i++) {
                 // Check if we know the class
-                std::optional<TagClassInt> tag_class;
+                std::optional<TagFourCC> tag_class;
                 auto &node = nodes[i];
 
                 // Check the class type
                 switch(node.type.read()) {
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
-                        tag_class = HEK::TAG_CLASS_SOUND;
+                        tag_class = HEK::TAG_FOURCC_SOUND;
                         break;
 
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
-                        tag_class = HEK::TAG_CLASS_EFFECT;
+                        tag_class = HEK::TAG_FOURCC_EFFECT;
                         break;
 
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
-                        tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                        tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
                         break;
 
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
-                        tag_class = HEK::TAG_CLASS_SOUND_LOOPING;
+                        tag_class = HEK::TAG_FOURCC_SOUND_LOOPING;
                         break;
 
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
-                        tag_class = HEK::TAG_CLASS_MODEL_ANIMATIONS;
+                        tag_class = HEK::TAG_FOURCC_MODEL_ANIMATIONS;
                         break;
 
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
-                        tag_class = HEK::TAG_CLASS_ACTOR_VARIANT;
+                        tag_class = HEK::TAG_FOURCC_ACTOR_VARIANT;
                         break;
 
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
-                        tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                        tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
                         break;
 
                     case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
-                        tag_class = HEK::TAG_CLASS_OBJECT;
+                        tag_class = HEK::TAG_FOURCC_OBJECT;
                         break;
 
                     default:

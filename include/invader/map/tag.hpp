@@ -50,7 +50,7 @@ namespace Invader {
          * Get the class of the tag
          * @return class of the tag
          */
-        TagClassInt get_tag_fourcc() const noexcept {
+        TagFourCC get_tag_fourcc() const noexcept {
             return this->tag_fourcc;
         }
 
@@ -262,7 +262,7 @@ namespace Invader {
         std::string path;
 
         /** Class of tag */
-        TagClassInt tag_fourcc;
+        TagFourCC tag_fourcc;
 
         /** This is indexed and not in the map? */
         bool indexed = false;

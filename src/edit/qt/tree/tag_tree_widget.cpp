@@ -10,7 +10,7 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, bool show_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), show_directories(show_directories) {
+    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, bool show_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), show_directories(show_directories) {
         this->setColumnCount(1);
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
@@ -398,7 +398,7 @@ namespace Invader::EditQt {
         return this->total_tags;
     }
 
-    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, const std::optional<std::vector<std::string>> &expression_filters) {
+    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagFourCC>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, const std::optional<std::vector<std::string>> &expression_filters) {
         bool change_made = false;
         
         // Did we change classes?

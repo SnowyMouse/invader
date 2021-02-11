@@ -85,13 +85,13 @@ int main(int argc, char * const *argv) {
         bool unsafe = false;
 
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
-        std::vector<std::pair<Invader::HEK::TagClassInt, Invader::HEK::TagClassInt>> class_replacements;
-        std::vector<std::pair<Invader::HEK::TagClassInt, Invader::HEK::TagClassInt>> reverse_class_replacements;
+        std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> class_replacements;
+        std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> reverse_class_replacements;
         std::optional<std::pair<std::string, std::string>> recursive;
     } refactor_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
-        auto get_class = [](auto *argument) -> Invader::HEK::TagClassInt {
+        auto get_class = [](auto *argument) -> Invader::HEK::TagFourCC {
             auto tag_class = Invader::HEK::tag_extension_to_fourcc(argument);
             if(!tag_class) {
                 eprintf_error("Error: %s is not a valid tag class", argument);
@@ -451,11 +451,11 @@ int main(int argc, char * const *argv) {
         
         // Skip some tags that cannot reference anything
         switch(tag.tag_fourcc) {
-            case Invader::HEK::TagClassInt::TAG_CLASS_BITMAP:
-            case Invader::HEK::TagClassInt::TAG_CLASS_PHYSICS:
-            case Invader::HEK::TagClassInt::TAG_CLASS_STRING_LIST:
-            case Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-            case Invader::HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_BITMAP:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_PHYSICS:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_STRING_LIST:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
                 skip = true;
                 break;
             default:

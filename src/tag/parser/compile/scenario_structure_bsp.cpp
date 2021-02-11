@@ -92,14 +92,14 @@ namespace Invader::Parser {
                 // Do we even have lightmaps?
                 for(auto &m : lm.materials) {
                     switch(m.shader.tag_fourcc) {
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
-                        case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA:
+                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
                             break;
                         default:
                             if(m.lightmap_vertices_count) {

@@ -11,7 +11,7 @@ namespace Invader::Parser {
         const char *       member_name,
         const char *       comment,
         Dependency *       dependency,
-        const TagClassInt *allowed_classes,
+        const TagFourCC *allowed_classes,
         std::size_t        count,
         bool               read_only
     ) : name(name),
@@ -681,21 +681,21 @@ namespace Invader::Parser {
         const auto *header = reinterpret_cast<const HEK::TagFileHeader *>(data);
         HEK::TagFileHeader::validate_header(header, data_size);
 
-        #define DO_TAG_CLASS(class_struct, fourcc) case TagClassInt::fourcc: { \
+        #define DO_TAG_CLASS(class_struct, fourcc) case TagFourCC::fourcc: { \
             return std::make_unique<Parser::class_struct>(Invader::Parser::class_struct::parse_hek_tag_file(data, data_size, postprocess)); \
         }
 
         switch(header->tag_fourcc) {
             DO_BASED_ON_TAG_CLASS
 
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_SCENARIO:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_FONT:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NONE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NULL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_FONT:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
                 break;
         }
 
@@ -705,22 +705,22 @@ namespace Invader::Parser {
         #undef DO_TAG_CLASS
     }
 
-    std::unique_ptr<ParserStruct> ParserStruct::generate_base_struct(TagClassInt tag_class) {
-        #define DO_TAG_CLASS(class_struct, fourcc) case TagClassInt::fourcc: { \
+    std::unique_ptr<ParserStruct> ParserStruct::generate_base_struct(TagFourCC tag_class) {
+        #define DO_TAG_CLASS(class_struct, fourcc) case TagFourCC::fourcc: { \
             return std::unique_ptr<ParserStruct>(new class_struct()); \
         }
 
         switch(tag_class) {
             DO_BASED_ON_TAG_CLASS
 
-            case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_SCENARIO:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_FONT:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NONE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NULL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_FONT:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
                 break;
         }
 
@@ -729,16 +729,16 @@ namespace Invader::Parser {
         #undef DO_TAG_CLASS
     }
 
-    std::vector<TagClassInt> ParserStruct::all_tag_classes(bool exclude_subclasses) {
-        std::vector<TagClassInt> classes;
+    std::vector<TagFourCC> ParserStruct::all_tag_classes(bool exclude_subclasses) {
+        std::vector<TagFourCC> classes;
 
-        #define DO_TAG_CLASS(class_struct, fourcc) classes.emplace_back(TagClassInt::fourcc);
+        #define DO_TAG_CLASS(class_struct, fourcc) classes.emplace_back(TagFourCC::fourcc);
         DO_BASED_ON_TAG_CLASS;
 
         // Remove subclasses
         if(!exclude_subclasses) {
             for(std::size_t i = 0; i < classes.size(); i++) {
-                if(classes[i] == TagClassInt::TAG_CLASS_ITEM || classes[i] == TagClassInt::TAG_CLASS_OBJECT || classes[i] == TagClassInt::TAG_CLASS_UNIT || classes[i] == TagClassInt::TAG_CLASS_DEVICE || classes[i] == TagClassInt::TAG_CLASS_SHADER) {
+                if(classes[i] == TagFourCC::TAG_FOURCC_ITEM || classes[i] == TagFourCC::TAG_FOURCC_OBJECT || classes[i] == TagFourCC::TAG_FOURCC_UNIT || classes[i] == TagFourCC::TAG_FOURCC_DEVICE || classes[i] == TagFourCC::TAG_FOURCC_SHADER) {
                     classes.erase(classes.begin() + i--);
                 }
             }

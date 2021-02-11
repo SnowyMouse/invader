@@ -25,12 +25,12 @@ namespace Invader {
         return dependencies;
     }
 
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
 
         if(!reverse) {
-            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, auto recursion) -> void {
+            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, auto recursion) -> void {
                 std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
 
                 // See if we can open the tag
@@ -115,14 +115,14 @@ namespace Invader {
 
                             // Skip some obvious stuff as well as null tag class ints
                             if(
-                                fourcc == Invader::TagClassInt::TAG_CLASS_NULL ||
-                                fourcc == Invader::TagClassInt::TAG_CLASS_BITMAP ||
-                                fourcc == Invader::TagClassInt::TAG_CLASS_CAMERA_TRACK ||
-                                fourcc == Invader::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT ||
-                                fourcc == Invader::TagClassInt::TAG_CLASS_PHYSICS ||
-                                fourcc == Invader::TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT ||
-                                fourcc == Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST ||
-                                fourcc == Invader::TagClassInt::TAG_CLASS_WIND) {
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_NULL ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_BITMAP ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_CAMERA_TRACK ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_PHYSICS ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_SOUND_ENVIRONMENT ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_WIND) {
                                 continue;
                             }
 

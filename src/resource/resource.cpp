@@ -162,13 +162,13 @@ int main(int argc, const char **argv) {
                         auto tag_class = tag.get_tag_fourcc();
                         switch(*resource_options.type) {
                             case ResourceMapType::RESOURCE_MAP_BITMAP:
-                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_BITMAP;
+                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_BITMAP;
                                 break;
                             case ResourceMapType::RESOURCE_MAP_SOUND:
-                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_SOUND;
+                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_SOUND;
                                 break;
                             case ResourceMapType::RESOURCE_MAP_LOC:
-                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT || tag_class == HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST || tag_class == HEK::TagClassInt::TAG_CLASS_FONT;
+                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT || tag_class == HEK::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST || tag_class == HEK::TagFourCC::TAG_FOURCC_FONT;
                                 break;
                         }
                         if(allowed) {
@@ -193,7 +193,7 @@ int main(int argc, const char **argv) {
                     else {
                         auto &new_path = tags_list.emplace_back();
                         new_path.path = tag;
-                        new_path.fourcc = TagClassInt::TAG_CLASS_NONE;
+                        new_path.fourcc = TagFourCC::TAG_FOURCC_NONE;
                     }
                 }
             }
@@ -213,27 +213,27 @@ int main(int argc, const char **argv) {
 
     for(auto &listed_tag : tags_list) {
         // First let's open it
-        TagClassInt tag_fourcc = TagClassInt::TAG_CLASS_NONE;
+        TagFourCC tag_fourcc = TagFourCC::TAG_FOURCC_NONE;
         std::vector<std::byte> tag_data;
         
         // But if we don't know the extension, we need to find that first!
-        if(listed_tag.fourcc == TagClassInt::TAG_CLASS_NONE) {
+        if(listed_tag.fourcc == TagFourCC::TAG_FOURCC_NONE) {
             auto pref_path = File::halo_path_to_preferred_path(listed_tag.path.c_str());
             for(auto &tags_folder : resource_options.tags) {
                 if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".font"))) {
-                    listed_tag.fourcc = TagClassInt::TAG_CLASS_FONT;
+                    listed_tag.fourcc = TagFourCC::TAG_FOURCC_FONT;
                     break;
                 }
                 else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".hud_message_text"))) {
-                    listed_tag.fourcc = TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT;
+                    listed_tag.fourcc = TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT;
                     break;
                 }
                 else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".unicode_string_list"))) {
-                    listed_tag.fourcc = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
+                    listed_tag.fourcc = TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST;
                     break;
                 }
             }
-            if(listed_tag.fourcc == TagClassInt::TAG_CLASS_NONE) {
+            if(listed_tag.fourcc == TagFourCC::TAG_FOURCC_NONE) {
                 eprintf_error("No font, hud message text, or unicode string list was found at %s.", pref_path.c_str());
                 return EXIT_FAILURE;
             }
@@ -258,16 +258,16 @@ int main(int argc, const char **argv) {
 
         switch(*resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
-                tag_fourcc = TagClassInt::TAG_CLASS_BITMAP;
+                tag_fourcc = TagFourCC::TAG_FOURCC_BITMAP;
                 break;
             case ResourceMapType::RESOURCE_MAP_SOUND:
-                tag_fourcc = TagClassInt::TAG_CLASS_SOUND;
+                tag_fourcc = TagFourCC::TAG_FOURCC_SOUND;
                 break;
             case ResourceMapType::RESOURCE_MAP_LOC:
                 switch(listed_tag.fourcc) {
-                    case TagClassInt::TAG_CLASS_FONT:
-                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
-                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                    case TagFourCC::TAG_FOURCC_FONT:
+                    case TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
+                    case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
                         tag_fourcc = listed_tag.fourcc;
                         break;
                         

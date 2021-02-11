@@ -256,7 +256,7 @@ namespace Invader::HEK {
      */
     ENDIAN_TEMPLATE(EndianType) struct TagDependency {
         /** Tag class of the tag being depended upon */
-        EndianType<TagClassInt> tag_fourcc;
+        EndianType<TagFourCC> tag_fourcc;
 
         /** Pointer to tag path when compiled. */
         EndianType<Pointer> path_pointer;

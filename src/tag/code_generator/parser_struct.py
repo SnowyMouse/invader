@@ -39,11 +39,11 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 if classes[0] == "*":
                     cpp_struct_value.write("    values.emplace_back({}, nullptr, 0, {});\n".format(first_arguments, struct_read_only))
                 else:
-                    cpp_struct_value.write("    TagClassInt {}_types[] = {{".format(member_name));
+                    cpp_struct_value.write("    TagFourCC {}_types[] = {{".format(member_name));
                     for c in range(0, classes_len):
                         if c != 0:
                             cpp_struct_value.write(", ")
-                        cpp_struct_value.write("TagClassInt::TAG_CLASS_{}".format(classes[c].upper()))
+                        cpp_struct_value.write("TagFourCC::TAG_FOURCC_{}".format(classes[c].upper()))
                     cpp_struct_value.write("};\n");
                     cpp_struct_value.write("    values.emplace_back({}, {}_types, {}, {});\n".format(first_arguments, member_name, classes_len, struct_read_only))
             elif type == "TagReflexive":

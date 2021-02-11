@@ -199,9 +199,9 @@ namespace Invader::HEK {
     static_assert(sizeof(NativeCacheFileTagDataHeader) == 0x38);
 
     struct CacheFileTagDataTag {
-        LittleEndian<TagClassInt> primary_class;
-        LittleEndian<TagClassInt> secondary_class;
-        LittleEndian<TagClassInt> tertiary_class;
+        LittleEndian<TagFourCC> primary_class;
+        LittleEndian<TagFourCC> secondary_class;
+        LittleEndian<TagFourCC> tertiary_class;
         LittleEndian<TagID> tag_id;
         LittleEndian<Pointer> tag_path;
         LittleEndian<Pointer> tag_data;
@@ -211,9 +211,9 @@ namespace Invader::HEK {
     static_assert(sizeof(CacheFileTagDataTag) == 0x20);
 
     struct NativeCacheFileTagDataTag {
-        LittleEndian<TagClassInt> primary_class;
-        LittleEndian<TagClassInt> secondary_class;
-        LittleEndian<TagClassInt> tertiary_class;
+        LittleEndian<TagFourCC> primary_class;
+        LittleEndian<TagFourCC> secondary_class;
+        LittleEndian<TagFourCC> tertiary_class;
         LittleEndian<TagID> tag_id;
         LittleEndian<Pointer64> tag_path;
         LittleEndian<Pointer64> tag_data;

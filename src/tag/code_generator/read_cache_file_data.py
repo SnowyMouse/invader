@@ -44,8 +44,8 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("        }\n")
                 if struct["classes"][0] != "*":
-                    cpp_read_cache_file_data.write("        else if(r.{}.tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
-                    cpp_read_cache_file_data.write("            r.{}.tag_fourcc = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_read_cache_file_data.write("        else if(r.{}.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL) {{\n".format(name))
+                    cpp_read_cache_file_data.write("            r.{}.tag_fourcc = HEK::TagFourCC::TAG_FOURCC_{};\n".format(name, struct["classes"][0].upper()))
                     cpp_read_cache_file_data.write("        }\n")
                     
             elif struct["type"] == "TagReflexive":

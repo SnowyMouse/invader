@@ -6,101 +6,101 @@
 #include <cstdint>
 
 namespace Invader::HEK {
-    enum TagClassInt : std::uint32_t {
-        TAG_CLASS_ACTOR = 0x61637472,
-        TAG_CLASS_ACTOR_VARIANT = 0x61637476,
-        TAG_CLASS_ANTENNA = 0x616E7421,
-        TAG_CLASS_MODEL_ANIMATIONS = 0x616E7472,
-        TAG_CLASS_BIPED = 0x62697064,
-        TAG_CLASS_BITMAP = 0x6269746D,
-        TAG_CLASS_SPHEROID = 0x626F6F6D,
-        TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT = 0x63646D67,
-        TAG_CLASS_MODEL_COLLISION_GEOMETRY = 0x636F6C6C,
-        TAG_CLASS_COLOR_TABLE = 0x636F6C6F,
-        TAG_CLASS_CONTRAIL = 0x636F6E74,
-        TAG_CLASS_DEVICE_CONTROL = 0x6374726C,
-        TAG_CLASS_DECAL = 0x64656361,
-        TAG_CLASS_UI_WIDGET_DEFINITION = 0x44654C61,
-        TAG_CLASS_INPUT_DEVICE_DEFAULTS = 0x64657663,
-        TAG_CLASS_DEVICE = 0x64657669,
-        TAG_CLASS_DETAIL_OBJECT_COLLECTION = 0x646F6263,
-        TAG_CLASS_EFFECT = 0x65666665,
-        TAG_CLASS_EQUIPMENT = 0x65716970,
-        TAG_CLASS_FLAG = 0x666C6167,
-        TAG_CLASS_FOG = 0x666F6720,
-        TAG_CLASS_FONT = 0x666F6E74,
-        TAG_CLASS_MATERIAL_EFFECTS = 0x666F6F74,
-        TAG_CLASS_GARBAGE = 0x67617262,
-        TAG_CLASS_GLOW = 0x676C7721,
-        TAG_CLASS_GRENADE_HUD_INTERFACE = 0x67726869,
-        TAG_CLASS_HUD_MESSAGE_TEXT = 0x686D7420,
-        TAG_CLASS_HUD_NUMBER = 0x68756423,
-        TAG_CLASS_HUD_GLOBALS = 0x68756467,
-        TAG_CLASS_ITEM = 0x6974656D,
-        TAG_CLASS_ITEM_COLLECTION = 0x69746D63,
-        TAG_CLASS_DAMAGE_EFFECT = 0x6A707421,
-        TAG_CLASS_LENS_FLARE = 0x6C656E73,
-        TAG_CLASS_LIGHTNING = 0x656C6563,
-        TAG_CLASS_DEVICE_LIGHT_FIXTURE = 0x6C696669,
-        TAG_CLASS_LIGHT = 0x6C696768,
-        TAG_CLASS_SOUND_LOOPING = 0x6C736E64,
-        TAG_CLASS_DEVICE_MACHINE = 0x6D616368,
-        TAG_CLASS_GLOBALS = 0x6D617467,
-        TAG_CLASS_METER = 0x6D657472,
-        TAG_CLASS_LIGHT_VOLUME = 0x6D677332,
-        TAG_CLASS_GBXMODEL = 0x6D6F6432,
-        TAG_CLASS_MODEL = 0x6D6F6465,
-        TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION = 0x6D706C79,
-        TAG_CLASS_PREFERENCES_NETWORK_GAME = 0x6E677072,
-        TAG_CLASS_NONE = ~static_cast<std::uint32_t>(0),
-        TAG_CLASS_NULL = 0,
-        TAG_CLASS_OBJECT = 0x6F626A65,
-        TAG_CLASS_PARTICLE = 0x70617274,
-        TAG_CLASS_PARTICLE_SYSTEM = 0x7063746C,
-        TAG_CLASS_PHYSICS = 0x70687973,
-        TAG_CLASS_PLACEHOLDER = 0x706C6163,
-        TAG_CLASS_POINT_PHYSICS = 0x70706879,
-        TAG_CLASS_PROJECTILE = 0x70726F6A,
-        TAG_CLASS_WEATHER_PARTICLE_SYSTEM = 0x7261696E,
-        TAG_CLASS_SCENARIO_STRUCTURE_BSP = 0x73627370,
-        TAG_CLASS_SCENERY = 0x7363656E,
-        TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED = 0x73636578,
-        TAG_CLASS_SHADER_TRANSPARENT_CHICAGO = 0x73636869,
-        TAG_CLASS_SCENARIO = 0x73636E72,
-        TAG_CLASS_SHADER_ENVIRONMENT = 0x73656E76,
-        TAG_CLASS_SHADER_TRANSPARENT_GLASS = 0x73676C61,
-        TAG_CLASS_SHADER = 0x73686472,
-        TAG_CLASS_SKY = 0x736B7920,
-        TAG_CLASS_SHADER_TRANSPARENT_METER = 0x736D6574,
-        TAG_CLASS_SOUND = 0x736E6421,
-        TAG_CLASS_SOUND_ENVIRONMENT = 0x736E6465,
-        TAG_CLASS_SHADER_MODEL = 0x736F736F,
-        TAG_CLASS_SHADER_TRANSPARENT_GENERIC = 0x736F7472,
-        TAG_CLASS_UI_WIDGET_COLLECTION = 0x536F756C,
-        TAG_CLASS_SHADER_TRANSPARENT_PLASMA = 0x73706C61,
-        TAG_CLASS_SOUND_SCENERY = 0x73736365,
-        TAG_CLASS_STRING_LIST = 0x73747223,
-        TAG_CLASS_SHADER_TRANSPARENT_WATER = 0x73776174,
-        TAG_CLASS_TAG_COLLECTION = 0x74616763,
-        TAG_CLASS_CAMERA_TRACK = 0x7472616B,
-        TAG_CLASS_DIALOGUE = 0x75646C67,
-        TAG_CLASS_UNIT_HUD_INTERFACE = 0x756E6869,
-        TAG_CLASS_UNIT = 0x756E6974,
-        TAG_CLASS_UNICODE_STRING_LIST = 0x75737472,
-        TAG_CLASS_VIRTUAL_KEYBOARD = 0x76636B79,
-        TAG_CLASS_VEHICLE = 0x76656869,
-        TAG_CLASS_WEAPON = 0x77656170,
-        TAG_CLASS_WIND = 0x77696E64,
-        TAG_CLASS_WEAPON_HUD_INTERFACE = 0x77706869,
+    enum TagFourCC : std::uint32_t {
+        TAG_FOURCC_ACTOR = 0x61637472,
+        TAG_FOURCC_ACTOR_VARIANT = 0x61637476,
+        TAG_FOURCC_ANTENNA = 0x616E7421,
+        TAG_FOURCC_MODEL_ANIMATIONS = 0x616E7472,
+        TAG_FOURCC_BIPED = 0x62697064,
+        TAG_FOURCC_BITMAP = 0x6269746D,
+        TAG_FOURCC_SPHEROID = 0x626F6F6D,
+        TAG_FOURCC_CONTINUOUS_DAMAGE_EFFECT = 0x63646D67,
+        TAG_FOURCC_MODEL_COLLISION_GEOMETRY = 0x636F6C6C,
+        TAG_FOURCC_COLOR_TABLE = 0x636F6C6F,
+        TAG_FOURCC_CONTRAIL = 0x636F6E74,
+        TAG_FOURCC_DEVICE_CONTROL = 0x6374726C,
+        TAG_FOURCC_DECAL = 0x64656361,
+        TAG_FOURCC_UI_WIDGET_DEFINITION = 0x44654C61,
+        TAG_FOURCC_INPUT_DEVICE_DEFAULTS = 0x64657663,
+        TAG_FOURCC_DEVICE = 0x64657669,
+        TAG_FOURCC_DETAIL_OBJECT_COLLECTION = 0x646F6263,
+        TAG_FOURCC_EFFECT = 0x65666665,
+        TAG_FOURCC_EQUIPMENT = 0x65716970,
+        TAG_FOURCC_FLAG = 0x666C6167,
+        TAG_FOURCC_FOG = 0x666F6720,
+        TAG_FOURCC_FONT = 0x666F6E74,
+        TAG_FOURCC_MATERIAL_EFFECTS = 0x666F6F74,
+        TAG_FOURCC_GARBAGE = 0x67617262,
+        TAG_FOURCC_GLOW = 0x676C7721,
+        TAG_FOURCC_GRENADE_HUD_INTERFACE = 0x67726869,
+        TAG_FOURCC_HUD_MESSAGE_TEXT = 0x686D7420,
+        TAG_FOURCC_HUD_NUMBER = 0x68756423,
+        TAG_FOURCC_HUD_GLOBALS = 0x68756467,
+        TAG_FOURCC_ITEM = 0x6974656D,
+        TAG_FOURCC_ITEM_COLLECTION = 0x69746D63,
+        TAG_FOURCC_DAMAGE_EFFECT = 0x6A707421,
+        TAG_FOURCC_LENS_FLARE = 0x6C656E73,
+        TAG_FOURCC_LIGHTNING = 0x656C6563,
+        TAG_FOURCC_DEVICE_LIGHT_FIXTURE = 0x6C696669,
+        TAG_FOURCC_LIGHT = 0x6C696768,
+        TAG_FOURCC_SOUND_LOOPING = 0x6C736E64,
+        TAG_FOURCC_DEVICE_MACHINE = 0x6D616368,
+        TAG_FOURCC_GLOBALS = 0x6D617467,
+        TAG_FOURCC_METER = 0x6D657472,
+        TAG_FOURCC_LIGHT_VOLUME = 0x6D677332,
+        TAG_FOURCC_GBXMODEL = 0x6D6F6432,
+        TAG_FOURCC_MODEL = 0x6D6F6465,
+        TAG_FOURCC_MULTIPLAYER_SCENARIO_DESCRIPTION = 0x6D706C79,
+        TAG_FOURCC_PREFERENCES_NETWORK_GAME = 0x6E677072,
+        TAG_FOURCC_NONE = ~static_cast<std::uint32_t>(0),
+        TAG_FOURCC_NULL = 0,
+        TAG_FOURCC_OBJECT = 0x6F626A65,
+        TAG_FOURCC_PARTICLE = 0x70617274,
+        TAG_FOURCC_PARTICLE_SYSTEM = 0x7063746C,
+        TAG_FOURCC_PHYSICS = 0x70687973,
+        TAG_FOURCC_PLACEHOLDER = 0x706C6163,
+        TAG_FOURCC_POINT_PHYSICS = 0x70706879,
+        TAG_FOURCC_PROJECTILE = 0x70726F6A,
+        TAG_FOURCC_WEATHER_PARTICLE_SYSTEM = 0x7261696E,
+        TAG_FOURCC_SCENARIO_STRUCTURE_BSP = 0x73627370,
+        TAG_FOURCC_SCENERY = 0x7363656E,
+        TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED = 0x73636578,
+        TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO = 0x73636869,
+        TAG_FOURCC_SCENARIO = 0x73636E72,
+        TAG_FOURCC_SHADER_ENVIRONMENT = 0x73656E76,
+        TAG_FOURCC_SHADER_TRANSPARENT_GLASS = 0x73676C61,
+        TAG_FOURCC_SHADER = 0x73686472,
+        TAG_FOURCC_SKY = 0x736B7920,
+        TAG_FOURCC_SHADER_TRANSPARENT_METER = 0x736D6574,
+        TAG_FOURCC_SOUND = 0x736E6421,
+        TAG_FOURCC_SOUND_ENVIRONMENT = 0x736E6465,
+        TAG_FOURCC_SHADER_MODEL = 0x736F736F,
+        TAG_FOURCC_SHADER_TRANSPARENT_GENERIC = 0x736F7472,
+        TAG_FOURCC_UI_WIDGET_COLLECTION = 0x536F756C,
+        TAG_FOURCC_SHADER_TRANSPARENT_PLASMA = 0x73706C61,
+        TAG_FOURCC_SOUND_SCENERY = 0x73736365,
+        TAG_FOURCC_STRING_LIST = 0x73747223,
+        TAG_FOURCC_SHADER_TRANSPARENT_WATER = 0x73776174,
+        TAG_FOURCC_TAG_COLLECTION = 0x74616763,
+        TAG_FOURCC_CAMERA_TRACK = 0x7472616B,
+        TAG_FOURCC_DIALOGUE = 0x75646C67,
+        TAG_FOURCC_UNIT_HUD_INTERFACE = 0x756E6869,
+        TAG_FOURCC_UNIT = 0x756E6974,
+        TAG_FOURCC_UNICODE_STRING_LIST = 0x75737472,
+        TAG_FOURCC_VIRTUAL_KEYBOARD = 0x76636B79,
+        TAG_FOURCC_VEHICLE = 0x76656869,
+        TAG_FOURCC_WEAPON = 0x77656170,
+        TAG_FOURCC_WIND = 0x77696E64,
+        TAG_FOURCC_WEAPON_HUD_INTERFACE = 0x77706869,
 
-        TAG_CLASS_INVADER_BITMAP = 0x65626974,
-        TAG_CLASS_INVADER_SCENARIO = 0x53636E72,
-        TAG_CLASS_INVADER_SOUND = 0x65736E64,
-        TAG_CLASS_INVADER_FONT = 0x6E666E74,
-        TAG_CLASS_INVADER_UI_WIDGET_DEFINITION = 0x6E757764,
-        TAG_CLASS_INVADER_UNIT_HUD_INTERFACE = 0x6E756869,
-        TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE = 0x6E776869,
-        TAG_CLASS_SHADER_TRANSPARENT_GLSL = 0x7374676C
+        TAG_FOURCC_INVADER_BITMAP = 0x65626974,
+        TAG_FOURCC_INVADER_SCENARIO = 0x53636E72,
+        TAG_FOURCC_INVADER_SOUND = 0x65736E64,
+        TAG_FOURCC_INVADER_FONT = 0x6E666E74,
+        TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION = 0x6E757764,
+        TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE = 0x6E756869,
+        TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE = 0x6E776869,
+        TAG_FOURCC_SHADER_TRANSPARENT_GLSL = 0x7374676C
     };
 
     /**
@@ -108,229 +108,229 @@ namespace Invader::HEK {
      * @param  tag_fourcc the tag class int
      * @return               true if an object, false if not
      */
-    #define IS_OBJECT_TAG(tag_fourcc) (tag_fourcc == TagClassInt::TAG_CLASS_BIPED || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE_CONTROL || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE_MACHINE || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_EQUIPMENT || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_GARBAGE || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_ITEM || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_OBJECT || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_PLACEHOLDER || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_PROJECTILE || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_SCENERY || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_SOUND_SCENERY || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_VEHICLE || \
-                                          tag_fourcc == TagClassInt::TAG_CLASS_WEAPON)
+    #define IS_OBJECT_TAG(tag_fourcc) (tag_fourcc == TagFourCC::TAG_FOURCC_BIPED || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_CONTROL || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_MACHINE || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_EQUIPMENT || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_GARBAGE || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_ITEM || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_OBJECT || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_PLACEHOLDER || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_PROJECTILE || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_SCENERY || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_SOUND_SCENERY || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_VEHICLE || \
+                                          tag_fourcc == TagFourCC::TAG_FOURCC_WEAPON)
 
     /**
      * Return the extension of the tag class or nullptr if none exists.
      * @param  tag_class This is the tag class being looked up.
      * @return           This is a C string containing the extension.
      */
-     constexpr const char *tag_fourcc_to_extension(TagClassInt tag_class) noexcept {
+     constexpr const char *tag_fourcc_to_extension(TagFourCC tag_class) noexcept {
          switch(tag_class) {
-         case TagClassInt::TAG_CLASS_ACTOR:
+         case TagFourCC::TAG_FOURCC_ACTOR:
              return "actor";
-         case TagClassInt::TAG_CLASS_ACTOR_VARIANT:
+         case TagFourCC::TAG_FOURCC_ACTOR_VARIANT:
              return "actor_variant";
-         case TagClassInt::TAG_CLASS_ANTENNA:
+         case TagFourCC::TAG_FOURCC_ANTENNA:
              return "antenna";
-         case TagClassInt::TAG_CLASS_MODEL_ANIMATIONS:
+         case TagFourCC::TAG_FOURCC_MODEL_ANIMATIONS:
              return "model_animations";
-         case TagClassInt::TAG_CLASS_BIPED:
+         case TagFourCC::TAG_FOURCC_BIPED:
              return "biped";
-         case TagClassInt::TAG_CLASS_BITMAP:
+         case TagFourCC::TAG_FOURCC_BITMAP:
              return "bitmap";
-         case TagClassInt::TAG_CLASS_SPHEROID:
+         case TagFourCC::TAG_FOURCC_SPHEROID:
              return "spheroid";
-         case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
+         case TagFourCC::TAG_FOURCC_CONTINUOUS_DAMAGE_EFFECT:
              return "continuous_damage_effect";
-         case TagClassInt::TAG_CLASS_MODEL_COLLISION_GEOMETRY:
+         case TagFourCC::TAG_FOURCC_MODEL_COLLISION_GEOMETRY:
              return "model_collision_geometry";
-         case TagClassInt::TAG_CLASS_COLOR_TABLE:
+         case TagFourCC::TAG_FOURCC_COLOR_TABLE:
              return "color_table";
-         case TagClassInt::TAG_CLASS_CONTRAIL:
+         case TagFourCC::TAG_FOURCC_CONTRAIL:
              return "contrail";
-         case TagClassInt::TAG_CLASS_DEVICE_CONTROL:
+         case TagFourCC::TAG_FOURCC_DEVICE_CONTROL:
              return "device_control";
-         case TagClassInt::TAG_CLASS_DECAL:
+         case TagFourCC::TAG_FOURCC_DECAL:
              return "decal";
-         case TagClassInt::TAG_CLASS_UI_WIDGET_DEFINITION:
+         case TagFourCC::TAG_FOURCC_UI_WIDGET_DEFINITION:
              return "ui_widget_definition";
-         case TagClassInt::TAG_CLASS_INPUT_DEVICE_DEFAULTS:
+         case TagFourCC::TAG_FOURCC_INPUT_DEVICE_DEFAULTS:
              return "input_device_defaults";
-         case TagClassInt::TAG_CLASS_DEVICE:
+         case TagFourCC::TAG_FOURCC_DEVICE:
              return "device";
-         case TagClassInt::TAG_CLASS_DETAIL_OBJECT_COLLECTION:
+         case TagFourCC::TAG_FOURCC_DETAIL_OBJECT_COLLECTION:
              return "detail_object_collection";
-         case TagClassInt::TAG_CLASS_EFFECT:
+         case TagFourCC::TAG_FOURCC_EFFECT:
              return "effect";
-         case TagClassInt::TAG_CLASS_EQUIPMENT:
+         case TagFourCC::TAG_FOURCC_EQUIPMENT:
              return "equipment";
-         case TagClassInt::TAG_CLASS_FLAG:
+         case TagFourCC::TAG_FOURCC_FLAG:
              return "flag";
-         case TagClassInt::TAG_CLASS_FOG:
+         case TagFourCC::TAG_FOURCC_FOG:
              return "fog";
-         case TagClassInt::TAG_CLASS_FONT:
+         case TagFourCC::TAG_FOURCC_FONT:
              return "font";
-         case TagClassInt::TAG_CLASS_MATERIAL_EFFECTS:
+         case TagFourCC::TAG_FOURCC_MATERIAL_EFFECTS:
              return "material_effects";
-         case TagClassInt::TAG_CLASS_GARBAGE:
+         case TagFourCC::TAG_FOURCC_GARBAGE:
              return "garbage";
-         case TagClassInt::TAG_CLASS_GLOW:
+         case TagFourCC::TAG_FOURCC_GLOW:
              return "glow";
-         case TagClassInt::TAG_CLASS_GRENADE_HUD_INTERFACE:
+         case TagFourCC::TAG_FOURCC_GRENADE_HUD_INTERFACE:
              return "grenade_hud_interface";
-         case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+         case TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
              return "hud_message_text";
-         case TagClassInt::TAG_CLASS_HUD_NUMBER:
+         case TagFourCC::TAG_FOURCC_HUD_NUMBER:
              return "hud_number";
-         case TagClassInt::TAG_CLASS_HUD_GLOBALS:
+         case TagFourCC::TAG_FOURCC_HUD_GLOBALS:
              return "hud_globals";
-         case TagClassInt::TAG_CLASS_ITEM:
+         case TagFourCC::TAG_FOURCC_ITEM:
              return "item";
-         case TagClassInt::TAG_CLASS_ITEM_COLLECTION:
+         case TagFourCC::TAG_FOURCC_ITEM_COLLECTION:
              return "item_collection";
-         case TagClassInt::TAG_CLASS_DAMAGE_EFFECT:
+         case TagFourCC::TAG_FOURCC_DAMAGE_EFFECT:
              return "damage_effect";
-         case TagClassInt::TAG_CLASS_LENS_FLARE:
+         case TagFourCC::TAG_FOURCC_LENS_FLARE:
              return "lens_flare";
-         case TagClassInt::TAG_CLASS_LIGHTNING:
+         case TagFourCC::TAG_FOURCC_LIGHTNING:
              return "lightning";
-         case TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE:
+         case TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE:
              return "device_light_fixture";
-         case TagClassInt::TAG_CLASS_LIGHT:
+         case TagFourCC::TAG_FOURCC_LIGHT:
              return "light";
-         case TagClassInt::TAG_CLASS_SOUND_LOOPING:
+         case TagFourCC::TAG_FOURCC_SOUND_LOOPING:
              return "sound_looping";
-         case TagClassInt::TAG_CLASS_DEVICE_MACHINE:
+         case TagFourCC::TAG_FOURCC_DEVICE_MACHINE:
              return "device_machine";
-         case TagClassInt::TAG_CLASS_GLOBALS:
+         case TagFourCC::TAG_FOURCC_GLOBALS:
              return "globals";
-         case TagClassInt::TAG_CLASS_METER:
+         case TagFourCC::TAG_FOURCC_METER:
              return "meter";
-         case TagClassInt::TAG_CLASS_LIGHT_VOLUME:
+         case TagFourCC::TAG_FOURCC_LIGHT_VOLUME:
              return "light_volume";
-         case TagClassInt::TAG_CLASS_GBXMODEL:
+         case TagFourCC::TAG_FOURCC_GBXMODEL:
              return "gbxmodel";
-         case TagClassInt::TAG_CLASS_MODEL:
+         case TagFourCC::TAG_FOURCC_MODEL:
              return "model";
-         case TagClassInt::TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION:
+         case TagFourCC::TAG_FOURCC_MULTIPLAYER_SCENARIO_DESCRIPTION:
              return "multiplayer_scenario_description";
-         case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
+         case TagFourCC::TAG_FOURCC_PREFERENCES_NETWORK_GAME:
              return "preferences_network_game";
-         case TagClassInt::TAG_CLASS_NONE:
+         case TagFourCC::TAG_FOURCC_NONE:
              return "none";
-         case TagClassInt::TAG_CLASS_OBJECT:
+         case TagFourCC::TAG_FOURCC_OBJECT:
              return "object";
-         case TagClassInt::TAG_CLASS_PARTICLE:
+         case TagFourCC::TAG_FOURCC_PARTICLE:
              return "particle";
-         case TagClassInt::TAG_CLASS_PARTICLE_SYSTEM:
+         case TagFourCC::TAG_FOURCC_PARTICLE_SYSTEM:
              return "particle_system";
-         case TagClassInt::TAG_CLASS_PHYSICS:
+         case TagFourCC::TAG_FOURCC_PHYSICS:
              return "physics";
-         case TagClassInt::TAG_CLASS_PLACEHOLDER:
+         case TagFourCC::TAG_FOURCC_PLACEHOLDER:
              return "placeholder";
-         case TagClassInt::TAG_CLASS_POINT_PHYSICS:
+         case TagFourCC::TAG_FOURCC_POINT_PHYSICS:
              return "point_physics";
-         case TagClassInt::TAG_CLASS_PROJECTILE:
+         case TagFourCC::TAG_FOURCC_PROJECTILE:
              return "projectile";
-         case TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM:
+         case TagFourCC::TAG_FOURCC_WEATHER_PARTICLE_SYSTEM:
              return "weather_particle_system";
-         case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
+         case TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP:
              return "scenario_structure_bsp";
-         case TagClassInt::TAG_CLASS_SCENERY:
+         case TagFourCC::TAG_FOURCC_SCENERY:
              return "scenery";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
              return "shader_transparent_chicago_extended";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO:
              return "shader_transparent_chicago";
-         case TagClassInt::TAG_CLASS_SCENARIO:
+         case TagFourCC::TAG_FOURCC_SCENARIO:
              return "scenario";
-         case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
+         case TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT:
              return "shader_environment";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
              return "shader_transparent_glass";
-         case TagClassInt::TAG_CLASS_SHADER:
+         case TagFourCC::TAG_FOURCC_SHADER:
              return "shader";
-         case TagClassInt::TAG_CLASS_SKY:
+         case TagFourCC::TAG_FOURCC_SKY:
              return "sky";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
              return "shader_transparent_meter";
-         case TagClassInt::TAG_CLASS_SOUND:
+         case TagFourCC::TAG_FOURCC_SOUND:
              return "sound";
-         case TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT:
+         case TagFourCC::TAG_FOURCC_SOUND_ENVIRONMENT:
              return "sound_environment";
-         case TagClassInt::TAG_CLASS_SHADER_MODEL:
+         case TagFourCC::TAG_FOURCC_SHADER_MODEL:
              return "shader_model";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
              return "shader_transparent_generic";
-         case TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION:
+         case TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION:
              return "ui_widget_collection";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA:
              return "shader_transparent_plasma";
-         case TagClassInt::TAG_CLASS_SOUND_SCENERY:
+         case TagFourCC::TAG_FOURCC_SOUND_SCENERY:
              return "sound_scenery";
-         case TagClassInt::TAG_CLASS_STRING_LIST:
+         case TagFourCC::TAG_FOURCC_STRING_LIST:
              return "string_list";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
              return "shader_transparent_water";
-         case TagClassInt::TAG_CLASS_TAG_COLLECTION:
+         case TagFourCC::TAG_FOURCC_TAG_COLLECTION:
              return "tag_collection";
-         case TagClassInt::TAG_CLASS_CAMERA_TRACK:
+         case TagFourCC::TAG_FOURCC_CAMERA_TRACK:
              return "camera_track";
-         case TagClassInt::TAG_CLASS_DIALOGUE:
+         case TagFourCC::TAG_FOURCC_DIALOGUE:
              return "dialogue";
-         case TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE:
+         case TagFourCC::TAG_FOURCC_UNIT_HUD_INTERFACE:
              return "unit_hud_interface";
-         case TagClassInt::TAG_CLASS_UNIT:
+         case TagFourCC::TAG_FOURCC_UNIT:
              return "unit";
-         case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+         case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
              return "unicode_string_list";
-         case TagClassInt::TAG_CLASS_VIRTUAL_KEYBOARD:
+         case TagFourCC::TAG_FOURCC_VIRTUAL_KEYBOARD:
              return "virtual_keyboard";
-         case TagClassInt::TAG_CLASS_VEHICLE:
+         case TagFourCC::TAG_FOURCC_VEHICLE:
              return "vehicle";
-         case TagClassInt::TAG_CLASS_WEAPON:
+         case TagFourCC::TAG_FOURCC_WEAPON:
              return "weapon";
-         case TagClassInt::TAG_CLASS_WIND:
+         case TagFourCC::TAG_FOURCC_WIND:
              return "wind";
-         case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
+         case TagFourCC::TAG_FOURCC_WEAPON_HUD_INTERFACE:
              return "weapon_hud_interface";
-         case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+         case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
              return "invader_bitmap";
-         case TagClassInt::TAG_CLASS_INVADER_SCENARIO:
+         case TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
              return "invader_scenario";
-         case TagClassInt::TAG_CLASS_INVADER_SOUND:
+         case TagFourCC::TAG_FOURCC_INVADER_SOUND:
              return "invader_sound";
-         case TagClassInt::TAG_CLASS_INVADER_FONT:
+         case TagFourCC::TAG_FOURCC_INVADER_FONT:
              return "invader_font";
-         case TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
+         case TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
              return "invader_ui_widget_definition";
-         case TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
+         case TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
              return "invader_unit_hud_interface";
-         case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
+         case TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
              return "invader_weapon_hud_interface";
-         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
              return "shader_transparent_glsl";
-         case TagClassInt::TAG_CLASS_NULL:
+         case TagFourCC::TAG_FOURCC_NULL:
              break;
          }
          return "unknown";
      }
 
     /**
-     * Return the tag class of the extension or TagClass::TAG_CLASS_NULL if failed or extension is nullptr.
+     * Return the tag class of the extension or TagClass::TAG_FOURCC_NULL if failed or extension is nullptr.
      * @param  extension This is the extension being looked up.
-     * @return           This is the equivalent tag class int of the extesion or TagClass::TAG_CLASS_NULL if failed.
+     * @return           This is the equivalent tag class int of the extesion or TagClass::TAG_FOURCC_NULL if failed.
      */
-    TagClassInt tag_extension_to_fourcc(const char *extension) noexcept;
+    TagFourCC tag_extension_to_fourcc(const char *extension) noexcept;
 }
 
 namespace Invader {
-    using TagClassInt = HEK::TagClassInt;
+    using TagFourCC = HEK::TagFourCC;
 }
 
 #endif

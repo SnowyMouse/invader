@@ -4,84 +4,84 @@
 #include <invader/tag/hek/header.hpp>
 
 namespace Invader::HEK {
-    std::uint16_t TagFileHeader::version_for_tag(TagClassInt tag_fourcc) {
+    std::uint16_t TagFileHeader::version_for_tag(TagFourCC tag_fourcc) {
         switch(tag_fourcc) {
-            case TAG_CLASS_ACTOR:
+            case TAG_FOURCC_ACTOR:
                 return 2;
-            case TAG_CLASS_MODEL_ANIMATIONS:
+            case TAG_FOURCC_MODEL_ANIMATIONS:
                 return 4;
-            case TAG_CLASS_BIPED:
+            case TAG_FOURCC_BIPED:
                 return 3;
-            case TAG_CLASS_BITMAP:
+            case TAG_FOURCC_BITMAP:
                 return 7;
-            case TAG_CLASS_CONTRAIL:
+            case TAG_FOURCC_CONTRAIL:
                 return 3;
-            case TAG_CLASS_EFFECT:
+            case TAG_FOURCC_EFFECT:
                 return 4;
-            case TAG_CLASS_EQUIPMENT:
+            case TAG_FOURCC_EQUIPMENT:
                 return 2;
-            case TAG_CLASS_ITEM:
+            case TAG_FOURCC_ITEM:
                 return 2;
-            case TAG_CLASS_ITEM_COLLECTION:
+            case TAG_FOURCC_ITEM_COLLECTION:
                 return 0;
-            case TAG_CLASS_DAMAGE_EFFECT:
+            case TAG_FOURCC_DAMAGE_EFFECT:
                 return 6;
-            case TAG_CLASS_LENS_FLARE:
+            case TAG_FOURCC_LENS_FLARE:
                 return 2;
-            case TAG_CLASS_LIGHT:
+            case TAG_FOURCC_LIGHT:
                 return 3;
-            case TAG_CLASS_SOUND_LOOPING:
+            case TAG_FOURCC_SOUND_LOOPING:
                 return 3;
-            case TAG_CLASS_GBXMODEL:
+            case TAG_FOURCC_GBXMODEL:
                 return 5;
-            case TAG_CLASS_GLOBALS:
+            case TAG_FOURCC_GLOBALS:
                 return 3;
-            case TAG_CLASS_MODEL:
+            case TAG_FOURCC_MODEL:
                 return 4;
-            case TAG_CLASS_MODEL_COLLISION_GEOMETRY:
+            case TAG_FOURCC_MODEL_COLLISION_GEOMETRY:
                 return 10;
-            case TAG_CLASS_PARTICLE:
+            case TAG_FOURCC_PARTICLE:
                 return 2;
-            case TAG_CLASS_PARTICLE_SYSTEM:
+            case TAG_FOURCC_PARTICLE_SYSTEM:
                 return 4;
-            case TAG_CLASS_PHYSICS:
+            case TAG_FOURCC_PHYSICS:
                 return 4;
-            case TAG_CLASS_PLACEHOLDER:
+            case TAG_FOURCC_PLACEHOLDER:
                 return 2;
-            case TAG_CLASS_PREFERENCES_NETWORK_GAME:
+            case TAG_FOURCC_PREFERENCES_NETWORK_GAME:
                 return 2;
-            case TAG_CLASS_PROJECTILE:
+            case TAG_FOURCC_PROJECTILE:
                 return 5;
-            case TAG_CLASS_SCENARIO_STRUCTURE_BSP:
+            case TAG_FOURCC_SCENARIO_STRUCTURE_BSP:
                 return 5;
-            case TAG_CLASS_SCENARIO:
+            case TAG_FOURCC_SCENARIO:
                 return 2;
-            case TAG_CLASS_SHADER_ENVIRONMENT:
+            case TAG_FOURCC_SHADER_ENVIRONMENT:
                 return 2;
-            case TAG_CLASS_SOUND:
+            case TAG_FOURCC_SOUND:
                 return 4;
-            case TAG_CLASS_SHADER_MODEL:
+            case TAG_FOURCC_SHADER_MODEL:
                 return 2;
-            case TAG_CLASS_SHADER_TRANSPARENT_WATER:
+            case TAG_FOURCC_SHADER_TRANSPARENT_WATER:
                 return 2;
-            case TAG_CLASS_CAMERA_TRACK:
+            case TAG_FOURCC_CAMERA_TRACK:
                 return 2;
-            case TAG_CLASS_UNIT:
+            case TAG_FOURCC_UNIT:
                 return 2;
-            case TAG_CLASS_VIRTUAL_KEYBOARD:
+            case TAG_FOURCC_VIRTUAL_KEYBOARD:
                 return 2;
-            case TAG_CLASS_WEAPON:
+            case TAG_FOURCC_WEAPON:
                 return 2;
-            case TAG_CLASS_WEAPON_HUD_INTERFACE:
+            case TAG_FOURCC_WEAPON_HUD_INTERFACE:
                 return 2;
-            case TAG_CLASS_INVADER_SOUND:
+            case TAG_FOURCC_INVADER_SOUND:
                 return 3;
             default:
                 return 1;
         }
     }
 
-    TagFileHeader::TagFileHeader(TagClassInt tag_fourcc) {
+    TagFileHeader::TagFileHeader(TagFourCC tag_fourcc) {
         // Clear everything
         std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), std::byte());
 
@@ -95,7 +95,7 @@ namespace Invader::HEK {
         #endif
     }
 
-    void TagFileHeader::validate_header(const TagFileHeader *header, std::size_t tag_file_size, std::optional<TagClassInt> expected_tag_class) {
+    void TagFileHeader::validate_header(const TagFileHeader *header, std::size_t tag_file_size, std::optional<TagFourCC> expected_tag_class) {
         if(tag_file_size < sizeof(*header)) {
             eprintf_error("Size of buffer is too small to contain a header");
             throw InvalidTagDataHeaderException();

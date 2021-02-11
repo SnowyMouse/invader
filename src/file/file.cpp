@@ -234,7 +234,7 @@ namespace Invader::File {
         }
 
         auto tag_class = HEK::tag_extension_to_fourcc(extension);
-        if(tag_class == TagClassInt::TAG_CLASS_NONE || tag_class == TagClassInt::TAG_CLASS_NULL) {
+        if(tag_class == TagFourCC::TAG_FOURCC_NONE || tag_class == TagFourCC::TAG_FOURCC_NULL) {
             return std::nullopt;
         }
         else {
@@ -287,7 +287,7 @@ namespace Invader::File {
                         auto tag_fourcc = HEK::tag_extension_to_fourcc(extension.c_str() + 1);
 
                         // First, make sure it's valid
-                        if(tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL || tag_fourcc == HEK::TagClassInt::TAG_CLASS_NONE) {
+                        if(tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL || tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NONE) {
                             goto spaghetti_next_tag;
                         }
 
@@ -333,7 +333,7 @@ namespace Invader::File {
                     auto tag_fourcc = HEK::tag_extension_to_fourcc(extension.c_str() + 1);
 
                     // First, make sure it's valid
-                    if(tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL || tag_fourcc == HEK::TagClassInt::TAG_CLASS_NONE) {
+                    if(tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL || tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NONE) {
                         continue;
                     }
 

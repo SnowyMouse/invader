@@ -215,7 +215,7 @@
         "fields": [
             {
                 "name": "bitmap class",
-                "type": "TagClassInt",
+                "type": "TagFourCC",
                 "hidden": true
             },
             {

@@ -607,7 +607,7 @@ int main(int argc, char * const *argv) {
     std::unique_ptr<Invader::Parser::ParserStruct> tag_struct;
     
     // Make a new tag... or don't
-    Invader::HEK::TagClassInt tag_class;
+    Invader::HEK::TagFourCC tag_class;
     if(edit_options.new_tag) {
         try {
             tag_class = Invader::File::split_tag_class_extension(file_path.string()).value().fourcc;

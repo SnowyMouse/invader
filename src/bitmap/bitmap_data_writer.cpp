@@ -16,7 +16,7 @@ namespace Invader {
             // Write all of the fields here
             auto &bitmap = bitmap_data.emplace_back();
             auto &bitmap_color_plate = scanned_color_plate.bitmaps[i];
-            bitmap.bitmap_class = TagClassInt::TAG_CLASS_BITMAP;
+            bitmap.bitmap_class = TagFourCC::TAG_FOURCC_BITMAP;
             bitmap.width = bitmap_color_plate.width;
             bitmap.height = bitmap_color_plate.height;
             switch(bitmap_type) {

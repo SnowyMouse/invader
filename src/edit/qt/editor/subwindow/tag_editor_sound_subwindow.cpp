@@ -59,10 +59,10 @@ namespace Invader::EditQt {
         };
         
         switch(this->get_parent_window()->get_file().tag_fourcc) {
-            case TagClassInt::TAG_CLASS_SOUND:
+            case TagFourCC::TAG_FOURCC_SOUND:
                 populate_pitch_range_box(dynamic_cast<Parser::Sound *>(parser_data));
                 break;
-            case TagClassInt::TAG_CLASS_INVADER_SOUND:
+            case TagFourCC::TAG_FOURCC_INVADER_SOUND:
                 populate_pitch_range_box(dynamic_cast<Parser::InvaderSound *>(parser_data));
                 break;
             default:
@@ -366,9 +366,9 @@ namespace Invader::EditQt {
         // Depending on the class, get the thing
         auto *parser_data = this->get_parent_window()->get_parser_data();
         switch(this->get_parent_window()->get_file().tag_fourcc) {
-            case TagClassInt::TAG_CLASS_SOUND:
+            case TagFourCC::TAG_FOURCC_SOUND:
                 return get_it(dynamic_cast<Parser::Sound *>(parser_data));
-            case TagClassInt::TAG_CLASS_INVADER_SOUND:
+            case TagFourCC::TAG_FOURCC_INVADER_SOUND:
                 return get_it(dynamic_cast<Parser::InvaderSound *>(parser_data));
             default:
                 std::terminate();

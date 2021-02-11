@@ -111,20 +111,20 @@ int main(int argc, const char **argv) {
         convert_options.output_tags = convert_options.tags;
     }
     
-    HEK::TagClassInt input_class, output_class;
+    HEK::TagFourCC input_class, output_class;
     
     switch(*convert_options.conversion) {
         case Conversion::GBXMODEL_TO_MODEL:
-            input_class = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
-            output_class = HEK::TagClassInt::TAG_CLASS_MODEL;
+            input_class = HEK::TagFourCC::TAG_FOURCC_GBXMODEL;
+            output_class = HEK::TagFourCC::TAG_FOURCC_MODEL;
             break;
         case Conversion::MODEL_TO_GBXMODEL:
-            input_class = HEK::TagClassInt::TAG_CLASS_MODEL;
-            output_class = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
+            input_class = HEK::TagFourCC::TAG_FOURCC_MODEL;
+            output_class = HEK::TagFourCC::TAG_FOURCC_GBXMODEL;
             break;
         case Conversion::CHICAGO_EXTENDED_TO_CHICAGO:
-            input_class = HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
-            output_class = HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO;
+            input_class = HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
+            output_class = HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO;
             break;
         default:
             std::terminate();

@@ -161,10 +161,10 @@ namespace Invader::EditQt {
         auto *parent_window = this->get_parent_window();
         auto *data = parent_window->get_parser_data();
         switch(parent_window->get_file().tag_fourcc) {
-            case TagClassInt::TAG_CLASS_BITMAP:
+            case TagFourCC::TAG_FOURCC_BITMAP:
                 generate_main_widget(this, dynamic_cast<Parser::Bitmap *>(data), TagEditorBitmapSubwindow::set_values);
                 break;
-            case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+            case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                 generate_main_widget(this, dynamic_cast<Parser::InvaderBitmap *>(data), TagEditorBitmapSubwindow::set_values);
                 break;
             default:
@@ -190,10 +190,10 @@ namespace Invader::EditQt {
             auto *parent_window = this->get_parent_window();
             Parser::BitmapData *bitmap_data;
             switch(parent_window->get_file().tag_fourcc) {
-                case TagClassInt::TAG_CLASS_BITMAP:
+                case TagFourCC::TAG_FOURCC_BITMAP:
                     bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
                     break;
-                case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                     bitmap_data = &dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
                     break;
                 default:
@@ -649,11 +649,11 @@ namespace Invader::EditQt {
         std::vector<std::byte> *pixel_data;
         auto *parent_window = this->get_parent_window();
         switch(parent_window->get_file().tag_fourcc) {
-            case TagClassInt::TAG_CLASS_BITMAP:
+            case TagFourCC::TAG_FOURCC_BITMAP:
                 bitmap_data = dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data.data() + index_unsigned;
                 pixel_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->processed_pixel_data;
                 break;
-            case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+            case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                 bitmap_data = dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->bitmap_data.data() + index_unsigned;
                 pixel_data = &dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->processed_pixel_data;
                 break;
@@ -764,10 +764,10 @@ namespace Invader::EditQt {
                 std::vector<Parser::BitmapData> *bitmap_data;
                 auto *parent_window = this->get_parent_window();
                 switch(parent_window->get_file().tag_fourcc) {
-                    case TagClassInt::TAG_CLASS_BITMAP:
+                    case TagFourCC::TAG_FOURCC_BITMAP:
                         bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data;
                         break;
-                    case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                    case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                         bitmap_data = &dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->bitmap_data;
                         break;
                     default:
