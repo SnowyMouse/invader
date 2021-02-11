@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.42.2] - 2021-02-10
+### Fixed
+- invader-edit: Fixed --list not working with arrays
+
 ## [0.42.1] - 2021-02-10
 ### Added
 - invader-edit: Added --save-as (-O) which uses a tag path, where --output (-o)

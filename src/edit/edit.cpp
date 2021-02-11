@@ -297,7 +297,6 @@ static std::vector<std::string> get_value_names_for_key(Invader::Parser::ParserS
                         eprintf_error("%s::%s is empty", ps->struct_name(), member.c_str());
                     }
                     
-                    auto range = get_range(key, key);
                     auto access_range = get_range(key, key);
                     
                     if(access_range.first == SIZE_MAX) {
@@ -313,16 +312,16 @@ static std::vector<std::string> get_value_names_for_key(Invader::Parser::ParserS
                         std::exit(EXIT_FAILURE);
                     }
                 
-                    if(range.second != range.first) {
+                    if(access_range.second != access_range.first) {
                         eprintf_error("Unable to enumerate multiple arrays");
                         std::exit(EXIT_FAILURE);
                     }
                     
-                    if(count <= range.first) {
-                        eprintf_error("%zu is out of bounds for array %s", range.first, member.c_str());
+                    if(count <= access_range.first) {
+                        eprintf_error("%zu is out of bounds for array %s", access_range.first, member.c_str());
                         std::exit(EXIT_FAILURE);
                     }
-                    return get_value_names_for_key(&i.get_object_in_array(range.first), key);
+                    return get_value_names_for_key(&i.get_object_in_array(access_range.first), key);
                 }
                 case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
                 case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK: {
