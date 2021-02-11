@@ -510,6 +510,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
     options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
     options.emplace_back("new", 'N', 0, "Create a new tag");
+    options.emplace_back("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<tag>");
     
     options.emplace_back("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>");
     options.emplace_back("move", 'M', 2, "Shift the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
@@ -525,6 +526,7 @@ int main(int argc, char * const *argv) {
         std::vector<Actions> actions;
         bool new_tag = false;
         bool check_read_only = true;
+        std::optional<std::string> overwrite_path;
     } edit_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
@@ -573,6 +575,9 @@ int main(int argc, char * const *argv) {
                 break;
             case 'N':
                 edit_options.new_tag = true;
+                break;
+            case 'o':
+                edit_options.overwrite_path = arguments[0];
                 break;
             case 'c':
                 try {
@@ -627,7 +632,7 @@ int main(int argc, char * const *argv) {
     }
     
     std::vector<std::string> output;
-    bool should_save = false;
+    bool should_save = edit_options.new_tag; // by default only save if making a new tag. this will be set to true if --set, --insert, --copy, --move, or --delete are used too
     
     for(auto &i : edit_options.actions) {
         switch(i.type) {
@@ -758,6 +763,11 @@ int main(int argc, char * const *argv) {
     
     for(auto &i : output) {
         std::printf("%s\n", i.c_str());
+    }
+    
+    if(edit_options.overwrite_path.has_value()) {
+        should_save = true;
+        file_path = edit_options.tags / *edit_options.overwrite_path;
     }
     
     if(should_save) {
