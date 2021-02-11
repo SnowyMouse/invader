@@ -22,6 +22,7 @@ enum ActionType {
     ACTION_TYPE_SET,
     ACTION_TYPE_COUNT,
     ACTION_TYPE_LIST,
+    ACTION_TYPE_LIST_ALL_VALUES,
     ACTION_TYPE_INSERT,
     ACTION_TYPE_COPY,
     ACTION_TYPE_DELETE,
@@ -564,6 +565,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
             type_str += " (bounds)";
         }
         
+        // Do we want to show the value or size?
         if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
             if(with_values) {
                 name = name + "[" + std::to_string(i.get_array_size()) + "]";
@@ -572,34 +574,66 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
                 name += "[]";
             }
         }
+        
+        else if(with_values) {
+            if(i.get_number_format() != Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
+                name = name + " (" + get_value(i, "") + ")";
+            }
+            else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY) {
+                auto &dep = i.get_dependency();
+                if(dep.path.size() > 0) {
+                    name = name + " (" + Invader::File::halo_path_to_preferred_path(dep.path) + "." + Invader::HEK::tag_fourcc_to_extension(dep.tag_fourcc) + ")";
+                }
+            }
+            else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING) {
+                name = name + " (" + i.get_string() + ")";
+            }
+        }
             
         output.emplace_back(level, name, type_str);
         
         // If reflexive, list that stuff
         if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
             auto count = i.get_array_size();
+            std::size_t inner_level = level + 1;
+            if(with_values) {
+                inner_level++;
+            }
+            
             for(std::size_t m = 0; m < count; m++) {
-                list_everything(i.get_object_in_array(m), output, with_values, level + 1);
+                if(with_values) {
+                    output.emplace_back(inner_level - 1, std::string(mv) + "[" + std::to_string(m) + "]", "struct");
+                }
+                list_everything(i.get_object_in_array(m), output, with_values, inner_level);
             }
         }
         
         // Or if it's a bitmask, do that too
         else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
             for(auto &j : i.list_enum()) {
-                output.emplace_back(level + 1, j, "bitfield");
+                if(with_values) {
+                    output.emplace_back(level + 1, std::string(j) + " " + (i.read_bitfield(j) ? "(1)" : "(0)"), "bitfield");
+                }
+                else {
+                    output.emplace_back(level + 1, j, "bitfield");
+                }
             }
         }
         
         // Or if it's an enum, list the values
         else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM) {
             for(auto &j : i.list_enum()) {
-                output.emplace_back(level + 1, j, "enum value");
+                std::string name = j;
+                if(with_values && std::strcmp(i.read_enum(), j) == 0) {
+                    name += " (*)";
+                }
+                output.emplace_back(level + 1, name, "enum value");
             }
         }
     }
 }
 
-static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::string> &output, bool with_values = false) {
+static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::string> &output, bool with_values) {
     // Print the right column (description)
     std::size_t terminal_width = 80;
     
@@ -706,8 +740,9 @@ int main(int argc, char * const *argv) {
     options.emplace_back("get", 'G', 1, "Get the value with the given key.", "<key>");
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
-    options.emplace_back("list", 'L', 0, "List all elements in a tag.");
     options.emplace_back("new", 'N', 0, "Create a new tag");
+    options.emplace_back("list", 'l', 0, "List all elements in a tag.");
+    options.emplace_back("list-values", 'L', 0, "List all elements and values in a tag. This may be slow on large tags.");
     
     options.emplace_back("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<file>");
     options.emplace_back("save-as", 'O', 1, "Output the tag to a different path relative to the tags directory rather than overwriting it.", "<tag>");
@@ -747,6 +782,9 @@ int main(int argc, char * const *argv) {
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {}, 0, 0 });
                 break;
             case 'L':
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST_ALL_VALUES, {}, {}, 0, 0 });
+                break;
+            case 'l':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST, {}, {}, 0, 0 });
                 break;
             case 'S':
@@ -840,7 +878,11 @@ int main(int argc, char * const *argv) {
     for(auto &i : edit_options.actions) {
         switch(i.type) {
             case ActionType::ACTION_TYPE_LIST: {
-                list_everything(populate_struct(*Invader::Parser::ParserStruct::generate_base_struct(tag_class)), output);
+                list_everything(populate_struct(*Invader::Parser::ParserStruct::generate_base_struct(tag_class)), output, false);
+                break;
+            }
+            case ActionType::ACTION_TYPE_LIST_ALL_VALUES: {
+                list_everything(*tag_struct, output, true);
                 break;
             }
             case ActionType::ACTION_TYPE_GET: {

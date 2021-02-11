@@ -492,8 +492,9 @@ Options:
   -i --info                    Show license and credits.
   -I --insert <key> <#> <pos>  Add # structs to the given index or "end" if the
                                end of the array.
-  -L --list <key>              List all the elements in the array at the given
-                               key (or the main struct if key is blank).
+  -l --list                    List all elements in a tag.
+  -L --list-values             List all elements and values in a tag. This may
+                               be slow on large tags.
   -M --move <key> <pos>        Swap the selected structs with the structs at
                                the given index or "end" if the end of the
                                array. The regions must not intersect.
