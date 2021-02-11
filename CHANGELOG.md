@@ -2,7 +2,15 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.42.0]
+## [0.42.1] - 2021-02-10
+### Added
+- invader-edit: Added --save-as (-O) which uses a tag path, where --output (-o)
+  now uses a file path
+
+### Fixed
+- invader: Readded --fs-path. Oops.
+
+## [0.42.0] - 2021-02-10
 ### Added
 - New tool: invader-edit - Command-line tool for editing tags (primarily made
   for scripting)

@@ -510,7 +510,9 @@ int main(int argc, char * const *argv) {
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
     options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
     options.emplace_back("new", 'N', 0, "Create a new tag");
-    options.emplace_back("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<tag>");
+    
+    options.emplace_back("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<file>");
+    options.emplace_back("save-as", 'O', 1, "Output the tag to a different path relative to the tags directory rather than overwriting it.", "<tag>");
     
     options.emplace_back("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>");
     options.emplace_back("move", 'M', 2, "Swap the selected structs with the structs at the given index or \"end\" if the end of the array. The regions must not intersect.", "<key> <pos>");
@@ -526,7 +528,7 @@ int main(int argc, char * const *argv) {
         std::vector<Actions> actions;
         bool new_tag = false;
         bool check_read_only = true;
-        std::optional<std::string> overwrite_path;
+        std::optional<std::variant<std::string, std::filesystem::path>> overwrite_path;
     } edit_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
@@ -577,7 +579,10 @@ int main(int argc, char * const *argv) {
                 edit_options.new_tag = true;
                 break;
             case 'o':
-                edit_options.overwrite_path = arguments[0];
+                edit_options.overwrite_path = std::filesystem::path(arguments[0]);
+                break;
+            case 'O':
+                edit_options.overwrite_path = std::string(arguments[0]);
                 break;
             case 'c':
                 try {
@@ -776,13 +781,49 @@ int main(int argc, char * const *argv) {
         std::printf("%s\n", i.c_str());
     }
     
+    // If we're overwriting a file that isn't the main one, let's find out what
+    bool create_directories_if_possible = false;
+    
     if(edit_options.overwrite_path.has_value()) {
         should_save = true;
-        file_path = edit_options.tags / *edit_options.overwrite_path;
+        
+        auto &p = *edit_options.overwrite_path;
+        auto *path = std::get_if<std::filesystem::path>(&p);
+        auto *str = std::get_if<std::string>(&p);
+        
+        if(path) {
+            file_path = *path;
+        }
+        else {
+            file_path = edit_options.tags / *str;
+            create_directories_if_possible = true; // if using a virtual path, we can create directories as needed
+        }
     }
     
     if(should_save) {
-        return Invader::File::save_file(file_path, tag_struct->generate_hek_tag_data(tag_class)) ? EXIT_SUCCESS : EXIT_FAILURE;
+        bool can_save = true;
+        try {
+            can_save = Invader::File::split_tag_class_extension(file_path.string()).value().class_int == tag_class;
+        }
+        catch(std::exception &) {
+            can_save = false;
+        }
+        
+        if(!can_save) {
+            eprintf_error("Cannot save: %s does not have the correct .%s extension", file_path.string().c_str(), Invader::HEK::tag_class_to_extension(tag_class));
+            return EXIT_FAILURE;
+        }
+        
+        if(create_directories_if_possible) {
+            std::error_code ec;
+            std::filesystem::create_directories(file_path.parent_path(), ec);
+        }
+        
+        if(!Invader::File::save_file(file_path, tag_struct->generate_hek_tag_data(tag_class))) {
+            eprintf_error("Unable to write to %s", file_path.string().c_str());
+            return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
     }
     else {
         return EXIT_SUCCESS;

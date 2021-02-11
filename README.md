@@ -492,8 +492,10 @@ Options:
                                the given index or "end" if the end of the
                                array. The regions must not intersect.
   -N --new                     Create a new tag
-  -o --output <tag>            Output the tag to a different path rather than
+  -o --output <file>           Output the tag to a different path rather than
                                overwriting it.
+  -O --save-as <tag>           Output the tag to a different path relative to
+                               the tags directory rather than overwriting it.
   -P --fs-path                 Use a filesystem path for the font data or tag
                                file.
   -S --set <key> <val>         Set the value at the given key to the given
