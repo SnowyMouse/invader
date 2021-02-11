@@ -672,9 +672,17 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
         const char *s = string.c_str();
         while (*s) len += (*s++ & 0xC0) != 0x80;
         
+        std::size_t subtract;
+            
+        #ifdef _WIN32
+        subtract = 1;  // subtract 1 on windows because windows cmd and powershell newline it if we don't
+        #else
+        subtract = 0;
+        #endif
+        
         // If we can include the type, do it
-        if(len + 1 + element.type.size() < terminal_width) {
-            for(std::size_t q = len; q < terminal_width - element.type.size(); q++) {
+        if(len + 1 + subtract + element.type.size() < terminal_width) {
+            for(std::size_t q = len; q < terminal_width - element.type.size() - subtract; q++) {
                 string += " ";
             }
             string += element.type;
@@ -686,6 +694,10 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
 
 int main(int argc, char * const *argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+    
+    #ifdef _WIN32
+    SetConsoleOutputCP(65001);
+    #endif
     
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
