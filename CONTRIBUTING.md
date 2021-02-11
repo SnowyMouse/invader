@@ -106,11 +106,11 @@ and code to ensure it is understandable by most people.
       and 10^6 bytes, respectively.
 - All text files must end with a newline. Most modern text editors will do this
   for you.
-- Tag classes should *always* be referred to by their full name and not 4CCs.
+- Tag classes should *always* be referred to by their full name and not FourCCs.
   For example, you should always refer to a `gbxmodel` as such and not a `mod2`.
-    - The 4CCs are often confusing and don't always reflect the full name in any
-      way (e.g., `jpt!` referring to a `damage_effect`)
-    - Referring to tags as their 4CCs is a product of map modding which, in
+    - The FourCCs are often confusing and don't always reflect the full name in
+      any way (e.g. `jpt!` refers to a `damage_effect`)
+    - Referring to tags as their FourCCs is a product of map modding which, in
       itself, should be discouraged.
 
 ## Issue conventions
