@@ -32,6 +32,23 @@ prone).
 
 [git master branch]: https://github.com/SnowyMouse/Invader/tree/master
 
+## Wine compatibility
+If you are expecting correct behavior, then you should NOT test Invader on Wine.
+Wine has a number of issues with running Windows programs, and this can range
+from performance issues to actual differences in a program's behavior, even when
+a program would otherwise have no issues.
+
+Because of this, it cannot be guaranteed that Invader will work as expected if
+using Wine. You can still report issues, but if your issues cannot be reproduced
+on native Windows, then your issue may be discarded.
+
+If you are on Linux, it is HIGHLY recommended to instead compile a Linux build.
+Or, if you are on macOS, compile a macOS build. And so on.
+
+If you must test the Windows version, it is recommended to use a virtual machine
+to run an actual version of Windows instead of using a compatibility layer like
+Wine.
+
 # Conventions
 These conventions apply only for contributing to the official Invader
 repository. Forks and other derivatives of Invader may use completely different
@@ -147,13 +164,18 @@ reproduce the bug:
     - We recommend using formats such as .7z, .zip, .tar.xz, or .tar.zst.
       Proprietary formats such as .rar should not be used. You may either link
       to a download page or attach it to your issue.
-    - If your issue is tag related, you can optionally use invader-info to
+    - If your issue is tag related, you can optionally use invader-archive to
       archive tags and their dependencies into a .tar.xz archive.
     - Do not only specify the map name or file name, as searching the Internet
       for the specific map takes time, and there is no guarantee we will find
       the correct version of the map.
 - A simple way to remember this is: If a bug cannot be reproduced, then it
   isn't a bug, and your issue will be closed.
+
+Also note that any issues submitted that involve Wine may be discarded if they
+cannot be reproduced on Windows. See [Wine compatibility] for more information.
+
+[Wine compatibility]: #wine-compatibility
 
 ## Source file conventions
 The Invader repository uses these conventions. If contributing code to Invader,

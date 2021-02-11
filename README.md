@@ -52,28 +52,34 @@ See CONTRIBUTING.md.
 Invader can be obtained by either downloading pre-compiled binaries or
 compiling from source.
 
-You can also download precompiled [Nightly Builds]. These will generally be
-up-to-date unless commits were made very recently.
+### Nightly builds (Windows)
+You can download precompiled [Nightly Builds]. These will usually be up-to-date
+unless commits were made very recently.
+
+Note that these builds are Windows-only. So, if you are not on Windows, you
+should not use these builds.
 
 [Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
 
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader
 binaries, this section probably doesn't apply to you, but you are welcome to
-compile Invader. Regardless, you can browse and download the source code for
-free on [GitHub].
+compile Invader if you want to. Regardless, you can browse and download the
+source code for free on [GitHub].
 
 [GitHub]: https://github.com/SnowyMouse/invader
 
 If you use Arch Linux, the [Arch Linux AUR] has a package you can use to build
-Invader.
+Invader. This will pull from the main repo on GitHub, so you only have to
+rebuild the package when you want to update.
 
 [Arch Linux AUR]: https://aur.archlinux.org/packages/invader-git/
 
 #### Dependencies
 Invader depends on software in order for it to build and work properly. This
 section lists the dependencies required to fully utilize Invader. Note that
-some of these dependencies may have their own dependencies.
+some of these dependencies may have their own dependencies (and so on), but if
+you use a package manager to get them, then it should take care of that for you.
 
 ##### Required dependencies
 - C++17 compiler with support for `filesystem`
