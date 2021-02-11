@@ -589,6 +589,13 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
                 output.emplace_back(level + 1, j, "bitfield");
             }
         }
+        
+        // Or if it's an enum, list the values
+        else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM) {
+            for(auto &j : i.list_enum()) {
+                output.emplace_back(level + 1, j, "enum value");
+            }
+        }
     }
 }
 
