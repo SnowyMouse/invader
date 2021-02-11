@@ -259,95 +259,6 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invade
     return values;
 }
 
-static std::vector<std::string> get_value_names_for_key(Invader::Parser::ParserStruct *ps, std::string key) {
-    // Array!
-    if(key == "") {
-        std::vector<std::string> names;
-        for(auto &i : ps->get_values()) {
-            auto *name = i.get_member_name();
-            if(name) {
-                names.emplace_back(name);
-            }
-        }
-        return names;
-    }
-    
-    if(key[0] == '.') {
-        key = std::string(key.begin() + 1, key.end());
-    }
-    else {
-        eprintf_error("Expected a dot before key %s", key.c_str());
-        std::exit(EXIT_FAILURE);
-    }
-
-    // Get the member name and range
-    auto member = get_top_member_name(key, key);
-    
-    // Find it!
-    auto values = ps->get_values();
-    for(auto &i : values) {
-        auto *member_name = i.get_member_name();
-        
-        if(member_name && member_name == member) {
-            switch(i.get_type()) {
-                case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
-                    auto count = i.get_array_size();
-                    
-                    if(count == 0) {
-                        eprintf_error("%s::%s is empty", ps->struct_name(), member.c_str());
-                    }
-                    
-                    auto access_range = get_range(key, key);
-                    
-                    if(access_range.first == SIZE_MAX) {
-                        access_range.first = count - 1;
-                    }
-                    
-                    if(access_range.second == SIZE_MAX) {
-                        access_range.second = count - 1;
-                    }
-                    
-                    if(count < access_range.first || count <= access_range.second) {
-                        eprintf_error("%zu-%zu is out of bounds for %s::%s (%zu element%s)", access_range.first, access_range.second, ps->struct_name(), member.c_str(), count, count == 1 ? "" : "s");
-                        std::exit(EXIT_FAILURE);
-                    }
-                
-                    if(access_range.second != access_range.first) {
-                        eprintf_error("Unable to enumerate multiple arrays");
-                        std::exit(EXIT_FAILURE);
-                    }
-                    
-                    if(count <= access_range.first) {
-                        eprintf_error("%zu is out of bounds for array %s", access_range.first, member.c_str());
-                        std::exit(EXIT_FAILURE);
-                    }
-                    return get_value_names_for_key(&i.get_object_in_array(access_range.first), key);
-                }
-                case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
-                case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK: {
-                    if(key != "") {
-                        eprintf_error("Expected end of key for enum/bitmask");
-                        std::exit(EXIT_FAILURE);
-                    }
-                    
-                    std::vector<std::string> enums;
-                    for(auto &q : i.list_enum()) {
-                        enums.emplace_back(q);
-                    }
-                    return enums;
-                }
-                default: {
-                    eprintf_error("%s::%s is not an array, enum, or bitmask", ps->struct_name(), member.c_str());
-                    std::exit(EXIT_FAILURE);
-                }
-            }
-        }
-    }
-    
-    eprintf_error("%s::%s does not exist", ps->struct_name(), member.c_str());
-    std::exit(EXIT_FAILURE);
-}
-
 static std::string get_value(const Invader::Parser::ParserStructValue &value, const std::string &bitmask) {
     auto format = value.get_number_format();
     if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
@@ -497,6 +408,107 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
     std::exit(EXIT_FAILURE);
 }
 
+// Ensure a struct has at least one of everything in everything (for listing)
+static Invader::Parser::ParserStruct &populate_struct(Invader::Parser::ParserStruct &ps) {
+    for(auto &i : ps.get_values()) {
+        if(i.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+            i.insert_objects_in_array(0, 1);
+            populate_struct(i.get_object_in_array(0));
+        }
+    }
+    return ps;
+}
+
+static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::pair<std::string, std::size_t>> &output, bool with_values, std::size_t level = 0) {
+    for(auto &i : ps.get_values()) {
+        auto *mv = i.get_member_name();
+        if(!mv) {
+            continue;
+        }
+        
+        auto type = i.get_type();
+        std::string name = mv;
+        
+        if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+            if(with_values) {
+                name = name + "[" + std::to_string(i.get_array_size()) + "]";
+            }
+            else {
+                name += "[]";
+            }
+        }
+            
+        output.emplace_back(name, level);
+        
+        // If reflexive, list that stuff
+        if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+            auto count = i.get_array_size();
+            for(std::size_t m = 0; m < count; m++) {
+                list_everything(i.get_object_in_array(m), output, with_values, level + 1);
+            }
+        }
+        
+        // Or if it's a bitmask, do that too
+        else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
+            for(auto &j : i.list_enum()) {
+                output.emplace_back(j, level + 1);
+            }
+        }
+    }
+}
+
+static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::string> &output, bool with_values = false) {
+    std::vector<std::pair<std::string, std::size_t>> array;
+    list_everything(ps, array, with_values);
+    
+    auto array_size = array.size();
+    for(std::size_t ar = 0; ar < array_size; ar++) {
+        auto &element = array[ar];
+        std::size_t level = element.second;
+        
+        // Build the indent
+        std::string indent;
+        
+        for(std::size_t e = 0; e < level; e++) {
+            // Check to see if we have something on the same level
+            bool has_next_in_array = false;
+            for(std::size_t ar2 = ar + 1; ar2 < array_size; ar2++) {
+                auto next_thing = array[ar2].second;
+                
+                // We have another element of the same level
+                if(next_thing == e + 1) {
+                    has_next_in_array = true;
+                    break;
+                }
+                
+                // We don't
+                else if(next_thing <= e) {
+                    break;
+                }
+            }
+            
+            if(has_next_in_array) {
+                if(e + 1 == level) {
+                    indent = indent + " ├──";
+                }
+                else {
+                    indent = indent + " │  ";
+                }
+            }
+            else {
+                if(e + 1 == level) {
+                    indent = indent + " └──";
+                }
+                else {
+                    indent = indent + "    ";
+                }
+            }
+        }
+        
+        output.emplace_back(indent + element.first);
+    }
+}
+
 int main(int argc, char * const *argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
     
@@ -507,7 +519,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("get", 'G', 1, "Get the value with the given key.", "<key>");
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
-    options.emplace_back("list", 'L', 1, "List all the elements in the array at the given key (or the main struct if key is blank).", "<key>");
+    options.emplace_back("list", 'L', 0, "List all elements in a tag.");
     options.emplace_back("new", 'N', 0, "Create a new tag");
     
     options.emplace_back("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<file>");
@@ -548,7 +560,7 @@ int main(int argc, char * const *argv) {
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {}, 0, 0 });
                 break;
             case 'L':
-                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST, arguments[0], {}, 0, 0 });
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST, {}, {}, 0, 0 });
                 break;
             case 'S':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_SET, arguments[0], arguments[1], 0, 0 });
@@ -641,10 +653,7 @@ int main(int argc, char * const *argv) {
     for(auto &i : edit_options.actions) {
         switch(i.type) {
             case ActionType::ACTION_TYPE_LIST: {
-                auto arr = get_value_names_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key));
-                for(auto &k : arr) {
-                    output.emplace_back(k);
-                }
+                list_everything(populate_struct(*Invader::Parser::ParserStruct::generate_base_struct(tag_class)), output);
                 break;
             }
             case ActionType::ACTION_TYPE_GET: {

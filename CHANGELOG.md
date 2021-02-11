@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-edit: Changed --list to instead show the entire structure in a TREE /F
+  style. Note that this requires the terminal to support UTF-8.
+
 ## [0.42.2] - 2021-02-10
 ### Fixed
 - invader-edit: Fixed --list not working with arrays
