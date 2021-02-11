@@ -74,10 +74,10 @@ namespace Invader::EditQt {
         }
         else {
             this->make_dirty(true);
-            this->parser_data = Parser::ParserStruct::generate_base_struct(tag_file.tag_class_int).release();
+            this->parser_data = Parser::ParserStruct::generate_base_struct(tag_file.tag_fourcc).release();
             if(!this->parser_data) {
                 char formatted_error[1024];
-                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_class_to_extension(tag_file.tag_class_int));
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_class_to_extension(tag_file.tag_fourcc));
                 QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
@@ -114,7 +114,7 @@ namespace Invader::EditQt {
         // Add another widget to our view?
         QFrame *extra_widget_panel = nullptr;
         QPushButton *extra_widget;
-        switch(tag_file.tag_class_int) {
+        switch(tag_file.tag_fourcc) {
             case TagClassInt::TAG_CLASS_BITMAP:
             case TagClassInt::TAG_CLASS_INVADER_BITMAP:
                 extra_widget = new QPushButton("Preview bitmap");
@@ -236,7 +236,7 @@ namespace Invader::EditQt {
         if(dirty) {
             char message_entire_text[512];
             if(this->file.tag_path.size() == 0) {
-                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_class_to_extension(this->file.tag_class_int));
+                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_class_to_extension(this->file.tag_fourcc));
             }
             else {
                 std::snprintf(message_entire_text, sizeof(message_entire_text), "This file \"%s\" has been modified.\nDo you want to save your changes?", this->file.full_path.string().c_str());
@@ -284,7 +284,7 @@ namespace Invader::EditQt {
 
         // Save; benchmark
         auto start = std::chrono::steady_clock::now();
-        auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_class_int);
+        auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_fourcc);
         auto str = this->file.full_path.string();
         const auto *c_str = str.c_str();
         auto result = Invader::File::save_file(c_str, tag_data);
@@ -303,7 +303,7 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save_as() {
-        TagTreeDialog d(nullptr, this->parent_window, this->file.tag_class_int);
+        TagTreeDialog d(nullptr, this->parent_window, this->file.tag_fourcc);
         if(d.exec() == QMessageBox::Accepted) {
             this->file = *d.get_tag();
             
@@ -327,7 +327,7 @@ namespace Invader::EditQt {
 
         char title_bar[512];
         if(this->file.tag_path.size() == 0) {
-            std::snprintf(title_bar, sizeof(title_bar), "Untitled %s", HEK::tag_class_to_extension(this->file.tag_class_int));
+            std::snprintf(title_bar, sizeof(title_bar), "Untitled %s", HEK::tag_class_to_extension(this->file.tag_fourcc));
         }
         else {
             const char *asterisk = dirty ? " *" : "";
@@ -370,7 +370,7 @@ namespace Invader::EditQt {
 
     void TagEditorWindow::show_subwindow() {
         if(!this->subwindow) {
-            switch(this->file.tag_class_int) {
+            switch(this->file.tag_fourcc) {
                 case TagClassInt::TAG_CLASS_BITMAP:
                 case TagClassInt::TAG_CLASS_INVADER_BITMAP:
                     this->subwindow = new TagEditorBitmapSubwindow(this);

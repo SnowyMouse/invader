@@ -282,14 +282,14 @@ int main(int argc, const char **argv) {
             i.tag_paths.reserve(tag_count);
             for(std::size_t t = 0; t < tag_count; t++) {
                 auto &tag = map.get_tag(t);
-                auto tag_class_int = tag.get_tag_class_int();
-                if(!tag.data_is_available() || std::strcmp(tag_class_to_extension(tag_class_int), "unknown") == 0) {
+                auto tag_fourcc = tag.get_tag_fourcc();
+                if(!tag.data_is_available() || std::strcmp(tag_class_to_extension(tag_fourcc), "unknown") == 0) {
                     continue;
                 }
                 if(compare_options.class_to_check.size()) {
                     bool should_add = false;
                     for(auto c : compare_options.class_to_check) {
-                        if(c == tag_class_int) {
+                        if(c == tag_fourcc) {
                             should_add = true;
                             break;
                         }
@@ -298,7 +298,7 @@ int main(int argc, const char **argv) {
                         continue;
                     }
                 }
-                i.tag_paths.emplace_back(tag.get_path(), tag_class_int);
+                i.tag_paths.emplace_back(tag.get_path(), tag_fourcc);
             }
         }
         else {
@@ -314,7 +314,7 @@ int main(int argc, const char **argv) {
                 if(compare_options.class_to_check.size()) {
                     bool should_add = false;
                     for(auto c : compare_options.class_to_check) {
-                        if(c == t.tag_class_int) {
+                        if(c == t.tag_fourcc) {
                             should_add = true;
                             break;
                         }
@@ -349,7 +349,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             for(std::size_t i = 1; i < input_count; i++) {
                 bool found = false;
                 for(auto &tag2 : inputs[i].tag_paths) {
-                    if(tag2.class_int != tag.class_int) {
+                    if(tag2.fourcc != tag.fourcc) {
                         continue;
                     }
                     if(CAN_COMPARE(by_path, tag.path, tag2.path)) {
@@ -388,7 +388,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     
                     // Add it if it's present!
                     for(auto &tag2 : input2.tag_paths) {
-                        if(tag2.class_int != tag.class_int) {
+                        if(tag2.fourcc != tag.fourcc) {
                             continue;
                         }
                         if(CAN_COMPARE(by_path, tag.path, tag2.path)) {
@@ -436,7 +436,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 for(std::size_t t = 0; t < tag_count; t++) {
                     auto &map_tag = i.map_data->get_tag(t);
                     auto &map_tag_path = map_tag.get_path();
-                    if(map_tag.get_tag_class_int() == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, map_tag_path)) {
+                    if(map_tag.get_tag_fourcc() == tag.fourcc && CAN_COMPARE(by_path_copy, tag.path, map_tag_path)) {
                         auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
                         struct_paths.emplace_back(map_tag_path);
@@ -453,7 +453,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             else {
                 for(auto &vd : i.virtual_directory) {
                     auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
-                    if(vd.tag_class_int == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, other_path)) {
+                    if(vd.tag_fourcc == tag.fourcc && CAN_COMPARE(by_path_copy, tag.path, other_path)) {
                         // Open it
                         auto file = Invader::File::open_file(vd.full_path).value();
                         
@@ -483,7 +483,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         
         // Just for setting counter/debugging
         auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs](bool did_match, std::size_t i) {
-            auto *extension = HEK::tag_class_to_extension(tag.class_int);
+            auto *extension = HEK::tag_class_to_extension(tag.fourcc);
             auto other_path = File::halo_path_to_preferred_path(struct_paths[i]);
             bool show_different_input = inputs.size() > 2; // only need to show differing inputs if we have more than two inputs
             std::size_t input_of_other = 1;
@@ -502,7 +502,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             if(did_match) {
                 if(show & Show::SHOW_MATCHED) {
                     if(by_path == ByPath::BY_PATH_SAME) {
-                        oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+                        oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.fourcc));
                     }
                     else if(show_different_input) {
                         oprintf_success(MATCHED_TO_DIFFERENT_INPUT("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
@@ -516,7 +516,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             else {
                 if(show & Show::SHOW_MISMATCHED) {
                     if(by_path == ByPath::BY_PATH_SAME) {
-                        oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+                        oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.fourcc));
                     }
                     else if(show_different_input) {
                         oprintf_success_warn(MATCHED_TO_DIFFERENT_INPUT("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
@@ -532,7 +532,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         if(functional) {
             try {
                 auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
-                    auto hdata = struct_v.generate_hek_tag_data(tag.class_int);
+                    auto hdata = struct_v.generate_hek_tag_data(tag.fourcc);
                     std::vector<std::uint8_t> meme_data;
                     
                     // Compile it
@@ -561,7 +561,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     // Process each tag
                     for(auto &t : compiled.tags) {
                         char o[1024] = {};
-                        auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                        auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
                         meme_data.insert(meme_data.end(), o, o + len);
                     }
                     
@@ -575,7 +575,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 }
             }
             catch(std::exception &e) {
-                eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int), e.what());
+                eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.fourcc), e.what());
             }
         }
         else {

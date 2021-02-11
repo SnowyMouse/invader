@@ -2,10 +2,10 @@
 
 #include <cstring>
 
-#include <invader/hek/class_int.hpp>
+#include <invader/hek/fourcc.hpp>
 
 namespace Invader::HEK {
-    #define MATCH_TAG_CLASS(check_extension,tag_class_int) else if(std::strcmp(extension, check_extension) == 0) return TagClassInt::tag_class_int;
+    #define MATCH_TAG_CLASS(check_extension,tag_fourcc) else if(std::strcmp(extension, check_extension) == 0) return TagClassInt::tag_fourcc;
 
     /**
      * Convert a string extension to its respective tag class integer

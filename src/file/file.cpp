@@ -284,17 +284,17 @@ namespace Invader::File {
                     }
                     else {
                         auto extension = file_path.extension().string();
-                        auto tag_class_int = HEK::extension_to_tag_class(extension.c_str() + 1);
+                        auto tag_fourcc = HEK::extension_to_tag_class(extension.c_str() + 1);
 
                         // First, make sure it's valid
-                        if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+                        if(tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL || tag_fourcc == HEK::TagClassInt::TAG_CLASS_NONE) {
                             goto spaghetti_next_tag;
                         }
 
                         // Next, add it
                         TagFile file;
                         file.full_path = file_path;
-                        file.tag_class_int = tag_class_int;
+                        file.tag_fourcc = tag_fourcc;
                         file.tag_directory = priority;
                         file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir).value();
                         all_tags.emplace_back(std::move(file));
@@ -330,17 +330,17 @@ namespace Invader::File {
                 }
                 else if(file_path.has_extension() && std::filesystem::is_regular_file(file_path)) {
                     auto extension = file_path.extension().string();
-                    auto tag_class_int = HEK::extension_to_tag_class(extension.c_str() + 1);
+                    auto tag_fourcc = HEK::extension_to_tag_class(extension.c_str() + 1);
 
                     // First, make sure it's valid
-                    if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+                    if(tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL || tag_fourcc == HEK::TagClassInt::TAG_CLASS_NONE) {
                         continue;
                     }
 
                     // Next, add it
                     TagFile file;
                     file.full_path = file_path;
-                    file.tag_class_int = tag_class_int;
+                    file.tag_fourcc = tag_fourcc;
                     file.tag_directory = priority;
                     file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir).value();
                     all_tags.emplace_back(std::move(file));

@@ -356,7 +356,7 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 return value.read_string();
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
-                return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_class_to_extension(value.get_dependency().tag_class_int);
+                return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_class_to_extension(value.get_dependency().tag_fourcc);
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
                 return value.read_enum();
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
@@ -413,7 +413,7 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                     auto &dep = value.get_dependency();
                     auto new_path = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(new_value)).value();
                     dep.path = new_path.path;
-                    dep.tag_class_int = new_path.class_int;
+                    dep.tag_fourcc = new_path.fourcc;
                     return;
                 }
                 catch (std::exception &) {
@@ -610,7 +610,7 @@ int main(int argc, char * const *argv) {
     Invader::HEK::TagClassInt tag_class;
     if(edit_options.new_tag) {
         try {
-            tag_class = Invader::File::split_tag_class_extension(file_path.string()).value().class_int;
+            tag_class = Invader::File::split_tag_class_extension(file_path.string()).value().fourcc;
             tag_struct = Invader::Parser::ParserStruct::generate_base_struct(tag_class);
         }
         catch (std::exception &) {
@@ -633,7 +633,7 @@ int main(int argc, char * const *argv) {
             return EXIT_FAILURE;
         }
         
-        tag_class = reinterpret_cast<const Invader::HEK::TagFileHeader *>(value->data())->tag_class_int;
+        tag_class = reinterpret_cast<const Invader::HEK::TagFileHeader *>(value->data())->tag_fourcc;
     }
     
     std::vector<std::string> output;
@@ -803,7 +803,7 @@ int main(int argc, char * const *argv) {
     if(should_save) {
         bool can_save = true;
         try {
-            can_save = Invader::File::split_tag_class_extension(file_path.string()).value().class_int == tag_class;
+            can_save = Invader::File::split_tag_class_extension(file_path.string()).value().fourcc == tag_class;
         }
         catch(std::exception &) {
             can_save = false;

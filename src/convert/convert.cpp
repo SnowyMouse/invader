@@ -136,7 +136,7 @@ int main(int argc, const char **argv) {
     std::vector<File::TagFilePath> paths;
     if(convert_options.match_all) {
         for(auto &i : File::load_virtual_tag_folder(tags_vector)) {
-            if(i.tag_class_int == input_class) {
+            if(i.tag_fourcc == input_class) {
                 paths.emplace_back(File::split_tag_class_extension(File::halo_path_to_preferred_path(i.tag_path)).value());
             }
         }

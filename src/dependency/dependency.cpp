@@ -80,7 +80,7 @@ int main(int argc, char * const *argv) {
 
     // Here's an array we can use to hold what we got
     bool success;
-    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_split->path.c_str(), tag_path_split->class_int, dependency_options.tags, dependency_options.reverse, dependency_options.recursive, success);
+    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_split->path.c_str(), tag_path_split->fourcc, dependency_options.tags, dependency_options.reverse, dependency_options.recursive, success);
 
     if(!success) {
         return EXIT_FAILURE;
@@ -88,6 +88,6 @@ int main(int argc, char * const *argv) {
 
     // See what depended on it or what depends on this
     for(auto &tag : found_tags) {
-        oprintf("%s.%s%s\n", Invader::File::halo_path_to_preferred_path(tag.path).c_str(), Invader::HEK::tag_class_to_extension(tag.class_int), tag.broken ? " [BROKEN]" : "");
+        oprintf("%s.%s%s\n", Invader::File::halo_path_to_preferred_path(tag.path).c_str(), Invader::HEK::tag_class_to_extension(tag.fourcc), tag.broken ? " [BROKEN]" : "");
     }
 }

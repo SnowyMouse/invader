@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <invader/file/file.hpp>
 
-#include <invader/hek/class_int.hpp>
+#include <invader/hek/fourcc.hpp>
 
 namespace Invader::EditQt {
     class TagTreeWindow;

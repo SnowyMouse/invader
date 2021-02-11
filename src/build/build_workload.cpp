@@ -147,7 +147,7 @@ namespace Invader {
                 auto &tag = this->tags.emplace_back();
                 tag_paths.emplace_back(i);
                 tag.path = i.path;
-                tag.tag_class_int = i.class_int;
+                tag.tag_fourcc = i.fourcc;
                 tag.stubbed = true;
             }
         }
@@ -631,20 +631,20 @@ namespace Invader {
         }
     }
 
-    void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int) {
-        #define COMPILE_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+    void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_fourcc) {
+        #define COMPILE_TAG_CLASS(class_struct, fourcc) case TagClassInt::fourcc: { \
             do_compile_tag(std::move(Parser::class_struct::parse_hek_tag_file(tag_data, tag_data_size, true))); \
             break; \
         }
 
         auto *header = reinterpret_cast<const HEK::TagFileHeader *>(tag_data);
 
-        if(!tag_class_int.has_value()) {
-            tag_class_int = header->tag_class_int;
+        if(!tag_fourcc.has_value()) {
+            tag_fourcc = header->tag_fourcc;
         }
 
         // Set this in case it's not set yet
-        this->tags[tag_index].tag_class_int = *tag_class_int;
+        this->tags[tag_index].tag_fourcc = *tag_fourcc;
         
         // Make sure the path isn't bullshit
         bool invalid_path = false;
@@ -687,12 +687,12 @@ namespace Invader {
         }
 
         // Check header and CRC32
-        HEK::TagFileHeader::validate_header(header, tag_data_size, tag_class_int);
+        HEK::TagFileHeader::validate_header(header, tag_data_size, tag_fourcc);
         HEK::BigEndian<std::uint32_t> expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
         
         // Make sure the header's CRC32 matches the calculated CRC32
         if(expected_crc != header->crc32) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_class_int.value()));
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_fourcc.value()));
         }
         
         // Calculate checksums. This is to prevent collisions when bitmap/sound data is modified but nothing else, since this data isn't directly factored into the map checksum.
@@ -711,7 +711,7 @@ namespace Invader {
             new_tag_struct.compile(workload, tag_index, &new_struct - structs.data());
         };
 
-        switch(*tag_class_int) {
+        switch(*tag_fourcc) {
             COMPILE_TAG_CLASS(Actor, TAG_CLASS_ACTOR)
             COMPILE_TAG_CLASS(ActorVariant, TAG_CLASS_ACTOR_VARIANT)
             COMPILE_TAG_CLASS(Antenna, TAG_CLASS_ANTENNA)
@@ -794,7 +794,7 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_SHADER:
             case TagClassInt::TAG_CLASS_ITEM:
             case TagClassInt::TAG_CLASS_DEVICE:
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_class_to_extension(*tag_class_int));
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_class_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
 
             // And, of course, BSP tags
@@ -849,7 +849,7 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
             case TagClassInt::TAG_CLASS_INVADER_SCENARIO:
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_class_to_extension(*tag_class_int));
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_class_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
                 
             // And this, of course, we don't know
@@ -858,7 +858,7 @@ namespace Invader {
         }
     }
 
-    std::size_t BuildWorkload::compile_tag_recursively(const char *tag_path, TagClassInt tag_class_int) {
+    std::size_t BuildWorkload::compile_tag_recursively(const char *tag_path, TagClassInt tag_fourcc) {
         // Remove duplicate slashes
         auto fixed_path = Invader::File::remove_duplicate_slashes(tag_path);
         tag_path = fixed_path.c_str();
@@ -868,7 +868,7 @@ namespace Invader {
         bool found = false;
         for(std::size_t i = 0; i < return_value; i++) {
             auto &tag = this->tags[i];
-            if((tag.tag_class_int == tag_class_int || tag.alias == tag_class_int) && tag.path == tag_path) {
+            if((tag.tag_fourcc == tag_fourcc || tag.alias == tag_fourcc) && tag.path == tag_path) {
                 if(tag.base_struct.has_value()) {
                     return i;
                 }
@@ -884,8 +884,8 @@ namespace Invader {
         // Find it
         char formatted_path[512];
         std::optional<std::filesystem::path> new_path;
-        if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
-            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
+        if(tag_fourcc != TagClassInt::TAG_CLASS_OBJECT) {
+            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_fourcc));
             Invader::File::halo_path_to_preferred_path_chars(formatted_path);
             
             // Only set the new path if it exists
@@ -901,7 +901,7 @@ namespace Invader {
                 if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) { /* only set the new path if it exists */ \
                     new_path = std::nullopt; \
                 } \
-                tag_class_int = new_int; \
+                tag_fourcc = new_int; \
             }
             TRY_THIS(TagClassInt::TAG_CLASS_BIPED);
             TRY_THIS(TagClassInt::TAG_CLASS_VEHICLE);
@@ -916,14 +916,14 @@ namespace Invader {
             TRY_THIS(TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE);
             #undef TRY_THIS
             if(!new_path.has_value()) {
-                tag_class_int = TagClassInt::TAG_CLASS_OBJECT;
-                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
+                tag_fourcc = TagClassInt::TAG_CLASS_OBJECT;
+                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_fourcc));
             }
             else {
                 // Look for it again
                 for(std::size_t i = 0; i < return_value; i++) {
                     auto &tag = this->tags[i];
-                    if(tag.tag_class_int == tag_class_int && tag.path == tag_path) {
+                    if(tag.tag_fourcc == tag_fourcc && tag.path == tag_path) {
                         if(tag.base_struct.has_value()) {
                             return i;
                         }
@@ -940,8 +940,8 @@ namespace Invader {
         if(!found) {
             auto &tag = this->tags.emplace_back();
             tag.path = tag_path;
-            tag.tag_class_int = tag_class_int;
-            this->get_tag_paths().emplace_back(tag_path, tag_class_int);
+            tag.tag_fourcc = tag_fourcc;
+            this->get_tag_paths().emplace_back(tag_path, tag_fourcc);
         }
 
         // And we're done! Maybe?
@@ -963,7 +963,7 @@ namespace Invader {
         auto &tag_file_data = *tag_file;
 
         try {
-            this->compile_tag_data_recursively(tag_file_data.data(), tag_file_data.size(), return_value, tag_class_int);
+            this->compile_tag_data_recursively(tag_file_data.data(), tag_file_data.size(), return_value, tag_fourcc);
         }
         catch(std::exception &e) {
             eprintf("Failed to compile tag %s\n", formatted_path);
@@ -1109,13 +1109,13 @@ namespace Invader {
         for(auto &tag : this->tags) {
             if(tag.stubbed) {
                 // Object tags and damage effects are referenced directly over the netcode
-                if(*this->cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_class_int) || tag.tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
-                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_class_int));
+                if(*this->cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_fourcc) || tag.tag_fourcc == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_fourcc));
                     warned++;
                 }
 
                 tag.path = "MISSINGNO.";
-                tag.tag_class_int = TagClassInt::TAG_CLASS_NONE;
+                tag.tag_fourcc = TagClassInt::TAG_CLASS_NONE;
                 this->stubbed_tag_count++;
             }
         }
@@ -1196,7 +1196,7 @@ namespace Invader {
         return workload;
     }
 
-    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
+    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_fourcc, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
         BuildWorkload workload = {};
         
         BuildParameters parameters;
@@ -1207,7 +1207,7 @@ namespace Invader {
         workload.disable_recursion = !recursion;
         workload.disable_error_checking = !error_checking;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
-        workload.compile_tag_recursively(tag, tag_class_int);
+        workload.compile_tag_recursively(tag, tag_fourcc);
         return workload;
     }
 
@@ -1249,7 +1249,7 @@ namespace Invader {
             auto &tag = tags[t];
 
             // Tag data
-            auto primary_class = tag.tag_class_int;
+            auto primary_class = tag.tag_fourcc;
             if(!native) {
                 reinterpret_cast<HEK::CacheFileTagDataTag *>(&tag_index)->indexed = tag.resource_index.has_value();
             }
@@ -1273,10 +1273,10 @@ namespace Invader {
             tag_id.tag_index = t;
 
             // Not strictly required to set the secondary or tertiary classes, but we do it anyway
-            tag_index.primary_class = tag.tag_class_int;
+            tag_index.primary_class = tag.tag_fourcc;
             tag_index.secondary_class = TagClassInt::TAG_CLASS_NONE;
             tag_index.tertiary_class = TagClassInt::TAG_CLASS_NONE;
-            switch(tag.tag_class_int) {
+            switch(tag.tag_fourcc) {
                 case TagClassInt::TAG_CLASS_BIPED:
                 case TagClassInt::TAG_CLASS_VEHICLE:
                     tag_index.secondary_class = TagClassInt::TAG_CLASS_UNIT;
@@ -1385,7 +1385,7 @@ namespace Invader {
                 }
                 else {
                     auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + offset + dependency.offset);
-                    dependency_struct.tag_class_int = tags[tag_index].tag_class_int;
+                    dependency_struct.tag_fourcc = tags[tag_index].tag_fourcc;
                     dependency_struct.tag_id = new_tag_id;
                     if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         dependency_struct.path_pointer = pointer_of_tag_path(tag_index);
@@ -1439,7 +1439,7 @@ namespace Invader {
                 // Go through each BSP tag
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &t = tags[i];
-                    if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+                    if(t.tag_fourcc != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                         continue;
                     }
 
@@ -1507,7 +1507,7 @@ namespace Invader {
 
                     if(!found) {
                         oprintf("\n");
-                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
                     }
                 }
             }
@@ -1559,7 +1559,7 @@ namespace Invader {
                 continue;
             }
             std::size_t resource_index = 0;
-            if(t.tag_class_int == TagClassInt::TAG_CLASS_BITMAP) {
+            if(t.tag_fourcc == TagClassInt::TAG_CLASS_BITMAP) {
                 auto &bitmap_struct = this->structs[*t.base_struct];
                 auto &bitmap_header = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_struct.data.data());
                 std::size_t bitmap_data_count = bitmap_header.bitmap_data.count.read();
@@ -1586,7 +1586,7 @@ namespace Invader {
                     }
                 }
             }
-            else if(t.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+            else if(t.tag_fourcc == TagClassInt::TAG_CLASS_SOUND) {
                 auto &sound_struct = this->structs[*t.base_struct];
                 auto &sound_header = *reinterpret_cast<Parser::Sound::struct_little *>(sound_struct.data.data());
                 std::size_t pitch_range_count = sound_header.pitch_ranges.count.read();
@@ -1676,7 +1676,7 @@ namespace Invader {
                         return std::nullopt;
                     };
 
-                    switch(t.tag_class_int) {
+                    switch(t.tag_fourcc) {
                         case TagClassInt::TAG_CLASS_BITMAP: {
                             auto index = find_tag_index(t.path, bitmaps, true);
                             if(index.has_value()) {
@@ -1852,7 +1852,7 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in bitmaps.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in bitmaps.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
@@ -2009,7 +2009,7 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in sounds.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in sounds.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
@@ -2027,7 +2027,7 @@ namespace Invader {
 
                                 const auto &loc_tag_struct = this->structs[*t.base_struct];
 
-                                switch(t.tag_class_int) {
+                                switch(t.tag_fourcc) {
                                     case TagClassInt::TAG_CLASS_FONT: {
                                         const auto &font_tag = *reinterpret_cast<const Parser::Font::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(font_tag)) {
@@ -2264,7 +2264,7 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in loc.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in loc.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
@@ -2284,7 +2284,7 @@ namespace Invader {
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 for(auto &t : this->tags) {
-                    switch(t.tag_class_int) {
+                    switch(t.tag_fourcc) {
                         // Iterate through each permutation in each pitch range to find the bitmap
                         case TagClassInt::TAG_CLASS_BITMAP: {
                             if(bitmaps.has_value()) {
@@ -2424,7 +2424,7 @@ namespace Invader {
                 continue;
             }
             
-            switch(tag.tag_class_int) {
+            switch(tag.tag_fourcc) {
                 case HEK::TagClassInt::TAG_CLASS_WEAPON:
                 case HEK::TagClassInt::TAG_CLASS_EQUIPMENT: {
                     auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(this->structs[*tag.base_struct].data.data())->pickup_text_index);

@@ -65,8 +65,8 @@ namespace Invader {
             const auto &tag = map->get_tag(tag_index);
 
             // See if we can extract this
-            auto tag_class_int = tag.get_tag_class_int();
-            const char *tag_extension = Invader::HEK::tag_class_to_extension(tag_class_int);
+            auto tag_fourcc = tag.get_tag_fourcc();
+            const char *tag_extension = Invader::HEK::tag_class_to_extension(tag_fourcc);
             if(!tag.data_is_available()) {
                 return false;
             }
@@ -85,7 +85,7 @@ namespace Invader {
             }
 
             // Skip globals
-            if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !non_mp_globals && type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
+            if(tag_fourcc == Invader::TagClassInt::TAG_CLASS_GLOBALS && !non_mp_globals && type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
                 workload.report_error(ErrorType::ERROR_TYPE_WARNING_PEDANTIC, "Skipping the non-multiplayer map's globals tag", tag_index);
                 return false;
             }
@@ -102,7 +102,7 @@ namespace Invader {
                     for(auto &s : tag_compiled.structs) {
                         for(auto &d : s.dependencies) {
                             auto &tag = tag_compiled.tags[d.tag_index];
-                            dependencies.emplace_back(&tag.path, tag.tag_class_int);
+                            dependencies.emplace_back(&tag.path, tag.tag_fourcc);
                         }
                     }
                     for(auto &d : dependencies) {
@@ -122,7 +122,7 @@ namespace Invader {
             if(type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
                 auto tag_path = tag.get_path();
                 bool changed = false;
-                switch(tag_class_int) {
+                switch(tag_fourcc) {
                     case Invader::TagClassInt::TAG_CLASS_WEAPON: {
                         #define ALTER_TAG_DATA(from, to) if(from != to) { from = to; changed = true; } 
                         
@@ -166,7 +166,7 @@ namespace Invader {
             }
 
             // Warn if we had to generate mipmaps
-            if(engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX && tag_class_int == Invader::HEK::TagClassInt::TAG_CLASS_BITMAP) {
+            if(engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX && tag_fourcc == Invader::HEK::TagClassInt::TAG_CLASS_BITMAP) {
                 auto bitmap_tag = Invader::Parser::Bitmap::parse_hek_tag_file(new_tag.data(), new_tag.size());
                 for(auto &data : bitmap_tag.bitmap_data) {
                     // Skip uncompressed bitmaps
@@ -232,7 +232,7 @@ namespace Invader {
                 }
 
                 const auto &tag = map->get_tag(t);
-                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_class_int());
+                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_fourcc());
 
                 for(auto &query : queries) {
                     if(File::path_matches(full_tag_path.c_str(), query.c_str())) {
@@ -259,11 +259,11 @@ namespace Invader {
             }
             const auto &tag_map = map->get_tag(tag);
             if(extract_tag(tag)) {
-                oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+                oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_fourcc()));
                 extracted++;
             }
             else {
-                eprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+                eprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_fourcc()));
             }
         }
         
@@ -283,7 +283,7 @@ namespace Invader {
         paths.reserve(tag_count);
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map.get_tag(i);
-            paths.emplace_back(tag.get_path(), tag.get_tag_class_int());
+            paths.emplace_back(tag.get_path(), tag.get_tag_fourcc());
         }
     }
     
@@ -291,7 +291,7 @@ namespace Invader {
         ExtractionWorkload workload(tag.get_map(), reporting_level);
         auto result = workload.extract_tag(tag.get_tag_index());
         if(result.has_value()) {
-            return result->get()->generate_hek_tag_data(tag.get_tag_class_int());
+            return result->get()->generate_hek_tag_data(tag.get_tag_fourcc());
         }
         else {
             throw InvalidTagDataException();
@@ -300,13 +300,13 @@ namespace Invader {
     
     std::optional<std::unique_ptr<Parser::ParserStruct>> ExtractionWorkload::extract_tag(std::size_t tag_index) {
         auto &tag = this->map.get_tag(tag_index);
-        auto tag_class_int = tag.get_tag_class_int();
+        auto tag_fourcc = tag.get_tag_fourcc();
 
-        #define EXTRACT_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+        #define EXTRACT_TAG_CLASS(class_struct, fourcc) case TagClassInt::fourcc: { \
             return std::make_unique<Parser::class_struct>(Parser::class_struct::parse_cache_file_data(tag)); \
         }
 
-        switch(tag_class_int) {
+        switch(tag_fourcc) {
             EXTRACT_TAG_CLASS(Actor, TAG_CLASS_ACTOR)
             EXTRACT_TAG_CLASS(ActorVariant, TAG_CLASS_ACTOR_VARIANT)
             EXTRACT_TAG_CLASS(Antenna, TAG_CLASS_ANTENNA)
@@ -416,7 +416,7 @@ namespace Invader {
                 break;
         }
 
-        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, tag_index, "Tag class %s is unsupported", tag_class_to_extension(tag_class_int));
+        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, tag_index, "Tag class %s is unsupported", tag_class_to_extension(tag_fourcc));
         return std::nullopt;
     }
 }

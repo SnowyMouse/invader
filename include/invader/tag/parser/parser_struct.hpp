@@ -111,12 +111,12 @@ namespace Invader::Parser {
     struct ParserStruct;
 
     struct Dependency {
-        TagClassInt tag_class_int;
+        TagClassInt tag_fourcc;
         std::string path;
         HEK::TagID tag_id = HEK::TagID::null_tag_id();
         
         bool operator==(const Dependency &other) const {
-            return this->path == other.path && (this->path.size() == 0 || this->tag_class_int == other.tag_class_int);
+            return this->path == other.path && (this->path.size() == 0 || this->tag_fourcc == other.tag_fourcc);
         }
         
         bool operator!=(const Dependency &other) const {

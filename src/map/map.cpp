@@ -339,7 +339,7 @@ namespace Invader {
             for(std::size_t i = 0; i < tag_count; i++) {
                 map.tags.push_back(Tag(map));
                 auto &tag = map.tags[i];
-                tag.tag_class_int = tags[i].primary_class;
+                tag.tag_fourcc = tags[i].primary_class;
                 tag.tag_data_index_offset = reinterpret_cast<const std::byte *>(tags + i) - map.tag_data;
                 tag.tag_index = i;
                 
@@ -396,14 +396,14 @@ namespace Invader {
                     tag.path = new_path;
                 }
 
-                if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(tag.tag_fourcc == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     continue;
                 }
                 else if(sizeof(tags->tag_data) == sizeof(HEK::Pointer) && reinterpret_cast<const CacheFileTagDataTag *>(tags)[i].indexed) {
                     tag.indexed = true;
 
                     // Indexed sound tags still use tag data (until you use reflexives)
-                    if(tag.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+                    if(tag.tag_fourcc == TagClassInt::TAG_CLASS_SOUND) {
                         tag.base_struct_pointer = tags[i].tag_data;
                     }
                     else {
@@ -413,7 +413,7 @@ namespace Invader {
 
                     // Find where it's located
                     DataMapType type;
-                    switch(tag.tag_class_int) {
+                    switch(tag.tag_fourcc) {
                         case TagClassInt::TAG_CLASS_BITMAP:
                             type = DataMapType::DATA_MAP_BITMAP;
                             break;
@@ -455,20 +455,20 @@ namespace Invader {
                     
                     // Do we even have an index?
                     if(!tag.resource_index.has_value()) {
-                        eprintf_error("Tag %s.%s could not be found in the resource map file", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_class_int));
+                        eprintf_error("Tag %s.%s could not be found in the resource map file", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_fourcc));
                         throw OutOfBoundsException();
                     }
 
                     // Make sure it's valid
                     if(*tag.resource_index >= count) {
-                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_class_int), *tag.resource_index, static_cast<std::size_t>(count));
+                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_fourcc), *tag.resource_index, static_cast<std::size_t>(count));
                         throw OutOfBoundsException();
                     }
 
                     // Set it all
                     auto &index = indices[*tag.resource_index];
                     tag.tag_data_size = index.size;
-                    if(tag.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+                    if(tag.tag_fourcc == TagClassInt::TAG_CLASS_SOUND) {
                         tag.base_struct_offset = index.data_offset + sizeof(HEK::Sound<HEK::LittleEndian>);
                     }
                     else {
@@ -544,7 +544,7 @@ namespace Invader {
         }
 
         // We can get this right off the bat
-        if(this->get_tag(this->get_scenario_tag_id()).get_tag_class_int() != TagClassInt::TAG_CLASS_SCENARIO) {
+        if(this->get_tag(this->get_scenario_tag_id()).get_tag_fourcc() != TagClassInt::TAG_CLASS_SCENARIO) {
             return true;
         }
 
@@ -552,7 +552,7 @@ namespace Invader {
         auto tag_count = this->get_tag_count();
         for(std::size_t t = 0; t < tag_count; t++) {
             auto &tag = this->get_tag(t);
-            auto tag_class = tag.get_tag_class_int();
+            auto tag_class = tag.get_tag_fourcc();
             auto &tag_path = tag.get_path();
 
             // If the tag has no data, but it's not because it's indexed, keep going
@@ -573,7 +573,7 @@ namespace Invader {
             // Go through each tag and see if we have any duplicates
             for(std::size_t t2 = t + 1; t2 < tag_count; t2++) {
                 auto &tag2 = this->get_tag(t2);
-                if(tag_class != tag2.get_tag_class_int()) {
+                if(tag_class != tag2.get_tag_fourcc()) {
                     continue;
                 }
                 if(tag2.get_path() == tag_path) {
@@ -584,9 +584,9 @@ namespace Invader {
         return false;
     }
 
-    std::optional<std::size_t> Map::find_tag(const char *tag_path, TagClassInt tag_class_int) const noexcept {
+    std::optional<std::size_t> Map::find_tag(const char *tag_path, TagClassInt tag_fourcc) const noexcept {
         for(auto &tag : tags) {
-            if(tag.get_tag_class_int() == tag_class_int && tag.get_path() == tag_path) {
+            if(tag.get_tag_fourcc() == tag_fourcc && tag.get_path() == tag_path) {
                 return &tag - tags.data();
             }
         }
@@ -626,7 +626,7 @@ namespace Invader {
                 auto &index = tag.get_tag_data_index();
                 
                 // BSP tags are NOT supposed to have this set
-                if(tag.get_tag_class_int() == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && index.tag_data != 0) {
+                if(tag.get_tag_fourcc() == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && index.tag_data != 0) {
                     return false;
                 }
             }

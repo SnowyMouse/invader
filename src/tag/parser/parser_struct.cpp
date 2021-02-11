@@ -681,11 +681,11 @@ namespace Invader::Parser {
         const auto *header = reinterpret_cast<const HEK::TagFileHeader *>(data);
         HEK::TagFileHeader::validate_header(header, data_size);
 
-        #define DO_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+        #define DO_TAG_CLASS(class_struct, fourcc) case TagClassInt::fourcc: { \
             return std::make_unique<Parser::class_struct>(Invader::Parser::class_struct::parse_hek_tag_file(data, data_size, postprocess)); \
         }
 
-        switch(header->tag_class_int) {
+        switch(header->tag_fourcc) {
             DO_BASED_ON_TAG_CLASS
 
             case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_SCENARIO:
@@ -699,14 +699,14 @@ namespace Invader::Parser {
                 break;
         }
 
-        eprintf_error("Unknown tag class %s", tag_class_to_extension(header->tag_class_int));
+        eprintf_error("Unknown tag class %s", tag_class_to_extension(header->tag_fourcc));
         throw InvalidTagDataException();
 
         #undef DO_TAG_CLASS
     }
 
     std::unique_ptr<ParserStruct> ParserStruct::generate_base_struct(TagClassInt tag_class) {
-        #define DO_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+        #define DO_TAG_CLASS(class_struct, fourcc) case TagClassInt::fourcc: { \
             return std::unique_ptr<ParserStruct>(new class_struct()); \
         }
 
@@ -732,7 +732,7 @@ namespace Invader::Parser {
     std::vector<TagClassInt> ParserStruct::all_tag_classes(bool exclude_subclasses) {
         std::vector<TagClassInt> classes;
 
-        #define DO_TAG_CLASS(class_struct, class_int) classes.emplace_back(TagClassInt::class_int);
+        #define DO_TAG_CLASS(class_struct, fourcc) classes.emplace_back(TagClassInt::fourcc);
         DO_BASED_ON_TAG_CLASS;
 
         // Remove subclasses
@@ -756,7 +756,7 @@ namespace Invader::Parser {
     }
     
     std::size_t ParserStruct::refactor_reference(const File::TagFilePath &from, const File::TagFilePath &to) {
-        return this->refactor_reference(from.path.c_str(), from.class_int, to.path.c_str(), to.class_int);
+        return this->refactor_reference(from.path.c_str(), from.fourcc, to.path.c_str(), to.fourcc);
     }
     
     std::size_t ParserStruct::refactor_references(const std::vector<std::pair<File::TagFilePath, File::TagFilePath>> &replacements) {

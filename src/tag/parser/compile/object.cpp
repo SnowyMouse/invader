@@ -293,7 +293,7 @@ namespace Invader::Parser {
         for(auto &d : s.dependencies) {
             std::size_t tag_index = d.tag_index;
             auto &dt = workload.tags[tag_index];
-            switch(dt.tag_class_int) {
+            switch(dt.tag_fourcc) {
                 case TagClassInt::TAG_CLASS_BITMAP:
                 case TagClassInt::TAG_CLASS_SOUND:
                     if(!ignore_shader_resources) {
@@ -356,7 +356,7 @@ namespace Invader::Parser {
             for(std::size_t r : resources) {
                 auto &resource = predicted_resources.emplace_back();
                 auto &resource_tag = workload.tags[r];
-                resource.type = resource_tag.tag_class_int == TagClassInt::TAG_CLASS_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_SOUND;
+                resource.type = resource_tag.tag_fourcc == TagClassInt::TAG_CLASS_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_SOUND;
                 resource.tag = HEK::TagID { static_cast<std::uint32_t>(r) };
                 resource.resource_index = 0;
                 auto &resource_dep = prs.dependencies.emplace_back();

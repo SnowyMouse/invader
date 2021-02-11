@@ -32,7 +32,7 @@ std::size_t refactor_tags(const std::filesystem::path &file_path, const std::vec
         auto tag_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
         count = tag_data->refactor_references(replacements);
         if(count) {
-            file_data = tag_data->generate_hek_tag_data(header->tag_class_int);
+            file_data = tag_data->generate_hek_tag_data(header->tag_fourcc);
         }
         else {
             return count;
@@ -196,13 +196,13 @@ int main(int argc, char * const *argv) {
         for(auto &i : refactor_options.replacements) {
             bool nonexistant = true;
             for(auto &t : refactor_options.tags) {
-                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + Invader::HEK::tag_class_to_extension(i.second.class_int)))) {
+                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + Invader::HEK::tag_class_to_extension(i.second.fourcc)))) {
                     nonexistant = false;
                     break;
                 }
             }
             if(nonexistant) {
-                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), Invader::HEK::tag_class_to_extension(i.first.class_int), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), Invader::HEK::tag_class_to_extension(i.second.class_int));
+                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), Invader::HEK::tag_class_to_extension(i.first.fourcc), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), Invader::HEK::tag_class_to_extension(i.second.fourcc));
                 failed = true;
             }
         }
@@ -215,10 +215,10 @@ int main(int argc, char * const *argv) {
     // Resolve all class replacements
     for(auto &r : class_replacements) {
         for(auto &t : all_tags) {
-            if(t.tag_class_int == r.second) {
+            if(t.tag_fourcc == r.second) {
                 auto split_from = *Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(t.tag_path));
                 auto split_to = split_from;
-                split_from.class_int = r.first;
+                split_from.fourcc = r.first;
                 refactor_options.replacements.emplace_back(split_from, split_to);
             }
         }
@@ -227,7 +227,7 @@ int main(int argc, char * const *argv) {
     // Make sure we aren't changing tag classes if move
     if(move_or_copy_file) {
         for(auto &t : refactor_options.replacements) {
-            if(t.first.class_int != t.second.class_int) {
+            if(t.first.fourcc != t.second.fourcc) {
                 eprintf_error("Error: Tag classes cannot be changed with -M move or -M copy");
                 return EXIT_FAILURE;
             }
@@ -259,8 +259,8 @@ int main(int argc, char * const *argv) {
         }
 
         // Get the path together
-        tag.tag_class_int = single_tag_maybe->class_int;
-        tag.tag_path = single_tag_maybe->path + "." + tag_class_to_extension(single_tag_maybe->class_int);
+        tag.tag_fourcc = single_tag_maybe->fourcc;
+        tag.tag_path = single_tag_maybe->path + "." + tag_class_to_extension(single_tag_maybe->fourcc);
 
         // Find it
         auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags);
@@ -294,7 +294,7 @@ int main(int argc, char * const *argv) {
             auto halo_path = preferred_path_to_halo_path(t.tag_path);
             if(halo_path.find(from_halo) == 0 && halo_path[from_halo_size] == '\\') {
                 TagFilePath from = unmaybe(split_tag_class_extension(halo_path), t.tag_path.c_str());
-                TagFilePath to = {to_halo + from.path.substr(from_halo_size), t.tag_class_int};
+                TagFilePath to = {to_halo + from.path.substr(from_halo_size), t.tag_fourcc};
                 replacements.emplace_back(std::move(from), std::move(to));
                 replacements_files.emplace_back(&t);
             }
@@ -328,7 +328,7 @@ int main(int argc, char * const *argv) {
         // If we're moving tags, we can't change tag classes
         if(move_or_copy_file && !refactor_options.dry_run) {
             for(auto &i : replacements) {
-                if(i.first.class_int != i.second.class_int) {
+                if(i.first.fourcc != i.second.fourcc) {
                     eprintf_error("Error: Tag class cannot be changed if moving tags.");
                     return EXIT_FAILURE;
                 }
@@ -349,7 +349,7 @@ int main(int argc, char * const *argv) {
                 auto *file = replacements_files[i];
                 auto &replacement = replacements[i];
 
-                auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.class_int));
+                auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.fourcc));
 
                 // Create directories. If this fails, it probably matters, but it's not critical in and of itself
                 std::error_code ec;
@@ -450,7 +450,7 @@ int main(int argc, char * const *argv) {
         }
         
         // Skip some tags that cannot reference anything
-        switch(tag.tag_class_int) {
+        switch(tag.tag_fourcc) {
             case Invader::HEK::TagClassInt::TAG_CLASS_BITMAP:
             case Invader::HEK::TagClassInt::TAG_CLASS_PHYSICS:
             case Invader::HEK::TagClassInt::TAG_CLASS_STRING_LIST:

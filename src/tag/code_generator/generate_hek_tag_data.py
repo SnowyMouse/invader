@@ -24,7 +24,7 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
                 cpp_save_hek_data.write("        std::size_t {}_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name,name))
                 
                 cpp_save_hek_data.write("        b.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
-                cpp_save_hek_data.write("        b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+                cpp_save_hek_data.write("        b.{}.tag_fourcc = this->{}.tag_fourcc;\n".format(name, name))
                 cpp_save_hek_data.write("        if({}_size > 0) {{\n".format(name))
                 cpp_save_hek_data.write("            b.{}.path_size = static_cast<std::uint32_t>({}_size);\n".format(name, name))
                 cpp_save_hek_data.write("            const auto *path_str = reinterpret_cast<const std::byte *>(this->{}.path.c_str());\n".format(name))
@@ -34,8 +34,8 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
                 cpp_save_hek_data.write("            }\n")
                 cpp_save_hek_data.write("        }\n")
                 if struct["classes"][0] != "*":
-                    cpp_save_hek_data.write("        else if(this->{}.tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
-                    cpp_save_hek_data.write("            b.{}.tag_class_int = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_save_hek_data.write("        else if(this->{}.tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
+                    cpp_save_hek_data.write("            b.{}.tag_fourcc = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
                     cpp_save_hek_data.write("        }\n")
                     
             elif struct["type"] == "TagReflexive":

@@ -160,7 +160,7 @@ namespace Invader::EditQt {
     void TagEditorBitmapSubwindow::TagEditorBitmapSubwindow::update() {
         auto *parent_window = this->get_parent_window();
         auto *data = parent_window->get_parser_data();
-        switch(parent_window->get_file().tag_class_int) {
+        switch(parent_window->get_file().tag_fourcc) {
             case TagClassInt::TAG_CLASS_BITMAP:
                 generate_main_widget(this, dynamic_cast<Parser::Bitmap *>(data), TagEditorBitmapSubwindow::set_values);
                 break;
@@ -189,7 +189,7 @@ namespace Invader::EditQt {
             std::size_t index_unsigned = static_cast<std::size_t>(index);
             auto *parent_window = this->get_parent_window();
             Parser::BitmapData *bitmap_data;
-            switch(parent_window->get_file().tag_class_int) {
+            switch(parent_window->get_file().tag_fourcc) {
                 case TagClassInt::TAG_CLASS_BITMAP:
                     bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
                     break;
@@ -648,7 +648,7 @@ namespace Invader::EditQt {
         Parser::BitmapData *bitmap_data;
         std::vector<std::byte> *pixel_data;
         auto *parent_window = this->get_parent_window();
-        switch(parent_window->get_file().tag_class_int) {
+        switch(parent_window->get_file().tag_fourcc) {
             case TagClassInt::TAG_CLASS_BITMAP:
                 bitmap_data = dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data.data() + index_unsigned;
                 pixel_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->processed_pixel_data;
@@ -763,7 +763,7 @@ namespace Invader::EditQt {
                 auto &sprite = sequence.sprites[i];
                 std::vector<Parser::BitmapData> *bitmap_data;
                 auto *parent_window = this->get_parent_window();
-                switch(parent_window->get_file().tag_class_int) {
+                switch(parent_window->get_file().tag_fourcc) {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data;
                         break;

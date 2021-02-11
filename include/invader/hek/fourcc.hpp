@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef INVADER__HEK__CLASS_INT_HPP
-#define INVADER__HEK__CLASS_INT_HPP
+#ifndef INVADER__HEK__FOURCC_HPP
+#define INVADER__HEK__FOURCC_HPP
 
 #include <cstdint>
 
@@ -105,24 +105,24 @@ namespace Invader::HEK {
 
     /**
      * Check if the tag class int is an object-type class
-     * @param  tag_class_int the tag class int
+     * @param  tag_fourcc the tag class int
      * @return               true if an object, false if not
      */
-    #define IS_OBJECT_TAG(tag_class_int) (tag_class_int == TagClassInt::TAG_CLASS_BIPED || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_DEVICE || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_DEVICE_CONTROL || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_DEVICE_MACHINE || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_EQUIPMENT || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_GARBAGE || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_ITEM || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_OBJECT || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_PLACEHOLDER || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_PROJECTILE || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_SCENERY || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_SOUND_SCENERY || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_VEHICLE || \
-                                          tag_class_int == TagClassInt::TAG_CLASS_WEAPON)
+    #define IS_OBJECT_TAG(tag_fourcc) (tag_fourcc == TagClassInt::TAG_CLASS_BIPED || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE_CONTROL || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_DEVICE_MACHINE || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_EQUIPMENT || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_GARBAGE || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_ITEM || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_OBJECT || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_PLACEHOLDER || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_PROJECTILE || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_SCENERY || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_SOUND_SCENERY || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_VEHICLE || \
+                                          tag_fourcc == TagClassInt::TAG_CLASS_WEAPON)
 
     /**
      * Return the extension of the tag class or nullptr if none exists.

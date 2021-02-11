@@ -206,7 +206,7 @@ int main(int argc, const char **argv) {
         for(std::size_t i = 0; i < tag_count; i++) {
             // Get the tag path information
             auto &tag = parsed_map->get_tag(i);
-            std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_class_to_extension(tag.get_tag_class_int()));
+            std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_class_to_extension(tag.get_tag_fourcc()));
 
             // Check each tags directory if it exists. If so, archive it
             bool exists = false;
@@ -254,7 +254,7 @@ int main(int argc, const char **argv) {
         // Now find its dependencies
         bool success;
         auto &base_tag_split = base_tag_split_maybe.value();
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_split.path.c_str(), base_tag_split.class_int, archive_options.tags, false, true, success);
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_split.path.c_str(), base_tag_split.fourcc, archive_options.tags, false, true, success);
         if(!success) {
             eprintf_error("Failed to find dependencies for %s. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
@@ -263,11 +263,11 @@ int main(int argc, const char **argv) {
         // Make sure there aren't any broken dependencies
         for(auto &dependency : dependencies) {
             if(dependency.broken) {
-                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.", dependency.path.c_str(), tag_class_to_extension(dependency.class_int));
+                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.", dependency.path.c_str(), tag_class_to_extension(dependency.fourcc));
                 return EXIT_FAILURE;
             }
 
-            std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(dependency.class_int));
+            std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(dependency.fourcc));
             archive_list.emplace_back(*dependency.file_path, path_copy);
         }
     }

@@ -4,8 +4,8 @@
 #include <invader/tag/hek/header.hpp>
 
 namespace Invader::HEK {
-    std::uint16_t TagFileHeader::version_for_tag(TagClassInt tag_class_int) {
-        switch(tag_class_int) {
+    std::uint16_t TagFileHeader::version_for_tag(TagClassInt tag_fourcc) {
+        switch(tag_fourcc) {
             case TAG_CLASS_ACTOR:
                 return 2;
             case TAG_CLASS_MODEL_ANIMATIONS:
@@ -81,17 +81,17 @@ namespace Invader::HEK {
         }
     }
 
-    TagFileHeader::TagFileHeader(TagClassInt tag_class_int) {
+    TagFileHeader::TagFileHeader(TagClassInt tag_fourcc) {
         // Clear everything
         std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), std::byte());
 
         // Set values
-        this->tag_class_int = tag_class_int;
+        this->tag_fourcc = tag_fourcc;
         #ifndef INVADER_EXTRACT_HIDDEN_VALUES
         this->blam = BLAM;
         this->header_size = sizeof(*this);
         this->something_255 = 255;
-        this->version = TagFileHeader::version_for_tag(tag_class_int);
+        this->version = TagFileHeader::version_for_tag(tag_fourcc);
         #endif
     }
 
@@ -106,7 +106,7 @@ namespace Invader::HEK {
             throw InvalidTagDataHeaderException();
         }
 
-        auto tag_class = header->tag_class_int.read();
+        auto tag_class = header->tag_fourcc.read();
         auto expected_version = version_for_tag(tag_class);
         if(header->version != expected_version) {
             eprintf_error("Version in header is wrong (%u expected, %u gotten)", expected_version, header->version.read());

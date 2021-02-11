@@ -29,7 +29,7 @@ namespace Invader::Parser {
                         auto &part = parts[p];
                         auto part_id = part.type.tag_id.read();
                         if(!part_id.is_null()) {
-                            auto r = part.type.tag_class_int.read();
+                            auto r = part.type.tag_fourcc.read();
                             if(IS_OBJECT_TAG(r)) {
                                 part.type_class = TagClassInt::TAG_CLASS_OBJECT;
                             }

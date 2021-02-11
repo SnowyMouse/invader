@@ -15,7 +15,7 @@ def make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_ref
     for struct in all_used_structs:
         name = struct["member_name"]
         if struct["type"] == "TagDependency":
-            cpp_refactor_reference.write("        if(this->{}.tag_class_int == from_class && this->{}.path == from_path) {{\n".format(name, name))
+            cpp_refactor_reference.write("        if(this->{}.tag_fourcc == from_class && this->{}.path == from_path) {{\n".format(name, name))
 
             # Make sure the class is correct for the reference
             if struct["classes"][0] != "*":
@@ -44,7 +44,7 @@ def make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_ref
                 cpp_refactor_reference.write("                throw InvalidTagDataException();\n")
                 cpp_refactor_reference.write("            }\n")
 
-            cpp_refactor_reference.write("            this->{}.tag_class_int = to_class;\n".format(name))
+            cpp_refactor_reference.write("            this->{}.tag_fourcc = to_class;\n".format(name))
             cpp_refactor_reference.write("            this->{}.path = to_path;\n".format(name))
             cpp_refactor_reference.write("            replaced++;\n")
             cpp_refactor_reference.write("        }\n")

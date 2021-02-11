@@ -24,7 +24,7 @@ int strip_tag(const std::filesystem::path &file_path, bool preprocess) {
     try {
         const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
         Invader::HEK::TagFileHeader::validate_header(header, tag->size());
-        file_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size(), preprocess)->generate_hek_tag_data(header->tag_class_int, true);
+        file_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size(), preprocess)->generate_hek_tag_data(header->tag_fourcc, true);
     }
     catch(std::exception &e) {
         eprintf_error("Error: Failed to strip %s: %s", file_path.string().c_str(), e.what());

@@ -18,7 +18,7 @@ namespace Invader::Info {
         }
         
         // If it's a bitmap tag, iterate through the bitmap data things. Otherwise, iterate through the permutations if it's a sound tag.
-        switch(tag.get_tag_class_int()) {
+        switch(tag.get_tag_fourcc()) {
             case TagClassInt::TAG_CLASS_BITMAP: {
                 auto &bitmap_header = tag.get_base_struct<HEK::Bitmap>();
                 std::size_t bitmap_data_count = bitmap_header.bitmap_data.count;
@@ -85,9 +85,9 @@ namespace Invader::Info {
             bool found = false;
             
             // Check if we can deal with this tag type
-            auto tag_class_int = tag.get_tag_class_int();
+            auto tag_fourcc = tag.get_tag_fourcc();
             for(auto &c : allowed_classes) {
-                if(c == tag_class_int) {
+                if(c == tag_fourcc) {
                     found = true;
                     break;
                 }
@@ -123,7 +123,7 @@ namespace Invader::Info {
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map.get_tag(i);
             if(tag.is_indexed()) {
-                switch(tag.get_tag_class_int()) {
+                switch(tag.get_tag_fourcc()) {
                     case HEK::TagClassInt::TAG_CLASS_SOUND: {
                         bool found = false;
                         for(const char * const *i = get_default_sound_resources(); *i; i++) {
@@ -178,7 +178,7 @@ namespace Invader::Info {
             std::vector<std::size_t> bitmap_offsets, bitmap_sizes, sound_offsets, sound_sizes;
             for(std::size_t i = 0; i < tag_count; i++) {
                 auto &tag = map.get_tag(i);
-                switch(tag.get_tag_class_int()) {
+                switch(tag.get_tag_fourcc()) {
                     case HEK::TagClassInt::TAG_CLASS_SOUND:
                         for(auto &i : resource_offsets_for_tag(tag)) {
                             sound_offsets.push_back(i.first);
@@ -298,14 +298,14 @@ namespace Invader::Info {
         auto tag_count = map.get_tag_count();
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map.get_tag(i);
-            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_class_int()));
+            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_fourcc()));
         }
     }
     
     static void print_all_indices(const Invader::Map &map, const std::vector<std::size_t> &indices) {
         for(auto i : indices) {
             auto &tag = map.get_tag(i);
-            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_class_int()));
+            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_fourcc()));
         }
     }
     

@@ -237,7 +237,7 @@ namespace Invader::EditQt {
         File::TagFile file;
         file.tag_path = File::halo_path_to_preferred_path(potential_halo_path_std_str);
         file.full_path = std::filesystem::path(this->tag_paths->currentText().toStdString()) / file.tag_path;
-        file.tag_class_int = *this->save_class;
+        file.tag_fourcc = *this->save_class;
         file.tag_directory = this->tag_paths->currentIndex();
         this->tag = file;
         this->done(QDialog::Accepted);

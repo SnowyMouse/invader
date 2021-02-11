@@ -278,10 +278,10 @@ namespace Invader {
         /**
          * Find the tag with the given path and class
          * @param tag_path      tag path to find
-         * @param tag_class_int tag class to find
+         * @param tag_fourcc tag class to find
          * @return              the index of the first tag found or std::nullopt if not found
          */
-        std::optional<std::size_t> find_tag(const char *tag_path, TagClassInt tag_class_int) const noexcept;
+        std::optional<std::size_t> find_tag(const char *tag_path, TagClassInt tag_fourcc) const noexcept;
 
         /**
          * Get the scenario tag ID

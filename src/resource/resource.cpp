@@ -159,7 +159,7 @@ int main(int argc, const char **argv) {
                     for(std::size_t t = 0; t < tag_count; t++) {
                         auto &tag = map.get_tag(t);
                         bool allowed = false;
-                        auto tag_class = tag.get_tag_class_int();
+                        auto tag_class = tag.get_tag_fourcc();
                         switch(*resource_options.type) {
                             case ResourceMapType::RESOURCE_MAP_BITMAP:
                                 allowed = tag_class == HEK::TagClassInt::TAG_CLASS_BITMAP;
@@ -193,7 +193,7 @@ int main(int argc, const char **argv) {
                     else {
                         auto &new_path = tags_list.emplace_back();
                         new_path.path = tag;
-                        new_path.class_int = TagClassInt::TAG_CLASS_NONE;
+                        new_path.fourcc = TagClassInt::TAG_CLASS_NONE;
                     }
                 }
             }
@@ -213,27 +213,27 @@ int main(int argc, const char **argv) {
 
     for(auto &listed_tag : tags_list) {
         // First let's open it
-        TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
+        TagClassInt tag_fourcc = TagClassInt::TAG_CLASS_NONE;
         std::vector<std::byte> tag_data;
         
         // But if we don't know the extension, we need to find that first!
-        if(listed_tag.class_int == TagClassInt::TAG_CLASS_NONE) {
+        if(listed_tag.fourcc == TagClassInt::TAG_CLASS_NONE) {
             auto pref_path = File::halo_path_to_preferred_path(listed_tag.path.c_str());
             for(auto &tags_folder : resource_options.tags) {
                 if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".font"))) {
-                    listed_tag.class_int = TagClassInt::TAG_CLASS_FONT;
+                    listed_tag.fourcc = TagClassInt::TAG_CLASS_FONT;
                     break;
                 }
                 else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".hud_message_text"))) {
-                    listed_tag.class_int = TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT;
+                    listed_tag.fourcc = TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT;
                     break;
                 }
                 else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".unicode_string_list"))) {
-                    listed_tag.class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
+                    listed_tag.fourcc = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
                     break;
                 }
             }
-            if(listed_tag.class_int == TagClassInt::TAG_CLASS_NONE) {
+            if(listed_tag.fourcc == TagClassInt::TAG_CLASS_NONE) {
                 eprintf_error("No font, hud message text, or unicode string list was found at %s.", pref_path.c_str());
                 return EXIT_FAILURE;
             }
@@ -258,29 +258,29 @@ int main(int argc, const char **argv) {
 
         switch(*resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
-                tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
+                tag_fourcc = TagClassInt::TAG_CLASS_BITMAP;
                 break;
             case ResourceMapType::RESOURCE_MAP_SOUND:
-                tag_class_int = TagClassInt::TAG_CLASS_SOUND;
+                tag_fourcc = TagClassInt::TAG_CLASS_SOUND;
                 break;
             case ResourceMapType::RESOURCE_MAP_LOC:
-                switch(listed_tag.class_int) {
+                switch(listed_tag.fourcc) {
                     case TagClassInt::TAG_CLASS_FONT:
                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                        tag_class_int = listed_tag.class_int;
+                        tag_fourcc = listed_tag.fourcc;
                         break;
                         
                     // Okay, we didn't find anything
                     default:
-                        eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_class_to_extension(listed_tag.class_int));
+                        eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_class_to_extension(listed_tag.fourcc));
                         return EXIT_FAILURE;
                 }
                 break;
         }
 
-        if(tag_class_int != listed_tag.class_int) {
-            eprintf_error("Expected %s. Got %s instead.", tag_class_to_extension(tag_class_int), tag_class_to_extension(listed_tag.class_int));
+        if(tag_fourcc != listed_tag.fourcc) {
+            eprintf_error("Expected %s. Got %s instead.", tag_class_to_extension(tag_fourcc), tag_class_to_extension(listed_tag.fourcc));
         }
 
         for(auto &tags_folder : resource_options.tags) {
@@ -300,7 +300,7 @@ int main(int argc, const char **argv) {
 
         // Compile the tags
         try {
-            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(listed_tag.path.c_str(), tag_class_int, resource_options.tags);
+            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(listed_tag.path.c_str(), tag_fourcc, resource_options.tags);
             auto &compiled_tag_tag = compiled_tag.tags[0];
             auto &compiled_tag_struct = compiled_tag.structs[*compiled_tag_tag.base_struct];
             auto *compiled_tag_data = compiled_tag_struct.data.data();
@@ -464,7 +464,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.c_str(), tag_class_to_extension(tag_class_int), e.what());
+            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.c_str(), tag_class_to_extension(tag_fourcc), e.what());
             return EXIT_FAILURE;
         }
 

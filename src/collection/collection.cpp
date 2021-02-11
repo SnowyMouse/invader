@@ -101,7 +101,7 @@ int main(int argc, char * const *argv) {
                 return EXIT_FAILURE;
             }
             entry.reference.path = Invader::File::preferred_path_to_halo_path(whole_tag->path);
-            entry.reference.tag_class_int = whole_tag->class_int;
+            entry.reference.tag_fourcc = whole_tag->fourcc;
         }
     }
     auto final_data = tag.generate_hek_tag_data(Invader::TagClassInt::TAG_CLASS_TAG_COLLECTION, true);

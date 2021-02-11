@@ -19,7 +19,7 @@ def make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_
                 for c in range(0, classes_len):
                     if c != 0:
                         test_line = " && " + test_line
-                    test_line = "this->{}.tag_class_int != TagClassInt::TAG_CLASS_{}".format(name, classes[c].upper()) + test_line
+                    test_line = "this->{}.tag_fourcc != TagClassInt::TAG_CLASS_{}".format(name, classes[c].upper()) + test_line
                 if classes_len == 1:
                     error_line = " {}".format(classes[0])
                 elif classes_len == 2:
@@ -36,7 +36,7 @@ def make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_
                 cpp_check_invalid_references.write("            if(!null_references) {\n")
                 cpp_check_invalid_references.write("                return true;\n")
                 cpp_check_invalid_references.write("            }\n")
-                cpp_check_invalid_references.write("            this->{}.tag_class_int = TagClassInt::TAG_CLASS_{};\n".format(name, classes[0].upper()))
+                cpp_check_invalid_references.write("            this->{}.tag_fourcc = TagClassInt::TAG_CLASS_{};\n".format(name, classes[0].upper()))
                 cpp_check_invalid_references.write("            this->{}.path = std::string();\n".format(name))
                 cpp_check_invalid_references.write("            return_value = true;\n".format(name))
                 cpp_check_invalid_references.write("        }\n")

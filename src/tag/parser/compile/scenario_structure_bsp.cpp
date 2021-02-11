@@ -91,7 +91,7 @@ namespace Invader::Parser {
                 
                 // Do we even have lightmaps?
                 for(auto &m : lm.materials) {
-                    switch(m.shader.tag_class_int) {
+                    switch(m.shader.tag_fourcc) {
                         case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
                         case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
                         case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:

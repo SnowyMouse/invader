@@ -95,7 +95,7 @@ struct BitmapOptions {
     bool regenerate = false;
 };
 
-template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagClassInt tag_class_int) {
+template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagClassInt tag_fourcc) {
     // Let's begin
     std::filesystem::path data_path = bitmap_options.data;
 
@@ -476,7 +476,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     std::error_code ec;
     std::filesystem::create_directories(tag_path.parent_path(), ec);
     
-    if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(tag_class_int, true))) {
+    if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(tag_fourcc, true))) {
         eprintf_error("Error: Failed to write to %s.", final_path.string().c_str());
         return EXIT_FAILURE;
     }

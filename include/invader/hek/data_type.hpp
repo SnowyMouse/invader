@@ -10,7 +10,7 @@
 #include "../error.hpp"
 #include "constants.hpp"
 #include "pad.hpp"
-#include "class_int.hpp"
+#include "fourcc.hpp"
 #include "endian.hpp"
 #include "../printf.hpp"
 
@@ -256,7 +256,7 @@ namespace Invader::HEK {
      */
     ENDIAN_TEMPLATE(EndianType) struct TagDependency {
         /** Tag class of the tag being depended upon */
-        EndianType<TagClassInt> tag_class_int;
+        EndianType<TagClassInt> tag_fourcc;
 
         /** Pointer to tag path when compiled. */
         EndianType<Pointer> path_pointer;
@@ -269,7 +269,7 @@ namespace Invader::HEK {
 
         ENDIAN_TEMPLATE(OtherEndian) operator TagDependency<OtherEndian>() const {
             TagDependency<OtherEndian> copy;
-            COPY_THIS(tag_class_int);
+            COPY_THIS(tag_fourcc);
             COPY_THIS(path_pointer);
             COPY_THIS(path_size);
             COPY_THIS(tag_id);

@@ -41,7 +41,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
         maximum = struct["maximum"] if "maximum" in struct else None
         if struct["type"] == "TagDependency":
             cpp_cache_format_data.write("        this->{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
-            cpp_cache_format_data.write("        r.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+            cpp_cache_format_data.write("        r.{}.tag_fourcc = this->{}.tag_fourcc;\n".format(name, name))
             cpp_cache_format_data.write("        if(this->{}.path.size() > 0) {{\n".format(name))
 
             # Make sure the class is correct for the reference
@@ -53,7 +53,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 for c in range(0, classes_len):
                     if c != 0:
                         test_line = " && " + test_line
-                    test_line = "this->{}.tag_class_int != TagClassInt::TAG_CLASS_{}".format(name, classes[c].upper()) + test_line
+                    test_line = "this->{}.tag_fourcc != TagClassInt::TAG_CLASS_{}".format(name, classes[c].upper()) + test_line
                 if classes_len == 1:
                     error_line = " {}".format(classes[0])
                 elif classes_len == 2:
@@ -67,11 +67,11 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                         error_line = error_line + " {}".format(classes[c])
 
                 cpp_cache_format_data.write("            if({}) {{\n".format(test_line))
-                cpp_cache_format_data.write("                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} must be{}, found %s, instead\", tag_class_to_extension(this->{}.tag_class_int));\n".format(struct_name, name, error_line, name))
+                cpp_cache_format_data.write("                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} must be{}, found %s, instead\", tag_class_to_extension(this->{}.tag_fourcc));\n".format(struct_name, name, error_line, name))
                 cpp_cache_format_data.write("                throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("            }\n")
 
-            cpp_cache_format_data.write("            std::size_t index = workload.compile_tag_recursively(this->{}.path.c_str(), this->{}.tag_class_int);\n".format(name, name))
+            cpp_cache_format_data.write("            std::size_t index = workload.compile_tag_recursively(this->{}.path.c_str(), this->{}.tag_fourcc);\n".format(name, name))
             cpp_cache_format_data.write("            this->{}.tag_id.index = static_cast<std::uint16_t>(index);\n".format(name))
             cpp_cache_format_data.write("            r.{}.tag_id = this->{}.tag_id;\n".format(name, name))
             cpp_cache_format_data.write("            auto &d = workload.structs[struct_index].dependencies.emplace_back();\n")

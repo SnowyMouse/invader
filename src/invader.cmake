@@ -69,7 +69,7 @@ set(INVADER_SOURCE_FILES
 
     ${INVADER_AUDIO_FILES}
 
-    src/hek/class_int.cpp
+    src/hek/fourcc.cpp
     src/hek/data_type.cpp
     src/hek/map.cpp
     src/resource/resource_map.cpp

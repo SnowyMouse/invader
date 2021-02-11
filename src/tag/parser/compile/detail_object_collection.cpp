@@ -43,7 +43,7 @@ namespace Invader::Parser {
             // Make sure it's not out-of-bounds
             if(type.sequence_index >= sequence_count) {
                 if(!workload.disable_error_checking) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence index #%zu of bitmap %s.%s for type #%zu is out of bounds (%zu >= %zu)", sequence_index, File::halo_path_to_preferred_path(sprite_plate_tag.path).c_str(), HEK::tag_class_to_extension(sprite_plate_tag.tag_class_int), sequence_index, sequence_index, sequence_count);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence index #%zu of bitmap %s.%s for type #%zu is out of bounds (%zu >= %zu)", sequence_index, File::halo_path_to_preferred_path(sprite_plate_tag.path).c_str(), HEK::tag_class_to_extension(sprite_plate_tag.tag_fourcc), sequence_index, sequence_index, sequence_count);
                     throw InvalidTagDataException();
                 }
             }
@@ -60,11 +60,11 @@ namespace Invader::Parser {
                 // TODO: Note these limitations in the definitions
                 if(!workload.disable_error_checking) {
                     if(sprite_count > MAX_SPRITE_COUNT) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence index #%zu of bitmap %s.%s for type #%zu exceeds the maximum number of sprites allowed for detail object collections (%zu > %zu)", sequence_index, File::halo_path_to_preferred_path(sprite_plate_tag.path).c_str(), HEK::tag_class_to_extension(sprite_plate_tag.tag_class_int), sequence_index, static_cast<std::size_t>(sprite_count), MAX_SPRITE_COUNT);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence index #%zu of bitmap %s.%s for type #%zu exceeds the maximum number of sprites allowed for detail object collections (%zu > %zu)", sequence_index, File::halo_path_to_preferred_path(sprite_plate_tag.path).c_str(), HEK::tag_class_to_extension(sprite_plate_tag.tag_fourcc), sequence_index, static_cast<std::size_t>(sprite_count), MAX_SPRITE_COUNT);
                         throw InvalidTagDataException();
                     }
                     if(sequence_offset > MAX_SPRITE_COUNT) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence index #%zu of bitmap %s.%s for type #%zu has a sprite offset which exceeds the maximum number of sprites allowed for detail object collections (%zu > %zu)", sequence_index, File::halo_path_to_preferred_path(sprite_plate_tag.path).c_str(), HEK::tag_class_to_extension(sprite_plate_tag.tag_class_int), sequence_offset, static_cast<std::size_t>(sprite_count), MAX_SPRITE_COUNT);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence index #%zu of bitmap %s.%s for type #%zu has a sprite offset which exceeds the maximum number of sprites allowed for detail object collections (%zu > %zu)", sequence_index, File::halo_path_to_preferred_path(sprite_plate_tag.path).c_str(), HEK::tag_class_to_extension(sprite_plate_tag.tag_fourcc), sequence_offset, static_cast<std::size_t>(sprite_count), MAX_SPRITE_COUNT);
                         throw InvalidTagDataException();
                     }
                 }

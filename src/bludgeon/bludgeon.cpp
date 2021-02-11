@@ -174,7 +174,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
         }
 
         // Do it!
-        file_data = parsed_data->generate_hek_tag_data(header->tag_class_int, true);
+        file_data = parsed_data->generate_hek_tag_data(header->tag_fourcc, true);
         if(!Invader::File::save_file(file_path, file_data)) {
             badly_designed_printf(eprintf_error, "Error: Failed to write to %s.", file_path.string().c_str());
             return EXIT_FAILURE;
