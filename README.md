@@ -135,6 +135,7 @@ this project is split into different programs.
 - [invader-compress]
 - [invader-convert]
 - [invader-dependency]
+- [invader-edit]
 - [invader-edit-qt]
 - [invader-extract]
 - [invader-font]
@@ -462,6 +463,42 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+```
+
+### invader-edit
+This program edits tags in a command-line interface. This is primarily used for
+scripting. If you want to edit tags in a graphical user interface, use
+[invader-edit-qt].
+
+```
+Usage: invader-edit [options] <tag.class>
+
+Edit tags via command-line.
+
+Options:
+  -c --copy <key> <pos>        Copy the selected struct(s) to the given index
+                               or "end" if the end of the array.
+  -C --count <key>             Get the number of elements in the array at the
+                               given key.
+  -E --erase <key>             Delete the selected struct(s).
+  -G --get <key>               Get the value with the given key.
+  -h --help                    Show this list of options.
+  -i --info                    Show license and credits.
+  -I --insert <key> <#> <pos>  Add # structs to the given index or "end" if the
+                               end of the array.
+  -L --list <key>              List all the elements in the array at the given
+                               key (or the main struct if key is blank).
+  -M --move <key> <pos>        Swap the selected structs with the structs at
+                               the given index or "end" if the end of the
+                               array. The regions must not intersect.
+  -N --new                     Create a new tag
+  -o --output <tag>            Output the tag to a different path rather than
+                               overwriting it.
+  -P --fs-path                 Use a filesystem path for the font data or tag
+                               file.
+  -S --set <key> <val>         Set the value at the given key to the given
+                               value.
+  -t --tags <dir>              Use the specified tags directory.
 ```
 
 ### invader-edit-qt
@@ -989,6 +1026,7 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-compress]: #invader-compress
 [invader-convert]: #invader-convert
 [invader-dependency]: #invader-dependency
+[invader-edit]: #invader-edit
 [invader-edit-qt]: #invader-edit-qt
 [invader-extract]: #invader-extract
 [invader-font]: #invader-font

@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- New tool: invader-edit - Command-line tool for editing tags (primarily made
+  for scripting)
 - invader-compare: Added shorthand for the conversion types. g2m can be used in
   place of gbxmodel-to-model, m2g in place of model-to-gbxmodel, and x2c in
   place of chicago-extended-to-chicago
