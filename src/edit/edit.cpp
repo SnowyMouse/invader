@@ -513,7 +513,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<tag>");
     
     options.emplace_back("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>");
-    options.emplace_back("move", 'M', 2, "Shift the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
+    options.emplace_back("move", 'M', 2, "Swap the selected structs with the structs at the given index or \"end\" if the end of the array. The regions must not intersect.", "<key> <pos>");
     options.emplace_back("erase", 'E', 1, "Delete the selected struct(s).", "<key>");
     options.emplace_back("copy", 'c', 2, "Copy the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
 
@@ -682,6 +682,10 @@ int main(int argc, char * const *argv) {
                         std::exit(EXIT_FAILURE);
                     }
                     try {
+                        if(i.count + k.get_array_size() > k.get_array_maximum_size()) {
+                            eprintf_error("%s's maximum size of %zu exceeded", k.get_member_name(), k.get_array_maximum_size());
+                            std::exit(EXIT_FAILURE);
+                        }
                         k.insert_objects_in_array(i.position == SIZE_MAX ? k.get_array_size() : i.position, i.count);
                     }
                     catch(std::exception &) {
@@ -701,6 +705,10 @@ int main(int argc, char * const *argv) {
                     }
                     try {
                         std::size_t iterations = range.second - range.first + 1;
+                        if(k.get_array_size() - iterations < k.get_array_minimum_size()) {
+                            eprintf_error("%s's minimum size of %zu exceeded", k.get_member_name(), k.get_array_maximum_size());
+                            std::exit(EXIT_FAILURE);
+                        }
                         k.delete_objects_in_array(range.first, iterations);
                     }
                     catch(std::exception &) {
@@ -720,14 +728,11 @@ int main(int argc, char * const *argv) {
                     }
                     try {
                         std::size_t to = i.position == SIZE_MAX ? k.get_array_size() : i.position;
-                        for(std::size_t n = range.first; n <= range.second; n++) {
-                            k.duplicate_objects_in_array(n, to, 1);
-                            if(n >= to) {
-                                n++;
-                                range.second++;
-                            }
-                            k.delete_objects_in_array(n, 1);
+                        std::size_t iterations = range.second - range.first + 1;
+                        if(to == range.first) {
+                            continue; // we can ignore if it's trying to swap itself
                         }
+                        k.swap_objects_in_array(range.first, to, iterations);
                     }
                     catch(std::exception &) {
                         std::exit(EXIT_FAILURE);
@@ -747,6 +752,12 @@ int main(int argc, char * const *argv) {
                     try {
                         std::size_t to = i.position == SIZE_MAX ? k.get_array_size() : i.position;
                         std::size_t iterations = range.second - range.first + 1;
+                        
+                        if(iterations + k.get_array_size() > k.get_array_maximum_size()) {
+                            eprintf_error("%s's maximum size of %zu exceeded", k.get_member_name(), k.get_array_maximum_size());
+                            std::exit(EXIT_FAILURE);
+                        }
+                        
                         k.duplicate_objects_in_array(range.first, to, iterations);
                     }
                     catch(std::exception &) {

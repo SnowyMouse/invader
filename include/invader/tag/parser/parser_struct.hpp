@@ -363,6 +363,16 @@ namespace Invader::Parser {
         }
 
         /**
+         * Swap objects in the array. The regions must NOT intersect
+         * @param index_from index of first object to copy
+         * @param index_to   index of first object to insert to
+         * @param count      number of objects to create
+         */
+        void swap_objects_in_array(std::size_t index_from, std::size_t index_to, std::size_t count) {
+            return this->swap_objects_in_array_fn(index_from, index_to, count, this->address);
+        }
+
+        /**
          * Get whether or not this is a bounds
          * @return is bounds
          */
@@ -449,6 +459,7 @@ namespace Invader::Parser {
         using delete_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
         using insert_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
         using duplicate_objects_in_array_fn_type = void (*)(std::size_t index_from, std::size_t index_to, std::size_t count, void *addr);
+        using swap_objects_in_array_fn_type = void (*)(std::size_t index_from, std::size_t index_to, std::size_t count, void *addr);
 
         /**
          * Get the object in the array (for get_object_in_array_fn)
@@ -509,8 +520,8 @@ namespace Invader::Parser {
 
         /**
          * Duplicate the object in the array (for duplicate_objects_in_array_fn)
-         * @param  index index for objects to be inserted
-         * @param  count count of objects to delete
+         * @param  index index for objects to be duplicate
+         * @param  count count of objects to duplicate
          * @param  addr  address of object
          */
         template <typename T>
@@ -532,6 +543,32 @@ namespace Invader::Parser {
                     q += count;
                 }
                 array[index_to + i] = array[q];
+            }
+        }
+
+        /**
+         * Swap the object in the array (for swap_objects_in_array_fn)
+         * @param  index index for objects to be swapped
+         * @param  count count of objects to delete
+         * @param  addr  address of object
+         */
+        template <typename T>
+        static void swap_object_in_array_template(std::size_t index_from, std::size_t index_to, std::size_t count, void *addr) {
+            if(count == 0 || index_from == index_to) {
+                return;
+            }
+            
+            auto &array = *reinterpret_cast<T *>(addr);
+            assert_range_exists(index_from, count, array);
+            assert_range_exists(index_to, count, array);
+            
+            if(index_from < (index_to + count - 1) && (index_from + count - 1) > index_to) {
+                eprintf_error("Cannot swap; range [%zu-%zu] intersects with [%zu-%zu]", index_from, index_from + count, index_to, index_to + count);
+                throw OutOfBoundsException();
+            }
+            
+            for(std::size_t i = 0; i < count; i++) {
+                std::swap((*reinterpret_cast<T *>(addr))[index_from + i], (*reinterpret_cast<T *>(addr))[index_to + i]);
             }
         }
 
@@ -693,6 +730,7 @@ namespace Invader::Parser {
          * @param delete_objects_in_array_fn    pointer to function for deleting objects from an array
          * @param insert_objects_in_array_fn    pointer to function for inserting objects in an array
          * @param duplicate_objects_in_array_fn pointer to function for duplicating objects in an array
+         * @param swap_objects_in_array_fn      pointer to function for swapping objects in an array
          * @param minimum_array_size            minimum number of elements in the array
          * @param maximum_array_size            maximum number of elements in the array
          * @param read_only                     value is read only
@@ -707,6 +745,7 @@ namespace Invader::Parser {
             delete_objects_in_array_fn_type     delete_objects_in_array_fn,
             insert_objects_in_array_fn_type     insert_objects_in_array_fn,
             duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn,
+            swap_objects_in_array_fn_type       swap_objects_in_array_fn,
             std::size_t                         minimum_array_size,
             std::size_t                         maximum_array_size,
             bool                                read_only
@@ -838,6 +877,7 @@ namespace Invader::Parser {
         delete_objects_in_array_fn_type delete_objects_in_array_fn = nullptr;
         insert_objects_in_array_fn_type insert_objects_in_array_fn = nullptr;
         duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr;
+        swap_objects_in_array_fn_type swap_objects_in_array_fn = nullptr;
 
         list_enum_fn_type list_enum_fn = nullptr;
         list_enum_fn_type list_enum_pretty_fn = nullptr;
