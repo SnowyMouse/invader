@@ -3,9 +3,14 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-edit: Added --list-values
+
 ### Changed
 - invader-edit: Changed --list to instead show the entire structure in a TREE /F
   style. Note that this requires the terminal to support UTF-8.
+- invader-edit: Changed --list to use -l (lowercase L) instead of -L which is
+  used by --list-values
 - invader-edit: Angles are now automatically converted to and from degrees.
 
 ## [0.42.2] - 2021-02-10
