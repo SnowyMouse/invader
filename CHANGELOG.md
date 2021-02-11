@@ -36,9 +36,6 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed "Copy virtual path" not appearing for directories
 - invader-info: Extended dirty check to check file size and type mismatching
 
-### Removed
-- Most tools: Removed --fs-path. Use GNU realpath, instead.
-
 ## [0.41.4] - 2021-01-24
 ### Fixed
 - invader-bitmap: Fixed single sprites sometimes resulting in too large of page

@@ -99,6 +99,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Must be specified if a string tag is not present.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";
     static constexpr char USAGE[] = "[options] <tag>";
@@ -107,6 +108,7 @@ int main(int argc, char * const *argv) {
         std::filesystem::path data = "data";
         std::optional<std::filesystem::path> tags;
         std::optional<Format> format;
+        bool use_filesystem_path = false;
     } string_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
@@ -123,6 +125,9 @@ int main(int argc, char * const *argv) {
                 std::exit(EXIT_SUCCESS);
             case 'd':
                 string_options.data = arguments[0];
+                break;
+            case 'P':
+                string_options.use_filesystem_path = true;
                 break;
             case 'f':
                 if(std::strcmp(arguments[0], "utf-16") == 0) {
@@ -144,7 +149,21 @@ int main(int argc, char * const *argv) {
     const char *valid_extension = string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt";
 
     // Check if there's a string tag
-    std::string string_tag = remaining_arguments[0];
+    std::string string_tag;
+    if(string_options.use_filesystem_path) {
+        std::vector<std::filesystem::path> data(&string_options.data, &string_options.data + 1);
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
+        if(string_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+            string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
+        }
+        else {
+            eprintf_error("Failed to find a valid %s file %s in the data directory", valid_extension, remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
+    }
+    else {
+        string_tag = remaining_arguments[0];
+    }
 
     // Ensure it's lowercase
     for(const char *c = string_tag.c_str(); *c; c++) {

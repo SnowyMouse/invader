@@ -19,6 +19,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
 
     static constexpr char DESCRIPTION[] = "Generate tag_collection tags.";
     static constexpr char USAGE[] = "[options] <tag>";
@@ -26,6 +27,7 @@ int main(int argc, char * const *argv) {
     struct CollectionOptions {
         std::filesystem::path data = "data";
         std::optional<std::filesystem::path> tags;
+        bool use_filesystem_path = false;
     } collection_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CollectionOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, collection_options, [](char opt, const std::vector<const char *> &arguments, auto &collection) {
@@ -43,6 +45,9 @@ int main(int argc, char * const *argv) {
             case 'd':
                 collection.data = arguments[0];
                 break;
+            case 'P':
+                collection.use_filesystem_path = true;
+                break;
         }
     });
 
@@ -51,7 +56,21 @@ int main(int argc, char * const *argv) {
     }
 
     // Check if there's a string tag
-    auto string_tag = remaining_arguments[0];
+    std::string string_tag;
+    if(collection_options.use_filesystem_path) {
+        std::vector<std::filesystem::path> data(&collection_options.data, &collection_options.data + 1);
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
+        if(string_tag_maybe.has_value()) {
+            string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
+        }
+        else {
+            eprintf_error("Failed to find a valid %s file %s in the data directory", INDEX_EXTENSION, remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
+    }
+    else {
+        string_tag = remaining_arguments[0];
+    }
 
     std::filesystem::path tags_path(*collection_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
