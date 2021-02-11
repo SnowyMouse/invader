@@ -25,7 +25,6 @@ int main(int argc, const char **argv) {
         std::optional<std::filesystem::path> output_tags;
         bool match_all = false;
         bool overwrite = false;
-        bool use_filesystem_path = false;
         std::vector<std::string> tags_to_convert;
     } convert_options;
 
@@ -37,7 +36,6 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Set the input tags directory.", "<dir>");
     options.emplace_back("output-tags", 'o', 1, "Set the output tags directory.", "<dir>");
     options.emplace_back("type", 'T', 1, "Type of conversion. Can be: gbxmodel-to-model (g2m), model-to-gbxmodel (m2g), chicago-extended-to-chicago (x2c)", "<type>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
 
     static constexpr char DESCRIPTION[] = "Convert from one tag type to another.";
     static constexpr char USAGE[] = "[options] <--all | -s <tag>>";
@@ -70,10 +68,6 @@ int main(int argc, const char **argv) {
                 
             case 'o':
                 compare_options.output_tags = args[0];
-                break;
-                
-            case 'P':
-                compare_options.use_filesystem_path = true;
                 break;
                 
             case 'O':
@@ -138,17 +132,6 @@ int main(int argc, const char **argv) {
         for(auto &i : File::load_virtual_tag_folder(tags_vector)) {
             if(i.tag_class_int == input_class) {
                 paths.emplace_back(File::split_tag_class_extension(File::halo_path_to_preferred_path(i.tag_path)).value());
-            }
-        }
-    }
-    else if(convert_options.use_filesystem_path) {
-        for(auto &i : convert_options.tags_to_convert) {
-            try {
-                paths.emplace_back(File::split_tag_class_extension(File::halo_path_to_preferred_path(File::file_path_to_tag_path(i, tags_vector).value())).value());
-            }
-            catch(std::exception &) {
-                eprintf_error("Invalid tag path %s", i.c_str());
-                return EXIT_FAILURE;
             }
         }
     }

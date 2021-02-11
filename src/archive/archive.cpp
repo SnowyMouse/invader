@@ -20,7 +20,6 @@ int main(int argc, const char **argv) {
         std::vector<std::filesystem::path> tags_excluded;
         std::vector<std::filesystem::path> tags_excluded_same;
         std::string output;
-        bool use_filesystem_path = false;
         bool copy = false;
         bool overwrite = false;
         std::optional<Invader::HEK::CacheFileEngine> engine;
@@ -37,7 +36,6 @@ int main(int argc, const char **argv) {
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist if using --copy");
     options.emplace_back("exclude", 'e', 1, "Exclude copying any tags that share a path with a tag in specified directory. Use multiple times to exclude multiple directories.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required if -s is not specified. Valid engines are: custom, demo, retail, xbox, native", "<id>");
 
@@ -63,9 +61,6 @@ int main(int argc, const char **argv) {
                 std::exit(EXIT_SUCCESS);
             case 's':
                 archive_options.single_tag = true;
-                break;
-            case 'P':
-                archive_options.use_filesystem_path = true;
                 break;
             case 'g':
                 if(std::strcmp(arguments[0], "custom") == 0) {
@@ -102,34 +97,7 @@ int main(int argc, const char **argv) {
     }
 
     // Require a tag
-    std::string base_tag;
-    if(archive_options.use_filesystem_path) {
-        // See if the tag path is valid
-        std::optional<std::string> base_tag_maybe;
-        if(std::filesystem::exists(remaining_arguments[0])) {
-            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags);
-        }
-        if(base_tag_maybe.has_value()) {
-            base_tag = *base_tag_maybe;
-            
-            // Remove extension if necessary
-            if(!archive_options.single_tag) {
-                auto path_test = std::filesystem::path(base_tag);
-                if(path_test.extension() != ".scenario") {
-                    eprintf_error("This function only accepts scenario tags. To use other tags, use -s");
-                    return EXIT_FAILURE;
-                }
-                base_tag = path_test.replace_extension().string();
-            }
-        }
-        else {
-            eprintf_error("Failed to find a valid%stag %s in the tags directory", archive_options.single_tag ? " " : " scenario ", remaining_arguments[0]);
-            return EXIT_FAILURE;
-        }
-    }
-    else {
-        base_tag.insert(base_tag.end(), remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
-    }
+    std::string base_tag = remaining_arguments[0];
     
     // Variables to hold this
     std::vector<std::pair<std::filesystem::path, std::string>> archive_list;

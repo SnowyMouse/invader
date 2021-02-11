@@ -64,7 +64,6 @@ int main(int argc, const char **argv) {
         bool quiet = false;
         std::optional<RawDataHandling> raw_data_handling;
         std::optional<std::uint32_t> forged_crc;
-        bool use_filesystem_path = false;
         std::optional<std::string> rename_scenario;
         std::optional<bool> compress;
         bool optimize_space = false;
@@ -88,7 +87,6 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
     options.emplace_back("compress", 'c', 0, "Compress the cache file.");
     options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 0 and 19. If compressing an Xbox or MCC map, this will be clamped from 0 to 9. Default: 19", "<level>");
@@ -191,9 +189,6 @@ int main(int argc, const char **argv) {
             case 'u':
                 build_options.compress = false;
                 break;
-            case 'P':
-                build_options.use_filesystem_path = true;
-                break;
             case 'i':
                 show_version_info();
                 std::exit(EXIT_SUCCESS);
@@ -210,26 +205,11 @@ int main(int argc, const char **argv) {
         }
     });
     
-    std::string scenario;
+    auto scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
 
     // By default, just use tags
     if(build_options.tags.size() == 0) {
         build_options.tags.emplace_back("tags");
-    }
-
-    if(build_options.use_filesystem_path) {
-        auto scenario_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], build_options.tags);
-        if(scenario_maybe.has_value()) std::printf("%s\n", scenario_maybe->c_str());
-        if(scenario_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
-            scenario = std::filesystem::path(*scenario_maybe).replace_extension().string();
-        }
-        else {
-            eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
-            return EXIT_FAILURE;
-        }
-    }
-    else {
-        scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
     }
 
     try {

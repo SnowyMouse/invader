@@ -504,7 +504,6 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file.");
     options.emplace_back("get", 'G', 1, "Get the value with the given key.", "<key>");
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
@@ -537,9 +536,6 @@ int main(int argc, char * const *argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
-            case 'P':
-                edit_options.use_filesystem_path = true;
-                break;
             case 'G':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_GET, arguments[0], {}, 0, 0 });
                 break;
@@ -591,13 +587,7 @@ int main(int argc, char * const *argv) {
         }
     });
 
-    std::filesystem::path file_path;
-    if(edit_options.use_filesystem_path) {
-        file_path = std::string(remaining_arguments[0]);
-    }
-    else {
-        file_path = std::filesystem::path(edit_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
-    }
+    auto file_path = Invader::File::tag_path_to_file_path(remaining_arguments[0], edit_options.tags);
     
     std::unique_ptr<Invader::Parser::ParserStruct> tag_struct;
     

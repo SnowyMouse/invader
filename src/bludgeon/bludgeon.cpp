@@ -194,7 +194,6 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count");
     options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " INVALID_NORMALS_FIX ", " INVALID_UPPERCASE_REFERENCES_FIX ", " EXCESSIVE_SCRIPT_NODES_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
@@ -204,7 +203,6 @@ int main(int argc, char * const *argv) {
 
     struct BludgeonOptions {
         std::optional<std::filesystem::path> tags;
-        bool use_filesystem_path = false;
         bool all = false;
         std::uint64_t fixes = WaysToFuckUpTheTag::NO_FIXES;
         std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
@@ -222,9 +220,6 @@ int main(int argc, char * const *argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
-            case 'P':
-                bludgeon_options.use_filesystem_path = true;
-                break;
             case 'a':
                 bludgeon_options.all = true;
                 break;
@@ -367,13 +362,7 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     else {
-        std::filesystem::path file_path;
-        if(bludgeon_options.use_filesystem_path) {
-            file_path = std::string(remaining_arguments[0]);
-        }
-        else {
-            file_path = std::filesystem::path(*bludgeon_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
-        }
+        std::filesystem::path file_path = std::filesystem::path(*bludgeon_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
         std::string file_path_str = file_path.string();
         bool bludgeoned;
         int result = bludgeon_tag(file_path_str.c_str(), fixes, bludgeoned);

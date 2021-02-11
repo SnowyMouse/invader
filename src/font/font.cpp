@@ -49,7 +49,6 @@ int main(int argc, char *argv[]) {
         std::filesystem::path data = "data/";
         std::filesystem::path tags = "tags";
         int pixel_size = 14;
-        bool use_filesystem_path = false;
         bool use_latin1 = false;
     } font_options;
 
@@ -59,7 +58,6 @@ int main(int argc, char *argv[]) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("font-size", 's', 1, "Set the font size in pixels.", "<px>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file.");
     options.emplace_back("latin1", 'l', 0, "Use 256 characters only (smaller)");
 
     static constexpr char DESCRIPTION[] = "Create font tags from OTF/TTF files.";
@@ -80,10 +78,6 @@ int main(int argc, char *argv[]) {
                 font_options.use_latin1 = true;
                 break;
 
-            case 'P':
-                font_options.use_filesystem_path = true;
-                break;
-
             case 's':
                 font_options.pixel_size = static_cast<int>(std::strtol(args[0], nullptr, 10));
                 if(font_options.pixel_size <= 0) {
@@ -100,40 +94,7 @@ int main(int argc, char *argv[]) {
     });
 
     // Do it!
-    std::string font_tag;
-    FontExtension found_format = static_cast<FontExtension>(0);
-    if(font_options.use_filesystem_path) {
-        auto path = std::filesystem::path(remaining_arguments[0]);
-        auto font_tag_maybe = Invader::File::file_path_to_tag_path(path, font_options.tags);
-        auto font_data_maybe = Invader::File::file_path_to_tag_path(path, font_options.data);
-        if(font_tag_maybe.has_value()) {
-            if(std::filesystem::path(*font_tag_maybe).extension() == ".font") {
-                font_tag = *font_tag_maybe;
-            }
-            else {
-                eprintf_error("This tool only works with font tags.");
-                return EXIT_FAILURE;
-            }
-        }
-        else if(font_data_maybe) {
-            for(FontExtension i = found_format; i < FontExtension::FONT_EXTENSION_COUNT; i = static_cast<FontExtension>(i + 1)) {
-                if(FONT_EXTENSION_STR[i] == path.extension()) {
-                    font_tag = font_tag_maybe.value();
-                    found_format = i;
-                    break;
-                }
-            }
-        }
-        
-        if(font_tag.size() == 0) {
-            eprintf_error("Failed to find %s in the tags or data directories", remaining_arguments[0]);
-            return EXIT_FAILURE;
-        }
-        font_tag = std::filesystem::path(font_tag).replace_extension().string();
-    }
-    else {
-        font_tag = remaining_arguments[0];
-    }
+    std::string font_tag = remaining_arguments[0];
 
     // Font tag path
     std::filesystem::path tags_path(font_options.tags);
@@ -151,7 +112,7 @@ int main(int argc, char *argv[]) {
 
     // Check if .ttf or .otf exists
     FontExtension ext;
-    for(ext = found_format; ext < FontExtension::FONT_EXTENSION_COUNT; ext = static_cast<FontExtension>(ext + 1)) {
+    for(ext = static_cast<FontExtension>(0); ext < FontExtension::FONT_EXTENSION_COUNT; ext = static_cast<FontExtension>(ext + 1)) {
         final_ttf_path = ttf_path.string() + FONT_EXTENSION_STR[ext];
         if(std::filesystem::exists(final_ttf_path)) {
             break;
