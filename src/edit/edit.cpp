@@ -8,6 +8,15 @@
 #include <invader/tag/hek/header.hpp>
 #include <string>
 
+#ifdef __linux__
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 enum ActionType {
     ACTION_TYPE_GET,
     ACTION_TYPE_SET,
@@ -419,7 +428,15 @@ static Invader::Parser::ParserStruct &populate_struct(Invader::Parser::ParserStr
     return ps;
 }
 
-static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::pair<std::string, std::size_t>> &output, bool with_values, std::size_t level = 0) {
+struct TagDataListTreeElement {
+    std::size_t level;
+    std::string name;
+    std::string type;
+    
+    TagDataListTreeElement(std::size_t level, const std::string &name, const std::string &type) : level(level), name(name), type(type) {}
+};
+
+static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDataListTreeElement> &output, bool with_values, std::size_t level = 0) {
     for(auto &i : ps.get_values()) {
         auto *mv = i.get_member_name();
         if(!mv) {
@@ -427,7 +444,112 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
         }
         
         auto type = i.get_type();
+        std::string type_str;
         std::string name = mv;
+        
+        switch(type) {
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE:
+                type_str = "array";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INT8:
+                type_str = "int8";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INT16:
+                type_str = "int16";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INT32:
+                type_str = "int32";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT8:
+                type_str = "uint8";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT16:
+                type_str = "uint16";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT32:
+                type_str = "uint32";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_FLOAT:
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_FRACTION:
+                type_str = "float32";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE:
+                type_str = "angle (float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INDEX:
+                type_str = "index";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORARGB:
+                type_str = "color (ARGB float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORRGB:
+                type_str = "color (RGB float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORARGBINT:
+                type_str = "color (A8R8G8B8)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT2DINT:
+                type_str = "point2d (integer)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT2D:
+                type_str = "point2d (float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT3D:
+                type_str = "point3d (float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_PLANE2D:
+                type_str = "plane2d (float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_PLANE3D:
+                type_str = "plane3d (float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_QUATERNION:
+                type_str = "quaternion (float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+                type_str = "dependency";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGID:
+                type_str = "bullshit";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+                type_str = "string";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET:
+                type_str = "data";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
+                type_str = "enum";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
+                type_str = "bitmask";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_MATRIX:
+                type_str = "matrix (float32)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_VECTOR2D:
+                type_str = "vector2d (float)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_VECTOR3D:
+                type_str = "vector3d (float)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D:
+                type_str = "euler2d (float)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D:
+                type_str = "euler3d (float)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_RECTANGLE2D:
+                type_str = "rectangle2d (float)";
+                break;
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_GROUP_START:
+                type_str = "group";
+                break;
+        }
+        
+        if(i.is_bounds()) {
+            type_str += " (bounds)";
+        }
         
         if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
             if(with_values) {
@@ -438,7 +560,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
             }
         }
             
-        output.emplace_back(name, level);
+        output.emplace_back(level, name, type_str);
         
         // If reflexive, list that stuff
         if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
@@ -451,29 +573,48 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
         // Or if it's a bitmask, do that too
         else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
             for(auto &j : i.list_enum()) {
-                output.emplace_back(j, level + 1);
+                output.emplace_back(level + 1, j, "bitfield");
             }
         }
     }
 }
 
 static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::string> &output, bool with_values = false) {
-    std::vector<std::pair<std::string, std::size_t>> array;
+    // Print the right column (description)
+    std::size_t terminal_width = 80;
+    
+    // Resize based on console width
+    #ifdef __linux__
+    struct winsize w = {};
+    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1) {
+        std::size_t new_width = static_cast<std::size_t>(w.ws_col);
+        terminal_width = new_width;
+    }
+    #endif
+    
+    #ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO w;
+    if(GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &w)) {
+        std::size_t new_width = w.srWindow.Right - w.srWindow.Left + 1;
+        terminal_width = new_width;
+    }
+    #endif
+    
+    std::vector<TagDataListTreeElement> array;
     list_everything(ps, array, with_values);
     
     auto array_size = array.size();
     for(std::size_t ar = 0; ar < array_size; ar++) {
         auto &element = array[ar];
-        std::size_t level = element.second;
         
         // Build the indent
         std::string indent;
         
-        for(std::size_t e = 0; e < level; e++) {
+        for(std::size_t e = 0; e < element.level; e++) {
             // Check to see if we have something on the same level
             bool has_next_in_array = false;
             for(std::size_t ar2 = ar + 1; ar2 < array_size; ar2++) {
-                auto next_thing = array[ar2].second;
+                auto next_thing = array[ar2].level;
                 
                 // We have another element of the same level
                 if(next_thing == e + 1) {
@@ -488,7 +629,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
             }
             
             if(has_next_in_array) {
-                if(e + 1 == level) {
+                if(e + 1 == element.level) {
                     indent = indent + " ├──";
                 }
                 else {
@@ -496,7 +637,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
                 }
             }
             else {
-                if(e + 1 == level) {
+                if(e + 1 == element.level) {
                     indent = indent + " └──";
                 }
                 else {
@@ -505,7 +646,21 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
             }
         }
         
-        output.emplace_back(indent + element.first);
+        // Get the actual length of the string (UTF-8)
+        int len = 0;
+        auto string = indent + element.name;
+        const char *s = string.c_str();
+        while (*s) len += (*s++ & 0xC0) != 0x80;
+        
+        // If we can include the type, do it
+        if(len + 1 + element.type.size() < terminal_width) {
+            for(std::size_t q = len; q < terminal_width - element.type.size(); q++) {
+                string += " ";
+            }
+            string += element.type;
+        }
+        
+        output.emplace_back(string);
     }
 }
 
