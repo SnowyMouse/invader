@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.42.0]
 ### Added
 - New tool: invader-edit - Command-line tool for editing tags (primarily made
   for scripting)
