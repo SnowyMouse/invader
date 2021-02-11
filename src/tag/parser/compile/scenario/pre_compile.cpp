@@ -326,7 +326,7 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (null) is unused", i); \
                     } \
                     else { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_class_to_extension(palette.tag_fourcc)); \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_fourcc_to_extension(palette.tag_fourcc)); \
                     } \
                 } \
                 else if(is_null) { \
@@ -620,7 +620,7 @@ namespace Invader::Parser {
                     // If this isn't even a scenario tag... what
                     if(first_scenario.tag_fourcc != TagClassInt::TAG_CLASS_SCENARIO) {
                         // This should fail even if we aren't checking for errors because this is invalid
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_fourcc));
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
                         throw InvalidTagDataException();
                     }
                     
@@ -629,7 +629,7 @@ namespace Invader::Parser {
                         // This should fail even if we aren't checking for errors because this is invalid
                         if(m == first_scenario.path) {
                             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Duplicate or cyclical child scenario references are present", tag_index);
-                            eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_fourcc));
+                            eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
                             throw InvalidTagDataException();
                         }
                     }
@@ -639,7 +639,7 @@ namespace Invader::Parser {
                     
                     // Find it
                     char file_path_cstr[1024];
-                    std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_fourcc));
+                    std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
                     auto file_path = File::tag_path_to_file_path(file_path_cstr, workload.get_build_parameters()->tags_directories);
                     if(!file_path.has_value() || !std::filesystem::exists(*file_path)) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Child scenario %s not found", file_path_cstr);
@@ -657,14 +657,14 @@ namespace Invader::Parser {
                     try {
                         auto child = Scenario::parse_hek_tag_file(data->data(), data->size());
                         data.reset(); // clear it
-                        merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + HEK::tag_class_to_extension(first_scenario.tag_fourcc)).c_str());
+                        merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc)).c_str());
                     }
                     catch(std::exception &) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to merge %s%s into %s.%s",
                                             File::halo_path_to_preferred_path(first_scenario.path).c_str(),
-                                            HEK::tag_class_to_extension(first_scenario.tag_fourcc),
+                                            HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc),
                                             workload.tags[tag_index].path.c_str(),
-                                            HEK::tag_class_to_extension(workload.tags[tag_index].tag_fourcc)
+                                            HEK::tag_fourcc_to_extension(workload.tags[tag_index].tag_fourcc)
                                            );
                         throw;
                     }

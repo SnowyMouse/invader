@@ -77,7 +77,7 @@ namespace Invader::EditQt {
             this->parser_data = Parser::ParserStruct::generate_base_struct(tag_file.tag_fourcc).release();
             if(!this->parser_data) {
                 char formatted_error[1024];
-                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_class_to_extension(tag_file.tag_fourcc));
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_fourcc_to_extension(tag_file.tag_fourcc));
                 QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
@@ -236,7 +236,7 @@ namespace Invader::EditQt {
         if(dirty) {
             char message_entire_text[512];
             if(this->file.tag_path.size() == 0) {
-                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_class_to_extension(this->file.tag_fourcc));
+                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_fourcc_to_extension(this->file.tag_fourcc));
             }
             else {
                 std::snprintf(message_entire_text, sizeof(message_entire_text), "This file \"%s\" has been modified.\nDo you want to save your changes?", this->file.full_path.string().c_str());
@@ -327,7 +327,7 @@ namespace Invader::EditQt {
 
         char title_bar[512];
         if(this->file.tag_path.size() == 0) {
-            std::snprintf(title_bar, sizeof(title_bar), "Untitled %s", HEK::tag_class_to_extension(this->file.tag_fourcc));
+            std::snprintf(title_bar, sizeof(title_bar), "Untitled %s", HEK::tag_fourcc_to_extension(this->file.tag_fourcc));
         }
         else {
             const char *asterisk = dirty ? " *" : "";

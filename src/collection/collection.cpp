@@ -80,7 +80,7 @@ int main(int argc, char * const *argv) {
     std::filesystem::path data_path(collection_options.data);
 
     auto input_path = (data_path / string_tag).string() + INDEX_EXTENSION;
-    auto output_path = (tags_path / string_tag).string() + "." + Invader::HEK::tag_class_to_extension(Invader::TagClassInt::TAG_CLASS_TAG_COLLECTION);
+    auto output_path = (tags_path / string_tag).string() + "." + Invader::HEK::tag_fourcc_to_extension(Invader::TagClassInt::TAG_CLASS_TAG_COLLECTION);
 
     // Open a file
     std::ifstream input_file = std::ifstream(input_path);

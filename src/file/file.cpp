@@ -233,12 +233,12 @@ namespace Invader::File {
             return std::nullopt;
         }
 
-        auto tag_class = HEK::extension_to_tag_class(extension);
+        auto tag_class = HEK::tag_extension_to_fourcc(extension);
         if(tag_class == TagClassInt::TAG_CLASS_NONE || tag_class == TagClassInt::TAG_CLASS_NULL) {
             return std::nullopt;
         }
         else {
-            return TagFilePath { std::string(tag_path, (extension - 1) - tag_path), HEK::extension_to_tag_class(extension) };
+            return TagFilePath { std::string(tag_path, (extension - 1) - tag_path), HEK::tag_extension_to_fourcc(extension) };
         }
     }
 
@@ -284,7 +284,7 @@ namespace Invader::File {
                     }
                     else {
                         auto extension = file_path.extension().string();
-                        auto tag_fourcc = HEK::extension_to_tag_class(extension.c_str() + 1);
+                        auto tag_fourcc = HEK::tag_extension_to_fourcc(extension.c_str() + 1);
 
                         // First, make sure it's valid
                         if(tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL || tag_fourcc == HEK::TagClassInt::TAG_CLASS_NONE) {
@@ -330,7 +330,7 @@ namespace Invader::File {
                 }
                 else if(file_path.has_extension() && std::filesystem::is_regular_file(file_path)) {
                     auto extension = file_path.extension().string();
-                    auto tag_fourcc = HEK::extension_to_tag_class(extension.c_str() + 1);
+                    auto tag_fourcc = HEK::tag_extension_to_fourcc(extension.c_str() + 1);
 
                     // First, make sure it's valid
                     if(tag_fourcc == HEK::TagClassInt::TAG_CLASS_NULL || tag_fourcc == HEK::TagClassInt::TAG_CLASS_NONE) {

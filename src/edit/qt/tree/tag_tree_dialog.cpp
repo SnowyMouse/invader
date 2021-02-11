@@ -138,7 +138,7 @@ namespace Invader::EditQt {
 
     void TagTreeDialog::change_title(HEK::TagClassInt save_class) {
         char title_text[512];
-        std::snprintf(title_text, sizeof(title_text), "Select a location to save the %s tag", HEK::tag_class_to_extension(save_class));
+        std::snprintf(title_text, sizeof(title_text), "Select a location to save the %s tag", HEK::tag_fourcc_to_extension(save_class));
         this->setWindowTitle(title_text);
     }
 
@@ -229,7 +229,7 @@ namespace Invader::EditQt {
 
         // Generate the thing
         char extension[256];
-        std::snprintf(extension, sizeof(extension), ".%s", HEK::tag_class_to_extension(*this->save_class));
+        std::snprintf(extension, sizeof(extension), ".%s", HEK::tag_fourcc_to_extension(*this->save_class));
         if(!potential_halo_path.endsWith(extension)) {
             potential_halo_path_std_str = potential_halo_path_std_str + extension;
         }
@@ -254,7 +254,7 @@ namespace Invader::EditQt {
             std::size_t pos = std::snprintf(title_text, sizeof(title_text), "Select a");
             std::size_t i = 0;
             while(pos < sizeof(title_text) && i < class_count) {
-                pos += std::snprintf(title_text + pos, sizeof(title_text) - pos, " %s", HEK::tag_class_to_extension(classes_v[i]));
+                pos += std::snprintf(title_text + pos, sizeof(title_text) - pos, " %s", HEK::tag_fourcc_to_extension(classes_v[i]));
 
                 if(pos + 3 < sizeof(title_text) && i + 2 <= class_count && class_count > 2) {
                     pos += std::snprintf(title_text + pos, sizeof(title_text) - pos, ",");

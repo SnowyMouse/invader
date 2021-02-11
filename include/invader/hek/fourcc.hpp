@@ -129,7 +129,7 @@ namespace Invader::HEK {
      * @param  tag_class This is the tag class being looked up.
      * @return           This is a C string containing the extension.
      */
-     constexpr const char *tag_class_to_extension(TagClassInt tag_class) noexcept {
+     constexpr const char *tag_fourcc_to_extension(TagClassInt tag_class) noexcept {
          switch(tag_class) {
          case TagClassInt::TAG_CLASS_ACTOR:
              return "actor";
@@ -326,7 +326,7 @@ namespace Invader::HEK {
      * @param  extension This is the extension being looked up.
      * @return           This is the equivalent tag class int of the extesion or TagClass::TAG_CLASS_NULL if failed.
      */
-    TagClassInt extension_to_tag_class(const char *extension) noexcept;
+    TagClassInt tag_extension_to_fourcc(const char *extension) noexcept;
 }
 
 namespace Invader {

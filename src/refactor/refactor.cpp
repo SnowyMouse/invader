@@ -92,7 +92,7 @@ int main(int argc, char * const *argv) {
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
         auto get_class = [](auto *argument) -> Invader::HEK::TagClassInt {
-            auto tag_class = Invader::HEK::extension_to_tag_class(argument);
+            auto tag_class = Invader::HEK::tag_extension_to_fourcc(argument);
             if(!tag_class) {
                 eprintf_error("Error: %s is not a valid tag class", argument);
                 std::exit(EXIT_FAILURE);
@@ -196,13 +196,13 @@ int main(int argc, char * const *argv) {
         for(auto &i : refactor_options.replacements) {
             bool nonexistant = true;
             for(auto &t : refactor_options.tags) {
-                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + Invader::HEK::tag_class_to_extension(i.second.fourcc)))) {
+                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + Invader::HEK::tag_fourcc_to_extension(i.second.fourcc)))) {
                     nonexistant = false;
                     break;
                 }
             }
             if(nonexistant) {
-                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), Invader::HEK::tag_class_to_extension(i.first.fourcc), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), Invader::HEK::tag_class_to_extension(i.second.fourcc));
+                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), Invader::HEK::tag_fourcc_to_extension(i.first.fourcc), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), Invader::HEK::tag_fourcc_to_extension(i.second.fourcc));
                 failed = true;
             }
         }
@@ -260,7 +260,7 @@ int main(int argc, char * const *argv) {
 
         // Get the path together
         tag.tag_fourcc = single_tag_maybe->fourcc;
-        tag.tag_path = single_tag_maybe->path + "." + tag_class_to_extension(single_tag_maybe->fourcc);
+        tag.tag_path = single_tag_maybe->path + "." + tag_fourcc_to_extension(single_tag_maybe->fourcc);
 
         // Find it
         auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags);
@@ -349,7 +349,7 @@ int main(int argc, char * const *argv) {
                 auto *file = replacements_files[i];
                 auto &replacement = replacements[i];
 
-                auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.fourcc));
+                auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_fourcc_to_extension(replacement.second.fourcc));
 
                 // Create directories. If this fails, it probably matters, but it's not critical in and of itself
                 std::error_code ec;

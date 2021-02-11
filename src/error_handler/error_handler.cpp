@@ -141,7 +141,7 @@ namespace Invader {
                 std::terminate();
             }
             auto &tag = this->tag_paths[index];
-            eprintf("...in %s.%s\n", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.fourcc));
+            eprintf("...in %s.%s\n", File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.fourcc));
         }
     }
     

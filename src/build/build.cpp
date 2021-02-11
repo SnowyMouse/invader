@@ -269,7 +269,7 @@ int main(int argc, const char **argv) {
                     c = std::tolower(c);
                 }
 
-                with_index->emplace_back(substr_v.data(), extension_to_tag_class(extension));
+                with_index->emplace_back(substr_v.data(), tag_extension_to_fourcc(extension));
             }
         }
 

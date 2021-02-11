@@ -692,7 +692,7 @@ namespace Invader {
         
         // Make sure the header's CRC32 matches the calculated CRC32
         if(expected_crc != header->crc32) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_fourcc.value()));
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_fourcc_to_extension(tag_fourcc.value()));
         }
         
         // Calculate checksums. This is to prevent collisions when bitmap/sound data is modified but nothing else, since this data isn't directly factored into the map checksum.
@@ -794,7 +794,7 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_SHADER:
             case TagClassInt::TAG_CLASS_ITEM:
             case TagClassInt::TAG_CLASS_DEVICE:
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_class_to_extension(*tag_fourcc));
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_fourcc_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
 
             // And, of course, BSP tags
@@ -849,7 +849,7 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
             case TagClassInt::TAG_CLASS_INVADER_SCENARIO:
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_class_to_extension(*tag_fourcc));
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_fourcc_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
                 
             // And this, of course, we don't know
@@ -885,7 +885,7 @@ namespace Invader {
         char formatted_path[512];
         std::optional<std::filesystem::path> new_path;
         if(tag_fourcc != TagClassInt::TAG_CLASS_OBJECT) {
-            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_fourcc));
+            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
             Invader::File::halo_path_to_preferred_path_chars(formatted_path);
             
             // Only set the new path if it exists
@@ -895,7 +895,7 @@ namespace Invader {
         }
         else {
             #define TRY_THIS(new_int) if(!new_path.has_value()) { \
-                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(new_int)); \
+                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(new_int)); \
                 Invader::File::halo_path_to_preferred_path_chars(formatted_path); \
                 new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories); \
                 if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) { /* only set the new path if it exists */ \
@@ -917,7 +917,7 @@ namespace Invader {
             #undef TRY_THIS
             if(!new_path.has_value()) {
                 tag_fourcc = TagClassInt::TAG_CLASS_OBJECT;
-                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_fourcc));
+                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
             }
             else {
                 // Look for it again
@@ -1110,7 +1110,7 @@ namespace Invader {
             if(tag.stubbed) {
                 // Object tags and damage effects are referenced directly over the netcode
                 if(*this->cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_fourcc) || tag.tag_fourcc == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
-                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_fourcc));
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.tag_fourcc));
                     warned++;
                 }
 
@@ -1507,7 +1507,7 @@ namespace Invader {
 
                     if(!found) {
                         oprintf("\n");
-                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                     }
                 }
             }
@@ -1852,7 +1852,7 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in bitmaps.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in bitmaps.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
@@ -2009,7 +2009,7 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in sounds.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in sounds.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
@@ -2264,7 +2264,7 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in loc.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_fourcc));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in loc.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;

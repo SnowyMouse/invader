@@ -356,7 +356,7 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 return value.read_string();
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
-                return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_class_to_extension(value.get_dependency().tag_fourcc);
+                return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_fourcc_to_extension(value.get_dependency().tag_fourcc);
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
                 return value.read_enum();
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
@@ -810,7 +810,7 @@ int main(int argc, char * const *argv) {
         }
         
         if(!can_save) {
-            eprintf_error("Cannot save: %s does not have the correct .%s extension", file_path.string().c_str(), Invader::HEK::tag_class_to_extension(tag_class));
+            eprintf_error("Cannot save: %s does not have the correct .%s extension", file_path.string().c_str(), Invader::HEK::tag_fourcc_to_extension(tag_class));
             return EXIT_FAILURE;
         }
         

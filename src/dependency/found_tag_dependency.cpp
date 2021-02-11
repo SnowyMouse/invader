@@ -36,7 +36,7 @@ namespace Invader {
                 // See if we can open the tag
                 bool found = false;
                 for(auto &tags_directory : tags) {
-                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_class_to_extension(tag_int_to_find));
+                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_fourcc_to_extension(tag_int_to_find));
                     auto tag_data = File::open_file(tag_path);
                     if(!tag_data.has_value()) {
                         eprintf_error("Failed to read tag %s", tag_path.string().c_str());
@@ -59,7 +59,7 @@ namespace Invader {
                             }
 
                             auto class_to_use = dependency.fourcc;
-                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
+                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_fourcc_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
@@ -89,7 +89,7 @@ namespace Invader {
                 }
 
                 if(!found) {
-                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.c_str(), tag_class_to_extension(tag_int_to_find));
+                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.c_str(), tag_fourcc_to_extension(tag_int_to_find));
                     success = false;
                     return;
                 }
@@ -111,7 +111,7 @@ namespace Invader {
                         }
                         else if(file.is_regular_file()) {
                             std::string dir_tag_path = current_path + file.path().filename().stem().string();
-                            auto fourcc = Invader::HEK::extension_to_tag_class(file.path().extension().string().c_str() + 1);
+                            auto fourcc = Invader::HEK::tag_extension_to_fourcc(file.path().extension().string().c_str() + 1);
 
                             // Skip some obvious stuff as well as null tag class ints
                             if(

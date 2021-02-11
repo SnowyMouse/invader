@@ -298,14 +298,14 @@ namespace Invader::Info {
         auto tag_count = map.get_tag_count();
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map.get_tag(i);
-            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_fourcc()));
+            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));
         }
     }
     
     static void print_all_indices(const Invader::Map &map, const std::vector<std::size_t> &indices) {
         for(auto i : indices) {
             auto &tag = map.get_tag(i);
-            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_fourcc()));
+            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));
         }
     }
     

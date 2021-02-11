@@ -116,7 +116,7 @@ namespace Invader::HEK {
         if(expected_tag_class.has_value()) {
             auto expected_tag_class_value = *expected_tag_class;
             if(expected_tag_class_value != tag_class) {
-                eprintf_error("Unexpected tag class in header (%s expected, %s gotten)", tag_class_to_extension(expected_tag_class_value), tag_class_to_extension(tag_class));
+                eprintf_error("Unexpected tag class in header (%s expected, %s gotten)", tag_fourcc_to_extension(expected_tag_class_value), tag_fourcc_to_extension(tag_class));
                 throw InvalidTagDataHeaderException();
             }
         }

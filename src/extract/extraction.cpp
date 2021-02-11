@@ -66,7 +66,7 @@ namespace Invader {
 
             // See if we can extract this
             auto tag_fourcc = tag.get_tag_fourcc();
-            const char *tag_extension = Invader::HEK::tag_class_to_extension(tag_fourcc);
+            const char *tag_extension = Invader::HEK::tag_fourcc_to_extension(tag_fourcc);
             if(!tag.data_is_available()) {
                 return false;
             }
@@ -232,7 +232,7 @@ namespace Invader {
                 }
 
                 const auto &tag = map->get_tag(t);
-                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_fourcc());
+                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_fourcc_to_extension(tag.get_tag_fourcc());
 
                 for(auto &query : queries) {
                     if(File::path_matches(full_tag_path.c_str(), query.c_str())) {
@@ -259,11 +259,11 @@ namespace Invader {
             }
             const auto &tag_map = map->get_tag(tag);
             if(extract_tag(tag)) {
-                oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_fourcc()));
+                oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
                 extracted++;
             }
             else {
-                eprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_fourcc()));
+                eprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
             }
         }
         
@@ -416,7 +416,7 @@ namespace Invader {
                 break;
         }
 
-        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, tag_index, "Tag class %s is unsupported", tag_class_to_extension(tag_fourcc));
+        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, tag_index, "Tag class %s is unsupported", tag_fourcc_to_extension(tag_fourcc));
         return std::nullopt;
     }
 }

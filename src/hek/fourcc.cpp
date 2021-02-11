@@ -12,7 +12,7 @@ namespace Invader::HEK {
      * @param  extension string name of the tag class
      * @return           respective tag class integer or TAG_CLASS_NULL if nullptr was given or the extension was not valid
      */
-    TagClassInt extension_to_tag_class(const char *extension) noexcept {
+    TagClassInt tag_extension_to_fourcc(const char *extension) noexcept {
         if(extension == nullptr) {
             return TagClassInt::TAG_CLASS_NULL;
         }

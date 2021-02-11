@@ -455,13 +455,13 @@ namespace Invader {
                     
                     // Do we even have an index?
                     if(!tag.resource_index.has_value()) {
-                        eprintf_error("Tag %s.%s could not be found in the resource map file", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_fourcc));
+                        eprintf_error("Tag %s.%s could not be found in the resource map file", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.tag_fourcc));
                         throw OutOfBoundsException();
                     }
 
                     // Make sure it's valid
                     if(*tag.resource_index >= count) {
-                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_fourcc), *tag.resource_index, static_cast<std::size_t>(count));
+                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.tag_fourcc), *tag.resource_index, static_cast<std::size_t>(count));
                         throw OutOfBoundsException();
                     }
 
@@ -561,7 +561,7 @@ namespace Invader {
             }
 
             // If the extension is invalid, return true
-            if(tag_class == TagClassInt::TAG_CLASS_NULL || tag_class == TagClassInt::TAG_CLASS_NONE || extension_to_tag_class(tag_class_to_extension(tag_class)) != tag_class) {
+            if(tag_class == TagClassInt::TAG_CLASS_NULL || tag_class == TagClassInt::TAG_CLASS_NONE || tag_extension_to_fourcc(tag_fourcc_to_extension(tag_class)) != tag_class) {
                 return true;
             }
 

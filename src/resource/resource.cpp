@@ -273,14 +273,14 @@ int main(int argc, const char **argv) {
                         
                     // Okay, we didn't find anything
                     default:
-                        eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_class_to_extension(listed_tag.fourcc));
+                        eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_fourcc_to_extension(listed_tag.fourcc));
                         return EXIT_FAILURE;
                 }
                 break;
         }
 
         if(tag_fourcc != listed_tag.fourcc) {
-            eprintf_error("Expected %s. Got %s instead.", tag_class_to_extension(tag_fourcc), tag_class_to_extension(listed_tag.fourcc));
+            eprintf_error("Expected %s. Got %s instead.", tag_fourcc_to_extension(tag_fourcc), tag_fourcc_to_extension(listed_tag.fourcc));
         }
 
         for(auto &tags_folder : resource_options.tags) {
@@ -464,7 +464,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.c_str(), tag_class_to_extension(tag_fourcc), e.what());
+            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.c_str(), tag_fourcc_to_extension(tag_fourcc), e.what());
             return EXIT_FAILURE;
         }
 

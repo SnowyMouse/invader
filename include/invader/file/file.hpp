@@ -77,7 +77,7 @@ namespace Invader::File {
         
         /** Join the path and class into one path */
         std::string join() const {
-            return path + "." + HEK::tag_class_to_extension(fourcc);
+            return path + "." + HEK::tag_fourcc_to_extension(fourcc);
         }
         
         TagFilePath() = default;

@@ -699,7 +699,7 @@ namespace Invader::Parser {
                 break;
         }
 
-        eprintf_error("Unknown tag class %s", tag_class_to_extension(header->tag_fourcc));
+        eprintf_error("Unknown tag class %s", tag_fourcc_to_extension(header->tag_fourcc));
         throw InvalidTagDataException();
 
         #undef DO_TAG_CLASS
