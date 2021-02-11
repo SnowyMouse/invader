@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-edit: Changed --list to instead show the entire structure in a TREE /F
   style. Note that this requires the terminal to support UTF-8.
+- invader-edit: Angles are now automatically converted to and from degrees.
 
 ## [0.42.2] - 2021-02-10
 ### Fixed

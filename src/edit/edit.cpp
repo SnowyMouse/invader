@@ -270,8 +270,9 @@ static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invade
 
 static std::string get_value(const Invader::Parser::ParserStructValue &value, const std::string &bitmask) {
     auto format = value.get_number_format();
+    auto type = value.get_type();
     if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
-        switch(value.get_type()) {
+        switch(type) {
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 return value.read_string();
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
@@ -281,7 +282,7 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
                 return std::to_string(value.read_bitfield(bitmask.c_str()) ? 1 : 0);
             default:
-                eprintf_error("Unsupported value type");
+                eprintf_error("Unsupported value type for this operation");
                 std::exit(EXIT_FAILURE);
         }
     }
@@ -304,7 +305,13 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
                     if(str.size() > 0) {
                         str += " ";
                     }
-                    str += std::to_string(std::get<double>(i));
+                    
+                    double multiplier = 1.0;
+                    if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D ||type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
+                        multiplier = 180.0 / HALO_PI;
+                    }
+                    
+                    str += std::to_string(std::get<double>(i) * multiplier);
                 }
                 break;
             default:
@@ -317,10 +324,11 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
 
 static void set_value(Invader::Parser::ParserStructValue &value, const std::string &new_value, const std::optional<std::string> bitfield = std::nullopt) {
     auto format = value.get_number_format();
+    auto type = value.get_type();
     
     // Something special?
     if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
-        switch(value.get_type()) {
+        switch(type) {
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 if(new_value.size() > 31) {
                     eprintf_error("String exceeds maximum length (%zu > 31)", new_value.size());
@@ -385,9 +393,14 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                 case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
                     values.emplace_back(std::strtol(current_path, &c, 10));
                     break;
-                case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
-                    values.emplace_back(std::strtod(current_path, &c));
+                case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
+                    double multiplier = 1.0;
+                    if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D ||type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
+                        multiplier = HALO_PI / 180.0;
+                    }
+                    values.emplace_back(std::strtod(current_path, &c) * multiplier);
                     break;
+                }
                 default: std::terminate();
             }
             start = c;
