@@ -13,6 +13,9 @@ This is used for recording Invader's changes. This changelog is based on
   used by --list-values
 - invader-edit: Angles are now automatically converted to and from degrees.
 
+### Fixed
+- invader-build: Fixed not defaulting pathfinding spheres for vehicles
+
 ## [0.42.2] - 2021-02-10
 ### Fixed
 - invader-edit: Fixed --list not working with arrays

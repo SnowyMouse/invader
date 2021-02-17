@@ -489,6 +489,7 @@ namespace Invader::Parser {
         }
 
         calculate_object_predicted_resources(workload, struct_index);
+        set_pathfinding_spheres(workload, struct_index);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         // Make sure zoom levels aren't too high for the HUD interface
