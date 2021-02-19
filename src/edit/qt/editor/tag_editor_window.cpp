@@ -391,8 +391,12 @@ namespace Invader::EditQt {
                 default:
                     std::terminate();
             }
+            this->subwindow->show();
         }
-        this->subwindow->show();
-        this->subwindow->setWindowState(Qt::WindowState::WindowActive);
+        
+        this->subwindow->setFocus();
+        this->subwindow->setWindowState((this->subwindow->windowState() | Qt::WindowState::WindowActive) & ~Qt::WindowMinimized);
+        this->subwindow->raise();
+        this->subwindow->activateWindow();
     }
 }

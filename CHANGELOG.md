@@ -15,6 +15,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-build: Fixed not defaulting pathfinding spheres for vehicles
+- invader-edit-qt: Fixed tag subwindows (e.g. Preview bitmap") not being brought
+  to front if they were already open
 
 ## [0.42.2] - 2021-02-10
 ### Fixed
