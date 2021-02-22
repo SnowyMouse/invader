@@ -102,7 +102,7 @@ namespace Invader {
                     RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY,
                     
                     /** (Custom Edition only) Always assume resource files' assets match */
-                    RAW_DATA_HANDLING_ALWAYS_INDEX
+                    RAW_DATA_HANDLING_ALWAYS_INDEX,
                 };
                 
                 /**
@@ -149,6 +149,11 @@ namespace Invader {
                  * How to handle raw data handling
                  */
                 RawDataHandling build_raw_data_handling;
+                
+                /**
+                 * Make sure indexed tags do not go over the stock resource limit indices while also checking paths
+                 */
+                bool build_check_custom_edition_resource_map_bounds = false;
                 
                 /**
                  * Version to use. This generally only impacts Xbox maps as it's unread in all of the official PC releases.

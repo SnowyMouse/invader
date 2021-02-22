@@ -73,6 +73,7 @@ int main(int argc, const char **argv) {
         bool mcc = false;
         bool increased_file_size_limits = false;
         std::optional<std::string> build_version;
+        bool check_custom_edition_resource_bounds = false;
         
         std::optional<XboxVariation> variation;
     } build_options;
@@ -96,7 +97,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
     options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
-    options.emplace_back("build-version", 'b', 1, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
+    options.emplace_back("build-version", 'B', 1, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
+    options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
 
     static constexpr char DESCRIPTION[] = "Build a cache file for a version of Halo: Combat Evolved.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
@@ -124,8 +126,11 @@ int main(int argc, const char **argv) {
             case 'm':
                 build_options.maps = std::string(arguments[0]);
                 break;
-            case 'b':
+            case 'B':
                 build_options.build_version = std::string(arguments[0]);
+                break;
+            case 'b':
+                build_options.check_custom_edition_resource_bounds = true;
                 break;
             case 'E':
                 build_options.increased_file_size_limits = true;
@@ -325,6 +330,8 @@ int main(int argc, const char **argv) {
             
             build_options.increased_file_size_limits = true;
         }
+        
+        parameters.details.build_check_custom_edition_resource_map_bounds = build_options.check_custom_edition_resource_bounds;
         
         if(build_options.increased_file_size_limits) {
             if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {

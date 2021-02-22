@@ -4,9 +4,13 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader-build: Added --stock-resource-bounds which, when building Custom
+  Edition maps, only indexes a tag if the tag's index in the resource mapis the
+  same on the equivalent stock resource map
 - invader-edit: Added --list-values
 
 ### Changed
+- invader-build: Changed --build-version's shorthand letter to `-B`
 - invader-edit: Changed --list to instead show the entire structure in a TREE /F
   style. Note that this requires the terminal to support UTF-8.
 - invader-edit: Changed --list to use -l (lowercase L) instead of -L which is

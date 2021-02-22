@@ -279,7 +279,10 @@ Build a cache file for a version of Halo: Combat Evolved.
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
-  -b --build-version           Set the build version. This is used on the Xbox
+  -b --stock-resource-bounds   Only index tags if the tag's index is within
+                               stock Custom Edition's resource map bounds.
+                               (Custom Edition only)
+  -B --build-version           Set the build version. This is used on the Xbox
                                version of the game (by default it's
                                01.10.12.2276 on Xbox and the Invader version on
                                other engines)

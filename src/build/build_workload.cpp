@@ -14,6 +14,7 @@
 #include <invader/tag/parser/compile/bitmap.hpp>
 #include <invader/tag/parser/compile/sound.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
+#include <invader/resource/list/resource_list.hpp>
 #include "../crc/crc32.h"
 
 namespace Invader {
@@ -1648,6 +1649,8 @@ namespace Invader {
         auto &bitmaps = this->parameters->bitmap_data;
         auto &sounds = this->parameters->sound_data;
         auto &loc = this->parameters->loc_data;
+        
+        bool check_ce_bounds = this->parameters->details.build_check_custom_edition_resource_map_bounds;
 
         switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
@@ -1682,6 +1685,10 @@ namespace Invader {
                             if(index.has_value()) {
                                 if((*index % 2) == 0) {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
+                                    break;
+                                }
+                                
+                                if(check_ce_bounds && (*index / 2 > get_default_bitmap_resources_count() || File::split_tag_class_extension_chars(get_default_bitmap_resources()[*index / 2])->path != t.path)) {
                                     break;
                                 }
 
@@ -1864,6 +1871,10 @@ namespace Invader {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
                                     break;
                                 }
+                                
+                                if(check_ce_bounds && (*index / 2 > get_default_sound_resources_count() || File::split_tag_class_extension_chars(get_default_sound_resources()[*index / 2])->path != t.path)) {
+                                    break;
+                                }
 
                                 bool match = true;
                                 if(!always_index_tags) {
@@ -2020,6 +2031,10 @@ namespace Invader {
                             auto index = find_tag_index(t.path, loc, false);
                             if(index.has_value()) {
                                 bool match = true;
+                                
+                                if(check_ce_bounds && (*index > get_default_loc_resources_count() || (t.path + "." + HEK::tag_fourcc_to_extension(t.tag_fourcc)) != get_default_loc_resources()[*index])) {
+                                    break;
+                                }
 
                                 const auto &loc_tag_struct_other = (*loc)[*index];
                                 const auto *loc_tag_struct_other_data = loc_tag_struct_other.data.data();
