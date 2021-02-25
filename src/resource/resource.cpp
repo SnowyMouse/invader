@@ -220,7 +220,7 @@ int main(int argc, const char **argv) {
             concatenate_resource = load_resource_map(resource_data.data(), resource_data.size());
             
             if(reinterpret_cast<ResourceMapHeader *>(resource_data.data())->type != header.type) {
-                eprintf_error("Cannot concatenate against a different type of resource map than what is being made");
+                eprintf_error("Cannot concatenate against a different resource map type than what is being made");
                 return EXIT_FAILURE;
             }
             
