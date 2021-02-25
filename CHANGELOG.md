@@ -8,6 +8,8 @@ This is used for recording Invader's changes. This changelog is based on
   Edition maps, only indexes a tag if the tag's index in the resource mapis the
   same on the equivalent stock resource map
 - invader-edit: Added --list-values
+- invader-resource: Added --concatenate which can concatenate an existing
+  resource map's data
 
 ### Changed
 - invader-build: Changed --build-version's shorthand letter to `-B`
@@ -21,6 +23,11 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed not defaulting pathfinding spheres for vehicles
 - invader-edit-qt: Fixed tag subwindows (e.g. Preview bitmap") not being brought
   to front if they were already open
+- invader-resource: Fixed defaulting to bitmaps and made specifying the type
+  actually required.
+  
+### Removed
+- invader-resource: Removed --padding. Use --concatenate instead.
 
 ## [0.42.2] - 2021-02-10
 ### Fixed

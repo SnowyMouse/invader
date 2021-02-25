@@ -200,8 +200,7 @@ Create or modify a bitmap tag.
 
 Options:
   -B --budget <length>         Set max length of sprite sheet. Can be 32, 64,
-                               128, 256, or 512. If --extended, then 1024 or
-                               2048 can be used, too. Default (new tag): 32
+                               128, 256, or 512. Default (new tag): 32
   -C --budget-count <count>    Set maximum number of sprite sheets. Setting
                                this to 0 disables budgeting. Default (new tag):
                                0
@@ -225,15 +224,15 @@ Options:
   -R --regenerate              Use the bitmap tag's compressed color plate data
                                as data.
   -s --mipmap-scale <type>     Mipmap scale type. This does not save in .bitmap
-                               tags. Can be: linear, nearest-alpha, nearest.
+                               tags. Can be: linear, nearest_alpha, nearest.
                                Default (new tag): linear
   -t --tags <dir>              Use the specified tags directory.
-  -T --type <type>             Set the type of bitmap. Can be: 2d-textures,
-                               3d-textures, cube-maps, interface-bitmaps, or
+  -T --type <type>             Set the type of bitmap. Can be: 2d_textures,
+                               3d_textures, cube_maps, interface_bitmaps, or
                                sprites. Default (new tag): 2d
-  -u --usage <usage>           Set the bitmap usage. Can be: alpha-blend,
-                               default, height-map, detail-map, light-map,
-                               vector-map. Default: default
+  -u --usage <usage>           Set the bitmap usage. Can be: alpha_blend,
+                               default, height_map, detail_map, light_map,
+                               vector_map. Default: default
 ```
 
 Refer to [Creating a bitmap] for information on how to create bitmap tags.
@@ -671,9 +670,11 @@ Usage: invader-resource [options] -T <type>
 Create resource maps.
 
 Options:
+  -c --concatenate <file>      Concatenate against the resource map at a path.
   -g --game-engine <id>        Specify the game engine. This option is
-                               required. Valid engines are: custom, demo,
-                               retail
+                               required. Demo and retail maps also require
+                               either -w or -M to be specified at least once.
+                               Valid engines are: custom, demo, retail
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Set the maps directory.
@@ -681,7 +682,6 @@ Options:
                                specified multiple times.
   -n --no-prefix               Don't use the "custom_" prefix when building a
                                Custom Edition resource map.
-  -p --padding <bytes>         Add an extra number of bytes after the header
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
@@ -689,8 +689,7 @@ Options:
                                Can be: bitmaps, sounds, or loc.
   -w --with-index <file>       Use an index file for the tags, ensuring tags
                                are ordered in the same way (barring
-                               duplicates). This can be specified multiple
-                               times.
+                               duplicates).
 ```
 
 
