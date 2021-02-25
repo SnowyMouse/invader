@@ -28,7 +28,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>");
     options.emplace_back("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>");
     options.emplace_back("no-prefix", 'n', 0, "Don't use the \"custom_\" prefix when building a Custom Edition resource map.");
-    options.emplace_back("concatenate", 'c', 1, "Concatenate against the resource map at a path.", "<file>");
+    options.emplace_back("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
     static constexpr char USAGE[] = "[options] -T <type>";
@@ -218,6 +218,16 @@ int main(int argc, const char **argv) {
         try {
             resource_data = File::open_file(*resource_options.concatenate_against).value();
             concatenate_resource = load_resource_map(resource_data.data(), resource_data.size());
+            
+            if(reinterpret_cast<ResourceMapHeader *>(resource_data.data())->type != header.type) {
+                eprintf_error("Cannot concatenate against a different type of resource map than what is being made");
+                return EXIT_FAILURE;
+            }
+            
+            if(*resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
+                eprintf_error("Cannot concatenate against a loc resource map");
+                return EXIT_FAILURE;
+            }
         }
         catch (std::exception &) {
             eprintf_error("Failed to load %s", resource_options.concatenate_against->string().c_str());
