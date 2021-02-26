@@ -347,7 +347,7 @@ loud or too quiet when played on their respective versions.
 
 Invader will modify a few tags when building a stock multiplayer map:
 
-- `vehicles\ghost\ghost bolt.damage_effect`, 
+- `vehicles\ghost\ghost bolt.damage_effect`,
   `vehicles\banshee\banshee bolt.damage_effect`
     - Stun: 0.0 if Custom Edition, else 1.0
     - Maximum stun: 0.0 if Custom Edition, else 1.0
@@ -717,26 +717,26 @@ Options:
   -b --bitrate <br>            Set the bitrate in kilobits per second. This
                                only applies to vorbis.
   -c --class <class>           Set the class. This is required when generating
-                               new sounds. Can be: ambient-computers,
-                               ambient-machinery, ambient-nature,
-                               device-computers, device-door,
-                               device-force-field, device-machinery,
-                               device-nature, first-person-damage, game-event,
-                               music, object-impacts, particle-impacts,
-                               projectile-impact, projectile-detonation,
-                               scripted-dialog-force-unspatialized,
-                               scripted-dialog-other, scripted-dialog-player,
-                               scripted-effect, slow-particle-impacts,
-                               unit-dialog, unit-footsteps, vehicle-collision,
-                               vehicle-engine, weapon-charge, weapon-empty,
-                               weapon-fire, weapon-idle, weapon-overheat,
-                               weapon-ready, weapon-reload
+                               new sounds. Can be: ambient_computers,
+                               ambient_machinery, ambient_nature,
+                               device_computers, device_door,
+                               device_force_field, device_machinery,
+                               device_nature, first_person_damage, game_event,
+                               music, object_impacts, particle_impacts,
+                               projectile_impact, projectile_detonation,
+                               scripted_dialog_force_unspatialized,
+                               scripted_dialog_other, scripted_dialog_player,
+                               scripted_effect, slow_particle_impacts,
+                               unit_dialog, unit_footsteps, vehicle_collision,
+                               vehicle_engine, weapon_charge, weapon_empty,
+                               weapon_fire, weapon_idle, weapon_overheat,
+                               weapon_ready, weapon_reload
   -C --channel-count <#>       Set the channel count. Can be: mono, stereo. By
                                default, this is determined based on the input
                                audio.
   -d --data <dir>              Use the specified data directory.
-  -F --format <fmt>            Set the format. Can be: 16-bit-pcm, ogg-vorbis,
-                               or xbox-adpcm.
+  -F --format <fmt>            Set the format. Can be: 16-bit_pcm, ogg_vorbis,
+                               or xbox_adpcm.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -j --threads                 Set the number of threads to use for parallel
@@ -748,7 +748,7 @@ Options:
                                FLAC, higher levels result in better sizes but
                                longer compression time, clamping from 0.0 to
                                0.8 (FLAC 0 to FLAC 8). Default: 1.0
-  -P --fs-path                 Use a filesystem path for the data.
+  -P --fs-path                 Use a filesystem path for the data or tag.
   -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
                                and 44100. By default, this is determined based
                                on the input audio.

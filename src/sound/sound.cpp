@@ -139,7 +139,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         else {
             sound_options.format = invader_sound->encoding_format;
         }
-        
+
         // If we have compression level set, then the sound option shouldn't have this set
         if(sound_options.compression_level.has_value()) {
             invader_sound->invader_sound_flags &= ~InvaderSoundFlagsFlag::INVADER_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
@@ -219,7 +219,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
     }
     bool split = sound_tag.flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
-    
+
     // Check to see if we have either just directories (so multiple pitch ranges) or just files (one pitch range)
     bool contains_files = false;
     bool contains_directories = false;
@@ -231,7 +231,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             contains_files = true;
         }
     }
-    
+
     // Is it bullshit?
     if(contains_files && contains_directories) {
         eprintf_error("Data directory must have only directories or only files");
@@ -248,7 +248,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     oprintf("Loading sounds... ");
     oflush();
-    
+
     // Load the sounds
     if(contains_files) {
         auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), "default");
@@ -326,21 +326,21 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     oflush();
     std::size_t total_sound_count = 0;
     std::atomic<std::size_t> thread_count = 0;
-    
+
     // Wait until we have 0 threads working
     auto wait_until_threads_are_done = [&thread_count]() {
         while(thread_count > 0) {
             std::this_thread::sleep_for(std::chrono::microseconds(1000));
         }
     };
-    
+
     // Wait until we have room for more threads
     auto wait_until_threads_are_open = [&thread_count, &sound_options]() {
         while(thread_count >= sound_options.max_threads) {
             std::this_thread::sleep_for(std::chrono::microseconds(1000));
         }
     };
-    
+
     // Process things!
     for(auto &pitch_range : pitch_ranges) {
         for(auto &permutation : pitch_range.first) {
@@ -350,12 +350,12 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count, sound_tag.flags & SoundFlagsFlag::SOUND_FLAGS_FLAG_FIT_TO_ADPCM_BLOCKSIZE).detach();
         }
     }
-    
+
     // Wait until done
     wait_until_threads_are_done();
-    
+
     oprintf("done!\n");
-    
+
     // Remove pitch ranges that are present in the tag but not in what we found
     while(true) {
         bool should_continue = false;
@@ -363,7 +363,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         for(std::size_t p = 0; p < pitch_range_count; p++) {
             should_continue = true;
             auto &name = sound_tag.pitch_ranges[p].name;
-            
+
             // Check the pitch ranges we got
             for(auto &pi : pitch_ranges) {
                 if(pi.second == name.string) {
@@ -371,19 +371,19 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     break;
                 }
             }
-            
+
             // If we didn't find a match, erase it and continue
             if(should_continue) {
                 sound_tag.pitch_ranges.erase(sound_tag.pitch_ranges.begin() + p);
                 break;
             }
         }
-        
+
         if(!should_continue) {
             break;
         }
     }
-    
+
     // Index read pitch ranges to output pitch range
     std::size_t pitch_range_count = pitch_ranges.size();
     std::vector<std::size_t> pitch_range_index(pitch_range_count);
@@ -391,7 +391,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         auto &index = pitch_range_index[i];
         std::size_t old_pitch_range_count = sound_tag.pitch_ranges.size();
         auto &name = pitch_ranges[i].second;
-        
+
         index = NULL_INDEX;
         for(std::size_t p = 0; p < old_pitch_range_count; p++) {
             if(name == sound_tag.pitch_ranges[p].name.string) {
@@ -399,7 +399,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 break;
             }
         }
-        
+
         // If no pitch range was found, add one
         if(index == NULL_INDEX) {
             index = old_pitch_range_count;
@@ -453,7 +453,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         eprintf_error("Split dialogue is unsupported.");
         std::exit(EXIT_FAILURE);
     }
-    
+
     // Make sure we don't completely blow things up
     std::mutex encoding_mutex;
 
@@ -466,11 +466,11 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         pitch_range.actual_permutation_count = actual_permutation_count;
         pitch_range.permutations.resize(actual_permutation_count);
         encoding_mutex.unlock();
-        
+
         for(auto &p : pitch_range.permutations) {
             p.format = sound_tag.format;
         }
-        
+
         for(std::size_t i = 0; i < actual_permutation_count; i++) {
             // Get the permutation and set its name, too
             auto &permutation = permutations[i];
@@ -552,7 +552,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                             mouth_data[t] = static_cast<std::byte>(sample * UINT8_MAX);
                         }
                     }
-                    
+
                     return mouth_data;
                 };
 
@@ -572,7 +572,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     samples_float = {};
                     generate_mouth_data(pcm_8_bit);
                 }
-                
+
                 // Do the encoding thing
                 std::vector<std::byte> samples;
                 std::size_t buffer_size = 0;
@@ -626,7 +626,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         eprintf_error("Invalid format. What?");
                         std::terminate();
                 }
-                
+
                 // Set the default stuff
                 mutex->lock();
                 auto &p = sound_tag->pitch_ranges[pitch_range].permutations[pitch_range_permutation];
@@ -635,7 +635,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 p.buffer_size = buffer_size;
                 p.samples.shrink_to_fit();
                 mutex->unlock();
-                
+
                 // Finish up
                 (*thread_count)--;
             };
@@ -643,7 +643,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             // Split things we can't trivially split losslessly
             if(split && enable_threading_split_permutation_encoding) {
                 std::size_t max_split_size = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
-                
+
                 std::size_t digested = 0;
                 while(permutation.pcm.size() > 0) {
                     // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one as a copy
@@ -672,10 +672,10 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         }
                         p.next_permutation_index = static_cast<Index>(next_permutation);
                     }
-                    
+
                     // Wait until we have threads cleared up
                     wait_until_threads_are_open();
-                    
+
                     // Punch it
                     thread_count++;
                     std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(sample_data), &permutation, is_dialogue, format, &sound_options, &thread_count).detach();
@@ -684,7 +684,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             else {
                 // Wait until we have threads cleared up
                 wait_until_threads_are_open();
-                    
+
                 // Punch it
                 thread_count++;
                 auto &p = pitch_range.permutations[i];
@@ -699,14 +699,14 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             encoding_mutex.unlock();
         }
     }
-    
+
     // Wait until we have 0 threads left
     wait_until_threads_are_done();
-    
+
     // Next, if we can split losslessly, do it
     if(split && !enable_threading_split_permutation_encoding) {
         auto split_size = format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM ? XBOX_ADPCM_SPLIT_SIZE : SPLIT_BUFFER_SIZE;
-        
+
         for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
             auto &pitch_range = sound_tag.pitch_ranges[pr];
             for(std::size_t ap = 0; ap < pitch_range.actual_permutation_count; ap++) {
@@ -716,17 +716,17 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 auto permutation_template = *next_permutation;
                 permutation_template.next_permutation_index = NULL_INDEX;
                 std::size_t samples_offset = 0;
-                
+
                 while(true) {
                     auto subpermutation_size = std::min(split_size, samples.size() - samples_offset);
                     next_permutation->samples = std::vector<std::byte>(samples.data() + samples_offset, samples.data() + samples_offset + subpermutation_size);
                     samples_offset += subpermutation_size;
-                    
+
                     // If we've hit the end, we're done
                     if(samples_offset == samples.size()) {
                         break;
                     }
-                    
+
                     // Add the next permutation
                     next_permutation->next_permutation_index = pitch_range.permutations.size();
                     next_permutation = &pitch_range.permutations.emplace_back(permutation_template);
@@ -736,7 +736,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagFourCC::TAG_FOURCC_SOUND : TagFourCC::TAG_FOURCC_INVADER_SOUND, true);
-    
+
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, invader_sound == nullptr ? "" : " [--extended]");
 
     return sound_tag_data;
@@ -753,13 +753,13 @@ int main(int argc, const char **argv) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, or xbox-adpcm.", "<fmt>");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit_pcm, ogg_vorbis, or xbox_adpcm.", "<fmt>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data or tag.");
     options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
     options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
     options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
     options.emplace_back("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>");
-    options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
+    options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient_computers, ambient_machinery, ambient_nature, device_computers, device_door, device_force_field, device_machinery, device_nature, first_person_damage, game_event, music, object_impacts, particle_impacts, projectile_impact, projectile_detonation, scripted_dialog_force_unspatialized, scripted_dialog_other, scripted_dialog_player, scripted_effect, slow_particle_impacts, unit_dialog, unit_footsteps, vehicle_collision, vehicle_engine, weapon_charge, weapon_empty, weapon_fire, weapon_idle, weapon_overheat, weapon_ready, weapon_reload", "<class>");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: CPU thread count");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
@@ -863,7 +863,7 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
-    
+
     if(sound_options.bitrate.has_value() && sound_options.compression_level.has_value()) {
         eprintf_error("Bitrate and compression level are mutually exclusive.");
         return EXIT_FAILURE;
@@ -902,7 +902,7 @@ int main(int argc, const char **argv) {
     // Generate sound tag
     std::vector<std::byte> sound_tag_data;
     auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
-    
+
     try {
         sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
     }
@@ -1004,7 +1004,7 @@ static void process_permutation_thread(SoundReader::Sound *permutation, std::uin
     // Calculate some stuff
     std::size_t bytes_per_sample = permutation->bits_per_sample / 8;
     std::size_t sample_count = permutation->pcm.size() / bytes_per_sample;
-    
+
     // Mutex for errors
     static std::mutex error_mutex;
 
@@ -1088,13 +1088,13 @@ static void process_permutation_thread(SoundReader::Sound *permutation, std::uin
         sample_count = new_samples.size();
         permutation->pcm = SoundEncoder::convert_float_to_int(new_samples, permutation->bits_per_sample);
     }
-    
+
 
     // Add samples to fit block size via resampling
     auto adpcm_block_size = SoundEncoder::calculate_adpcm_pcm_block_size(highest_channel_count);
     auto trip_adpcm_block_size = adpcm_block_size * 123;
     auto quad_adpcm_block_size = adpcm_block_size * 124;
-    
+
     if(fit_adpcm_block_size && format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM && sample_count > quad_adpcm_block_size) {
         std::size_t delta = trip_adpcm_block_size + (adpcm_block_size - (sample_count % adpcm_block_size));
         if(delta > 0) {
@@ -1102,7 +1102,7 @@ static void process_permutation_thread(SoundReader::Sound *permutation, std::uin
             std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation->pcm, permutation->bits_per_sample);
             std::vector<float> new_samples(float_samples.size() * ratio);
             auto new_quad = static_cast<std::size_t>(quad_adpcm_block_size * ratio);
-            
+
             // Resample it
             SRC_DATA data = {};
             data.data_in = float_samples.data();
@@ -1116,17 +1116,17 @@ static void process_permutation_thread(SoundReader::Sound *permutation, std::uin
                 eprintf_error("Failed to resample: %s", src_strerror(res));
                 std::exit(EXIT_FAILURE);
             }
-            
+
             new_samples.resize(data.output_frames_gen * permutation->channel_count);
             auto new_int_samples = SoundEncoder::convert_float_to_int(new_samples, permutation->bits_per_sample);
-            
+
             permutation->pcm.erase(permutation->pcm.begin(), permutation->pcm.begin() + quad_adpcm_block_size * bytes_per_sample);
             permutation->pcm.insert(permutation->pcm.begin(), new_int_samples.begin(), new_int_samples.begin() + new_quad * bytes_per_sample);
-            
+
             sample_count -= quad_adpcm_block_size;
             sample_count += new_quad;
         }
     }
-    
+
     (*thread_count)--;
 }
