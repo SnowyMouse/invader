@@ -245,6 +245,12 @@ int main(int argc, const char **argv) {
             
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;
+            
+            if(!index_file.is_open()) {
+                eprintf_error("Failed to open index file %s", build_options.index.c_str());
+                return EXIT_FAILURE;
+            }
+            
             while(std::getline(index_file, tag)) {
                 // Check if empty
                 if(tag.size() == 0) {
