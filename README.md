@@ -842,7 +842,7 @@ do this. Fortunately, there is a command you can run that will actually fix the
 tags for you:
 
 ```
-invader-refactor -Nc model gbxmodel
+invader-refactor -M no-move -c model gbxmodel
 ```
 
 Lastly, invader-build checks the CRC32 checksums of each tag. This is done to
