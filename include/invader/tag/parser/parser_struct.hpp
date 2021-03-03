@@ -78,10 +78,10 @@ namespace Invader::File {
                                 DO_TAG_CLASS(ScenarioStructureBSP, TAG_FOURCC_SCENARIO_STRUCTURE_BSP) \
                                 DO_TAG_CLASS(Scenery, TAG_FOURCC_SCENERY) \
                                 DO_TAG_CLASS(Shader, TAG_FOURCC_SHADER) \
-                                DO_TAG_CLASS(ShaderTransparentChicago, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO) \
-                                DO_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED) \
                                 DO_TAG_CLASS(ShaderEnvironment, TAG_FOURCC_SHADER_ENVIRONMENT) \
                                 DO_TAG_CLASS(ShaderModel, TAG_FOURCC_SHADER_MODEL) \
+                                DO_TAG_CLASS(ShaderTransparentChicago, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO) \
+                                DO_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED) \
                                 DO_TAG_CLASS(ShaderTransparentGeneric, TAG_FOURCC_SHADER_TRANSPARENT_GENERIC) \
                                 DO_TAG_CLASS(ShaderTransparentGlass, TAG_FOURCC_SHADER_TRANSPARENT_GLASS) \
                                 DO_TAG_CLASS(ShaderTransparentMeter, TAG_FOURCC_SHADER_TRANSPARENT_METER) \

@@ -20,12 +20,18 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit: Angles are now automatically converted to and from degrees.
 
 ### Fixed
+- invader: Fixed alphabetical order for shader_transparent_chicago(_extended)
+  tags
 - invader-build: Fixed not defaulting pathfinding spheres for vehicles
 - invader-build: Fixed `-w` not erroring if the index file couldn't be opened
 - invader-edit-qt: Fixed tag subwindows (e.g. Preview bitmap") not being brought
   to front if they were already open
 - invader-resource: Fixed defaulting to bitmaps and made specifying the type
   actually required.
+
+### Removed
+- invader: Removed the spheroid definitions as well as support for extracting
+  and building maps with spheroid tags.
   
 ### Removed
 - invader-resource: Removed --padding. Use --concatenate instead.
