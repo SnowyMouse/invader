@@ -696,6 +696,7 @@ namespace Invader::Parser {
             case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
             case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
             case Invader::HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SPHEROID:
                 break;
         }
 
@@ -721,6 +722,7 @@ namespace Invader::Parser {
             case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
             case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
             case Invader::HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SPHEROID:
                 break;
         }
 

@@ -363,7 +363,6 @@ namespace Invader {
             EXTRACT_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED)
             EXTRACT_TAG_CLASS(ShaderTransparentChicago, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO)
             EXTRACT_TAG_CLASS(Scenario, TAG_FOURCC_SCENARIO)
-            EXTRACT_TAG_CLASS(Spheroid, TAG_FOURCC_SPHEROID)
             EXTRACT_TAG_CLASS(ShaderEnvironment, TAG_FOURCC_SHADER_ENVIRONMENT)
             EXTRACT_TAG_CLASS(ShaderTransparentGlass, TAG_FOURCC_SHADER_TRANSPARENT_GLASS)
             EXTRACT_TAG_CLASS(Shader, TAG_FOURCC_SHADER)
@@ -413,6 +412,7 @@ namespace Invader {
             case TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
             case TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
             case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+            case TagFourCC::TAG_FOURCC_SPHEROID:
                 break;
         }
 

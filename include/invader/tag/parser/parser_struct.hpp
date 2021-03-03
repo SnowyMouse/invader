@@ -92,7 +92,6 @@ namespace Invader::File {
                                 DO_TAG_CLASS(SoundScenery, TAG_FOURCC_SOUND_SCENERY) \
                                 DO_TAG_CLASS(SoundEnvironment, TAG_FOURCC_SOUND_ENVIRONMENT) \
                                 DO_TAG_CLASS(SoundLooping, TAG_FOURCC_SOUND_LOOPING) \
-                                DO_TAG_CLASS(Spheroid, TAG_FOURCC_SPHEROID) \
                                 DO_TAG_CLASS(StringList, TAG_FOURCC_STRING_LIST) \
                                 DO_TAG_CLASS(TagCollection, TAG_FOURCC_TAG_COLLECTION) \
                                 DO_TAG_CLASS(UnicodeStringList, TAG_FOURCC_UNICODE_STRING_LIST) \
