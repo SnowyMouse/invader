@@ -12,6 +12,8 @@ This is used for recording Invader's changes. This changelog is based on
   resource map's data
 
 ### Changed
+- invader: Now uses long distance matching for Zstandard. This slightly improves
+  compression ratio.
 - invader-build: Changed --build-version's shorthand letter to `-B`
 - invader-edit: Changed --list to instead show the entire structure in a TREE /F
   style. Note that this requires the terminal to support UTF-8.

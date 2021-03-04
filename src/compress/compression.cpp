@@ -201,7 +201,13 @@ namespace Invader::Compression {
             }
 
             // Immediately compress it
-            auto compressed_size = ZSTD_compress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE, compression_level);
+            auto *context = ZSTD_createCCtx();
+            ZSTD_CCtx_setParameter(context, ZSTD_cParameter::ZSTD_c_enableLongDistanceMatching, 1);
+            ZSTD_CCtx_setParameter(context, ZSTD_cParameter::ZSTD_c_compressionLevel, compression_level);
+            auto compressed_size = ZSTD_compress2(context, output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE);
+            ZSTD_freeCCtx(context);
+            
+            // Check if it's an error
             if(ZSTD_isError(compressed_size)) {
                 throw CompressionFailureException();
             }
