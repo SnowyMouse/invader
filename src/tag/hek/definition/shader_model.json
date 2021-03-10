@@ -9,8 +9,8 @@
             "self illumination mask",
             "change color mask inverse",
             "change color mask",
-            "auxiliary inverse",
-            "auxiliary"
+            "auxiliary mask inverse",
+            "auxiliary mask"
         ],
         "type": "enum"
     },
