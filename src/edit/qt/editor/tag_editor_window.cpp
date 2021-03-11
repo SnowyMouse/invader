@@ -394,6 +394,9 @@ namespace Invader::EditQt {
             this->subwindow->show();
         }
         
+        this->subwindow->setVisible(true);
+        
+        // Run all the memes to get this to the front
         this->subwindow->setFocus();
         this->subwindow->setWindowState((this->subwindow->windowState() | Qt::WindowState::WindowActive) & ~Qt::WindowMinimized);
         this->subwindow->raise();
