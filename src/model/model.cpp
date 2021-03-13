@@ -3,7 +3,6 @@
 #include <vector>
 #include <cstring>
 #include <regex>
-#include <map>
 
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
@@ -35,7 +34,7 @@ int main(int argc, const char **argv) {
 
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("legacy", 'L', 0, "Use legacy behavior (models directory; cannot use -P with a data directory).");
+    options.emplace_back("legacy", 'L', 0, "Use legacy behavior (use parent folder's filename for the tag name).");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path or data directory.");
     options.emplace_back("type", 'T', 1, "Specify the type of model. Can be: model, gbxmodel", "<type>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
@@ -88,45 +87,47 @@ int main(int argc, const char **argv) {
         auto model_tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], model_options.tags);
         if(model_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
             auto path = std::filesystem::path(*model_tag_maybe);
-            if(model_options.legacy) {
-                path = path / (path.parent_path().filename().string() + extension);
-            }
             if(path.extension() == extension) {
-                model_tag = path.replace_extension().string();
+                // Legacy - bump up a directory
+                if(model_options.legacy) {
+                    model_tag = path.parent_path();
+                }
+                
+                // Otherwise use this
+                else {
+                    model_tag = path.replace_extension().string();
+                }
             }
             else {
                 eprintf_error("Extension must be %s", remaining_arguments[0]);
+                return EXIT_FAILURE;
             }
         }
-        else if(model_options.legacy) {
+        else {
             auto model_folder_maybe = File::file_path_to_tag_path(remaining_arguments[0], model_options.data);
             if(model_folder_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
                 model_tag = *model_folder_maybe;
             }
             else {
                 eprintf_error("Failed to find a valid model %s in the data or tags directories.", remaining_arguments[0]);
-        return EXIT_FAILURE;
+                return EXIT_FAILURE;
             }
-        }
-        else {
-            eprintf_error("Failed to find a valid model %s in the tags directories.", remaining_arguments[0]);
-        return EXIT_FAILURE;
         }
     }
     else {
         model_tag = remaining_arguments[0];
-        if(model_options.legacy) {
-            auto tp = std::filesystem::path(model_tag);
-            model_tag = (tp / tp.parent_path().filename()).string();
-        }
+    }
+    
+    // Double the filename if legacy
+    auto data_dir = model_tag;
+    if(model_options.legacy) {
+        auto tp = std::filesystem::path(model_tag);
+        model_tag = (tp / tp.filename()).string();
     }
     
     // Let's do this
-    std::map<std::string, JMS> jms_files;
-    std::filesystem::path directory = model_options.data / model_tag;
-    if(model_options.legacy) {
-        directory = directory.parent_path() / "models";
-    }
+    JMSMap jms_files;
+    std::filesystem::path directory = model_options.data / data_dir / "models";
     
     // Does it exist?
     if(!std::filesystem::is_directory(directory)) {
@@ -165,5 +166,6 @@ int main(int argc, const char **argv) {
         eprintf_error("No .jms files found in %s", directory.c_str());
         return EXIT_FAILURE;
     }
+    
     
 }

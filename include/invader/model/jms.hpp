@@ -4,6 +4,7 @@
 #define INVADER__MODEL__JMS_HPP
 
 #include <vector>
+#include <map>
 
 #include "../hek/data_type.hpp"
 #include "../tag/parser/parser_struct.hpp"
@@ -78,6 +79,8 @@ namespace Invader {
         std::string string() const;
         static JMS from_string(const char *string, const char **end = nullptr);
     };
+    
+    using JMSMap = std::map<std::string, JMS>;
 }
 
 #endif
