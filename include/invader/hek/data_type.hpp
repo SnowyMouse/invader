@@ -397,6 +397,14 @@ namespace Invader::HEK {
             copy.w = w * m_distance;
             return copy;
         }
+        
+        bool operator ==(const Quaternion<EndianType> &other) const noexcept {
+            return this->i == other.i && this->j == other.j && this->k == other.k && this->w == other.w;
+        };
+        
+        bool operator !=(const Quaternion<EndianType> &other) const noexcept {
+            return !(*this == other);
+        };
     };
     static_assert(sizeof(Quaternion<BigEndian>) == 0x10);
 
