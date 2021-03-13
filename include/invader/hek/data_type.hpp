@@ -668,8 +668,22 @@ namespace Invader::HEK {
 
         Point2D<EndianType> operator+(const Point2D<EndianType> &add) const {
             Point2D<EndianType> copy;
-            copy.y = this->x + add.x;
-            copy.x = this->y + add.y;
+            copy.x = this->x + add.x;
+            copy.y = this->y + add.y;
+            return copy;
+        }
+
+        Point2D<EndianType> operator*(float multiply) const {
+            Point2D<EndianType> copy;
+            copy.x = this->x * multiply;
+            copy.y = this->y * multiply;
+            return copy;
+        }
+
+        Point2D<EndianType> operator/(float divide) const {
+            Point2D<EndianType> copy;
+            copy.x = this->x / divide;
+            copy.y = this->y / divide;
             return copy;
         }
         
@@ -733,6 +747,22 @@ namespace Invader::HEK {
             copy.x = this->x + add;
             copy.y = this->y + add;
             copy.z = this->z + add;
+            return copy;
+        }
+
+        Point3D<EndianType> operator*(float multiply) const {
+            Point3D<EndianType> copy;
+            copy.x = this->x * multiply;
+            copy.y = this->y * multiply;
+            copy.z = this->z * multiply;
+            return copy;
+        }
+
+        Point3D<EndianType> operator/(float divide) const {
+            Point3D<EndianType> copy;
+            copy.x = this->x / divide;
+            copy.y = this->y / divide;
+            copy.z = this->z / divide;
             return copy;
         }
 
