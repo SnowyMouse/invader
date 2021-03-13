@@ -81,6 +81,7 @@ set(INVADER_SOURCE_FILES
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
     src/error_handler/error_handler.cpp
+    src/model/jms.cpp
     src/script/compiler.cpp
     src/script/script_tree.cpp
     src/script/tokenizer.cpp
