@@ -521,6 +521,76 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         v.binormal = v.binormal.normalize();
                         v.tangent = v.tangent.normalize();
                     }
+                    
+                    // Now let's... do this horrible monstrosity
+                    
+                    // Add the first triangle
+                    std::vector<HEK::Index> triangle_man = { all_triangles_here[0].vertices[0], all_triangles_here[0].vertices[1], all_triangles_here[0].vertices[2] };
+                    
+                    // Our remaining triangles
+                    std::vector<JMS::Triangle> remaining_triangles = std::vector<JMS::Triangle>(all_triangles_here.begin() + 1, all_triangles_here.end());
+                    
+                    // Add the rest
+                    while(remaining_triangles.size() > 0) {
+                        bool normals_flipped = (triangle_man.size() % 1) == 1;
+                        
+                        HEK::Index current_triangle[3];
+                        current_triangle[0] = triangle_man[triangle_man.size() - 2];
+                        
+                        auto &a = current_triangle[0];
+                        auto b_index = normals_flipped ? 2 : 1;
+                        auto c_index = normals_flipped ? 1 : 2;
+                        auto &b = current_triangle[b_index];
+                        
+                        a = triangle_man[triangle_man.size() - 2];
+                        b = triangle_man[triangle_man.size() - 1];
+                        
+                        // Maybe search for a triangle that happens to match
+                        bool found = false;
+                        auto remaining_triangle_count = remaining_triangles.size();
+                        for(std::size_t r = 0; r < remaining_triangle_count; r++) {
+                            auto &tri = remaining_triangles[r];
+                            
+                            // Check these
+                            if(tri.vertices[0] != a || tri.vertices[b_index] != b) {
+                                continue;
+                            }
+                            
+                            // We have a match! Delete it.
+                            found = true;
+                            triangle_man.emplace_back(tri.vertices[c_index]);
+                            remaining_triangles.erase(remaining_triangles.begin() + r);
+                            break;
+                        }
+                        
+                        // Got it!
+                        if(found) {
+                            continue;
+                        }
+                        
+                        // We don't have it, so we have to add some degenerate triangles
+                        triangle_man.emplace_back(b);
+                        auto first_triangle = remaining_triangles[0];
+                        remaining_triangles.erase(remaining_triangles.begin());
+                        triangle_man.emplace_back(first_triangle.vertices[0]);
+                        triangle_man.emplace_back(first_triangle.vertices[0]);
+                        triangle_man.emplace_back(first_triangle.vertices[b_index]);
+                        triangle_man.emplace_back(first_triangle.vertices[c_index]);
+                    }
+                    
+                    // Add null's
+                    while(triangle_man.size() % 3 > 0) {
+                        triangle_man.emplace_back(NULL_INDEX);
+                    }
+                    
+                    // Add the triangles
+                    part.triangles.resize(triangle_man.size() / 3);
+                    std::size_t q = 0;
+                    for(auto &t : part.triangles) {
+                        t.vertex0_index = triangle_man[q++];
+                        t.vertex1_index = triangle_man[q++];
+                        t.vertex2_index = triangle_man[q++];
+                    }
                 }
             }
         }
