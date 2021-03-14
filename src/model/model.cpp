@@ -609,6 +609,48 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         }
     }
     
+    // Get everything
+    auto all_tags = File::load_virtual_tag_folder(tags);
+    auto prefer_shaders = path.parent_path() / "shaders";
+    
+    // Resolve shaders
+    for(auto &s : model_tag->shaders) {
+        std::optional<File::TagFilePath> first_guess;
+        
+        for(auto &t : all_tags) {
+            // Shader tag?
+            if(!IS_SHADER_TAG(t.tag_fourcc)) {
+                continue;
+            }
+            
+            // Same name?
+            if(t.full_path.filename().replace_extension() != s.shader.path) {
+                continue;
+            }
+            
+            // Do we have it?
+            if(t.full_path.parent_path() == prefer_shaders) {
+                first_guess = File::TagFilePath(t.tag_path, t.tag_fourcc);
+                break;
+            }
+            
+            // No? Well hold it for now
+            else if(!first_guess.has_value()) {
+                first_guess = File::TagFilePath(t.tag_path, t.tag_fourcc);
+            }
+        }
+        
+        // Did we find it?
+        if(first_guess.has_value()) {
+            s.shader.path = File::preferred_path_to_halo_path(first_guess->path);
+            s.shader.tag_fourcc = first_guess->fourcc;
+        }
+        else {
+            eprintf_error("Failed to find a shader tag with the filename %s", s.shader.path.c_str());
+            std::exit(EXIT_FAILURE);
+        }
+    }
+    
     return tag->generate_hek_tag_data(fourcc);
 }
 
