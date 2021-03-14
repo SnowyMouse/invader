@@ -11,7 +11,7 @@ namespace Invader {
                 
     static const char CRLF[] = "\r\n";
     static const char TAB[] = "\t";
-    static const constexpr std::uint16_t JMS_VERSION = 8200;
+    static const constexpr std::uint32_t JMS_VERSION = 8200;
     
     // Skip to the next character that can be read
     static const char *next_character(const char *string) {
@@ -35,11 +35,10 @@ namespace Invader {
         return value;
     }
     
-    static std::int16_t read_next_int16(const char *&string) {
-        auto value = read_next_int32(string);
-        if(value > INT16_MAX || value < INT16_MIN) {
-            throw std::out_of_range("int16 out of range");
-        }
+    static std::uint32_t read_next_uint32(const char *&string) {
+        std::size_t offset;
+        std::uint32_t value = std::stoul(string, &offset, 10);
+        string += offset;
         return value;
     }
     
@@ -76,13 +75,9 @@ namespace Invader {
     
     template <typename T> static std::vector<T> array_from_string(const char *&string) {
         std::vector<T> arr;
-        auto count = read_next_int16(string);
-        if(count < 0) {
-            throw std::out_of_range("negative array size");
-        }
-        std::size_t countv = static_cast<std::size_t>(count);
-        arr.reserve(countv);
-        for(std::size_t i = 0; i < countv; i++) {
+        auto count = read_next_uint32(string);
+        arr.reserve(count);
+        for(std::size_t i = 0; i < count; i++) {
             arr.emplace_back(T::from_string(string, &string));
         }
         return arr;
@@ -179,8 +174,8 @@ namespace Invader {
         SET_CURSOR
         Marker m;
         m.name = string_from_string(cursor, true);
-        m.region = read_next_int16(cursor);
-        m.node = read_next_int16(cursor);
+        m.region = read_next_uint32(cursor);
+        m.node = read_next_uint32(cursor);
         m.rotation = quaternion_from_string(cursor);
         m.position = point3d_from_string(cursor) / 100.0F;
         m.radius = read_next_float(cursor);
@@ -200,8 +195,8 @@ namespace Invader {
         SET_CURSOR
         Node n;
         n.name = string_from_string(cursor, true);
-        n.first_child = read_next_int16(cursor);
-        n.sibling_node = read_next_int16(cursor);
+        n.first_child = read_next_uint32(cursor);
+        n.sibling_node = read_next_uint32(cursor);
         n.rotation = quaternion_from_string(cursor);
         n.position = point3d_from_string(cursor) / 100.0F;
         SET_END
@@ -241,10 +236,10 @@ namespace Invader {
     JMS::Vertex JMS::Vertex::from_string(const char *string, const char **end) {
         SET_CURSOR
         Vertex v;
-        v.node0 = read_next_int16(cursor);
+        v.node0 = read_next_uint32(cursor);
         v.position = point3d_from_string(cursor) / 100.0F;
         v.normal = vector3d_from_string(cursor).normalize();
-        v.node1 = read_next_int16(cursor);
+        v.node1 = read_next_uint32(cursor);
         v.node1_weight = read_next_float(cursor);
         v.texture_coordinates = point2d_from_string(cursor);
         v.texture_coordinates.y = 1.0F - v.texture_coordinates.y; // this is flipped for some reason
@@ -267,11 +262,11 @@ namespace Invader {
     JMS::Triangle JMS::Triangle::from_string(const char *string, const char **end) {
         SET_CURSOR
         Triangle t;
-        t.region = read_next_int16(cursor);
-        t.shader = read_next_int16(cursor);
-        t.vertices[0] = read_next_int16(cursor);
-        t.vertices[2] = read_next_int16(cursor);
-        t.vertices[1] = read_next_int16(cursor);
+        t.region = read_next_uint32(cursor);
+        t.shader = read_next_uint32(cursor);
+        t.vertices[0] = read_next_uint32(cursor);
+        t.vertices[2] = read_next_uint32(cursor);
+        t.vertices[1] = read_next_uint32(cursor);
         SET_END
         return t;
     }
