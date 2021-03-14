@@ -109,20 +109,36 @@ namespace Invader::HEK {
      * @return               true if an object, false if not
      */
     #define IS_OBJECT_TAG(tag_fourcc) (tag_fourcc == TagFourCC::TAG_FOURCC_BIPED || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_CONTROL || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_MACHINE || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_EQUIPMENT || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_GARBAGE || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_ITEM || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_OBJECT || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_PLACEHOLDER || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_PROJECTILE || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_SCENERY || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_SOUND_SCENERY || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_VEHICLE || \
-                                          tag_fourcc == TagFourCC::TAG_FOURCC_WEAPON)
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_CONTROL || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_DEVICE_MACHINE || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_EQUIPMENT || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_GARBAGE || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_ITEM || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_OBJECT || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_PLACEHOLDER || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_PROJECTILE || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SCENERY || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SOUND_SCENERY || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_VEHICLE || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_WEAPON)
+
+    /**
+     * Check if the tag class int is an shader-type class
+     * @param  tag_fourcc the tag class int
+     * @return               true if an shader, false if not
+     */
+    #define IS_SHADER_TAG(tag_fourcc) (tag_fourcc == TagFourCC::TAG_FOURCC_SHADER || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_MODEL || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA || \
+                                       tag_fourcc == TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER)
 
     /**
      * Return the extension of the tag class or nullptr if none exists.
