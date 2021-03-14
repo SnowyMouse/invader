@@ -11,6 +11,7 @@
 #include <invader/command_line_option.hpp>
 #include <invader/model/jms.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/compile/model.hpp>
 
 enum ModelType {
     MODEL_TYPE_MODEL = 0,
@@ -650,6 +651,9 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             std::exit(EXIT_FAILURE);
         }
     }
+    
+    // Generate compressed vertices
+    regenerate_missing_model_vertices(*model_tag, true);
     
     return tag->generate_hek_tag_data(fourcc);
 }
