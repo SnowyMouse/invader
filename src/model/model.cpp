@@ -767,13 +767,13 @@ int main(int argc, const char **argv) {
 
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("legacy", 'L', 0, "Use legacy behavior (use parent folder's filename for the tag name).");
+    options.emplace_back("legacy", 'L', 0, "Use legacy behavior (use parent folder's filename for the tag name for tool.exe backwards compatibility).");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path or data directory.");
     options.emplace_back("type", 'T', 1, "Specify the type of model. Can be: model, gbxmodel", "<type>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Additional tags directories can be specified for searching shaders, but the tag will be output to the first one.", "<dir>");
 
-    static constexpr char DESCRIPTION[] = "Create a model tag.";
+    static constexpr char DESCRIPTION[] = "Compile a model tag.";
     static constexpr char USAGE[] = "[options] <model-tag>";
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ModelOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, model_options, [](char opt, const auto &args, ModelOptions &model_options) {

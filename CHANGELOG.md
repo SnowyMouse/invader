@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- New tool: invader-model - Compiles model tags
 - invader-build: Added --stock-resource-bounds which, when building Custom
   Edition maps, only indexes a tag if the tag's index in the resource mapis the
   same on the equivalent stock resource map

@@ -147,6 +147,7 @@ this project is split into different programs.
 - [invader-font]
 - [invader-index]
 - [invader-info]
+- [invader-model]
 - [invader-refactor]
 - [invader-resource]
 - [invader-sound]
@@ -611,6 +612,45 @@ Options:
                                tags_external_indices, uncompressed_size
 ```
 
+### invader-model
+This program compiles model tags. It can compile both model and gbxmodel formats
+directly from .JMS files.
+
+JMS files should be placed in the data folder in a `models` folder in a folder
+relative to where the model tag will be generated in the tags directory. So, if
+you want to compile a model tags `weapons/pistol/pistol.model`, you would put
+your JMS files in `data/weapons/pistol/pistol/models` or, if using legacy mode,
+in `data/weapons/pistol/models`. A tutorial will be made sometime in the future
+regarding this.
+
+You can make JMS files for free using [Halo-Asset-Blender-Development-Toolset]
+in [Blender].
+
+[Halo-Asset-Blender-Development-Toolset]: https://github.com/General-101/Halo-Asset-Blender-Development-Toolset
+[Blender]: https://www.blender.org/
+
+```
+Usage: invader-model [options] <model-tag>
+
+Compile a model tag.
+
+Options:
+  -d --data <dir>              Use the specified data directory.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -L --legacy                  Use legacy behavior (use parent folder's
+                               filename for the tag name for tool.exe backwards
+                               compatibility).
+  -P --fs-path                 Use a filesystem path for the tag path or data
+                               directory.
+  -t --tags <dir>              Use the specified tags directory. Additional
+                               tags directories can be specified for searching
+                               shaders, but the tag will be output to the first
+                               one.
+  -T --type <type>             Specify the type of model. Can be: model,
+                               gbxmodel
+```
+
 ### invader-refactor
 This program renames and moves tag references.
 
@@ -1043,6 +1083,7 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-font]: #invader-font
 [invader-index]: #invader-index
 [invader-info]: #invader-info
+[invader-model]: #invader-model
 [invader-refactor]: #invader-refactor
 [invader-resource]: #invader-resource
 [invader-sound]: #invader-sound
