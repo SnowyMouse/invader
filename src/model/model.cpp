@@ -309,7 +309,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             child_node.parent_node_index = n;
             
             // Next node?
-            next_node_to_set_parent = nodes[n].sibling_node;
+            next_node_to_set_parent = nodes[next_node_to_set_parent].sibling_node;
         }
     }
     
