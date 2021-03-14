@@ -20,6 +20,17 @@ namespace Invader {
             
             std::string string() const;
             static Node from_string(const char *string, const char **end);
+            
+            bool operator ==(const Node &other) const noexcept {
+                return other.name == this->name &&
+                       other.first_child == this->first_child &&
+                       other.sibling_node == this->sibling_node &&
+                       other.rotation == this->rotation &&
+                       other.position == this->position;
+            }
+            bool operator !=(const Node &other) const noexcept {
+                return !(*this == other);
+            }
         };
         std::vector<Node> nodes;
         
@@ -63,6 +74,19 @@ namespace Invader {
             
             std::string string() const;
             static Vertex from_string(const char *string, const char **end);
+            
+            bool operator ==(const Vertex &other) const noexcept {
+                return this->node0 == other.node0 &&
+                       this->position == other.position &&
+                       this->normal == other.normal &&
+                       this->node1 == other.node1 &&
+                       this->node1_weight == other.node1_weight &&
+                       this->texture_coordinates == other.texture_coordinates;
+            }
+            
+            bool operator !=(const Vertex &other) const noexcept {
+                return !(*this == other);
+            }
         };
         std::vector<Vertex> vertices;
         
