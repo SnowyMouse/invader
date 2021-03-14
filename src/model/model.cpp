@@ -365,6 +365,19 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 }
                 auto &p = model_tag_region.permutations[permutation_index];
                 
+                // Are we the superhigh LoD? If so, add markers.
+                if(lod.first == "superhigh") {
+                    for(auto &ji : jms.markers) {
+                        if(ji.region == r) {
+                            auto &m = p.markers.emplace_back();
+                            std::strncpy(m.name.string, ji.name.c_str(), sizeof(m.name.string) - 1);
+                            m.node_index = ji.node;
+                            m.rotation = ji.rotation;
+                            m.translation = ji.position;
+                        }
+                    }
+                }
+                
                 // Add our new geometry
                 auto new_geometry_index = model_tag->geometries.size();
                 auto &geometry = model_tag->geometries.emplace_back();
