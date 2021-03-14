@@ -543,7 +543,11 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     std::vector<HEK::Index> triangle_man = { all_triangles_here[0].vertices[0], all_triangles_here[0].vertices[1], all_triangles_here[0].vertices[2] };
                     
                     // Our remaining triangles
-                    std::vector<JMS::Triangle> remaining_triangles = std::vector<JMS::Triangle>(all_triangles_here.begin() + 1, all_triangles_here.end());
+                    std::list<JMS::Triangle> remaining_triangles = std::list<JMS::Triangle>(all_triangles_here.begin() + 1, all_triangles_here.end());
+                    
+                    std::size_t sa = 0;
+                    std::size_t sb = 0;
+                    std::size_t sz = 0;
                     
                     // Add the rest
                     while(remaining_triangles.size() > 0) {
@@ -560,15 +564,49 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         a = triangle_man[triangle_man.size() - 2];
                         b = triangle_man[triangle_man.size() - 1];
                         
-                        // Lazy
+                        // Let's try to find a triangle that can simply go next
+                        bool triangle_found = false;
+                        for(auto rt = remaining_triangles.begin(); rt != remaining_triangles.end(); rt++) {
+                            if(rt->vertices[0] == a && rt->vertices[b_index] == b) {
+                                triangle_found = true;
+                                triangle_man.emplace_back(rt->vertices[c_index]);
+                                remaining_triangles.erase(rt);
+                                sa++;
+                                break;
+                            }
+                        }
+                        if(triangle_found) {
+                            continue;
+                        }
+                        
+                        // Try a triangle that can go next but requires one degenerate triangle
+                        for(auto rt = remaining_triangles.begin(); rt != remaining_triangles.end(); rt++) {
+                            if(rt->vertices[0] == b) {
+                                triangle_man.emplace_back(b);
+                                triangle_man.emplace_back(rt->vertices[b_index]);
+                                triangle_man.emplace_back(rt->vertices[c_index]);
+                                triangle_found = true;
+                                remaining_triangles.erase(rt);
+                                sb++;
+                                break;
+                            }
+                        }
+                        if(triangle_found) {
+                            continue;
+                        }
+                        
+                        // Last resort - Guarantees we can get the triangle in place but adds some degenerate triangles
                         triangle_man.emplace_back(b);
-                        auto first_triangle = remaining_triangles[0];
+                        auto first_triangle = *remaining_triangles.begin();
                         remaining_triangles.erase(remaining_triangles.begin());
                         triangle_man.emplace_back(first_triangle.vertices[a_index]);
                         triangle_man.emplace_back(first_triangle.vertices[a_index]);
                         triangle_man.emplace_back(first_triangle.vertices[b_index]);
                         triangle_man.emplace_back(first_triangle.vertices[c_index]);
+                        sz++;
                     }
+                    
+                    //std::printf("%zu %zu %zu\n", sa, sb, sz);
                     
                     // Add null's
                     while(triangle_man.size() % 3 > 0) {
