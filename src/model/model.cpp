@@ -426,6 +426,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     auto &part = geometry.parts.emplace_back();
                     part.prev_filthy_part_index = ~0;
                     part.next_filthy_part_index = ~0;
+                    part.shader_index = s;
                     
                     // Isolate all triangles
                     std::vector<JMS::Triangle> all_triangles_here;
