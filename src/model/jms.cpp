@@ -247,17 +247,21 @@ namespace Invader {
         v.node1 = read_next_int16(cursor);
         v.node1_weight = read_next_float(cursor);
         v.texture_coordinates = point2d_from_string(cursor);
+        v.texture_coordinates.y = 1.0F - v.texture_coordinates.y;
         read_next_float(cursor);
         SET_END
         return v;
     }
     std::string JMS::Vertex::string() const {
+        auto modified_texture_coordinates = this->texture_coordinates;
+        modified_texture_coordinates.y = 1.0F - modified_texture_coordinates.y; // please don't ask
+        
         return std::to_string(static_cast<std::int16_t>(this->node0)) + CRLF +
                vector_to_string(this->position * 100.0F) + CRLF +
                vector_to_string(this->normal) + CRLF +
                std::to_string(static_cast<std::int16_t>(this->node1)) + CRLF +
                std::to_string(this->node1_weight) + CRLF +
-               vector_to_string(this->texture_coordinates) + TAB + "0";
+               vector_to_string(modified_texture_coordinates) + TAB + "0";
     }
     
     JMS::Triangle JMS::Triangle::from_string(const char *string, const char **end) {
@@ -266,8 +270,8 @@ namespace Invader {
         t.region = read_next_int16(cursor);
         t.shader = read_next_int16(cursor);
         t.vertices[0] = read_next_int16(cursor);
-        t.vertices[1] = read_next_int16(cursor);
         t.vertices[2] = read_next_int16(cursor);
+        t.vertices[1] = read_next_int16(cursor);
         SET_END
         return t;
     }
@@ -275,7 +279,7 @@ namespace Invader {
         return std::to_string(static_cast<std::int16_t>(this->region)) + CRLF +
                std::to_string(static_cast<std::int16_t>(this->shader)) + CRLF +
                std::to_string(static_cast<std::int16_t>(this->vertices[0])) + TAB +
-               std::to_string(static_cast<std::int16_t>(this->vertices[1])) + TAB +
-               std::to_string(static_cast<std::int16_t>(this->vertices[2]));
+               std::to_string(static_cast<std::int16_t>(this->vertices[2])) + TAB + // normal flipping madness
+               std::to_string(static_cast<std::int16_t>(this->vertices[1]));
     }
 }
