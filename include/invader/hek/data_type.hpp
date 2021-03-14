@@ -542,6 +542,13 @@ namespace Invader::HEK {
             copy.k = this->k + add.k;
             return copy;
         }
+
+        bool operator==(const Vector3D<EndianType> &other) const {
+            return this->i == other.i && this->j == other.j && this->k == other.k;
+        }
+        bool operator!=(const Vector3D<EndianType> &other) const {
+            return !(*this == other);
+        }
         
         static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
         
@@ -596,6 +603,13 @@ namespace Invader::HEK {
             copy.k = 0.0F;
             return copy;
         }
+
+        bool operator==(const Vector2D<EndianType> &other) const {
+            return this->i == other.i && this->j == other.j;
+        }
+        bool operator!=(const Vector2D<EndianType> &other) const {
+            return !(*this == other);
+        }
         
         static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
         
@@ -635,6 +649,13 @@ namespace Invader::HEK {
         Vector3D<EndianType> vector;
         EndianType<float> w;
 
+        bool operator==(const Plane3D<EndianType> &other) const {
+            return this->vector == other.vector && this->w == other.w;
+        }
+        bool operator!=(const Plane3D<EndianType> &other) const {
+            return !(*this == other);
+        }
+
         ENDIAN_TEMPLATE(OtherEndian) operator Plane3D<OtherEndian>() const {
             Plane3D<OtherEndian> copy;
             COPY_THIS(vector);
@@ -650,6 +671,13 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct Plane2D {
         Vector2D<EndianType> vector;
         EndianType<float> w;
+
+        bool operator==(const Plane2D<EndianType> &other) const {
+            return this->vector == other.vector && this->w == other.w;
+        }
+        bool operator!=(const Plane2D<EndianType> &other) const {
+            return !(*this == other);
+        }
 
         ENDIAN_TEMPLATE(OtherEndian) operator Plane2D<OtherEndian>() const {
             Plane2D<OtherEndian> copy;
@@ -697,6 +725,10 @@ namespace Invader::HEK {
         
         bool operator==(const Point2D<EndianType> &other) const {
             return other.x == this->x && other.y == this->y;
+        }
+        
+        bool operator!=(const Point2D<EndianType> &other) const {
+            return !(*this == other);
         }
 
         /**
@@ -776,6 +808,10 @@ namespace Invader::HEK {
 
         bool operator ==(const Point3D<EndianType> &other) const {
             return this->x == other.x && this->y == other.y && this->z == other.z;
+        }
+        
+        bool operator !=(const Point3D<EndianType> &other) const {
+            return !(*this == other);
         }
 
         /**
