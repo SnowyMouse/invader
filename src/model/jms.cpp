@@ -50,12 +50,17 @@ namespace Invader {
         return value;
     }
     
-    static std::string string_from_string(const char *&string) {
+    static std::string string_from_string(const char *&string, bool limit_31_characters) {
         string = next_character(string);
         const char *end_of_string = string;
         while(*end_of_string && *end_of_string != '\r' && *end_of_string != '\n' && *end_of_string != '\t') {
             end_of_string++;
         }
+        
+        if(limit_31_characters && end_of_string - string > 31) {
+            throw std::out_of_range("maximum string length exceeded");
+        }
+        
         std::string value = std::string(string, end_of_string);
         string = end_of_string;
         return value;
@@ -173,7 +178,7 @@ namespace Invader {
     JMS::Marker JMS::Marker::from_string(const char *string, const char **end) {
         SET_CURSOR
         Marker m;
-        m.name = string_from_string(cursor);
+        m.name = string_from_string(cursor, true);
         m.region = read_next_int16(cursor);
         m.node = read_next_int16(cursor);
         m.rotation = quaternion_from_string(cursor);
@@ -194,7 +199,7 @@ namespace Invader {
     JMS::Node JMS::Node::from_string(const char *string, const char **end) {
         SET_CURSOR
         Node n;
-        n.name = string_from_string(cursor);
+        n.name = string_from_string(cursor, true);
         n.first_child = read_next_int16(cursor);
         n.sibling_node = read_next_int16(cursor);
         n.rotation = quaternion_from_string(cursor);
@@ -213,8 +218,8 @@ namespace Invader {
     JMS::Material JMS::Material::from_string(const char *string, const char **end) {
         SET_CURSOR
         Material m;
-        m.name = string_from_string(cursor);
-        m.tif_path = string_from_string(cursor);
+        m.name = string_from_string(cursor, false);
+        m.tif_path = string_from_string(cursor, false);
         SET_END
         return m;
     }
@@ -225,7 +230,7 @@ namespace Invader {
     JMS::Region JMS::Region::from_string(const char *string, const char **end) {
         SET_CURSOR
         Region r;
-        r.name = string_from_string(cursor);
+        r.name = string_from_string(cursor, true);
         SET_END
         return r;
     }
