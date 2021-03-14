@@ -11,5 +11,7 @@ if(${INVADER_MODEL})
     target_link_libraries(invader-model invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-model)
+
+    do_windows_rc(invader-model invader-model "Model tag compiler")
 endif()
 

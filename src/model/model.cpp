@@ -823,7 +823,7 @@ int main(int argc, const char **argv) {
             if(path.extension() == extension) {
                 // Legacy - bump up a directory
                 if(model_options.legacy) {
-                    model_tag = path.parent_path();
+                    model_tag = path.parent_path().string();
                 }
                 
                 // Otherwise use this
@@ -896,7 +896,7 @@ int main(int argc, const char **argv) {
     
     // Nothing found?
     if(jms_files.empty()) {
-        eprintf_error("No .jms files found in %s", directory.c_str());
+        eprintf_error("No .jms files found in %s", directory.string().c_str());
         return EXIT_FAILURE;
     }
     
