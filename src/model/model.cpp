@@ -880,7 +880,7 @@ int main(int argc, const char **argv) {
                         eprintf_error("Failed to read %s", path.string().c_str());
                         return EXIT_FAILURE;
                     }
-                    jms_files.emplace(path.filename().replace_extension(), JMS::from_string(std::string(reinterpret_cast<const char *>(file->data()), file->size()).c_str()));
+                    jms_files.emplace(path.filename().replace_extension().string(), JMS::from_string(std::string(reinterpret_cast<const char *>(file->data()), file->size()).c_str()));
                 }
                 catch(std::exception &) {
                     eprintf_error("Failed to parse %s", path.string().c_str());
