@@ -554,11 +554,6 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     // Our remaining triangles
                     std::list<JMS::Triangle> remaining_triangles = std::list<JMS::Triangle>(all_triangles_here.begin() + 1, all_triangles_here.end());
                     
-                    std::size_t sa = 0;
-                    std::size_t sb = 0;
-                    std::size_t sc = 0;
-                    std::size_t sz = 0;
-                    
                     // Add the rest
                     while(remaining_triangles.size() > 0) {
                         bool normals_flipped = (triangle_man.size() % 2) == 1;
