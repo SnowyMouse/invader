@@ -280,7 +280,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     for(std::size_t n = 0; n < node_count; n++) {
         auto &node = nodes[n];
         std::size_t q = 0;
-        auto sibling_node = nodes[nodes[n].sibling_node].sibling_node;
+        auto sibling_node = nodes[n].sibling_node;
         while(sibling_node != NULL_INDEX) {
             sibling_node = nodes[sibling_node].sibling_node;
             if(q++ > node_count) {
