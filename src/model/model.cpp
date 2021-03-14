@@ -691,14 +691,28 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     }
     
     // Get everything
-    auto all_tags = File::load_virtual_tag_folder(tags);
+    std::vector<Invader::File::TagFile> all_tags_shaders;
+    std::vector<std::filesystem::path> all_shader_dirs;
+    auto shaders_path = std::filesystem::path(File::file_path_to_tag_path(path, tags[0]).value()).parent_path() / "shaders";
+    
+    // First get all shader directories
+    for(auto &i : tags) {
+        auto si = i / shaders_path;
+        if(std::filesystem::is_directory(si)) {
+            all_shader_dirs.emplace_back(si);
+        }
+    }
+    all_tags_shaders = File::load_virtual_tag_folder(all_shader_dirs);
+    
+    std::optional<std::vector<Invader::File::TagFile>> all_tags;
     auto prefer_shaders = path.parent_path() / "shaders";
     
     // Resolve shaders
     for(auto &s : model_tag->shaders) {
         std::optional<File::TagFilePath> first_guess;
         
-        for(auto &t : all_tags) {
+        // Check shaders folder first
+        for(auto &t : all_tags_shaders) {
             // Shader tag?
             if(!IS_SHADER_TAG(t.tag_fourcc)) {
                 continue;
@@ -709,15 +723,31 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 continue;
             }
             
-            // Do we have it?
-            if(t.full_path.parent_path() == prefer_shaders) {
-                first_guess = File::TagFilePath(t.tag_path, t.tag_fourcc);
-                break;
+            first_guess = File::TagFilePath((shaders_path / t.tag_path).string(), t.tag_fourcc);
+            break;
+        }
+        
+        // If that fails, we have to load the tags directory
+        if(!first_guess.has_value()) {
+            // Load the virtual tags directory if we haven't already
+            if(!all_tags.has_value()) {
+                all_tags = File::load_virtual_tag_folder(tags);
             }
             
-            // No? Well hold it for now
-            else if(!first_guess.has_value()) {
+            // Do it
+            for(auto &t : *all_tags) {
+                // Shader tag?
+                if(!IS_SHADER_TAG(t.tag_fourcc)) {
+                    continue;
+                }
+                
+                // Same name?
+                if(t.full_path.filename().replace_extension() != s.shader.path) {
+                    continue;
+                }
+                
                 first_guess = File::TagFilePath(t.tag_path, t.tag_fourcc);
+                break;
             }
         }
         
