@@ -54,6 +54,9 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         std::exit(EXIT_FAILURE);
     }
     
+    // We don't use local nodes
+    model_tag->flags &= ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+    
     // Clear this stuff
     model_tag->markers.clear();
     model_tag->nodes.clear();
@@ -79,10 +82,12 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     std::string top_permutation;
     std::string top_lod;
     
-    // Get regions
+    // Get regions and shaders
     std::vector<std::string> regions;
     
     for(auto &jms : map) {
+        auto jms_data_copy = jms.second;
+        
         std::string lod = lods[0];
         std::string permutation = jms.first;
         
@@ -107,49 +112,142 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             eprintf_error("Permutation %s has multiple %s LoDs", permutation.c_str(), lod.c_str());
             std::exit(EXIT_FAILURE);
         }
-        permutation_map.emplace(lod, jms.second); // add it
         
         // Make sure it has nodes!
-        if(jms.second.nodes.empty()) {
+        if(jms_data_copy.nodes.empty()) {
             eprintf_error("Permutation %s's %s LoD has no nodes", permutation.c_str(), lod.c_str());
             std::exit(EXIT_FAILURE);
         }
         
         // If we haven't added nodes, add them
         if(nodes.empty()) {
-            nodes = jms.second.nodes;
+            nodes = jms_data_copy.nodes;
             top_permutation = permutation;
             top_lod = lod;
         }
         
         // Otherwise, make sure we have the same nodes
-        if(nodes != jms.second.nodes) {
+        if(nodes != jms_data_copy.nodes) {
             eprintf_error("Permutation %s's %s LoD does not match permutation %s's %s LoD's node", permutation.c_str(), lod.c_str(), top_permutation.c_str(), top_lod.c_str());
             std::exit(EXIT_FAILURE);
         }
         
+        
+        // Bounds check!
+        auto material_count = jms_data_copy.materials.size();
+        auto region_count = jms_data_copy.regions.size();
+        for(auto &i : jms_data_copy.triangles) {
+            if(i.shader >= material_count) {
+                eprintf_error("Permutation %s's %s LoD has an out-of-bounds shader index", permutation.c_str(), lod.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+            if(i.region >= region_count) {
+                eprintf_error("Permutation %s's %s LoD has an out-of-bounds region index", permutation.c_str(), lod.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        
         // Add any regions it may have
-        for(auto &i : jms.second.regions) {
+        for(std::size_t i = 0; i < region_count; i++) {
+            auto &r = jms_data_copy.regions[i];
+            std::size_t new_region_index = 0;
             auto iterator = regions.begin();
             bool has_it = false;
-            for(; iterator != regions.end(); iterator++) {
+            for(; iterator != regions.end(); iterator++, new_region_index++) {
                 // The regions already exists
-                if(i.name == *iterator) {
+                if(r.name == *iterator) {
                     has_it = true;
                     break;
                 }
                 
                 // This string value is less than it, so it goes before it
-                else if(i.name < *iterator) {
+                else if(r.name < *iterator) {
                     break;
                 }
             }
             
             // Add the new region if it doesn't exist
             if(!has_it) {
-                regions.insert(iterator, i.name);
+                regions.insert(iterator, r.name);
+            }
+            
+            // Fix all the triangles to point to the new region
+            for(auto &t : jms_data_copy.triangles) {
+                if(t.region == i) {
+                    t.region = new_region_index;
+                }
             }
         }
+        
+        // Add any shaders it may have, too
+        for(std::size_t mat = 0; mat < material_count; mat++) {
+            auto shader_name = jms_data_copy.materials[mat].name;
+            if(shader_name.empty()) {
+                eprintf_error("Permutation %s's %s LoD has an empty shader name", permutation.c_str(), lod.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+            
+            // Find any trailing numbers at the end
+            HEK::Index shader_index = 0;
+            bool trailing_numbers = false;
+            for(std::size_t q = shader_name.size() - 1; q > 0; q--) {
+                if(shader_name[q] >= '0' && shader_name[q] <= '9') {
+                    trailing_numbers = true;
+                }
+                else {
+                    if(trailing_numbers) {
+                        q++; // Add 1 to get the number thing
+                        
+                        // Check index thing here
+                        try {
+                            if((shader_index = std::stoul(shader_name.substr(q))) >= NULL_INDEX) {
+                                throw std::out_of_range("invalid index");
+                            }
+                        }
+                        catch(std::exception &) {
+                            eprintf_error("Permutation %s's %s LoD has an invalid shader name %s", permutation.c_str(), lod.c_str(), shader_name.c_str());
+                            std::exit(EXIT_FAILURE);
+                        }
+                        
+                        q--; // subtract 1 to go back before the number
+                        while(q > 0 && shader_name[q] == ' ') { // remove trailing spaces
+                            q--;
+                        }
+                        
+                        shader_name = shader_name.substr(0, q + 1);
+                    }
+                    break;
+                }
+            }
+            
+            // Did we add it previously?
+            bool shader_permutation_exists = false;
+            std::size_t new_shader_index = model_tag->shaders.size();
+            for(std::size_t i = 0; i < new_shader_index; i++) {
+                auto &shader = model_tag->shaders[i];
+                if(shader.shader.path == shader_name && shader.permutation == shader_index) {
+                    shader_permutation_exists = true;
+                    new_shader_index = i;
+                    break;
+                }
+            }
+            
+            // Nope? Okay. Add it then!
+            if(!shader_permutation_exists) {
+                auto &shader = model_tag->shaders.emplace_back();
+                shader.shader.path = shader_name;
+                shader.permutation = shader_index;
+            }
+            
+            // Fix all the triangles to point to the new material
+            for(auto &i : jms_data_copy.triangles) {
+                if(i.shader == shader_index) {
+                    i.shader = new_shader_index;
+                }
+            }
+        }
+        
+        permutation_map.emplace(lod, jms_data_copy); // Now add it
     }
     
     // Add nodes
@@ -221,6 +319,211 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     for(auto &i : regions) {
         auto &region = model_tag->regions.emplace_back();
         std::strncpy(region.name.string, i.c_str(), sizeof(region.name.string) - 1);
+    }
+    
+    // Go through each permutation now
+    for(auto &i : permutations) {
+        for(auto &lod : i.second) {
+            auto &jms = lod.second;
+            
+            // Find all regions this encompasses
+            std::vector<std::size_t> regions_we_are_in;
+            for(auto &t : jms.triangles) {
+                bool in_it = false;
+                for(auto &r : regions_we_are_in) {
+                    if(r == t.region) {
+                        in_it = true;
+                    }
+                }
+                if(!in_it) {
+                    regions_we_are_in.emplace_back(t.region);
+                }
+            }
+            
+            // Go through each region now...
+            for(auto &r : regions_we_are_in) {
+                auto &model_tag_region = model_tag->regions[r];
+                
+                // Is there already an entry in the model tag region permutation array for this?
+                bool in_it = false;
+                std::size_t permutation_index = model_tag_region.permutations.size();
+                for(std::size_t p = 0; p < permutation_index; p++) {
+                    if(i.first == model_tag_region.permutations[p].name.string) {
+                        in_it = true;
+                        permutation_index = p;
+                        break;
+                    }
+                }
+                if(!in_it) {
+                    auto &p = model_tag_region.permutations.emplace_back();
+                    p.super_low = NULL_INDEX;
+                    p.low = NULL_INDEX;
+                    p.medium = NULL_INDEX;
+                    p.high = NULL_INDEX;
+                    p.super_high = NULL_INDEX;
+                    std::strncpy(p.name.string, i.first.c_str(), sizeof(p.name.string) - 1);
+                }
+                auto &p = model_tag_region.permutations[permutation_index];
+                
+                // Add our new geometry
+                auto new_geometry_index = model_tag->geometries.size();
+                auto &geometry = model_tag->geometries.emplace_back();
+                
+                // Set the index
+                if(lod.first == "superhigh") {
+                    p.super_high = new_geometry_index;
+                }
+                else if(lod.first == "high") {
+                    p.high = new_geometry_index;
+                }
+                else if(lod.first == "medium") {
+                    p.medium = new_geometry_index;
+                }
+                else if(lod.first == "low") {
+                    p.low = new_geometry_index;
+                }
+                else if(lod.first == "superlow") {
+                    p.super_low = new_geometry_index;
+                }
+                else {
+                    eprintf_error("Eep!");
+                    std::exit(EXIT_FAILURE);
+                }
+                
+                // Now for the shader indices
+                std::vector<std::size_t> shaders_we_use;
+                for(auto &t : jms.triangles) {
+                    if(t.region == r) {
+                        bool shader_in_it = false;
+                        for(auto &s : shaders_we_use) {
+                            if(s == t.shader) {
+                                shader_in_it = true;
+                                break;
+                            }
+                        }
+                        if(!shader_in_it) {
+                            shaders_we_use.emplace_back(t.region);
+                        }
+                    }
+                }
+                
+                // Go through each shader. Add a part thing
+                for(auto &s : shaders_we_use) {
+                    auto &part = geometry.parts.emplace_back();
+                    part.prev_filthy_part_index = ~0;
+                    part.next_filthy_part_index = ~0;
+                    
+                    // Isolate all triangles
+                    std::vector<JMS::Triangle> all_triangles_here;
+                    for(auto &t : jms.triangles) {
+                        if(t.region == r && t.shader == s) {
+                            all_triangles_here.emplace_back(t);
+                        }
+                    }
+                    
+                    // Isolate all vertices
+                    std::map<std::size_t, std::size_t> all_vertices_here_indexed;
+                    std::vector<JMS::Vertex> all_vertices_here;
+                    for(auto &t : all_triangles_here) {
+                        for(auto &v : t.vertices) {
+                            // Add the vertex. Note the index of it
+                            if(all_vertices_here_indexed.find(v) == all_vertices_here_indexed.end()) {
+                                all_vertices_here_indexed[v] = all_vertices_here.size();
+                                all_vertices_here.emplace_back(jms.vertices[v]);
+                            }
+                        }
+                    }
+                    
+                    // Set the vertices now
+                    for(auto &t : all_triangles_here) {
+                        for(auto &v : t.vertices) {
+                            v = all_vertices_here_indexed[v];
+                        }
+                    }
+                    
+                    // Add all vertices
+                    for(auto &v : all_vertices_here) {
+                        auto &vm = part.uncompressed_vertices.emplace_back();
+                        vm.position = v.position;
+                        vm.normal = v.normal;
+                        vm.texture_coords = v.texture_coordinates;
+                        vm.node0_index = v.node0;
+                        vm.node0_weight = 1.0F - v.node1_weight;
+                        vm.node1_index = v.node1;
+                        vm.node1_weight = v.node1_weight;
+                    }
+                    
+                    // Calculate binormal/tangent (most of this is from the MEK @ https://github.com/Sigmmma/reclaimer/blob/e9900716d1962f4a172f517791c2f6b7900898c5/reclaimer/model/jms.py - thanks MosesofEgypt!)
+                    for(auto &t : all_triangles_here) {
+                        static constexpr const std::size_t range = sizeof(t.vertices) / sizeof(*t.vertices);
+                        static_assert(range == 3);
+                        
+                        for(std::size_t v = 0; v < range; v++) {
+                            // Get our vertices, binormal, and tangent
+                            auto &vertex0 = part.uncompressed_vertices[t.vertices[(v + 0) % range]];
+                            auto &vertex1 = part.uncompressed_vertices[t.vertices[(v + 1) % range]];
+                            auto &vertex2 = part.uncompressed_vertices[t.vertices[(v + 2) % range]];
+                            
+                            auto &b = vertex0.binormal;
+                            auto &t = vertex0.tangent;
+                            
+                            // Subtract the x/y/z from the other two vertices
+                            float x1 = vertex1.position.x - vertex0.position.x;
+                            float x2 = vertex2.position.x - vertex0.position.x;
+                            float y1 = vertex1.position.y - vertex0.position.y;
+                            float y2 = vertex2.position.y - vertex0.position.y;
+                            float z1 = vertex1.position.z - vertex0.position.z;
+                            float z2 = vertex2.position.z - vertex0.position.z;
+                            
+                            // Do the same thing with the texture coordinates
+                            float u1 = vertex1.texture_coords.x - vertex0.texture_coords.x;
+                            float u2 = vertex2.texture_coords.x - vertex0.texture_coords.x;
+                            
+                            // Since it's flipped, subtract v from 1 to flip it back.
+                            float v1 = (1.0F - vertex1.texture_coords.y) - (1.0F - vertex0.texture_coords.y);
+                            float v2 = (1.0F - vertex2.texture_coords.y) - (1.0F - vertex0.texture_coords.y);
+                            
+                            float r = u1 * v2 - u2 * v1;
+                            if(r == 0) {
+                                continue;
+                            }
+                            
+                            r = 1.0 / r;
+                            
+                            // Binormal
+                            float bi = -(u1 * x2 - u2 * x1) * r;
+                            float bj = -(u1 * y2 - u2 * y1) * r;
+                            float bk = -(u1 * z2 - u2 * z1) * r;
+                            float b_len = std::sqrt(bi*bi + bj*bj + bk*bk);
+                            
+                            // Tangent
+                            float ti = (v2 * x1 - v1 * x2) * r;
+                            float tj = (v2 * y1 - v1 * y2) * r;
+                            float tk = (v2 * z1 - v1 * z2) * r;
+                            float t_len = std::sqrt(ti*ti + tj*tj + tk*tk);
+                            
+                            if(b_len > 0) {
+                                b.i = b.i + bi / b_len;
+                                b.j = b.j + bj / b_len;
+                                b.k = b.k + bk / b_len;
+                            }
+                            
+                            if(t_len > 0) {
+                                t.i = t.i + ti / t_len;
+                                t.j = t.j + tj / t_len;
+                                t.k = t.k + tk / t_len;
+                            }
+                        }
+                    }
+                    
+                    // Normalize vectors
+                    for(auto &v : part.uncompressed_vertices) {
+                        v.binormal = v.binormal.normalize();
+                        v.tangent = v.tangent.normalize();
+                    }
+                }
+            }
+        }
     }
     
     return tag->generate_hek_tag_data(fourcc);

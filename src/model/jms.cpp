@@ -247,14 +247,14 @@ namespace Invader {
         v.node1 = read_next_int16(cursor);
         v.node1_weight = read_next_float(cursor);
         v.texture_coordinates = point2d_from_string(cursor);
-        v.texture_coordinates.y = 1.0F - v.texture_coordinates.y;
+        v.texture_coordinates.y = 1.0F - v.texture_coordinates.y; // this is flipped for some reason
         read_next_float(cursor);
         SET_END
         return v;
     }
     std::string JMS::Vertex::string() const {
         auto modified_texture_coordinates = this->texture_coordinates;
-        modified_texture_coordinates.y = 1.0F - modified_texture_coordinates.y; // please don't ask
+        modified_texture_coordinates.y = 1.0F - modified_texture_coordinates.y;
         
         return std::to_string(static_cast<std::int16_t>(this->node0)) + CRLF +
                vector_to_string(this->position * 100.0F) + CRLF +
@@ -279,7 +279,7 @@ namespace Invader {
         return std::to_string(static_cast<std::int16_t>(this->region)) + CRLF +
                std::to_string(static_cast<std::int16_t>(this->shader)) + CRLF +
                std::to_string(static_cast<std::int16_t>(this->vertices[0])) + TAB +
-               std::to_string(static_cast<std::int16_t>(this->vertices[2])) + TAB + // normal flipping madness
+               std::to_string(static_cast<std::int16_t>(this->vertices[2])) + TAB +
                std::to_string(static_cast<std::int16_t>(this->vertices[1]));
     }
 }
