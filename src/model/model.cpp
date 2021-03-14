@@ -264,6 +264,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     }
     
     // List permutations
+    oprintf("Found %zu permutation%s:\n", permutations.size(), permutations.size() == 1 ? "" : "s");
     for(auto &p : permutations) {
         oprintf("    %-33s", p.first.c_str());
         
@@ -880,8 +881,6 @@ int main(int argc, const char **argv) {
         eprintf_error("No .jms files found in %s", directory.c_str());
         return EXIT_FAILURE;
     }
-    
-    oprintf("Found %zu model%s:\n", jms_files.size(), jms_files.size() == 1 ? "" : "s");
     
     // Generate a tag
     std::vector<std::byte> tag_data;
