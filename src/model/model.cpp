@@ -413,7 +413,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                             }
                         }
                         if(!shader_in_it) {
-                            shaders_we_use.emplace_back(t.region);
+                            shaders_we_use.emplace_back(t.shader);
                         }
                     }
                 }
