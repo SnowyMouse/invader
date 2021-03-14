@@ -537,7 +537,16 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         v.tangent = v.tangent.normalize();
                     }
                     
-                    // Now let's... do this horrible monstrosity
+                    // Now let's... do this horrible monstrosity, triangle strips!
+                    //
+                    // Basically, triangles in Halo are stored like this:
+                    //
+                    // A B C D          A          B          C          D
+                    // 0 1 2 3 4 5 6 = (0, 1, 2); (1, 3, 2); (2, 3, 4); (3, 5, 4); (4, 5, 6)
+                    //
+                    // It can save lots of space, but only if everything is nicely sequenced like this.
+                    // If not, you can lose space by having to add degenerate triangles.
+                    // On average, it saves a decent amount of space... as far as 16-bit integers go at least.
                     
                     // Add the first triangle
                     std::vector<HEK::Index> triangle_man = { all_triangles_here[0].vertices[0], all_triangles_here[0].vertices[1], all_triangles_here[0].vertices[2] };
@@ -547,6 +556,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     
                     std::size_t sa = 0;
                     std::size_t sb = 0;
+                    std::size_t sc = 0;
                     std::size_t sz = 0;
                     
                     // Add the rest
@@ -555,8 +565,13 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         
                         HEK::Index current_triangle[3] = {};
                         auto a_index = 0;
+                        
                         auto b_index = normals_flipped ? 2 : 1;
                         auto c_index = normals_flipped ? 1 : 2;
+                        
+                        auto a_index_next = a_index;
+                        auto b_index_next = c_index;
+                        auto c_index_next = b_index;
                         
                         auto &a = current_triangle[a_index];
                         auto &b = current_triangle[b_index];
@@ -564,14 +579,14 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         a = triangle_man[triangle_man.size() - 2];
                         b = triangle_man[triangle_man.size() - 1];
                         
-                        // Let's try to find a triangle that can simply go next
+                        // Let's try to find a triangle that can simply go next with only one index
                         bool triangle_found = false;
                         for(auto rt = remaining_triangles.begin(); rt != remaining_triangles.end(); rt++) {
-                            if(rt->vertices[0] == a && rt->vertices[b_index] == b) {
+                            // ABC ; BDC -> A B C D
+                            if(rt->vertices[a_index] == a && rt->vertices[b_index] == b) {
                                 triangle_found = true;
                                 triangle_man.emplace_back(rt->vertices[c_index]);
                                 remaining_triangles.erase(rt);
-                                sa++;
                                 break;
                             }
                         }
@@ -579,15 +594,30 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                             continue;
                         }
                         
-                        // Try a triangle that can go next but requires one degenerate triangle
+                        // Try a triangle that can go next but requires two indices
                         for(auto rt = remaining_triangles.begin(); rt != remaining_triangles.end(); rt++) {
-                            if(rt->vertices[0] == b) {
+                            // ABC ; CBD -> A B C B D
+                            if(rt->vertices[a_index_next] == b && rt->vertices[b_index_next] == a) {
+                                triangle_man.emplace_back(rt->vertices[b_index_next]);
+                                triangle_man.emplace_back(rt->vertices[c_index_next]);
+                                triangle_found = true;
+                                remaining_triangles.erase(rt);
+                                break;
+                            }
+                        }
+                        if(triangle_found) {
+                            continue;
+                        }
+                        
+                        // Try a triangle that can go next but requires three indices
+                        for(auto rt = remaining_triangles.begin(); rt != remaining_triangles.end(); rt++) {
+                            // ABC ; CDE -> A B C C E D
+                            if(rt->vertices[a_index] == b) {
                                 triangle_man.emplace_back(b);
                                 triangle_man.emplace_back(rt->vertices[b_index]);
                                 triangle_man.emplace_back(rt->vertices[c_index]);
                                 triangle_found = true;
                                 remaining_triangles.erase(rt);
-                                sb++;
                                 break;
                             }
                         }
@@ -595,7 +625,8 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                             continue;
                         }
                         
-                        // Last resort - Guarantees we can get the triangle in place but adds some degenerate triangles
+                        // Last resort - Guarantees we can get the triangle in place but requires five indices
+                        // ABC; DEF -> A B C C D D F E
                         triangle_man.emplace_back(b);
                         auto first_triangle = *remaining_triangles.begin();
                         remaining_triangles.erase(remaining_triangles.begin());
@@ -603,10 +634,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         triangle_man.emplace_back(first_triangle.vertices[a_index]);
                         triangle_man.emplace_back(first_triangle.vertices[b_index]);
                         triangle_man.emplace_back(first_triangle.vertices[c_index]);
-                        sz++;
                     }
-                    
-                    //std::printf("%zu %zu %zu\n", sa, sb, sz);
                     
                     // Add null's
                     while(triangle_man.size() % 3 > 0) {
