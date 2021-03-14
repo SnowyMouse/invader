@@ -643,12 +643,23 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         
         // Did we find it?
         if(first_guess.has_value()) {
-            s.shader.path = File::preferred_path_to_halo_path(first_guess->path);
+            s.shader.path = File::split_tag_class_extension(File::preferred_path_to_halo_path(first_guess->path)).value().path;
             s.shader.tag_fourcc = first_guess->fourcc;
         }
         else {
             eprintf_error("Failed to find a shader tag with the filename %s", s.shader.path.c_str());
             std::exit(EXIT_FAILURE);
+        }
+    }
+    
+    // Fix geometries
+    for(auto &r : model_tag->regions) {
+        for(auto &p : r.permutations) {
+            #define REPLACE_IF_NEEDED(from, to) if(to == NULL_INDEX) { to = from; }
+            REPLACE_IF_NEEDED(p.super_high, p.high);
+            REPLACE_IF_NEEDED(p.high, p.medium);
+            REPLACE_IF_NEEDED(p.medium, p.low);
+            REPLACE_IF_NEEDED(p.low, p.super_low);
         }
     }
     
