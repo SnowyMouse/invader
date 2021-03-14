@@ -75,13 +75,23 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         "superlow"
     };
     
+    // LoDs but enum'd
+    enum LoD {
+        LOD_SUPERHIGH = 0,
+        LOD_HIGH,
+        LOD_MEDIUM,
+        LOD_LOW,
+        LOD_SUPERLOW,
+        LOD_END
+    };
+    
     // Get our nodes
     std::vector<JMS::Node> nodes;
     
     // Sort JMSes into permutations
-    std::map<std::string, JMSMap> permutations;
+    std::map<std::string, std::map<LoD, JMS>> permutations;
     std::string top_permutation;
-    std::string top_lod;
+    const char *top_lod = lods[0];
     
     // Get regions and shaders
     std::vector<std::string> regions;
@@ -89,16 +99,16 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     for(auto &jms : map) {
         auto jms_data_copy = jms.second;
         
-        std::string lod = lods[0];
+        auto lod = LoD::LOD_SUPERHIGH;
         std::string permutation = jms.first;
         
         // Find the string and LoD
         const auto *str = permutation.c_str();
         for(const auto *i = str; *i != 0; i++) {
             if(*i == ' ') {
-                for(const auto *l : lods) {
-                    if(std::strcmp(l, i + 1) == 0) {
-                        lod = l;
+                for(auto lod_test = static_cast<LoD>(0); lod_test < LoD::LOD_END; lod_test = static_cast<LoD>(lod_test + 1)) {
+                    if(std::strcmp(lods[lod_test], i + 1) == 0) {
+                        lod = lod_test;
                         permutation = std::string(str, i);
                         goto spaghetti_code_loop_done;
                     }
@@ -109,14 +119,16 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         // Get the permutation map
         spaghetti_code_loop_done:
         auto &permutation_map = permutations[permutation];
+        const auto *lod_str = lods[lod];
+        
         if(permutation_map.find(lod) != permutation_map.end()) {
-            eprintf_error("Permutation %s has multiple %s LoDs", permutation.c_str(), lod.c_str());
+            eprintf_error("Permutation %s has multiple %s LoDs", permutation.c_str(), lod_str);
             std::exit(EXIT_FAILURE);
         }
         
         // Make sure it has nodes!
         if(jms_data_copy.nodes.empty()) {
-            eprintf_error("Permutation %s's %s LoD has no nodes", permutation.c_str(), lod.c_str());
+            eprintf_error("Permutation %s's %s LoD has no nodes", permutation.c_str(), lod_str);
             std::exit(EXIT_FAILURE);
         }
         
@@ -124,12 +136,12 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         if(nodes.empty()) {
             nodes = jms_data_copy.nodes;
             top_permutation = permutation;
-            top_lod = lod;
+            top_lod = lod_str;
         }
         
         // Otherwise, make sure we have the same nodes
         if(nodes != jms_data_copy.nodes) {
-            eprintf_error("Permutation %s's %s LoD does not match permutation %s's %s LoD's node", permutation.c_str(), lod.c_str(), top_permutation.c_str(), top_lod.c_str());
+            eprintf_error("Permutation %s's %s LoD does not match permutation %s's %s LoD's node", permutation.c_str(), lod_str, top_permutation.c_str(), top_lod);
             std::exit(EXIT_FAILURE);
         }
         
@@ -139,11 +151,11 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         auto region_count = jms_data_copy.regions.size();
         for(auto &i : jms_data_copy.triangles) {
             if(i.shader >= material_count) {
-                eprintf_error("Permutation %s's %s LoD has an out-of-bounds shader index", permutation.c_str(), lod.c_str());
+                eprintf_error("Permutation %s's %s LoD has an out-of-bounds shader index", permutation.c_str(), lod_str);
                 std::exit(EXIT_FAILURE);
             }
             if(i.region >= region_count) {
-                eprintf_error("Permutation %s's %s LoD has an out-of-bounds region index", permutation.c_str(), lod.c_str());
+                eprintf_error("Permutation %s's %s LoD has an out-of-bounds region index", permutation.c_str(), lod_str);
                 std::exit(EXIT_FAILURE);
             }
         }
@@ -184,7 +196,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         for(std::size_t mat = 0; mat < material_count; mat++) {
             auto shader_name = jms_data_copy.materials[mat].name;
             if(shader_name.empty()) {
-                eprintf_error("Permutation %s's %s LoD has an empty shader name", permutation.c_str(), lod.c_str());
+                eprintf_error("Permutation %s's %s LoD has an empty shader name", permutation.c_str(), lod_str);
                 std::exit(EXIT_FAILURE);
             }
             
@@ -206,7 +218,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                             }
                         }
                         catch(std::exception &) {
-                            eprintf_error("Permutation %s's %s LoD has an invalid shader name %s", permutation.c_str(), lod.c_str(), shader_name.c_str());
+                            eprintf_error("Permutation %s's %s LoD has an invalid shader name %s", permutation.c_str(), lod_str, shader_name.c_str());
                             std::exit(EXIT_FAILURE);
                         }
                         
@@ -249,6 +261,22 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         }
         
         permutation_map.emplace(lod, jms_data_copy); // Now add it
+    }
+    
+    // List permutations
+    for(auto &p : permutations) {
+        oprintf("    %-33s", p.first.c_str());
+        
+        bool add_comma = false;
+        for(auto &i : p.second) {
+            if(add_comma) {
+                oprintf(", ");
+            }
+            oprintf("%s", lods[i.first]);
+            add_comma = true;
+        }
+        
+        oprintf("\n");
     }
     
     // Add nodes
@@ -364,7 +392,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 auto &p = model_tag_region.permutations[permutation_index];
                 
                 // Are we the superhigh LoD? If so, add markers.
-                if(lod.first == "superhigh") {
+                if(lod.first == LoD::LOD_SUPERHIGH) {
                     for(auto &ji : jms.markers) {
                         if(ji.region == r) {
                             auto &m = p.markers.emplace_back();
@@ -381,24 +409,25 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 auto &geometry = model_tag->geometries.emplace_back();
                 
                 // Set the index
-                if(lod.first == "superhigh") {
-                    p.super_high = new_geometry_index;
-                }
-                else if(lod.first == "high") {
-                    p.high = new_geometry_index;
-                }
-                else if(lod.first == "medium") {
-                    p.medium = new_geometry_index;
-                }
-                else if(lod.first == "low") {
-                    p.low = new_geometry_index;
-                }
-                else if(lod.first == "superlow") {
-                    p.super_low = new_geometry_index;
-                }
-                else {
-                    eprintf_error("Eep!");
-                    std::exit(EXIT_FAILURE);
+                switch(lod.first) {
+                    case LoD::LOD_SUPERHIGH:
+                        p.super_high = new_geometry_index;
+                        break;
+                    case LoD::LOD_HIGH:
+                        p.high = new_geometry_index;
+                        break;
+                    case LoD::LOD_MEDIUM:
+                        p.medium = new_geometry_index;
+                        break;
+                    case LoD::LOD_LOW:
+                        p.low = new_geometry_index;
+                        break;
+                    case LoD::LOD_SUPERLOW:
+                        p.super_low = new_geometry_index;
+                        break;
+                    default:
+                        eprintf_error("Eep!");
+                        std::terminate();
                 }
                 
                 // Now for the shader indices
@@ -851,6 +880,8 @@ int main(int argc, const char **argv) {
         eprintf_error("No .jms files found in %s", directory.c_str());
         return EXIT_FAILURE;
     }
+    
+    oprintf("Found %zu model%s:\n", jms_files.size(), jms_files.size() == 1 ? "" : "s");
     
     // Generate a tag
     std::vector<std::byte> tag_data;
