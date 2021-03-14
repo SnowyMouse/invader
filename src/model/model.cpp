@@ -279,17 +279,14 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     // Make sure we don't have infinite loops with sibling indices, too
     for(std::size_t n = 0; n < node_count; n++) {
         auto &node = nodes[n];
-        
         std::size_t q = 0;
-        if(node.sibling_node != NULL_INDEX) {
-            std::size_t sibling;
-            do {
-                sibling = node.sibling_node;
-                if(q++ > node_count) {
-                    eprintf_error("Infinite loop detected with node %s's sibling index", node.name.c_str());
-                    std::exit(EXIT_FAILURE);
-                }
-            } while(sibling != NULL_INDEX);
+        auto sibling_node = nodes[nodes[n].sibling_node].sibling_node;
+        while(sibling_node != NULL_INDEX) {
+            sibling_node = nodes[sibling_node].sibling_node;
+            if(q++ > node_count) {
+                eprintf_error("Infinite loop detected with node %s's sibling index", node.name.c_str());
+                std::exit(EXIT_FAILURE);
+            }
         }
     }
     
