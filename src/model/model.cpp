@@ -67,7 +67,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     model_tag->node_list_checksum = 0;
     
     // LoDs
-    const char * const lods[] = {
+    static constexpr const char * const lods[] = {
         "superhigh",
         "high",
         "medium",
@@ -709,8 +709,26 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         
         // Did we find it?
         if(first_guess.has_value()) {
+            static const constexpr TagFourCC priorities[] = {
+                TagFourCC::TAG_FOURCC_SHADER_MODEL,
+                TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT,
+                TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC,
+                TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO,
+                TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED,
+                TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS,
+                TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER
+            };
+            
             s.shader.path = File::split_tag_class_extension(File::preferred_path_to_halo_path(first_guess->path)).value().path;
             s.shader.tag_fourcc = first_guess->fourcc;
+            
+            // Check if we have a higher priority shader
+            for(auto p : priorities) {
+                if(File::tag_path_to_file_path(s.shader.path + "." + HEK::tag_fourcc_to_extension(p), tags).has_value()) {
+                    s.shader.tag_fourcc = p;
+                    break;
+                }
+            }
         }
         else {
             eprintf_error("Failed to find a shader tag with the filename %s", s.shader.path.c_str());
