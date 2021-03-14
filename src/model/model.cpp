@@ -266,18 +266,25 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     // List permutations
     oprintf("Found %zu permutation%s:\n", permutations.size(), permutations.size() == 1 ? "" : "s");
     for(auto &p : permutations) {
-        oprintf("    %-33s", p.first.c_str());
+        oprintf("    %-32s", p.first.c_str());
         
         bool add_comma = false;
+        std::size_t verts = 0;
+        std::size_t tris = 0;
+        
         for(auto &i : p.second) {
             if(add_comma) {
                 oprintf(", ");
             }
             oprintf("%s", lods[i.first]);
             add_comma = true;
+            
+            verts += i.second.vertices.size();
+            tris += i.second.triangles.size();
         }
         
         oprintf("\n");
+        oprintf("    %-32s[%zu vert%s / %zu triangle%s]\n", "", verts, verts == 1 ? "ex" : "ices", tris, tris == 1 ? "" : "s");
     }
     
     // Add nodes
@@ -347,6 +354,8 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         auto &region = model_tag->regions.emplace_back();
         std::strncpy(region.name.string, i.c_str(), sizeof(region.name.string) - 1);
     }
+    
+    std::size_t triangle_count = 0;
     
     // Go through each permutation now
     for(auto &i : permutations) {
@@ -658,6 +667,11 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         triangle_man.emplace_back(first_triangle.vertices[c_index]);
                     }
                     
+                    // Add triangle count
+                    if(triangle_man.size() > 2) {
+                        triangle_count += triangle_man.size() - 2;
+                    }
+                    
                     // Add null's
                     while(triangle_man.size() % 3 > 0) {
                         triangle_man.emplace_back(NULL_INDEX);
@@ -750,7 +764,27 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     // Generate compressed vertices
     regenerate_missing_model_vertices(*model_tag, true);
     
-    return tag->generate_hek_tag_data(fourcc);
+    auto rval = tag->generate_hek_tag_data(fourcc);
+    
+    std::size_t vertex_count = 0;
+    std::size_t vertex_size_uncompressed = 0;
+    std::size_t vertex_size_compressed = 0;
+    std::size_t triangle_size = 0;
+    
+    for(auto &g : model_tag->geometries) {
+        for(auto &p : g.parts) {
+            vertex_count += p.uncompressed_vertices.size();
+            vertex_size_uncompressed += p.uncompressed_vertices.size() * sizeof(Parser::ModelVertexUncompressed::struct_big);
+            vertex_size_compressed += p.compressed_vertices.size() * sizeof(Parser::ModelVertexCompressed::struct_big);
+            triangle_size += p.triangles.size() * sizeof(p.triangles[0]);
+        }
+    }
+    
+    oprintf("Total: %zu vertices (%0.03f KiB uncompressed; %0.03f KiB compressed)\n", vertex_count, vertex_size_uncompressed / 1024.0F, vertex_size_compressed / 1024.0F);
+    oprintf("       %zu triangle strips (%0.03f KiB)\n", triangle_count, triangle_count * sizeof(HEK::Index) / 1024.0F);
+    oprintf("Output: %s, %0.03f KiB\n", HEK::tag_fourcc_to_extension(fourcc), rval.size() / 1024.0F);
+    
+    return rval;
 }
 
 int main(int argc, const char **argv) {
