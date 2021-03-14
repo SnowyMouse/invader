@@ -37,7 +37,7 @@ namespace Invader {
     
     static std::uint32_t read_next_uint32(const char *&string) {
         std::size_t offset;
-        std::uint32_t value = std::stoul(string, &offset, 10);
+        std::uint32_t value = static_cast<std::uint32_t>(std::stol(string, &offset, 10));
         string += offset;
         return value;
     }
