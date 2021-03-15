@@ -102,6 +102,11 @@ namespace Invader {
         
         std::string string() const;
         static JMS from_string(const char *string, const char **end = nullptr);
+        
+        /**
+         * Optimize, removing duplicate vertices
+         */
+        void optimize();
     };
     
     using JMSMap = std::map<std::string, JMS>;

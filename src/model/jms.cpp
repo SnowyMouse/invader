@@ -277,4 +277,38 @@ namespace Invader {
                std::to_string(static_cast<std::int16_t>(this->vertices[2])) + TAB +
                std::to_string(static_cast<std::int16_t>(this->vertices[1]));
     }
+    
+    void JMS::optimize() {
+        // Here we go
+        auto erase_vertex = [](JMS *jms, std::size_t vertex, std::size_t new_vertex = 0) {
+            jms->vertices.erase(jms->vertices.begin() + vertex);
+                    
+            // Go through each triangle and associate the triangles with the new vertex if they use the old one
+            // Or decrease their index by 1 if they reference a vertex after it
+            for(auto &t : jms->triangles) {
+                for(auto &t2 : t.vertices) {
+                    if(t2 == vertex) {
+                        t2 = new_vertex;
+                    }
+                    else if(t2 > vertex) {
+                        t2--;
+                    }
+                }
+            }
+        };
+        
+        // Optimize vertices by deduping
+        for(std::size_t v = 0; v < this->vertices.size(); v++) {
+            for(std::size_t v2 = v + 1; v2 < this->vertices.size(); v2++) {
+                // If it's the same, we can optimize it
+                if(this->vertices[v] == this->vertices[v2]) {
+                    // Delete vertex if needed
+                    erase_vertex(this, v2, v);
+                    
+                    // Decrement
+                    v2--;
+                }
+            }
+        }
+    }
 }
