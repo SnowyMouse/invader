@@ -215,6 +215,12 @@ namespace Invader {
         Material m;
         m.name = string_from_string(cursor, false);
         m.tif_path = string_from_string(cursor, false);
+        
+        // Lowercase the name
+        for(char &c : m.name) {
+            c = std::tolower(c);
+        }
+        
         SET_END
         return m;
     }
