@@ -415,31 +415,8 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     }
                 }
                 
-                // Add our new geometry
-                auto new_geometry_index = model_tag->geometries.size();
-                auto &geometry = model_tag->geometries.emplace_back();
-                
-                // Set the index
-                switch(lod.first) {
-                    case LoD::LOD_SUPERHIGH:
-                        p.super_high = new_geometry_index;
-                        break;
-                    case LoD::LOD_HIGH:
-                        p.high = new_geometry_index;
-                        break;
-                    case LoD::LOD_MEDIUM:
-                        p.medium = new_geometry_index;
-                        break;
-                    case LoD::LOD_LOW:
-                        p.low = new_geometry_index;
-                        break;
-                    case LoD::LOD_SUPERLOW:
-                        p.super_low = new_geometry_index;
-                        break;
-                    default:
-                        eprintf_error("Eep!");
-                        std::terminate();
-                }
+                // Instantiate our new geometry
+                typename std::remove_pointer<decltype(model_tag->geometries.data())>::type geometry;
                 
                 // Now for the shader indices
                 std::vector<std::size_t> shaders_we_use;
@@ -687,6 +664,42 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         t.vertex2_index = triangle_man[q++];
                     }
                 }
+                
+                // See if we've already made this exact geometry before
+                std::size_t new_geometry_index;
+                for(new_geometry_index = 0; new_geometry_index < model_tag->geometries.size(); new_geometry_index++) {
+                    if(model_tag->geometries[new_geometry_index] == geometry) {
+                        break; // found a duplicate
+                    }
+                }
+                
+                // If we didn't find it, we have to add it then
+                if(new_geometry_index == model_tag->geometries.size()) {
+                    model_tag->geometries.emplace_back(geometry);
+                }
+                
+                // Set the index
+                switch(lod.first) {
+                    case LoD::LOD_SUPERHIGH:
+                        p.super_high = new_geometry_index;
+                        break;
+                    case LoD::LOD_HIGH:
+                        p.high = new_geometry_index;
+                        break;
+                    case LoD::LOD_MEDIUM:
+                        p.medium = new_geometry_index;
+                        break;
+                    case LoD::LOD_LOW:
+                        p.low = new_geometry_index;
+                        break;
+                    case LoD::LOD_SUPERLOW:
+                        p.super_low = new_geometry_index;
+                        break;
+                    default:
+                        eprintf_error("Eep!");
+                        std::terminate();
+                }
+                
             }
         }
     }
