@@ -29,23 +29,27 @@ namespace Invader {
     }
     
     static std::int32_t read_next_int32(const char *&string) {
-        std::size_t offset;
-        std::int32_t value = std::stol(string, &offset, 10);
-        string += offset;
+        string = next_character(string);
+        auto *old_str = string;
+        std::int32_t value = std::strtol(string, const_cast<char **>(&string), 10);
+        if(old_str == string) {
+            throw std::invalid_argument("cannot convert string to number");
+        }
         return value;
     }
     
     static std::uint32_t read_next_uint32(const char *&string) {
-        std::size_t offset;
-        std::uint32_t value = static_cast<std::uint32_t>(std::stol(string, &offset, 10));
-        string += offset;
+        std::uint32_t value = static_cast<std::uint32_t>(read_next_int32(string));
         return value;
     }
     
     static float read_next_float(const char *&string) {
-        std::size_t offset;
-        float value = std::stof(string, &offset);
-        string += offset;
+        string = next_character(string);
+        auto *old_str = string;
+        float value = std::strtof(string, const_cast<char **>(&string));
+        if(old_str == string) {
+            throw std::invalid_argument("cannot convert string to number");
+        }
         return value;
     }
     
