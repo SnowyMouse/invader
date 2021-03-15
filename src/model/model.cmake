@@ -12,6 +12,6 @@ if(${INVADER_MODEL})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-model)
 
-    do_windows_rc(invader-model invader-model "Model tag compiler")
+    do_windows_rc(invader-model invader-model.exe "Model tag compiler")
 endif()
 
