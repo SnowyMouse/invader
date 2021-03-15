@@ -731,7 +731,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     }
     all_tags_shaders = File::load_virtual_tag_folder(all_shader_dirs);
     for(auto &i : all_tags_shaders) {
-        i.tag_path = shaders_path / i.tag_path;
+        i.tag_path = (shaders_path / i.tag_path).string();
     }
     
     std::optional<std::vector<Invader::File::TagFile>> all_tags;
