@@ -901,6 +901,12 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
+            case 'd':
+                model_options.data = args[0];
+                break;
+            case 't':
+                model_options.tags.emplace_back(args[0]);
+                break;
         }
     });
     
