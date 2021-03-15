@@ -6,7 +6,7 @@ endif()
 
 if(${INVADER_MODEL})
     add_executable(invader-model
-        src/model/model
+        src/model/model.cpp
     )
     target_link_libraries(invader-model invader)
 
