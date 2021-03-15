@@ -201,6 +201,18 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 std::exit(EXIT_FAILURE);
             }
             
+            // Check to see if this shader is even used
+            bool shader_is_used = false;
+            for(auto &t : jms_data_copy.triangles) {
+                if(t.shader == mat) {
+                    shader_is_used = true;
+                    break;
+                }
+            }
+            if(!shader_is_used) {
+                continue; // skip
+            }
+            
             // Find any trailing numbers at the end
             HEK::Index shader_index = 0;
             bool trailing_numbers = false;
@@ -254,9 +266,10 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             }
             
             // Fix all the triangles to point to the new material
-            for(auto &i : jms_data_copy.triangles) {
-                if(i.shader == mat) {
-                    i.shader = new_shader_index;
+            auto tri_count = jms_data_copy.triangles.size();
+            for(std::size_t t = 0; t < tri_count; t++) {
+                if(jms.second.triangles[t].shader == mat) { // check the original copy in case we changed the shader index previously
+                    jms_data_copy.triangles[t].shader = new_shader_index;
                 }
             }
         }
