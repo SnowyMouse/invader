@@ -99,6 +99,33 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     for(auto &jms : map) {
         auto jms_data_copy = jms.second;
         
+        // Optimize vertices
+        for(std::size_t v = 0; v < jms_data_copy.vertices.size(); v++) {
+            for(std::size_t v2 = v + 1; v2 < jms_data_copy.vertices.size(); v2++) {
+                // If it's the same, we can optimize it
+                if(jms_data_copy.vertices[v] == jms_data_copy.vertices[v2]) {
+                    // Delete the vertex
+                    jms_data_copy.vertices.erase(jms_data_copy.vertices.begin() + v2);
+                    
+                    // Go through each triangle and associate the triangles with the new vertex if they use the old one
+                    // Or decrease their index by 1 if they reference a vertex after it
+                    for(auto &t : jms_data_copy.triangles) {
+                        for(auto &t2 : t.vertices) {
+                            if(t2 == v2) {
+                                t2 = v;
+                            }
+                            else if(t2 > v2) {
+                                t2--;
+                            }
+                        }
+                    }
+                    
+                    // Decrement
+                    v2--;
+                }
+            }
+        }
+        
         auto lod = LoD::LOD_SUPERHIGH;
         std::string permutation = jms.first;
         
