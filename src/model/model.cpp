@@ -255,7 +255,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             
             // Fix all the triangles to point to the new material
             for(auto &i : jms_data_copy.triangles) {
-                if(i.shader == shader_index) {
+                if(i.shader == mat) {
                     i.shader = new_shader_index;
                 }
             }
