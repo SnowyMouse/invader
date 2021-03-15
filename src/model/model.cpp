@@ -730,29 +730,45 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         }
     }
     all_tags_shaders = File::load_virtual_tag_folder(all_shader_dirs);
+    for(auto &i : all_tags_shaders) {
+        i.tag_path = shaders_path / i.tag_path;
+    }
     
     std::optional<std::vector<Invader::File::TagFile>> all_tags;
     auto prefer_shaders = path.parent_path() / "shaders";
     
     // Resolve shaders
     for(auto &s : model_tag->shaders) {
+        auto shader_being_found = s.shader.path;
         std::optional<File::TagFilePath> first_guess;
+        std::vector<File::TagFilePath> all_shaders_found;
         
-        // Check shaders folder first
-        for(auto &t : all_tags_shaders) {
-            // Shader tag?
-            if(!IS_SHADER_TAG(t.tag_fourcc)) {
-                continue;
+        auto search_directory = [&first_guess, &shader_being_found, &all_shaders_found](const auto &directory) {
+            if(first_guess.has_value()) {
+                return;
             }
             
-            // Same name?
-            if(t.full_path.filename().replace_extension() != s.shader.path) {
-                continue;
+            for(auto &t : directory) {
+                // Shader tag?
+                if(!IS_SHADER_TAG(t.tag_fourcc)) {
+                    continue;
+                }
+                
+                // Same name?
+                if(t.full_path.filename().replace_extension() != shader_being_found) {
+                    continue;
+                }
+                
+                auto potential_shader = File::split_tag_class_extension(t.tag_path).value();
+                if(!first_guess.has_value()) {
+                    first_guess = potential_shader;
+                }
+                all_shaders_found.emplace_back(potential_shader);
             }
-            
-            first_guess = File::TagFilePath((shaders_path / t.tag_path).string(), t.tag_fourcc);
-            break;
-        }
+        };
+        
+        // Check our shaders directory first
+        search_directory(all_tags_shaders);
         
         // If that fails, we have to load the tags directory
         if(!first_guess.has_value()) {
@@ -762,20 +778,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             }
             
             // Do it
-            for(auto &t : *all_tags) {
-                // Shader tag?
-                if(!IS_SHADER_TAG(t.tag_fourcc)) {
-                    continue;
-                }
-                
-                // Same name?
-                if(t.full_path.filename().replace_extension() != s.shader.path) {
-                    continue;
-                }
-                
-                first_guess = File::TagFilePath(t.tag_path, t.tag_fourcc);
-                break;
-            }
+            search_directory(*all_tags);
         }
         
         // Did we find it?
@@ -790,7 +793,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER
             };
             
-            s.shader.path = File::split_tag_class_extension(File::preferred_path_to_halo_path(first_guess->path)).value().path;
+            s.shader.path = File::preferred_path_to_halo_path(first_guess->path);
             s.shader.tag_fourcc = first_guess->fourcc;
             
             // Check if we have a higher priority shader
@@ -804,6 +807,14 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         else {
             eprintf_error("Failed to find a shader tag with the filename %s", s.shader.path.c_str());
             std::exit(EXIT_FAILURE);
+        }
+        
+        if(all_shaders_found.size() > 1) {
+            eprintf_warn("Shader %s is ambiguous. Matched %zu shaders:", shader_being_found.c_str(), all_shaders_found.size());
+            for(auto &i : all_shaders_found) {
+                eprintf_warn("    %s", File::halo_path_to_preferred_path(i.join()).c_str());
+            }
+            eprintf_warn("Using %s.%s", File::halo_path_to_preferred_path(s.shader.path).c_str(), HEK::tag_fourcc_to_extension(s.shader.tag_fourcc));
         }
     }
     
