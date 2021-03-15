@@ -28,31 +28,6 @@ namespace Invader {
         throw std::invalid_argument("null string given");
     }
     
-    static std::int32_t read_next_int32(const char *&string) {
-        string = next_character(string);
-        auto *old_str = string;
-        std::int32_t value = std::strtol(string, const_cast<char **>(&string), 10);
-        if(old_str == string) {
-            throw std::invalid_argument("cannot convert string to number");
-        }
-        return value;
-    }
-    
-    static std::uint32_t read_next_uint32(const char *&string) {
-        std::uint32_t value = static_cast<std::uint32_t>(read_next_int32(string));
-        return value;
-    }
-    
-    static float read_next_float(const char *&string) {
-        string = next_character(string);
-        auto *old_str = string;
-        float value = std::strtof(string, const_cast<char **>(&string));
-        if(old_str == string) {
-            throw std::invalid_argument("cannot convert string to number");
-        }
-        return value;
-    }
-    
     static std::string string_from_string(const char *&string, bool limit_31_characters) {
         string = next_character(string);
         const char *end_of_string = string;
@@ -61,11 +36,38 @@ namespace Invader {
         }
         
         if(limit_31_characters && end_of_string - string > 31) {
-            throw std::out_of_range("maximum string length exceeded");
+            throw std::out_of_range(std::string("maximum string length (") + std::to_string(end_of_string - string) + " > 31) exceeded");
         }
         
         std::string value = std::string(string, end_of_string);
         string = end_of_string;
+        return value;
+    }
+    
+    static float read_next_float(const char *&string) {
+        string = next_character(string);
+        auto *old_str = string;
+        float value = std::strtof(string, const_cast<char **>(&string));
+        if(old_str == string) {
+            auto string_copy = string;
+            throw std::invalid_argument("cannot convert string `" + string_from_string(string_copy, false) + "` to a number");
+        }
+        return value;
+    }
+    
+    static std::int32_t read_next_int32(const char *&string) {
+        string = next_character(string);
+        auto *old_str = string;
+        std::int32_t value = std::strtol(string, const_cast<char **>(&string), 10);
+        if(old_str == string) {
+            auto string_copy = string;
+            throw std::invalid_argument("cannot convert string `" + string_from_string(string_copy, false) + "` to an integer");
+        }
+        return value;
+    }
+    
+    static std::uint32_t read_next_uint32(const char *&string) {
+        std::uint32_t value = static_cast<std::uint32_t>(read_next_int32(string));
         return value;
     }
     
