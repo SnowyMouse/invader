@@ -1017,6 +1017,10 @@ int main(int argc, const char **argv) {
             std::terminate();
     }
     
+    // Make directories if needed
+    std::error_code ec;
+    std::filesystem::create_directories(file_path.parent_path(), ec);
+    
     if(!File::save_file(file_path, tag_data)) {
         eprintf_error("Failed to write to %s", file_path.string().c_str());
         return EXIT_FAILURE;
