@@ -23,7 +23,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
 
-    static constexpr char DESCRIPTION[] = "Compile a model tag.";
+    static constexpr char DESCRIPTION[] = "Recover source data from tags.";
     static constexpr char USAGE[] = "[options] <tag.class>";
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RecoverOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, recover_options, [](char opt, const auto &args, RecoverOptions &recover_options) {

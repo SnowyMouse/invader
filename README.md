@@ -148,6 +148,7 @@ this project is split into different programs.
 - [invader-index]
 - [invader-info]
 - [invader-model]
+- [invader-recover]
 - [invader-refactor]
 - [invader-resource]
 - [invader-sound]
@@ -651,6 +652,24 @@ Options:
                                gbxmodel
 ```
 
+### invader-recover
+This program recovers source data from bitmaps (if color plate data is present),
+models, string lists, tag collections, and scenario scripts
+
+```
+Usage: invader-recover [options] <tag.class>
+
+Recover source data from tags.
+
+Options:
+  -d --tags <dir>              Use the specified data directory.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -P --fs-path                 Use a filesystem path for the tag path
+                               directory.
+  -t --tags <dir>              Use the specified tags directory.
+```
+
 ### invader-refactor
 This program renames and moves tag references.
 
@@ -1084,6 +1103,7 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-index]: #invader-index
 [invader-info]: #invader-info
 [invader-model]: #invader-model
+[invader-recover]: #invader-recover
 [invader-refactor]: #invader-refactor
 [invader-resource]: #invader-resource
 [invader-sound]: #invader-sound

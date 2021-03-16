@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - New tool: invader-model - Compiles model tags
+- New tool: invader-recover - Recover source data from bitmaps (if color plate
+  data is present), models, string lists, tag collections, and scenario scripts
 - invader-build: Added --stock-resource-bounds which, when building Custom
   Edition maps, only indexes a tag if the tag's index in the resource mapis the
   same on the equivalent stock resource map
