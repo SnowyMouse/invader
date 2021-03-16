@@ -82,7 +82,7 @@ namespace Invader::Recover {
             eprintf_error("Color plate size is wrong");
             std::exit(EXIT_FAILURE);
         }
-        std::vector<std::uint32_t> pixels(image_size);
+        std::vector<HEK::LittleEndian<std::uint32_t>> pixels(image_size);
         
         auto fail = []() {
             eprintf_error("Color plate data could not be decompressed");
