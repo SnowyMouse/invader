@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <sstream>
 #include <stdexcept>
 #include <invader/model/jms.hpp>
 
@@ -12,6 +13,40 @@ namespace Invader {
     static const char CRLF[] = "\r\n";
     static const char TAB[] = "\t";
     static const constexpr std::uint32_t JMS_VERSION = 8200;
+    
+    static std::string precise_double_str(const double value) {
+        // Get it to 8 digits
+        std::ostringstream out;
+        auto decimal_point = std::use_facet<std::numpunct<char>>(out.getloc()).decimal_point();
+        out.precision(10);
+        out << std::fixed << value;
+        auto str = out.str();
+        
+        // Remove potential commas to decimals
+        auto decimal_point_location = str.find_first_of(decimal_point);
+        if(decimal_point_location != std::string::npos) {
+            str[decimal_point_location] = '.';
+        }
+        else {
+            decimal_point_location = 1;
+        }
+        
+        // Remove trailing zeroes
+        std::size_t n = str.size() - 1;
+        while(n > decimal_point_location && str[n] == '0') {
+            n--;
+        }
+        
+        // Only remove decimal if needed. Otherwise, add one so we remove the 0 instead.
+        if(str[n] != '.') {
+            n++;
+        }
+        
+        // Done
+        str.resize(n);
+        
+        return str;
+    }
     
     // Skip to the next character that can be read
     static const char *next_character(const char *string) {
@@ -90,19 +125,19 @@ namespace Invader {
     }
     
     static std::string vector_to_string(const HEK::Vector3D<HEK::NativeEndian> &vector) {
-        return std::to_string(vector.i.read()) + TAB + std::to_string(vector.j.read()) + TAB + std::to_string(vector.k.read());
+        return precise_double_str(vector.i.read()) + TAB + precise_double_str(vector.j.read()) + TAB + precise_double_str(vector.k.read());
     }
     
     static std::string vector_to_string(const HEK::Point3D<HEK::NativeEndian> &vector) {
-        return std::to_string(vector.x.read()) + TAB + std::to_string(vector.y.read()) + TAB + std::to_string(vector.z.read());
+        return precise_double_str(vector.x.read()) + TAB + precise_double_str(vector.y.read()) + TAB + precise_double_str(vector.z.read());
     }
     
     static std::string vector_to_string(const HEK::Point2D<HEK::NativeEndian> &vector) {
-        return std::to_string(vector.x.read()) + TAB + std::to_string(vector.y.read());
+        return precise_double_str(vector.x.read()) + TAB + precise_double_str(vector.y.read());
     }
     
     static std::string vector_to_string(const HEK::Quaternion<HEK::NativeEndian> &vector) {
-        return std::to_string(vector.i.read()) + TAB + std::to_string(vector.j.read())+ TAB + std::to_string(vector.k.read())+ TAB + std::to_string(vector.w.read());
+        return precise_double_str(vector.i.read()) + TAB + precise_double_str(vector.j.read())+ TAB + precise_double_str(vector.k.read())+ TAB + precise_double_str(vector.w.read());
     }
     
     static HEK::Quaternion<HEK::NativeEndian> quaternion_from_string(const char *&string) {
@@ -194,7 +229,7 @@ namespace Invader {
                std::to_string(static_cast<std::int16_t>(this->node)) + CRLF +
                vector_to_string(this->rotation) + CRLF +
                vector_to_string(this->position * 100.0F) + CRLF +
-               std::to_string(this->radius);
+               precise_double_str(this->radius);
     }
     
     JMS::Node JMS::Node::from_string(const char *string, const char **end) {
@@ -267,7 +302,7 @@ namespace Invader {
                vector_to_string(this->position * 100.0F) + CRLF +
                vector_to_string(this->normal) + CRLF +
                std::to_string(static_cast<std::int16_t>(this->node1)) + CRLF +
-               std::to_string(this->node1_weight) + CRLF +
+               precise_double_str(this->node1_weight) + CRLF +
                vector_to_string(modified_texture_coordinates) + TAB + "0";
     }
     
