@@ -14,7 +14,12 @@ if(${INVADER_RECOVER})
         src/recover/recover.cpp
         src/recover/recover_method.cpp
     )
-    target_link_libraries(invader-recover invader tiff)
+
+    target_include_directories(invader-recover
+        PUBLIC ${TIFF_INCLUDE_DIRS}
+    )
+    
+    target_link_libraries(invader-recover ${TIFF_LIBRARIES} invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-recover)
 
