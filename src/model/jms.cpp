@@ -144,10 +144,10 @@ namespace Invader {
             if(version != JMS_VERSION) {
                 throw std::invalid_argument("invalid version");
             }
-            read_next_int32(cursor); // skip
             
             // Build our JMS struct
             JMS jms;
+            jms.node_list_checksum = read_next_uint32(cursor); // skip
             jms.nodes = array_from_string<Node>(cursor);
             jms.materials = array_from_string<Material>(cursor);
             jms.markers = array_from_string<Marker>(cursor);
@@ -165,13 +165,13 @@ namespace Invader {
         std::string r;
         
         r += std::to_string(JMS_VERSION) + CRLF;
-        r += std::to_string(0) + CRLF;
-        r += array_to_string(nodes);
-        r += array_to_string(materials);
-        r += array_to_string(markers);
-        r += array_to_string(regions);
-        r += array_to_string(vertices);
-        r += array_to_string(triangles);
+        r += std::to_string(this->node_list_checksum) + CRLF;
+        r += array_to_string(this->nodes);
+        r += array_to_string(this->materials);
+        r += array_to_string(this->markers);
+        r += array_to_string(this->regions);
+        r += array_to_string(this->vertices);
+        r += array_to_string(this->triangles);
         
         return r;
     }

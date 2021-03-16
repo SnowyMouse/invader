@@ -3,7 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
-- Nothing yet
+### Fixed
+- invader-model: Fixed node list checksum not being copied
+- invader-recover: Fixed node list checksum not being copied
 
 ## [0.43.0] - 2021-03-16
 ### Added

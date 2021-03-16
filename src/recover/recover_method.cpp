@@ -165,6 +165,9 @@ namespace Invader::Recover {
     template<typename T> static void make_jms(const T &model, const std::string &permutation, std::size_t lod, const std::filesystem::path &models_path, bool local_nodes) {
         JMS jms;
         
+        // Set the checksum value
+        jms.node_list_checksum = model.node_list_checksum;
+        
         // Fill out the nodes
         for(const auto &node : model.nodes) {
             auto &new_node = jms.nodes.emplace_back();

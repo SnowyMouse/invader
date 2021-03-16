@@ -11,6 +11,8 @@
 
 namespace Invader {
     struct JMS {
+        std::uint32_t node_list_checksum = 0;
+        
         struct Node {
             std::string name;
             HEK::Index first_child;

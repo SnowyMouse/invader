@@ -377,6 +377,9 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         for(auto &lod : i.second) {
             auto &jms = lod.second;
             
+            // Set the checksum value
+            model_tag->node_list_checksum = jms.node_list_checksum;
+            
             // Find all regions this encompasses
             std::vector<std::size_t> regions_we_are_in;
             for(auto &t : jms.triangles) {
