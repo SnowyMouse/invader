@@ -470,6 +470,11 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                         for(auto &v : t.vertices) {
                             // Add the vertex. Note the index of it
                             if(all_vertices_here_indexed.find(v) == all_vertices_here_indexed.end()) {
+                                if(v >= jms.vertices.size()) {
+                                    eprintf_error("Vertex index out of bounds");
+                                    std::exit(EXIT_FAILURE);
+                                }
+                                
                                 all_vertices_here_indexed[v] = all_vertices_here.size();
                                 all_vertices_here.emplace_back(jms.vertices[v]);
                             }
