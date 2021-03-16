@@ -93,6 +93,7 @@ include(src/compare/compare.cmake)
 include(src/convert/convert.cmake)
 include(src/edit/edit.cmake)
 include(src/model/model.cmake)
+include(src/recover/recover.cmake)
 
 # Qt stuff
 include(src/edit/qt/qt.cmake)
