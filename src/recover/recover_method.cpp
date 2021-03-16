@@ -178,6 +178,9 @@ namespace Invader::Recover {
         // Map a shader indices from the model to the JMS
         std::map<std::string, std::optional<std::size_t>> shader_map;
         
+        float u_scale = model.base_map_u_scale == 0.0F ? 1.0F : model.base_map_u_scale;
+        float v_scale = model.base_map_v_scale == 0.0F ? 1.0F : model.base_map_v_scale;
+        
         // Get the region
         for(auto &r : model.regions) {
             for(auto &p : r.permutations) {
@@ -319,6 +322,9 @@ namespace Invader::Recover {
                             vertex.normal = v.normal;
                             vertex.position = v.position;
                             vertex.texture_coordinates = v.texture_coords;
+                            
+                            vertex.texture_coordinates.x = vertex.texture_coordinates.x * u_scale;
+                            vertex.texture_coordinates.y = vertex.texture_coordinates.y * v_scale;
                         }
                         
                         // Add indices
