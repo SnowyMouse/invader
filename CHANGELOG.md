@@ -2,7 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [Untagged]
+- Nothing yet
+
+## [0.43.0] - 2021-03-16
 ### Added
 - New tool: invader-model - Compiles model tags
 - New tool: invader-recover - Recover source data from bitmaps (if color plate
@@ -1871,5 +1874,6 @@ image as one bitmap
 [0.42.0]: https://github.com/SnowyMouse/invader/compare/0.41.4...0.42.0
 [0.42.1]: https://github.com/SnowyMouse/invader/compare/0.42.0...0.42.1
 [0.42.2]: https://github.com/SnowyMouse/invader/compare/0.42.1...0.42.2
+[0.43.0]: https://github.com/SnowyMouse/invader/compare/0.42.2...0.43.0
 
-[Unreleased]: https://github.com/SnowyMouse/invader/compare/0.42.2...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.43.0...master
