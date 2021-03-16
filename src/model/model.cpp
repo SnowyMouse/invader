@@ -4,6 +4,7 @@
 #include <cstring>
 #include <regex>
 #include <list>
+#include <cmath>
 
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
@@ -831,6 +832,32 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             REPLACE_IF_NEEDED(p.high, p.medium);
             REPLACE_IF_NEEDED(p.medium, p.low);
             REPLACE_IF_NEEDED(p.low, p.super_low);
+        }
+    }
+    
+    // Set the base U/V scale so compressed vertices can have meaningful U/Vs if above 1
+    float max_u = 1.0F;
+    float max_v = 1.0F;
+    
+    for(auto &g : model_tag->geometries) {
+        for(auto &p : g.parts) {
+            for(auto &v : p.uncompressed_vertices) {
+                max_u = std::max(std::fabs(static_cast<float>(v.texture_coords.x)), max_u);
+                max_v = std::max(std::fabs(static_cast<float>(v.texture_coords.y)), max_v);
+            }
+        }
+    }
+    
+    // Set our scaling
+    model_tag->base_map_u_scale = max_u;
+    model_tag->base_map_v_scale = max_v;
+    
+    for(auto &g : model_tag->geometries) {
+        for(auto &p : g.parts) {
+            for(auto &v : p.uncompressed_vertices) {
+                v.texture_coords.x = v.texture_coords.x / max_u;
+                v.texture_coords.y = v.texture_coords.y / max_v;
+            }
         }
     }
     
