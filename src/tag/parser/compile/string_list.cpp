@@ -209,4 +209,12 @@ namespace Invader::Parser {
     void UnicodeStringListString::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
         string_list_pre_compile<char16_t>(this, workload, tag_index, offset);
     }
+    
+    bool check_for_broken_strings(const StringList &list) {
+        return fix_broken_strings(const_cast<StringList &>(list), false);
+    }
+    
+    bool check_for_broken_strings(const UnicodeStringList &list) {
+        return fix_broken_strings(const_cast<UnicodeStringList &>(list), false);
+    }
 }

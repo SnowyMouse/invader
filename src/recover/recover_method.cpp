@@ -7,6 +7,7 @@
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/model/jms.hpp>
+#include <invader/tag/parser/compile/string_list.hpp>
 #include "recover_method.hpp"
 
 namespace Invader::Recover {
@@ -432,6 +433,54 @@ namespace Invader::Recover {
         std::exit(EXIT_SUCCESS);
     }
     
+    static void recover_string_list(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data) {
+        auto *unicode_string_list = dynamic_cast<const Parser::UnicodeStringList *>(&tag);
+        auto *string_list = dynamic_cast<const Parser::StringList *>(&tag);
+        
+        if(string_list) {
+            std::string result;
+            
+            if(Parser::check_for_broken_strings(*string_list)) {
+                eprintf_error("String list has broken strings - tag is corrupt or edited improperly");
+                std::exit(EXIT_FAILURE);
+            }
+            
+            // Just do it!
+            for(auto &i : string_list->strings) {
+                result += std::string(reinterpret_cast<const char *>(i.string.data())) + "\r\n###END-STRING###\r\n";
+            }
+        
+            // Save
+            auto *final_result = reinterpret_cast<const std::byte *>(result.data());
+            create_directories_save_and_quit(data / (path + ".txt"), std::vector<std::byte>(final_result, final_result + result.size()));
+        }
+        else if(unicode_string_list) {
+            // Start with the BOM
+            std::u16string result = u"\xFEFF";
+            
+            // Oh... also, is this broken?
+            if(Parser::check_for_broken_strings(*unicode_string_list)) {
+                eprintf_error("String list has broken strings - tag is corrupt or edited improperly");
+                std::exit(EXIT_FAILURE);
+            }
+            
+            // Go through each string and add it
+            for(auto &i : unicode_string_list->strings) {
+                result += reinterpret_cast<const char16_t *>(i.string.data());
+                result += u"\r\n###END-STRING###\r\n";
+            }
+        
+            // Save
+            auto *result_data = result.data();
+            auto *final_result = reinterpret_cast<const std::byte *>(result_data);
+            auto *final_result_end = reinterpret_cast<const std::byte *>(result_data + result.size());
+            create_directories_save_and_quit(data / (path + ".txt"), std::vector<std::byte>(final_result, final_result_end));
+        }
+        else {
+            return;
+        }
+    }
+    
     void recover_model(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data) {
         recover_jms<Parser::Model>(tag, path, data);
         recover_jms<Parser::GBXModel>(tag, path, data);
@@ -441,6 +490,7 @@ namespace Invader::Recover {
         recover_bitmap(tag, path, data);
         recover_tag_collection(tag, path, data);
         recover_model(tag, path, data);
+        recover_string_list(tag, path, data);
     
         eprintf_warn("Data cannot be recovered from tag class %s", HEK::tag_fourcc_to_extension(tag_fourcc));
         std::exit(EXIT_FAILURE);
