@@ -396,7 +396,6 @@ namespace Invader::Recover {
         
         // Create directories if needed
         std::error_code ec;
-        std::filesystem::remove_all(model_directory, ec);
         std::filesystem::create_directories(model_directory, ec);
         
         if(model->markers.size() > 0) {
@@ -481,6 +480,39 @@ namespace Invader::Recover {
         }
     }
     
+    static void recover_scripts(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data) {
+        auto *scenario = dynamic_cast<const Parser::Scenario *>(&tag);
+        if(!scenario) {
+            return;
+        }
+        
+        if(scenario->source_files.size() == 0) {
+            eprintf_warn("Scenario does not have any script source data to recover");
+            std::exit(EXIT_FAILURE);
+        }
+        
+        // Models
+        auto scripts_directory = data / std::filesystem::path(path).replace_extension() / "scripts";
+        
+        // Create directories if needed
+        std::error_code ec;
+        std::filesystem::create_directories(scripts_directory, ec);
+        
+        // Write it all
+        for(auto &hsc : scenario->source_files) {
+            auto hsc_path = scripts_directory / (std::string(hsc.name.string) + ".hsc");
+            if(File::save_file(hsc_path, hsc.source)) {
+                oprintf_success("Recovered %s", hsc_path.string().c_str());
+            }
+            else {
+                eprintf_error("Failed to write to %s", hsc_path.string().c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        
+        std::exit(EXIT_SUCCESS);
+    }
+    
     void recover_model(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data) {
         recover_jms<Parser::Model>(tag, path, data);
         recover_jms<Parser::GBXModel>(tag, path, data);
@@ -491,6 +523,7 @@ namespace Invader::Recover {
         recover_tag_collection(tag, path, data);
         recover_model(tag, path, data);
         recover_string_list(tag, path, data);
+        recover_scripts(tag, path, data);
     
         eprintf_warn("Data cannot be recovered from tag class %s", HEK::tag_fourcc_to_extension(tag_fourcc));
         std::exit(EXIT_FAILURE);
