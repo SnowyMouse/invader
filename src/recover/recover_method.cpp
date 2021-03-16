@@ -6,6 +6,7 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/model/jms.hpp>
 #include "recover_method.hpp"
 
 namespace Invader::Recover {
@@ -152,9 +153,294 @@ namespace Invader::Recover {
         std::exit(EXIT_SUCCESS);
     }
     
+    static const char *ALL_LODS[] = {
+        "superhigh",
+        "high",
+        "medium",
+        "low",
+        "superlow"
+    };
+    
+    template<typename T> static void make_jms(const T &model, const std::string &permutation, std::size_t lod, const std::filesystem::path &models_path, bool local_nodes) {
+        JMS jms;
+        
+        // Fill out the nodes
+        for(const auto &node : model.nodes) {
+            auto &new_node = jms.nodes.emplace_back();
+            new_node.name = node.name.string;
+            new_node.position = node.default_translation;
+            new_node.rotation = node.default_rotation;
+            new_node.sibling_node = node.next_sibling_node_index;
+            new_node.first_child = node.first_child_node_index;
+        }
+        
+        // Map a shader indices from the model to the JMS
+        std::map<std::string, std::optional<std::size_t>> shader_map;
+        
+        // Get the region
+        for(auto &r : model.regions) {
+            for(auto &p : r.permutations) {
+                if(permutation == p.name.string) {
+                    // Get the geometry index
+                    std::size_t geometry_index;
+                    bool can_be_used;
+                    switch(lod) {
+                        case 0:
+                            geometry_index = p.super_high;
+                            can_be_used = true;
+                            break;
+                        case 1:
+                            geometry_index = p.high;
+                            can_be_used = geometry_index != p.super_high;
+                            break;
+                        case 2:
+                            geometry_index = p.medium;
+                            can_be_used = geometry_index != p.high;
+                            break;
+                        case 3:
+                            geometry_index = p.low;
+                            can_be_used = geometry_index != p.medium;
+                            break;
+                        case 4:
+                            geometry_index = p.super_low;
+                            can_be_used = geometry_index != p.low;
+                            break;
+                        default:
+                            std::terminate();
+                    }
+                    
+                    // Is it valid?
+                    if(geometry_index >= model.geometries.size()) {
+                        throw Invader::InvalidTagDataException();
+                    }
+                    
+                    // Skip it?
+                    if(!can_be_used) {
+                        continue;
+                    }
+                    
+                    // Add our new region
+                    auto new_region_index = jms.regions.size();
+                    auto &new_region = jms.regions.emplace_back();
+                    new_region.name = r.name.string;
+                    
+                    // If superhigh, export markers too
+                    if(lod == 0) {
+                        for(auto &m : p.markers) {
+                            auto &marker = jms.markers.emplace_back();
+                            marker.name = m.name.string;
+                            marker.node = m.node_index;
+                            marker.position = m.translation;
+                            marker.rotation = m.rotation;
+                            marker.region = new_region_index;
+                        }
+                    }
+                    
+                    // Geometry
+                    auto &geometry = model.geometries[geometry_index];
+                    
+                    for(auto &p : geometry.parts) {
+                        // Is the shader valid?
+                        if(p.shader_index >= model.shaders.size()) {
+                            eprintf_error("Invalid shader index!");
+                            throw Invader::InvalidTagDataException();
+                        }
+                        
+                        // Here we go
+                        auto &shader_entry = model.shaders[p.shader_index];
+                        auto shader_name = std::filesystem::path(File::halo_path_to_preferred_path(shader_entry.shader.path)).filename().string();
+                        
+                        // If the permutation is non-zero, also add the permutation index
+                        if(shader_entry.permutation > 0) {
+                            shader_name += std::to_string(shader_entry.permutation);
+                        }
+                        
+                        auto &mapped_index_maybe = shader_map[shader_name];
+                        
+                        // Add the shader if not present
+                        if(!mapped_index_maybe.has_value()) {
+                            mapped_index_maybe = jms.materials.size();
+                            auto &material = jms.materials.emplace_back();
+                            material.name = shader_name;
+                            material.tif_path = "<none>";
+                        }
+                        
+                        // Uncompressed vertices are missing
+                        if(p.uncompressed_vertices.size() == 0) {
+                            eprintf_error("Missing uncompressed vertices - tag likely extracted improperly (haw haw!)");
+                            throw Invader::InvalidTagDataException();
+                        }
+                        
+                        // Begin extracting the geometry data
+                        auto shader_mapped_index = *mapped_index_maybe;
+                        
+                        // Extract the vertices
+                        std::size_t first_vertex_offset = jms.vertices.size();
+                        for(auto &v : p.uncompressed_vertices) {
+                            auto &vertex = jms.vertices.emplace_back();
+                            
+                            // Handle local nodes
+                            if(local_nodes) {
+                                auto *memes = reinterpret_cast<const Parser::GBXModelGeometryPart *>(&p);
+                                if(memes->local_node_count > sizeof(memes->local_node_indices) / sizeof(*memes->local_node_indices)) {
+                                    eprintf_error("Local nodes overflow");
+                                    throw Invader::InvalidTagDataException();
+                                }
+                                
+                                if(v.node0_index != NULL_INDEX) {
+                                    if(v.node0_index >= memes->local_node_count) {
+                                        eprintf_error("Local nodes index out of bounds");
+                                        throw Invader::InvalidTagDataException();
+                                    }
+                                    vertex.node0 = v.node0_index;
+                                }
+                                else {
+                                    vertex.node0 = NULL_INDEX;
+                                }
+                                
+                                if(v.node1_index != NULL_INDEX) {
+                                    if(v.node1_index >= memes->local_node_count) {
+                                        eprintf_error("Local nodes index out of bounds");
+                                        throw Invader::InvalidTagDataException();
+                                    }
+                                    vertex.node1 = v.node1_index;
+                                }
+                                else {
+                                    vertex.node1 = NULL_INDEX;
+                                }
+                            }
+                            else {
+                                vertex.node0 = v.node0_index;
+                                vertex.node1 = v.node1_index;
+                            }
+                            
+                            vertex.node1_weight = v.node1_weight;
+                            vertex.normal = v.normal;
+                            vertex.position = v.position;
+                            vertex.texture_coordinates = v.texture_coords;
+                        }
+                        
+                        // Add indices
+                        std::vector<HEK::Index> indices;
+                        for(auto &t : p.triangles) {
+                            indices.emplace_back(t.vertex0_index);
+                            indices.emplace_back(t.vertex1_index);
+                            indices.emplace_back(t.vertex2_index);
+                        }
+                        
+                        // Error if that went wrong
+                        if(indices.size() < 3) {
+                            eprintf_error("Geometry has no geometry");
+                            throw Invader::InvalidTagDataException();
+                        }
+                        
+                        // Begin adding the triangles
+                        auto triangle_count = indices.size() - 2;
+                        auto *triangle = indices.data();
+                        auto *triangle_end = indices.data() + triangle_count;
+                        bool flipped_normal = false;
+                        for(; triangle < triangle_end; triangle++) {
+                            // Get the vertex indices
+                            auto a = triangle[0];
+                            auto b = triangle[flipped_normal ? 2 : 1];
+                            auto c = triangle[flipped_normal ? 1 : 2];
+                            flipped_normal = !flipped_normal;
+                            
+                            // Check if degenerate or null. If so, skip
+                            if(a == b || b == c || a == c || a == NULL_INDEX || b == NULL_INDEX || c == NULL_INDEX) {
+                                continue;
+                            }
+                            
+                            // Read it!
+                            auto &new_triangle = jms.triangles.emplace_back();
+                            new_triangle.region = new_region_index;
+                            new_triangle.shader = shader_mapped_index;
+                            new_triangle.vertices[0] = first_vertex_offset + a;
+                            new_triangle.vertices[1] = first_vertex_offset + b;
+                            new_triangle.vertices[2] = first_vertex_offset + c;
+                        }
+                    }
+                    
+                    break;
+                }
+            }
+        }
+        
+        // If we didn't get anything, return
+        if(jms.triangles.size() == 0) {
+            return;
+        }
+        
+        // Filename memery
+        auto filename = models_path / (permutation + " " + ALL_LODS[lod] + ".jms");
+        auto string_data = jms.string();
+        auto *jms_data = string_data.data();
+        if(File::save_file(filename, std::vector<std::byte>(reinterpret_cast<std::byte *>(jms_data), reinterpret_cast<std::byte *>(jms_data + string_data.size())))) {
+            oprintf_success("Recovered %s", filename.string().c_str());
+        }
+        else {
+            eprintf_error("Failed to write to %s", filename.string().c_str());
+            std::exit(EXIT_FAILURE);
+        }
+    }
+    
+    template<typename T> static void recover_jms(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data) {
+        auto *model = dynamic_cast<const T *>(&tag);
+        if(!model) {
+            return;
+        }
+        
+        // Models
+        auto model_directory = data / std::filesystem::path(path).replace_extension() / "models";
+        
+        // Create directories if needed
+        std::error_code ec;
+        std::filesystem::remove_all(model_directory, ec);
+        std::filesystem::create_directories(model_directory, ec);
+        
+        if(model->markers.size() > 0) {
+            eprintf_error("Markers are present in base struct - tag likely extracted improperly (haw haw!)");
+            throw Invader::InvalidTagDataException();
+        }
+        
+        bool local_nodes = model->flags == HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        
+        // Get all permutations
+        std::vector<std::string> permutations;
+        for(auto &r : model->regions) {
+            for(auto &p : r.permutations) {
+                bool in_it = false;
+                for(auto &p2 : permutations) {
+                    if(p2 == p.name.string) {
+                        in_it = true;
+                        break;
+                    }
+                }
+                if(!in_it) {
+                    permutations.emplace_back(p.name.string);
+                }
+            }
+        }
+        
+        // Make all permutations
+        for(auto &p : permutations) {
+            for(std::size_t i = 0; i < sizeof(ALL_LODS) / sizeof(*ALL_LODS); i++) {
+                make_jms(*model, p, i, model_directory, local_nodes);
+            }
+        }
+        
+        std::exit(EXIT_SUCCESS);
+    }
+    
+    void recover_model(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data) {
+        recover_jms<Parser::Model>(tag, path, data);
+        recover_jms<Parser::GBXModel>(tag, path, data);
+    }
+    
     void recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc) {
-        recover_tag_collection(tag, path, data);
         recover_bitmap(tag, path, data);
+        recover_tag_collection(tag, path, data);
+        recover_model(tag, path, data);
     
         eprintf_warn("Data cannot be recovered from tag class %s", HEK::tag_fourcc_to_extension(tag_fourcc));
         std::exit(EXIT_FAILURE);
