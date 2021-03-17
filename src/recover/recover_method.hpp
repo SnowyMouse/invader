@@ -18,8 +18,9 @@ namespace Invader::Recover {
      * @param path       tag path
      * @param data       data directory to recover to
      * @param tag_fourcc tag class fourcc
+     * @param overwrite  overwrite data
      */
-    void recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc);
+    void recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc, bool overwrite);
 }
 
 #endif

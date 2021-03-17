@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-recover: Added `-O` to overwrite data rather than overwriting by
+  default
+
 ### Fixed
 - invader-model: Fixed node list checksum not being copied
 - invader-recover: Fixed node list checksum not being copied

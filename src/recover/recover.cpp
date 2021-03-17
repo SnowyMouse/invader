@@ -15,12 +15,14 @@ int main(int argc, const char **argv) {
         std::filesystem::path tags = "tags";
         std::filesystem::path data = "data";
         bool filesystem_path = false;
+        bool overwrite = false;
     } recover_options;
 
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("tags", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("overwrite", 'O', 0, "Overwrite data if it already exists");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
 
     static constexpr char DESCRIPTION[] = "Recover source data from tags.";
@@ -36,6 +38,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'd':
                 recover_options.data = args[0];
+                break;
+            case 'O':
+                recover_options.overwrite = true;
                 break;
             case 't':
                 recover_options.tags = args[0];
@@ -74,5 +79,5 @@ int main(int argc, const char **argv) {
     
     // Load it
     auto tag_data = Parser::ParserStruct::parse_hek_tag_file(file->data(), file->size());
-    Recover::recover(*tag_data, std::filesystem::path(tag).replace_extension().string(), recover_options.data, reinterpret_cast<const HEK::TagFileHeader *>(file->data())->tag_fourcc);
+    Recover::recover(*tag_data, std::filesystem::path(tag).replace_extension().string(), recover_options.data, reinterpret_cast<const HEK::TagFileHeader *>(file->data())->tag_fourcc, recover_options.overwrite);
 }
