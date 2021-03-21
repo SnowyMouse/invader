@@ -233,6 +233,23 @@ namespace Invader::EditQt {
         if(this->initial_load) {
             this->refresh_view();
         }
+        
+        // Set the title
+        std::string title;
+        for(auto &i : directories) {
+            auto str = i.string();
+            if(!title.empty()) {
+                title += ", ";
+                
+                if(title.size() + str.size() > 512) {
+                    title += "...";
+                    break;
+                }
+            }
+            title += str;
+        }
+        title += std::string(" — ") + qApp->applicationDisplayName().toStdString();
+        this->setWindowTitle(title.c_str());
     }
 
     void TagTreeWindow::paintEvent(QPaintEvent *event) {

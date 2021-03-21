@@ -325,16 +325,18 @@ namespace Invader::EditQt {
     void TagEditorWindow::make_dirty(bool dirty) {
         this->dirty = dirty;
 
-        char title_bar[512];
-        if(this->file.tag_path.size() == 0) {
-            std::snprintf(title_bar, sizeof(title_bar), "Untitled %s", HEK::tag_fourcc_to_extension(this->file.tag_fourcc));
+        // Start writing the title
+        std::string title;
+        if(this->file.tag_path.empty()) {
+            title = std::string("Untitled ") + HEK::tag_fourcc_to_extension(this->file.tag_fourcc);
         }
         else {
-            const char *asterisk = dirty ? " *" : "";
-            std::snprintf(title_bar, sizeof(title_bar), "%s%s", this->file.full_path.string().c_str(), asterisk);
+            title = std::string(this->file.full_path.string().c_str()) + (dirty ? " *" : "");
         }
-        this->setWindowTitle(title_bar);
-
+        
+        title += std::string(" — ") + qApp->applicationDisplayName().toStdString();
+        this->setWindowTitle(title.c_str());
+        
         if(this->subwindow) {
             if(this->subwindow->isHidden()) {
                 this->subwindow->deleteLater();

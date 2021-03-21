@@ -7,6 +7,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-recover: Added `-O` to overwrite data rather than overwriting by
   default
 
+### Changed
+- invader-edit-qt: The tags directories are now listed in the title bar of the
+  main window
+
 ### Fixed
 - invader-model: Fixed node list checksum not being copied
 - invader-recover: Fixed node list checksum not being copied
