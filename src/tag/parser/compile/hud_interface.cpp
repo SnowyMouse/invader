@@ -6,6 +6,31 @@
 
 #include "hud_interface.hpp"
 
+#define CHECK_INTERFACE_BITMAP_SEQ(bitmap_tag, sequence_index, name) { \
+    if((!workload.disable_recursion && !workload.disable_error_checking) && (!bitmap_tag.tag_id.is_null())) { \
+        std::size_t sequence_count; \
+        const BitmapGroupSequence::struct_little *sequences; \
+        char bitmap_tag_path[256]; \
+        HEK::BitmapType bitmap_type; \
+        get_sequence_data(workload, bitmap_tag.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type); \
+        if(sequence_index >= sequence_count) { \
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced by %s is out of bounds (>= %zu)", static_cast<std::size_t>(sequence_index), bitmap_tag_path, name, sequence_count); \
+            throw InvalidTagDataException(); \
+        } \
+        else { \
+            auto &sequence = sequences[sequence_index]; \
+            if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) { \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in %s has 0 sprites", static_cast<std::size_t>(sequence_index), name, bitmap_tag_path); \
+                throw InvalidTagDataException(); \
+            } \
+            else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) { \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in %s has 0 bitmaps", static_cast<std::size_t>(sequence_index), name, bitmap_tag_path); \
+                throw InvalidTagDataException(); \
+            } \
+        } \
+    } \
+}
+
 namespace Invader::Parser {
     void WeaponHUDInterface::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         union {
@@ -44,7 +69,7 @@ namespace Invader::Parser {
         }
     }
 
-    void get_sequence_data(const Invader::BuildWorkload &workload, const HEK::TagID &tag_id, std::size_t &sequence_count, const BitmapGroupSequence::struct_little *&sequences, char *bitmap_tag_path, std::size_t bitmap_tag_path_size, HEK::BitmapType &bitmap_type) {
+    void get_sequence_data(const BuildWorkload &workload, const HEK::TagID &tag_id, std::size_t &sequence_count, const BitmapGroupSequence::struct_little *&sequences, char *bitmap_tag_path, std::size_t bitmap_tag_path_size, HEK::BitmapType &bitmap_type) {
         if(tag_id.is_null()) {
             sequence_count = 0;
             sequences = nullptr;
@@ -62,7 +87,7 @@ namespace Invader::Parser {
         }
     }
 
-    void WeaponHUDInterfaceCrosshair::post_compile(Invader::BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
+    void WeaponHUDInterfaceCrosshair::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         // Figure out what we're getting into
         std::size_t sequence_count;
         const BitmapGroupSequence::struct_little *sequences;
@@ -110,91 +135,56 @@ namespace Invader::Parser {
         }
     }
 
-    void WeaponHUDInterfaceMeter::post_compile(Invader::BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
+    void WeaponHUDInterfaceMeter::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         // Make sure it's valid
         if(this->sequence_index != NULL_INDEX && (!workload.disable_recursion || !workload.disable_error_checking)) {
-            // Figure out what we're getting into
-            std::size_t sequence_count;
-            const BitmapGroupSequence::struct_little *sequences;
-            char bitmap_tag_path[256];
-            HEK::BitmapType bitmap_type;
-            get_sequence_data(workload, this->meter_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
-
-            if(this->sequence_index >= sequence_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceMeter::struct_little), sequence_count);
-                throw InvalidTagDataException();
-            }
-            else {
-                auto &sequence = sequences[this->sequence_index];
-                if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 sprites", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceMeter::struct_little));
-                    throw InvalidTagDataException();
-                }
-                else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 bitmaps", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceMeter::struct_little));
-                    throw InvalidTagDataException();
-                }
-            }
+            CHECK_INTERFACE_BITMAP_SEQ(this->meter_bitmap, this->sequence_index, (std::string("meter #") + std::to_string(struct_offset / sizeof(*this))).c_str());
         }
     }
 
-    void WeaponHUDInterfaceStaticElement::post_compile(Invader::BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
+    void WeaponHUDInterfaceStaticElement::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         // Make sure it's valid
         if(this->sequence_index != NULL_INDEX && (!workload.disable_recursion || !workload.disable_error_checking)) {
-            // Figure out what we're getting into
-            std::size_t sequence_count;
-            const BitmapGroupSequence::struct_little *sequences;
-            char bitmap_tag_path[256];
-            HEK::BitmapType bitmap_type;
-            get_sequence_data(workload, this->interface_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
-
-            if(this->sequence_index >= sequence_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in static element #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceStaticElement::struct_little), sequence_count);
-                throw InvalidTagDataException();
-            }
-            else {
-                auto &sequence = sequences[this->sequence_index];
-                if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in static element #%zu has 0 sprites", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceStaticElement::struct_little));
-                    throw InvalidTagDataException();
-                }
-                else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in static element #%zu has 0 bitmaps", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceStaticElement::struct_little));
-                    throw InvalidTagDataException();
-                }
-            }
+            CHECK_INTERFACE_BITMAP_SEQ(this->interface_bitmap, this->sequence_index, (std::string("static element #") + std::to_string(struct_offset / sizeof(*this))).c_str());
         }
     }
 
-    void WeaponHUDInterfaceOverlayElement::post_compile(Invader::BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
-        // Figure out what we're getting into
-        std::size_t sequence_count;
-        const BitmapGroupSequence::struct_little *sequences;
-        char bitmap_tag_path[256];
-        HEK::BitmapType bitmap_type;
-        get_sequence_data(workload, this->overlay_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
-
+    void WeaponHUDInterfaceOverlayElement::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         // Make sure it's valid
         std::size_t overlay_count = this->overlays.size();
         for(std::size_t i = 0; i < overlay_count; i++) {
             auto &overlay = this->overlays[i];
-            if(overlay.sequence_index != NULL_INDEX && (!workload.disable_recursion || !workload.disable_error_checking)) {
-                if(overlay.sequence_index >= sequence_count) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of element #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceOverlayElement::struct_little), sequence_count);
-                    throw InvalidTagDataException();
-                }
-                else {
-                    auto &sequence = sequences[overlay.sequence_index];
-                    if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of element #%zu has 0 sprites", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceOverlayElement::struct_little));
-                        throw InvalidTagDataException();
-                    }
-                    else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of element #%zu has 0 bitmaps", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceOverlayElement::struct_little));
-                        throw InvalidTagDataException();
-                    }
-                }
-            }
+            CHECK_INTERFACE_BITMAP_SEQ(this->overlay_bitmap, overlay.sequence_index, (std::string("overlay #") + std::to_string(struct_offset / sizeof(*this))).c_str());
+        }
+    }
+    
+    void UnitHUDInterface::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        // Bounds check these values
+        CHECK_INTERFACE_BITMAP_SEQ(this->hud_background_interface_bitmap, this->hud_background_sequence_index, "HUD background");
+        CHECK_INTERFACE_BITMAP_SEQ(this->shield_panel_background_interface_bitmap, this->shield_panel_background_sequence_index, "shield panel background");
+        CHECK_INTERFACE_BITMAP_SEQ(this->shield_panel_meter_meter_bitmap, this->shield_panel_meter_sequence_index, "shield panel meter");
+        CHECK_INTERFACE_BITMAP_SEQ(this->health_panel_background_interface_bitmap, this->shield_panel_background_sequence_index, "health panel background");
+        CHECK_INTERFACE_BITMAP_SEQ(this->health_panel_meter_meter_bitmap, this->health_panel_meter_sequence_index, "health panel meter");
+        CHECK_INTERFACE_BITMAP_SEQ(this->motion_sensor_background_interface_bitmap, this->motion_sensor_background_sequence_index, "motion sensor background");
+        CHECK_INTERFACE_BITMAP_SEQ(this->motion_sensor_foreground_interface_bitmap, this->motion_sensor_foreground_sequence_index, "motion sensor foreground");
+        
+        // Bounds check the overlays
+        auto overlay_count = this->overlays.size();
+        for(std::size_t i = 0; i < overlay_count; i++) {
+            char overlay_name[256];
+            std::snprintf(overlay_name, sizeof(overlay_name), "overlay #%zu", i);
+            auto &overlay = this->overlays[i];
+            CHECK_INTERFACE_BITMAP_SEQ(overlay.interface_bitmap, overlay.sequence_index, overlay_name);
+        }
+        
+        // Bounds check the meters
+        auto meter_count = this->meters.size();
+        for(std::size_t i = 0; i < meter_count; i++) {
+            char meter_name[256];
+            std::snprintf(meter_name, sizeof(meter_name), "meter #%zu", i);
+            auto &meter = this->meters[i];
+            CHECK_INTERFACE_BITMAP_SEQ(meter.background_interface_bitmap, meter.background_sequence_index, (std::string(meter_name) + " background").c_str());
+            CHECK_INTERFACE_BITMAP_SEQ(meter.meter_meter_bitmap, meter.meter_sequence_index, (std::string(meter_name) + " meter").c_str());
         }
     }
 }

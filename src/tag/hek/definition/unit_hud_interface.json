@@ -1152,6 +1152,7 @@
             }
         ],
         "type": "struct",
-        "size": 1388
+        "size": 1388,
+        "post_compile": true
     }
 ]

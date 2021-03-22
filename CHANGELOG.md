@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
   default
 
 ### Changed
+- invader-build: Unit HUD interface sequences are now checked
 - invader-edit-qt: The tags directories are now listed in the title bar of the
   main window
 
