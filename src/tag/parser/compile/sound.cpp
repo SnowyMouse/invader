@@ -51,19 +51,17 @@ namespace Invader::Parser {
         switch(this->format) {
             case HEK::SoundFormat::SOUND_FORMAT_FLAC:
                 if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses FLAC which does not exist on the target engine", permutation_index);
-                    throw InvalidTagDataException();
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses FLAC which does not exist on the target engine", permutation_index);
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                 if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
-                    throw InvalidTagDataException();
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_IMA_ADPCM:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM is unsupported on the target engine", permutation_index);
-                throw InvalidTagDataException();
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine", permutation_index);
+                break;
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                 if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the target engine without a mod", permutation_index);

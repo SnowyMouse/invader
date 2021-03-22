@@ -9,6 +9,11 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-build: Unit HUD interface sequences are now checked
+- invader-build: Using the high resolution scaling flag on Xbox is now treated
+  as an error, as this functionality does not exist on the Xbox version
+- invader-build: Some fatal errors have been reduced to errors since they are
+  technically valid tag data and can be handled, but not valid for the target
+  engine
 - invader-edit-qt: The tags directories are now listed in the title bar of the
   main window
 
