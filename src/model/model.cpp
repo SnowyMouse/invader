@@ -843,7 +843,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         }
     }
     
-    // Fix geometries
+    // Fix geometries. Set the flag
     for(auto &r : model_tag->regions) {
         for(auto &p : r.permutations) {
             #define REPLACE_IF_NEEDED(from, to) if(to == NULL_INDEX) { to = from; }
@@ -851,6 +851,11 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             REPLACE_IF_NEEDED(p.high, p.medium);
             REPLACE_IF_NEEDED(p.medium, p.low);
             REPLACE_IF_NEEDED(p.low, p.super_low);
+            
+            // Set this flag
+            if(p.name.string[0] == '~') {
+                p.flags = HEK::ModelRegionPermutationFlagsFlag::MODEL_REGION_PERMUTATION_FLAGS_FLAG_CANNOT_BE_CHOSEN_RANDOMLY;
+            }
         }
     }
     
