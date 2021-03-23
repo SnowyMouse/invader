@@ -226,6 +226,9 @@ namespace Invader {
         Marker m;
         m.name = string_from_string(cursor, true);
         m.region = read_next_uint32(cursor);
+        if((m.region & NULL_INDEX) == NULL_INDEX) {
+            m.region = 0; // -1 = 0 I guess
+        }
         m.node = read_next_uint32(cursor);
         m.rotation = quaternion_from_string(cursor);
         m.position = point3d_from_string(cursor) / 100.0F;
@@ -315,6 +318,9 @@ namespace Invader {
         SET_CURSOR
         Triangle t;
         t.region = read_next_uint32(cursor);
+        if((t.region & NULL_INDEX) == NULL_INDEX) {
+            t.region = 0; // -1 = 0 I guess
+        }
         t.shader = read_next_uint32(cursor);
         t.vertices[0] = read_next_uint32(cursor);
         t.vertices[2] = read_next_uint32(cursor);

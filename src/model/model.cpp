@@ -169,6 +169,9 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             }
         }
         
+        auto triangle_count = jms_data_copy.triangles.size();
+        auto marker_count = jms_data_copy.markers.size();
+        
         // Add any regions it may have
         for(std::size_t i = 0; i < region_count; i++) {
             auto &r = jms_data_copy.regions[i];
@@ -193,10 +196,15 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 regions.insert(iterator, r.name);
             }
             
-            // Fix all the triangles to point to the new region
-            for(auto &t : jms_data_copy.triangles) {
-                if(t.region == i) {
-                    t.region = new_region_index;
+            // Fix all the triangles and markers to point to the new region
+            for(std::size_t t = 0; t < triangle_count; t++) {
+                if(jms.second.triangles[t].region == i) {
+                    jms_data_copy.triangles[t].region = new_region_index;
+                }
+            }
+            for(std::size_t m = 0; m < marker_count; m++) {
+                if(jms.second.markers[m].region == i) {
+                    jms_data_copy.markers[m].region = new_region_index;
                 }
             }
         }
