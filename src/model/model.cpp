@@ -126,6 +126,14 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             permutation = "__base";
         }
         
+        // Check for multiple permutations of the same name
+        for(auto &p2 : permutations) {
+            if(p2.first == permutation) {
+                eprintf_error("Multiple permutations of the same name (%s)", permutation.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        
         // Let's begin
         auto &permutation_map = permutations[permutation];
         const auto *lod_str = lods[lod];
@@ -286,7 +294,8 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     }
     
     // List permutations
-    oprintf("Found %zu permutation%s:\n", permutations.size(), permutations.size() == 1 ? "" : "s");
+    auto permutation_count = permutations.size();
+    oprintf("Found %zu permutation%s:\n",permutation_count, permutation_count == 1 ? "" : "s");
     for(auto &p : permutations) {
         oprintf("    %-32s", p.first.c_str());
         

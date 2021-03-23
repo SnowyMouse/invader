@@ -16,6 +16,7 @@ This is used for recording Invader's changes. This changelog is based on
   engine
 - invader-edit-qt: The tags directories are now listed in the title bar of the
   main window
+- invader-model: Duplicate permutations of the same name are now checked
 
 ### Fixed
 - invader-model: Fixed node list checksum not being copied
