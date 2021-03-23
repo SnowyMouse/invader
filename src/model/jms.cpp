@@ -74,8 +74,18 @@ namespace Invader {
             throw std::out_of_range(std::string("maximum string length (") + std::to_string(end_of_string - string) + " > 31) exceeded");
         }
         
+        // Make a substring out of this
         std::string value = std::string(string, end_of_string);
+        
+        // Strings get lowercased
+        for(auto &c : value) {
+            c = std::tolower(c);
+        }
+        
+        // Set pointer to end of this string
         string = end_of_string;
+        
+        // Done!
         return value;
     }
     
@@ -240,6 +250,12 @@ namespace Invader {
         n.sibling_node = read_next_uint32(cursor);
         n.rotation = quaternion_from_string(cursor);
         n.position = point3d_from_string(cursor) / 100.0F;
+        
+        // Rename base -> __base. I don't know why this has to be done, but it's what tool.exe does.
+        if(n.name == "base") {
+            n.name = "__base";
+        }
+        
         SET_END
         return n;
     }
@@ -256,11 +272,6 @@ namespace Invader {
         Material m;
         m.name = string_from_string(cursor, false);
         m.tif_path = string_from_string(cursor, false);
-        
-        // Lowercase the name
-        for(char &c : m.name) {
-            c = std::tolower(c);
-        }
         
         SET_END
         return m;
