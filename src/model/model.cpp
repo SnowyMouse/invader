@@ -883,6 +883,14 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     // Generate compressed vertices
     regenerate_missing_model_vertices(*model_tag, true);
     
+    // Finally, delete empty regions
+    for(std::size_t r = 0; r < model_tag->regions.size(); r++) {
+        if(model_tag->regions[r].permutations.size() == 0) {
+            model_tag->regions.erase(model_tag->regions.begin() + r);
+            r--;
+        }
+    }
+    
     auto rval = tag->generate_hek_tag_data(fourcc);
     
     std::size_t vertex_count = 0;
