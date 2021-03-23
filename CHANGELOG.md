@@ -19,7 +19,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-model: Fixed node list checksum not being copied
-- invader-model: Fixed "base" node not being renamed to "__base"
+- invader-model: Fixed "base" permutation not being renamed to "__base"
 - invader-model: Fixed marker, region, and node names not being lowercased
 - invader-recover: Fixed node list checksum not being copied
 

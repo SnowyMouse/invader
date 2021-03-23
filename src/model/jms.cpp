@@ -250,12 +250,6 @@ namespace Invader {
         n.sibling_node = read_next_uint32(cursor);
         n.rotation = quaternion_from_string(cursor);
         n.position = point3d_from_string(cursor) / 100.0F;
-        
-        // Rename base -> __base. I don't know why this has to be done, but it's what tool.exe does.
-        if(n.name == "base") {
-            n.name = "__base";
-        }
-        
         SET_END
         return n;
     }

@@ -120,6 +120,13 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         
         // Get the permutation map
         spaghetti_code_loop_done:
+        
+        // Change "base" to "__base"
+        if(permutation == "base") {
+            permutation = "__base";
+        }
+        
+        // Let's begin
         auto &permutation_map = permutations[permutation];
         const auto *lod_str = lods[lod];
         
@@ -1023,7 +1030,15 @@ int main(int argc, const char **argv) {
                         eprintf_error("Failed to read %s", path.string().c_str());
                         return EXIT_FAILURE;
                     }
-                    jms_files.emplace(path.filename().replace_extension().string(), JMS::from_string(std::string(reinterpret_cast<const char *>(file->data()), file->size()).c_str()));
+                    
+                    // Lowercase model name
+                    auto model_name = path.filename().replace_extension().string();
+                    for(char &c : model_name) {
+                        c = std::tolower(c);
+                    }
+                    
+                    // Add it
+                    jms_files.emplace(model_name, JMS::from_string(std::string(reinterpret_cast<const char *>(file->data()), file->size()).c_str()));
                 }
                 catch(std::exception &e) {
                     eprintf_error("Failed to parse %s: %s", path.string().c_str(), e.what());
