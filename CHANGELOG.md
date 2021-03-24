@@ -26,6 +26,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-model: Fixed empty regions not being removed
 - invader-model: Fixed some markers and triangles not being set to the correct
   region (or sometimes any region at all)
+- invader-model: Fixed some triangles with -1 (null) as the shader not being set
+  to shader #0, resulting in an error
 - invader-model: Fixed regions starting with a tilde (~) not having the flag
   "cannot be chosen randomly" set
 - invader-recover: Fixed node list checksum not being copied
