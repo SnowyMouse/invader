@@ -117,27 +117,32 @@
             {
                 "name": "super low detail node count",
                 "unit": "nodes",
-                "type": "uint16"
+                "type": "uint16",
+                "cache_only": true
             },
             {
                 "name": "low detail node count",
                 "unit": "nodes",
-                "type": "uint16"
+                "type": "uint16",
+                "cache_only": true
             },
             {
                 "name": "medium detail node count",
                 "unit": "nodes",
-                "type": "uint16"
+                "type": "uint16",
+                "cache_only": true
             },
             {
                 "name": "high detail node count",
                 "unit": "nodes",
-                "type": "uint16"
+                "type": "uint16",
+                "cache_only": true
             },
             {
                 "name": "super high detail node count",
                 "unit": "nodes",
-                "type": "uint16"
+                "type": "uint16",
+                "cache_only": true
             },
             {
                 "type": "pad",

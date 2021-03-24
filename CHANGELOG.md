@@ -16,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
   engine
 - invader-edit-qt: The tags directories are now listed in the title bar of the
   main window
+- invader-edit-qt: Model node counts for the various LoDs are now hidden since
+  these values are always overridden on build
 
 ### Fixed
 - invader-model: Fixed node list checksum not being copied
