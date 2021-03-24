@@ -37,6 +37,7 @@ namespace Invader::Parser {
         const char *          unit,
         std::size_t           count,
         bool                  bounds,
+        bool                  volatile_value,
         bool                  read_only,
         std::optional<Number> minimum,
         std::optional<Number> maximum
@@ -50,6 +51,7 @@ namespace Invader::Parser {
         unit(unit),
         minimum(minimum),
         maximum(maximum),
+        volatile_value(volatile_value),
         read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
@@ -170,6 +172,8 @@ namespace Invader::Parser {
             case VALUE_TYPE_UINT16:
             case VALUE_TYPE_INT32:
             case VALUE_TYPE_UINT32:
+            case VALUE_TYPE_ENUM:
+            case VALUE_TYPE_BITMASK:
                 return 1 * this->count;
             case VALUE_TYPE_POINT2DINT:
                 return 2 * this->count;
@@ -217,10 +221,8 @@ namespace Invader::Parser {
             case VALUE_TYPE_REFLEXIVE:
             case VALUE_TYPE_DEPENDENCY:
             case VALUE_TYPE_TAGID:
-            case VALUE_TYPE_BITMASK:
             case VALUE_TYPE_TAGSTRING:
             case VALUE_TYPE_TAGDATAOFFSET:
-            case VALUE_TYPE_ENUM:
             case VALUE_TYPE_GROUP_START:
                 return 0;
         }
@@ -258,6 +260,8 @@ namespace Invader::Parser {
 
                 case VALUE_TYPE_UINT16:
                 case VALUE_TYPE_INDEX:
+                case VALUE_TYPE_ENUM:
+                case VALUE_TYPE_BITMASK:
                     *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint16_t *>(addr));
                     addr += sizeof(std::uint16_t);
                     values++;
@@ -443,10 +447,8 @@ namespace Invader::Parser {
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
                 case VALUE_TYPE_TAGID:
-                case VALUE_TYPE_BITMASK:
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
-                case VALUE_TYPE_ENUM:
                 case VALUE_TYPE_GROUP_START:
                     break;
             }
@@ -475,6 +477,8 @@ namespace Invader::Parser {
                     values++;
                     break;
 
+                case VALUE_TYPE_BITMASK:
+                case VALUE_TYPE_ENUM:
                 case VALUE_TYPE_UINT16:
                 case VALUE_TYPE_INDEX:
                     *reinterpret_cast<std::uint16_t *>(addr) = std::get<std::int64_t>(*values);
@@ -661,10 +665,8 @@ namespace Invader::Parser {
 
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
-                case VALUE_TYPE_BITMASK:
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
-                case VALUE_TYPE_ENUM:
                 case VALUE_TYPE_TAGID:
                 case VALUE_TYPE_GROUP_START:
                     eprintf_error("Tried to use set_values() with a type that doesn't have values");
@@ -771,5 +773,143 @@ namespace Invader::Parser {
     
     bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose) const {
         return this->compare(what, precision, ignore_volatile, verbose, 0);
+    }
+    
+    bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const {
+        // Different struct name
+        if(typeid(this) != typeid(what)) {
+            if(verbose) {
+                oprintf_success_warn("%s is not a %s", this->struct_name(), what->struct_name());
+            }
+            return false;
+        }
+        
+        auto &this_value = *this;
+        
+        // Make sure these are the same
+        auto &v_this = this->get_values();
+        auto &v_other = what->get_values();
+        
+        auto vt_size = v_this.size();
+        auto vo_size = v_other.size();
+        
+        if(vt_size != vo_size) {
+            eprintf_error("Value count is different for the same struct type");
+            std::terminate();
+        }
+        
+        bool should_continue = true;
+        bool is_different = false;
+        
+        for(std::size_t v = 0; v < vt_size && should_continue; v++) {
+            auto &vt = v_this[v];
+            auto &vo = v_other[v];
+            
+            auto vt_type = vt.get_type();
+            auto vo_type = vo.get_type();
+        
+            auto complain = [&is_different, &should_continue, &verbose, &vt, &this_value](std::optional<std::size_t> index = std::nullopt) {
+                is_different = true;
+                if(verbose) {
+                    if(index.has_value()) {
+                        oprintf_success_warn("%s::%s#%zu is different", this_value.struct_name(), vt.get_member_name(), *index);
+                    }
+                    else {
+                        oprintf_success_warn("%s::%s is different", this_value.struct_name(), vt.get_member_name());
+                    }
+                }
+                else {
+                    should_continue = false;
+                }
+            };
+            
+            // Check the type
+            if(vt_type != vo_type) {
+                eprintf_error("Type is different for the same struct type's values");
+                std::terminate();
+            }
+            
+            // Ignore volatile values
+            if(ignore_volatile && vt.is_volatile()) {
+                continue;
+            }
+            
+            switch(vt_type) {
+                case ParserStructValue::ValueType::VALUE_TYPE_GROUP_START:
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET:
+                    if(vt.get_data() != vo.get_data()) {
+                        complain();
+                    }
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+                    if(vt.get_dependency() != vo.get_dependency()) {
+                        complain();
+                    }
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+                    if(std::strcmp(vt.get_string(), vo.get_string()) != 0) {
+                        complain();
+                    }
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto vt_count = vt.get_array_size();
+                    auto vo_count = vo.get_array_size();
+                    if(vt_count != vo_count) {
+                        complain();
+                    }
+                    else {
+                        bool complained = false;
+                        
+                        for(std::size_t i = 0; i < vt_count && should_continue; i++) {
+                            const auto &vt_struct = vt.get_object_in_array(i);
+                            const auto &vo_struct = vo.get_object_in_array(i);
+                            
+                            bool same = vt_struct.compare(&vo_struct, precision, ignore_volatile, verbose, depth + 1);
+                            if(!same) {
+                                complain(i);
+                                complained = true;
+                            }
+                        }
+                        
+                        // Complain some more.
+                        if(complained) {
+                            complain();
+                        }
+                    }
+                    break;
+                }
+                default: {
+                    auto vt_v = vt.get_values();
+                    auto vo_v = vo.get_values();
+                    
+                    // Is it different?
+                    if(vt_v != vo_v) {
+                        if(precision && vt.get_number_format() == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) { // if precision, is it different by too much?
+                            auto value_count = vt_v.size();
+                            for(std::size_t i = 0; i < value_count; i++) {
+                                if(std::fabs(std::get<double>(vt_v[i]) - std::get<double>(vt_v[i])) > 0.000001) {
+                                    complain();
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            complain();
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return !is_different;
+    }
+    
+    std::vector<ParserStructValue> &ParserStruct::get_values() {
+        if(!this->values.has_value()) {
+            this->values = this->get_values_internal();
+        }
+        return *this->values;
     }
 }

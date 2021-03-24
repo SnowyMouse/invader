@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, all_used_groups, hpp, struct_name, extract_hidden, read_only, struct_title):
-    hpp.write("        std::vector<ParserStructValue> get_values() override;\n".format(struct_name))
-    cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values() {{\n".format(struct_name))
+    hpp.write("    private:\n".format(struct_name))
+    hpp.write("        std::vector<ParserStructValue> get_values_internal() override;\n".format(struct_name))
+    hpp.write("    public:\n".format(struct_name))
+    cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values_internal() {{\n".format(struct_name))
     cpp_struct_value.write("    std::vector<ParserStructValue> values;\n")
     
     if not extract_hidden:
@@ -112,8 +114,9 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 count = 1 * (2 if bounds_b else 1)
                 minimum = "static_cast<ParserStructValue::Number>({})".format(struct["minimum"]) if "minimum" in struct else "std::nullopt"
                 maximum = "static_cast<ParserStructValue::Number>({})".format(struct["maximum"]) if "maximum" in struct else "std::nullopt"
+                volatile = "true" if ("volatile" in struct and struct["volatile"]) else "false"
 
-                cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {}, {}, {}, {}, {});\n".format(first_arguments, type.upper(), unit, count, bounds, struct_read_only, minimum, maximum))
+                cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {}, {}, {}, {}, {}, {});\n".format(first_arguments, type.upper(), unit, count, bounds, volatile, struct_read_only, minimum, maximum))
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")

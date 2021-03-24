@@ -249,6 +249,22 @@ namespace Invader::Parser {
         Dependency &get_dependency() noexcept {
             return *reinterpret_cast<Dependency *>(this->address);
         }
+        
+        /**
+         * Get the data
+         * @return data
+         */
+        std::vector<std::byte> &get_data() noexcept {
+            return *reinterpret_cast<std::vector<std::byte> *>(this->address);
+        }
+        
+        /**
+         * Get the data
+         * @return data
+         */
+        const std::vector<std::byte> &get_data() const noexcept {
+            return *reinterpret_cast<const std::vector<std::byte> *>(this->address);
+        }
 
         /**
          * Get the value type used
@@ -289,6 +305,14 @@ namespace Invader::Parser {
         const char *get_unit() const noexcept {
             return this->unit;
         }
+        
+        /**
+         * Get whether this value is volatile
+         * @return volatile
+         */
+        bool is_volatile() const noexcept {
+            return this->volatile_value;
+        }
 
         /**
          * Set the string value
@@ -310,10 +334,19 @@ namespace Invader::Parser {
         }
 
         /**
+         * Get the object in the array
+         * @param  index index
+         * @return       object in array
+         */
+        const ParserStruct &get_object_in_array(std::size_t index) const {
+            return const_cast<ParserStructValue *>(this)->get_object_in_array(index);
+        }
+
+        /**
          * Get the number of elements in the array
          * @return number of elements in array
          */
-        std::size_t get_array_size() noexcept {
+        std::size_t get_array_size() const noexcept {
             return this->get_array_size_fn(this->address);
         }
 
@@ -321,7 +354,7 @@ namespace Invader::Parser {
          * Get the minimum number of elements in the array
          * @return minimum number of elements in array
          */
-        std::size_t get_array_minimum_size() noexcept {
+        std::size_t get_array_minimum_size() const noexcept {
             return this->min_array_size;
         }
 
@@ -329,7 +362,7 @@ namespace Invader::Parser {
          * Get the maximum number of elements in the array
          * @return maximum number of elements in array
          */
-        std::size_t get_array_maximum_size() noexcept {
+        std::size_t get_array_maximum_size() const noexcept {
             return this->max_array_size;
         }
 
@@ -771,7 +804,7 @@ namespace Invader::Parser {
          * @param name        name of the value
          * @param member_name variable name of the value
          * @param comment     comments
-         * @param string      pointer to string
+         * @param offset      pointer to offset
          * @param read_only   value is read only
          */
         ParserStructValue(
@@ -832,17 +865,18 @@ namespace Invader::Parser {
 
         /**
          * Instantiate a ParserStructValue with a value
-         * @param name        name of the value
-         * @param member_name variable name of the value
-         * @param comment     comments
-         * @param object      pointer to the object
-         * @param type        type of value
-         * @param unit        unit to use
-         * @param count       number of values (if multiple values or bounds)
-         * @param bounds      whether or not this is bounds
-         * @param read_only   value is read only
-         * @param minimum     optional minimum value
-         * @param maximum     optional maximum value
+         * @param name           name of the value
+         * @param member_name    variable name of the value
+         * @param comment        comments
+         * @param object         pointer to the object
+         * @param type           type of value
+         * @param unit           unit to use
+         * @param count          number of values (if multiple values or bounds)
+         * @param bounds         whether or not this is bounds
+         * @param volatile_value value is volatile
+         * @param read_only      value is read only
+         * @param minimum        optional minimum value
+         * @param maximum        optional maximum value
          */
         ParserStructValue(
             const char *          name,
@@ -853,6 +887,7 @@ namespace Invader::Parser {
             const char *          unit = nullptr,
             std::size_t           count = 1,
             bool                  bounds = false,
+            bool                  volatile_value = false,
             bool                  read_only = false,
             std::optional<Number> minimum = std::nullopt,
             std::optional<Number> maximum = std::nullopt
@@ -888,6 +923,7 @@ namespace Invader::Parser {
         std::size_t min_array_size;
         std::size_t max_array_size;
 
+        bool volatile_value = false;
         bool read_only = false;
 
         template <typename T>
@@ -1030,7 +1066,15 @@ namespace Invader::Parser {
          * Get the values in the struct
          * @return values in the struct
          */
-        virtual std::vector<ParserStructValue> get_values() = 0;
+        std::vector<ParserStructValue> &get_values();
+
+        /**
+         * Get the values in the struct
+         * @return values in the struct
+         */
+        const std::vector<ParserStructValue> &get_values() const {
+            return const_cast<ParserStruct *>(this)->get_values();
+        }
 
         /**
          * Get whether or not the struct has a title
@@ -1053,7 +1097,7 @@ namespace Invader::Parser {
         /**
          * Compare the struct against another struct
          * @param what            struct to compare against
-         * @param precision       allow small differences for floats (can account for minor precision differences but may slightly increase false positives)
+         * @param precision       allow small differences for floats (can account for minor precision differences but may slightly increase false positives/negatives)
          * @param ignore_volatile ignore data that can be added or removed when a map is compiled
          * @param verbose         print differences and other information to stdout
          */
@@ -1070,7 +1114,13 @@ namespace Invader::Parser {
         virtual ~ParserStruct() = default;
     protected:
         bool cache_formatted = false;
-        virtual bool compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const = 0;
+        
+        virtual std::vector<ParserStructValue> get_values_internal() = 0;
+        
+    private:
+        bool compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const;
+        
+        std::optional<std::vector<ParserStructValue>> values;
     };
 }
 
