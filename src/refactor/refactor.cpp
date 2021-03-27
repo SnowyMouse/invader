@@ -73,6 +73,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
     options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>");
+    options.emplace_back("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. This cannot be used with --class or --recursive.", "<a> <b>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
     static constexpr char USAGE[] = "<-M <mode>> [options]";
@@ -84,6 +85,7 @@ int main(int argc, char * const *argv) {
         const char *single_tag = nullptr;
         bool unsafe = false;
 
+        std::vector<std::pair<std::string, std::string>> string_replacements;
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
         std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> class_replacements;
         std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> reverse_class_replacements;
@@ -147,6 +149,9 @@ int main(int argc, char * const *argv) {
             case 's':
                 refactor_options.single_tag = arguments[0];
                 return;
+            case 'R':
+                refactor_options.string_replacements.emplace_back(Invader::File::preferred_path_to_halo_path(arguments[0]), Invader::File::preferred_path_to_halo_path(arguments[1]));
+                return;
         }
     });
 
@@ -169,12 +174,22 @@ int main(int argc, char * const *argv) {
     }
 
     if(*refactor_options.mode == RefactorMode::REFACTOR_MODE_NO_MOVE && refactor_options.recursive) {
-        eprintf_error("Error: -M no-move and --recursive cannot be used at the same time");
+        eprintf_error("Error: --mode no-move and --recursive cannot be used at the same time");
         return EXIT_FAILURE;
     }
     
     if(refactor_options.unsafe && *refactor_options.mode != RefactorMode::REFACTOR_MODE_NO_MOVE) {
         eprintf_error("Error: -U can only be used with -M no-move");
+        return EXIT_FAILURE;
+    }
+    
+    if(refactor_options.class_replacements.size() > 0 && refactor_options.string_replacements.size() > 0) {
+        eprintf_error("Error: --class and --replace-string cannot be used at the same time");
+        return EXIT_FAILURE;
+    }
+    
+    if(refactor_options.recursive && refactor_options.string_replacements.size() > 0) {
+        eprintf_error("Error: --recursive and --replace-string cannot be used at the same time");
         return EXIT_FAILURE;
     }
     
@@ -209,6 +224,39 @@ int main(int argc, char * const *argv) {
         if(failed) {
             eprintf_warn("Use --unsafe to override");
             return EXIT_FAILURE;
+        }
+    }
+    
+    // Resolve string replacements
+    if(refactor_options.string_replacements.size() > 0) {
+        for(auto &t : all_tags) {
+            auto from_full = *Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(t.tag_path));
+            auto from = from_full.path;
+            auto to = from;
+            
+            for(auto &r : refactor_options.string_replacements) {
+                std::size_t n = 0;
+                
+                while(true) {
+                    // Find the first instance
+                    auto first_instance = to.find(r.first, n);
+                    
+                    // Did we find it?
+                    if(first_instance == std::string::npos) {
+                        break;
+                    }
+                    
+                    // Replace it!
+                    to = to.replace(first_instance, r.first.size(), r.second);
+                    n = first_instance + r.second.size();
+                }
+            }
+            
+            if(from != to) {
+                auto to_full = from_full;
+                to_full.path = to;
+                refactor_options.replacements.emplace_back(from_full, to_full);
+            }
         }
     }
     

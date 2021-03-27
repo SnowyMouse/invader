@@ -6,6 +6,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-recover: Added `-O` to overwrite data rather than overwriting by
   default
+- invader-refactor: Added `-R` which can replace strings in paths. For example,
+  using `invader-refactor -R warthog puma -M move` replaces all instances of
+  `warthog` with `puma`
 
 ### Changed
 - invader-build: Unit HUD interface sequences are now checked

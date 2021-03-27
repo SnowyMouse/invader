@@ -703,6 +703,10 @@ Options:
                                to the tag are not changed except for other tags
                                copied by this command. Can be: copy, move,
                                no-move
+  -R --replace-string <a> <b>  Replaces all instances in a path of <a> with
+                               <b>. This can be used multiple times for
+                               multiple replacements. This cannot be used with
+                               --class or --recursive.
   -r --recursive <f> <t>       Recursively move all tags in a directory. This
                                will fail if a tag is present in both the old
                                and new directories, it cannot be used with

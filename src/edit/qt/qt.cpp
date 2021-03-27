@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
     if(edit_qt_options.fast_listing) {
         w.set_fast_listing_mode(true);
     }
-
+    
     // Give a spiel
     if(edit_qt_options.disable_safeguards) {
         QMessageBox message(QMessageBox::Warning, "You think you want this, but you actually don't.", "WARNING: Safeguards have been disabled.\n\nManually editing data that is normally read-only will likely break your tags.\n\nRemember: If something is normally read-only, then there is a much better program for modifying it than a tag editor.", QMessageBox::Ok | QMessageBox::Cancel);
