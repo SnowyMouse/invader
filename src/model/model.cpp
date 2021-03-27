@@ -1045,7 +1045,11 @@ int main(int argc, const char **argv) {
         // Get paths. Sort alphabetically.
         for(auto &i : std::filesystem::directory_iterator(directory)) {
             auto path = i.path();
-            if(path.extension() == ".jms" && i.is_regular_file()) {
+            auto extension = path.extension().string();
+            for(auto &c : extension) {
+                c = std::tolower(c);
+            }
+            if(extension == ".jms" && i.is_regular_file()) {
                 try {
                     auto file = File::open_file(path);
                     if(!file.has_value()) {
