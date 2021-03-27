@@ -6,7 +6,7 @@ endif()
 
 if(${INVADER_COMPRESS})
     add_executable(invader-edit
-        src/edit/edit
+        src/edit/edit.cpp
     )
     target_link_libraries(invader-edit invader)
 
