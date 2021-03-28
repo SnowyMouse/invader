@@ -1112,6 +1112,11 @@ namespace Invader::Parser {
         }
 
         virtual ~ParserStruct() = default;
+        
+        ParserStruct() = default;
+        ParserStruct(const ParserStruct &) noexcept;
+        ParserStruct(ParserStruct &&) noexcept;
+        ParserStruct &operator=(const ParserStruct &) noexcept;
     protected:
         bool cache_formatted = false;
         

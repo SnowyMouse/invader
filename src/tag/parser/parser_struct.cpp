@@ -912,4 +912,11 @@ namespace Invader::Parser {
         }
         return *this->values;
     }
+    
+    ParserStruct::ParserStruct(const ParserStruct &copy) noexcept : cache_formatted(copy.cache_formatted) {}
+    ParserStruct::ParserStruct(ParserStruct &&move) noexcept : cache_formatted(move.cache_formatted) {}
+    ParserStruct &ParserStruct::operator=(const ParserStruct &copy) noexcept {
+        this->cache_formatted = copy.cache_formatted;
+        return *this;
+    }
 }
