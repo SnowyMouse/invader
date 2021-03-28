@@ -975,7 +975,7 @@ namespace Invader::Parser {
          * @param  reset_enums attempt to fix the enums by setting them to 0
          * @return             true if broken enums were found; false if not
          */
-        virtual bool check_for_broken_enums(bool reset_enums) = 0;
+        bool check_for_broken_enums(bool reset_enums);
 
         /**
          * Check for broken indices

@@ -951,6 +951,42 @@ namespace Invader::Parser {
         return !is_different;
     }
     
+    bool ParserStruct::check_for_broken_enums(bool reset_enums) {
+        auto &values = this->get_values();
+        bool result = false;
+        for(auto &i : values) {
+            switch(i.get_type()) {
+                case ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
+                    try {
+                        i.read_enum();
+                    }
+                    catch(std::exception &) {
+                        if(reset_enums) {
+                            i.write_enum(i.list_enum()[0]);
+                        }
+                        result = true;
+                    }
+                    break;
+                }
+                case ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto count = i.get_array_size();
+                    for(std::size_t c = 0; c < count && (!result || reset_enums); c++) { // continue until result is true, unless we're nulling references
+                        result = i.get_object_in_array(c).check_for_broken_enums(reset_enums) || result;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            
+            // If we're done, stop
+            if(!reset_enums && result) {
+                break;
+            }
+        }
+        return result;
+    }
+    
     std::vector<ParserStructValue> &ParserStruct::get_values() {
         if(!this->values.has_value()) {
             this->values = this->get_values_internal();
