@@ -809,7 +809,7 @@ namespace Invader::Parser {
             }
             
             // If we're done, stop
-            if(null_references && result) {
+            if(!null_references && result) {
                 break;
             }
         }
