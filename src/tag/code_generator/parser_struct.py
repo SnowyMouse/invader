@@ -6,6 +6,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
     hpp.write("    public:\n".format(struct_name))
     cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values_internal() {{\n".format(struct_name))
     cpp_struct_value.write("    std::vector<ParserStructValue> values;\n")
+    cpp_struct_value.write("    values.reserve({});\n".format(len(all_used_structs)))
     
     if not extract_hidden:
         for struct in all_used_structs:
