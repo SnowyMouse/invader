@@ -160,7 +160,7 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
         std::exit(EXIT_FAILURE);
     }
     
-    auto values = ps->get_values();
+    auto &values = ps->get_values();
     
     // Do it!
     for(auto &i : values) {
