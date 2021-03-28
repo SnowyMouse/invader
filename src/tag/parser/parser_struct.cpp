@@ -771,6 +771,51 @@ namespace Invader::Parser {
         return total;
     }
     
+    bool ParserStruct::check_for_invalid_references(bool null_references) {
+        auto &values = this->get_values();
+        bool result = false;
+        for(auto &i : values) {
+            switch(i.get_type()) {
+                case ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+                    auto &dep = i.get_dependency();
+                    auto &allowed_classes = i.get_allowed_classes(); // get allowed classes
+                    if(allowed_classes.size() >= 1 && !dep.path.empty()) { // do we even have any?
+                        bool valid = false;
+                        for(auto &c : allowed_classes) {
+                            if(c == dep.tag_fourcc) {
+                                valid = true;
+                                break;
+                            }
+                        }
+                        if(!valid) {
+                            if(null_references) {
+                                dep.tag_fourcc = allowed_classes[0]; // set it
+                                dep.path.clear(); // clear the path
+                            }
+                            result = true;
+                        }
+                    }
+                    break;
+                }
+                case ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto count = i.get_array_size();
+                    for(std::size_t c = 0; c < count && (!result || null_references); c++) { // continue until result is true, unless we're nulling references
+                        result = i.get_object_in_array(c).check_for_invalid_references(null_references) || result;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            
+            // If we're done, stop
+            if(null_references && result) {
+                break;
+            }
+        }
+        return result;
+    }
+    
     bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose) const {
         return this->compare(what, precision, ignore_volatile, verbose, 0);
     }

@@ -997,7 +997,7 @@ namespace Invader::Parser {
          * @param  null_references attempt to fix the references by nulling them out
          * @return                 true if invalid references were found; false if not
          */
-        virtual bool check_for_invalid_references(bool null_references) = 0;
+        bool check_for_invalid_references(bool null_references);
 
         /**
          * Check for nonnormal vectors
