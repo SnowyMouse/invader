@@ -73,7 +73,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
     options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>");
-    options.emplace_back("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. This cannot be used with --class or --recursive.", "<a> <b>");
+    options.emplace_back("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. If --class or --recursive are used, this applies to the output of those. Otherwise, it applies to all tags.", "<a> <b>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
     static constexpr char USAGE[] = "<-M <mode>> [options]";
@@ -183,16 +183,6 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     
-    if(refactor_options.class_replacements.size() > 0 && refactor_options.string_replacements.size() > 0) {
-        eprintf_error("Error: --class and --replace-string cannot be used at the same time");
-        return EXIT_FAILURE;
-    }
-    
-    if(refactor_options.recursive && refactor_options.string_replacements.size() > 0) {
-        eprintf_error("Error: --recursive and --replace-string cannot be used at the same time");
-        return EXIT_FAILURE;
-    }
-    
     auto move_or_copy_file = (*refactor_options.mode == RefactorMode::REFACTOR_MODE_MOVE || *refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY);
 
     if(refactor_options.tags.size() == 0) {
@@ -224,39 +214,6 @@ int main(int argc, char * const *argv) {
         if(failed) {
             eprintf_warn("Use --unsafe to override");
             return EXIT_FAILURE;
-        }
-    }
-    
-    // Resolve string replacements
-    if(refactor_options.string_replacements.size() > 0) {
-        for(auto &t : all_tags) {
-            auto from_full = *Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(t.tag_path));
-            auto from = from_full.path;
-            auto to = from;
-            
-            for(auto &r : refactor_options.string_replacements) {
-                std::size_t n = 0;
-                
-                while(true) {
-                    // Find the first instance
-                    auto first_instance = to.find(r.first, n);
-                    
-                    // Did we find it?
-                    if(first_instance == std::string::npos) {
-                        break;
-                    }
-                    
-                    // Replace it!
-                    to = to.replace(first_instance, r.first.size(), r.second);
-                    n = first_instance + r.second.size();
-                }
-            }
-            
-            if(from != to) {
-                auto to_full = from_full;
-                to_full.path = to;
-                refactor_options.replacements.emplace_back(from_full, to_full);
-            }
         }
     }
     
@@ -380,6 +337,54 @@ int main(int argc, char * const *argv) {
                     eprintf_error("Error: Tag class cannot be changed if moving tags.");
                     return EXIT_FAILURE;
                 }
+            }
+        }
+    }
+    
+    // Resolve string replacements
+    if(refactor_options.string_replacements.size() > 0) {
+        // If empty, try finding anything that has the string we're looking for
+        if(replacements.empty()) {
+            for(auto &t : all_tags) {
+                auto path_split = *Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(t.tag_path));
+                bool in_it = false;
+                
+                for(auto &i : refactor_options.string_replacements) {
+                    if(path_split.path.find(i.first) != std::string::npos) {
+                        in_it = true;
+                    }
+                }
+                
+                if(in_it) {
+                    replacements.emplace_back(path_split, path_split);
+                    replacements_files.emplace_back(&t);
+                }
+            }
+        }
+        for(auto &i : replacements) {
+            auto &from_full = i.second;
+            auto from = from_full.path;
+            auto to = from;
+            
+            for(auto &r : refactor_options.string_replacements) {
+                std::size_t n = 0;
+                
+                while(true) {
+                    // Find the first instance
+                    auto first_instance = to.find(r.first, n);
+                    
+                    // Did we find it?
+                    if(first_instance == std::string::npos) {
+                        break;
+                    }
+                    
+                    // Replace it!
+                    to = to.replace(first_instance, r.first.size(), r.second);
+                    n = first_instance + r.second.size();
+                }
+            }
+            if(from != to) {
+                from_full.path = to;
             }
         }
     }
