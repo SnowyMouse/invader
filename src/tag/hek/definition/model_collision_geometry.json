@@ -393,6 +393,7 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP3DNode",
                 "hek_maximum": 131072,
+                "minimum": 1,
                 "compound": true
             },
             {
