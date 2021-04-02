@@ -9,6 +9,12 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-refactor: Added `-R` which can replace strings in paths. For example,
   using `invader-refactor -R warthog puma -M move` replaces all instances of
   `warthog` with `puma`
+- invader-compare: Added `-j` which can let you specify the number of threads to
+  do comparison. Note that doing this is a balancing act: more threads can help,
+  but if I/O becomes the bottleneck (as is the case with many small tags), then
+  more threads can also degrade performance. Smaller tagsets will not benefit
+  from extra threads as much as larger tagsets, thus this setting is defaulted
+  to 1 thread for the most consistent performance.
 
 ### Changed
 - invader-build: Unit HUD interface sequences are now checked
@@ -23,6 +29,7 @@ This is used for recording Invader's changes. This changelog is based on
   these values are always overridden on build
 
 ### Fixed
+- invader-compare: Fixed a performance issue when comparing large tagsets
 - invader-model: Fixed node list checksum not being copied
 - invader-model: Fixed "base" permutation not being renamed to "__base"
 - invader-model: Fixed marker, region, and node names not being lowercased

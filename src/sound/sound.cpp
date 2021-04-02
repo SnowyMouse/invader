@@ -785,10 +785,7 @@ int main(int argc, const char **argv) {
 
             case 'j':
                 try {
-                    sound_options.max_threads = std::stoi(arguments[0]);
-                    if(sound_options.max_threads < 1) {
-                        throw std::exception();
-                    }
+                    sound_options.max_threads = std::stoul(arguments[0]);
                 }
                 catch(std::exception &) {
                     eprintf_error("Invalid number of threads %s\n", arguments[0]);
