@@ -2,18 +2,43 @@
 
 namespace Invader {
     bool BuildWorkload::BuildWorkloadStruct::can_dedupe(const BuildWorkload::BuildWorkloadStruct &other) const noexcept {
-        if(this->unsafe_to_dedupe || other.unsafe_to_dedupe || (this->bsp.has_value() && this->bsp != other.bsp)) {
-            return false;
-        }
-
         std::size_t this_size = this->data.size();
         std::size_t other_size = other.data.size();
-
-        if(this->dependencies == other.dependencies && this->pointers == other.pointers && this_size >= other_size) {
-            return std::memcmp(this->data.data(), other.data.data(), other_size) == 0;
+        
+        if(this->unsafe_to_dedupe || other.unsafe_to_dedupe || (this->bsp.has_value() && this->bsp != other.bsp) || other_size > this_size) {
+            return false;
         }
-
-        return false;
+        
+        // Make sure dependencies match
+        if(this->dependencies != other.dependencies) {
+            std::vector<BuildWorkloadDependency> this_dep_small;
+            for(auto &td : this->dependencies) {
+                if(td.offset < other_size) {
+                    if(td.offset + sizeof(HEK::TagDependency<HEK::LittleEndian>) > other_size) { // other struct only contains part of the dependency
+                        return false;
+                    }
+                    this_dep_small.emplace_back(td);
+                }
+            }
+            if(this_dep_small != other.dependencies) {
+                return false;
+            }
+        }
+        
+        // And now pointers
+        if(this->pointers != other.pointers) {
+            std::vector<BuildWorkloadStructPointer> this_ptr_small;
+            for(auto &ptr : this->pointers) {
+                if(ptr.offset < other_size) {
+                    this_ptr_small.emplace_back(ptr);
+                }
+            }
+            if(this_ptr_small != other.pointers) {
+                return false;
+            }
+        }
+        
+        return std::memcmp(this->data.data(), other.data.data(), other_size) == 0;
     }
 
     void BuildWorkload::dedupe_structs() {
