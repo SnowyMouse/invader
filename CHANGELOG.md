@@ -17,6 +17,7 @@ This is used for recording Invader's changes. This changelog is based on
   to 1 thread for the most consistent performance.
 
 ### Changed
+- invader: Re-enabled unused6, unused7, unused8, unused9 teams
 - invader-build: Unit HUD interface sequences are now checked
 - invader-build: Using the high resolution scaling flag on Xbox is now treated
   as an error, as this functionality does not exist on the Xbox version
@@ -29,6 +30,7 @@ This is used for recording Invader's changes. This changelog is based on
   these values are always overridden on build
 
 ### Fixed
+- invader-build: Fixed an issue with -O resulting in Halo crashing
 - invader-compare: Fixed a performance issue when comparing large tagsets
 - invader-model: Fixed node list checksum not being copied
 - invader-model: Fixed "base" permutation not being renamed to "__base"
