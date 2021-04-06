@@ -72,6 +72,7 @@ set(INVADER_SOURCE_FILES
     src/map/tag.cpp
     src/file/file.cpp
     src/build/build_workload.cpp
+    src/build/build_workload_dedupe.cpp
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
     src/error_handler/error_handler.cpp
