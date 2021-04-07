@@ -3,13 +3,23 @@
 #ifndef INVADER__ERROR_HPP
 #define INVADER__ERROR_HPP
 
-#include <exception>
+#include <stdexcept>
 
 namespace Invader {
+    class Exception : public std::runtime_error {
+    protected:
+        Exception(const char *what) : std::runtime_error(what) {}
+        Exception(const Exception &) = default;
+        Exception(Exception &&) = default;
+        virtual ~Exception() = 0;
+    };
+    
     #define DEFINE_EXCEPTION(exception_class, error_text) \
-    class exception_class : public std::exception {\
-        /** What happened? */ \
-        const char *what() const noexcept override { return error_text; } \
+    class exception_class : public Exception {\
+    public: \
+        exception_class() : Exception(error_text) {} \
+        exception_class(const exception_class &) = default; \
+        exception_class(exception_class &&) = default; \
     }
 
     /**

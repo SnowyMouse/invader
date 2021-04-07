@@ -24,7 +24,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either -w or -M to be specified at least once. Valid engines are: custom, demo, retail", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either -w or -M to be specified at least once. Valid engines are: pc-custom, pc-demo, pc-retail", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>");
     options.emplace_back("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>");
     options.emplace_back("no-prefix", 'n', 0, "Don't use the \"custom_\" prefix when building a Custom Edition resource map.");
@@ -76,10 +76,10 @@ int main(int argc, const char **argv) {
                 break;
 
             case 'g':
-                if(std::strcmp(arguments[0], "custom") == 0) {
+                if(std::strcmp(arguments[0], "pc-custom") == 0) {
                     resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
-                else if(std::strcmp(arguments[0], "retail") == 0 || std::strcmp(arguments[0], "demo") == 0) {
+                else if(std::strcmp(arguments[0], "pc-retail") == 0 || std::strcmp(arguments[0], "pc-demo") == 0) {
                     resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 }
                 else {

@@ -39,7 +39,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required if -s is not specified. Valid engines are: custom, demo, retail, xbox, native", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required if -s is not specified. Valid engines are: pc-custom, pc-demo, pc-retail, xbox-2276, native", "<id>");
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
@@ -68,19 +68,19 @@ int main(int argc, const char **argv) {
                 archive_options.use_filesystem_path = true;
                 break;
             case 'g':
-                if(std::strcmp(arguments[0], "custom") == 0) {
+                if(std::strcmp(arguments[0], "pc-custom") == 0) {
                     archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
-                else if(std::strcmp(arguments[0], "retail") == 0) {
+                else if(std::strcmp(arguments[0], "pc-retail") == 0) {
                     archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 }
-                else if(std::strcmp(arguments[0], "demo") == 0) {
+                else if(std::strcmp(arguments[0], "pc-demo") == 0) {
                     archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_DEMO;
                 }
                 else if(std::strcmp(arguments[0], "native") == 0) {
                     archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE;
                 }
-                else if(std::strcmp(arguments[0], "xbox") == 0) {
+                else if(std::strcmp(arguments[0], "xbox-2276") == 0) {
                     archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX;
                 }
                 break;
