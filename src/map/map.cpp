@@ -26,6 +26,10 @@ namespace Invader {
                            std::vector<std::byte> &&bitmaps_data,
                            std::vector<std::byte> &&loc_data,
                            std::vector<std::byte> &&sounds_data) {
+        if(data.size() < sizeof(HEK::CacheFileHeader)) {
+            throw InvalidMapException(); // no
+        }
+        
         Map map;
         try {
             if(map.decompress_if_needed(data.data(), data.size())) {

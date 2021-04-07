@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
+- invader-build: Added `-A` which specifies whether to forge/index against a
+  specific target
 - invader-build: Added `-T` which can specify tag space
 - invader-compare: Added `-j` which can let you specify the number of threads to
   do comparison. Note that doing this is a balancing act: more threads can help,
@@ -19,6 +21,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader: Re-enabled unused6, unused7, unused8, unused9 teams
+- invader-build: Automatic forging and indexing now has to be manually invoked
+  with `-A`
 - invader-build: Unit HUD interface sequences are now checked
 - invader-build: Using the high resolution scaling flag on Xbox is now treated
   as an error, as this functionality does not exist on the Xbox version

@@ -175,12 +175,14 @@ Options:
                                directories.
   -g --game-engine <id>        Specify the game engine. This option is required
                                if -s is not specified. Valid engines are:
-                               custom, demo, retail, xbox, native
+                               pc-custom, pc-demo, pc-retail, xbox-2276, native
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -o --output <file>           Output to a specific file. Extension must be
                                .tar.xz unless using --copy which then it's a
                                directory.
+  -O --overwrite               Overwrite tags if they already exist if using
+                               --copy
   -P --fs-path                 Use a filesystem path for the tag.
   -s --single-tag              Archive a tag tree instead of a cache file.
   -t --tags <dir>              Use the specified tags directory. Use multiple
@@ -275,11 +277,15 @@ This program builds cache files.
 ```
 Usage: invader-build [options] -g <target> <scenario>
 
-Build a cache file for a version of Halo: Combat Evolved.
+Build a cache file.
 
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
+  -A --auto-forge <engine>     Ensure the map will be network compatible with
+                               the given target engine. Valid engines are:
+                               pc-custom, pc-demo, pc-retail, xbox-0009,
+                               xbox-0135, xbox-2276, native
   -b --stock-resource-bounds   Only index tags if the tag's index is within
                                stock Custom Edition's resource map bounds.
                                (Custom Edition only)
@@ -294,16 +300,16 @@ Options:
                                by the target engine to its theoretical maximum
                                size. This may create a map that will not work
                                without a mod.
-  -g --game-engine <id>        Specify the game engine. This option is
-                               required. Valid engines are: custom, demo,
-                               native, retail, xbox, xbox-tw, xbox-jp,
-                               mcc-custom, mcc-retail
+  -g --game-engine <engine>    Specify the game engine. This option is
+                               required. Valid engines are: pc-custom, pc-demo,
+                               pc-retail, xbox-0009, xbox-0135, xbox-2276,
+                               native
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
   -l --level <level>           Set the compression level. Must be between 0 and
-                               19. If compressing an Xbox or MCC map, this will
-                               be clamped from 0 to 9. Default: 19
+                               19. If compressing an Xbox map, this will be
+                               clamped from 0 to 9. Default: 19
   -m --maps <dir>              Use the specified maps directory.
   -n --no-external-tags        Do not use external tags. This can speed up
                                build time at a cost of a much larger file size.
@@ -317,6 +323,8 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+  -T --tag-space <MiB>         Override the tag space. This may result in
+                               memes.
   -u --uncompressed            Do not compress the cache file. This is default
                                for demo, retail, and custom engines.
   -w --with-index <file>       Use an index file for the tags, ensuring the
@@ -736,10 +744,11 @@ Create resource maps.
 
 Options:
   -c --concatenate <file>      Concatenate against the resource map at a path.
+                               This cannot be used with -T loc
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Demo and retail maps also require
                                either -w or -M to be specified at least once.
-                               Valid engines are: custom, demo, retail
+                               Valid engines are: pc-custom, pc-demo, pc-retail
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Set the maps directory.

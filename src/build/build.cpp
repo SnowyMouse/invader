@@ -74,20 +74,25 @@ int main(int argc, const char **argv) {
         std::optional<std::string> build_version;
         bool check_custom_edition_resource_bounds = false;
         std::optional<std::uint64_t> max_tag_space;
+        std::optional<HEK::CacheFileEngine> auto_forge_target;
+        
         
         std::optional<XboxVariation> variation;
     } build_options;
+    
+    #define VALID_ENGINES_LIST "pc-custom, pc-demo, pc-retail, xbox-0009, xbox-0135, xbox-2276, native"
 
     std::vector<CommandLineOption> options;
     options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: pc-custom, pc-demo, pc-retail, xbox-0009, xbox-0135, xbox-2276, native", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
+    options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("tag-space", 'T', 1, "Override the tag space. This may result in memes.", "<MiB>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
@@ -101,7 +106,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("build-version", 'B', 1, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
     options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
 
-    static constexpr char DESCRIPTION[] = "Build a cache file for a version of Halo: Combat Evolved.";
+    static constexpr char DESCRIPTION[] = "Build a cache file.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
 
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
@@ -158,30 +163,34 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-            case 'g':
-                build_options.variation = std::nullopt;
+            case 'A':
+            case 'g': {
+                HEK::CacheFileEngine engine;
+                std::optional<XboxVariation> variation;
+                
+                variation = std::nullopt;
                 if(std::strcmp(arguments[0], "pc-custom") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                    engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
                 else if(std::strcmp(arguments[0], "pc-retail") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                    engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 }
                 else if(std::strcmp(arguments[0], "pc-demo") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                    engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
                 }
                 else if(std::strcmp(arguments[0], "xbox-2276") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
                 }
                 else if(std::strcmp(arguments[0], "xbox-0009") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
-                    build_options.variation = XboxVariation::XBOX_JP;
+                    engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    variation = XboxVariation::XBOX_JP;
                 }
                 else if(std::strcmp(arguments[0], "xbox-0135") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
-                    build_options.variation = XboxVariation::XBOX_TW;
+                    engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    variation = XboxVariation::XBOX_TW;
                 }
                 else if(std::strcmp(arguments[0], "pc-native") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+                    engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
                 }
                 else {
                     eprintf_error("Unknown engine type: %s", arguments[0]);
@@ -208,7 +217,17 @@ int main(int argc, const char **argv) {
                     
                     std::exit(EXIT_FAILURE);
                 }
+                
+                if(opt == 'g') {
+                    build_options.engine = engine;
+                    build_options.variation = variation;
+                }
+                else if(opt == 'A') {
+                    build_options.auto_forge_target = engine;
+                }
+                
                 break;
+            }
             case 'C':
                 build_options.forged_crc = read_str32("Invalid CRC32", arguments[0]);
                 break;
@@ -477,78 +496,83 @@ int main(int argc, const char **argv) {
             map_name = File::base_name(scenario.c_str());
         }
         
-        // CRC32 spoofing, indices, etc.
-        if(!parameters.index.has_value()) {
-            switch(*build_options.engine) {
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                    parameters.index = retail_indices(map_name.c_str());
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    parameters.index = custom_edition_indices(map_name.c_str());
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                    parameters.index = demo_indices(map_name.c_str());
-                    break;
-                default: break;
+        // CRC32 spoofing, indexing, etc.
+        if(build_options.auto_forge_target.has_value()) {
+            auto auto_forge_target = *build_options.auto_forge_target;
+            
+            if(!parameters.index.has_value()) {
+                switch(auto_forge_target) {
+                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                        parameters.index = retail_indices(map_name.c_str());
+                        break;
+                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                        parameters.index = custom_edition_indices(map_name.c_str());
+                        break;
+                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                        parameters.index = demo_indices(map_name.c_str());
+                        break;
+                    default: break;
+                }
             }
-        }
-        if(!parameters.forge_crc.has_value() && *build_options.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-            if(map_name == "beavercreek") {
-                parameters.forge_crc = 0x07B3876A;
-            }
-            else if(map_name == "bloodgulch") {
-                parameters.forge_crc = 0x7B309554;
-            }
-            else if(map_name == "boardingaction") {
-                parameters.forge_crc = 0xF4DEEF94;
-            }
-            else if(map_name == "carousel") {
-                parameters.forge_crc = 0x9C301A08;
-            }
-            else if(map_name == "chillout") {
-                parameters.forge_crc = 0x93C53C27;
-            }
-            else if(map_name == "damnation") {
-                parameters.forge_crc = 0x0FBA059D;
-            }
-            else if(map_name == "dangercanyon") {
-                parameters.forge_crc = 0xC410CD74;
-            }
-            else if(map_name == "deathisland") {
-                parameters.forge_crc = 0x1DF8C97F;
-            }
-            else if(map_name == "gephyrophobia") {
-                parameters.forge_crc = 0xD2872165;
-            }
-            else if(map_name == "hangemhigh") {
-                parameters.forge_crc = 0xA7C8B9C6;
-            }
-            else if(map_name == "icefields") {
-                parameters.forge_crc = 0x5EC1DEB7;
-            }
-            else if(map_name == "infinity") {
-                parameters.forge_crc = 0x0E7F7FE7;
-            }
-            else if(map_name == "longest") {
-                parameters.forge_crc = 0xC8F48FF6;
-            }
-            else if(map_name == "prisoner") {
-                parameters.forge_crc = 0x43B81A8B;
-            }
-            else if(map_name == "putput") {
-                parameters.forge_crc = 0xAF2F0B84;
-            }
-            else if(map_name == "ratrace") {
-                parameters.forge_crc = 0xF7F8E14C;
-            }
-            else if(map_name == "sidewinder") {
-                parameters.forge_crc = 0xBD95CF55;
-            }
-            else if(map_name == "timberland") {
-                parameters.forge_crc = 0x54446470;
-            }
-            else if(map_name == "wizard") {
-                parameters.forge_crc = 0xCF3359B1;
+            
+            if(!parameters.forge_crc.has_value() && auto_forge_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                if(map_name == "beavercreek") {
+                    parameters.forge_crc = 0x07B3876A;
+                }
+                else if(map_name == "bloodgulch") {
+                    parameters.forge_crc = 0x7B309554;
+                }
+                else if(map_name == "boardingaction") {
+                    parameters.forge_crc = 0xF4DEEF94;
+                }
+                else if(map_name == "carousel") {
+                    parameters.forge_crc = 0x9C301A08;
+                }
+                else if(map_name == "chillout") {
+                    parameters.forge_crc = 0x93C53C27;
+                }
+                else if(map_name == "damnation") {
+                    parameters.forge_crc = 0x0FBA059D;
+                }
+                else if(map_name == "dangercanyon") {
+                    parameters.forge_crc = 0xC410CD74;
+                }
+                else if(map_name == "deathisland") {
+                    parameters.forge_crc = 0x1DF8C97F;
+                }
+                else if(map_name == "gephyrophobia") {
+                    parameters.forge_crc = 0xD2872165;
+                }
+                else if(map_name == "hangemhigh") {
+                    parameters.forge_crc = 0xA7C8B9C6;
+                }
+                else if(map_name == "icefields") {
+                    parameters.forge_crc = 0x5EC1DEB7;
+                }
+                else if(map_name == "infinity") {
+                    parameters.forge_crc = 0x0E7F7FE7;
+                }
+                else if(map_name == "longest") {
+                    parameters.forge_crc = 0xC8F48FF6;
+                }
+                else if(map_name == "prisoner") {
+                    parameters.forge_crc = 0x43B81A8B;
+                }
+                else if(map_name == "putput") {
+                    parameters.forge_crc = 0xAF2F0B84;
+                }
+                else if(map_name == "ratrace") {
+                    parameters.forge_crc = 0xF7F8E14C;
+                }
+                else if(map_name == "sidewinder") {
+                    parameters.forge_crc = 0xBD95CF55;
+                }
+                else if(map_name == "timberland") {
+                    parameters.forge_crc = 0x54446470;
+                }
+                else if(map_name == "wizard") {
+                    parameters.forge_crc = 0xCF3359B1;
+                }
             }
         }
 
