@@ -4,17 +4,18 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
-- invader-recover: Added `-O` to overwrite data rather than overwriting by
-  default
-- invader-refactor: Added `-R` which can replace strings in paths. For example,
-  using `invader-refactor -R warthog puma -M move` replaces all instances of
-  `warthog` with `puma`
+- invader-build: Added `-T` which can specify tag space
 - invader-compare: Added `-j` which can let you specify the number of threads to
   do comparison. Note that doing this is a balancing act: more threads can help,
   but if I/O becomes the bottleneck (as is the case with many small tags), then
   more threads can also degrade performance. Smaller tagsets will not benefit
   from extra threads as much as larger tagsets, thus this setting is defaulted
   to 1 thread for the most consistent performance.
+- invader-recover: Added `-O` to overwrite data rather than overwriting by
+  default
+- invader-refactor: Added `-R` which can replace strings in paths. For example,
+  using `invader-refactor -R warthog puma -M move` replaces all instances of
+  `warthog` with `puma`
 
 ### Changed
 - invader: Re-enabled unused6, unused7, unused8, unused9 teams
@@ -24,6 +25,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Some fatal errors have been reduced to errors since they are
   technically valid tag data and can be handled, but not valid for the target
   engine
+- invader-build: Changed the valid parameters for `-g` to make it more
+  consistent. All PC build targets are prefixed with `pc-`, and all Xbox build
+  targets use the build version (i.e. `xbox-2276` for English, `xbox-0009` for
+  Japanese, and `xbox-0135` for Taiwanese)
 - invader-edit-qt: The tags directories are now listed in the title bar of the
   main window
 - invader-edit-qt: Model node counts for the various LoDs are now hidden since
@@ -43,6 +48,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-model: Fixed regions starting with a tilde (~) not having the flag
   "cannot be chosen randomly" set
 - invader-recover: Fixed node list checksum not being copied
+
+### Removed
+- invader-build: Dropped MCC build targets
 
 ## [0.43.0] - 2021-03-16
 ### Added
