@@ -20,7 +20,7 @@
 namespace Invader {
     using namespace HEK;
     
-    BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine), build_compress_mcc(false) {
+    BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine) {
         switch(engine) {
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_PC;
@@ -471,12 +471,7 @@ namespace Invader {
                     oprintf("Compressing...");
                     oflush();
                 }
-                if(!workload.parameters->details.build_compress_mcc) {
-                    final_data = Compression::compress_map_data(final_data.data(), final_data.size(), workload.parameters->details.build_compression_level.value_or(19));
-                }
-                else {
-                    final_data = Compression::ceaflate_compress(final_data.data(), final_data.size(), workload.parameters->details.build_compression_level.value_or(9));
-                }
+                final_data = Compression::compress_map_data(final_data.data(), final_data.size(), workload.parameters->details.build_compression_level.value_or(19));
                 if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf(" done\n");
                 }

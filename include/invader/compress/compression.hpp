@@ -61,30 +61,6 @@ namespace Invader::Compression {
      * @return            size of output in bytes
      */
     std::size_t decompress_map_file(const char *input, std::byte *output, std::size_t output_size);
-    
-    /**
-     * Compress the file using ceaflate
-     * @param input      input buffer
-     * @param input_size input buffer size
-     * @return           compressed data
-     */
-    std::vector<std::byte> ceaflate_compress(const std::byte *input, std::size_t input_size, int compression_level = 9);
-    
-    /**
-     * Decompress the file using ceaflate
-     * @param input      input buffer
-     * @param input_size input buffer size
-     * @return           decompressed data
-     */
-    std::vector<std::byte> ceaflate_decompress(const std::byte *input, std::size_t input_size);
-    
-    /**
-     * Query the decompressed size of the file
-     * @param input      input buffer
-     * @param input_size input buffer size
-     * @return           compressed size, if valid, or std::nullopt if not
-     */
-    std::optional<std::size_t> ceaflate_compression_size(const std::byte *input, std::size_t input_size) noexcept;
 }
 
 #endif

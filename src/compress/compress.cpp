@@ -11,7 +11,6 @@
 
 #define COMPRESSION_FORMAT_DEFLATE "deflate"
 #define COMPRESSION_FORMAT_ZSTANDARD "zstandard"
-#define COMPRESSION_FORMAT_CEAFLATE "mcc-deflate"
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -20,12 +19,10 @@ int main(int argc, const char **argv) {
         const char *output = nullptr;
         int compression_level = 19;
         bool decompress = false;
-        bool ceaflate = false;
     } compress_options;
 
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("mcc", 'M', 0, "Use MCC-style (de)compression");
     options.emplace_back("output", 'o', 1, "Emit the resulting map at the given path. By default, this is the map path (overwrite).", "<file>");
     options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 0 and 19. If compressing an MCC map, this will be clamped from 0 to 9. Default: 19", "<level>");
     options.emplace_back("decompress", 'd', 0, "Decompress instead of compress.");
@@ -50,9 +47,6 @@ int main(int argc, const char **argv) {
                     eprintf_error("Compression level must be between 0 and 19");
                     std::exit(EXIT_FAILURE);
                 }
-                break;
-            case 'M':
-                compress_options.ceaflate = true;
                 break;
             case 'o':
                 compress_options.output = arguments[0];
@@ -85,22 +79,7 @@ int main(int argc, const char **argv) {
     if(compress_options.decompress) {
         std::vector<std::byte> decompressed_data;
         try {
-            if(!compress_options.ceaflate) {
-                try {
-                    decompressed_data = Compression::decompress_map_data(input_file_data.data(), input_file_data.size());
-                }
-                catch (std::exception &) {
-                    // Is it MCC compressed?
-                    if(!compress_options.ceaflate && Compression::ceaflate_compression_size(input_file_data.data(), input_file_data.size()).has_value()) {
-                        eprintf_warn("This file appears to use MCC compression. You can try decompressing with -M.");
-                    }
-                    
-                    throw;
-                }
-            }
-            else {
-                decompressed_data = Compression::ceaflate_decompress(input_file_data.data(), input_file_data.size());
-            }
+            decompressed_data = Compression::decompress_map_data(input_file_data.data(), input_file_data.size());
         }
         catch(Invader::MapNeedsCompressedException &) {
             eprintf_error("Failed to decompress %s: map is already uncompressed", compress_options.output);
@@ -116,19 +95,13 @@ int main(int argc, const char **argv) {
         }
         auto finished = TIME_ELAPSED_MS;
         
-        // Determine the compression format used
-        if(compress_options.ceaflate) {
-            compression_format = COMPRESSION_FORMAT_CEAFLATE;
-        }
-        else {
-            auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(decompressed_data.data());
-            switch(header.engine) {
-                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    eprintf_error("Uncompressed maps are not supported by the target engine");
-                    return EXIT_FAILURE;
-                default:
-                    compression_format = COMPRESSION_FORMAT_ZSTANDARD;
-            }
+        auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(decompressed_data.data());
+        switch(header.engine) {
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                eprintf_error("Uncompressed maps are not supported by the target engine");
+                return EXIT_FAILURE;
+            default:
+                compression_format = COMPRESSION_FORMAT_ZSTANDARD;
         }
         
         oprintf("Decompressed %s (%s, %zu -> %zu, %zu ms)\n", input, compression_format, input_file_data.size(), decompressed_data.size(), finished);
@@ -136,12 +109,7 @@ int main(int argc, const char **argv) {
     else {
         std::vector<std::byte> compressed_data;
         try {
-            if(!compress_options.ceaflate) {
-                compressed_data = Compression::compress_map_data(input_file_data.data(), input_file_data.size(), static_cast<int>(compress_options.compression_level));
-            }
-            else {
-                compressed_data = Compression::ceaflate_compress(input_file_data.data(), input_file_data.size(), static_cast<int>(compress_options.compression_level));
-            }
+            compressed_data = Compression::compress_map_data(input_file_data.data(), input_file_data.size(), static_cast<int>(compress_options.compression_level));
         }
         catch(Invader::MapNeedsDecompressedException &) {
             eprintf_error("Failed to decompress %s: map is already compressed", compress_options.output);
@@ -157,18 +125,13 @@ int main(int argc, const char **argv) {
         }
         
         // Determine the compression format used
-        if(compress_options.ceaflate) {
-            compression_format = COMPRESSION_FORMAT_CEAFLATE;
-        }
-        else {
-            auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(input_file_data.data());
-            switch(header.engine) {
-                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    eprintf_error("Uncompressed maps are not supported by the target engine");
-                    return EXIT_FAILURE;
-                default:
-                    compression_format = COMPRESSION_FORMAT_ZSTANDARD;
-            }
+        auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(input_file_data.data());
+        switch(header.engine) {
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                eprintf_error("Uncompressed maps are not supported by the target engine");
+                return EXIT_FAILURE;
+            default:
+                compression_format = COMPRESSION_FORMAT_ZSTANDARD;
         }
         
         auto finished = TIME_ELAPSED_MS;

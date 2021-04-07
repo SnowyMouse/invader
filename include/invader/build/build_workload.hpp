@@ -136,11 +136,6 @@ namespace Invader {
                 std::optional<int> build_compression_level;
                 
                 /**
-                 * Use MCC-style compression?
-                 */
-                bool build_compress_mcc;
-                
-                /**
                  * Do BSPs occupy tag space?
                  */
                 bool build_bsps_occupy_tag_space;

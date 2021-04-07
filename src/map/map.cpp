@@ -112,11 +112,6 @@ namespace Invader {
                     throw InvalidMapException();
             }
         }
-        else if(Compression::ceaflate_compression_size(data, data_size).has_value()) {
-            this->compressed = CompressionType::COMPRESSION_TYPE_MCC_DEFLATE;
-            this->data = Compression::ceaflate_decompress(data, data_size);
-            return this->decompress_if_needed(this->data.data(), this->data.size());
-        }
         
         return compression_type;
     }
