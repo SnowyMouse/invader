@@ -339,6 +339,7 @@ int main(int argc, const char **argv) {
         if(file_size >= sizeof(header_cache)) {
             std::memcpy(header_cache, file.data(), sizeof(header_cache));
         }
+        
         map = std::make_unique<Map>(Map::map_with_move(std::move(file)));
     }
     catch (std::exception &e) {

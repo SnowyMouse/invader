@@ -101,6 +101,11 @@ namespace Invader::HEK {
     }
 
     bool CacheFileDemoHeader::valid() const noexcept {
-        return static_cast<CacheFileHeader>(*this).valid();
+        try {
+            return static_cast<CacheFileHeader>(*this).valid();
+        }
+        catch(std::exception &) {
+            return false;
+        }
     }
 }
