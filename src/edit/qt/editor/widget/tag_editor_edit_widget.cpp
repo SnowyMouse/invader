@@ -335,13 +335,13 @@ namespace Invader::EditQt {
                     std::size_t count = allowed_classes.size();
                     if(count) {
                         for(std::size_t i = 0; i < count; i++) {
-                            model->appendRow(new QStandardItem(HEK::tag_class_to_extension(allowed_classes[i])));
+                            model->appendRow(new QStandardItem(HEK::tag_fourcc_to_extension(allowed_classes[i])));
                         }
                     }
                     else {
                         auto all_classes = Parser::ParserStruct::all_tag_classes(true);
                         for(auto c : all_classes) {
-                            model->appendRow(new QStandardItem(HEK::tag_class_to_extension(c)));
+                            model->appendRow(new QStandardItem(HEK::tag_fourcc_to_extension(c)));
                         }
                     }
                     combobox->setModel(model);
@@ -356,7 +356,7 @@ namespace Invader::EditQt {
 
                     // Lastly, set the dependency
                     textbox->setText(Invader::File::halo_path_to_preferred_path(dependency.path).c_str());
-                    combobox->setCurrentText(HEK::tag_class_to_extension(dependency.tag_class_int));
+                    combobox->setCurrentText(HEK::tag_fourcc_to_extension(dependency.tag_fourcc));
 
                     break;
                 }
@@ -679,12 +679,12 @@ namespace Invader::EditQt {
 
             case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
                 // Get the dependency stuff
-                auto class_int = HEK::extension_to_tag_class(reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLower().toLatin1().data());
+                auto fourcc = HEK::tag_extension_to_fourcc(reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLower().toLatin1().data());
                 auto path = reinterpret_cast<QLineEdit *>(this->widgets[1])->text();
 
                 // Set the dependency
                 auto &dependency = value->get_dependency();
-                dependency.tag_class_int = class_int;
+                dependency.tag_fourcc = fourcc;
                 dependency.path = Invader::File::preferred_path_to_halo_path(path.toStdString());
 
                 this->verify_dependency_path();
@@ -860,7 +860,7 @@ namespace Invader::EditQt {
         else if(!this->get_editor_window()->get_parent_window()->fast_listing_mode()) {
             // First pass: Check to see if the exact path exists
             for(auto &t : this->get_editor_window()->get_parent_window()->get_all_tags()) {
-                if(t.tag_class_int == dependency.tag_class_int && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == preferred_path) {
+                if(t.tag_fourcc == dependency.tag_fourcc && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == preferred_path) {
                     found = true;
                     break;
                 }
@@ -874,10 +874,10 @@ namespace Invader::EditQt {
                 if(textbox->cursorPosition() == textbox->text().size()) {
                     auto split_path = File::split_tag_class_extension(preferred_path);
                     if(split_path.has_value()) {
-                        auto class_int = split_path->class_int;
+                        auto fourcc = split_path->fourcc;
                         bool is_allowed = false;
                         for(auto &ac : this->get_struct_value()->get_allowed_classes()) {
-                            if(ac == class_int) {
+                            if(ac == fourcc) {
                                 is_allowed = true;
                                 break;
                             }
@@ -887,14 +887,14 @@ namespace Invader::EditQt {
                         if(is_allowed) {
                             // First, Jason Jones the path in, accounting for the extension
                             dependency.path = split_path->path;
-                            dependency.tag_class_int = split_path->class_int;
+                            dependency.tag_fourcc = split_path->fourcc;
                             textbox->setText(split_path->path.c_str());
                             textbox->setCursorPosition(textbox->text().size());
-                            reinterpret_cast<QComboBox *>(this->widgets[0])->setCurrentText(HEK::tag_class_to_extension(split_path->class_int));
+                            reinterpret_cast<QComboBox *>(this->widgets[0])->setCurrentText(HEK::tag_fourcc_to_extension(split_path->fourcc));
                             
                             // Then look for it
                             for(auto &t : this->get_editor_window()->get_parent_window()->get_all_tags()) {
-                                if(t.tag_class_int == class_int && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == split_path->path) {
+                                if(t.tag_fourcc == fourcc && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == split_path->path) {
                                     found = true;
                                     break;
                                 }
@@ -907,7 +907,7 @@ namespace Invader::EditQt {
         
         // If fast listing mode is enabled, query the filesystem
         else {
-            auto path_with_extension = preferred_path + "." + HEK::tag_class_to_extension(dependency.tag_class_int);
+            auto path_with_extension = preferred_path + "." + HEK::tag_fourcc_to_extension(dependency.tag_fourcc);
             for(auto &i : this->get_editor_window()->get_parent_window()->get_tag_directories()) {
                 if(std::filesystem::exists(i / path_with_extension)) {
                     found = true;
@@ -930,7 +930,7 @@ namespace Invader::EditQt {
         if(tag.has_value()) {
             auto &tag_val = tag.value();
             this->textbox_widgets[0]->setText(File::split_tag_class_extension(File::halo_path_to_preferred_path(tag_val.tag_path))->path.c_str());
-            reinterpret_cast<QComboBox *>(this->widgets[0])->setCurrentText(HEK::tag_class_to_extension(tag_val.tag_class_int));
+            reinterpret_cast<QComboBox *>(this->widgets[0])->setCurrentText(HEK::tag_fourcc_to_extension(tag_val.tag_fourcc));
             this->on_change();
         }
     }

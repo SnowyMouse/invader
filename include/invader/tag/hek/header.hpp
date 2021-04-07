@@ -6,7 +6,7 @@
 #include <optional>
 
 #include "../../hek/pad.hpp"
-#include "../../hek/class_int.hpp"
+#include "../../hek/fourcc.hpp"
 #include "../../hek/data_type.hpp"
 #include "../../hek/endian.hpp"
 
@@ -26,7 +26,7 @@ namespace Invader::HEK {
         TagString tag_name_unused;
 
         /** Tag class of this tag */
-        BigEndian<TagClassInt> tag_class_int;
+        BigEndian<TagFourCC> tag_fourcc;
 
         /** CRC32? Unread? */
         BigEndian<std::uint32_t> crc32;
@@ -46,10 +46,10 @@ namespace Invader::HEK {
         BigEndian<std::uint32_t> blam;
 
         /** Get the correct version value for the tag */
-        static std::uint16_t version_for_tag(TagClassInt tag_class_int);
+        static std::uint16_t version_for_tag(TagFourCC tag_fourcc);
 
         /** Generate a new tag file header for a tag class */
-        TagFileHeader(TagClassInt tag_class_int);
+        TagFileHeader(TagFourCC tag_fourcc);
 
         /**
          * Validate the header, throwing an exception if not valid
@@ -58,7 +58,7 @@ namespace Invader::HEK {
          * @param expected_tag_class tag class expected
          * @throws                   std::exception if not valid
          */
-        static void validate_header(const TagFileHeader *header, std::size_t tag_file_size, std::optional<TagClassInt> expected_tag_class = std::nullopt);
+        static void validate_header(const TagFileHeader *header, std::size_t tag_file_size, std::optional<TagFourCC> expected_tag_class = std::nullopt);
 
         /** Make a blank tag file header. No values will be initialized. */
         TagFileHeader() = default;

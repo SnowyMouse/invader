@@ -21,11 +21,11 @@ with open(args[1], "w") as cpp:
         with open(args[i]) as a:
             indices[basename] = [line.rstrip() for line in a]
         cpp.write("    static std::vector<File::TagFilePath> {}_indices() {{\n".format(basename))
-        cpp.write("        static constexpr std::pair<HEK::TagClassInt, const char *> indices[] = {\n")
+        cpp.write("        static constexpr std::pair<HEK::TagFourCC, const char *> indices[] = {\n")
         resource = basename == "bitmaps" or basename == "sounds" or basename == "loc"
         for n in indices[basename]:
             name_split = n.split(".")
-            cpp.write("            std::pair<HEK::TagClassInt, const char *>(HEK::TagClassInt::TAG_CLASS_{}, \"{}\"),\n".format("NONE" if resource else name_split[1].upper(), name_split[0].replace("\\", "\\\\")))
+            cpp.write("            std::pair<HEK::TagFourCC, const char *>(HEK::TagFourCC::TAG_FOURCC_{}, \"{}\"),\n".format("NONE" if resource else name_split[1].upper(), name_split[0].replace("\\", "\\\\")))
         cpp.write("        };\n")
         cpp.write("        std::vector<File::TagFilePath> paths;\n")
         cpp.write("        paths.reserve(sizeof(indices) / sizeof(*indices));\n")

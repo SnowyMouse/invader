@@ -10,10 +10,10 @@ namespace Invader {
 
         // If it's indexed, check if the corresponding data is available
         if(this->is_indexed()) {
-            switch(this->tag_class_int) {
-                case TagClassInt::TAG_CLASS_BITMAP:
+            switch(this->tag_fourcc) {
+                case TagFourCC::TAG_FOURCC_BITMAP:
                     return this->map.bitmap_data.size() > 0;
-                case TagClassInt::TAG_CLASS_SOUND:
+                case TagFourCC::TAG_FOURCC_SOUND:
                     return this->map.sound_data.size() > 0;
                 default:
                     return this->map.loc_data.size() > 0;
@@ -56,7 +56,7 @@ namespace Invader {
         }
 
         // Indexed sound tags can use data in both the sound tag in the cache file and the sound tag in sounds.map
-        if(this->tag_class_int == TagClassInt::TAG_CLASS_SOUND && this->indexed) {
+        if(this->tag_fourcc == TagFourCC::TAG_FOURCC_SOUND && this->indexed) {
             if(pointer == this->base_struct_pointer) {
                 return this->map.resolve_tag_data_pointer(pointer, minimum);
             }
@@ -65,7 +65,7 @@ namespace Invader {
             }
         }
 
-        if(this->indexed || (this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
+        if(this->indexed || (this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
             auto edge = this->base_struct_offset + this->tag_data_size;
             auto offset = this->base_struct_offset + pointer - this->base_struct_pointer;
 
@@ -75,11 +75,11 @@ namespace Invader {
 
             Map::DataMapType type;
             if(this->indexed) {
-                switch(this->tag_class_int) {
-                    case TagClassInt::TAG_CLASS_BITMAP:
+                switch(this->tag_fourcc) {
+                    case TagFourCC::TAG_FOURCC_BITMAP:
                         type = Map::DataMapType::DATA_MAP_BITMAP;
                         break;
-                    case TagClassInt::TAG_CLASS_SOUND:
+                    case TagFourCC::TAG_FOURCC_SOUND:
                         type = Map::DataMapType::DATA_MAP_SOUND;
                         break;
                     default:

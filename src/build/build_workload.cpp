@@ -14,6 +14,7 @@
 #include <invader/tag/parser/compile/bitmap.hpp>
 #include <invader/tag/parser/compile/sound.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
+#include <invader/resource/list/resource_list.hpp>
 #include "../crc/crc32.h"
 
 namespace Invader {
@@ -75,21 +76,6 @@ namespace Invader {
     #define TAG_DATA_HEADER_STRUCT (structs[0])
     #define TAG_ARRAY_STRUCT (structs[1])
 
-    bool BuildWorkload::BuildWorkloadStruct::can_dedupe(const BuildWorkload::BuildWorkloadStruct &other) const noexcept {
-        if(this->unsafe_to_dedupe || other.unsafe_to_dedupe || (this->bsp.has_value() && this->bsp != other.bsp)) {
-            return false;
-        }
-
-        std::size_t this_size = this->data.size();
-        std::size_t other_size = other.data.size();
-
-        if(this->dependencies == other.dependencies && this->pointers == other.pointers && this_size >= other_size) {
-            return std::memcmp(this->data.data(), other.data.data(), other_size) == 0;
-        }
-
-        return false;
-    }
-
     BuildWorkload::BuildWorkload() : ErrorHandler() {}
 
     std::vector<std::byte> BuildWorkload::compile_map(const BuildParameters &parameters) {
@@ -147,7 +133,7 @@ namespace Invader {
                 auto &tag = this->tags.emplace_back();
                 tag_paths.emplace_back(i);
                 tag.path = i.path;
-                tag.tag_class_int = i.class_int;
+                tag.tag_fourcc = i.fourcc;
                 tag.stubbed = true;
             }
         }
@@ -631,20 +617,20 @@ namespace Invader {
         }
     }
 
-    void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int) {
-        #define COMPILE_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+    void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagFourCC> tag_fourcc) {
+        #define COMPILE_TAG_CLASS(class_struct, fourcc) case TagFourCC::fourcc: { \
             do_compile_tag(std::move(Parser::class_struct::parse_hek_tag_file(tag_data, tag_data_size, true))); \
             break; \
         }
 
         auto *header = reinterpret_cast<const HEK::TagFileHeader *>(tag_data);
 
-        if(!tag_class_int.has_value()) {
-            tag_class_int = header->tag_class_int;
+        if(!tag_fourcc.has_value()) {
+            tag_fourcc = header->tag_fourcc;
         }
 
         // Set this in case it's not set yet
-        this->tags[tag_index].tag_class_int = *tag_class_int;
+        this->tags[tag_index].tag_fourcc = *tag_fourcc;
         
         // Make sure the path isn't bullshit
         bool invalid_path = false;
@@ -687,12 +673,12 @@ namespace Invader {
         }
 
         // Check header and CRC32
-        HEK::TagFileHeader::validate_header(header, tag_data_size, tag_class_int);
+        HEK::TagFileHeader::validate_header(header, tag_data_size, tag_fourcc);
         HEK::BigEndian<std::uint32_t> expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
         
         // Make sure the header's CRC32 matches the calculated CRC32
         if(expected_crc != header->crc32) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_class_int.value()));
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_fourcc_to_extension(tag_fourcc.value()));
         }
         
         // Calculate checksums. This is to prevent collisions when bitmap/sound data is modified but nothing else, since this data isn't directly factored into the map checksum.
@@ -711,94 +697,94 @@ namespace Invader {
             new_tag_struct.compile(workload, tag_index, &new_struct - structs.data());
         };
 
-        switch(*tag_class_int) {
-            COMPILE_TAG_CLASS(Actor, TAG_CLASS_ACTOR)
-            COMPILE_TAG_CLASS(ActorVariant, TAG_CLASS_ACTOR_VARIANT)
-            COMPILE_TAG_CLASS(Antenna, TAG_CLASS_ANTENNA)
-            COMPILE_TAG_CLASS(ModelAnimations, TAG_CLASS_MODEL_ANIMATIONS)
-            COMPILE_TAG_CLASS(Biped, TAG_CLASS_BIPED)
-            COMPILE_TAG_CLASS(Bitmap, TAG_CLASS_BITMAP)
-            COMPILE_TAG_CLASS(ModelCollisionGeometry, TAG_CLASS_MODEL_COLLISION_GEOMETRY)
-            COMPILE_TAG_CLASS(ColorTable, TAG_CLASS_COLOR_TABLE)
-            COMPILE_TAG_CLASS(Contrail, TAG_CLASS_CONTRAIL)
-            COMPILE_TAG_CLASS(DeviceControl, TAG_CLASS_DEVICE_CONTROL)
-            COMPILE_TAG_CLASS(Decal, TAG_CLASS_DECAL)
-            COMPILE_TAG_CLASS(UIWidgetDefinition, TAG_CLASS_UI_WIDGET_DEFINITION)
-            COMPILE_TAG_CLASS(InputDeviceDefaults, TAG_CLASS_INPUT_DEVICE_DEFAULTS)
-            COMPILE_TAG_CLASS(DetailObjectCollection, TAG_CLASS_DETAIL_OBJECT_COLLECTION)
-            COMPILE_TAG_CLASS(Effect, TAG_CLASS_EFFECT)
-            COMPILE_TAG_CLASS(Equipment, TAG_CLASS_EQUIPMENT)
-            COMPILE_TAG_CLASS(Flag, TAG_CLASS_FLAG)
-            COMPILE_TAG_CLASS(Fog, TAG_CLASS_FOG)
-            COMPILE_TAG_CLASS(Font, TAG_CLASS_FONT)
-            COMPILE_TAG_CLASS(MaterialEffects, TAG_CLASS_MATERIAL_EFFECTS)
-            COMPILE_TAG_CLASS(Garbage, TAG_CLASS_GARBAGE)
-            COMPILE_TAG_CLASS(Glow, TAG_CLASS_GLOW)
-            COMPILE_TAG_CLASS(GrenadeHUDInterface, TAG_CLASS_GRENADE_HUD_INTERFACE)
-            COMPILE_TAG_CLASS(HUDMessageText, TAG_CLASS_HUD_MESSAGE_TEXT)
-            COMPILE_TAG_CLASS(HUDNumber, TAG_CLASS_HUD_NUMBER)
-            COMPILE_TAG_CLASS(HUDGlobals, TAG_CLASS_HUD_GLOBALS)
-            COMPILE_TAG_CLASS(InvaderBitmap, TAG_CLASS_INVADER_BITMAP)
-            COMPILE_TAG_CLASS(InvaderSound, TAG_CLASS_INVADER_SOUND)
-            COMPILE_TAG_CLASS(ItemCollection, TAG_CLASS_ITEM_COLLECTION)
-            COMPILE_TAG_CLASS(DamageEffect, TAG_CLASS_DAMAGE_EFFECT)
-            COMPILE_TAG_CLASS(LensFlare, TAG_CLASS_LENS_FLARE)
-            COMPILE_TAG_CLASS(Lightning, TAG_CLASS_LIGHTNING)
-            COMPILE_TAG_CLASS(DeviceLightFixture, TAG_CLASS_DEVICE_LIGHT_FIXTURE)
-            COMPILE_TAG_CLASS(Light, TAG_CLASS_LIGHT)
-            COMPILE_TAG_CLASS(SoundLooping, TAG_CLASS_SOUND_LOOPING)
-            COMPILE_TAG_CLASS(DeviceMachine, TAG_CLASS_DEVICE_MACHINE)
-            COMPILE_TAG_CLASS(Globals, TAG_CLASS_GLOBALS)
-            COMPILE_TAG_CLASS(Meter, TAG_CLASS_METER)
-            COMPILE_TAG_CLASS(LightVolume, TAG_CLASS_LIGHT_VOLUME)
-            COMPILE_TAG_CLASS(GBXModel, TAG_CLASS_GBXMODEL)
-            COMPILE_TAG_CLASS(Model, TAG_CLASS_MODEL)
-            COMPILE_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION)
-            COMPILE_TAG_CLASS(Particle, TAG_CLASS_PARTICLE)
-            COMPILE_TAG_CLASS(ParticleSystem, TAG_CLASS_PARTICLE_SYSTEM)
-            COMPILE_TAG_CLASS(Physics, TAG_CLASS_PHYSICS)
-            COMPILE_TAG_CLASS(Placeholder, TAG_CLASS_PLACEHOLDER)
-            COMPILE_TAG_CLASS(PointPhysics, TAG_CLASS_POINT_PHYSICS)
-            COMPILE_TAG_CLASS(Projectile, TAG_CLASS_PROJECTILE)
-            COMPILE_TAG_CLASS(WeatherParticleSystem, TAG_CLASS_WEATHER_PARTICLE_SYSTEM)
-            COMPILE_TAG_CLASS(Scenery, TAG_CLASS_SCENERY)
-            COMPILE_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED)
-            COMPILE_TAG_CLASS(ShaderTransparentChicago, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO)
-            COMPILE_TAG_CLASS(Scenario, TAG_CLASS_SCENARIO)
-            COMPILE_TAG_CLASS(ShaderEnvironment, TAG_CLASS_SHADER_ENVIRONMENT)
-            COMPILE_TAG_CLASS(ShaderTransparentGlass, TAG_CLASS_SHADER_TRANSPARENT_GLASS)
-            COMPILE_TAG_CLASS(Sky, TAG_CLASS_SKY)
-            COMPILE_TAG_CLASS(ShaderTransparentMeter, TAG_CLASS_SHADER_TRANSPARENT_METER)
-            COMPILE_TAG_CLASS(Sound, TAG_CLASS_SOUND)
-            COMPILE_TAG_CLASS(SoundEnvironment, TAG_CLASS_SOUND_ENVIRONMENT)
-            COMPILE_TAG_CLASS(ShaderModel, TAG_CLASS_SHADER_MODEL)
-            COMPILE_TAG_CLASS(ShaderTransparentGeneric, TAG_CLASS_SHADER_TRANSPARENT_GENERIC)
-            COMPILE_TAG_CLASS(TagCollection, TAG_CLASS_UI_WIDGET_COLLECTION)
-            COMPILE_TAG_CLASS(ShaderTransparentPlasma, TAG_CLASS_SHADER_TRANSPARENT_PLASMA)
-            COMPILE_TAG_CLASS(SoundScenery, TAG_CLASS_SOUND_SCENERY)
-            COMPILE_TAG_CLASS(StringList, TAG_CLASS_STRING_LIST)
-            COMPILE_TAG_CLASS(ShaderTransparentWater, TAG_CLASS_SHADER_TRANSPARENT_WATER)
-            COMPILE_TAG_CLASS(TagCollection, TAG_CLASS_TAG_COLLECTION)
-            COMPILE_TAG_CLASS(CameraTrack, TAG_CLASS_CAMERA_TRACK)
-            COMPILE_TAG_CLASS(Dialogue, TAG_CLASS_DIALOGUE)
-            COMPILE_TAG_CLASS(UnitHUDInterface, TAG_CLASS_UNIT_HUD_INTERFACE)
-            COMPILE_TAG_CLASS(UnicodeStringList, TAG_CLASS_UNICODE_STRING_LIST)
-            COMPILE_TAG_CLASS(VirtualKeyboard, TAG_CLASS_VIRTUAL_KEYBOARD)
-            COMPILE_TAG_CLASS(Vehicle, TAG_CLASS_VEHICLE)
-            COMPILE_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
-            COMPILE_TAG_CLASS(Wind, TAG_CLASS_WIND)
-            COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
+        switch(*tag_fourcc) {
+            COMPILE_TAG_CLASS(Actor, TAG_FOURCC_ACTOR)
+            COMPILE_TAG_CLASS(ActorVariant, TAG_FOURCC_ACTOR_VARIANT)
+            COMPILE_TAG_CLASS(Antenna, TAG_FOURCC_ANTENNA)
+            COMPILE_TAG_CLASS(ModelAnimations, TAG_FOURCC_MODEL_ANIMATIONS)
+            COMPILE_TAG_CLASS(Biped, TAG_FOURCC_BIPED)
+            COMPILE_TAG_CLASS(Bitmap, TAG_FOURCC_BITMAP)
+            COMPILE_TAG_CLASS(ModelCollisionGeometry, TAG_FOURCC_MODEL_COLLISION_GEOMETRY)
+            COMPILE_TAG_CLASS(ColorTable, TAG_FOURCC_COLOR_TABLE)
+            COMPILE_TAG_CLASS(Contrail, TAG_FOURCC_CONTRAIL)
+            COMPILE_TAG_CLASS(DeviceControl, TAG_FOURCC_DEVICE_CONTROL)
+            COMPILE_TAG_CLASS(Decal, TAG_FOURCC_DECAL)
+            COMPILE_TAG_CLASS(UIWidgetDefinition, TAG_FOURCC_UI_WIDGET_DEFINITION)
+            COMPILE_TAG_CLASS(InputDeviceDefaults, TAG_FOURCC_INPUT_DEVICE_DEFAULTS)
+            COMPILE_TAG_CLASS(DetailObjectCollection, TAG_FOURCC_DETAIL_OBJECT_COLLECTION)
+            COMPILE_TAG_CLASS(Effect, TAG_FOURCC_EFFECT)
+            COMPILE_TAG_CLASS(Equipment, TAG_FOURCC_EQUIPMENT)
+            COMPILE_TAG_CLASS(Flag, TAG_FOURCC_FLAG)
+            COMPILE_TAG_CLASS(Fog, TAG_FOURCC_FOG)
+            COMPILE_TAG_CLASS(Font, TAG_FOURCC_FONT)
+            COMPILE_TAG_CLASS(MaterialEffects, TAG_FOURCC_MATERIAL_EFFECTS)
+            COMPILE_TAG_CLASS(Garbage, TAG_FOURCC_GARBAGE)
+            COMPILE_TAG_CLASS(Glow, TAG_FOURCC_GLOW)
+            COMPILE_TAG_CLASS(GrenadeHUDInterface, TAG_FOURCC_GRENADE_HUD_INTERFACE)
+            COMPILE_TAG_CLASS(HUDMessageText, TAG_FOURCC_HUD_MESSAGE_TEXT)
+            COMPILE_TAG_CLASS(HUDNumber, TAG_FOURCC_HUD_NUMBER)
+            COMPILE_TAG_CLASS(HUDGlobals, TAG_FOURCC_HUD_GLOBALS)
+            COMPILE_TAG_CLASS(InvaderBitmap, TAG_FOURCC_INVADER_BITMAP)
+            COMPILE_TAG_CLASS(InvaderSound, TAG_FOURCC_INVADER_SOUND)
+            COMPILE_TAG_CLASS(ItemCollection, TAG_FOURCC_ITEM_COLLECTION)
+            COMPILE_TAG_CLASS(DamageEffect, TAG_FOURCC_DAMAGE_EFFECT)
+            COMPILE_TAG_CLASS(LensFlare, TAG_FOURCC_LENS_FLARE)
+            COMPILE_TAG_CLASS(Lightning, TAG_FOURCC_LIGHTNING)
+            COMPILE_TAG_CLASS(DeviceLightFixture, TAG_FOURCC_DEVICE_LIGHT_FIXTURE)
+            COMPILE_TAG_CLASS(Light, TAG_FOURCC_LIGHT)
+            COMPILE_TAG_CLASS(SoundLooping, TAG_FOURCC_SOUND_LOOPING)
+            COMPILE_TAG_CLASS(DeviceMachine, TAG_FOURCC_DEVICE_MACHINE)
+            COMPILE_TAG_CLASS(Globals, TAG_FOURCC_GLOBALS)
+            COMPILE_TAG_CLASS(Meter, TAG_FOURCC_METER)
+            COMPILE_TAG_CLASS(LightVolume, TAG_FOURCC_LIGHT_VOLUME)
+            COMPILE_TAG_CLASS(GBXModel, TAG_FOURCC_GBXMODEL)
+            COMPILE_TAG_CLASS(Model, TAG_FOURCC_MODEL)
+            COMPILE_TAG_CLASS(MultiplayerScenarioDescription, TAG_FOURCC_MULTIPLAYER_SCENARIO_DESCRIPTION)
+            COMPILE_TAG_CLASS(Particle, TAG_FOURCC_PARTICLE)
+            COMPILE_TAG_CLASS(ParticleSystem, TAG_FOURCC_PARTICLE_SYSTEM)
+            COMPILE_TAG_CLASS(Physics, TAG_FOURCC_PHYSICS)
+            COMPILE_TAG_CLASS(Placeholder, TAG_FOURCC_PLACEHOLDER)
+            COMPILE_TAG_CLASS(PointPhysics, TAG_FOURCC_POINT_PHYSICS)
+            COMPILE_TAG_CLASS(Projectile, TAG_FOURCC_PROJECTILE)
+            COMPILE_TAG_CLASS(WeatherParticleSystem, TAG_FOURCC_WEATHER_PARTICLE_SYSTEM)
+            COMPILE_TAG_CLASS(Scenery, TAG_FOURCC_SCENERY)
+            COMPILE_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED)
+            COMPILE_TAG_CLASS(ShaderTransparentChicago, TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO)
+            COMPILE_TAG_CLASS(Scenario, TAG_FOURCC_SCENARIO)
+            COMPILE_TAG_CLASS(ShaderEnvironment, TAG_FOURCC_SHADER_ENVIRONMENT)
+            COMPILE_TAG_CLASS(ShaderTransparentGlass, TAG_FOURCC_SHADER_TRANSPARENT_GLASS)
+            COMPILE_TAG_CLASS(Sky, TAG_FOURCC_SKY)
+            COMPILE_TAG_CLASS(ShaderTransparentMeter, TAG_FOURCC_SHADER_TRANSPARENT_METER)
+            COMPILE_TAG_CLASS(Sound, TAG_FOURCC_SOUND)
+            COMPILE_TAG_CLASS(SoundEnvironment, TAG_FOURCC_SOUND_ENVIRONMENT)
+            COMPILE_TAG_CLASS(ShaderModel, TAG_FOURCC_SHADER_MODEL)
+            COMPILE_TAG_CLASS(ShaderTransparentGeneric, TAG_FOURCC_SHADER_TRANSPARENT_GENERIC)
+            COMPILE_TAG_CLASS(TagCollection, TAG_FOURCC_UI_WIDGET_COLLECTION)
+            COMPILE_TAG_CLASS(ShaderTransparentPlasma, TAG_FOURCC_SHADER_TRANSPARENT_PLASMA)
+            COMPILE_TAG_CLASS(SoundScenery, TAG_FOURCC_SOUND_SCENERY)
+            COMPILE_TAG_CLASS(StringList, TAG_FOURCC_STRING_LIST)
+            COMPILE_TAG_CLASS(ShaderTransparentWater, TAG_FOURCC_SHADER_TRANSPARENT_WATER)
+            COMPILE_TAG_CLASS(TagCollection, TAG_FOURCC_TAG_COLLECTION)
+            COMPILE_TAG_CLASS(CameraTrack, TAG_FOURCC_CAMERA_TRACK)
+            COMPILE_TAG_CLASS(Dialogue, TAG_FOURCC_DIALOGUE)
+            COMPILE_TAG_CLASS(UnitHUDInterface, TAG_FOURCC_UNIT_HUD_INTERFACE)
+            COMPILE_TAG_CLASS(UnicodeStringList, TAG_FOURCC_UNICODE_STRING_LIST)
+            COMPILE_TAG_CLASS(VirtualKeyboard, TAG_FOURCC_VIRTUAL_KEYBOARD)
+            COMPILE_TAG_CLASS(Vehicle, TAG_FOURCC_VEHICLE)
+            COMPILE_TAG_CLASS(Weapon, TAG_FOURCC_WEAPON)
+            COMPILE_TAG_CLASS(Wind, TAG_FOURCC_WIND)
+            COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_FOURCC_WEAPON_HUD_INTERFACE)
             
-            case TagClassInt::TAG_CLASS_OBJECT:
-            case TagClassInt::TAG_CLASS_UNIT:
-            case TagClassInt::TAG_CLASS_SHADER:
-            case TagClassInt::TAG_CLASS_ITEM:
-            case TagClassInt::TAG_CLASS_DEVICE:
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_class_to_extension(*tag_class_int));
+            case TagFourCC::TAG_FOURCC_OBJECT:
+            case TagFourCC::TAG_FOURCC_UNIT:
+            case TagFourCC::TAG_FOURCC_SHADER:
+            case TagFourCC::TAG_FOURCC_ITEM:
+            case TagFourCC::TAG_FOURCC_DEVICE:
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_fourcc_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
 
             // And, of course, BSP tags
-            case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
+            case TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
                 std::size_t bsp = this->bsp_count++;
@@ -822,7 +808,7 @@ namespace Invader {
                     auto &new_ptr = new_bsp_header_struct.pointers.emplace_back();
                     new_ptr.limit_to_32_bits = true;
                     new_ptr.offset = reinterpret_cast<std::byte *>(&bsp_data->pointer) - reinterpret_cast<std::byte *>(bsp_data);
-                    bsp_data->signature = TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;
+                    bsp_data->signature = TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP;
 
                     // Make the new BSP struct thingy and make the header point to it
                     std::size_t new_bsp_struct_index = this->structs.size();
@@ -840,16 +826,16 @@ namespace Invader {
             }
 
             // We don't have any way of handling these tags
-            case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
-            case TagClassInt::TAG_CLASS_SPHEROID:
-            case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
-            case TagClassInt::TAG_CLASS_INVADER_FONT:
-            case TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
-            case TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
-            case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
-            case TagClassInt::TAG_CLASS_INVADER_SCENARIO:
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_class_to_extension(*tag_class_int));
+            case TagFourCC::TAG_FOURCC_PREFERENCES_NETWORK_GAME:
+            case TagFourCC::TAG_FOURCC_SPHEROID:
+            case TagFourCC::TAG_FOURCC_CONTINUOUS_DAMAGE_EFFECT:
+            case TagFourCC::TAG_FOURCC_INVADER_FONT:
+            case TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
+            case TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
+            case TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
+            case TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
+            case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_fourcc_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
                 
             // And this, of course, we don't know
@@ -858,7 +844,7 @@ namespace Invader {
         }
     }
 
-    std::size_t BuildWorkload::compile_tag_recursively(const char *tag_path, TagClassInt tag_class_int) {
+    std::size_t BuildWorkload::compile_tag_recursively(const char *tag_path, TagFourCC tag_fourcc) {
         // Remove duplicate slashes
         auto fixed_path = Invader::File::remove_duplicate_slashes(tag_path);
         tag_path = fixed_path.c_str();
@@ -868,7 +854,7 @@ namespace Invader {
         bool found = false;
         for(std::size_t i = 0; i < return_value; i++) {
             auto &tag = this->tags[i];
-            if((tag.tag_class_int == tag_class_int || tag.alias == tag_class_int) && tag.path == tag_path) {
+            if((tag.tag_fourcc == tag_fourcc || tag.alias == tag_fourcc) && tag.path == tag_path) {
                 if(tag.base_struct.has_value()) {
                     return i;
                 }
@@ -884,8 +870,8 @@ namespace Invader {
         // Find it
         char formatted_path[512];
         std::optional<std::filesystem::path> new_path;
-        if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
-            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
+        if(tag_fourcc != TagFourCC::TAG_FOURCC_OBJECT) {
+            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
             Invader::File::halo_path_to_preferred_path_chars(formatted_path);
             
             // Only set the new path if it exists
@@ -895,35 +881,35 @@ namespace Invader {
         }
         else {
             #define TRY_THIS(new_int) if(!new_path.has_value()) { \
-                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(new_int)); \
+                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(new_int)); \
                 Invader::File::halo_path_to_preferred_path_chars(formatted_path); \
                 new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories); \
                 if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) { /* only set the new path if it exists */ \
                     new_path = std::nullopt; \
                 } \
-                tag_class_int = new_int; \
+                tag_fourcc = new_int; \
             }
-            TRY_THIS(TagClassInt::TAG_CLASS_BIPED);
-            TRY_THIS(TagClassInt::TAG_CLASS_VEHICLE);
-            TRY_THIS(TagClassInt::TAG_CLASS_WEAPON);
-            TRY_THIS(TagClassInt::TAG_CLASS_EQUIPMENT);
-            TRY_THIS(TagClassInt::TAG_CLASS_GARBAGE);
-            TRY_THIS(TagClassInt::TAG_CLASS_SCENERY);
-            TRY_THIS(TagClassInt::TAG_CLASS_PLACEHOLDER);
-            TRY_THIS(TagClassInt::TAG_CLASS_SOUND_SCENERY);
-            TRY_THIS(TagClassInt::TAG_CLASS_DEVICE_CONTROL);
-            TRY_THIS(TagClassInt::TAG_CLASS_DEVICE_MACHINE);
-            TRY_THIS(TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE);
+            TRY_THIS(TagFourCC::TAG_FOURCC_BIPED);
+            TRY_THIS(TagFourCC::TAG_FOURCC_VEHICLE);
+            TRY_THIS(TagFourCC::TAG_FOURCC_WEAPON);
+            TRY_THIS(TagFourCC::TAG_FOURCC_EQUIPMENT);
+            TRY_THIS(TagFourCC::TAG_FOURCC_GARBAGE);
+            TRY_THIS(TagFourCC::TAG_FOURCC_SCENERY);
+            TRY_THIS(TagFourCC::TAG_FOURCC_PLACEHOLDER);
+            TRY_THIS(TagFourCC::TAG_FOURCC_SOUND_SCENERY);
+            TRY_THIS(TagFourCC::TAG_FOURCC_DEVICE_CONTROL);
+            TRY_THIS(TagFourCC::TAG_FOURCC_DEVICE_MACHINE);
+            TRY_THIS(TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE);
             #undef TRY_THIS
             if(!new_path.has_value()) {
-                tag_class_int = TagClassInt::TAG_CLASS_OBJECT;
-                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
+                tag_fourcc = TagFourCC::TAG_FOURCC_OBJECT;
+                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
             }
             else {
                 // Look for it again
                 for(std::size_t i = 0; i < return_value; i++) {
                     auto &tag = this->tags[i];
-                    if(tag.tag_class_int == tag_class_int && tag.path == tag_path) {
+                    if(tag.tag_fourcc == tag_fourcc && tag.path == tag_path) {
                         if(tag.base_struct.has_value()) {
                             return i;
                         }
@@ -940,8 +926,8 @@ namespace Invader {
         if(!found) {
             auto &tag = this->tags.emplace_back();
             tag.path = tag_path;
-            tag.tag_class_int = tag_class_int;
-            this->get_tag_paths().emplace_back(tag_path, tag_class_int);
+            tag.tag_fourcc = tag_fourcc;
+            this->get_tag_paths().emplace_back(tag_path, tag_fourcc);
         }
 
         // And we're done! Maybe?
@@ -963,7 +949,7 @@ namespace Invader {
         auto &tag_file_data = *tag_file;
 
         try {
-            this->compile_tag_data_recursively(tag_file_data.data(), tag_file_data.size(), return_value, tag_class_int);
+            this->compile_tag_data_recursively(tag_file_data.data(), tag_file_data.size(), return_value, tag_fourcc);
         }
         catch(std::exception &e) {
             eprintf("Failed to compile tag %s\n", formatted_path);
@@ -1005,7 +991,7 @@ namespace Invader {
                                    std::strcmp(this->scenario_name.string, "ui") == 0 ||
                                    std::strcmp(this->scenario_name.string, "wizard") == 0;
 
-        this->scenario_index = this->compile_tag_recursively(this->scenario, TagClassInt::TAG_CLASS_SCENARIO);
+        this->scenario_index = this->compile_tag_recursively(this->scenario, TagFourCC::TAG_FOURCC_SCENARIO);
         std::string full_scenario_path = this->tags[this->scenario_index].path;
         const char *first_char = full_scenario_path.c_str();
         const char *last_slash = first_char;
@@ -1016,14 +1002,14 @@ namespace Invader {
         }
         this->tags[this->scenario_index].path = std::string(first_char, last_slash - first_char) + this->scenario_name.string;
 
-        this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
+        this->compile_tag_recursively("globals\\globals", TagFourCC::TAG_FOURCC_GLOBALS);
         
         auto engine_target = this->parameters->details.build_cache_file_engine;
         
         // Xbox maps don't have tag collection tags, so we have to add each individual tag
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            this->compile_tag_recursively("ui\\shell\\bitmaps\\white", TagClassInt::TAG_CLASS_BITMAP);
-            this->compile_tag_recursively("ui\\multiplayer_game_text", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST); // yes, this tag is in all scenario types, even singleplayer. why? idk lol
+            this->compile_tag_recursively("ui\\shell\\bitmaps\\white", TagFourCC::TAG_FOURCC_BITMAP);
+            this->compile_tag_recursively("ui\\multiplayer_game_text", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST); // yes, this tag is in all scenario types, even singleplayer. why? idk lol
             
             switch(*this->cache_file_type) {
                 case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
@@ -1031,37 +1017,37 @@ namespace Invader {
                         REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine for multiplayer scenarios");
                         throw InvalidTagDataException();
                     }
-                    this->compile_tag_recursively("ui\\shell\\multiplayer", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    this->compile_tag_recursively("ui\\shell\\multiplayer", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
                     break;
                 case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
                     if(this->demo_ui) {
-                        this->compile_tag_recursively("ui\\shell\\solo_demo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
-                        this->compile_tag_recursively("ui\\shell\\strings\\temp_strings", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                        this->compile_tag_recursively("ui\\shell\\solo_demo", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
+                        this->compile_tag_recursively("ui\\shell\\strings\\temp_strings", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
                     }
                     else {
-                        this->compile_tag_recursively("ui\\shell\\solo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                        this->compile_tag_recursively("ui\\shell\\solo", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
                     }
                     break;
                 case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
-                    this->compile_tag_recursively("ui\\default_multiplayer_game_setting_names", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\saved_game_file_strings", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\multiplayer_scenarios", TagClassInt::TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION);
-                    this->compile_tag_recursively("ui\\random_player_names", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\english", TagClassInt::TAG_CLASS_VIRTUAL_KEYBOARD);
-                    this->compile_tag_recursively("ui\\shell\\strings\\default_player_profile_names", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\strings\\game_variant_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\joystick_set_short_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_short_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_long_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\default_multiplayer_game_setting_names", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\saved_game_file_strings", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\multiplayer_scenarios", TagFourCC::TAG_FOURCC_MULTIPLAYER_SCENARIO_DESCRIPTION);
+                    this->compile_tag_recursively("ui\\random_player_names", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\english", TagFourCC::TAG_FOURCC_VIRTUAL_KEYBOARD);
+                    this->compile_tag_recursively("ui\\shell\\strings\\default_player_profile_names", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\strings\\game_variant_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\joystick_set_short_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_short_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_long_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
                     if(this->demo_ui) {
-                        this->compile_tag_recursively("ui\\shell\\main_menu_demo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                        this->compile_tag_recursively("ui\\shell\\main_menu_demo", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
                     }
                     else {
-                        this->compile_tag_recursively("ui\\shell\\main_menu", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                        this->compile_tag_recursively("ui\\shell\\main_menu", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
                     }
-                    this->compile_tag_recursively("sound\\music\\title1\\title1", TagClassInt::TAG_CLASS_SOUND_LOOPING);
-                    this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagClassInt::TAG_CLASS_SOUND);
-                    this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagClassInt::TAG_CLASS_SOUND);
+                    this->compile_tag_recursively("sound\\music\\title1\\title1", TagFourCC::TAG_FOURCC_SOUND_LOOPING);
+                    this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagFourCC::TAG_FOURCC_SOUND);
+                    this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagFourCC::TAG_FOURCC_SOUND);
                     break;
                 case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
                     std::terminate();
@@ -1075,33 +1061,33 @@ namespace Invader {
                 throw InvalidTagDataException();
             }
             
-            this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
+            this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
 
             // Load the correct tag collection tag
             switch(*this->cache_file_type) {
                 case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
-                    this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
+                    this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
                     break;
                 case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
-                    this->compile_tag_recursively("ui\\ui_tags_loaded_multiplayer_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
+                    this->compile_tag_recursively("ui\\ui_tags_loaded_multiplayer_scenario_type", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
                     break;
                 case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
-                    this->compile_tag_recursively("ui\\ui_tags_loaded_mainmenu_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
+                    this->compile_tag_recursively("ui\\ui_tags_loaded_mainmenu_scenario_type", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
                     break;
                 case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
                     std::terminate();
             }
 
             // These are required for UI elements and other things
-            this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagClassInt::TAG_CLASS_SOUND);
-            this->compile_tag_recursively("sound\\sfx\\ui\\back", TagClassInt::TAG_CLASS_SOUND);
-            this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagClassInt::TAG_CLASS_SOUND);
+            this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagFourCC::TAG_FOURCC_SOUND);
+            this->compile_tag_recursively("sound\\sfx\\ui\\back", TagFourCC::TAG_FOURCC_SOUND);
+            this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagFourCC::TAG_FOURCC_SOUND);
             
             // WHY ARE THESE IN SINGLEPLAYER?
-            this->compile_tag_recursively("ui\\shell\\main_menu\\mp_map_list", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-            this->compile_tag_recursively("ui\\shell\\strings\\loading", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-            this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagClassInt::TAG_CLASS_BITMAP);
-            this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
+            this->compile_tag_recursively("ui\\shell\\main_menu\\mp_map_list", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+            this->compile_tag_recursively("ui\\shell\\strings\\loading", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
+            this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagFourCC::TAG_FOURCC_BITMAP);
+            this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagFourCC::TAG_FOURCC_BITMAP);
         }
 
         // Mark stubs
@@ -1109,13 +1095,13 @@ namespace Invader {
         for(auto &tag : this->tags) {
             if(tag.stubbed) {
                 // Object tags and damage effects are referenced directly over the netcode
-                if(*this->cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_class_int) || tag.tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
-                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_class_int));
+                if(*this->cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_fourcc) || tag.tag_fourcc == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT)) {
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.tag_fourcc));
                     warned++;
                 }
 
                 tag.path = "MISSINGNO.";
-                tag.tag_class_int = TagClassInt::TAG_CLASS_NONE;
+                tag.tag_fourcc = TagFourCC::TAG_FOURCC_NONE;
                 this->stubbed_tag_count++;
             }
         }
@@ -1125,58 +1111,6 @@ namespace Invader {
             eprintf_warn("An exception error will occur if %s used by the server.", warned == 1 ? "this tag is" : "these tags are");
             eprintf_warn("You can fix this by referencing %s in some already referenced tag in the map.", warned == 1 ? "it" : "them");
         }
-    }
-
-    void BuildWorkload::dedupe_structs() {
-        bool found_something = true;
-        std::size_t total_savings = 0;
-        std::size_t struct_count = this->structs.size();
-
-        oprintf("Optimizing tag space...");
-        oflush();
-
-        while(found_something) {
-            found_something = false;
-            for(std::size_t i = 0; i < struct_count; i++) {
-                if(this->structs[i].unsafe_to_dedupe) {
-                    continue;
-                }
-                for(std::size_t j = i + 1; j < struct_count; j++) {
-                    if(this->structs[j].unsafe_to_dedupe) {
-                        continue;
-                    }
-
-                    // Check if the structs are the same
-                    if(this->structs[i].can_dedupe(this->structs[j])) {
-                        // If so, go through every struct pointer. If they equal j, set to i. If they're greater than j, decrement
-                        for(std::size_t k = 0; k < struct_count; k++) {
-                            for(auto &pointer : this->structs[k].pointers) {
-                                auto &struct_index = pointer.struct_index;
-                                if(struct_index == j) {
-                                    struct_index = i;
-                                }
-                            }
-                        }
-
-                        // Also go through every tag, too
-                        for(auto &tag : this->tags) {
-                            if(tag.base_struct.has_value()) {
-                                auto &base_struct = tag.base_struct.value();
-                                if(base_struct == j) {
-                                    base_struct = i;
-                                }
-                            }
-                        }
-
-                        total_savings += this->structs[j].data.size();
-                        this->structs[j].unsafe_to_dedupe = true;
-
-                        found_something = true;
-                    }
-                }
-            }
-        }
-        oprintf(" done; reduced tag space usage by %.02f MiB\n", BYTES_TO_MiB(total_savings));
     }
 
     BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
@@ -1196,7 +1130,7 @@ namespace Invader {
         return workload;
     }
 
-    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
+    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagFourCC tag_fourcc, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
         BuildWorkload workload = {};
         
         BuildParameters parameters;
@@ -1207,7 +1141,7 @@ namespace Invader {
         workload.disable_recursion = !recursion;
         workload.disable_error_checking = !error_checking;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
-        workload.compile_tag_recursively(tag, tag_class_int);
+        workload.compile_tag_recursively(tag, tag_fourcc);
         return workload;
     }
 
@@ -1249,7 +1183,7 @@ namespace Invader {
             auto &tag = tags[t];
 
             // Tag data
-            auto primary_class = tag.tag_class_int;
+            auto primary_class = tag.tag_fourcc;
             if(!native) {
                 reinterpret_cast<HEK::CacheFileTagDataTag *>(&tag_index)->indexed = tag.resource_index.has_value();
             }
@@ -1260,7 +1194,7 @@ namespace Invader {
             else if(tag.resource_index.has_value() && !tag.base_struct.has_value()) {
                 tag_index.tag_data = *tag.resource_index;
             }
-            else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP || native) {
+            else if(primary_class != TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP || native) {
                 auto &tag_data_ptr = TAG_ARRAY_STRUCT.pointers.emplace_back();
                 tag_data_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_data) - reinterpret_cast<std::byte *>(tag_array);
                 tag_data_ptr.struct_index = *tag.base_struct;
@@ -1273,43 +1207,43 @@ namespace Invader {
             tag_id.tag_index = t;
 
             // Not strictly required to set the secondary or tertiary classes, but we do it anyway
-            tag_index.primary_class = tag.tag_class_int;
-            tag_index.secondary_class = TagClassInt::TAG_CLASS_NONE;
-            tag_index.tertiary_class = TagClassInt::TAG_CLASS_NONE;
-            switch(tag.tag_class_int) {
-                case TagClassInt::TAG_CLASS_BIPED:
-                case TagClassInt::TAG_CLASS_VEHICLE:
-                    tag_index.secondary_class = TagClassInt::TAG_CLASS_UNIT;
-                    tag_index.tertiary_class = TagClassInt::TAG_CLASS_OBJECT;
+            tag_index.primary_class = tag.tag_fourcc;
+            tag_index.secondary_class = TagFourCC::TAG_FOURCC_NONE;
+            tag_index.tertiary_class = TagFourCC::TAG_FOURCC_NONE;
+            switch(tag.tag_fourcc) {
+                case TagFourCC::TAG_FOURCC_BIPED:
+                case TagFourCC::TAG_FOURCC_VEHICLE:
+                    tag_index.secondary_class = TagFourCC::TAG_FOURCC_UNIT;
+                    tag_index.tertiary_class = TagFourCC::TAG_FOURCC_OBJECT;
                     break;
-                case TagClassInt::TAG_CLASS_WEAPON:
-                case TagClassInt::TAG_CLASS_GARBAGE:
-                case TagClassInt::TAG_CLASS_EQUIPMENT:
-                    tag_index.secondary_class = TagClassInt::TAG_CLASS_ITEM;
-                    tag_index.tertiary_class = TagClassInt::TAG_CLASS_OBJECT;
+                case TagFourCC::TAG_FOURCC_WEAPON:
+                case TagFourCC::TAG_FOURCC_GARBAGE:
+                case TagFourCC::TAG_FOURCC_EQUIPMENT:
+                    tag_index.secondary_class = TagFourCC::TAG_FOURCC_ITEM;
+                    tag_index.tertiary_class = TagFourCC::TAG_FOURCC_OBJECT;
                     break;
-                case TagClassInt::TAG_CLASS_DEVICE_CONTROL:
-                case TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE:
-                case TagClassInt::TAG_CLASS_DEVICE_MACHINE:
-                    tag_index.secondary_class = TagClassInt::TAG_CLASS_DEVICE;
-                    tag_index.tertiary_class = TagClassInt::TAG_CLASS_OBJECT;
+                case TagFourCC::TAG_FOURCC_DEVICE_CONTROL:
+                case TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE:
+                case TagFourCC::TAG_FOURCC_DEVICE_MACHINE:
+                    tag_index.secondary_class = TagFourCC::TAG_FOURCC_DEVICE;
+                    tag_index.tertiary_class = TagFourCC::TAG_FOURCC_OBJECT;
                     break;
-                case TagClassInt::TAG_CLASS_SCENERY:
-                case TagClassInt::TAG_CLASS_SOUND_SCENERY:
-                case TagClassInt::TAG_CLASS_PLACEHOLDER:
-                case TagClassInt::TAG_CLASS_PROJECTILE:
-                    tag_index.secondary_class = TagClassInt::TAG_CLASS_OBJECT;
+                case TagFourCC::TAG_FOURCC_SCENERY:
+                case TagFourCC::TAG_FOURCC_SOUND_SCENERY:
+                case TagFourCC::TAG_FOURCC_PLACEHOLDER:
+                case TagFourCC::TAG_FOURCC_PROJECTILE:
+                    tag_index.secondary_class = TagFourCC::TAG_FOURCC_OBJECT;
                     break;
-                case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
-                case TagClassInt::TAG_CLASS_SHADER_MODEL:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
-                    tag_index.secondary_class = TagClassInt::TAG_CLASS_SHADER;
+                case TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT:
+                case TagFourCC::TAG_FOURCC_SHADER_MODEL:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
+                    tag_index.secondary_class = TagFourCC::TAG_FOURCC_SHADER;
                     break;
                 default:
                     break;
@@ -1385,7 +1319,7 @@ namespace Invader {
                 }
                 else {
                     auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + offset + dependency.offset);
-                    dependency_struct.tag_class_int = tags[tag_index].tag_class_int;
+                    dependency_struct.tag_fourcc = tags[tag_index].tag_fourcc;
                     dependency_struct.tag_id = new_tag_id;
                     if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         dependency_struct.path_pointer = pointer_of_tag_path(tag_index);
@@ -1439,7 +1373,7 @@ namespace Invader {
                 // Go through each BSP tag
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &t = tags[i];
-                    if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+                    if(t.tag_fourcc != TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP) {
                         continue;
                     }
 
@@ -1507,7 +1441,7 @@ namespace Invader {
 
                     if(!found) {
                         oprintf("\n");
-                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                     }
                 }
             }
@@ -1559,7 +1493,7 @@ namespace Invader {
                 continue;
             }
             std::size_t resource_index = 0;
-            if(t.tag_class_int == TagClassInt::TAG_CLASS_BITMAP) {
+            if(t.tag_fourcc == TagFourCC::TAG_FOURCC_BITMAP) {
                 auto &bitmap_struct = this->structs[*t.base_struct];
                 auto &bitmap_header = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_struct.data.data());
                 std::size_t bitmap_data_count = bitmap_header.bitmap_data.count.read();
@@ -1586,7 +1520,7 @@ namespace Invader {
                     }
                 }
             }
-            else if(t.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+            else if(t.tag_fourcc == TagFourCC::TAG_FOURCC_SOUND) {
                 auto &sound_struct = this->structs[*t.base_struct];
                 auto &sound_header = *reinterpret_cast<Parser::Sound::struct_little *>(sound_struct.data.data());
                 std::size_t pitch_range_count = sound_header.pitch_ranges.count.read();
@@ -1648,6 +1582,8 @@ namespace Invader {
         auto &bitmaps = this->parameters->bitmap_data;
         auto &sounds = this->parameters->sound_data;
         auto &loc = this->parameters->loc_data;
+        
+        bool check_ce_bounds = this->parameters->details.build_check_custom_edition_resource_map_bounds;
 
         switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
@@ -1676,12 +1612,16 @@ namespace Invader {
                         return std::nullopt;
                     };
 
-                    switch(t.tag_class_int) {
-                        case TagClassInt::TAG_CLASS_BITMAP: {
+                    switch(t.tag_fourcc) {
+                        case TagFourCC::TAG_FOURCC_BITMAP: {
                             auto index = find_tag_index(t.path, bitmaps, true);
                             if(index.has_value()) {
                                 if((*index % 2) == 0) {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
+                                    break;
+                                }
+                                
+                                if(check_ce_bounds && (*index / 2 > get_default_bitmap_resources_count() || File::split_tag_class_extension_chars(get_default_bitmap_resources()[*index / 2])->path != t.path)) {
                                     break;
                                 }
 
@@ -1852,16 +1792,20 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in bitmaps.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in bitmaps.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
                         }
-                        case TagClassInt::TAG_CLASS_SOUND: {
+                        case TagFourCC::TAG_FOURCC_SOUND: {
                             auto index = find_tag_index(t.path, sounds, true);
                             if(index.has_value()) {
                                 if((*index % 2) == 0) {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
+                                    break;
+                                }
+                                
+                                if(check_ce_bounds && (*index / 2 > get_default_sound_resources_count() || File::split_tag_class_extension_chars(get_default_sound_resources()[*index / 2])->path != t.path)) {
                                     break;
                                 }
 
@@ -2009,17 +1953,21 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in sounds.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in sounds.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
                         }
-                        case TagClassInt::TAG_CLASS_FONT:
-                        case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                        case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
+                        case TagFourCC::TAG_FOURCC_FONT:
+                        case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
+                        case TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT: {
                             auto index = find_tag_index(t.path, loc, false);
                             if(index.has_value()) {
                                 bool match = true;
+                                
+                                if(check_ce_bounds && (*index > get_default_loc_resources_count() || (t.path + "." + HEK::tag_fourcc_to_extension(t.tag_fourcc)) != get_default_loc_resources()[*index])) {
+                                    break;
+                                }
 
                                 const auto &loc_tag_struct_other = (*loc)[*index];
                                 const auto *loc_tag_struct_other_data = loc_tag_struct_other.data.data();
@@ -2027,8 +1975,8 @@ namespace Invader {
 
                                 const auto &loc_tag_struct = this->structs[*t.base_struct];
 
-                                switch(t.tag_class_int) {
-                                    case TagClassInt::TAG_CLASS_FONT: {
+                                switch(t.tag_fourcc) {
+                                    case TagFourCC::TAG_FOURCC_FONT: {
                                         const auto &font_tag = *reinterpret_cast<const Parser::Font::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(font_tag)) {
                                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in loc.map appears to be corrupt (font main struct goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
@@ -2110,7 +2058,7 @@ namespace Invader {
                                         }
                                         break;
                                     }
-                                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST: {
+                                    case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST: {
                                         const auto &ustr_tag = *reinterpret_cast<const Parser::UnicodeStringList::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(ustr_tag)) {
                                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
@@ -2167,7 +2115,7 @@ namespace Invader {
                                         }
                                         break;
                                     }
-                                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
+                                    case TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT: {
                                         const auto &hud_message_tag = *reinterpret_cast<const Parser::HUDMessageText::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(hud_message_tag)) {
                                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", t.path.c_str());
@@ -2264,7 +2212,7 @@ namespace Invader {
                                     break;
                                 }
                                 else {
-                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in loc.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in loc.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 }
                             }
                             break;
@@ -2284,9 +2232,9 @@ namespace Invader {
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 for(auto &t : this->tags) {
-                    switch(t.tag_class_int) {
+                    switch(t.tag_fourcc) {
                         // Iterate through each permutation in each pitch range to find the bitmap
-                        case TagClassInt::TAG_CLASS_BITMAP: {
+                        case TagFourCC::TAG_FOURCC_BITMAP: {
                             if(bitmaps.has_value()) {
                                 auto &bitmap_tag_struct = this->structs[*t.base_struct];
                                 auto &bitmap_tag = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
@@ -2318,7 +2266,7 @@ namespace Invader {
                         }
 
                         // Iterate through each permutation in each pitch range to find the sound
-                        case TagClassInt::TAG_CLASS_SOUND: {
+                        case TagFourCC::TAG_FOURCC_SOUND: {
                             if(sounds.has_value()) {
                                 auto &sound_tag_struct = this->structs[*t.base_struct];
                                 auto &sound_tag = *reinterpret_cast<Parser::Sound::struct_little *>(sound_tag_struct.data.data());
@@ -2381,7 +2329,7 @@ namespace Invader {
     
     void BuildWorkload::check_hud_text_indices() {
         // This should effectively just get the tag
-        auto &globals_tag_struct = this->structs[this->tags[this->compile_tag_recursively("globals\\globals", HEK::TagClassInt::TAG_CLASS_GLOBALS)].base_struct.value()];
+        auto &globals_tag_struct = this->structs[this->tags[this->compile_tag_recursively("globals\\globals", HEK::TagFourCC::TAG_FOURCC_GLOBALS)].base_struct.value()];
         auto &globals_tag_data = *reinterpret_cast<Parser::Globals::struct_little *>(globals_tag_struct.data.data());
         if(globals_tag_data.interface_bitmaps.count != 1) {
             return;
@@ -2424,9 +2372,9 @@ namespace Invader {
                 continue;
             }
             
-            switch(tag.tag_class_int) {
-                case HEK::TagClassInt::TAG_CLASS_WEAPON:
-                case HEK::TagClassInt::TAG_CLASS_EQUIPMENT: {
+            switch(tag.tag_fourcc) {
+                case HEK::TagFourCC::TAG_FOURCC_WEAPON:
+                case HEK::TagFourCC::TAG_FOURCC_EQUIPMENT: {
                     auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(this->structs[*tag.base_struct].data.data())->pickup_text_index);
                     if(index >= item_strings && index != NULL_INDEX) {
                         REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, i, "Pickup text index is not valid (%zu >= %zu)", index, item_strings);
@@ -2434,8 +2382,8 @@ namespace Invader {
                     }
                     break;
                 }
-                case HEK::TagClassInt::TAG_CLASS_BIPED:
-                case HEK::TagClassInt::TAG_CLASS_VEHICLE: {
+                case HEK::TagFourCC::TAG_FOURCC_BIPED:
+                case HEK::TagFourCC::TAG_FOURCC_VEHICLE: {
                     auto &unit_struct = this->structs[*tag.base_struct];
                     auto &unit_data = *reinterpret_cast<Parser::Unit::struct_little *>(unit_struct.data.data());
                     auto index = static_cast<std::size_t>(unit_data.hud_text_message_index);

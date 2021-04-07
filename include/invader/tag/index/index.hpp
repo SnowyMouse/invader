@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include "../../hek/class_int.hpp"
+#include "../../hek/fourcc.hpp"
 #include "../../file/file.hpp"
 
 namespace Invader {

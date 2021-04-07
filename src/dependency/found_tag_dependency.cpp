@@ -19,24 +19,24 @@ namespace Invader {
 
                 // Continue
                 auto &tag = tag_compiled.tags[d.tag_index];
-                dependencies.emplace_back(tag.path, tag.tag_class_int);
+                dependencies.emplace_back(tag.path, tag.tag_fourcc);
             }
         }
         return dependencies;
     }
 
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
 
         if(!reverse) {
-            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, auto recursion) -> void {
+            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, auto recursion) -> void {
                 std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
 
                 // See if we can open the tag
                 bool found = false;
                 for(auto &tags_directory : tags) {
-                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_class_to_extension(tag_int_to_find));
+                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_fourcc_to_extension(tag_int_to_find));
                     auto tag_data = File::open_file(tag_path);
                     if(!tag_data.has_value()) {
                         eprintf_error("Failed to read tag %s", tag_path.string().c_str());
@@ -49,7 +49,7 @@ namespace Invader {
                             // Make sure it's not in found_tags
                             bool dupe = false;
                             for(auto &tag : found_tags) {
-                                if(tag.path == dependency.path && tag.class_int == dependency.class_int) {
+                                if(tag.path == dependency.path && tag.fourcc == dependency.fourcc) {
                                     dupe = true;
                                     break;
                                 }
@@ -58,8 +58,8 @@ namespace Invader {
                                 continue;
                             }
 
-                            auto class_to_use = dependency.class_int;
-                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
+                            auto class_to_use = dependency.fourcc;
+                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_fourcc_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
@@ -89,7 +89,7 @@ namespace Invader {
                 }
 
                 if(!found) {
-                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.c_str(), tag_class_to_extension(tag_int_to_find));
+                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.c_str(), tag_fourcc_to_extension(tag_int_to_find));
                     success = false;
                     return;
                 }
@@ -111,25 +111,25 @@ namespace Invader {
                         }
                         else if(file.is_regular_file()) {
                             std::string dir_tag_path = current_path + file.path().filename().stem().string();
-                            auto class_int = Invader::HEK::extension_to_tag_class(file.path().extension().string().c_str() + 1);
+                            auto fourcc = Invader::HEK::tag_extension_to_fourcc(file.path().extension().string().c_str() + 1);
 
                             // Skip some obvious stuff as well as null tag class ints
                             if(
-                                class_int == Invader::TagClassInt::TAG_CLASS_NULL ||
-                                class_int == Invader::TagClassInt::TAG_CLASS_BITMAP ||
-                                class_int == Invader::TagClassInt::TAG_CLASS_CAMERA_TRACK ||
-                                class_int == Invader::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT ||
-                                class_int == Invader::TagClassInt::TAG_CLASS_PHYSICS ||
-                                class_int == Invader::TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT ||
-                                class_int == Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST ||
-                                class_int == Invader::TagClassInt::TAG_CLASS_WIND) {
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_NULL ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_BITMAP ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_CAMERA_TRACK ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_PHYSICS ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_SOUND_ENVIRONMENT ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST ||
+                                fourcc == Invader::TagFourCC::TAG_FOURCC_WIND) {
                                 continue;
                             }
 
                             // If we already found this, ignore it
                             bool skip = false;
                             for(auto &f : found_tags) {
-                                if(f.path == dir_tag_path && f.class_int == class_int) {
+                                if(f.path == dir_tag_path && f.fourcc == fourcc) {
                                     skip = true;
                                     break;
                                 }
@@ -150,8 +150,8 @@ namespace Invader {
                             try {
                                 auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
                                 for(auto &dependency : dependencies) {
-                                    if(dependency.path == tag_path_to_find && dependency.class_int == tag_int_to_find) {
-                                        found_tags.emplace_back(dir_tag_path, class_int, false, file.path());
+                                    if(dependency.path == tag_path_to_find && dependency.fourcc == tag_int_to_find) {
+                                        found_tags.emplace_back(dir_tag_path, fourcc, false, file.path());
                                         break;
                                     }
                                 }

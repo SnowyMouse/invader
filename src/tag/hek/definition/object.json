@@ -515,14 +515,16 @@
                 "type": "TagReflexive",
                 "struct": "ObjectFunction",
                 "compound": true,
-                "hek_maximum": 4
+                "hek_maximum": 4,
+                "maximum": 4
             },
             {
                 "name": "change colors",
                 "type": "TagReflexive",
                 "struct": "ObjectChangeColors",
                 "compound": true,
-                "hek_maximum": 4
+                "hek_maximum": 4,
+                "maximum": 4
             },
             {
                 "name": "predicted resources",

@@ -233,6 +233,23 @@ namespace Invader::EditQt {
         if(this->initial_load) {
             this->refresh_view();
         }
+        
+        // Set the title
+        std::string title;
+        for(auto &i : directories) {
+            auto str = i.string();
+            if(!title.empty()) {
+                title += ", ";
+                
+                if(title.size() + str.size() > 512) {
+                    title += "...";
+                    break;
+                }
+            }
+            title += str;
+        }
+        title += std::string(" — ") + qApp->applicationDisplayName().toStdString();
+        this->setWindowTitle(title.c_str());
     }
 
     void TagTreeWindow::paintEvent(QPaintEvent *event) {
@@ -461,7 +478,7 @@ namespace Invader::EditQt {
                     if(std::filesystem::exists(path)) {
                         tag.full_path = path;
                         tag.tag_directory = &i - paths.data();
-                        tag.tag_class_int = split->class_int;
+                        tag.tag_fourcc = split->fourcc;
                         tag.tag_path = split->path;
                         found = true;
                         break;
@@ -477,7 +494,7 @@ namespace Invader::EditQt {
                     if(std::filesystem::exists(test_full_path)) {
                         tag.full_path = test_full_path;
                         tag.tag_directory = &i - paths.data();
-                        tag.tag_class_int = split->class_int;
+                        tag.tag_fourcc = split->fourcc;
                         tag.tag_path = split->path;
                         found = true;
                         break;
@@ -538,7 +555,7 @@ namespace Invader::EditQt {
         dialog.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
         QStringList items;
         for(auto i : Parser::ParserStruct::all_tag_classes(false)) {
-            items.append(HEK::tag_class_to_extension(i));
+            items.append(HEK::tag_fourcc_to_extension(i));
         }
         dialog.setComboBoxItems(items);
         dialog.setLabelText("Choose a class for the new tag");
@@ -547,7 +564,7 @@ namespace Invader::EditQt {
         // If we got it, onwards!
         if(dialog.exec() == QDialog::Accepted) {
             File::TagFile tag = {};
-            tag.tag_class_int = HEK::extension_to_tag_class(dialog.textValue().toLatin1().data());
+            tag.tag_fourcc = HEK::tag_extension_to_fourcc(dialog.textValue().toLatin1().data());
 
             // Create; benchmark
             auto start = std::chrono::steady_clock::now();

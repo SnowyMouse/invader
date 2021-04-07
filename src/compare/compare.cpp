@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <thread>
+#include <mutex>
 #include <vector>
 #include <cstring>
 #include <regex>
@@ -47,13 +49,13 @@ enum ByPath {
     BY_PATH_DIFFERENT = 2
 };
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose);
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose, std::size_t job_count);
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
 
     struct CompareOptions {
-        std::vector<HEK::TagClassInt> class_to_check;
+        std::vector<HEK::TagFourCC> class_to_check;
         Input *top_input = nullptr;
         std::vector<Input> inputs;
         bool exhaustive = false;
@@ -63,6 +65,7 @@ int main(int argc, const char **argv) {
         bool verbose = false;
         ByPath by_path = ByPath::BY_PATH_SAME;
         Show show = Show::SHOW_ALL;
+        std::optional<std::size_t> job_count;
     } compare_options;
 
     std::vector<Invader::CommandLineOption> options;
@@ -79,6 +82,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input.");
     options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with -f");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
+    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for comparison. This cannot be used with --verbose. Default: 1");
 
     static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
     static constexpr char USAGE[] = "[options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]";
@@ -106,6 +110,16 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 compare_options.top_input->ignore_resource_maps = true;
+                break;
+
+            case 'j':
+                try {
+                    compare_options.job_count = std::stoul(args[0]);
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid number of threads %s\n", args[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
                 
             case 'B':
@@ -182,14 +196,14 @@ int main(int argc, const char **argv) {
                 break;
                 
             case 'c': {
-                auto class_to_check = extension_to_tag_class(args[0]);
+                auto class_to_check = tag_extension_to_fourcc(args[0]);
                 for(auto c : compare_options.class_to_check) {
                     if(c == class_to_check) {
                         eprintf_error("Class %s was already specified", args[0]);
                         std::exit(EXIT_FAILURE);
                     }
                 }
-                if(class_to_check == TagClassInt::TAG_CLASS_NULL || class_to_check == TagClassInt::TAG_CLASS_NONE) {
+                if(class_to_check == TagFourCC::TAG_FOURCC_NULL || class_to_check == TagFourCC::TAG_FOURCC_NONE) {
                     eprintf_error("Class %s is not a valid class", args[0]);
                     std::exit(EXIT_FAILURE);
                 }
@@ -225,8 +239,18 @@ int main(int argc, const char **argv) {
     
     // Make sure everything's valid
     if(compare_options.inputs.size() < 2) {
-        eprintf_error("At least two inputs are required");
+        eprintf_error("At least two inputs are required. Use -h for more information.");
         return EXIT_FAILURE;
+    }
+    
+    if(compare_options.verbose && compare_options.job_count.has_value()) {
+        eprintf_error("--verbose and --threads cannot be used together. Use -h for more information.");
+        return EXIT_FAILURE;
+    }
+    
+    // Default 0 to 1
+    if(!compare_options.job_count.has_value()) {
+        compare_options.job_count = 1;
     }
     
     // Can we close it?
@@ -282,14 +306,14 @@ int main(int argc, const char **argv) {
             i.tag_paths.reserve(tag_count);
             for(std::size_t t = 0; t < tag_count; t++) {
                 auto &tag = map.get_tag(t);
-                auto tag_class_int = tag.get_tag_class_int();
-                if(!tag.data_is_available() || std::strcmp(tag_class_to_extension(tag_class_int), "unknown") == 0) {
+                auto tag_fourcc = tag.get_tag_fourcc();
+                if(!tag.data_is_available() || std::strcmp(tag_fourcc_to_extension(tag_fourcc), "unknown") == 0) {
                     continue;
                 }
                 if(compare_options.class_to_check.size()) {
                     bool should_add = false;
                     for(auto c : compare_options.class_to_check) {
-                        if(c == tag_class_int) {
+                        if(c == tag_fourcc) {
                             should_add = true;
                             break;
                         }
@@ -298,7 +322,7 @@ int main(int argc, const char **argv) {
                         continue;
                     }
                 }
-                i.tag_paths.emplace_back(tag.get_path(), tag_class_int);
+                i.tag_paths.emplace_back(tag.get_path(), tag_fourcc);
             }
         }
         else {
@@ -314,7 +338,7 @@ int main(int argc, const char **argv) {
                 if(compare_options.class_to_check.size()) {
                     bool should_add = false;
                     for(auto c : compare_options.class_to_check) {
-                        if(c == t.tag_class_int) {
+                        if(c == t.tag_fourcc) {
                             should_add = true;
                             break;
                         }
@@ -329,10 +353,10 @@ int main(int argc, const char **argv) {
         i.tag_paths.shrink_to_fit();
     }
     
-    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path, compare_options.verbose);
+    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path, compare_options.verbose, *compare_options.job_count);
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose) {
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose, std::size_t job_count) {
     // Find all tags we have in common first
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
@@ -349,7 +373,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             for(std::size_t i = 1; i < input_count; i++) {
                 bool found = false;
                 for(auto &tag2 : inputs[i].tag_paths) {
-                    if(tag2.class_int != tag.class_int) {
+                    if(tag2.fourcc != tag.fourcc) {
                         continue;
                     }
                     if(CAN_COMPARE(by_path, tag.path, tag2.path)) {
@@ -388,7 +412,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     
                     // Add it if it's present!
                     for(auto &tag2 : input2.tag_paths) {
-                        if(tag2.class_int != tag.class_int) {
+                        if(tag2.fourcc != tag.fourcc) {
                             continue;
                         }
                         if(CAN_COMPARE(by_path, tag.path, tag2.path)) {
@@ -409,180 +433,218 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
     // Next, compare each tag
     std::size_t matched_count = 0;
     std::size_t mismatched_count = 0;
-    for(auto &tag : tags) {
-        std::vector<std::unique_ptr<Parser::ParserStruct>> structs;
-        std::vector<std::string> struct_paths;
-        std::vector<const Input *> struct_inputs;
-        
-        bool first_input = true;
-        bool only_finding_same_tag = true;
-        
-        // Go through each input
-        for(auto &i : inputs) {
-            // On the first input, we always break when we find the tag since we're only looking for tags with the same path to match the tag with the outer loop
-            // On subsequent inputs, we only break if we're *always* looking for tags with the same path.
-            auto by_path_copy = by_path;
-            if(first_input) {
-                first_input = false; // set to false
-                by_path_copy = ByPath::BY_PATH_SAME;
-            }
-            
-            only_finding_same_tag = by_path_copy == ByPath::BY_PATH_SAME;
-            
-            // If it's a map, do this
-            if(i.map.has_value()) {
-                // First, extract it
-                auto tag_count = i.map_data->get_tag_count();
-                for(std::size_t t = 0; t < tag_count; t++) {
-                    auto &map_tag = i.map_data->get_tag(t);
-                    auto &map_tag_path = map_tag.get_path();
-                    if(map_tag.get_tag_class_int() == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, map_tag_path)) {
-                        auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
-                        structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
-                        struct_paths.emplace_back(map_tag_path);
-                        struct_inputs.emplace_back(&i);
+    
+    std::mutex tag_mutex;
+    std::mutex log_mutex;
+    std::size_t tag_index = 0;
+    
+    std::vector<std::thread> threads;
+    threads.reserve(job_count);
+    for(std::size_t t = 0; t < job_count; t++) {
+        auto perform_comparison_thread = [](auto *inputs, auto *tags, auto by_path, auto show_all, auto show, auto *matched_count, auto *mismatched_count, auto functional, auto precision, auto verbose, auto *tag_mutex, auto *tag_index, auto *log_mutex) {
+            while(true) {
+                tag_mutex->lock();
+                if(*tag_index >= tags->size()) {
+                    tag_mutex->unlock();
+                    return;
+                }
+                auto &tag = (*tags)[*tag_index];
+                (*tag_index)++;
+                tag_mutex->unlock();
+                
+                std::vector<std::unique_ptr<Parser::ParserStruct>> structs;
+                std::vector<std::string> struct_paths;
+                std::vector<const Input *> struct_inputs;
+                
+                bool first_input = true;
+                bool only_finding_same_tag = true;
+                auto path_unsplit = File::halo_path_to_preferred_path(tag.path + "." + HEK::tag_fourcc_to_extension(tag.fourcc)); // combine this
+                
+                // Go through each input
+                for(auto &i : *inputs) {
+                    // On the first input, we always break when we find the tag since we're only looking for tags with the same path to match the tag with the outer loop
+                    // On subsequent inputs, we only break if we're *always* looking for tags with the same path.
+                    auto by_path_copy = by_path;
+                    if(first_input) {
+                        first_input = false; // set to false
+                        by_path_copy = ByPath::BY_PATH_SAME;
+                    }
+                    
+                    only_finding_same_tag = by_path_copy == ByPath::BY_PATH_SAME;
+                    
+                    // If it's a map, do this
+                    if(i.map.has_value()) {
+                        // First, extract it
+                        auto tag_count = i.map_data->get_tag_count();
+                        for(std::size_t t = 0; t < tag_count; t++) {
+                            auto &map_tag = i.map_data->get_tag(t);
+                            auto &map_tag_path = map_tag.get_path();
+                            if(map_tag.get_tag_fourcc() == tag.fourcc && CAN_COMPARE(by_path_copy, tag.path, map_tag_path)) {
+                                auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
+                                structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
+                                struct_paths.emplace_back(map_tag_path);
+                                struct_inputs.emplace_back(&i);
+                                    
+                                if(only_finding_same_tag) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // If it's a tag, do this
+                    else {
+                        for(auto &vd : i.virtual_directory) {
+                            // Skip if the FourCC is different
+                            if(vd.tag_fourcc != tag.fourcc) {
+                                continue;
+                            }
                             
-                        if(only_finding_same_tag) {
-                            break;
+                            if(CAN_COMPARE(by_path_copy, path_unsplit, vd.tag_path)) {
+                                // Open it
+                                auto file = Invader::File::open_file(vd.full_path).value();
+                                
+                                // Parse it
+                                structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
+                                struct_paths.emplace_back(File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path);
+                                struct_inputs.emplace_back(&i);
+                                
+                                if(only_finding_same_tag) {
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
-            }
-            
-            // If it's a tag, do this
-            else {
-                for(auto &vd : i.virtual_directory) {
-                    auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
-                    if(vd.tag_class_int == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, other_path)) {
-                        // Open it
-                        auto file = Invader::File::open_file(vd.full_path).value();
-                        
-                        // Parse it
-                        structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
-                        struct_paths.emplace_back(other_path);
-                        struct_inputs.emplace_back(&i);
-                        
-                        if(only_finding_same_tag) {
-                            break;
+                
+                auto found_count = structs.size();
+                if(found_count < 2) {
+                    return;
+                }
+                
+                #define MATCHED(type) "%s%s.%s", show_all ? type ": " : ""
+                #define MATCHED_TO(type) "%s%s.%s, %s.%s", show_all ? type ": " : ""
+                #define MATCHED_TO_DIFFERENT_INPUT(type) "%s%s.%s, %s.%s (%zu)", show_all ? type ": " : ""
+                
+                auto &first_struct = structs[0];
+                
+                // Just for setting counter/debugging
+                auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs, &log_mutex](bool did_match, std::size_t i) {
+                    auto *extension = HEK::tag_fourcc_to_extension(tag.fourcc);
+                    auto other_path = File::halo_path_to_preferred_path(struct_paths[i]);
+                    bool show_different_input = inputs->size() > 2; // only need to show differing inputs if we have more than two inputs
+                    std::size_t input_of_other = 1;
+                    
+                    // If we're using multiple inputs, get the input of the other thing
+                    if(show_different_input) {
+                        auto *other_input = struct_inputs[i];
+                        for(auto &i : *inputs) {
+                            if(&i == other_input) {
+                                input_of_other = &i - inputs->data();
+                                break;
+                            }
                         }
                     }
-                }
-            }
-        }
-        
-        auto found_count = structs.size();
-        if(found_count < 2) {
-            continue;
-        }
-        
-        #define MATCHED(type) "%s%s.%s", show_all ? type ": " : ""
-        #define MATCHED_TO(type) "%s%s.%s, %s.%s", show_all ? type ": " : ""
-        #define MATCHED_TO_DIFFERENT_INPUT(type) "%s%s.%s, %s.%s (%zu)", show_all ? type ": " : ""
-        
-        auto &first_struct = structs[0];
-        
-        // Just for setting counter/debugging
-        auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs](bool did_match, std::size_t i) {
-            auto *extension = HEK::tag_class_to_extension(tag.class_int);
-            auto other_path = File::halo_path_to_preferred_path(struct_paths[i]);
-            bool show_different_input = inputs.size() > 2; // only need to show differing inputs if we have more than two inputs
-            std::size_t input_of_other = 1;
-            
-            // If we're using multiple inputs, get the input of the other thing
-            if(show_different_input) {
-                auto *other_input = struct_inputs[i];
-                for(auto &i : inputs) {
-                    if(&i == other_input) {
-                        input_of_other = &i - inputs.data();
-                        break;
-                    }
-                }
-            }
-            
-            if(did_match) {
-                if(show & Show::SHOW_MATCHED) {
-                    if(by_path == ByPath::BY_PATH_SAME) {
-                        oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
-                    }
-                    else if(show_different_input) {
-                        oprintf_success(MATCHED_TO_DIFFERENT_INPUT("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
+                    
+                    if(did_match) {
+                        if(show & Show::SHOW_MATCHED) {
+                            log_mutex->lock();
+                            if(by_path == ByPath::BY_PATH_SAME) {
+                                oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc));
+                            }
+                            else if(show_different_input) {
+                                oprintf_success(MATCHED_TO_DIFFERENT_INPUT("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
+                            }
+                            else {
+                                oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
+                            }
+                            log_mutex->unlock();
+                        }
+                        (*matched_count)++;
                     }
                     else {
-                        oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
+                        if(show & Show::SHOW_MISMATCHED) {
+                            log_mutex->lock();
+                            if(by_path == ByPath::BY_PATH_SAME) {
+                                oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc));
+                            }
+                            else if(show_different_input) {
+                                oprintf_success_warn(MATCHED_TO_DIFFERENT_INPUT("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
+                            }
+                            else {
+                                oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
+                            }
+                            log_mutex->unlock();
+                        }
+                        (*mismatched_count)++;
+                    }
+                };
+                
+                if(functional) {
+                    try {
+                        auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
+                            auto hdata = struct_v.generate_hek_tag_data(tag.fourcc);
+                            std::vector<std::uint8_t> meme_data;
+                            
+                            // Compile it
+                            auto compiled = BuildWorkload::compile_single_tag(hdata.data(), hdata.size());
+                            
+                            // Process each struct
+                            for(auto &s : compiled.structs) {
+                                // Process struct data
+                                meme_data.insert(meme_data.end(), reinterpret_cast<const std::uint8_t *>(s.data.data()), reinterpret_cast<const std::uint8_t *>(s.data.data() + s.data.size()));
+                                
+                                // Process each dependency
+                                for(auto &d : s.dependencies) {
+                                    char o[1024] = {};
+                                    auto len = std::snprintf(o, sizeof(o), "D:%08zX->%08zX!", d.offset, d.tag_index);
+                                    meme_data.insert(meme_data.end(), o, o + len);
+                                }
+                                
+                                // Process each pointer
+                                for(auto &p : s.pointers) {
+                                    char o[1024] = {};
+                                    auto len = std::snprintf(o, sizeof(o), "P:%08zX->%08zX!", p.offset, p.struct_index);
+                                    meme_data.insert(meme_data.end(), o, o + len);
+                                }
+                            }
+                            
+                            // Process each tag
+                            for(auto &t : compiled.tags) {
+                                char o[1024] = {};
+                                auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
+                                meme_data.insert(meme_data.end(), o, o + len);
+                            }
+                            
+                            return meme_data;
+                        };
+                        
+                        auto first_meme = meme_up_struct(*first_struct);
+                        for(std::size_t i = 1; i < found_count; i++) {
+                            auto mms = meme_up_struct(*structs[i]);
+                            match_log(first_meme == mms, i);
+                        }
+                    }
+                    catch(std::exception &e) {
+                        log_mutex->lock();
+                        eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc), e.what());
+                        log_mutex->unlock();
                     }
                 }
-                matched_count++;
-            }
-            else {
-                if(show & Show::SHOW_MISMATCHED) {
-                    if(by_path == ByPath::BY_PATH_SAME) {
-                        oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
-                    }
-                    else if(show_different_input) {
-                        oprintf_success_warn(MATCHED_TO_DIFFERENT_INPUT("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
-                    }
-                    else {
-                        oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
+                else {
+                    for(std::size_t i = 1; i < found_count; i++) {
+                        match_log(first_struct->compare(structs[i].get(), precision, true, verbose), i);
                     }
                 }
-                mismatched_count++;
             }
         };
         
-        if(functional) {
-            try {
-                auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
-                    auto hdata = struct_v.generate_hek_tag_data(tag.class_int);
-                    std::vector<std::uint8_t> meme_data;
-                    
-                    // Compile it
-                    auto compiled = BuildWorkload::compile_single_tag(hdata.data(), hdata.size());
-                    
-                    // Process each struct
-                    for(auto &s : compiled.structs) {
-                        // Process struct data
-                        meme_data.insert(meme_data.end(), reinterpret_cast<const std::uint8_t *>(s.data.data()), reinterpret_cast<const std::uint8_t *>(s.data.data() + s.data.size()));
-                        
-                        // Process each dependency
-                        for(auto &d : s.dependencies) {
-                            char o[1024] = {};
-                            auto len = std::snprintf(o, sizeof(o), "D:%08zX->%08zX!", d.offset, d.tag_index);
-                            meme_data.insert(meme_data.end(), o, o + len);
-                        }
-                        
-                        // Process each pointer
-                        for(auto &p : s.pointers) {
-                            char o[1024] = {};
-                            auto len = std::snprintf(o, sizeof(o), "P:%08zX->%08zX!", p.offset, p.struct_index);
-                            meme_data.insert(meme_data.end(), o, o + len);
-                        }
-                    }
-                    
-                    // Process each tag
-                    for(auto &t : compiled.tags) {
-                        char o[1024] = {};
-                        auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_class_to_extension(t.tag_class_int));
-                        meme_data.insert(meme_data.end(), o, o + len);
-                    }
-                    
-                    return meme_data;
-                };
-                
-                auto first_meme = meme_up_struct(*first_struct);
-                for(std::size_t i = 1; i < found_count; i++) {
-                    auto mms = meme_up_struct(*structs[i]);
-                    match_log(first_meme == mms, i);
-                }
-            }
-            catch(std::exception &e) {
-                eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int), e.what());
-            }
-        }
-        else {
-            for(std::size_t i = 1; i < found_count; i++) {
-                match_log(first_struct->compare(structs[i].get(), precision, true, verbose), i);
-            }
-        }
+        threads.emplace_back(perform_comparison_thread, &inputs, &tags, by_path, show_all, show, &matched_count, &mismatched_count, functional, precision, verbose, &tag_mutex, &tag_index, &log_mutex);
+    }
+    
+    // Wait for threads to finish
+    for(auto &t : threads) {
+        t.join();
     }
     
     // Show the total matched if we are showing both

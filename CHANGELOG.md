@@ -2,8 +2,103 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [Untagged]
 ### Added
+- invader-recover: Added `-O` to overwrite data rather than overwriting by
+  default
+- invader-refactor: Added `-R` which can replace strings in paths. For example,
+  using `invader-refactor -R warthog puma -M move` replaces all instances of
+  `warthog` with `puma`
+- invader-compare: Added `-j` which can let you specify the number of threads to
+  do comparison. Note that doing this is a balancing act: more threads can help,
+  but if I/O becomes the bottleneck (as is the case with many small tags), then
+  more threads can also degrade performance. Smaller tagsets will not benefit
+  from extra threads as much as larger tagsets, thus this setting is defaulted
+  to 1 thread for the most consistent performance.
+
+### Changed
+- invader: Re-enabled unused6, unused7, unused8, unused9 teams
+- invader-build: Unit HUD interface sequences are now checked
+- invader-build: Using the high resolution scaling flag on Xbox is now treated
+  as an error, as this functionality does not exist on the Xbox version
+- invader-build: Some fatal errors have been reduced to errors since they are
+  technically valid tag data and can be handled, but not valid for the target
+  engine
+- invader-edit-qt: The tags directories are now listed in the title bar of the
+  main window
+- invader-edit-qt: Model node counts for the various LoDs are now hidden since
+  these values are always overridden on build
+
+### Fixed
+- invader-build: Fixed an issue with -O resulting in Halo crashing
+- invader-compare: Fixed a performance issue when comparing large tagsets
+- invader-model: Fixed node list checksum not being copied
+- invader-model: Fixed "base" permutation not being renamed to "__base"
+- invader-model: Fixed marker, region, and node names not being lowercased
+- invader-model: Fixed empty regions not being removed
+- invader-model: Fixed some markers and triangles not being set to the correct
+  region (or sometimes any region at all)
+- invader-model: Fixed some triangles with -1 (null) as the shader not being set
+  to shader #0, resulting in an error
+- invader-model: Fixed regions starting with a tilde (~) not having the flag
+  "cannot be chosen randomly" set
+- invader-recover: Fixed node list checksum not being copied
+
+## [0.43.0] - 2021-03-16
+### Added
+- New tool: invader-model - Compiles model tags
+- New tool: invader-recover - Recover source data from bitmaps (if color plate
+  data is present), models, string lists, tag collections, and scenario scripts
+- invader-build: Added --stock-resource-bounds which, when building Custom
+  Edition maps, only indexes a tag if the tag's index in the resource mapis the
+  same on the equivalent stock resource map
+- invader-edit: Added --list-values
+- invader-resource: Added --concatenate which can concatenate an existing
+  resource map's data
+
+### Changed
+- invader: Now uses long distance matching for Zstandard. This slightly improves
+  compression ratio.
+- invader-build: Changed --build-version's shorthand letter to `-B`
+- invader-edit: Changed --list to instead show the entire structure in a TREE /F
+  style. Note that this requires the terminal to support UTF-8.
+- invader-edit: Changed --list to use -l (lowercase L) instead of -L which is
+  used by --list-values
+- invader-edit: Angles are now automatically converted to and from degrees.
+
+### Fixed
+- invader: Fixed alphabetical order for shader_transparent_chicago(_extended)
+  tags
+- invader-build: Fixed not defaulting pathfinding spheres for vehicles
+- invader-build: Fixed `-w` not erroring if the index file couldn't be opened
+- invader-edit-qt: Fixed tag subwindows (e.g. Preview bitmap") not being brought
+  to front if they were already open
+- invader-resource: Fixed defaulting to bitmaps and made specifying the type
+  actually required.
+
+### Removed
+- invader: Removed the spheroid definitions as well as support for extracting
+  and building maps with spheroid tags.
+  
+### Removed
+- invader-resource: Removed --padding. Use --concatenate instead.
+
+## [0.42.2] - 2021-02-10
+### Fixed
+- invader-edit: Fixed --list not working with arrays
+
+## [0.42.1] - 2021-02-10
+### Added
+- invader-edit: Added --save-as (-O) which uses a tag path, where --output (-o)
+  now uses a file path
+
+### Fixed
+- invader: Readded --fs-path. Oops.
+
+## [0.42.0] - 2021-02-10
+### Added
+- New tool: invader-edit - Command-line tool for editing tags (primarily made
+  for scripting)
 - invader-compare: Added shorthand for the conversion types. g2m can be used in
   place of gbxmodel-to-model, m2g in place of model-to-gbxmodel, and x2c in
   place of chicago-extended-to-chicago
@@ -1815,5 +1910,9 @@ image as one bitmap
 [0.41.2]: https://github.com/SnowyMouse/invader/compare/0.41.1...0.41.2
 [0.41.3]: https://github.com/SnowyMouse/invader/compare/0.41.2...0.41.3
 [0.41.4]: https://github.com/SnowyMouse/invader/compare/0.41.3...0.41.4
+[0.42.0]: https://github.com/SnowyMouse/invader/compare/0.41.4...0.42.0
+[0.42.1]: https://github.com/SnowyMouse/invader/compare/0.42.0...0.42.1
+[0.42.2]: https://github.com/SnowyMouse/invader/compare/0.42.1...0.42.2
+[0.43.0]: https://github.com/SnowyMouse/invader/compare/0.42.2...0.43.0
 
-[Unreleased]: https://github.com/SnowyMouse/invader/compare/0.41.4...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.43.0...master

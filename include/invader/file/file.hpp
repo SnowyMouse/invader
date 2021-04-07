@@ -9,7 +9,7 @@
 #include <optional>
 #include <mutex>
 
-#include "../hek/class_int.hpp"
+#include "../hek/fourcc.hpp"
 
 namespace Invader::File {
     #ifdef INVADER_FORCE_PORTABLE_PREFERRED_PATHS
@@ -73,21 +73,21 @@ namespace Invader::File {
         std::string path;
 
         /** Class of the tag */
-        TagClassInt class_int;
+        TagFourCC fourcc;
         
         /** Join the path and class into one path */
         std::string join() const {
-            return path + "." + HEK::tag_class_to_extension(class_int);
+            return path + "." + HEK::tag_fourcc_to_extension(fourcc);
         }
         
         TagFilePath() = default;
         TagFilePath(const TagFilePath &copy) = default;
-        TagFilePath(const std::string &path, TagClassInt class_int) : path(path), class_int(class_int) {}
+        TagFilePath(const std::string &path, TagFourCC fourcc) : path(path), fourcc(fourcc) {}
         bool operator==(const TagFilePath &other) const noexcept {
-            return other.class_int == this->class_int && other.path == this->path;
+            return other.fourcc == this->fourcc && other.path == this->path;
         }
         bool operator!=(const TagFilePath &other) const noexcept {
-            return other.class_int != this->class_int || other.path != this->path;
+            return other.fourcc != this->fourcc || other.path != this->path;
         }
     };
 
@@ -116,7 +116,7 @@ namespace Invader::File {
         std::size_t tag_directory = {};
 
         /** Tag class of this tag */
-        HEK::TagClassInt tag_class_int = {};
+        HEK::TagFourCC tag_fourcc = {};
 
         /**
          * Split the tag path

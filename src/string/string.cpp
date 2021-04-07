@@ -17,7 +17,7 @@ enum Format {
     STRING_LIST_FORMAT_LATIN1
 };
 
-template <typename T, typename G, Invader::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
+template <typename T, typename G, Invader::TagFourCC C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
 
     using namespace Invader::HEK;
@@ -271,10 +271,10 @@ int main(int argc, char * const *argv) {
     std::vector<std::byte> final_data;
     switch(*string_options.format) {
         case STRING_LIST_FORMAT_UNICODE:
-            final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_LATIN1:
-            final_data = generate_string_list_tag<char, Invader::Parser::StringList, Invader::TagClassInt::TAG_CLASS_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char, Invader::Parser::StringList, Invader::TagFourCC::TAG_FOURCC_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
             final_data = generate_hud_message_text_tag(text);

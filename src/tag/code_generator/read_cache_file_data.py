@@ -24,19 +24,19 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
             if ("non_cached" in struct and struct["non_cached"]) or ("unused" in struct and struct["unused"]) or ("ignore_cached" in struct and struct["ignore_cached"]):
                 continue
             if struct["type"] == "TagDependency":
-                cpp_read_cache_file_data.write("        r.{}.tag_class_int = l.{}.tag_class_int.read();\n".format(name, name))
+                cpp_read_cache_file_data.write("        r.{}.tag_fourcc = l.{}.tag_fourcc.read();\n".format(name, name))
                 cpp_read_cache_file_data.write("        r.{}.tag_id = l.{}.tag_id.read();\n".format(name, name))
                 cpp_read_cache_file_data.write("        if(!r.{}.tag_id.is_null()) {{\n".format(name))
                 cpp_read_cache_file_data.write("            try {\n")
                 cpp_read_cache_file_data.write("                auto &referenced_tag = tag.get_map().get_tag(r.{}.tag_id.index);\n".format(name))
-                cpp_read_cache_file_data.write("                if(referenced_tag.get_tag_class_int() != r.{}.tag_class_int) {{\n".format(name))
+                cpp_read_cache_file_data.write("                if(referenced_tag.get_tag_fourcc() != r.{}.tag_fourcc) {{\n".format(name))
                 cpp_read_cache_file_data.write("                    eprintf_error(\"Corrupt tag reference (class in reference does not match class in referenced tag)\");\n")
                 cpp_read_cache_file_data.write("                    throw InvalidTagDataException();\n")
                 cpp_read_cache_file_data.write("                }\n")
                 cpp_read_cache_file_data.write("                r.{}.path = referenced_tag.get_path();\n".format(name))
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            catch (std::exception &) {\n")
-                cpp_read_cache_file_data.write("                eprintf_error(\"Invalid reference for {}::{} in %s.%s\", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp_read_cache_file_data.write("                eprintf_error(\"Invalid reference for {}::{} in %s.%s\", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));\n".format(struct_name, name))
                 cpp_read_cache_file_data.write("                throw;\n")
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            for(char &c : r.{}.path) {{\n".format(name))
@@ -44,8 +44,8 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("        }\n")
                 if struct["classes"][0] != "*":
-                    cpp_read_cache_file_data.write("        else if(r.{}.tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
-                    cpp_read_cache_file_data.write("            r.{}.tag_class_int = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_read_cache_file_data.write("        else if(r.{}.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL) {{\n".format(name))
+                    cpp_read_cache_file_data.write("            r.{}.tag_fourcc = HEK::TagFourCC::TAG_FOURCC_{};\n".format(name, struct["classes"][0].upper()))
                     cpp_read_cache_file_data.write("        }\n")
                     
             elif struct["type"] == "TagReflexive":
@@ -61,7 +61,7 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                 cpp_read_cache_file_data.write("                    r.{}.emplace_back({}::parse_cache_file_data(tag, l_{}_ptr + i * sizeof({}::struct_little)));\n".format(name, struct["struct"], name, struct["struct"]))
                 cpp_read_cache_file_data.write("                }\n")
                 cpp_read_cache_file_data.write("                catch (std::exception &) {\n")
-                cpp_read_cache_file_data.write("                    eprintf_error(\"Failed to parse {}::{} #%zu in %s.%s\", i, File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp_read_cache_file_data.write("                    eprintf_error(\"Failed to parse {}::{} #%zu in %s.%s\", i, File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));\n".format(struct_name, name))
                 cpp_read_cache_file_data.write("                    throw;\n")
                 cpp_read_cache_file_data.write("                }\n")
                 cpp_read_cache_file_data.write("            }\n")
@@ -102,7 +102,7 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                     cpp_read_cache_file_data.write("                data = tag.data(l.{}.pointer, l_{}_data_size);\n".format(name, name))
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            catch (std::exception &) {\n")
-                cpp_read_cache_file_data.write("                eprintf_error(\"Failed to read tag data for {}::{} in %s.%s\", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp_read_cache_file_data.write("                eprintf_error(\"Failed to read tag data for {}::{} in %s.%s\", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));\n".format(struct_name, name))
                 cpp_read_cache_file_data.write("                throw;\n")
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            r.{}.insert(r.{}.begin(), data, data + l_{}_data_size);\n".format(name, name, name))

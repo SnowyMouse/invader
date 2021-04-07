@@ -10,7 +10,7 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, bool show_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), show_directories(show_directories) {
+    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, bool show_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), show_directories(show_directories) {
         this->setColumnCount(1);
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
@@ -53,7 +53,7 @@ namespace Invader::EditQt {
                 if(!remove && this->filter.has_value() && this->filter->size() > 0) {
                     remove = true;
                     for(auto f : *this->filter) {
-                        if(tag.tag_class_int == f) {
+                        if(tag.tag_fourcc == f) {
                             remove = false;
                             break;
                         }
@@ -81,7 +81,7 @@ namespace Invader::EditQt {
 
                         // If we're a lower priority, or the class isn't the same, continue too
                         auto &other_tag = all_tags[j];
-                        if(other_tag.tag_directory > tag.tag_directory || other_tag.tag_class_int != tag.tag_class_int) {
+                        if(other_tag.tag_directory > tag.tag_directory || other_tag.tag_fourcc != tag.tag_fourcc) {
                             continue;
                         }
 
@@ -282,7 +282,7 @@ namespace Invader::EditQt {
                     if(this->filter.has_value() && this->filter->size() > 0) {
                         new_item->setDisabled(true);
                         for(auto &i : *this->filter) {
-                            if(i == path_split->class_int) {
+                            if(i == path_split->fourcc) {
                                 new_item->setDisabled(false);
                                 break;
                             }
@@ -398,7 +398,7 @@ namespace Invader::EditQt {
         return this->total_tags;
     }
 
-    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, const std::optional<std::vector<std::string>> &expression_filters) {
+    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagFourCC>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, const std::optional<std::vector<std::string>> &expression_filters) {
         bool change_made = false;
         
         // Did we change classes?
@@ -458,7 +458,7 @@ namespace Invader::EditQt {
                 auto path_str = path.toStdString();
                 auto split = File::split_tag_class_extension(path_str).value();
                 file.tag_path = path_str;
-                file.tag_class_int = split.class_int;
+                file.tag_fourcc = split.fourcc;
                 
                 std::optional<std::filesystem::path> full_path_maybe;
                 std::size_t directory = 0;

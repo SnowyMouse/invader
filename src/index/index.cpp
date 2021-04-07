@@ -106,7 +106,7 @@ int main(int argc, const char **argv) {
                 auto tag_count = map.get_tag_count();
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &tag = map.get_tag(i);
-                    std::fprintf(f, "%s.%s\n", tag.get_path().c_str(), tag_class_to_extension(tag.get_tag_class_int()));
+                    std::fprintf(f, "%s.%s\n", tag.get_path().c_str(), tag_fourcc_to_extension(tag.get_tag_fourcc()));
                 }
             }
             catch(std::exception &) {

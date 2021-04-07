@@ -52,28 +52,34 @@ See CONTRIBUTING.md.
 Invader can be obtained by either downloading pre-compiled binaries or
 compiling from source.
 
-You can also download precompiled [Nightly Builds]. These will generally be
-up-to-date unless commits were made very recently.
+### Nightly builds (Windows)
+You can download precompiled [Nightly Builds]. These will usually be up-to-date
+unless commits were made very recently.
+
+Note that these builds are Windows-only. So, if you are not on Windows, you
+should not use these builds.
 
 [Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
 
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader
 binaries, this section probably doesn't apply to you, but you are welcome to
-compile Invader. Regardless, you can browse and download the source code for
-free on [GitHub].
+compile Invader if you want to. Regardless, you can browse and download the
+source code for free on [GitHub].
 
 [GitHub]: https://github.com/SnowyMouse/invader
 
 If you use Arch Linux, the [Arch Linux AUR] has a package you can use to build
-Invader.
+Invader. This will pull from the main repo on GitHub, so you only have to
+rebuild the package when you want to update.
 
 [Arch Linux AUR]: https://aur.archlinux.org/packages/invader-git/
 
 #### Dependencies
 Invader depends on software in order for it to build and work properly. This
 section lists the dependencies required to fully utilize Invader. Note that
-some of these dependencies may have their own dependencies.
+some of these dependencies may have their own dependencies (and so on), but if
+you use a package manager to get them, then it should take care of that for you.
 
 ##### Required dependencies
 - C++17 compiler with support for `filesystem`
@@ -135,11 +141,14 @@ this project is split into different programs.
 - [invader-compress]
 - [invader-convert]
 - [invader-dependency]
+- [invader-edit]
 - [invader-edit-qt]
 - [invader-extract]
 - [invader-font]
 - [invader-index]
 - [invader-info]
+- [invader-model]
+- [invader-recover]
 - [invader-refactor]
 - [invader-resource]
 - [invader-sound]
@@ -193,8 +202,7 @@ Create or modify a bitmap tag.
 
 Options:
   -B --budget <length>         Set max length of sprite sheet. Can be 32, 64,
-                               128, 256, or 512. If --extended, then 1024 or
-                               2048 can be used, too. Default (new tag): 32
+                               128, 256, or 512. Default (new tag): 32
   -C --budget-count <count>    Set maximum number of sprite sheets. Setting
                                this to 0 disables budgeting. Default (new tag):
                                0
@@ -218,15 +226,15 @@ Options:
   -R --regenerate              Use the bitmap tag's compressed color plate data
                                as data.
   -s --mipmap-scale <type>     Mipmap scale type. This does not save in .bitmap
-                               tags. Can be: linear, nearest-alpha, nearest.
+                               tags. Can be: linear, nearest_alpha, nearest.
                                Default (new tag): linear
   -t --tags <dir>              Use the specified tags directory.
-  -T --type <type>             Set the type of bitmap. Can be: 2d-textures,
-                               3d-textures, cube-maps, interface-bitmaps, or
+  -T --type <type>             Set the type of bitmap. Can be: 2d_textures,
+                               3d_textures, cube_maps, interface_bitmaps, or
                                sprites. Default (new tag): 2d
-  -u --usage <usage>           Set the bitmap usage. Can be: alpha-blend,
-                               default, height-map, detail-map, light-map,
-                               vector-map. Default: default
+  -u --usage <usage>           Set the bitmap usage. Can be: alpha_blend,
+                               default, height_map, detail_map, light_map,
+                               vector_map. Default: default
 ```
 
 Refer to [Creating a bitmap] for information on how to create bitmap tags.
@@ -272,7 +280,10 @@ Build a cache file for a version of Halo: Combat Evolved.
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
-  -b --build-version           Set the build version. This is used on the Xbox
+  -b --stock-resource-bounds   Only index tags if the tag's index is within
+                               stock Custom Edition's resource map bounds.
+                               (Custom Edition only)
+  -B --build-version           Set the build version. This is used on the Xbox
                                version of the game (by default it's
                                01.10.12.2276 on Xbox and the Invader version on
                                other engines)
@@ -338,7 +349,7 @@ loud or too quiet when played on their respective versions.
 
 Invader will modify a few tags when building a stock multiplayer map:
 
-- `vehicles\ghost\ghost bolt.damage_effect`, 
+- `vehicles\ghost\ghost bolt.damage_effect`,
   `vehicles\banshee\banshee bolt.damage_effect`
     - Stun: 0.0 if Custom Edition, else 1.0
     - Maximum stun: 0.0 if Custom Edition, else 1.0
@@ -464,6 +475,45 @@ Options:
                                precedence.
 ```
 
+### invader-edit
+This program edits tags in a command-line interface. This is primarily used for
+scripting. If you want to edit tags in a graphical user interface, use
+[invader-edit-qt].
+
+```
+Usage: invader-edit [options] <tag.class>
+
+Edit tags via command-line.
+
+Options:
+  -c --copy <key> <pos>        Copy the selected struct(s) to the given index
+                               or "end" if the end of the array.
+  -C --count <key>             Get the number of elements in the array at the
+                               given key.
+  -E --erase <key>             Delete the selected struct(s).
+  -G --get <key>               Get the value with the given key.
+  -h --help                    Show this list of options.
+  -i --info                    Show license and credits.
+  -I --insert <key> <#> <pos>  Add # structs to the given index or "end" if the
+                               end of the array.
+  -l --list                    List all elements in a tag.
+  -L --list-values             List all elements and values in a tag. This may
+                               be slow on large tags.
+  -M --move <key> <pos>        Swap the selected structs with the structs at
+                               the given index or "end" if the end of the
+                               array. The regions must not intersect.
+  -N --new                     Create a new tag
+  -o --output <file>           Output the tag to a different path rather than
+                               overwriting it.
+  -O --save-as <tag>           Output the tag to a different path relative to
+                               the tags directory rather than overwriting it.
+  -P --fs-path                 Use a filesystem path for the font data or tag
+                               file.
+  -S --set <key> <val>         Set the value at the given key to the given
+                               value.
+  -t --tags <dir>              Use the specified tags directory.
+```
+
 ### invader-edit-qt
 This program edits tags in a Qt-based GUI.
 
@@ -563,6 +613,64 @@ Options:
                                tags_external_indices, uncompressed_size
 ```
 
+### invader-model
+This program compiles model tags. It can compile both model and gbxmodel formats
+directly from .JMS files.
+
+JMS files should be placed in the data folder in a `models` folder in a folder
+relative to where the model tag will be generated in the tags directory. So, if
+you want to compile a model tags `weapons/pistol/pistol.model`, you would put
+your JMS files in `data/weapons/pistol/pistol/models` or, if using legacy mode,
+in `data/weapons/pistol/models`. A tutorial will be made sometime in the future
+regarding this.
+
+You can make JMS files for free using [Halo-Asset-Blender-Development-Toolset]
+in [Blender].
+
+[Halo-Asset-Blender-Development-Toolset]: https://github.com/General-101/Halo-Asset-Blender-Development-Toolset
+[Blender]: https://www.blender.org/
+
+```
+Usage: invader-model [options] <model-tag>
+
+Compile a model tag.
+
+Options:
+  -d --data <dir>              Use the specified data directory.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -L --legacy                  Use legacy behavior (use parent folder's
+                               filename for the tag name for tool.exe backwards
+                               compatibility).
+  -P --fs-path                 Use a filesystem path for the tag path or data
+                               directory.
+  -t --tags <dir>              Use the specified tags directory. Additional
+                               tags directories can be specified for searching
+                               shaders, but the tag will be output to the first
+                               one.
+  -T --type <type>             Specify the type of model. Can be: model,
+                               gbxmodel
+```
+
+### invader-recover
+This program recovers source data from bitmaps (if color plate data is present),
+models, string lists, tag collections, and scenario scripts
+
+```
+Usage: invader-recover [options] <tag.class>
+
+Recover source data from tags.
+
+Options:
+  -d --tags <dir>              Use the specified data directory.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -O --overwrite               Overwrite data if it already exists
+  -P --fs-path                 Use a filesystem path for the tag path
+                               directory.
+  -t --tags <dir>              Use the specified tags directory.
+```
+
 ### invader-refactor
 This program renames and moves tag references.
 
@@ -600,6 +708,11 @@ Options:
                                and new directories, it cannot be used with
                                no-move. This can only be specified once per
                                operation and cannot be used with --tag.
+  -R --replace-string <a> <b>  Replaces all instances in a path of <a> with
+                               <b>. This can be used multiple times for
+                               multiple replacements. If --class or --recursive
+                               are used, this applies to the output of those.
+                               Otherwise, it applies to all tags.
   -s --single-tag <path>       Make changes to a single tag, only, rather than
                                the whole tags directory.
   -t --tags <dir>              Use the specified tags directory. Use multiple
@@ -622,9 +735,11 @@ Usage: invader-resource [options] -T <type>
 Create resource maps.
 
 Options:
+  -c --concatenate <file>      Concatenate against the resource map at a path.
   -g --game-engine <id>        Specify the game engine. This option is
-                               required. Valid engines are: custom, demo,
-                               retail
+                               required. Demo and retail maps also require
+                               either -w or -M to be specified at least once.
+                               Valid engines are: custom, demo, retail
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Set the maps directory.
@@ -632,7 +747,6 @@ Options:
                                specified multiple times.
   -n --no-prefix               Don't use the "custom_" prefix when building a
                                Custom Edition resource map.
-  -p --padding <bytes>         Add an extra number of bytes after the header
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
@@ -640,8 +754,7 @@ Options:
                                Can be: bitmaps, sounds, or loc.
   -w --with-index <file>       Use an index file for the tags, ensuring tags
                                are ordered in the same way (barring
-                               duplicates). This can be specified multiple
-                               times.
+                               duplicates).
 ```
 
 
@@ -669,26 +782,26 @@ Options:
   -b --bitrate <br>            Set the bitrate in kilobits per second. This
                                only applies to vorbis.
   -c --class <class>           Set the class. This is required when generating
-                               new sounds. Can be: ambient-computers,
-                               ambient-machinery, ambient-nature,
-                               device-computers, device-door,
-                               device-force-field, device-machinery,
-                               device-nature, first-person-damage, game-event,
-                               music, object-impacts, particle-impacts,
-                               projectile-impact, projectile-detonation,
-                               scripted-dialog-force-unspatialized,
-                               scripted-dialog-other, scripted-dialog-player,
-                               scripted-effect, slow-particle-impacts,
-                               unit-dialog, unit-footsteps, vehicle-collision,
-                               vehicle-engine, weapon-charge, weapon-empty,
-                               weapon-fire, weapon-idle, weapon-overheat,
-                               weapon-ready, weapon-reload
+                               new sounds. Can be: ambient_computers,
+                               ambient_machinery, ambient_nature,
+                               device_computers, device_door,
+                               device_force_field, device_machinery,
+                               device_nature, first_person_damage, game_event,
+                               music, object_impacts, particle_impacts,
+                               projectile_impact, projectile_detonation,
+                               scripted_dialog_force_unspatialized,
+                               scripted_dialog_other, scripted_dialog_player,
+                               scripted_effect, slow_particle_impacts,
+                               unit_dialog, unit_footsteps, vehicle_collision,
+                               vehicle_engine, weapon_charge, weapon_empty,
+                               weapon_fire, weapon_idle, weapon_overheat,
+                               weapon_ready, weapon_reload
   -C --channel-count <#>       Set the channel count. Can be: mono, stereo. By
                                default, this is determined based on the input
                                audio.
   -d --data <dir>              Use the specified data directory.
-  -F --format <fmt>            Set the format. Can be: 16-bit-pcm, ogg-vorbis,
-                               or xbox-adpcm.
+  -F --format <fmt>            Set the format. Can be: 16-bit_pcm, ogg_vorbis,
+                               or xbox_adpcm.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -j --threads                 Set the number of threads to use for parallel
@@ -700,7 +813,7 @@ Options:
                                FLAC, higher levels result in better sizes but
                                longer compression time, clamping from 0.0 to
                                0.8 (FLAC 0 to FLAC 8). Default: 1.0
-  -P --fs-path                 Use a filesystem path for the data.
+  -P --fs-path                 Use a filesystem path for the data or tag.
   -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
                                and 44100. By default, this is determined based
                                on the input audio.
@@ -794,7 +907,7 @@ do this. Fortunately, there is a command you can run that will actually fix the
 tags for you:
 
 ```
-invader-refactor -Nc model gbxmodel
+invader-refactor -M no-move -c model gbxmodel
 ```
 
 Lastly, invader-build checks the CRC32 checksums of each tag. This is done to
@@ -989,11 +1102,14 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-compress]: #invader-compress
 [invader-convert]: #invader-convert
 [invader-dependency]: #invader-dependency
+[invader-edit]: #invader-edit
 [invader-edit-qt]: #invader-edit-qt
 [invader-extract]: #invader-extract
 [invader-font]: #invader-font
 [invader-index]: #invader-index
 [invader-info]: #invader-info
+[invader-model]: #invader-model
+[invader-recover]: #invader-recover
 [invader-refactor]: #invader-refactor
 [invader-resource]: #invader-resource
 [invader-sound]: #invader-sound

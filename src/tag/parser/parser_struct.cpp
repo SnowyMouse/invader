@@ -11,7 +11,7 @@ namespace Invader::Parser {
         const char *       member_name,
         const char *       comment,
         Dependency *       dependency,
-        const TagClassInt *allowed_classes,
+        const TagFourCC *allowed_classes,
         std::size_t        count,
         bool               read_only
     ) : name(name),
@@ -37,6 +37,7 @@ namespace Invader::Parser {
         const char *          unit,
         std::size_t           count,
         bool                  bounds,
+        bool                  volatile_value,
         bool                  read_only,
         std::optional<Number> minimum,
         std::optional<Number> maximum
@@ -50,6 +51,7 @@ namespace Invader::Parser {
         unit(unit),
         minimum(minimum),
         maximum(maximum),
+        volatile_value(volatile_value),
         read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
@@ -62,6 +64,7 @@ namespace Invader::Parser {
         delete_objects_in_array_fn_type     delete_objects_in_array_fn,
         insert_objects_in_array_fn_type     insert_objects_in_array_fn,
         duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn,
+        swap_objects_in_array_fn_type       swap_objects_in_array_fn,
         std::size_t                         minimum_array_size,
         std::size_t                         maximum_array_size,
         bool                                read_only
@@ -75,6 +78,7 @@ namespace Invader::Parser {
         delete_objects_in_array_fn(delete_objects_in_array_fn),
         insert_objects_in_array_fn(insert_objects_in_array_fn),
         duplicate_objects_in_array_fn(duplicate_objects_in_array_fn),
+        swap_objects_in_array_fn(swap_objects_in_array_fn),
         min_array_size(minimum_array_size),
         max_array_size(maximum_array_size),
         read_only(read_only) {}
@@ -168,6 +172,8 @@ namespace Invader::Parser {
             case VALUE_TYPE_UINT16:
             case VALUE_TYPE_INT32:
             case VALUE_TYPE_UINT32:
+            case VALUE_TYPE_ENUM:
+            case VALUE_TYPE_BITMASK:
                 return 1 * this->count;
             case VALUE_TYPE_POINT2DINT:
                 return 2 * this->count;
@@ -215,10 +221,8 @@ namespace Invader::Parser {
             case VALUE_TYPE_REFLEXIVE:
             case VALUE_TYPE_DEPENDENCY:
             case VALUE_TYPE_TAGID:
-            case VALUE_TYPE_BITMASK:
             case VALUE_TYPE_TAGSTRING:
             case VALUE_TYPE_TAGDATAOFFSET:
-            case VALUE_TYPE_ENUM:
             case VALUE_TYPE_GROUP_START:
                 return 0;
         }
@@ -256,6 +260,8 @@ namespace Invader::Parser {
 
                 case VALUE_TYPE_UINT16:
                 case VALUE_TYPE_INDEX:
+                case VALUE_TYPE_ENUM:
+                case VALUE_TYPE_BITMASK:
                     *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint16_t *>(addr));
                     addr += sizeof(std::uint16_t);
                     values++;
@@ -441,10 +447,8 @@ namespace Invader::Parser {
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
                 case VALUE_TYPE_TAGID:
-                case VALUE_TYPE_BITMASK:
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
-                case VALUE_TYPE_ENUM:
                 case VALUE_TYPE_GROUP_START:
                     break;
             }
@@ -473,6 +477,8 @@ namespace Invader::Parser {
                     values++;
                     break;
 
+                case VALUE_TYPE_BITMASK:
+                case VALUE_TYPE_ENUM:
                 case VALUE_TYPE_UINT16:
                 case VALUE_TYPE_INDEX:
                     *reinterpret_cast<std::uint16_t *>(addr) = std::get<std::int64_t>(*values);
@@ -659,10 +665,8 @@ namespace Invader::Parser {
 
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
-                case VALUE_TYPE_BITMASK:
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
-                case VALUE_TYPE_ENUM:
                 case VALUE_TYPE_TAGID:
                 case VALUE_TYPE_GROUP_START:
                     eprintf_error("Tried to use set_values() with a type that doesn't have values");
@@ -679,46 +683,48 @@ namespace Invader::Parser {
         const auto *header = reinterpret_cast<const HEK::TagFileHeader *>(data);
         HEK::TagFileHeader::validate_header(header, data_size);
 
-        #define DO_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+        #define DO_TAG_CLASS(class_struct, fourcc) case TagFourCC::fourcc: { \
             return std::make_unique<Parser::class_struct>(Invader::Parser::class_struct::parse_hek_tag_file(data, data_size, postprocess)); \
         }
 
-        switch(header->tag_class_int) {
+        switch(header->tag_fourcc) {
             DO_BASED_ON_TAG_CLASS
 
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_SCENARIO:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_FONT:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NONE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NULL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_FONT:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SPHEROID:
                 break;
         }
 
-        eprintf_error("Unknown tag class %s", tag_class_to_extension(header->tag_class_int));
+        eprintf_error("Unknown tag class %s", tag_fourcc_to_extension(header->tag_fourcc));
         throw InvalidTagDataException();
 
         #undef DO_TAG_CLASS
     }
 
-    std::unique_ptr<ParserStruct> ParserStruct::generate_base_struct(TagClassInt tag_class) {
-        #define DO_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+    std::unique_ptr<ParserStruct> ParserStruct::generate_base_struct(TagFourCC tag_class) {
+        #define DO_TAG_CLASS(class_struct, fourcc) case TagFourCC::fourcc: { \
             return std::unique_ptr<ParserStruct>(new class_struct()); \
         }
 
         switch(tag_class) {
             DO_BASED_ON_TAG_CLASS
 
-            case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_SCENARIO:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_FONT:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NONE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_NULL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_FONT:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+            case Invader::HEK::TagFourCC::TAG_FOURCC_SPHEROID:
                 break;
         }
 
@@ -727,16 +733,16 @@ namespace Invader::Parser {
         #undef DO_TAG_CLASS
     }
 
-    std::vector<TagClassInt> ParserStruct::all_tag_classes(bool exclude_subclasses) {
-        std::vector<TagClassInt> classes;
+    std::vector<TagFourCC> ParserStruct::all_tag_classes(bool exclude_subclasses) {
+        std::vector<TagFourCC> classes;
 
-        #define DO_TAG_CLASS(class_struct, class_int) classes.emplace_back(TagClassInt::class_int);
+        #define DO_TAG_CLASS(class_struct, fourcc) classes.emplace_back(TagFourCC::fourcc);
         DO_BASED_ON_TAG_CLASS;
 
         // Remove subclasses
         if(!exclude_subclasses) {
             for(std::size_t i = 0; i < classes.size(); i++) {
-                if(classes[i] == TagClassInt::TAG_CLASS_ITEM || classes[i] == TagClassInt::TAG_CLASS_OBJECT || classes[i] == TagClassInt::TAG_CLASS_UNIT || classes[i] == TagClassInt::TAG_CLASS_DEVICE || classes[i] == TagClassInt::TAG_CLASS_SHADER) {
+                if(classes[i] == TagFourCC::TAG_FOURCC_ITEM || classes[i] == TagFourCC::TAG_FOURCC_OBJECT || classes[i] == TagFourCC::TAG_FOURCC_UNIT || classes[i] == TagFourCC::TAG_FOURCC_DEVICE || classes[i] == TagFourCC::TAG_FOURCC_SHADER) {
                     classes.erase(classes.begin() + i--);
                 }
             }
@@ -754,7 +760,7 @@ namespace Invader::Parser {
     }
     
     std::size_t ParserStruct::refactor_reference(const File::TagFilePath &from, const File::TagFilePath &to) {
-        return this->refactor_reference(from.path.c_str(), from.class_int, to.path.c_str(), to.class_int);
+        return this->refactor_reference(from.path.c_str(), from.fourcc, to.path.c_str(), to.fourcc);
     }
     
     std::size_t ParserStruct::refactor_references(const std::vector<std::pair<File::TagFilePath, File::TagFilePath>> &replacements) {
@@ -765,7 +771,233 @@ namespace Invader::Parser {
         return total;
     }
     
+    bool ParserStruct::check_for_invalid_references(bool null_references) {
+        auto &values = this->get_values();
+        bool result = false;
+        for(auto &i : values) {
+            switch(i.get_type()) {
+                case ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+                    auto &dep = i.get_dependency();
+                    auto &allowed_classes = i.get_allowed_classes(); // get allowed classes
+                    if(allowed_classes.size() >= 1 && !dep.path.empty()) { // do we even have any?
+                        bool valid = false;
+                        for(auto &c : allowed_classes) {
+                            if(c == dep.tag_fourcc) {
+                                valid = true;
+                                break;
+                            }
+                        }
+                        if(!valid) {
+                            if(null_references) {
+                                dep.tag_fourcc = allowed_classes[0]; // set it
+                                dep.path.clear(); // clear the path
+                            }
+                            result = true;
+                        }
+                    }
+                    break;
+                }
+                case ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto count = i.get_array_size();
+                    for(std::size_t c = 0; c < count && (!result || null_references); c++) { // continue until result is true, unless we're nulling references
+                        result = i.get_object_in_array(c).check_for_invalid_references(null_references) || result;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            
+            // If we're done, stop
+            if(!null_references && result) {
+                break;
+            }
+        }
+        return result;
+    }
+    
     bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose) const {
         return this->compare(what, precision, ignore_volatile, verbose, 0);
+    }
+    
+    bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const {
+        // Different struct name
+        if(typeid(this) != typeid(what)) {
+            if(verbose) {
+                oprintf_success_warn("%s is not a %s", this->struct_name(), what->struct_name());
+            }
+            return false;
+        }
+        
+        auto &this_value = *this;
+        
+        // Make sure these are the same
+        auto &v_this = this->get_values();
+        auto &v_other = what->get_values();
+        
+        auto vt_size = v_this.size();
+        auto vo_size = v_other.size();
+        
+        if(vt_size != vo_size) {
+            eprintf_error("Value count is different for the same struct type");
+            std::terminate();
+        }
+        
+        bool should_continue = true;
+        bool is_different = false;
+        
+        for(std::size_t v = 0; v < vt_size && should_continue; v++) {
+            auto &vt = v_this[v];
+            auto &vo = v_other[v];
+            
+            auto vt_type = vt.get_type();
+            auto vo_type = vo.get_type();
+        
+            auto complain = [&is_different, &should_continue, &verbose, &vt, &this_value](std::optional<std::size_t> index = std::nullopt) {
+                is_different = true;
+                if(verbose) {
+                    if(index.has_value()) {
+                        oprintf_success_warn("%s::%s#%zu is different", this_value.struct_name(), vt.get_member_name(), *index);
+                    }
+                    else {
+                        oprintf_success_warn("%s::%s is different", this_value.struct_name(), vt.get_member_name());
+                    }
+                }
+                else {
+                    should_continue = false;
+                }
+            };
+            
+            // Check the type
+            if(vt_type != vo_type) {
+                eprintf_error("Type is different for the same struct type's values");
+                std::terminate();
+            }
+            
+            // Ignore volatile values
+            if(ignore_volatile && vt.is_volatile()) {
+                continue;
+            }
+            
+            switch(vt_type) {
+                case ParserStructValue::ValueType::VALUE_TYPE_GROUP_START:
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET:
+                    if(vt.get_data() != vo.get_data()) {
+                        complain();
+                    }
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+                    if(vt.get_dependency() != vo.get_dependency()) {
+                        complain();
+                    }
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+                    if(std::strcmp(vt.get_string(), vo.get_string()) != 0) {
+                        complain();
+                    }
+                    break;
+                case ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto vt_count = vt.get_array_size();
+                    auto vo_count = vo.get_array_size();
+                    if(vt_count != vo_count) {
+                        complain();
+                    }
+                    else {
+                        bool complained = false;
+                        
+                        for(std::size_t i = 0; i < vt_count && should_continue; i++) {
+                            const auto &vt_struct = vt.get_object_in_array(i);
+                            const auto &vo_struct = vo.get_object_in_array(i);
+                            
+                            bool same = vt_struct.compare(&vo_struct, precision, ignore_volatile, verbose, depth + 1);
+                            if(!same) {
+                                complain(i);
+                                complained = true;
+                            }
+                        }
+                        
+                        // Complain some more.
+                        if(complained) {
+                            complain();
+                        }
+                    }
+                    break;
+                }
+                default: {
+                    auto vt_v = vt.get_values();
+                    auto vo_v = vo.get_values();
+                    
+                    // Is it different?
+                    if(vt_v != vo_v) {
+                        if(precision && vt.get_number_format() == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) { // if precision, is it different by too much?
+                            auto value_count = vt_v.size();
+                            for(std::size_t i = 0; i < value_count; i++) {
+                                if(std::fabs(std::get<double>(vt_v[i]) - std::get<double>(vt_v[i])) > 0.000001) {
+                                    complain();
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            complain();
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return !is_different;
+    }
+    
+    bool ParserStruct::check_for_broken_enums(bool reset_enums) {
+        auto &values = this->get_values();
+        bool result = false;
+        for(auto &i : values) {
+            switch(i.get_type()) {
+                case ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
+                    try {
+                        i.read_enum();
+                    }
+                    catch(std::exception &) {
+                        if(reset_enums) {
+                            i.write_enum(i.list_enum()[0]);
+                        }
+                        result = true;
+                    }
+                    break;
+                }
+                case ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                    auto count = i.get_array_size();
+                    for(std::size_t c = 0; c < count && (!result || reset_enums); c++) { // continue until result is true, unless we're nulling references
+                        result = i.get_object_in_array(c).check_for_broken_enums(reset_enums) || result;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            
+            // If we're done, stop
+            if(!reset_enums && result) {
+                break;
+            }
+        }
+        return result;
+    }
+    
+    std::vector<ParserStructValue> &ParserStruct::get_values() {
+        if(!this->values.has_value()) {
+            this->values = this->get_values_internal();
+        }
+        return *this->values;
+    }
+    
+    ParserStruct::ParserStruct(const ParserStruct &copy) noexcept : cache_formatted(copy.cache_formatted) {}
+    ParserStruct::ParserStruct(ParserStruct &&move) noexcept : cache_formatted(move.cache_formatted) {}
+    ParserStruct &ParserStruct::operator=(const ParserStruct &copy) noexcept {
+        this->cache_formatted = copy.cache_formatted;
+        return *this;
     }
 }

@@ -32,6 +32,23 @@ prone).
 
 [git master branch]: https://github.com/SnowyMouse/Invader/tree/master
 
+## Wine compatibility
+If you are expecting correct behavior, then you should NOT test Invader on Wine.
+Wine has a number of issues with running Windows programs, and this can range
+from performance issues to actual differences in a program's behavior, even when
+a program would otherwise have no issues.
+
+Because of this, it cannot be guaranteed that Invader will work as expected if
+using Wine. You can still report issues, but if your issues cannot be reproduced
+on native Windows, then your issue may be discarded.
+
+If you are on Linux, it is HIGHLY recommended to instead compile a Linux build.
+Or, if you are on macOS, compile a macOS build. And so on.
+
+If you must test the Windows version, it is recommended to use a virtual machine
+to run an actual version of Windows instead of using a compatibility layer like
+Wine.
+
 # Conventions
 These conventions apply only for contributing to the official Invader
 repository. Forks and other derivatives of Invader may use completely different
@@ -106,11 +123,11 @@ and code to ensure it is understandable by most people.
       and 10^6 bytes, respectively.
 - All text files must end with a newline. Most modern text editors will do this
   for you.
-- Tag classes should *always* be referred to by their full name and not 4CCs.
+- Tag classes should *always* be referred to by their full name and not FourCCs.
   For example, you should always refer to a `gbxmodel` as such and not a `mod2`.
-    - The 4CCs are often confusing and don't always reflect the full name in any
-      way (e.g., `jpt!` referring to a `damage_effect`)
-    - Referring to tags as their 4CCs is a product of map modding which, in
+    - The FourCCs are often confusing and don't always reflect the full name in
+      any way (e.g. `jpt!` refers to a `damage_effect`)
+    - Referring to tags as their FourCCs is a product of map modding which, in
       itself, should be discouraged.
 
 ## Issue conventions
@@ -147,13 +164,18 @@ reproduce the bug:
     - We recommend using formats such as .7z, .zip, .tar.xz, or .tar.zst.
       Proprietary formats such as .rar should not be used. You may either link
       to a download page or attach it to your issue.
-    - If your issue is tag related, you can optionally use invader-info to
+    - If your issue is tag related, you can optionally use invader-archive to
       archive tags and their dependencies into a .tar.xz archive.
     - Do not only specify the map name or file name, as searching the Internet
       for the specific map takes time, and there is no guarantee we will find
       the correct version of the map.
 - A simple way to remember this is: If a bug cannot be reproduced, then it
   isn't a bug, and your issue will be closed.
+
+Also note that any issues submitted that involve Wine may be discarded if they
+cannot be reproduced on Windows. See [Wine compatibility] for more information.
+
+[Wine compatibility]: #wine-compatibility
 
 ## Source file conventions
 The Invader repository uses these conventions. If contributing code to Invader,

@@ -7,10 +7,10 @@ import os
 from definition import make_definitions
 from parser import make_parser
 
-bitfield_cpp = 18
+bitfield_cpp = 15
 
 if len(sys.argv) < bitfield_cpp+4:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <parser-refactor-reference.cpp> <parser-struct-value.cpp> <parser-check-broken-enums.cpp> <parser-check-invalid-references.cpp> <parser-check-invalid-ranges.cpp> <parser-normalize.cpp> <parser-read-hek-file.cpp> <parser-scan-padding.cpp> <bitfield.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+    print("Usage: {} <a lovely bunch of cppoconuts.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -22,7 +22,7 @@ extract_hidden = True if sys.argv[bitfield_cpp+2].lower() == "on" else False
 
 for i in range(bitfield_cpp+3, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
-        name = name.replace(" ", "_").replace("'", "").replace("-","_").replace("(","").replace(")","")
+        name = name.replace(" ", "_").replace("'", "").replace("(","").replace(")","")
         if not ignore_numbers and name[0].isnumeric():
             name = "_{}".format(name)
         return name
@@ -51,7 +51,7 @@ for i in range(bitfield_cpp+3, len(sys.argv)):
                     print("{}::{} - default AND cache_only cannot be used together in a field since they may be unexpectedly modified".format(s["name"],f["name"]), file=sys.stderr)
                     sys.exit(1)
                 if f["type"] != "pad":
-                    f["member_name"] = make_name_fun(f["name"], False)
+                    f["member_name"] = make_name_fun(f["name"], False).replace("-", "_")
                 if f["type"] == "TagDependency":
                     # Superclasses
                     def expand_superclass(arr, superclass, subclass):
@@ -134,12 +134,9 @@ with open(sys.argv[2], "w") as hpp:
                     with open(sys.argv[7], "w") as cpp_cache_deformat_data:
                         with open(sys.argv[8], "w") as cpp_refactor_reference:
                             with open(sys.argv[9], "w") as cpp_struct_value:
-                                with open(sys.argv[10], "w") as cpp_check_broken_enums:
-                                    with open(sys.argv[11], "w") as cpp_check_invalid_references:
-                                        with open(sys.argv[12], "w") as cpp_check_invalid_ranges:
-                                            with open(sys.argv[13], "w") as cpp_check_invalid_indices:
-                                                with open(sys.argv[14], "w") as cpp_compare:
-                                                    with open(sys.argv[15], "w") as cpp_normalize:
-                                                        with open(sys.argv[16], "w") as cpp_hek_file:
-                                                            with open(sys.argv[17], "w") as cpp_scan_padding:
-                                                                make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare, cpp_normalize, cpp_hek_file, cpp_scan_padding)
+                                with open(sys.argv[10], "w") as cpp_check_invalid_ranges:
+                                    with open(sys.argv[11], "w") as cpp_check_invalid_indices:
+                                        with open(sys.argv[12], "w") as cpp_normalize:
+                                            with open(sys.argv[13], "w") as cpp_hek_file:
+                                                with open(sys.argv[14], "w") as cpp_scan_padding:
+                                                    make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_hek_file, cpp_scan_padding)

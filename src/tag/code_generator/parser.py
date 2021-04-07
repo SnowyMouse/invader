@@ -9,15 +9,12 @@ from read_hek_file import make_parse_hek_tag_file
 from cache_deformat_data import make_cache_deformat
 from refactor_reference import make_refactor_reference
 from parser_struct import make_parser_struct
-from check_broken_enums import make_check_broken_enums
-from check_invalid_references import make_check_invalid_references
 from check_invalid_ranges import make_check_invalid_ranges
 from check_invalid_indices import make_check_invalid_indices
 from check_normalize import make_normalize
-from compare import make_compare
 from scan_padding import make_scan_padding
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare, cpp_normalize, cpp_read_hek_file, cpp_scan_padding):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_read_hek_file, cpp_scan_padding):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -25,12 +22,9 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_cache_format_data.write(what)
         cpp_cache_deformat_data.write(what)
         cpp_struct_value.write(what)
-        cpp_check_broken_enums.write(what)
-        cpp_check_invalid_references.write(what)
         cpp_check_invalid_ranges.write(what)
         cpp_refactor_reference.write(what)
         cpp_check_invalid_indices.write(what)
-        cpp_compare.write(what)
         cpp_normalize.write(what)
         cpp_read_hek_file.write(what)
         cpp_scan_padding.write(what)
@@ -60,22 +54,22 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
     cpp_save_hek_data.write("extern \"C\" std::uint32_t crc32(std::uint32_t crc, const void *buf, std::size_t size) noexcept;\n")
     write_for_all_cpps("namespace Invader::Parser {\n")
 
-    for s in all_structs_arranged:
-        struct_name = s["name"]
-        post_cache_deformat = "post_cache_deformat" in s and s["post_cache_deformat"]
-        post_cache_parse = "post_cache_parse" in s and s["post_cache_parse"]
-        pre_compile = "pre_compile" in s and s["pre_compile"]
-        post_compile = "post_compile" in s and s["post_compile"]
-        postprocess_hek_data = "postprocess_hek_data" in s and s["postprocess_hek_data"]
-        normalize = "normalize" in s and s["normalize"]
-        read_only = "read_only" in s and s["read_only"]
+    for struct in all_structs_arranged:
+        struct_name = struct["name"]
+        post_cache_deformat = "post_cache_deformat" in struct and struct["post_cache_deformat"]
+        post_cache_parse = "post_cache_parse" in struct and struct["post_cache_parse"]
+        pre_compile = "pre_compile" in struct and struct["pre_compile"]
+        post_compile = "post_compile" in struct and struct["post_compile"]
+        postprocess_hek_data = "postprocess_hek_data" in struct and struct["postprocess_hek_data"]
+        normalize = "normalize" in struct and struct["normalize"]
+        read_only = "read_only" in struct and struct["read_only"]
         private_functions = post_cache_deformat
-        title = None if "title" not in s else s["title"]
+        title = None if "title" not in struct else struct["title"]
 
         hpp.write("    struct {} : public ParserStruct {{\n".format(struct_name))
         hpp.write("        using struct_big = HEK::{}<HEK::BigEndian>;\n".format(struct_name))
         hpp.write("        using struct_little = HEK::{}<HEK::LittleEndian>;\n".format(struct_name))
-        all_used_groups = s["groups"] if "groups" in s else []
+        all_used_groups = struct["groups"] if "groups" in struct else []
         all_used_structs = []
         
         # First add all of the values
@@ -122,7 +116,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                 hpp.write("        {} {}{}{};\n".format(type_to_write, t["member_name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"]), initializer))
                 all_used_structs.append(deepcopy(t))
                 continue
-        add_structs_from_struct(s)
+        add_structs_from_struct(struct)
         
         # Next, account for enums being excluded on different structs
         for s in all_used_structs:
@@ -188,19 +182,16 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         # Next, run all this stuff to generate our C++ source files
         make_scan_padding(all_used_structs, struct_name, all_bitfields, hpp, cpp_scan_padding)
         make_cache_deformat(post_cache_deformat, all_used_structs, struct_name, hpp, cpp_cache_deformat_data)
-        make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums, all_structs_arranged)
+        make_cache_format_data(struct_name, struct, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums, all_structs_arranged)
         make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data)
         make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs, struct_name, hpp, cpp_read_cache_file_data)
         make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, all_used_structs, hpp, cpp_read_hek_data)
         make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_file)
         make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_reference)
         make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, all_used_groups, hpp, struct_name, extract_hidden, read_only, title)
-        make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
-        make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_invalid_references)
         make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_invalid_ranges)
         make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_invalid_indices, all_structs_arranged)
         make_normalize(all_used_structs, struct_name, hpp, cpp_normalize, normalize)
-        make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
 

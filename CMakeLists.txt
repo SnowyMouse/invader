@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.12)
 
 # Project name - You should change this if you're making a fork
 project(Invader
-    VERSION 0.41.4
+    VERSION 0.43.0
     DESCRIPTION "Modding toolkit for Halo Combat Evolved"
     LANGUAGES C CXX
 )
@@ -92,6 +92,9 @@ include(src/bludgeon/bludgeon.cmake)
 include(src/compare/compare.cmake)
 include(src/scan/scan.cmake)
 include(src/convert/convert.cmake)
+include(src/edit/edit.cmake)
+include(src/model/model.cmake)
+include(src/recover/recover.cmake)
 
 # Qt stuff
 include(src/edit/qt/qt.cmake)

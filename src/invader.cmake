@@ -11,11 +11,8 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-broken-enums.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-references.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-ranges.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-indices.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/parser-compare.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-normalize.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-file.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-scan-padding.cpp"
@@ -58,11 +55,8 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-references.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-ranges.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-indices.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-broken-enums.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/parser-compare.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-normalize.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-file.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-scan-padding.cpp"
@@ -71,7 +65,7 @@ set(INVADER_SOURCE_FILES
 
     ${INVADER_AUDIO_FILES}
 
-    src/hek/class_int.cpp
+    src/hek/fourcc.cpp
     src/hek/data_type.cpp
     src/hek/map.cpp
     src/resource/resource_map.cpp
@@ -80,9 +74,11 @@ set(INVADER_SOURCE_FILES
     src/map/tag.cpp
     src/file/file.cpp
     src/build/build_workload.cpp
+    src/build/build_workload_dedupe.cpp
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
     src/error_handler/error_handler.cpp
+    src/model/jms.cpp
     src/script/compiler.cpp
     src/script/script_tree.cpp
     src/script/tokenizer.cpp

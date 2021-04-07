@@ -9,8 +9,8 @@
             "self illumination mask",
             "change color mask inverse",
             "change color mask",
-            "multipurpose map alpha inverse",
-            "multipurpose map alpha"
+            "auxiliary mask inverse",
+            "auxiliary mask"
         ],
         "type": "enum"
     },
@@ -46,7 +46,7 @@
             {
                 "name": "multipurpose map",
                 "first": "multipurpose map",
-                "description": "A multipurpose map is not actually a visible texture but rather a composite four-channel monochrome map used for shading the texture mapped to the UVs of the model.\n\nThe classic channel order (used for the Xbox version of the game) is the following:\n- alpha is the auxiliary channel (unused by the shader)\n- red is specular and detail mapping\n- green is self illumination\n- blue is color change\n\nThe swapped channel order (used for the PC releases of the game) is the following:\n- alpha is color change\n- red is the auxiliary channel (unused by the shader)\n- green is self illumination\n- blue is specular and detail mapping"
+                "description": "A multipurpose map is not actually a visible texture but rather a composite four-channel monochrome map used for shading the texture mapped to the UVs of the model.\n\nThe classic channel order (used for the Xbox version of the game) is the following:\n- alpha is the auxiliary channel (optional detail mask)\n- red is specular and detail mapping\n- green is self illumination\n- blue is color change\n\nThe swapped channel order (used for the PC releases of the game) is the following:\n- alpha is color change\n- red is the auxiliary channel (optional detail mask)\n- green is self illumination\n- blue is specular and detail mapping"
             }
         ],
         "fields": [

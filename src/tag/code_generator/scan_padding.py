@@ -31,7 +31,7 @@ def make_scan_padding(all_used_structs, struct_name, all_bitfields, hpp, cpp_sca
         cpp_scan_padding.write("        for(std::size_t i = 0; i < sizeof(l_copy); i++) {\n")
         cpp_scan_padding.write("            auto v = reinterpret_cast<const std::uint8_t *>(&l_copy)[i];\n")
         cpp_scan_padding.write("            if(v != 0) {\n")
-        cpp_scan_padding.write("                oprintf(\"%s.%s: {} @ 0x%04zX - %02X\\n\", tag.get_path().c_str(), Invader::HEK::tag_class_to_extension(tag.get_tag_class_int()), i, v);\n".format(struct_name))
+        cpp_scan_padding.write("                oprintf(\"%s.%s: {} @ 0x%04zX - %02X\\n\", tag.get_path().c_str(), Invader::HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()), i, v);\n".format(struct_name))
         cpp_scan_padding.write("            }\n")
         cpp_scan_padding.write("        }\n")
     cpp_scan_padding.write("    }\n")

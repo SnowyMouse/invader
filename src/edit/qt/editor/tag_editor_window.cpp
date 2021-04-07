@@ -74,10 +74,10 @@ namespace Invader::EditQt {
         }
         else {
             this->make_dirty(true);
-            this->parser_data = Parser::ParserStruct::generate_base_struct(tag_file.tag_class_int).release();
+            this->parser_data = Parser::ParserStruct::generate_base_struct(tag_file.tag_fourcc).release();
             if(!this->parser_data) {
                 char formatted_error[1024];
-                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_class_to_extension(tag_file.tag_class_int));
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_fourcc_to_extension(tag_file.tag_fourcc));
                 QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
@@ -114,48 +114,48 @@ namespace Invader::EditQt {
         // Add another widget to our view?
         QFrame *extra_widget_panel = nullptr;
         QPushButton *extra_widget;
-        switch(tag_file.tag_class_int) {
-            case TagClassInt::TAG_CLASS_BITMAP:
-            case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+        switch(tag_file.tag_fourcc) {
+            case TagFourCC::TAG_FOURCC_BITMAP:
+            case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                 extra_widget = new QPushButton("Preview bitmap");
                 break;
             #ifndef DISABLE_AUDIO
-            case TagClassInt::TAG_CLASS_SOUND:
-            case TagClassInt::TAG_CLASS_INVADER_SOUND:
+            case TagFourCC::TAG_FOURCC_SOUND:
+            case TagFourCC::TAG_FOURCC_INVADER_SOUND:
                 extra_widget = new QPushButton("Preview sound");
                 break;
             #endif
-            case TagClassInt::TAG_CLASS_FONT:
+            case TagFourCC::TAG_FOURCC_FONT:
                 extra_widget = new QPushButton("Preview font");
                 break;
-            case TagClassInt::TAG_CLASS_STRING_LIST:
-            case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+            case TagFourCC::TAG_FOURCC_STRING_LIST:
+            case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
                 extra_widget = new QPushButton("Preview string list");
                 break;
-            // case TagClassInt::TAG_CLASS_GBXMODEL:
-            // case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
+            // case TagFourCC::TAG_FOURCC_GBXMODEL:
+            // case TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP:
             //     extra_widget = new QPushButton("Preview model");
             //     break;
-            // case TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
-            // case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
-            // case TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
-            // case TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE:
-            // case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
+            // case TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
+            // case TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
+            // case TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
+            // case TagFourCC::TAG_FOURCC_UNIT_HUD_INTERFACE:
+            // case TagFourCC::TAG_FOURCC_WEAPON_HUD_INTERFACE:
             //     extra_widget = new QPushButton("Preview interface");
             //     break;
-            // case TagClassInt::TAG_CLASS_SHADER:
-            // case TagClassInt::TAG_CLASS_SHADER_MODEL:
-            // case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
-            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
-            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
-            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
-            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
-            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
-            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
-            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+            // case TagFourCC::TAG_FOURCC_SHADER:
+            // case TagFourCC::TAG_FOURCC_SHADER_MODEL:
+            // case TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT:
+            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO:
+            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
+            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
+            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
+            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
+            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
             //     extra_widget = new QPushButton("Preview shader");
             //     break;
-            // case TagClassInt::TAG_CLASS_SCENARIO:
+            // case TagFourCC::TAG_FOURCC_SCENARIO:
             //     extra_widget = new QPushButton("Edit scenario");
             //     break;
             default:
@@ -236,7 +236,7 @@ namespace Invader::EditQt {
         if(dirty) {
             char message_entire_text[512];
             if(this->file.tag_path.size() == 0) {
-                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_class_to_extension(this->file.tag_class_int));
+                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_fourcc_to_extension(this->file.tag_fourcc));
             }
             else {
                 std::snprintf(message_entire_text, sizeof(message_entire_text), "This file \"%s\" has been modified.\nDo you want to save your changes?", this->file.full_path.string().c_str());
@@ -284,7 +284,7 @@ namespace Invader::EditQt {
 
         // Save; benchmark
         auto start = std::chrono::steady_clock::now();
-        auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_class_int);
+        auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_fourcc);
         auto str = this->file.full_path.string();
         const auto *c_str = str.c_str();
         auto result = Invader::File::save_file(c_str, tag_data);
@@ -303,7 +303,7 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save_as() {
-        TagTreeDialog d(nullptr, this->parent_window, this->file.tag_class_int);
+        TagTreeDialog d(nullptr, this->parent_window, this->file.tag_fourcc);
         if(d.exec() == QMessageBox::Accepted) {
             this->file = *d.get_tag();
             
@@ -325,16 +325,18 @@ namespace Invader::EditQt {
     void TagEditorWindow::make_dirty(bool dirty) {
         this->dirty = dirty;
 
-        char title_bar[512];
-        if(this->file.tag_path.size() == 0) {
-            std::snprintf(title_bar, sizeof(title_bar), "Untitled %s", HEK::tag_class_to_extension(this->file.tag_class_int));
+        // Start writing the title
+        std::string title;
+        if(this->file.tag_path.empty()) {
+            title = std::string("Untitled ") + HEK::tag_fourcc_to_extension(this->file.tag_fourcc);
         }
         else {
-            const char *asterisk = dirty ? " *" : "";
-            std::snprintf(title_bar, sizeof(title_bar), "%s%s", this->file.full_path.string().c_str(), asterisk);
+            title = std::string(this->file.full_path.string().c_str()) + (dirty ? " *" : "");
         }
-        this->setWindowTitle(title_bar);
-
+        
+        title += std::string(" — ") + qApp->applicationDisplayName().toStdString();
+        this->setWindowTitle(title.c_str());
+        
         if(this->subwindow) {
             if(this->subwindow->isHidden()) {
                 this->subwindow->deleteLater();
@@ -370,29 +372,36 @@ namespace Invader::EditQt {
 
     void TagEditorWindow::show_subwindow() {
         if(!this->subwindow) {
-            switch(this->file.tag_class_int) {
-                case TagClassInt::TAG_CLASS_BITMAP:
-                case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+            switch(this->file.tag_fourcc) {
+                case TagFourCC::TAG_FOURCC_BITMAP:
+                case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                     this->subwindow = new TagEditorBitmapSubwindow(this);
                     break;
                 #ifndef DISABLE_AUDIO
-                case TagClassInt::TAG_CLASS_SOUND:
-                case TagClassInt::TAG_CLASS_INVADER_SOUND:
+                case TagFourCC::TAG_FOURCC_SOUND:
+                case TagFourCC::TAG_FOURCC_INVADER_SOUND:
                     this->subwindow = new TagEditorSoundSubwindow(this);
                     break;
                 #endif
-                case TagClassInt::TAG_CLASS_FONT:
+                case TagFourCC::TAG_FOURCC_FONT:
                     this->subwindow = new TagEditorFontSubwindow(this);
                     break;
-                case TagClassInt::TAG_CLASS_STRING_LIST:
-                case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                case TagFourCC::TAG_FOURCC_STRING_LIST:
+                case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
                     this->subwindow = new TagEditorStringSubwindow(this);
                     break;
                 default:
                     std::terminate();
             }
+            this->subwindow->show();
         }
-        this->subwindow->show();
-        this->subwindow->setWindowState(Qt::WindowState::WindowActive);
+        
+        this->subwindow->setVisible(true);
+        
+        // Run all the memes to get this to the front
+        this->subwindow->setFocus();
+        this->subwindow->setWindowState((this->subwindow->windowState() | Qt::WindowState::WindowActive) & ~Qt::WindowMinimized);
+        this->subwindow->raise();
+        this->subwindow->activateWindow();
     }
 }

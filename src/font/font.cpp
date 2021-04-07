@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
     // Write
     std::error_code ec;
     std::filesystem::create_directories(tag_path.parent_path(), ec);
-    if(!Invader::File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(Invader::TagClassInt::TAG_CLASS_FONT, true))) {
+    if(!Invader::File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(Invader::TagFourCC::TAG_FOURCC_FONT, true))) {
         eprintf_error("Failed to save %s.", final_tag_path.c_str());
         return EXIT_FAILURE;
     }

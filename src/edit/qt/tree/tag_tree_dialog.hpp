@@ -22,7 +22,7 @@ namespace Invader::EditQt {
          * @param parent_window  parent window
          * @param classes        an optional array of classes to filter
          */
-        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
+        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes = std::nullopt);
 
         /**
          * Instantiate a TagFileDialog for saving
@@ -30,13 +30,13 @@ namespace Invader::EditQt {
          * @param parent_window  parent window
          * @param tag_class      tag class to save
          */
-        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, HEK::TagClassInt save_class);
+        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, HEK::TagFourCC save_class);
 
         /**
          * Set the filter, limiting the view to those classes and directories that contain the given classes
          * @param classes an optional array of classes; if none is given, then the filter is cleared
          */
-        void set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
+        void set_filter(const std::optional<std::vector<HEK::TagFourCC>> &classes = std::nullopt);
 
         /**
          * Get the resulting tag file
@@ -47,19 +47,19 @@ namespace Invader::EditQt {
         ~TagTreeDialog() = default;
 
     private:
-        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, std::optional<HEK::TagClassInt> saving);
+        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, std::optional<HEK::TagFourCC> saving);
         std::optional<File::TagFile> tag;
         TagTreeWidget *tree_widget;
         void match_find_filter(const QString &filter);
-        void change_title(const std::optional<std::vector<HEK::TagClassInt>> &classes);
-        void change_title(HEK::TagClassInt save_class);
+        void change_title(const std::optional<std::vector<HEK::TagFourCC>> &classes);
+        void change_title(HEK::TagFourCC save_class);
         void done(int r);
         void on_double_click(QTreeWidgetItem *item, int column);
         void on_click(QTreeWidgetItem *item, int column);
         void new_folder();
         void do_save_as();
-        std::optional<HEK::TagClassInt> save_class;
-        std::optional<std::vector<HEK::TagClassInt>> filter_classes;
+        std::optional<HEK::TagFourCC> save_class;
+        std::optional<std::vector<HEK::TagFourCC>> filter_classes;
         QString path_filter;
         void refresh_filter();
 

@@ -179,41 +179,41 @@ namespace Invader::Parser {
 
         for(std::uint16_t i = 0; i < element_count; i++) {
             // Check if we know the class
-            std::optional<TagClassInt> tag_class;
+            std::optional<TagFourCC> tag_class;
             auto &node = nodes[i];
 
             // Check the class type
             switch(node.type.read()) {
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
-                    tag_class = HEK::TAG_CLASS_SOUND;
+                    tag_class = HEK::TAG_FOURCC_SOUND;
                     break;
 
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
-                    tag_class = HEK::TAG_CLASS_EFFECT;
+                    tag_class = HEK::TAG_FOURCC_EFFECT;
                     break;
 
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
-                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
                     break;
 
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
-                    tag_class = HEK::TAG_CLASS_SOUND_LOOPING;
+                    tag_class = HEK::TAG_FOURCC_SOUND_LOOPING;
                     break;
 
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
-                    tag_class = HEK::TAG_CLASS_MODEL_ANIMATIONS;
+                    tag_class = HEK::TAG_FOURCC_MODEL_ANIMATIONS;
                     break;
 
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
-                    tag_class = HEK::TAG_CLASS_ACTOR_VARIANT;
+                    tag_class = HEK::TAG_FOURCC_ACTOR_VARIANT;
                     break;
 
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
-                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
                     break;
 
                 case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
-                    tag_class = HEK::TAG_CLASS_OBJECT;
+                    tag_class = HEK::TAG_FOURCC_OBJECT;
                     break;
 
                 default:
@@ -252,14 +252,14 @@ namespace Invader::Parser {
                 bool exists = false;
                 auto &new_tag = workload.tags[new_id];
                 for(auto &r : scenario.references) {
-                    if(r.reference.tag_class_int == new_tag.tag_class_int && r.reference.path == new_tag.path) {
+                    if(r.reference.tag_fourcc == new_tag.tag_fourcc && r.reference.path == new_tag.path) {
                         exists = true;
                         break;
                     }
                 }
                 if(!exists) {
                     auto &reference = scenario.references.emplace_back().reference;
-                    reference.tag_class_int = new_tag.tag_class_int;
+                    reference.tag_fourcc = new_tag.tag_fourcc;
                     reference.path = new_tag.path;
                     reference.tag_id = HEK::TagID { static_cast<std::uint32_t>(new_id) };
                 }
@@ -326,7 +326,7 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (null) is unused", i); \
                     } \
                     else { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_class_to_extension(palette.tag_class_int)); \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_fourcc_to_extension(palette.tag_fourcc)); \
                     } \
                 } \
                 else if(is_null) { \
@@ -424,19 +424,19 @@ namespace Invader::Parser {
         MERGE_ARRAY(netgame_flags, true);
         MERGE_ARRAY(netgame_equipment, true);
         MERGE_ARRAY(starting_equipment, true);
-        MERGE_ARRAY(actor_palette, merge.reference.path != base.reference.path || merge.reference.tag_class_int != base.reference.tag_class_int);
+        MERGE_ARRAY(actor_palette, merge.reference.path != base.reference.path || merge.reference.tag_fourcc != base.reference.tag_fourcc);
         MERGE_ARRAY(ai_animation_references, merge.animation_name != base.animation_name);
         MERGE_ARRAY(ai_script_references, merge.script_name != base.script_name);
         MERGE_ARRAY(ai_recording_references, merge.recording_name != base.recording_name);
-        MERGE_ARRAY(references, merge.reference.path != base.reference.path || merge.reference.tag_class_int != base.reference.tag_class_int);
+        MERGE_ARRAY(references, merge.reference.path != base.reference.path || merge.reference.tag_fourcc != base.reference.tag_fourcc);
         MERGE_ARRAY(cutscene_flags, merge.name != base.name);
         MERGE_ARRAY(cutscene_camera_points, merge.name != base.name);
         MERGE_ARRAY(cutscene_titles, merge.name != base.name);
         MERGE_ARRAY(source_files, merge.name != base.name);
-        MERGE_ARRAY(decal_palette, merge.reference.path != base.reference.path || merge.reference.tag_class_int != base.reference.tag_class_int);
+        MERGE_ARRAY(decal_palette, merge.reference.path != base.reference.path || merge.reference.tag_fourcc != base.reference.tag_fourcc);
         
         // Merge palettes
-        #define MERGE_PALETTE(what) MERGE_ARRAY(what, merge.name.path != base.name.path || merge.name.tag_class_int != base.name.tag_class_int)
+        #define MERGE_PALETTE(what) MERGE_ARRAY(what, merge.name.path != base.name.path || merge.name.tag_fourcc != base.name.tag_fourcc)
         
         MERGE_PALETTE(scenery_palette);
         MERGE_PALETTE(biped_palette);
@@ -504,7 +504,7 @@ namespace Invader::Parser {
         
         #define MERGE_OBJECTS_ALL(what, what_palette, ...) { \
             auto object_count = scenario_to_merge.what.size(); \
-            auto translate_palette = TRANSLATE_PALETTE(what_palette, (merge.name.path == base.name.path && merge.name.tag_class_int == base.name.tag_class_int)); \
+            auto translate_palette = TRANSLATE_PALETTE(what_palette, (merge.name.path == base.name.path && merge.name.tag_fourcc == base.name.tag_fourcc)); \
             for(std::size_t o = 0; o < object_count; o++) { \
                 auto &new_element = base_scenario.what.emplace_back(scenario_to_merge.what[o]); \
                 new_element.name = translate_object_name(new_element.name); \
@@ -533,7 +533,7 @@ namespace Invader::Parser {
         #undef MERGE_OBJECTS_ALL
         
         // Decals
-        auto translate_decal_palette = TRANSLATE_PALETTE(decal_palette, merge.reference.tag_class_int == base.reference.tag_class_int && merge.reference.path == base.reference.path);
+        auto translate_decal_palette = TRANSLATE_PALETTE(decal_palette, merge.reference.tag_fourcc == base.reference.tag_fourcc && merge.reference.path == base.reference.path);
         for(auto &decal : scenario_to_merge.decals) {
             // Add our new decal
             auto &new_decal = base_scenario.decals.emplace_back(decal);
@@ -541,7 +541,7 @@ namespace Invader::Parser {
         }
         
         // AI stuff
-        auto translate_actor_palette = TRANSLATE_PALETTE(actor_palette, (merge.reference.tag_class_int == base.reference.tag_class_int && merge.reference.path == base.reference.path));
+        auto translate_actor_palette = TRANSLATE_PALETTE(actor_palette, (merge.reference.tag_fourcc == base.reference.tag_fourcc && merge.reference.path == base.reference.path));
         auto translate_animation_palette = TRANSLATE_PALETTE(ai_animation_references, merge.animation_name == base.animation_name);
         auto translate_command_list = TRANSLATE_PALETTE(command_lists, merge.name == base.name);
         auto translate_recording = TRANSLATE_PALETTE(ai_recording_references, merge.recording_name == base.recording_name);
@@ -618,9 +618,9 @@ namespace Invader::Parser {
                 auto &first_scenario = scenario.child_scenarios[0].child_scenario;
                 if(!first_scenario.path.empty()) {
                     // If this isn't even a scenario tag... what
-                    if(first_scenario.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO) {
+                    if(first_scenario.tag_fourcc != TagFourCC::TAG_FOURCC_SCENARIO) {
                         // This should fail even if we aren't checking for errors because this is invalid
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
                         throw InvalidTagDataException();
                     }
                     
@@ -629,7 +629,7 @@ namespace Invader::Parser {
                         // This should fail even if we aren't checking for errors because this is invalid
                         if(m == first_scenario.path) {
                             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Duplicate or cyclical child scenario references are present", tag_index);
-                            eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
+                            eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
                             throw InvalidTagDataException();
                         }
                     }
@@ -639,7 +639,7 @@ namespace Invader::Parser {
                     
                     // Find it
                     char file_path_cstr[1024];
-                    std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
+                    std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
                     auto file_path = File::tag_path_to_file_path(file_path_cstr, workload.get_build_parameters()->tags_directories);
                     if(!file_path.has_value() || !std::filesystem::exists(*file_path)) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Child scenario %s not found", file_path_cstr);
@@ -657,14 +657,14 @@ namespace Invader::Parser {
                     try {
                         auto child = Scenario::parse_hek_tag_file(data->data(), data->size());
                         data.reset(); // clear it
-                        merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + HEK::tag_class_to_extension(first_scenario.tag_class_int)).c_str());
+                        merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc)).c_str());
                     }
                     catch(std::exception &) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to merge %s%s into %s.%s",
                                             File::halo_path_to_preferred_path(first_scenario.path).c_str(),
-                                            HEK::tag_class_to_extension(first_scenario.tag_class_int),
+                                            HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc),
                                             workload.tags[tag_index].path.c_str(),
-                                            HEK::tag_class_to_extension(workload.tags[tag_index].tag_class_int)
+                                            HEK::tag_fourcc_to_extension(workload.tags[tag_index].tag_fourcc)
                                            );
                         throw;
                     }

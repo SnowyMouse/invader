@@ -102,7 +102,7 @@ namespace Invader {
                     RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY,
                     
                     /** (Custom Edition only) Always assume resource files' assets match */
-                    RAW_DATA_HANDLING_ALWAYS_INDEX
+                    RAW_DATA_HANDLING_ALWAYS_INDEX,
                 };
                 
                 /**
@@ -151,6 +151,11 @@ namespace Invader {
                 RawDataHandling build_raw_data_handling;
                 
                 /**
+                 * Make sure indexed tags do not go over the stock resource limit indices while also checking paths
+                 */
+                bool build_check_custom_edition_resource_map_bounds = false;
+                
+                /**
                  * Version to use. This generally only impacts Xbox maps as it's unread in all of the official PC releases.
                  */
                 std::string build_version;
@@ -192,12 +197,12 @@ namespace Invader {
         /**
          * Compile a single tag
          * @param tag               tag to use
-         * @param tag_class_int     tag class
+         * @param tag_fourcc        tag class
          * @param tags_directories  tags directories to use
          * @param recursion         should use recursion
          * @param error_checking    have error checking besides completely invalid tags
          */
-        static BuildWorkload compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion = false, bool error_checking = false);
+        static BuildWorkload compile_single_tag(const char *tag, TagFourCC tag_fourcc, const std::vector<std::filesystem::path> &tags_directories, bool recursion = false, bool error_checking = false);
 
         /**
          * Compile a single tag
@@ -310,10 +315,10 @@ namespace Invader {
             std::string path;
 
             /** Class of the tag */
-            TagClassInt tag_class_int;
+            TagFourCC tag_fourcc;
 
             /** Original tag class, if applicable */
-            std::optional<TagClassInt> alias;
+            std::optional<TagFourCC> alias;
 
             /** Asset data structs */
             std::vector<std::size_t> asset_data;
@@ -392,19 +397,19 @@ namespace Invader {
         /**
          * Add the tag
          * @param tag_path      path of the tag
-         * @param tag_class_int class of the tag
+         * @param tag_fourcc    class of the tag
          * @return              index of the tag
          */
-        std::size_t compile_tag_recursively(const char *tag_path, TagClassInt tag_class_int);
+        std::size_t compile_tag_recursively(const char *tag_path, TagFourCC tag_fourcc);
 
         /**
          * Compile the tag data
          * @param tag_data      path of the tag
          * @param tag_data_size size of the tag
          * @param tag_index     index of the tag
-         * @param tag_class_int explicitly give a tag class
+         * @param tag_fourcc    explicitly give a tag class
          */
-        void compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int = std::nullopt);
+        void compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagFourCC> tag_fourcc = std::nullopt);
         
         ~BuildWorkload() override = default;
 

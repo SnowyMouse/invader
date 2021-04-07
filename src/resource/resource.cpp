@@ -24,11 +24,11 @@ int main(int argc, const char **argv) {
     options.emplace_back("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail", "<id>");
-    options.emplace_back("padding", 'p', 1, "Add an extra number of bytes after the header", "<bytes>");
-    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates). This can be specified multiple times.", "<file>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either -w or -M to be specified at least once. Valid engines are: custom, demo, retail", "<id>");
+    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>");
     options.emplace_back("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>");
     options.emplace_back("no-prefix", 'n', 0, "Don't use the \"custom_\" prefix when building a Custom Edition resource map.");
+    options.emplace_back("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
     static constexpr char USAGE[] = "[options] -T <type>";
@@ -41,15 +41,16 @@ int main(int argc, const char **argv) {
         const char *maps = "maps";
 
         // Resource map type
-        std::optional<ResourceMapType> type = ResourceMapType::RESOURCE_MAP_BITMAP;
+        std::optional<ResourceMapType> type;
 
         // Engine target
         std::optional<HEK::CacheFileEngine> engine_target;
 
         const char * const *(*default_fn)() = get_default_bitmap_resources;
         std::vector<std::pair<const char *, bool>> index; // path, and is it a map?
-        std::size_t padding = 0;
         bool no_prefix = false;
+        
+        std::optional<std::filesystem::path> concatenate_against;
     } resource_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
@@ -60,6 +61,10 @@ int main(int argc, const char **argv) {
 
             case 't':
                 resource_options.tags.push_back(arguments[0]);
+                break;
+
+            case 'c':
+                resource_options.concatenate_against = arguments[0];
                 break;
 
             case 'm':
@@ -81,10 +86,6 @@ int main(int argc, const char **argv) {
                     eprintf_error("Invalid engine %s. Use --help for more information.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
-                break;
-
-            case 'p':
-                resource_options.padding = std::stoull(arguments[0]);
                 break;
 
             case 'w':
@@ -131,6 +132,11 @@ int main(int argc, const char **argv) {
         eprintf_error("Only bitmaps.map and sounds.map can be made for retail/demo engines.");
         return EXIT_FAILURE;
     }
+    
+    if(retail && resource_options.index.size() == 0) {
+        eprintf_error("A map or index is required for building retail/demo maps.");
+        return EXIT_FAILURE;
+    }
 
     // If we don't have any tags directories, use a default one
     if(resource_options.tags.size() == 0) {
@@ -159,16 +165,16 @@ int main(int argc, const char **argv) {
                     for(std::size_t t = 0; t < tag_count; t++) {
                         auto &tag = map.get_tag(t);
                         bool allowed = false;
-                        auto tag_class = tag.get_tag_class_int();
+                        auto tag_class = tag.get_tag_fourcc();
                         switch(*resource_options.type) {
                             case ResourceMapType::RESOURCE_MAP_BITMAP:
-                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_BITMAP;
+                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_BITMAP;
                                 break;
                             case ResourceMapType::RESOURCE_MAP_SOUND:
-                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_SOUND;
+                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_SOUND;
                                 break;
                             case ResourceMapType::RESOURCE_MAP_LOC:
-                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT || tag_class == HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST || tag_class == HEK::TagClassInt::TAG_CLASS_FONT;
+                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT || tag_class == HEK::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST || tag_class == HEK::TagFourCC::TAG_FOURCC_FONT;
                                 break;
                         }
                         if(allowed) {
@@ -193,7 +199,7 @@ int main(int argc, const char **argv) {
                     else {
                         auto &new_path = tags_list.emplace_back();
                         new_path.path = tag;
-                        new_path.class_int = TagClassInt::TAG_CLASS_NONE;
+                        new_path.fourcc = TagFourCC::TAG_FOURCC_NONE;
                     }
                 }
             }
@@ -205,7 +211,30 @@ int main(int argc, const char **argv) {
     header.resource_count = tags_list.size();
 
     // Read the amazing fun happy stuff
-    std::vector<std::byte> resource_data(sizeof(ResourceMapHeader) + resource_options.padding);
+    std::vector<std::byte> resource_data(sizeof(ResourceMapHeader));
+    
+    std::vector<Resource> concatenate_resource;
+    if(resource_options.concatenate_against.has_value()) {
+        try {
+            resource_data = File::open_file(*resource_options.concatenate_against).value();
+            concatenate_resource = load_resource_map(resource_data.data(), resource_data.size());
+            
+            if(reinterpret_cast<ResourceMapHeader *>(resource_data.data())->type != header.type) {
+                eprintf_error("Cannot concatenate against a different resource map type than what is being made");
+                return EXIT_FAILURE;
+            }
+            
+            if(*resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
+                eprintf_error("Cannot concatenate against a loc resource map");
+                return EXIT_FAILURE;
+            }
+        }
+        catch (std::exception &) {
+            eprintf_error("Failed to load %s", resource_options.concatenate_against->string().c_str());
+            return EXIT_FAILURE;
+        }
+    }
+    
     std::vector<std::size_t> offsets;
     std::vector<std::size_t> sizes;
     std::vector<std::string> paths;
@@ -213,27 +242,27 @@ int main(int argc, const char **argv) {
 
     for(auto &listed_tag : tags_list) {
         // First let's open it
-        TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
+        TagFourCC tag_fourcc = TagFourCC::TAG_FOURCC_NONE;
         std::vector<std::byte> tag_data;
         
         // But if we don't know the extension, we need to find that first!
-        if(listed_tag.class_int == TagClassInt::TAG_CLASS_NONE) {
+        if(listed_tag.fourcc == TagFourCC::TAG_FOURCC_NONE) {
             auto pref_path = File::halo_path_to_preferred_path(listed_tag.path.c_str());
             for(auto &tags_folder : resource_options.tags) {
                 if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".font"))) {
-                    listed_tag.class_int = TagClassInt::TAG_CLASS_FONT;
+                    listed_tag.fourcc = TagFourCC::TAG_FOURCC_FONT;
                     break;
                 }
                 else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".hud_message_text"))) {
-                    listed_tag.class_int = TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT;
+                    listed_tag.fourcc = TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT;
                     break;
                 }
                 else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".unicode_string_list"))) {
-                    listed_tag.class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
+                    listed_tag.fourcc = TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST;
                     break;
                 }
             }
-            if(listed_tag.class_int == TagClassInt::TAG_CLASS_NONE) {
+            if(listed_tag.fourcc == TagFourCC::TAG_FOURCC_NONE) {
                 eprintf_error("No font, hud message text, or unicode string list was found at %s.", pref_path.c_str());
                 return EXIT_FAILURE;
             }
@@ -258,29 +287,29 @@ int main(int argc, const char **argv) {
 
         switch(*resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
-                tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
+                tag_fourcc = TagFourCC::TAG_FOURCC_BITMAP;
                 break;
             case ResourceMapType::RESOURCE_MAP_SOUND:
-                tag_class_int = TagClassInt::TAG_CLASS_SOUND;
+                tag_fourcc = TagFourCC::TAG_FOURCC_SOUND;
                 break;
             case ResourceMapType::RESOURCE_MAP_LOC:
-                switch(listed_tag.class_int) {
-                    case TagClassInt::TAG_CLASS_FONT:
-                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
-                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                        tag_class_int = listed_tag.class_int;
+                switch(listed_tag.fourcc) {
+                    case TagFourCC::TAG_FOURCC_FONT:
+                    case TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
+                    case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
+                        tag_fourcc = listed_tag.fourcc;
                         break;
                         
                     // Okay, we didn't find anything
                     default:
-                        eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_class_to_extension(listed_tag.class_int));
+                        eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_fourcc_to_extension(listed_tag.fourcc));
                         return EXIT_FAILURE;
                 }
                 break;
         }
 
-        if(tag_class_int != listed_tag.class_int) {
-            eprintf_error("Expected %s. Got %s instead.", tag_class_to_extension(tag_class_int), tag_class_to_extension(listed_tag.class_int));
+        if(tag_fourcc != listed_tag.fourcc) {
+            eprintf_error("Expected %s. Got %s instead.", tag_fourcc_to_extension(tag_fourcc), tag_fourcc_to_extension(listed_tag.fourcc));
         }
 
         for(auto &tags_folder : resource_options.tags) {
@@ -300,7 +329,7 @@ int main(int argc, const char **argv) {
 
         // Compile the tags
         try {
-            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(listed_tag.path.c_str(), tag_class_int, resource_options.tags);
+            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(listed_tag.path.c_str(), tag_fourcc, resource_options.tags);
             auto &compiled_tag_tag = compiled_tag.tags[0];
             auto &compiled_tag_struct = compiled_tag.structs[*compiled_tag_tag.base_struct];
             auto *compiled_tag_data = compiled_tag_struct.data.data();
@@ -316,10 +345,10 @@ int main(int argc, const char **argv) {
                     data.insert(data.end(), s.data.begin(), s.data.end());
                 }
 
-                std::size_t sound_offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
+                std::size_t offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
                 for(auto &s : compiled_tag.structs) {
                     for(auto &ptr : s.pointers) {
-                        *reinterpret_cast<LittleEndian<Pointer> *>(data.data() + structs[&s - compiled_tag.structs.data()] + ptr.offset) = structs[ptr.struct_index] - sound_offset;
+                        *reinterpret_cast<LittleEndian<Pointer> *>(data.data() + structs[&s - compiled_tag.structs.data()] + ptr.offset) = structs[ptr.struct_index] - offset;
                     }
                 }
             };
@@ -330,6 +359,36 @@ int main(int argc, const char **argv) {
                     // Do stuff to the tag data
                     auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag_data);
                     std::size_t bitmap_count = bitmap.bitmap_data.count;
+                    
+                    // Combine all data into one blob if custom edition
+                    auto bitmap_data_offset_custom = resource_data.size();
+                    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                        bool append = true;
+                        std::vector<std::byte> data_custom;
+                        
+                        for(auto &r : compiled_tag.raw_data) {
+                            data_custom.insert(data_custom.end(), r.begin(), r.end());
+                        }
+                        
+                        for(auto &i : concatenate_resource) {
+                            if(i.data == data_custom) {
+                                bitmap_data_offset_custom = i.data_offset;
+                                append = false;
+                                std::printf("Matched %s\n", File::halo_path_to_preferred_path(halo_tag_path).c_str());
+                                break;
+                            }
+                        }
+
+                        offsets.push_back(bitmap_data_offset_custom);
+                        paths.push_back(halo_tag_path + "__pixels");
+                        sizes.push_back(data_custom.size());
+                        
+                        if(append) {
+                            resource_data.insert(resource_data.end(), data_custom.begin(), data_custom.end());
+                            PAD_RESOURCES_32_BIT
+                        }
+                    }
+                    
                     if(bitmap_count) {
                         auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&bitmap.bitmap_data.pointer)].data.data());
                         for(std::size_t b = 0; b < bitmap_count; b++) {
@@ -339,6 +398,17 @@ int main(int argc, const char **argv) {
                             if(retail) {
                                 // Generate the path to add
                                 std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", halo_tag_path.c_str(), b);
+                                
+                                // We already have it
+                                for(auto &i : concatenate_resource) {
+                                    if(i.data == compiled_tag.raw_data[b]) {
+                                        paths.push_back(path_temp);
+                                        sizes.push_back(i.data.size());
+                                        offsets.push_back(i.data_offset);
+                                        std::printf("Matched %s\n", File::halo_path_to_preferred_path(path_temp).c_str());
+                                        goto next_bitmap_data;
+                                    }
+                                }
 
                                 // Push it good
                                 paths.push_back(path_temp);
@@ -351,26 +421,17 @@ int main(int argc, const char **argv) {
                             }
                             // Otherwise set the sizes
                             else {
-                                bitmap_data->pixel_data_offset = resource_data.size() + bitmap_data->pixel_data_offset;
+                                bitmap_data->pixel_data_offset = bitmap_data_offset_custom + bitmap_data->pixel_data_offset;
                                 bitmap_data->flags = bitmap_data->flags.read() | BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
                             }
+                            
+                            next_bitmap_data: continue;
                         }
                     }
 
                     // Push the asset data and tag data if we aren't on retail
                     if(!retail) {
                         write_pointers();
-
-                        offsets.push_back(resource_data.size());
-                        std::size_t total_size = 0;
-                        for(auto &r : compiled_tag.raw_data) {
-                            total_size += r.size();
-                            resource_data.insert(resource_data.end(), r.begin(), r.end());
-                        }
-                        paths.push_back(halo_tag_path + "__pixels");
-                        sizes.push_back(total_size);
-
-                        PAD_RESOURCES_32_BIT
 
                         // Push the tag data
                         offsets.push_back(resource_data.size());
@@ -389,6 +450,36 @@ int main(int argc, const char **argv) {
                     std::size_t pitch_range_count = sound.pitch_ranges.count;
                     std::size_t b = 0;
                     std::size_t expected_offset = 0;
+                    
+                    // Combine all data into one blob if custom edition
+                    auto sound_data_offset_custom = resource_data.size();
+                    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                        bool append = true;
+                        std::vector<std::byte> data_custom;
+                        
+                        for(auto &r : compiled_tag.raw_data) {
+                            data_custom.insert(data_custom.end(), r.begin(), r.end());
+                        }
+                        
+                        for(auto &i : concatenate_resource) {
+                            if(i.data == data_custom) {
+                                sound_data_offset_custom = i.data_offset;
+                                append = false;
+                                std::printf("Matched %s\n", File::halo_path_to_preferred_path(halo_tag_path).c_str());
+                                break;
+                            }
+                        }
+
+                        offsets.push_back(sound_data_offset_custom);
+                        paths.push_back(halo_tag_path + "__samples");
+                        sizes.push_back(data_custom.size());
+                        
+                        if(append) {
+                            resource_data.insert(resource_data.end(), data_custom.begin(), data_custom.end());
+                            PAD_RESOURCES_32_BIT
+                        }
+                    }
+                    
                     if(pitch_range_count) {
                         auto &pitch_range_struct = compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&sound.pitch_ranges.pointer)];
                         auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(pitch_range_struct.data.data());
@@ -402,21 +493,31 @@ int main(int argc, const char **argv) {
                                     if(retail) {
                                         // Generate the path to add
                                         std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", halo_tag_path.c_str(), pr, p);
+                                
+                                        // We already have it
+                                        for(auto &i : concatenate_resource) {
+                                            if(i.data == compiled_tag.raw_data[b]) {
+                                                paths.push_back(path_temp);
+                                                sizes.push_back(i.data.size());
+                                                offsets.push_back(i.data_offset);
+                                                std::printf("Matched %s\n", File::halo_path_to_preferred_path(path_temp).c_str());
+                                                goto next_sound_data;
+                                            }
+                                        }
 
                                         // Push it REAL good
                                         paths.push_back(path_temp);
-                                        std::size_t size = permutation.samples.size.read();
-                                        sizes.push_back(size);
+                                        sizes.push_back(permutation.samples.size.read());
                                         offsets.push_back(resource_data.size());
                                         resource_data.insert(resource_data.end(), compiled_tag.raw_data[b].begin(), compiled_tag.raw_data[b].end());
 
-                                        b++;
-
                                         PAD_RESOURCES_32_BIT
+
+                                        next_sound_data: b++;
                                     }
                                     else {
                                         permutation.samples.external = 1;
-                                        permutation.samples.file_offset = resource_data.size() + expected_offset;
+                                        permutation.samples.file_offset = sound_data_offset_custom + expected_offset;
                                         expected_offset += permutation.samples.size;
                                     }
                                 }
@@ -427,18 +528,6 @@ int main(int argc, const char **argv) {
                     // If we're not on retail, push asset and tag data
                     if(!retail) {
                         write_pointers();
-
-                        // Push the asset data first
-                        offsets.push_back(resource_data.size());
-                        std::size_t total_size = 0;
-                        for(auto &r : compiled_tag.raw_data) {
-                            total_size += r.size();
-                            resource_data.insert(resource_data.end(), r.begin(), r.end());
-                        }
-                        paths.push_back(halo_tag_path + "__permutations");
-                        sizes.push_back(total_size);
-
-                        PAD_RESOURCES_32_BIT
 
                         // Push the tag data
                         offsets.push_back(resource_data.size());
@@ -451,7 +540,7 @@ int main(int argc, const char **argv) {
 
                     break;
                 }
-                case ResourceMapType::RESOURCE_MAP_LOC:
+                case ResourceMapType::RESOURCE_MAP_LOC: {
                     write_pointers();
                     offsets.push_back(resource_data.size());
                     resource_data.insert(resource_data.end(), data.begin(), data.end());
@@ -461,10 +550,11 @@ int main(int argc, const char **argv) {
                     PAD_RESOURCES_32_BIT
 
                     break;
+                }
             }
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.c_str(), tag_class_to_extension(tag_class_int), e.what());
+            eprintf_error("Failed to compile %s due to an exception: %s", tag_path.c_str(), e.what());
             return EXIT_FAILURE;
         }
 

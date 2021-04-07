@@ -10,7 +10,7 @@
 #include "../error.hpp"
 #include "constants.hpp"
 #include "pad.hpp"
-#include "class_int.hpp"
+#include "fourcc.hpp"
 #include "endian.hpp"
 #include "../printf.hpp"
 
@@ -256,7 +256,7 @@ namespace Invader::HEK {
      */
     ENDIAN_TEMPLATE(EndianType) struct TagDependency {
         /** Tag class of the tag being depended upon */
-        EndianType<TagClassInt> tag_class_int;
+        EndianType<TagFourCC> tag_fourcc;
 
         /** Pointer to tag path when compiled. */
         EndianType<Pointer> path_pointer;
@@ -269,7 +269,7 @@ namespace Invader::HEK {
 
         ENDIAN_TEMPLATE(OtherEndian) operator TagDependency<OtherEndian>() const {
             TagDependency<OtherEndian> copy;
-            COPY_THIS(tag_class_int);
+            COPY_THIS(tag_fourcc);
             COPY_THIS(path_pointer);
             COPY_THIS(path_size);
             COPY_THIS(tag_id);
@@ -397,6 +397,14 @@ namespace Invader::HEK {
             copy.w = w * m_distance;
             return copy;
         }
+        
+        bool operator ==(const Quaternion<EndianType> &other) const noexcept {
+            return this->i == other.i && this->j == other.j && this->k == other.k && this->w == other.w;
+        };
+        
+        bool operator !=(const Quaternion<EndianType> &other) const noexcept {
+            return !(*this == other);
+        };
     };
     static_assert(sizeof(Quaternion<BigEndian>) == 0x10);
 
@@ -534,6 +542,13 @@ namespace Invader::HEK {
             copy.k = this->k + add.k;
             return copy;
         }
+
+        bool operator==(const Vector3D<EndianType> &other) const {
+            return this->i == other.i && this->j == other.j && this->k == other.k;
+        }
+        bool operator!=(const Vector3D<EndianType> &other) const {
+            return !(*this == other);
+        }
         
         static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
         
@@ -588,6 +603,13 @@ namespace Invader::HEK {
             copy.k = 0.0F;
             return copy;
         }
+
+        bool operator==(const Vector2D<EndianType> &other) const {
+            return this->i == other.i && this->j == other.j;
+        }
+        bool operator!=(const Vector2D<EndianType> &other) const {
+            return !(*this == other);
+        }
         
         static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
         
@@ -627,6 +649,13 @@ namespace Invader::HEK {
         Vector3D<EndianType> vector;
         EndianType<float> w;
 
+        bool operator==(const Plane3D<EndianType> &other) const {
+            return this->vector == other.vector && this->w == other.w;
+        }
+        bool operator!=(const Plane3D<EndianType> &other) const {
+            return !(*this == other);
+        }
+
         ENDIAN_TEMPLATE(OtherEndian) operator Plane3D<OtherEndian>() const {
             Plane3D<OtherEndian> copy;
             COPY_THIS(vector);
@@ -642,6 +671,13 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct Plane2D {
         Vector2D<EndianType> vector;
         EndianType<float> w;
+
+        bool operator==(const Plane2D<EndianType> &other) const {
+            return this->vector == other.vector && this->w == other.w;
+        }
+        bool operator!=(const Plane2D<EndianType> &other) const {
+            return !(*this == other);
+        }
 
         ENDIAN_TEMPLATE(OtherEndian) operator Plane2D<OtherEndian>() const {
             Plane2D<OtherEndian> copy;
@@ -668,13 +704,31 @@ namespace Invader::HEK {
 
         Point2D<EndianType> operator+(const Point2D<EndianType> &add) const {
             Point2D<EndianType> copy;
-            copy.y = this->x + add.x;
-            copy.x = this->y + add.y;
+            copy.x = this->x + add.x;
+            copy.y = this->y + add.y;
+            return copy;
+        }
+
+        Point2D<EndianType> operator*(float multiply) const {
+            Point2D<EndianType> copy;
+            copy.x = this->x * multiply;
+            copy.y = this->y * multiply;
+            return copy;
+        }
+
+        Point2D<EndianType> operator/(float divide) const {
+            Point2D<EndianType> copy;
+            copy.x = this->x / divide;
+            copy.y = this->y / divide;
             return copy;
         }
         
         bool operator==(const Point2D<EndianType> &other) const {
             return other.x == this->x && other.y == this->y;
+        }
+        
+        bool operator!=(const Point2D<EndianType> &other) const {
+            return !(*this == other);
         }
 
         /**
@@ -736,8 +790,28 @@ namespace Invader::HEK {
             return copy;
         }
 
+        Point3D<EndianType> operator*(float multiply) const {
+            Point3D<EndianType> copy;
+            copy.x = this->x * multiply;
+            copy.y = this->y * multiply;
+            copy.z = this->z * multiply;
+            return copy;
+        }
+
+        Point3D<EndianType> operator/(float divide) const {
+            Point3D<EndianType> copy;
+            copy.x = this->x / divide;
+            copy.y = this->y / divide;
+            copy.z = this->z / divide;
+            return copy;
+        }
+
         bool operator ==(const Point3D<EndianType> &other) const {
             return this->x == other.x && this->y == other.y && this->z == other.z;
+        }
+        
+        bool operator !=(const Point3D<EndianType> &other) const {
+            return !(*this == other);
         }
 
         /**

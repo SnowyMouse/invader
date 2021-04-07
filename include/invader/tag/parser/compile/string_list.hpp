@@ -20,6 +20,21 @@ namespace Invader::Parser {
      * @return      true if the list had invalid strings
      */
     bool fix_broken_strings(UnicodeStringList &list, bool fix);
+    
+    
+    /**
+     * Detect if the string list has broken strings
+     * @param list list to check
+     * @return     true if the list has invalid strings
+     */
+    bool check_for_broken_strings(const StringList &list);
+    
+    /**
+     * Detect if the string list has broken strings
+     * @param list list to check
+     * @return     true if the list has invalid strings
+     */
+    bool check_for_broken_strings(const UnicodeStringList &list);
 }
 
 #endif

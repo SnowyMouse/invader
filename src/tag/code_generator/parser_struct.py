@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, all_used_groups, hpp, struct_name, extract_hidden, read_only, struct_title):
-    hpp.write("        std::vector<ParserStructValue> get_values() override;\n".format(struct_name))
-    cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values() {{\n".format(struct_name))
+    hpp.write("    private:\n".format(struct_name))
+    hpp.write("        std::vector<ParserStructValue> get_values_internal() override;\n".format(struct_name))
+    hpp.write("    public:\n".format(struct_name))
+    cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values_internal() {{\n".format(struct_name))
     cpp_struct_value.write("    std::vector<ParserStructValue> values;\n")
+    cpp_struct_value.write("    values.reserve({});\n".format(len(all_used_structs)))
     
     if not extract_hidden:
         for struct in all_used_structs:
@@ -39,11 +42,11 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 if classes[0] == "*":
                     cpp_struct_value.write("    values.emplace_back({}, nullptr, 0, {});\n".format(first_arguments, struct_read_only))
                 else:
-                    cpp_struct_value.write("    TagClassInt {}_types[] = {{".format(member_name));
+                    cpp_struct_value.write("    TagFourCC {}_types[] = {{".format(member_name));
                     for c in range(0, classes_len):
                         if c != 0:
                             cpp_struct_value.write(", ")
-                        cpp_struct_value.write("TagClassInt::TAG_CLASS_{}".format(classes[c].upper()))
+                        cpp_struct_value.write("TagFourCC::TAG_FOURCC_{}".format(classes[c].upper()))
                     cpp_struct_value.write("};\n");
                     cpp_struct_value.write("    values.emplace_back({}, {}_types, {}, {});\n".format(first_arguments, member_name, classes_len, struct_read_only))
             elif type == "TagReflexive":
@@ -51,7 +54,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 maximum = 0xFFFFFFFF if not ("maximum" in struct) else struct["maximum"]
 
                 vstruct = "std::vector<{}>".format(struct["struct"])
-                cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::get_object_in_array_template<{}>, ParserStructValue::get_array_size_template<{}>, ParserStructValue::delete_objects_in_array_template<{}>, ParserStructValue::insert_object_in_array_template<{}>, ParserStructValue::duplicate_object_in_array_template<{}>, static_cast<std::size_t>({}), static_cast<std::size_t>({}), {});\n".format(first_arguments, vstruct, vstruct, vstruct, vstruct, vstruct, minimum, maximum, struct_read_only))
+                cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::get_object_in_array_template<{}>, ParserStructValue::get_array_size_template<{}>, ParserStructValue::delete_objects_in_array_template<{}>, ParserStructValue::insert_object_in_array_template<{}>, ParserStructValue::duplicate_object_in_array_template<{}>, ParserStructValue::swap_object_in_array_template<{}>, static_cast<std::size_t>({}), static_cast<std::size_t>({}), {});\n".format(first_arguments, vstruct, vstruct, vstruct, vstruct, vstruct, vstruct, minimum, maximum, struct_read_only))
             elif type == "TagDataOffset" or type == "TagString":
                 cpp_struct_value.write("    values.emplace_back({}, {});\n".format(first_arguments, struct_read_only))
             elif type == "ScenarioScriptNodeValue" or type == "ScenarioStructureBSPArrayVertex":
@@ -112,8 +115,9 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 count = 1 * (2 if bounds_b else 1)
                 minimum = "static_cast<ParserStructValue::Number>({})".format(struct["minimum"]) if "minimum" in struct else "std::nullopt"
                 maximum = "static_cast<ParserStructValue::Number>({})".format(struct["maximum"]) if "maximum" in struct else "std::nullopt"
+                volatile = "true" if ("volatile" in struct and struct["volatile"]) else "false"
 
-                cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {}, {}, {}, {}, {});\n".format(first_arguments, type.upper(), unit, count, bounds, struct_read_only, minimum, maximum))
+                cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {}, {}, {}, {}, {}, {});\n".format(first_arguments, type.upper(), unit, count, bounds, volatile, struct_read_only, minimum, maximum))
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")

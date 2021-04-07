@@ -293,27 +293,27 @@ namespace Invader::Parser {
         for(auto &d : s.dependencies) {
             std::size_t tag_index = d.tag_index;
             auto &dt = workload.tags[tag_index];
-            switch(dt.tag_class_int) {
-                case TagClassInt::TAG_CLASS_BITMAP:
-                case TagClassInt::TAG_CLASS_SOUND:
+            switch(dt.tag_fourcc) {
+                case TagFourCC::TAG_FOURCC_BITMAP:
+                case TagFourCC::TAG_FOURCC_SOUND:
                     if(!ignore_shader_resources) {
                         resources.push_back(tag_index);
                     }
                     break;
-                case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
-                case TagClassInt::TAG_CLASS_SHADER_MODEL:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
-                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+                case TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT:
+                case TagFourCC::TAG_FOURCC_SHADER_MODEL:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA:
+                case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
                     if(ignore_shader_resources) {
                         break;
                     }
                     // fallthrough
-                case TagClassInt::TAG_CLASS_GBXMODEL:
+                case TagFourCC::TAG_FOURCC_GBXMODEL:
                     recursively_get_all_predicted_resources_from_struct(workload, *dt.base_struct, resources, false);
                     break;
                 default:
@@ -356,7 +356,7 @@ namespace Invader::Parser {
             for(std::size_t r : resources) {
                 auto &resource = predicted_resources.emplace_back();
                 auto &resource_tag = workload.tags[r];
-                resource.type = resource_tag.tag_class_int == TagClassInt::TAG_CLASS_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_SOUND;
+                resource.type = resource_tag.tag_fourcc == TagFourCC::TAG_FOURCC_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_SOUND;
                 resource.tag = HEK::TagID { static_cast<std::uint32_t>(r) };
                 resource.resource_index = 0;
                 auto &resource_dep = prs.dependencies.emplace_back();
@@ -489,6 +489,7 @@ namespace Invader::Parser {
         }
 
         calculate_object_predicted_resources(workload, struct_index);
+        set_pathfinding_spheres(workload, struct_index);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         // Make sure zoom levels aren't too high for the HUD interface
