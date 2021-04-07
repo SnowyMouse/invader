@@ -16,15 +16,10 @@ namespace Invader {
                            const std::byte *bitmaps_data, std::size_t bitmaps_data_size,
                            const std::byte *loc_data, std::size_t loc_data_size,
                            const std::byte *sounds_data, std::size_t sounds_data_size) {
-        Map map;
-        if(!map.decompress_if_needed(data, data_size)) {
-            map.data.insert(map.data.end(), data, data + data_size);
-        }
-        map.bitmap_data.insert(map.bitmap_data.end(), bitmaps_data, bitmaps_data + bitmaps_data_size);
-        map.sound_data.insert(map.sound_data.end(), sounds_data, sounds_data + sounds_data_size);
-        map.loc_data.insert(map.loc_data.end(), loc_data, loc_data + loc_data_size);
-        map.load_map();
-        return map;
+        return Map::map_with_move(std::vector<std::byte>(data, data + data_size), 
+                                  std::vector<std::byte>(bitmaps_data, bitmaps_data + bitmaps_data_size),
+                                  std::vector<std::byte>(loc_data, loc_data + loc_data_size),
+                                  std::vector<std::byte>(sounds_data, sounds_data + sounds_data_size));
     }
 
     Map Map::map_with_move(std::vector<std::byte> &&data,
@@ -32,16 +27,21 @@ namespace Invader {
                            std::vector<std::byte> &&loc_data,
                            std::vector<std::byte> &&sounds_data) {
         Map map;
-        if(map.decompress_if_needed(data.data(), data.size())) {
-            data.clear();
+        try {
+            if(map.decompress_if_needed(data.data(), data.size())) {
+                data.clear();
+            }
+            else {
+                map.data = std::move(data);
+            }
+            map.bitmap_data = std::move(bitmaps_data);
+            map.sound_data = std::move(sounds_data);
+            map.loc_data = std::move(loc_data);
+            map.load_map();
         }
-        else {
-            map.data = std::move(data);
+        catch(Exception &) {
+            throw InvalidMapException();
         }
-        map.bitmap_data = std::move(bitmaps_data);
-        map.sound_data = std::move(sounds_data);
-        map.loc_data = std::move(loc_data);
-        map.load_map();
         return map;
     }
 
@@ -213,87 +213,82 @@ namespace Invader {
     void Map::load_map() {
         using namespace Invader::HEK;
         
-        try {
-            // Get header
-            auto *header_maybe = reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
-            auto data_length = this->data.size();
+        // Get header
+        auto *header_maybe = reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
+        auto data_length = this->data.size();
 
-            auto continue_loading_map = [&data_length](Map &map, auto &header) {
-                // Set the engine and type
-                map.engine = header.engine;
-                map.header_type = header.map_type;
+        auto continue_loading_map = [&data_length](Map &map, auto &header) {
+            // Set the engine and type
+            map.engine = header.engine;
+            map.header_type = header.map_type;
 
-                // If we don't know the type of engine, bail
-                switch(map.engine) {
-                    case CacheFileEngine::CACHE_FILE_DEMO:
-                    case CacheFileEngine::CACHE_FILE_RETAIL:
-                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                        break;
-                    case CacheFileEngine::CACHE_FILE_NATIVE: {
-                        invader_assert(reinterpret_cast<const NativeCacheFileHeader *>(&header)->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED);
-                        break;
-                    }
-                    case CacheFileEngine::CACHE_FILE_XBOX:
-                        break;
-                    case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
-                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
-                    case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                        invader_assert_m(false, "this should not happen");
-                        break;
-                    default:
-                        throw UnsupportedMapEngineException();
+            // If we don't know the type of engine, bail
+            switch(map.engine) {
+                case CacheFileEngine::CACHE_FILE_DEMO:
+                case CacheFileEngine::CACHE_FILE_RETAIL:
+                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    break;
+                case CacheFileEngine::CACHE_FILE_NATIVE: {
+                    invader_assert(reinterpret_cast<const NativeCacheFileHeader *>(&header)->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED);
+                    break;
                 }
-
-                // Check if any overflowing occurs
-                if(header.decompressed_file_size > data_length || header.build.overflows() || header.name.overflows()) {
-                    throw InvalidMapException();
-                }
-
-                // Get tag data
-                switch(map.engine) {
-                    case CacheFileEngine::CACHE_FILE_NATIVE:
-                        map.base_memory_address = HEK::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
-                        break;
-                    case CacheFileEngine::CACHE_FILE_DEMO:
-                        map.base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
-                        break;
-                    case CacheFileEngine::CACHE_FILE_XBOX:
-                        map.base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
-                        break;
-                    default:
-                        map.base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
-                        break;
-                }
-
-                map.tag_data_length = header.tag_data_size;
-                map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
-                map.scenario_name = header.name;
-                map.build = header.build;
-                map.header_decompressed_file_size = header.decompressed_file_size;
-                map.header_crc32 = header.crc32;
-            };
-
-            // Check if the literals are invalid
-            if(!header_maybe->valid()) {
-                // Maybe it's a demo map?
-                auto *demo_header_maybe = reinterpret_cast<const CacheFileDemoHeader *>(header_maybe);
-                if(!demo_header_maybe->valid()) {
-                    throw InvalidMapException();
-                }
-                continue_loading_map(*this, *demo_header_maybe);
-            }
-            else if(header_maybe->engine == CacheFileEngine::CACHE_FILE_NATIVE) {
-                continue_loading_map(*this, *reinterpret_cast<const NativeCacheFileHeader *>(header_maybe));
-            }
-            else {
-                continue_loading_map(*this, *header_maybe);
+                case CacheFileEngine::CACHE_FILE_XBOX:
+                    break;
+                case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
+                    invader_assert_m(false, "this should not happen");
+                    break;
+                default:
+                    throw UnsupportedMapEngineException();
             }
 
-            this->populate_tag_array();
+            // Check if any overflowing occurs
+            if(header.decompressed_file_size > data_length || header.build.overflows() || header.name.overflows()) {
+                throw InvalidMapException();
+            }
+
+            // Get tag data
+            switch(map.engine) {
+                case CacheFileEngine::CACHE_FILE_NATIVE:
+                    map.base_memory_address = HEK::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
+                    break;
+                case CacheFileEngine::CACHE_FILE_DEMO:
+                    map.base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+                    break;
+                case CacheFileEngine::CACHE_FILE_XBOX:
+                    map.base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
+                    break;
+                default:
+                    map.base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+                    break;
+            }
+
+            map.tag_data_length = header.tag_data_size;
+            map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
+            map.scenario_name = header.name;
+            map.build = header.build;
+            map.header_decompressed_file_size = header.decompressed_file_size;
+            map.header_crc32 = header.crc32;
+        };
+
+        // Check if the literals are invalid
+        if(!header_maybe->valid()) {
+            // Maybe it's a demo map?
+            auto *demo_header_maybe = reinterpret_cast<const CacheFileDemoHeader *>(header_maybe);
+            if(!demo_header_maybe->valid()) {
+                throw InvalidMapException();
+            }
+            continue_loading_map(*this, *demo_header_maybe);
         }
-        catch(Invader::Exception &) {
-            throw Invader::InvalidMapException();
+        else if(header_maybe->engine == CacheFileEngine::CACHE_FILE_NATIVE) {
+            continue_loading_map(*this, *reinterpret_cast<const NativeCacheFileHeader *>(header_maybe));
         }
+        else {
+            continue_loading_map(*this, *header_maybe);
+        }
+
+        this->populate_tag_array();
     }
     
     std::uint32_t Map::get_crc32() const noexcept {
