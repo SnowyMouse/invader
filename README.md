@@ -285,7 +285,9 @@ Options:
   -A --auto-forge <engine>     Ensure the map will be network compatible with
                                the given target engine. Valid engines are:
                                pc-custom, pc-demo, pc-retail, xbox-0009,
-                               xbox-0135, xbox-2276, native
+                               xbox-0135, xbox-2276, native (or none to disable
+                               this). Default: Use the parameter from
+                               --game-engine
   -b --stock-resource-bounds   Only index tags if the tag's index is within
                                stock Custom Edition's resource map bounds.
                                (Custom Edition only)
@@ -323,12 +325,17 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
-  -T --tag-space <MiB>         Override the tag space. This may result in
-                               memes.
+  -T --tag-space <size>        Override the tag space. This may result in a map
+                               that does not work with the stock games. You can
+                               specify the number of bytes, optionally
+                               suffixing with K (for KiB), M (for MiB), or G
+                               (for GiB), or specify in hexadecimal the number
+                               of bytes (e.g. 0x1000).
   -u --uncompressed            Do not compress the cache file. This is default
                                for demo, retail, and custom engines.
   -w --with-index <file>       Use an index file for the tags, ensuring the
                                map's tags are ordered in the same way.
+
 ```
 
 #### Tag patches
