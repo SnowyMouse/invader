@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+Nothing here... yet!
+
+## [0.44.0] - 2021-04-07
 ### Added
 - invader-build: Added `-A` which specifies whether to forge/index against a
   specific target versus automatically doing it.
@@ -1926,5 +1929,6 @@ image as one bitmap
 [0.42.1]: https://github.com/SnowyMouse/invader/compare/0.42.0...0.42.1
 [0.42.2]: https://github.com/SnowyMouse/invader/compare/0.42.1...0.42.2
 [0.43.0]: https://github.com/SnowyMouse/invader/compare/0.42.2...0.43.0
+[0.43.0]: https://github.com/SnowyMouse/invader/compare/0.43.0...0.44.0
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.43.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.44.0...master
