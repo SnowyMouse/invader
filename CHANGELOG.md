@@ -5,7 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Added
 - invader-build: Added `-A` which specifies whether to forge/index against a
-  specific target
+  specific target versus automatically doing it.
 - invader-build: Added `-T` which can specify tag space
 - invader-compare: Added `-j` which can let you specify the number of threads to
   do comparison. Note that doing this is a balancing act: more threads can help,

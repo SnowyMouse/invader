@@ -75,7 +75,7 @@ int main(int argc, const char **argv) {
         bool check_custom_edition_resource_bounds = false;
         std::optional<std::uint64_t> max_tag_space;
         std::optional<HEK::CacheFileEngine> auto_forge_target;
-        
+        bool do_not_auto_forge = false;
         
         std::optional<XboxVariation> variation;
     } build_options;
@@ -92,7 +92,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
-    options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
+    options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST " (or none to disable this). Default: Use the parameter from --game-engine", "<engine>");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("tag-space", 'T', 1, "Override the tag space. This may result in memes.", "<MiB>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
@@ -192,6 +192,11 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(arguments[0], "pc-native") == 0) {
                     engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
                 }
+                else if(std::strcmp(arguments[0], "none") == 0 && opt == 'A') {
+                    build_options.do_not_auto_forge = true;
+                    build_options.auto_forge_target = std::nullopt;
+                    break;
+                }
                 else {
                     eprintf_error("Unknown engine type: %s", arguments[0]);
                     
@@ -222,7 +227,7 @@ int main(int argc, const char **argv) {
                     build_options.engine = engine;
                     build_options.variation = variation;
                 }
-                else if(opt == 'A') {
+                if(opt == 'A' || (!build_options.auto_forge_target.has_value() && build_options.do_not_auto_forge)) {
                     build_options.auto_forge_target = engine;
                 }
                 
