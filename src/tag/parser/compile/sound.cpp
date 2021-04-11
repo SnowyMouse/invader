@@ -64,10 +64,11 @@ namespace Invader::Parser {
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                 if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the target engine without a mod", permutation_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the original target engine", permutation_index);
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                // Xbox ADPCM works on everything
                 break;
             default:
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid sound format set", permutation_index);
