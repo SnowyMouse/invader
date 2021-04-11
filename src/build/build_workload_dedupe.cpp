@@ -5,7 +5,7 @@ namespace Invader {
         std::size_t this_size = this->data.size();
         std::size_t other_size = other.data.size();
         
-        if(this->unsafe_to_dedupe || other.unsafe_to_dedupe || (this->bsp.has_value() && this->bsp != other.bsp) || other_size > this_size) {
+        if(this->unsafe_to_dedupe || other.unsafe_to_dedupe || this->bsp != other.bsp || other_size > this_size) {
             return false;
         }
         
