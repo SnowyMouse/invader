@@ -99,27 +99,30 @@ namespace Invader::File {
     }
 
     std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::filesystem::path &tags) {
-        std::error_code ec;
-        auto relative_path = std::filesystem::relative(file_path, tags, ec);
-        
-        // Nope?
-        if(ec) {
-            return std::nullopt;
-        }
-        
         // Get the top level directory
-        auto relative_test = relative_path;
+        bool did_it = false;
+        std::error_code ec;
+        
+        auto absolute_tags = std::filesystem::absolute(tags);
+        auto absolute_path = std::filesystem::absolute(file_path);
+        auto relative_test = absolute_path;
+        
+        // Okay, we got it!
         while(relative_test.has_parent_path()) {
             relative_test = relative_test.parent_path();
+            if(std::filesystem::absolute(relative_test, ec) == absolute_tags) {
+                did_it = true;
+                break;
+            }
         }
         
         // If we get this, then it isn't inside the actual directory
-        if(relative_test == "..") {
+        if(!did_it) {
             return std::nullopt;
         }
         
-        // Done
-        return relative_path.string();
+        // All right, got it
+        return absolute_path.lexically_relative(absolute_tags);
     }
     
     std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags) {
@@ -242,7 +245,7 @@ namespace Invader::File {
         }
     }
 
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::filesystem::path> &tags, std::pair<std::mutex, std::size_t> *status, std::size_t *errors) {
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::filesystem::path> &tags, bool filter_duplicates, std::pair<std::mutex, std::size_t> *status, std::size_t *errors) {
         std::vector<TagFile> all_tags;
         
         std::size_t new_errors = 0;
@@ -361,8 +364,29 @@ namespace Invader::File {
         std::size_t dir_count = tags.size();
         for(std::size_t i = 0; i < dir_count; i++) {
             auto &d = tags[i];
-            
             maybe_iterate_directories(d, d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&tags[i], &tags[i] + 1));
+        }
+        
+        // Remove duplicates
+        if(filter_duplicates) {
+            for(std::size_t i = 0; i < all_tags.size(); i++) {
+                for(std::size_t j = 0; j < i; j++) {
+                    auto &tagi = all_tags[i];
+                    auto &tagj = all_tags[j];
+                    
+                    if(tagi.tag_fourcc == tagj.tag_fourcc && tagi.tag_path == tagj.tag_path) {
+                        if(tagi.tag_directory > tagj.tag_directory) {
+                            all_tags.erase(all_tags.begin() + i);
+                        }
+                        else {
+                            all_tags.erase(all_tags.begin() + j);
+                        }
+                        
+                        i--;
+                        break;
+                    }
+                }
+            }
         }
         
         // Change error count if errors was specified

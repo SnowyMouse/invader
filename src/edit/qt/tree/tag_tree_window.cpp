@@ -264,7 +264,7 @@ namespace Invader::EditQt {
         // Function for loading it
         std::size_t error_count;
         auto load_it = [&error_count](std::vector<File::TagFile> *to, std::vector<std::filesystem::path> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
-            *to = Invader::File::load_virtual_tag_folder(*all_paths, statuser, &error_count);
+            *to = Invader::File::load_virtual_tag_folder(*all_paths, false, statuser, &error_count);
         };
 
         // Run this in parallel
