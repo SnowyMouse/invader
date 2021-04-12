@@ -3,7 +3,14 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
-Nothing here... yet!
+### Fixed
+- invader: Fixed an issue with symbolic links being followed through, resulting
+  in errors
+- invader: Fixed duplicate tags across multiple tags directories being
+  considered in some programs
+- invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
+  being defaulted to -1. It is no longer allowed to set these to -1, either, as
+  they are known to cause unexpected crashes.
 
 ## [0.44.0] - 2021-04-07
 ### Added

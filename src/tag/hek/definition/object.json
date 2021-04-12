@@ -490,11 +490,13 @@
             },
             {
                 "name": "hud text message index",
-                "type": "Index"
+                "type": "int16",
+                "minimum": 0
             },
             {
                 "name": "forced shader permutation index",
-                "type": "Index"
+                "type": "int16",
+                "minimum": 0
             },
             {
                 "name": "attachments",
