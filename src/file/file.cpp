@@ -122,7 +122,7 @@ namespace Invader::File {
         }
         
         // All right, got it
-        return absolute_path.lexically_relative(absolute_tags);
+        return absolute_path.lexically_relative(absolute_tags).string();
     }
     
     std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags) {
