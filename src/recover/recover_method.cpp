@@ -410,8 +410,17 @@ namespace Invader::Recover {
             return;
         }
         
+        // Check if the parent filename is the same
+        auto path_path = std::filesystem::path(path);
+        auto parent_path_path = path_path.parent_path();
+        if(parent_path_path.filename() != path_path.filename()) {
+            eprintf_error("Cannot recover due to parent filename not matching tag filename");
+            eprintf_error("Parent filename is %s, but the tag's filename is %s", parent_path_path.filename().string().c_str(), path_path.filename().string().c_str());
+            std::exit(EXIT_FAILURE);
+        }
+        
         // Models
-        auto model_directory = data / std::filesystem::path(path).replace_extension() / "models";
+        auto model_directory = data / parent_path_path / "models";
         
         if(std::filesystem::exists(model_directory)) {
             if(!overwrite) {

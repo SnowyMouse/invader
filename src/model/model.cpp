@@ -928,12 +928,10 @@ int main(int argc, const char **argv) {
         std::vector<std::filesystem::path> tags;
         std::filesystem::path data = "data";
         bool filesystem_path = false;
-        bool legacy = false;
     } model_options;
 
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("legacy", 'L', 0, "Use legacy behavior (use parent folder's filename for the tag name for tool.exe backwards compatibility).");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path or data directory.");
     options.emplace_back("type", 'T', 1, "Specify the type of model. Can be: model, gbxmodel", "<type>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
@@ -949,9 +947,6 @@ int main(int argc, const char **argv) {
                 std::exit(EXIT_SUCCESS);
             case 'P':
                 model_options.filesystem_path = true;
-                break;
-            case 'L':
-                model_options.legacy = true;
                 break;
             case 'T':
                 if(std::strcmp(args[0], "model") == 0) {
@@ -993,15 +988,7 @@ int main(int argc, const char **argv) {
         if(model_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
             auto path = std::filesystem::path(*model_tag_maybe);
             if(path.extension() == extension) {
-                // Legacy - bump up a directory
-                if(model_options.legacy) {
-                    model_tag = path.parent_path().string();
-                }
-                
-                // Otherwise use this
-                else {
-                    model_tag = path.replace_extension().string();
-                }
+                model_tag = path.parent_path().string(); // bump up a directory
             }
             else {
                 eprintf_error("Extension must be %s", remaining_arguments[0]);
@@ -1025,10 +1012,8 @@ int main(int argc, const char **argv) {
     
     // Double the filename if legacy
     auto data_dir = model_tag;
-    if(model_options.legacy) {
-        auto tp = std::filesystem::path(model_tag);
-        model_tag = (tp / tp.filename()).string();
-    }
+    auto tp = std::filesystem::path(model_tag);
+    model_tag = (tp / tp.filename()).string();
     
     // Let's do this
     JMSMap jms_files;

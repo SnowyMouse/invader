@@ -654,9 +654,6 @@ Options:
   -d --data <dir>              Use the specified data directory.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -L --legacy                  Use legacy behavior (use parent folder's
-                               filename for the tag name for tool.exe backwards
-                               compatibility).
   -P --fs-path                 Use a filesystem path for the tag path or data
                                directory.
   -t --tags <dir>              Use the specified tags directory. Additional
