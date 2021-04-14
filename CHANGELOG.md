@@ -7,7 +7,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-model: "Legacy" mode is now the only option as, while it's not very
   sane, the workflow of making a map currently fully depends on it. -L was also
   removed.
-- invader-refactor: Changed model recovery to follow the (formerly) legacy
+- invader-recover: Changed model recovery to follow the (formerly) legacy
   directory structure
 
 ### Fixed
