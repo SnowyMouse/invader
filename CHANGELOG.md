@@ -18,6 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
   being defaulted to -1. It is no longer allowed to set these to -1, either, as
   they are known to cause unexpected crashes.
+- invader-recover: Fixed alpha channel not being tagged correctly as an extra
+  sample when making TIFFs
 
 ## [0.44.0] - 2021-04-07
 ### Added

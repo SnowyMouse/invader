@@ -137,9 +137,13 @@ namespace Invader::Recover {
         }
         
         TIFFSetField(tiff, TIFFTAG_IMAGEWIDTH, width); 
-        TIFFSetField(tiff, TIFFTAG_IMAGELENGTH, height); 
+        TIFFSetField(tiff, TIFFTAG_IMAGELENGTH, height);
+        
+        std::uint16_t extrasamples = EXTRASAMPLE_UNASSALPHA;
+        TIFFSetField(tiff, TIFFTAG_EXTRASAMPLES, 1, &extrasamples);
+        
+        TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 4);
         TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8, 8, 8, 8); 
-        TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 4); 
         TIFFSetField(tiff, TIFFTAG_ROWSPERSTRIP, 1);   
         TIFFSetField(tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
         TIFFSetField(tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
