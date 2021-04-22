@@ -18,6 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
   being defaulted to -1. It is no longer allowed to set these to -1, either, as
   they are known to cause unexpected crashes.
+- invader-model: Fixed "unnamed" not being renamed to "__unnamed". This probably
+  did not do anything useful, but tool.exe does this, so we have to as well.
 - invader-recover: Fixed alpha channel not being tagged correctly as an extra
   sample when making TIFFs
 

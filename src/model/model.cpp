@@ -154,6 +154,12 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             std::exit(EXIT_FAILURE);
         }
         
+        // Regions
+        for(auto &r : jms_data_copy.regions) {
+            if(r.name == "unnamed") {
+                r.name = "__unnamed";
+            }
+        }
         
         // Bounds check!
         auto material_count = jms_data_copy.materials.size();
