@@ -3,12 +3,18 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-strip: Added --search. This works like invader-extract's --search in
+  that you can strip tags that follow a specific pattern.
+
 ### Changed
 - invader-model: "Legacy" mode is now the only option as, while it's not very
   sane, the workflow of making a map currently fully depends on it. -L was also
   removed.
 - invader-recover: Changed model recovery to follow the (formerly) legacy
   directory structure
+- invader-strip: Tag.class is no longer taken as an argument. Instead, the new
+  -s option is used.
 
 ### Fixed
 - invader: Fixed an issue with symbolic links being followed through, resulting

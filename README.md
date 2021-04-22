@@ -868,7 +868,7 @@ Options:
 This program strips hidden data from tags and recalculates their CRC32 values.
 
 ```
-Usage: invader-strip [options] <-a | tag.class>
+Usage: invader-strip <options>
 
 Strips extra hidden data from tags.
 
@@ -878,6 +878,8 @@ Options:
   -i --info                    Show license and credits.
   -P --fs-path                 Use a filesystem path for the tag path if
                                specifying a tag.
+  -s --search <expr>           Search for tags (* and ? are wildcards); use
+                               multiple times for multiple queries
   -t --tags <dir>              Use the specified tags directory.
 ```
 
