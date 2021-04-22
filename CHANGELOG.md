@@ -21,6 +21,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-recover: Fixed alpha channel not being tagged correctly as an extra
   sample when making TIFFs
 
+### Removed
+- invader-strip: Removed `-p` (preprocessing) since invader-compare has been
+  able to do this anyway
+
 ## [0.44.0] - 2021-04-07
 ### Added
 - invader-build: Added `-A` which specifies whether to forge/index against a
