@@ -49,22 +49,24 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Strip all tags in the tags directory.");
-    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
 
     static constexpr char DESCRIPTION[] = "Strips extra hidden data from tags.";
-    static constexpr char USAGE[] = "<options>";
+    static constexpr char USAGE[] = "[options] <-a | tag.class>";
 
     struct StripOptions {
-        std::vector<std::filesystem::path> tags;
-        std::vector<std::string> search;
+        std::optional<std::filesystem::path> tags;
         bool use_filesystem_path = false;
         bool all = false;
     } strip_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StripOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, strip_options, [](char opt, const std::vector<const char *> &arguments, auto &strip_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StripOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, strip_options, [](char opt, const std::vector<const char *> &arguments, auto &strip_options) {
         switch(opt) {
             case 't':
-                strip_options.tags.emplace_back(arguments[0]);
+                if(strip_options.tags.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
+                strip_options.tags = arguments[0];
                 break;
             case 'i':
                 Invader::show_version_info();
@@ -75,42 +77,52 @@ int main(int argc, char * const *argv) {
             case 'a':
                 strip_options.all = true;
                 break;
-            case 's':
-                strip_options.search.emplace_back(Invader::File::halo_path_to_preferred_path(arguments[0]));
-                break;
         }
     });
-    if(strip_options.tags.empty()) {
-        strip_options.tags = { "tags" };
+    if(!strip_options.tags.has_value()) {
+        strip_options.tags = "tags";
     }
-    
-    if(strip_options.all) {
-        strip_options.search = { "*" };
+
+    if(remaining_arguments.size() == 0) {
+        if(!strip_options.all) {
+            eprintf_error("Expected --all to be used OR a tag path. Use -h for more information.");
+            return EXIT_FAILURE;
+        }
+
+        std::size_t success = 0;
+        std::size_t total = 0;
+
+        auto recursively_strip_dir = [&total, &success](const std::filesystem::path &dir, auto &recursively_strip_dir) -> void {
+            for(auto i : std::filesystem::directory_iterator(dir)) {
+                if(i.is_directory()) {
+                    recursively_strip_dir(i, recursively_strip_dir);
+                }
+                else if(i.is_regular_file()) {
+                    total++;
+                    success += strip_tag(i.path().string().c_str()) == EXIT_SUCCESS;
+                }
+            }
+        };
+
+        recursively_strip_dir(std::filesystem::path(*strip_options.tags), recursively_strip_dir);
+
+        oprintf("Stripped %zu out of %zu tag%s\n", success, total, total == 1 ? "" : "s");
+
+        return EXIT_SUCCESS;
     }
-    
-    if(strip_options.search.empty()) {
-        eprintf_error("No tags to strip. Use -h for more information.");
+    else if(strip_options.all) {
+        eprintf_error("--all and a tag path cannot be used at the same time. Use -h for more information.");
         return EXIT_FAILURE;
     }
-    
-    std::size_t success = 0;
-    std::size_t total = 0;
-    
-    auto virtual_tags_directory = Invader::File::load_virtual_tag_folder(strip_options.tags);
-    for(auto &i : virtual_tags_directory) {
-        bool matches = false;
-        auto *path = i.tag_path.c_str();
-        for(auto &s : strip_options.search) {
-            if((matches = Invader::File::path_matches(path, s.c_str()))) {
-                break;
-            }
+    else {
+        std::filesystem::path file_path;
+        if(strip_options.use_filesystem_path) {
+            file_path = std::string(remaining_arguments[0]);
         }
-        if(matches) {
-            total++;
-            success += strip_tag(i.full_path) == EXIT_SUCCESS ? 1 : 0;
+        else {
+            file_path = std::filesystem::path(*strip_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
         }
+        std::string file_path_str = file_path.string();
+        return strip_tag(file_path_str.c_str());
     }
-    oprintf("Stripped %zu out of %zu tag%s\n", success, total, total == 1 ? "" : "s");
-
-    return success == total ? EXIT_SUCCESS : EXIT_FAILURE;
 }
