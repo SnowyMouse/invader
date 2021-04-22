@@ -7,19 +7,7 @@ Our Discord server is https://discord.gg/RCX3nvw
 The official source code repository is https://github.com/SnowyMouse/invader
 
 ## License
-Invader is licensed under version 3.0 of the GNU General Public License. Note
-that Invader is NOT licensed under any later or previous version of the GNU
-GPL.
-
-See COPYING for a copy of version 3 of the GNU General Public License.
-
-The ADPCM encoder and MosesofEgypt's Xbox ADPCM modifications are BSD and MIT,
-respectively. Licenses can be found at `src/sound/adpcm_xq/license.txt` and
-`src/sound/reclaimer-license.txt`.
-
-Roboto Mono is from Google Fonts under [Apache License, Version 2.0].
-
-[Apache License, Version 2.0]: http://www.apache.org/licenses/LICENSE-2.0
+See LICENSE.md for information about what is licensed under what.
 
 ## Getting started
 This readme addresses a few topics:
