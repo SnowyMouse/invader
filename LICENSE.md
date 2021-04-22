@@ -5,7 +5,7 @@ works. This file describes the licenses of Invader's source code.
 ## Invader
 Invader, itself, is licensed under version 3 of the GNU General Public License,
 particularly version 3 of the license as published by the Free Software
-Foundation in 29 June 2007. See GPLv3.txt for an EXACT copy of this license.
+Foundation in 29 June 2007. See COPYING for an EXACT copy of this license.
 
 Invader is not licensed under ANY earlier or later revision of the GNU General
 Public License (or ANY other license at all) EXCEPT at the discretion of Snowy.
