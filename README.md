@@ -163,7 +163,7 @@ Options:
                                directories.
   -g --game-engine <id>        Specify the game engine. This option is required
                                if -s is not specified. Valid engines are:
-                               pc-custom, pc-demo, pc-retail, xbox-2276, native
+                               pc-custom, pc-demo, pc-retail, xbox-2276
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -o --output <file>           Output to a specific file. Extension must be
@@ -273,9 +273,8 @@ Options:
   -A --auto-forge <engine>     Ensure the map will be network compatible with
                                the given target engine. Valid engines are:
                                pc-custom, pc-demo, pc-retail, xbox-0009,
-                               xbox-0135, xbox-2276, native (or none to disable
-                               this). Default: Use the parameter from
-                               --game-engine
+                               xbox-0135, xbox-2276 (or none to disable this).
+                               Default: Use the parameter from --game-engine
   -b --stock-resource-bounds   Only index tags if the tag's index is within
                                stock Custom Edition's resource map bounds.
                                (Custom Edition only)
@@ -292,8 +291,7 @@ Options:
                                without a mod.
   -g --game-engine <engine>    Specify the game engine. This option is
                                required. Valid engines are: pc-custom, pc-demo,
-                               pc-retail, xbox-0009, xbox-0135, xbox-2276,
-                               native
+                               pc-retail, xbox-0009, xbox-0135, xbox-2276
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
