@@ -322,7 +322,7 @@
             {
                 "name": "sprite budget",
                 "first": "sprite budget size",
-                "description": "Sprite budget affects the sprite sheets that are generated.\n\n\"sprite budget size\" determines the maximum size of a sprite sheet. This value is ignored if sprite budget count is set to 0.\n\n\"sprite budget count\" determines the maximum number of sprite sheets allowed.\n\nNote that invader-bitmap will try to ensure all sprites in each sprite sequence are in the same sprite sheet, but if the budget is set too low, it may have to split them across multiple sprite sheets. If this happens, you may, in some instances, experience graphical or performance issues.\n\nIf the budget count is set to 0, then invader-bitmap will default to budget of 32767 sprite sheets with no hard limit. This will also guarantee that all sprites in a sequeence share a sprite sheet."
+                "description": "Sprite budget affects the sprite sheets that are generated.\n\n\"sprite budget size\" determines the maximum size of a sprite sheet. This value is ignored if sprite budget count is set to 0.\n\n\"sprite budget count\" determines the maximum number of sprite sheets allowed.\n\nNote that invader-bitmap will try to ensure all sprites in each sprite sequence are in the same sprite sheet, but if the budget is set too low, it may have to split them across multiple sprite sheets. If this happens, you may, in some instances, experience graphical or performance issues.\n\nIf the budget count is set to 0, then invader-bitmap will default to budget of 32767 sprite sheets with no hard limit. This will also guarantee that all sprites in a sequence share a sprite sheet."
             }
         ],
         "fields": [
