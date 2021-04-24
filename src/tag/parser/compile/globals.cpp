@@ -40,11 +40,14 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
             
-            std::size_t required_weapons = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX ? 14 : 16;
-            
-            if(this->weapon_list.size() < required_weapons) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Globals tag does not have at least %zu weapons blocks which is required for the map type", required_weapons);
-                throw InvalidTagDataException();
+            // Check for this stuff
+            auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
+            if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                std::size_t required_weapons = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX ? 14 : 16;
+                if(this->weapon_list.size() < required_weapons) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Globals tag does not have at least %zu weapons blocks which is required for the map type", required_weapons);
+                    throw InvalidTagDataException();
+                }
             }
         }
 

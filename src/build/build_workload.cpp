@@ -1050,7 +1050,7 @@ namespace Invader {
         }
         
         // Use tag collection tags if we aren't on Xbox
-        else {
+        else if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             if(this->demo_ui && !this->disable_error_checking) {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine");
                 throw InvalidTagDataException();
