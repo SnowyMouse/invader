@@ -57,7 +57,7 @@ namespace Invader {
             case CacheFileEngine::CACHE_FILE_NATIVE:
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_NATIVE;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
-                this->build_compress = true;
+                this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
                 this->build_bsps_occupy_tag_space = false; // technically they do, but they are treated as regular tags
                 this->build_version = full_version();
