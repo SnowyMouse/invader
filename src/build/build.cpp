@@ -80,7 +80,7 @@ int main(int argc, const char **argv) {
         std::optional<XboxVariation> variation;
     } build_options;
     
-    #define VALID_ENGINES_LIST "pc-custom, pc-demo, pc-retail, xbox-0009, xbox-0135, xbox-2276, native"
+    #define VALID_ENGINES_LIST "pc-custom, pc-demo, pc-retail, xbox-0009, xbox-0135, xbox-2276"
 
     std::vector<CommandLineOption> options;
     options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
@@ -230,7 +230,7 @@ int main(int argc, const char **argv) {
                     engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
                     variation = XboxVariation::XBOX_TW;
                 }
-                else if(std::strcmp(arguments[0], "pc-native") == 0) {
+                else if(std::strcmp(arguments[0], "native") == 0) {
                     engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
                 }
                 else if(std::strcmp(arguments[0], "none") == 0 && opt == 'A') {
