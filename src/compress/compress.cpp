@@ -73,7 +73,7 @@ int main(int argc, const char **argv) {
     auto input_file_data = input_file.value();
 
     #define TIME_ELAPSED_MS std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
-    
+
     const char *compression_format;
 
     if(compress_options.decompress) {
@@ -94,7 +94,7 @@ int main(int argc, const char **argv) {
             return EXIT_FAILURE;
         }
         auto finished = TIME_ELAPSED_MS;
-        
+
         auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(decompressed_data.data());
         switch(header.engine) {
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
@@ -103,7 +103,7 @@ int main(int argc, const char **argv) {
             default:
                 compression_format = COMPRESSION_FORMAT_ZSTANDARD;
         }
-        
+
         oprintf("Decompressed %s (%s, %zu -> %zu, %zu ms)\n", input, compression_format, input_file_data.size(), decompressed_data.size(), finished);
     }
     else {
@@ -112,7 +112,7 @@ int main(int argc, const char **argv) {
             compressed_data = Compression::compress_map_data(input_file_data.data(), input_file_data.size(), static_cast<int>(compress_options.compression_level));
         }
         catch(Invader::MapNeedsDecompressedException &) {
-            eprintf_error("Failed to decompress %s: map is already compressed", compress_options.output);
+            eprintf_error("Failed to compress %s: map is already compressed", compress_options.output);
             return EXIT_FAILURE;
         }
         catch(std::exception &e) {
@@ -123,7 +123,7 @@ int main(int argc, const char **argv) {
             eprintf_error("Failed to save %s", compress_options.output);
             return EXIT_FAILURE;
         }
-        
+
         // Determine the compression format used
         auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(input_file_data.data());
         switch(header.engine) {
@@ -133,7 +133,7 @@ int main(int argc, const char **argv) {
             default:
                 compression_format = COMPRESSION_FORMAT_ZSTANDARD;
         }
-        
+
         auto finished = TIME_ELAPSED_MS;
         oprintf("Compressed %s (%s, %zu -> %zu, %.02f%%, %zu ms)\n", input, compression_format, input_file_data.size(), compressed_data.size(), compressed_data.size() * 100.0 / input_file_data.size(), finished);
     }
