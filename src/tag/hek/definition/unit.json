@@ -27,7 +27,6 @@
             "unused8",
             "unused9"
         ],
-        "exclude": [{"option": "unused6"},{"option": "unused7"},{"option": "unused8"},{"option": "unused9"}],
         "type": "enum"
     },
     {
