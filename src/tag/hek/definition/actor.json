@@ -93,6 +93,10 @@
             "crouch when in line of fire",
             "avoid friends line of fire"
         ],
+        "exclude": [
+            { "field": "unused" },
+            { "field": "unused 1" }
+        ],
         "width": 32
     },
     {
