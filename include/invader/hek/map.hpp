@@ -13,11 +13,7 @@ namespace Invader::HEK {
         CACHE_FILE_DEMO = 0x6,
         CACHE_FILE_RETAIL = 0x7,
         CACHE_FILE_CUSTOM_EDITION = 0x261,
-        CACHE_FILE_NATIVE = 0x1A86,
-
-        CACHE_FILE_DEMO_COMPRESSED = 0x861A0006,
-        CACHE_FILE_RETAIL_COMPRESSED = 0x861A0007,
-        CACHE_FILE_CUSTOM_EDITION_COMPRESSED = 0x861A0261
+        CACHE_FILE_NATIVE = 0x1A86
     };
 
     const char *engine_name(CacheFileEngine engine) noexcept;
@@ -94,11 +90,6 @@ namespace Invader::HEK {
     struct NativeCacheFileHeader {
         constexpr const static bool IS_DEMO = false;
         
-        enum NativeCacheFileCompressionType : TagEnum {
-            NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED = 0,
-            NATIVE_CACHE_FILE_COMPRESSION_ZSTD = 1
-        };
-        
         LittleEndian<CacheFileLiteral> head_literal;
         LittleEndian<CacheFileEngine> engine;
         LittleEndian<std::uint64_t> decompressed_file_size;
@@ -107,7 +98,7 @@ namespace Invader::HEK {
         TagString name;
         TagString build;
         LittleEndian<CacheFileType> map_type;
-        LittleEndian<NativeCacheFileCompressionType> compression_type;
+        PAD(0x2);
         LittleEndian<std::uint32_t> crc32;
         PAD(0x18);
         TagString timestamp;

@@ -53,37 +53,13 @@ namespace Invader {
         using namespace Invader::HEK;
         
         const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(data);
-        const auto *potential_header_demo = reinterpret_cast<const CacheFileDemoHeader *>(data);
         CompressionType compression_type = CompressionType::COMPRESSION_TYPE_NONE;
         
         auto do_decompress_if_needed = [&compression_type, &data, &data_size](Map *map, auto *header) {
             switch(header->engine) {
-                case CacheFileEngine::CACHE_FILE_NATIVE: {
-                    auto *header_native = reinterpret_cast<const NativeCacheFileHeader *>(header);
-                    switch(header_native->compression_type) {
-                        case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED:
-                            compression_type = CompressionType::COMPRESSION_TYPE_NONE;
-                            break;
-                        case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_ZSTD:
-                            compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
-                            break;
-                    }
-                    
-                    // If we aren't compressed, then the file size in the header *must* match for native maps.
-                    if(!compression_type && header_native->decompressed_file_size.read() != data_size) {
-                        eprintf_error("decompressed file size in the header is wrong");
-                        throw InvalidMapException();
-                    }
-                    
-                    break;
-                }
                 case CacheFileEngine::CACHE_FILE_XBOX:
                     compression_type = CompressionType::COMPRESSION_TYPE_DEFLATE;
                     break;
-                case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
-                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
-                case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                    compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
                 default:
                     break;
             }
@@ -104,17 +80,6 @@ namespace Invader {
         
         if(potential_header->valid()) {
             do_decompress_if_needed(this, potential_header);
-        }
-        else if(potential_header_demo->valid()) {
-            switch(potential_header_demo->engine) {
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                    do_decompress_if_needed(this, potential_header_demo);
-                    break;
-                default:
-                    eprintf_error("engine version and map header mismatch");
-                    throw InvalidMapException();
-            }
         }
         
         return compression_type;
@@ -237,11 +202,6 @@ namespace Invader {
                     break;
                 }
                 case CacheFileEngine::CACHE_FILE_XBOX:
-                    break;
-                case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
-                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
-                case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                    invader_assert_m(false, "this should not happen");
                     break;
                 default:
                     throw UnsupportedMapEngineException();

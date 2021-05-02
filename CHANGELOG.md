@@ -25,6 +25,9 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Removed
 - invader: Removed all invader_ tag classes
+- invader: Removed invader-compress
+- invader: Removed support for compressed Gearbox maps
+- invader-build: Removed `-u` (uncompressed) and `-c` (compressed)
 - invader-strip: Removed `-p` (preprocessing) since invader-compare has been
   able to do this anyway
 

@@ -66,7 +66,6 @@ int main(int argc, const char **argv) {
         std::optional<std::uint32_t> forged_crc;
         bool use_filesystem_path = false;
         std::optional<std::string> rename_scenario;
-        std::optional<bool> compress;
         bool optimize_space = false;
         bool hide_pedantic_warnings = false;
         std::optional<int> compression_level;
@@ -97,9 +96,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("tag-space", 'T', 1, "Override the tag space. This may result in a map that does not work with the stock games. You can specify the number of bytes, optionally suffixing with K (for KiB), M (for MiB), or G (for GiB), or specify in hexadecimal the number of bytes (e.g. 0x1000).", "<size>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
-    options.emplace_back("compress", 'c', 0, "Compress the cache file.");
-    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 0 and 19. If compressing an Xbox map, this will be clamped from 0 to 9. Default: 19", "<level>");
-    options.emplace_back("uncompressed", 'u', 0, "Do not compress the cache file. This is default for demo, retail, and custom engines.");
+    options.emplace_back("level", 'l', 1, "Set the compression level (Xbox maps only). Must be between 0 and 9. Default: 9", "<level>");
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
     options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
@@ -194,8 +191,8 @@ int main(int argc, const char **argv) {
             case 'l':
                 try {
                     build_options.compression_level = std::stoi(arguments[0]);
-                    if(build_options.compression_level < 0 || build_options.compression_level > 19) {
-                        eprintf_error("Compression level must be between 0 and 19");
+                    if(build_options.compression_level < 0 || build_options.compression_level > 9) {
+                        eprintf_error("Compression level must be between 0 and 9");
                         std::exit(EXIT_FAILURE);
                     }
                 }
@@ -276,12 +273,6 @@ int main(int argc, const char **argv) {
             }
             case 'C':
                 build_options.forged_crc = read_str32("Invalid CRC32", arguments[0]);
-                break;
-            case 'c':
-                build_options.compress = true;
-                break;
-            case 'u':
-                build_options.compress = false;
                 break;
             case 'P':
                 build_options.use_filesystem_path = true;
@@ -407,12 +398,6 @@ int main(int argc, const char **argv) {
             parameters.details.build_version = *build_options.build_version;
         }
         
-        // Block this
-        if(build_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX && !build_options.compress.value_or(true)) {
-            eprintf_error("Uncompressed maps are not supported by the target engine.");
-            return EXIT_FAILURE;
-        }
-        
         parameters.details.build_check_custom_edition_resource_map_bounds = build_options.check_custom_edition_resource_bounds;
         
         if(build_options.increased_file_size_limits) {
@@ -420,11 +405,6 @@ int main(int argc, const char **argv) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
         }
-        
-        if(build_options.compress.has_value()) {
-            parameters.details.build_compress = *build_options.compress;
-        }
-        
         if(build_options.compression_level.has_value()) {
             parameters.details.build_compression_level = build_options.compression_level;
         }

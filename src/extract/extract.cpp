@@ -139,14 +139,11 @@ int main(int argc, const char **argv) {
         if(header.valid()) {
             switch(header.engine.read()) {
                 case HEK::CACHE_FILE_DEMO:
-                case HEK::CACHE_FILE_DEMO_COMPRESSED:
                 case HEK::CACHE_FILE_RETAIL:
-                case HEK::CACHE_FILE_RETAIL_COMPRESSED:
                     bitmaps = open_map_possibly("bitmaps.map", nullptr, open_map_possibly);
                     sounds = open_map_possibly("sounds.map", nullptr, open_map_possibly);
                     break;
-                case HEK::CACHE_FILE_CUSTOM_EDITION:
-                case HEK::CACHE_FILE_CUSTOM_EDITION_COMPRESSED: {
+                case HEK::CACHE_FILE_CUSTOM_EDITION: {
                     loc = open_map_possibly("custom_loc.map", "loc.map", open_map_possibly);
                     bitmaps = open_map_possibly("custom_bitmaps.map", "bitmaps.map", open_map_possibly);
                     sounds = open_map_possibly("custom_sounds.map", "sounds.map", open_map_possibly);
