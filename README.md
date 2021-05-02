@@ -74,7 +74,6 @@ you use a package manager to get them, then it should take care of that for you.
 - C99 compiler
 - CMake 3.12 or newer
 - Python 3.7 or newer
-- Zstandard 1.3 or newer
 - LibTIFF 3.6 or newer
 - libvorbis 1.3.6 or newer
 - libsamplerate 0.1.9 or newer

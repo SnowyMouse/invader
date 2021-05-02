@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <zstd.h>
 #include <zlib.h>
 #include <tiffio.h>
 #include <invader/file/file.hpp>
