@@ -168,12 +168,6 @@ namespace Invader::Info {
                 case Map::CompressionType::COMPRESSION_TYPE_DEFLATE:
                     compression_algorithm = "Deflate";
                     break;
-                case Map::CompressionType::COMPRESSION_TYPE_ZSTANDARD:
-                    compression_algorithm = "Zstandard";
-                    break;
-                case Map::CompressionType::COMPRESSION_TYPE_MCC_DEFLATE:
-                    compression_algorithm = "MCC-Deflate";
-                    break;
             }
             
             PRINT_LINE(oprintf, "Compressed:", "Yes (%.02f %%) via %s\n", calculate_compression_ratio(map) * 100.0, compression_algorithm);

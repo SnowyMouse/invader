@@ -29,9 +29,7 @@ namespace Invader {
     
         enum CompressionType {
             COMPRESSION_TYPE_NONE,
-            COMPRESSION_TYPE_ZSTANDARD,
-            COMPRESSION_TYPE_DEFLATE,
-            COMPRESSION_TYPE_MCC_DEFLATE
+            COMPRESSION_TYPE_DEFLATE
         };
 
         /**
