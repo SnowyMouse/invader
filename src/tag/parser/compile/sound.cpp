@@ -57,7 +57,7 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine", permutation_index);
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the original target engine", permutation_index);
                 }
                 break;
