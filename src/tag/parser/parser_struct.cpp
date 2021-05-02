@@ -946,7 +946,19 @@ namespace Invader::Parser {
             switch(i.get_type()) {
                 case ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
                     try {
-                        i.read_enum();
+                        auto *enum_val = i.read_enum();
+                        bool inside = false;
+                        
+                        for(auto &k : i.list_enum()) {
+                            if(std::strcmp(k, enum_val) == 0) {
+                                inside = true;
+                                break;
+                            }
+                        }
+                        
+                        if(!inside) {
+                            throw std::exception(); // throw - it's not valid
+                        }
                     }
                     catch(std::exception &) {
                         if(reset_enums) {
