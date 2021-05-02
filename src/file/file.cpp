@@ -109,7 +109,11 @@ namespace Invader::File {
         
         // Okay, we got it!
         while(relative_test.has_parent_path()) {
-            relative_test = relative_test.parent_path();
+            auto new_relative_test = relative_test.parent_path();
+            if(new_relative_test == relative_test) { // if it's the same (parent path = path), bail because infinite loops are bad
+                break;
+            }
+            relative_test = std::move(new_relative_test);
             if(std::filesystem::absolute(relative_test, ec) == absolute_tags) {
                 did_it = true;
                 break;
