@@ -737,6 +737,7 @@ namespace Invader::Parser {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Non-Gearbox model tags do not work on the target engine", tag_index);
                 throw InvalidTagDataException();
             default: break;

@@ -44,6 +44,14 @@ namespace Invader {
                 this->build_bsps_occupy_tag_space = true;
                 this->build_version = full_version();
                 break;
+            case CacheFileEngine::CACHE_FILE_MCC_CEA:
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_MCC_CEA;
+                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_MCC_CEA_BASE_MEMORY_ADDRESS;
+                this->build_compress = false;
+                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                this->build_bsps_occupy_tag_space = true;
+                this->build_version = full_version();
+                break;
             case CacheFileEngine::CACHE_FILE_XBOX:
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_XBOX;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
@@ -276,6 +284,9 @@ namespace Invader {
                             throw std::exception();
                             break;
                     }
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                    max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_MCC_CEA;
                     break;
                 case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                     max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
@@ -1572,6 +1583,7 @@ namespace Invader {
 
         switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
                 for(auto &t : this->tags) {
                     // Find the tag
                     auto find_tag_index = [](const std::string &path, const std::optional<std::vector<Resource>> &resources, bool every_other) -> std::optional<std::size_t> {

@@ -197,6 +197,12 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_RETAIL:
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     break;
+                case CacheFileEngine::CACHE_FILE_MCC_CEA:
+                    if(reinterpret_cast<const HEK::CacheFileHeader &>(header).compressed_padding != 0) { // if this is non-zero then we can't open it
+                        throw InvalidMapException();
+                    }
+                    
+                    break;
                 case CacheFileEngine::CACHE_FILE_NATIVE: {
                     invader_assert(reinterpret_cast<const NativeCacheFileHeader *>(&header)->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED);
                     break;
@@ -211,6 +217,9 @@ namespace Invader {
             if(header.decompressed_file_size > data_length || header.build.overflows() || header.name.overflows()) {
                 throw InvalidMapException();
             }
+            
+            map.tag_data_length = header.tag_data_size;
+            map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
 
             // Get tag data
             switch(map.engine) {
@@ -223,13 +232,16 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_XBOX:
                     map.base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
                     break;
+                case CacheFileEngine::CACHE_FILE_MCC_CEA: {
+                    auto *tag_data_header = reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(map.tag_data);
+                    map.base_memory_address = tag_data_header->tag_array_address - sizeof(*tag_data_header);
+                    break;
+                }
                 default:
                     map.base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                     break;
             }
 
-            map.tag_data_length = header.tag_data_size;
-            map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
             map.scenario_name = header.name;
             map.build = header.build;
             map.header_decompressed_file_size = header.decompressed_file_size;

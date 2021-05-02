@@ -79,7 +79,7 @@ int main(int argc, const char **argv) {
         std::optional<XboxVariation> variation;
     } build_options;
     
-    #define VALID_ENGINES_LIST "pc-custom, pc-demo, pc-retail, xbox-0009, xbox-0135, xbox-2276"
+    #define VALID_ENGINES_LIST "mcc-cea, pc-custom, pc-demo, pc-retail, xbox-0009, xbox-0135, xbox-2276"
 
     std::vector<CommandLineOption> options;
     options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
@@ -207,7 +207,10 @@ int main(int argc, const char **argv) {
                 std::optional<XboxVariation> variation;
                 
                 variation = std::nullopt;
-                if(std::strcmp(arguments[0], "pc-custom") == 0) {
+                if(std::strcmp(arguments[0], "mcc-cea") == 0) {
+                    engine = HEK::CacheFileEngine::CACHE_FILE_MCC_CEA;
+                }
+                else if(std::strcmp(arguments[0], "pc-custom") == 0) {
                     engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
                 else if(std::strcmp(arguments[0], "pc-retail") == 0) {

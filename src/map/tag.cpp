@@ -49,9 +49,11 @@ namespace Invader {
     
     std::byte *Tag::data(HEK::Pointer64 pointer, std::size_t minimum) {
         using namespace HEK;
+        
+        auto engine = this->get_map().get_engine();
 
         // Limit the pointer to 32-bit
-        if(this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             pointer &= UINT32_MAX;
         }
 
@@ -65,7 +67,7 @@ namespace Invader {
             }
         }
 
-        if(this->indexed || (this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
+        if(this->indexed || (engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
             auto edge = this->base_struct_offset + this->tag_data_size;
             auto offset = this->base_struct_offset + pointer - this->base_struct_pointer;
 
