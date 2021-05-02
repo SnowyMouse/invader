@@ -330,14 +330,14 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Add all sequences
     for(auto &sequence : scanned_color_plate.sequences) {
         auto &bgs = bitmap_tag_data.bitmap_group_sequence.emplace_back();
-
-        bgs.first_bitmap_index = sequence.first_bitmap;
         
         if(bitmap_options.bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
             bgs.bitmap_count = sequence.sprites.size() == 1 ? 1 : 0;
+            bgs.first_bitmap_index = NULL_INDEX;
         }
         else {
             bgs.bitmap_count = sequence.bitmap_count;
+            bgs.first_bitmap_index = sequence.first_bitmap;
         }
 
         // Add the sprites in the sequence
@@ -353,6 +353,16 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bgss.left = static_cast<float>(sprite.left) / bitmap.width;
             bgss.right = static_cast<float>(sprite.right) / bitmap.width;
             bgss.registration_point.x = static_cast<float>(sprite.registration_point_x) / bitmap.width;
+            
+            // Set the first bitmap index here
+            if(bgss.bitmap_index < bgs.first_bitmap_index) {
+                bgs.first_bitmap_index = bgss.bitmap_index;
+            }
+        }
+        
+        // If we never set it, set it to 0
+        if(bgs.first_bitmap_index == NULL_INDEX) {
+            bgs.first_bitmap_index = 0;
         }
     }
 

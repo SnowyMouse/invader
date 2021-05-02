@@ -21,6 +21,7 @@ This is used for recording Invader's changes. This changelog is based on
   considered in some programs
 - invader: Fixed invalid enums not being properly detected if they're valid for
   HEK but marked as invalid for the game
+- invader-bitmap: Fixed first bitmap index not being a valid bitmap
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
   being defaulted to -1. It is no longer allowed to set these to -1, either, as
   they are known to cause unexpected crashes.
