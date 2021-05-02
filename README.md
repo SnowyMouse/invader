@@ -125,7 +125,6 @@ this project is split into different programs.
 - [invader-bludgeon]
 - [invader-build]
 - [invader-compare]
-- [invader-compress]
 - [invader-convert]
 - [invader-dependency]
 - [invader-edit]
@@ -271,9 +270,8 @@ Options:
                                up build time, but stock tags can't be modified.
   -A --auto-forge <engine>     Ensure the map will be network compatible with
                                the given target engine. Valid engines are:
-                               pc-custom, pc-demo, pc-retail, xbox-0009,
-                               xbox-0135, xbox-2276 (or none to disable this).
-                               Default: Use the parameter from --game-engine
+                               mcc-cea, pc-custom, pc-demo, pc-retail,
+                               xbox-0009, xbox-0135, xbox-2276
   -b --stock-resource-bounds   Only index tags if the tag's index is within
                                stock Custom Edition's resource map bounds.
                                (Custom Edition only)
@@ -281,7 +279,6 @@ Options:
                                version of the game (by default it's
                                01.10.12.2276 on Xbox and the Invader version on
                                other engines)
-  -c --compress                Compress the cache file.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
   -E --extend-file-limits      Extend file size limits beyond what is allowed
@@ -289,14 +286,14 @@ Options:
                                size. This may create a map that will not work
                                without a mod.
   -g --game-engine <engine>    Specify the game engine. This option is
-                               required. Valid engines are: pc-custom, pc-demo,
-                               pc-retail, xbox-0009, xbox-0135, xbox-2276
+                               required. Valid engines are: mcc-cea, pc-custom,
+                               pc-demo, pc-retail, xbox-0009, xbox-0135,
+                               xbox-2276
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
-  -l --level <level>           Set the compression level. Must be between 0 and
-                               19. If compressing an Xbox map, this will be
-                               clamped from 0 to 9. Default: 19
+  -l --level <level>           Set the compression level (Xbox maps only). Must
+                               be between 0 and 9. Default: 9
   -m --maps <dir>              Use the specified maps directory.
   -n --no-external-tags        Do not use external tags. This can speed up
                                build time at a cost of a much larger file size.
@@ -316,11 +313,8 @@ Options:
                                suffixing with K (for KiB), M (for MiB), or G
                                (for GiB), or specify in hexadecimal the number
                                of bytes (e.g. 0x1000).
-  -u --uncompressed            Do not compress the cache file. This is default
-                               for demo, retail, and custom engines.
   -w --with-index <file>       Use an index file for the tags, ensuring the
                                map's tags are ordered in the same way.
-
 ```
 
 #### Tag patches
@@ -407,26 +401,6 @@ Options:
   -v --verbose                 Output more information on the differences
                                between tags to standard output. This will not
                                work with -f
-```
-
-### invader-compress
-This program compresses cache files.
-
-```
-Usage: invader-compress [options] <map>
-
-Compress cache files.
-
-Options:
-  -d --decompress              Decompress instead of compress.
-  -h --help                    Show this list of options.
-  -i --info                    Show credits, source info, and other info.
-  -l --level <level>           Set the compression level. Must be between 0 and
-                               19. If compressing an MCC map, this will be
-                               clamped from 0 to 9. Default: 19
-  -M --mcc                     Use MCC-style (de)compression
-  -o --output <file>           Emit the resulting map at the given path. By
-                               default, this is the map path (overwrite).
 ```
 
 ### invader-convert
@@ -1097,7 +1071,6 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-bludgeon]: #invader-bludgeon
 [invader-build]: #invader-build
 [invader-compare]: #invader-compare
-[invader-compress]: #invader-compress
 [invader-convert]: #invader-convert
 [invader-dependency]: #invader-dependency
 [invader-edit]: #invader-edit

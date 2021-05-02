@@ -91,7 +91,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
-    options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST " (or none to disable this). Default: Use the parameter from --game-engine", "<engine>");
+    options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("tag-space", 'T', 1, "Override the tag space. This may result in a map that does not work with the stock games. You can specify the number of bytes, optionally suffixing with K (for KiB), M (for MiB), or G (for GiB), or specify in hexadecimal the number of bytes (e.g. 0x1000).", "<size>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
