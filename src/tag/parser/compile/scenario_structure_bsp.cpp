@@ -96,7 +96,6 @@ namespace Invader::Parser {
                         case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
                         case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
                         case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
                         case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
                         case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA:
                         case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:

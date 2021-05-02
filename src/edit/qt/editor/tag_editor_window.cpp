@@ -116,12 +116,10 @@ namespace Invader::EditQt {
         QPushButton *extra_widget;
         switch(tag_file.tag_fourcc) {
             case TagFourCC::TAG_FOURCC_BITMAP:
-            case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                 extra_widget = new QPushButton("Preview bitmap");
                 break;
             #ifndef DISABLE_AUDIO
             case TagFourCC::TAG_FOURCC_SOUND:
-            case TagFourCC::TAG_FOURCC_INVADER_SOUND:
                 extra_widget = new QPushButton("Preview sound");
                 break;
             #endif
@@ -150,7 +148,6 @@ namespace Invader::EditQt {
             // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
             // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
             // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
-            // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
             // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
             // case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
             //     extra_widget = new QPushButton("Preview shader");
@@ -374,12 +371,10 @@ namespace Invader::EditQt {
         if(!this->subwindow) {
             switch(this->file.tag_fourcc) {
                 case TagFourCC::TAG_FOURCC_BITMAP:
-                case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
                     this->subwindow = new TagEditorBitmapSubwindow(this);
                     break;
                 #ifndef DISABLE_AUDIO
                 case TagFourCC::TAG_FOURCC_SOUND:
-                case TagFourCC::TAG_FOURCC_INVADER_SOUND:
                     this->subwindow = new TagEditorSoundSubwindow(this);
                     break;
                 #endif

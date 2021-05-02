@@ -11,8 +11,6 @@
 #include <invader/crc/hek/crc.hpp>
 #include <invader/compress/compression.hpp>
 #include <invader/tag/index/index.hpp>
-#include <invader/tag/parser/compile/bitmap.hpp>
-#include <invader/tag/parser/compile/sound.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
 #include <invader/resource/list/resource_list.hpp>
 #include "../crc/crc32.h"
@@ -719,8 +717,6 @@ namespace Invader {
             COMPILE_TAG_CLASS(HUDMessageText, TAG_FOURCC_HUD_MESSAGE_TEXT)
             COMPILE_TAG_CLASS(HUDNumber, TAG_FOURCC_HUD_NUMBER)
             COMPILE_TAG_CLASS(HUDGlobals, TAG_FOURCC_HUD_GLOBALS)
-            COMPILE_TAG_CLASS(InvaderBitmap, TAG_FOURCC_INVADER_BITMAP)
-            COMPILE_TAG_CLASS(InvaderSound, TAG_FOURCC_INVADER_SOUND)
             COMPILE_TAG_CLASS(ItemCollection, TAG_FOURCC_ITEM_COLLECTION)
             COMPILE_TAG_CLASS(DamageEffect, TAG_FOURCC_DAMAGE_EFFECT)
             COMPILE_TAG_CLASS(LensFlare, TAG_FOURCC_LENS_FLARE)
@@ -824,12 +820,6 @@ namespace Invader {
             case TagFourCC::TAG_FOURCC_PREFERENCES_NETWORK_GAME:
             case TagFourCC::TAG_FOURCC_SPHEROID:
             case TagFourCC::TAG_FOURCC_CONTINUOUS_DAMAGE_EFFECT:
-            case TagFourCC::TAG_FOURCC_INVADER_FONT:
-            case TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
-            case TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
-            case TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
-            case TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
-            case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_fourcc_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
                 

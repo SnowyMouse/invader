@@ -13,6 +13,12 @@ namespace Invader {
     using BitmapType = HEK::BitmapType;
     using BitmapSpriteUsage = HEK::BitmapSpriteUsage;
     using BitmapUsage = HEK::BitmapUsage;
+    
+    enum BitmapMipmapScaleType {
+        BITMAP_MIPMAP_SCALE_TYPE_LINEAR,
+        BITMAP_MIPMAP_SCALE_TYPE_NEAREST_ALPHA,
+        BITMAP_MIPMAP_SCALE_TYPE_NEAREST
+    };
 
     struct GeneratedBitmapDataBitmapMipmap {
         std::uint32_t first_pixel;
@@ -93,7 +99,7 @@ namespace Invader {
             float bump_height,
             std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters,
             std::int16_t mipmaps,
-            HEK::InvaderBitmapMipmapScaling mipmap_type,
+            BitmapMipmapScaleType mipmap_type,
             std::optional<float> mipmap_fade_factor,
             std::optional<float> sharpen,
             std::optional<float> blur
@@ -183,7 +189,7 @@ namespace Invader {
          * @param sharpen            sharpen filter
          * @param usage              bitmap usage value
          */
-        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage);
+        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage);
 
         /**
          * Consolidate the stacked bitmap data (cubemaps and 3d textures)

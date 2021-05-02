@@ -109,15 +109,12 @@
             "v16u16",
             "unused",
             "make it actually work",
-            "external",
-            "stubbed",
-            "zstandard compressed (extended)"
+            "external"
         ],
         "cache_only": [
             "unused",
             "make it actually work",
-            "external",
-            "stubbed"
+            "external"
         ],
         "width": 16
     },

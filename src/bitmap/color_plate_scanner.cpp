@@ -39,7 +39,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
         // We don't support this yet
         if(usage == BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
             eprintf_error("Vector maps are not supported at this time");
@@ -570,7 +570,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
+    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
         
@@ -794,14 +794,14 @@ namespace Invader {
                         
                         if(pixel_count > 0) {
                             // Interpolate color?
-                            if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR || mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA) {
+                            if(mipmap_type == BitmapMipmapScaleType::BITMAP_MIPMAP_SCALE_TYPE_LINEAR || mipmap_type == BitmapMipmapScaleType::BITMAP_MIPMAP_SCALE_TYPE_NEAREST_ALPHA) {
                                 INTERPOLATE_CHANNEL(red);
                                 INTERPOLATE_CHANNEL(green);
                                 INTERPOLATE_CHANNEL(blue);
                             }
 
                             // Interpolate alpha?
-                            if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR && usage != BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
+                            if(mipmap_type == BitmapMipmapScaleType::BITMAP_MIPMAP_SCALE_TYPE_LINEAR && usage != BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
                                 INTERPOLATE_CHANNEL(alpha);
                             }
                         }

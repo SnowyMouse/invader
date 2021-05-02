@@ -388,7 +388,6 @@ namespace Invader {
             EXTRACT_TAG_CLASS(Weapon, TAG_FOURCC_WEAPON)
             EXTRACT_TAG_CLASS(Wind, TAG_FOURCC_WIND)
             EXTRACT_TAG_CLASS(WeaponHUDInterface, TAG_FOURCC_WEAPON_HUD_INTERFACE)
-            EXTRACT_TAG_CLASS(InvaderBitmap, TAG_FOURCC_INVADER_BITMAP)
 
             case TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP: {
                 if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
@@ -405,13 +404,6 @@ namespace Invader {
 
             case TagFourCC::TAG_FOURCC_NONE:
             case TagFourCC::TAG_FOURCC_NULL:
-            case TagFourCC::TAG_FOURCC_INVADER_SOUND:
-            case TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
-            case TagFourCC::TAG_FOURCC_INVADER_FONT:
-            case TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
-            case TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
-            case TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
-            case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
             case TagFourCC::TAG_FOURCC_SPHEROID:
                 break;
         }

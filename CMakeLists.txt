@@ -94,6 +94,7 @@ include(src/convert/convert.cmake)
 include(src/edit/edit.cmake)
 include(src/model/model.cmake)
 include(src/recover/recover.cmake)
+include(src/lightmap/lightmap.cmake)
 
 # Qt stuff
 include(src/edit/qt/qt.cmake)

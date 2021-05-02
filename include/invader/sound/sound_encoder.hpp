@@ -42,7 +42,7 @@ namespace Invader::SoundEncoder {
     std::vector<std::byte> convert_to_pcm_wav(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate);
 
     /**
-     * Encoide the PCM data to FLAC. This is lossless.
+     * Encode the PCM data to FLAC. This is lossless.
      * @param pcm               PCM data
      * @param bits_per_sample   bits per sample of the PCM data
      * @param channel_count     channel count

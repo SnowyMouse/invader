@@ -74,8 +74,6 @@ namespace Invader::HEK {
                 return 2;
             case TAG_FOURCC_WEAPON_HUD_INTERFACE:
                 return 2;
-            case TAG_FOURCC_INVADER_SOUND:
-                return 3;
             default:
                 return 1;
         }

@@ -24,6 +24,7 @@ This is used for recording Invader's changes. This changelog is based on
   sample when making TIFFs
 
 ### Removed
+- invader: Removed all invader_ tag classes
 - invader-strip: Removed `-p` (preprocessing) since invader-compare has been
   able to do this anyway
 

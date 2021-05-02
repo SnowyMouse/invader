@@ -55,19 +55,12 @@ namespace Invader::Recover {
 
     static void recover_bitmap(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *bitmap = dynamic_cast<const Parser::Bitmap *>(&tag);
-        auto *invader_bitmap = dynamic_cast<const Parser::InvaderBitmap *>(&tag);
-
         auto file_path = data / (path + ".tif");
 
         const std::vector<std::byte> *input;
         std::size_t width, height;
         if(bitmap) {
             input = &bitmap->compressed_color_plate_data;
-            width = bitmap->color_plate_width;
-            height = bitmap->color_plate_height;
-        }
-        else if(invader_bitmap) {
-            input = &invader_bitmap->compressed_color_plate_data;
             width = bitmap->color_plate_width;
             height = bitmap->color_plate_height;
         }
@@ -99,20 +92,8 @@ namespace Invader::Recover {
         }
         std::vector<HEK::LittleEndian<std::uint32_t>> pixels(image_size);
 
-        auto fail = []() {
-            eprintf_error("Color plate data could not be decompressed");
-            std::exit(EXIT_FAILURE);
-        };
-
-        // Zstandard if extended
-        if(invader_bitmap) {
-            if(ZSTD_decompress(pixels.data(), image_size, compressed_data, compressed_size) != image_size) {
-                fail();
-            }
-        }
-
-        // DEFLATE if not extended
-        else {
+        // Inflate if regular
+        if(bitmap) {
             z_stream inflate_stream;
             inflate_stream.zalloc = Z_NULL;
             inflate_stream.zfree = Z_NULL;
@@ -123,9 +104,10 @@ namespace Invader::Recover {
             inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(compressed_data));
 
             // Do it
-            inflateInit(&inflate_stream);
-            inflate(&inflate_stream, Z_FINISH);
-            inflateEnd(&inflate_stream);
+            if(inflateInit(&inflate_stream) != Z_OK || inflate(&inflate_stream, Z_FINISH) != Z_OK || inflateEnd(&inflate_stream) != Z_OK) {
+                eprintf_error("Color plate data could not be decompressed");
+                std::exit(EXIT_FAILURE);
+            }
         }
 
         // Let's begin

@@ -40,7 +40,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     // Parse the sound tag
     T sound_tag = {};
-    auto *invader_sound = sizeof(Parser::InvaderSound) == sizeof(T) ? reinterpret_cast<Parser::InvaderSound *>(&sound_tag) : nullptr;
 
     if(std::filesystem::exists(tag_path)) {
         if(std::filesystem::is_directory(tag_path)) {
@@ -71,97 +70,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             std::exit(EXIT_FAILURE);
         }
         sound_tag.sound_class = *sound_options.sound_class;
-    }
-
-    if(invader_sound) {
-        // Set sample rate
-        if(sound_options.sample_rate.has_value()) {
-            switch(*sound_options.sample_rate) {
-                case 22050:
-                    invader_sound->encoding_sample_rate = HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_22050_HZ;
-                    break;
-                case 44100:
-                    invader_sound->encoding_sample_rate = HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_44100_HZ;
-                    break;
-                default:
-                    eprintf_error("Invalid sample rate given. What?");
-                    std::terminate();
-            }
-        }
-        else switch(invader_sound->encoding_sample_rate) {
-            case HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_AUTOMATIC:
-                break;
-            case HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_22050_HZ:
-                sound_options.sample_rate = 22050;
-                break;
-            case HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_44100_HZ:
-                sound_options.sample_rate = 44100;
-                break;
-            default:
-                eprintf_error("Invalid sample rate read. What?");
-                std::terminate();
-                break;
-        }
-
-        // Set channel count
-        if(sound_options.channel_count.has_value()) {
-            switch(*sound_options.channel_count) {
-                case 1:
-                    invader_sound->encoding_channel_count = HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_MONO;
-                    break;
-                case 2:
-                    invader_sound->encoding_channel_count = HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_STEREO;
-                    break;
-                default:
-                    eprintf_error("Invalid channel count given. What?");
-                    std::terminate();
-            }
-        }
-        else switch(invader_sound->encoding_channel_count) {
-            case HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_AUTOMATIC:
-                break;
-            case HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_MONO:
-                sound_options.channel_count = 1;
-                break;
-            case HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_STEREO:
-                sound_options.channel_count = 2;
-                break;
-            default:
-                eprintf_error("Invalid channel count read. What?");
-                std::terminate();
-                break;
-        }
-
-        // Set format
-        if(sound_options.format.has_value()) {
-            invader_sound->encoding_format = *sound_options.format;
-        }
-        else {
-            sound_options.format = invader_sound->encoding_format;
-        }
-
-        // If we have compression level set, then the sound option shouldn't have this set
-        if(sound_options.compression_level.has_value()) {
-            invader_sound->invader_sound_flags &= ~InvaderSoundFlagsFlag::INVADER_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
-        }
-        // If we don't have compression level set but we have a bitrate, set the flag
-        else if(sound_options.bitrate.has_value()) {
-            invader_sound->invader_sound_flags |= InvaderSoundFlagsFlag::INVADER_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
-            invader_sound->compression_bitrate = *sound_options.bitrate;
-        }
-        // If we have neither but we have the bitrate flag, set the bitrate
-        else if(invader_sound->invader_sound_flags & InvaderSoundFlagsFlag::INVADER_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE) {
-            sound_options.bitrate = invader_sound->compression_bitrate;
-        }
-
-        // If we have a compression level set, set our compression level to the thing
-        if(sound_options.compression_level.has_value()) {
-            invader_sound->compression_level = *sound_options.compression_level;
-        }
-        // Otherwise, default to it
-        else {
-            sound_options.compression_level = invader_sound->compression_level;
-        }
     }
 
     // Hold onto this
@@ -427,9 +335,9 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
             output_name = "Ogg Vorbis";
             break;
-        case SoundFormat::SOUND_FORMAT_FLAC:
-            output_name = "Free Lossless Audio Codec";
-            break;
+        //case SoundFormat::SOUND_FORMAT_FLAC:
+        //    output_name = "Free Lossless Audio Codec";
+        //    break;
         case SoundFormat::SOUND_FORMAT_ENUM_COUNT:
             eprintf_error("Invalid format output name. What?");
             std::terminate();
@@ -602,21 +510,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         break;
                     }
 
-                    // Encode to FLAC
-                    case SoundFormat::SOUND_FORMAT_FLAC: {
-                        // Clamp to 0.0 - 0.8
-                        if(sound_options->compression_level > 0.8F) {
-                            sound_options->compression_level = 0.8F;
-                        }
-                        else if(sound_options->compression_level < 0.0F) {
-                            sound_options->compression_level = 0.0F;
-                        }
-                        // Convert to integer, rounding to the nearest level
-                        int flac_level = static_cast<int>(*sound_options->compression_level * 10.0F + 0.5F);
-                        samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation->bits_per_sample, permutation->channel_count, permutation->sample_rate, flac_level);
-                        break;
-                    }
-
                     // Encode to Xbox ADPCMeme
                     case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
                         samples = Invader::SoundEncoder::encode_to_xbox_adpcm(pcm, permutation->bits_per_sample, permutation->channel_count);
@@ -735,9 +628,9 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
     }
 
-    auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagFourCC::TAG_FOURCC_SOUND : TagFourCC::TAG_FOURCC_INVADER_SOUND, true);
+    auto sound_tag_data = sound_tag.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SOUND, true);
 
-    oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, invader_sound == nullptr ? "" : " [--extended]");
+    oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0);
 
     return sound_tag_data;
 }
@@ -890,7 +783,7 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
-    // Make sure format was set (invader_sound tags won't need this)
+    // Make sure format was set
     if(!sound_options.format.has_value()) {
         eprintf_error("No sound format set. Use -h for more information.");
         return EXIT_FAILURE;

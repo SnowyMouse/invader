@@ -91,16 +91,7 @@ namespace Invader::HEK {
         TAG_FOURCC_VEHICLE = 0x76656869,
         TAG_FOURCC_WEAPON = 0x77656170,
         TAG_FOURCC_WIND = 0x77696E64,
-        TAG_FOURCC_WEAPON_HUD_INTERFACE = 0x77706869,
-
-        TAG_FOURCC_INVADER_BITMAP = 0x65626974,
-        TAG_FOURCC_INVADER_SCENARIO = 0x53636E72,
-        TAG_FOURCC_INVADER_SOUND = 0x65736E64,
-        TAG_FOURCC_INVADER_FONT = 0x6E666E74,
-        TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION = 0x6E757764,
-        TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE = 0x6E756869,
-        TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE = 0x6E776869,
-        TAG_FOURCC_SHADER_TRANSPARENT_GLSL = 0x7374676C
+        TAG_FOURCC_WEAPON_HUD_INTERFACE = 0x77706869
     };
 
     /**
@@ -315,22 +306,6 @@ namespace Invader::HEK {
              return "wind";
          case TagFourCC::TAG_FOURCC_WEAPON_HUD_INTERFACE:
              return "weapon_hud_interface";
-         case TagFourCC::TAG_FOURCC_INVADER_BITMAP:
-             return "invader_bitmap";
-         case TagFourCC::TAG_FOURCC_INVADER_SCENARIO:
-             return "invader_scenario";
-         case TagFourCC::TAG_FOURCC_INVADER_SOUND:
-             return "invader_sound";
-         case TagFourCC::TAG_FOURCC_INVADER_FONT:
-             return "invader_font";
-         case TagFourCC::TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION:
-             return "invader_ui_widget_definition";
-         case TagFourCC::TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE:
-             return "invader_unit_hud_interface";
-         case TagFourCC::TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE:
-             return "invader_weapon_hud_interface";
-         case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLSL:
-             return "shader_transparent_glsl";
          case TagFourCC::TAG_FOURCC_NULL:
              break;
          }

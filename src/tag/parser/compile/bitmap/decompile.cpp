@@ -6,8 +6,8 @@
 #include <invader/bitmap/pixel.hpp>
 
 namespace Invader::Parser {
-    template <typename T> static void do_post_cache_parse(T *bitmap, const Invader::Tag &tag) {
-        bitmap->postprocess_hek_data();
+    void Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        this->postprocess_hek_data();
 
         auto &map = tag.get_map();
         auto engine = map.get_engine();
@@ -15,8 +15,8 @@ namespace Invader::Parser {
         auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
         
         // Un-zero out these if we're sprites (again, this is completely *insane* but compiled maps have this zeroed out for whatever reason which can completely FUCK things up if this were to not be "sprites" all of a sudden)
-        if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
-            for(auto &sequence : bitmap->bitmap_group_sequence) {
+        if(this->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+            for(auto &sequence : this->bitmap_group_sequence) {
                 // Default
                 sequence.first_bitmap_index = NULL_INDEX;
                 sequence.bitmap_count = sequence.sprites.size() == 1 ? 1 : 0; // set to 1 if we have one sprite; 0 otherwise
@@ -31,12 +31,12 @@ namespace Invader::Parser {
         }
 
         // Do we have bitmap data?
-        auto bd_count = bitmap->bitmap_data.size();
+        auto bd_count = this->bitmap_data.size();
         if(bd_count) {
             auto *bitmap_data_le_array = tag.resolve_reflexive(base_struct.bitmap_data);
             
             for(std::size_t bd = 0; bd < bd_count; bd++) {
-                auto &bitmap_data = bitmap->bitmap_data[bd];
+                auto &bitmap_data = this->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
                 std::size_t size = bitmap_data.pixel_data_size;
                 
@@ -101,6 +101,8 @@ namespace Invader::Parser {
                     
                     // Set our buffer up
                     xbox_to_pc_buffer.resize(HEK::size_of_bitmap(bitmap_data));
+                    
+                    auto *bitmap = this;
                     
                     auto copy_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data, &bitmap](std::optional<std::size_t> input_offset = std::nullopt, std::optional<std::size_t> output_cubemap_face = std::nullopt) -> std::size_t {
                         std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
@@ -304,19 +306,11 @@ namespace Invader::Parser {
                 }
 
                 // Calculate our offset
-                bitmap_data.pixel_data_offset = static_cast<std::size_t>(bitmap->processed_pixel_data.size());
+                bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
                 
                 // Insert this
-                bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + size);
+                this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + size);
             }
         }
-    }
-
-    void Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        do_post_cache_parse(this, tag);
-    }
-
-    void InvaderBitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        do_post_cache_parse(this, tag);
     }
 }

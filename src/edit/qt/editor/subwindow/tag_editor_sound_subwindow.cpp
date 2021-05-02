@@ -62,9 +62,6 @@ namespace Invader::EditQt {
             case TagFourCC::TAG_FOURCC_SOUND:
                 populate_pitch_range_box(dynamic_cast<Parser::Sound *>(parser_data));
                 break;
-            case TagFourCC::TAG_FOURCC_INVADER_SOUND:
-                populate_pitch_range_box(dynamic_cast<Parser::InvaderSound *>(parser_data));
-                break;
             default:
                 std::terminate();
         }
@@ -256,9 +253,6 @@ namespace Invader::EditQt {
                 case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                     add_to_pcm(SoundReader::sound_from_16_bit_pcm_big_endian(sound_data, sound_size, this->channel_count, this->sample_rate));
                     break;
-                case HEK::SoundFormat::SOUND_FORMAT_FLAC:
-                    add_to_pcm(SoundReader::sound_from_flac(sound_data, sound_size));
-                    break;
                 case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                     add_to_pcm(SoundReader::sound_from_ogg(sound_data, sound_size));
                     break;
@@ -368,8 +362,6 @@ namespace Invader::EditQt {
         switch(this->get_parent_window()->get_file().tag_fourcc) {
             case TagFourCC::TAG_FOURCC_SOUND:
                 return get_it(dynamic_cast<Parser::Sound *>(parser_data));
-            case TagFourCC::TAG_FOURCC_INVADER_SOUND:
-                return get_it(dynamic_cast<Parser::InvaderSound *>(parser_data));
             default:
                 std::terminate();
         }

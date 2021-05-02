@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
-#include <invader/tag/parser/compile/sound.hpp>
 
 namespace Invader::Parser {
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
@@ -49,11 +48,6 @@ namespace Invader::Parser {
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
         
         switch(this->format) {
-            case HEK::SoundFormat::SOUND_FORMAT_FLAC:
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses FLAC which does not exist on the target engine", permutation_index);
-                }
-                break;
             case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                 if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
@@ -237,16 +231,6 @@ namespace Invader::Parser {
         }
     }
 
-    template <typename T> static void sound_post_cache_parse(const Invader::Tag &tag, T *sound) {
-        sound->maximum_bend_per_second = std::pow(sound->maximum_bend_per_second, TICK_RATE);
-        if(tag.is_indexed()) {
-            auto &tag_data = *(reinterpret_cast<const typename T::struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(static_cast<HEK::Pointer>(0), 0)) - 1);
-            sound->format = tag_data.format;
-            sound->channel_count = tag_data.channel_count;
-            sound->sample_rate = tag_data.sample_rate;
-        }
-    }
-
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         sound_pre_compile(this, workload, tag_index);
         
@@ -282,15 +266,13 @@ namespace Invader::Parser {
     }
 
     void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        sound_post_cache_parse(tag, this);
-    }
-
-    void InvaderSound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        sound_pre_compile(this, workload, tag_index);
-    }
-
-    void InvaderSound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        sound_post_cache_parse(tag, this);
+        this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, TICK_RATE);
+        if(tag.is_indexed()) {
+            auto &tag_data = *(reinterpret_cast<const struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(static_cast<HEK::Pointer>(0), 0)) - 1);
+            this->format = tag_data.format;
+            this->channel_count = tag_data.channel_count;
+            this->sample_rate = tag_data.sample_rate;
+        }
     }
 
     void SoundPermutation::post_cache_deformat() {
@@ -397,37 +379,5 @@ namespace Invader::Parser {
         for(auto &i : this->detail_sounds) {
             maximum_distance = std::max(get_max_distance_of_sound_tag(i.sound), maximum_distance.read());
         }
-    }
-        
-
-    Sound downgrade_invader_sound(const InvaderSound &sound) {
-        Sound s = {};
-        s.flags = sound.flags;
-        s.sound_class = sound.sound_class;
-        s.sample_rate = sound.sample_rate;
-        s.minimum_distance = sound.minimum_distance;
-        s.maximum_distance = sound.maximum_distance;
-        s.skip_fraction = sound.skip_fraction;
-        s.random_pitch_bounds = sound.random_pitch_bounds;
-        s.inner_cone_angle = sound.inner_cone_angle;
-        s.outer_cone_angle = sound.outer_cone_angle;
-        s.outer_cone_gain = sound.outer_cone_gain;
-        s.random_gain_modifier = sound.random_gain_modifier;
-        s.maximum_bend_per_second = sound.maximum_bend_per_second;
-        s.zero_skip_fraction_modifier = sound.zero_skip_fraction_modifier;
-        s.zero_gain_modifier = sound.zero_gain_modifier;
-        s.zero_pitch_modifier = sound.zero_pitch_modifier;
-        s.one_skip_fraction_modifier = sound.one_skip_fraction_modifier;
-        s.one_gain_modifier = sound.one_gain_modifier;
-        s.one_pitch_modifier = sound.one_pitch_modifier;
-        s.channel_count = sound.channel_count;
-        s.format = sound.format;
-        s.promotion_sound = sound.promotion_sound;
-        s.promotion_count = sound.promotion_count;
-        s.longest_permutation_length = sound.longest_permutation_length;
-        s.unknown_ffffffff_0 = sound.unknown_ffffffff_0;
-        s.unknown_ffffffff_1 = sound.unknown_ffffffff_1;
-        s.pitch_ranges = sound.pitch_ranges;
-        return s;
     }
 }

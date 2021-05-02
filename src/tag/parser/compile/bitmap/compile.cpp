@@ -336,39 +336,6 @@ namespace Invader::Parser {
         do_pre_compile(this, workload, tag_index);
     }
 
-    void InvaderBitmap::postprocess_hek_data() {
-        do_postprocess_hek_data(this);
-    }
-
-    void InvaderBitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        do_pre_compile(this, workload, tag_index);
-    }
-
-    Bitmap downgrade_invader_bitmap(const InvaderBitmap &tag) {
-        Bitmap new_tag = {};
-        new_tag.type = tag.type;
-        new_tag.encoding_format = tag.encoding_format;
-        new_tag.usage = tag.usage;
-        new_tag.flags = tag.flags;
-        new_tag.detail_fade_factor = tag.detail_fade_factor;
-        new_tag.sharpen_amount = tag.sharpen_amount;
-        new_tag.bump_height = tag.bump_height;
-        new_tag.sprite_budget_size = tag.sprite_budget_size;
-        new_tag.sprite_budget_count = tag.sprite_budget_count;
-        new_tag.color_plate_width = tag.color_plate_width;
-        new_tag.color_plate_height = tag.color_plate_height;
-        new_tag.compressed_color_plate_data = tag.compressed_color_plate_data;
-        new_tag.processed_pixel_data = tag.processed_pixel_data;
-        new_tag.blur_filter_size = tag.blur_filter_size;
-        new_tag.alpha_bias = tag.alpha_bias;
-        new_tag.mipmap_count = tag.mipmap_count;
-        new_tag.sprite_usage = tag.sprite_usage;
-        new_tag.sprite_spacing = tag.sprite_spacing;
-        new_tag.bitmap_group_sequence = tag.bitmap_group_sequence;
-        new_tag.bitmap_data = tag.bitmap_data;
-        return new_tag;
-    }
-
     template <typename T> static bool fix_power_of_two_for_tag(T &tag, bool fix) {
         bool fixed = false;
         for(auto &d : tag.bitmap_data) {

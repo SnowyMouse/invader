@@ -102,14 +102,6 @@ namespace Invader::HEK {
         MATCH_TAG_CLASS("wind", TAG_FOURCC_WIND)
         MATCH_TAG_CLASS("weapon_hud_interface", TAG_FOURCC_WEAPON_HUD_INTERFACE)
 
-        MATCH_TAG_CLASS("invader_bitmap", TAG_FOURCC_INVADER_BITMAP)
-        MATCH_TAG_CLASS("invader_sound", TAG_FOURCC_INVADER_SOUND)
-        MATCH_TAG_CLASS("invader_font", TAG_FOURCC_INVADER_FONT)
-        MATCH_TAG_CLASS("invader_ui_widget_definition", TAG_FOURCC_INVADER_UI_WIDGET_DEFINITION)
-        MATCH_TAG_CLASS("invader_unit_hud_interface", TAG_FOURCC_INVADER_UNIT_HUD_INTERFACE)
-        MATCH_TAG_CLASS("invader_weapon_hud_interface", TAG_FOURCC_INVADER_WEAPON_HUD_INTERFACE)
-        MATCH_TAG_CLASS("shader_transparent_glsl", TAG_FOURCC_SHADER_TRANSPARENT_GLSL)
-
         return TAG_FOURCC_NULL;
     }
 

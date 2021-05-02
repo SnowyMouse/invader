@@ -52,8 +52,6 @@ namespace Invader::File {
                                 DO_TAG_CLASS(HUDMessageText, TAG_FOURCC_HUD_MESSAGE_TEXT) \
                                 DO_TAG_CLASS(HUDNumber, TAG_FOURCC_HUD_NUMBER) \
                                 DO_TAG_CLASS(InputDeviceDefaults, TAG_FOURCC_INPUT_DEVICE_DEFAULTS) \
-                                DO_TAG_CLASS(InvaderBitmap, TAG_FOURCC_INVADER_BITMAP) \
-                                DO_TAG_CLASS(InvaderSound, TAG_FOURCC_INVADER_SOUND) \
                                 DO_TAG_CLASS(Item, TAG_FOURCC_ITEM) \
                                 DO_TAG_CLASS(ItemCollection, TAG_FOURCC_ITEM_COLLECTION) \
                                 DO_TAG_CLASS(LensFlare, TAG_FOURCC_LENS_FLARE) \
