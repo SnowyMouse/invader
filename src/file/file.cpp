@@ -367,8 +367,8 @@ namespace Invader::File {
         // Go through each directory
         std::size_t dir_count = tags.size();
         for(std::size_t i = 0; i < dir_count; i++) {
-            auto &d = tags[i];
-            maybe_iterate_directories(d, d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&tags[i], &tags[i] + 1));
+            auto d = std::filesystem::path(remove_trailing_slashes(tags[i].string()));
+            maybe_iterate_directories(d, d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&d, &d + 1));
         }
         
         // Remove duplicates

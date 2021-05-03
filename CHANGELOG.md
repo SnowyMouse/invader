@@ -21,6 +21,7 @@ This is used for recording Invader's changes. This changelog is based on
   considered in some programs
 - invader: Fixed invalid enums not being properly detected if they're valid for
   HEK but marked as invalid for the game
+- invader: Fixed iterating through directories with trailing slashes
 - invader-bitmap: Fixed first bitmap index not being a valid bitmap
 - invader-bitmap: Fixed an infinite loop with `-P`
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
