@@ -614,7 +614,23 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                                 char o[1024] = {};
                                 auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 meme_data.insert(meme_data.end(), o, o + len);
+                                
+                                // Raw data pointers
+                                for(auto &ad : t.asset_data) {
+                                    std::snprintf(o, sizeof(o), "AD:%zu!", ad);
+                                    meme_data.insert(meme_data.end(), o, o + len);
+                                }
                             }
+                            
+                            // And of course we need the raw data and model data
+                            for(auto &rd : compiled.raw_data) {
+                                meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*rd.begin()), reinterpret_cast<std::uint8_t *>(&*rd.end()));
+                            }
+                            
+                            // Lastly, model data
+                            meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*compiled.uncompressed_model_vertices.begin()), reinterpret_cast<std::uint8_t *>(&*compiled.uncompressed_model_vertices.end()));
+                            meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*compiled.compressed_model_vertices.begin()), reinterpret_cast<std::uint8_t *>(&*compiled.compressed_model_vertices.end()));
+                            meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*compiled.model_indices.begin()), reinterpret_cast<std::uint8_t *>(&*compiled.model_indices.end()));
                             
                             return meme_data;
                         };
