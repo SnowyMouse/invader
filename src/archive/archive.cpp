@@ -68,7 +68,10 @@ int main(int argc, const char **argv) {
                 archive_options.use_filesystem_path = true;
                 break;
             case 'g':
-                if(std::strcmp(arguments[0], "pc-custom") == 0) {
+                if(std::strcmp(arguments[0], "mcc-cea") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_MCC_CEA;
+                }
+                else if(std::strcmp(arguments[0], "pc-custom") == 0) {
                     archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
                 else if(std::strcmp(arguments[0], "pc-retail") == 0) {
@@ -111,7 +114,7 @@ int main(int argc, const char **argv) {
         }
         if(base_tag_maybe.has_value()) {
             base_tag = *base_tag_maybe;
-            
+
             // Remove extension if necessary
             if(!archive_options.single_tag) {
                 auto path_test = std::filesystem::path(base_tag);
@@ -130,7 +133,7 @@ int main(int argc, const char **argv) {
     else {
         base_tag.insert(base_tag.end(), remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
-    
+
     // Variables to hold this
     std::vector<std::pair<std::filesystem::path, std::string>> archive_list;
 
@@ -182,7 +185,7 @@ int main(int argc, const char **argv) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
             parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
-            
+
             map = Invader::BuildWorkload::compile_map(parameters);
         }
         catch(std::exception &e) {
@@ -271,7 +274,7 @@ int main(int argc, const char **argv) {
             archive_list.emplace_back(*dependency.file_path, path_copy);
         }
     }
-    
+
     // Don't archive anything that is in an excluded directory
     for(auto &i : archive_options.tags_excluded) {
         for(std::size_t t = 0; t < archive_list.size(); t++) {
@@ -293,10 +296,10 @@ int main(int argc, const char **argv) {
                 try {
                     auto tag_archive_data = Invader::File::open_file(archive_list[t].first).value();
                     auto tag_archive = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_archive_data.data(), tag_archive_data.size(), true);
-                    
+
                     auto tag_exclude_data = Invader::File::open_file(path_to_test).value();
                     auto tag_exclude = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_exclude_data.data(), tag_exclude_data.size(), true);
-                    
+
                     // Do a functional comparison
                     if(!tag_archive->compare(tag_exclude.get(), true, true)) {
                         continue;
@@ -306,14 +309,14 @@ int main(int argc, const char **argv) {
                     eprintf_error("Failed to do a functional comparison of %s and %s\n", archive_list[t].first.string().c_str(), path_to_test.string().c_str());
                     std::exit(EXIT_FAILURE);
                 }
-            
+
                 // Exclude
                 archive_list.erase(archive_list.begin() + t);
                 t--;
             }
         }
     }
-    
+
     // Archive
     if(!archive_options.copy) {
         // Begin making the archive
@@ -366,7 +369,7 @@ int main(int argc, const char **argv) {
         // Save and close
         archive_write_close(archive);
         archive_write_free(archive);
-        
+
         oprintf("Saved %s\n", archive_options.output.c_str());
     }
     // Copy
@@ -382,19 +385,19 @@ int main(int argc, const char **argv) {
                 return EXIT_FAILURE;
             }
         }
-        
+
         // Go through each file to archive
         for(std::size_t i = 0; i < archive_list.size(); i++) {
             auto old_path = std::filesystem::path(archive_list[i].first.c_str());
             auto new_path = base_path / std::filesystem::path(archive_list[i].second.c_str());
-            
+
             // Copy function
             auto place_if_possible = [&new_path, &old_path, &archive_options]() -> bool {
                 // If it exists, continue
                 if(!archive_options.overwrite && std::filesystem::exists(new_path)) {
                     return false;
                 }
-                
+
                 // Try to see if we need to create the directory
                 auto up_one_dir = new_path.parent_path();
                 if(!std::filesystem::exists(up_one_dir)) {
@@ -406,7 +409,7 @@ int main(int argc, const char **argv) {
                         return false;
                     }
                 }
-                
+
                 // Now copy
                 try {
                     std::filesystem::copy_file(old_path, new_path, std::filesystem::copy_options::overwrite_existing);
@@ -415,10 +418,10 @@ int main(int argc, const char **argv) {
                     eprintf_error("Failed to create copy %s to %s: %s", old_path.string().c_str(), new_path.string().c_str(), e.what());
                     return false;
                 }
-                
+
                 return true;
             };
-            
+
             if(place_if_possible()) {
                 oprintf_success("Saved %s", new_path.string().c_str());
             }
