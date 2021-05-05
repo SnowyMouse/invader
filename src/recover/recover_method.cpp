@@ -101,9 +101,9 @@ namespace Invader::Recover {
             inflate_stream.next_out = reinterpret_cast<Bytef *>(pixels.data());
             inflate_stream.avail_in = compressed_size;
             inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(compressed_data));
-
+            
             // Do it
-            if(inflateInit(&inflate_stream) != Z_OK || inflate(&inflate_stream, Z_FINISH) != Z_OK || inflateEnd(&inflate_stream) != Z_OK) {
+            if(inflateInit(&inflate_stream) != Z_OK || inflate(&inflate_stream, Z_FINISH) != Z_STREAM_END || inflateEnd(&inflate_stream) != Z_OK) {
                 eprintf_error("Color plate data could not be decompressed");
                 std::exit(EXIT_FAILURE);
             }
