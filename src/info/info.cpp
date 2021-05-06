@@ -105,10 +105,10 @@ namespace Invader::Info {
             if(total_external == 0) {
                 PRINT_LINE(oprintf_success, "External tags:", "%s", "None");
             }
-            else if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            else if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 PRINT_LINE(oprintf_success_lesser_warn, "External tags:", "%zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_external, external_bitmaps, external_bitmaps == 1 ? "" : "s", external_loc, external_sounds, external_sounds == 1 ? "" : "s");
                 
-                // If we're custom edition, we need to see if they're at least all indexed
+                // If we're custom edition or cea, we need to see if they're at least all indexed
                 std::size_t indexed_bitmaps = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, false).size();
                 std::size_t indexed_sounds = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, false).size();
                 std::size_t indexed_loc = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false).size();
@@ -179,6 +179,9 @@ namespace Invader::Info {
         // Uncompressed size
         std::optional<HEK::CacheFileLimits> max_uncompressed_size;
         switch(map.get_engine()) {
+            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_MCC_CEA;
+                break;
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
