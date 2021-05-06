@@ -459,7 +459,7 @@ int main(int argc, const char **argv) {
                 }
             };
             
-            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 // Try custom_*
                 auto bitmaps = build_options.maps / "custom_bitmaps.map";
                 auto sounds = build_options.maps / "custom_sounds.map";
