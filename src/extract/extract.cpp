@@ -76,8 +76,8 @@ int main(int argc, const char **argv) {
                 std::exit(EXIT_SUCCESS);
         }
     });
-    
-    
+
+
     if(!extract_options.tags_directory.has_value()) {
         extract_options.tags_directory = "tags";
     }
@@ -104,7 +104,7 @@ int main(int argc, const char **argv) {
             extract_options.maps_directory = maps_folder.string();
         }
     }
-    
+
     // Load resource maps
     if(extract_options.maps_directory.has_value() && !extract_options.ignore_resource_maps) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
@@ -143,6 +143,7 @@ int main(int argc, const char **argv) {
                     bitmaps = open_map_possibly("bitmaps.map", nullptr, open_map_possibly);
                     sounds = open_map_possibly("sounds.map", nullptr, open_map_possibly);
                     break;
+                case HEK::CACHE_FILE_MCC_CEA:
                 case HEK::CACHE_FILE_CUSTOM_EDITION: {
                     loc = open_map_possibly("custom_loc.map", "loc.map", open_map_possibly);
                     bitmaps = open_map_possibly("custom_bitmaps.map", "bitmaps.map", open_map_possibly);
