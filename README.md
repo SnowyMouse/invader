@@ -711,7 +711,8 @@ Options:
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Demo and retail maps also require
                                either -w or -M to be specified at least once.
-                               Valid engines are: pc-custom, pc-demo, pc-retail
+                               Valid engines are: mcc-cea, pc-custom, pc-demo,
+                               pc-retail
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Set the maps directory.
