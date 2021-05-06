@@ -717,8 +717,6 @@ Options:
   -m --maps <dir>              Set the maps directory.
   -M --with-map <file>         Use a map file for the tags. This can be
                                specified multiple times.
-  -n --no-prefix               Don't use the "custom_" prefix when building a
-                               Custom Edition resource map.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.

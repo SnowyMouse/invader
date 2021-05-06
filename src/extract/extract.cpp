@@ -108,13 +108,10 @@ int main(int argc, const char **argv) {
     // Load resource maps
     if(extract_options.maps_directory.has_value() && !extract_options.ignore_resource_maps) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
-        auto open_map_possibly = [&maps_directory](const char *map, const char *map_alt, auto &open_map_possibly) -> std::vector<std::byte> {
+        auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
             auto potential_map = Invader::File::open_file(maps_directory / map);
             if(potential_map.has_value()) {
                 return *potential_map;
-            }
-            else if(map_alt) {
-                return open_map_possibly(map_alt, nullptr, open_map_possibly);
             }
             else {
                 return std::vector<std::byte>();
@@ -140,14 +137,14 @@ int main(int argc, const char **argv) {
             switch(header.engine.read()) {
                 case HEK::CACHE_FILE_DEMO:
                 case HEK::CACHE_FILE_RETAIL:
-                    bitmaps = open_map_possibly("bitmaps.map", nullptr, open_map_possibly);
-                    sounds = open_map_possibly("sounds.map", nullptr, open_map_possibly);
+                    bitmaps = open_map_possibly("bitmaps.map");
+                    sounds = open_map_possibly("sounds.map");
                     break;
                 case HEK::CACHE_FILE_MCC_CEA:
                 case HEK::CACHE_FILE_CUSTOM_EDITION: {
-                    loc = open_map_possibly("custom_loc.map", "loc.map", open_map_possibly);
-                    bitmaps = open_map_possibly("custom_bitmaps.map", "bitmaps.map", open_map_possibly);
-                    sounds = open_map_possibly("custom_sounds.map", "sounds.map", open_map_possibly);
+                    loc = open_map_possibly("loc.map");
+                    bitmaps = open_map_possibly("bitmaps.map");
+                    sounds = open_map_possibly("sounds.map");
                     break;
                 }
                 default:
@@ -156,8 +153,8 @@ int main(int argc, const char **argv) {
         }
         // Maybe it's a demo map?
         else if(reinterpret_cast<Invader::HEK::CacheFileDemoHeader *>(&header)->valid()) {
-            bitmaps = open_map_possibly("bitmaps.map", nullptr, open_map_possibly);
-            sounds = open_map_possibly("sounds.map", nullptr, open_map_possibly);
+            bitmaps = open_map_possibly("bitmaps.map");
+            sounds = open_map_possibly("sounds.map");
         }
     }
 

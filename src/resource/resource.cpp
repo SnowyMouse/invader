@@ -27,7 +27,6 @@ int main(int argc, const char **argv) {
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either -w or -M to be specified at least once. Valid engines are: pc-custom, pc-demo, pc-retail", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>");
     options.emplace_back("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>");
-    options.emplace_back("no-prefix", 'n', 0, "Don't use the \"custom_\" prefix when building a Custom Edition resource map.");
     options.emplace_back("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
@@ -71,12 +70,8 @@ int main(int argc, const char **argv) {
                 resource_options.maps = arguments[0];
                 break;
 
-            case 'n':
-                resource_options.no_prefix = true;
-                break;
-
             case 'g':
-                if(std::strcmp(arguments[0], "pc-custom") == 0) {
+                if(std::strcmp(arguments[0], "pc-custom") == 0 || std::strcmp(arguments[0], "mcc-cea") == 0) {
                     resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
                 else if(std::strcmp(arguments[0], "pc-retail") == 0 || std::strcmp(arguments[0], "pc-demo") == 0) {
@@ -563,7 +558,6 @@ int main(int argc, const char **argv) {
 
     // Get the final path of the map
     const char *map;
-    std::string prefix = (!retail && !resource_options.no_prefix) ? "custom_" : "";
     switch(*resource_options.type) {
         case ResourceMapType::RESOURCE_MAP_BITMAP:
             map = "bitmaps.map";
@@ -577,7 +571,7 @@ int main(int argc, const char **argv) {
         default:
             std::terminate();
     }
-    auto map_path = std::filesystem::path(resource_options.maps) / (prefix + map);
+    auto map_path = std::filesystem::path(resource_options.maps) / map;
 
     // Finish up building up the map
     std::size_t resource_count = paths.size();

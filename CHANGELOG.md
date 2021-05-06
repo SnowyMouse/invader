@@ -33,6 +33,7 @@ This is used for recording Invader's changes. This changelog is based on
   sample when making TIFFs
 
 ### Removed
+- invader: Removed support for "custom_" prefixed resource maps
 - invader: Removed all invader_ tag classes
 - invader: Removed invader-compress
 - invader: Removed support for compressed Gearbox maps
