@@ -55,6 +55,7 @@ int main(int argc, const char **argv) {
     // Parameters
     struct BuildOptions {
         std::filesystem::path maps = "maps";
+        std::optional<std::filesystem::path> resource_map_path;
         std::vector<std::filesystem::path> tags;
         std::optional<std::filesystem::path> output;
         std::string last_argument;
@@ -89,6 +90,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
+    options.emplace_back("resource-path", 'R', 1, "Specify the directory for loading resource maps. (by default this is the maps directory)", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
@@ -128,6 +130,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'm':
                 build_options.maps = std::string(arguments[0]);
+                break;
+            case 'R':
+                build_options.resource_map_path = std::string(arguments[0]);
                 break;
             case 'B':
                 build_options.build_version = std::string(arguments[0]);
@@ -458,15 +463,27 @@ int main(int argc, const char **argv) {
                 }
             };
             
-            auto bitmaps = build_options.maps / "bitmaps.map";
-            auto sounds = build_options.maps / "sounds.map";
+            // Where are the memes located?
+            std::filesystem::path resource_target_path;
+            const char *resource_error_prefix;
+            if(!build_options.resource_map_path.has_value()) {
+                resource_target_path = std::filesystem::path(build_options.maps);
+                resource_error_prefix = "Maps";
+            }
+            else {
+                resource_target_path = *build_options.resource_map_path;
+                resource_error_prefix = "Resource";
+            }
+            
+            auto bitmaps = resource_target_path / "bitmaps.map";
+            auto sounds = resource_target_path / "sounds.map";
             if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 // Use loc for MCC and Custom Edition
-                auto loc = build_options.maps / "loc.map";
+                auto loc = resource_target_path / "loc.map";
                 
                 // Well, guess that's that
                 if(!std::filesystem::is_regular_file(bitmaps) || !std::filesystem::is_regular_file(sounds) || !std::filesystem::is_regular_file(loc)) {
-                    eprintf_error("Maps folder is missing either bitmaps.map, sounds.map, OR loc.map");
+                    eprintf_error("%s directory is missing either bitmaps.map, sounds.map, OR loc.map", resource_error_prefix);
                     error = true;
                     goto show_me_the_spaghetti_code_error;
                 }
@@ -478,7 +495,7 @@ int main(int argc, const char **argv) {
             else {
                 // Well, guess that's that
                 if(!std::filesystem::is_regular_file(bitmaps) || !std::filesystem::is_regular_file(sounds)) {
-                    eprintf_error("Maps folder is missing a bitmaps.map OR sounds.map");
+                    eprintf_error("%s directory is missing either bitmaps.map OR sounds.map", resource_error_prefix);
                     error = true;
                     goto show_me_the_spaghetti_code_error;
                 }
@@ -613,7 +630,7 @@ int main(int argc, const char **argv) {
             }
             
             // If we are not building for MCC and the scenario name is mismatched, warn
-            if(final_file_name_no_extension_string != map_name) {
+            if(final_file_name_no_extension_string != map_name && build_options.engine != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 eprintf_warn("The base name (%s) does not match the scenario (%s)", final_file_name_no_extension_string.c_str(), map_name.c_str());
                 eprintf_warn("The map will fail to load correctly in the target engine with this file name.");
                 

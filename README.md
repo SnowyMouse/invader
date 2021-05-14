@@ -304,6 +304,8 @@ Options:
                                the cache file.
   -P --fs-path                 Use a filesystem path for the tag.
   -q --quiet                   Only output error messages.
+  -R --resource-path <dir>     Specify the directory for loading resource maps.
+                               (by default this is the maps directory)
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
@@ -314,6 +316,7 @@ Options:
                                (for GiB), or specify in hexadecimal the number
                                of bytes (e.g. 0x1000).
   -w --with-index <file>       Use an index file for the tags, ensuring the
+                               map's tags are ordered in the same way.g the
                                map's tags are ordered in the same way.
 ```
 

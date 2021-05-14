@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader: Added support for the upcoming MCC: CEA map format.
 - invader-build: Added `mcc-cea` as a build target.
+- invader-build: Added `-R` which can specify a different path to load resource
+  maps from.
 
 ### Changed
 - invader-model: "Legacy" mode is now the only option as, while it's not very
