@@ -263,7 +263,8 @@ namespace Invader::EditQt {
         
         // Go through each tag directory
         for(auto &t : this->last_window->get_tag_directories()) {
-            for(auto &q : std::filesystem::directory_iterator(t / start)) {
+            std::error_code ec;
+            for(auto &q : std::filesystem::directory_iterator(t / start, ec)) {
                 QTreeWidgetItem *new_item;
                 bool directory = q.is_directory();
                 auto relative = std::filesystem::relative(q.path(), t);
