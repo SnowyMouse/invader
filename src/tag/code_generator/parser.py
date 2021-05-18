@@ -12,8 +12,9 @@ from parser_struct import make_parser_struct
 from check_invalid_ranges import make_check_invalid_ranges
 from check_invalid_indices import make_check_invalid_indices
 from check_normalize import make_normalize
+from scan_padding import make_scan_padding
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_read_hek_file):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_read_hek_file, cpp_scan_padding):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -26,6 +27,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_check_invalid_indices.write(what)
         cpp_normalize.write(what)
         cpp_read_hek_file.write(what)
+        cpp_scan_padding.write(what)
 
     hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -178,6 +180,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                     break
         
         # Next, run all this stuff to generate our C++ source files
+        make_scan_padding(all_used_structs, struct_name, all_bitfields, hpp, cpp_scan_padding)
         make_cache_deformat(post_cache_deformat, all_used_structs, struct_name, hpp, cpp_cache_deformat_data)
         make_cache_format_data(struct_name, struct, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums, all_structs_arranged)
         make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data)
