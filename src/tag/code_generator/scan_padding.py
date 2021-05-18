@@ -10,7 +10,7 @@ def make_scan_padding(all_used_structs, struct_name, all_bitfields, hpp, cpp_sca
     hpp.write("         * @return parsed tag data\n")
     hpp.write("         */\n")
     hpp.write("        static void scan_padding(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer = std::nullopt);\n")
-    cpp_scan_padding.write("    void {}::scan_padding(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {{\n".format(struct_name))
+    cpp_scan_padding.write("    void {}::scan_padding([[maybe_unused]] const Invader::Tag &tag, [[maybe_unused]] std::optional<HEK::Pointer> pointer) {{\n".format(struct_name))
     if len(all_used_structs) > 0:
         cpp_scan_padding.write("        const auto &l = pointer.has_value() ? tag.get_struct_at_pointer<HEK::{}>(*pointer) : tag.get_base_struct<HEK::{}>();\n".format(struct_name, struct_name))
         cpp_scan_padding.write("        auto l_copy = l;\n")
