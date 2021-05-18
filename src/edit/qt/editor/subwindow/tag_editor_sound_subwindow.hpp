@@ -4,6 +4,7 @@
 #define INVADER__EDIT__QT__TAG_EDITOR_SOUND_SUBWINDOW_HPP
 
 #include <QAudio>
+#include <optional>
 
 #include "tag_editor_subwindow.hpp"
 
