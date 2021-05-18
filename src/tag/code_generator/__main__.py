@@ -52,6 +52,8 @@ for i in range(bitfield_cpp+3, len(sys.argv)):
                     sys.exit(1)
                 if f["type"] != "pad":
                     f["member_name"] = make_name_fun(f["name"], False).replace("-", "_")
+                if "display_name" not in f and "name" in f:
+                    f["display_name"] = f["name"]
                 if f["type"] == "TagDependency":
                     # Superclasses
                     def expand_superclass(arr, superclass, subclass):

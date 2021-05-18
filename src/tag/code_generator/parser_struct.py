@@ -19,7 +19,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             def make_cpp_string(what):
                 return "\"{}\"".format(what.replace("\"", "\\\"").replace("\n", "\\n"))
 
-            name = "\"{}\"".format(struct["name"])
+            name = "\"{}\"".format(struct["display_name"])
             member_name = struct["member_name"]
             member_name_q = "\"{}\"".format(member_name)
             comment = "nullptr" if "comment" not in struct else make_cpp_string(struct["comment"])
