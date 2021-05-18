@@ -171,9 +171,6 @@ if(${INVADER_FORCE_PORTABLE_PREFERRED_PATHS})
     add_definitions(-DINVADER_FORCE_PORTABLE_PREFERRED_PATHS)
 endif()
 
-# This is fun
-option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for debugging Invader ONLY - this WILL break tags")
-
 # Include color code script
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/color_code.cpp"
@@ -183,7 +180,7 @@ add_custom_command(
 # Include definition script
 add_custom_command(
     OUTPUT ${INVADER_PARSER_FILES}
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" ${INVADER_PARSER_FILES} ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" ${INVADER_PARSER_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )
 
 # Include version script
@@ -240,11 +237,6 @@ add_custom_command(
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices" "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices"
 )
-
-# Set a constant if we're extracting hidden values
-if(${INVADER_EXTRACT_HIDDEN_VALUES})
-    add_definitions(-DINVADER_EXTRACT_HIDDEN_VALUES)
-endif()
 
 # Remove warnings from this
 set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)

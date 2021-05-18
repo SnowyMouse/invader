@@ -85,12 +85,10 @@ namespace Invader::HEK {
 
         // Set values
         this->tag_fourcc = tag_fourcc;
-        #ifndef INVADER_EXTRACT_HIDDEN_VALUES
         this->blam = BLAM;
         this->header_size = sizeof(*this);
         this->something_255 = 255;
         this->version = TagFileHeader::version_for_tag(tag_fourcc);
-        #endif
     }
 
     void TagFileHeader::validate_header(const TagFileHeader *header, std::size_t tag_file_size, std::optional<TagFourCC> expected_tag_class) {

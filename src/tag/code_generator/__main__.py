@@ -9,8 +9,8 @@ from parser import make_parser
 
 bitfield_cpp = 15
 
-if len(sys.argv) < bitfield_cpp+4:
-    print("Usage: {} <a lovely bunch of cppoconuts.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < bitfield_cpp+3:
+    print("Usage: {} <a lovely bunch of cppoconuts.cpp> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -18,9 +18,7 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-extract_hidden = True if sys.argv[bitfield_cpp+2].lower() == "on" else False
-
-for i in range(bitfield_cpp+3, len(sys.argv)):
+for i in range(bitfield_cpp+2, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("(","").replace(")","")
         if not ignore_numbers and name[0].isnumeric():
@@ -139,4 +137,4 @@ with open(sys.argv[2], "w") as hpp:
                                         with open(sys.argv[12], "w") as cpp_normalize:
                                             with open(sys.argv[13], "w") as cpp_hek_file:
                                                 with open(sys.argv[14], "w") as cpp_scan_padding:
-                                                    make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_hek_file, cpp_scan_padding)
+                                                    make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_hek_file, cpp_scan_padding)

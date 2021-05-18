@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 if(NOT DEFINED ${INVADER_SCAN})
-    set(INVADER_SCAN true CACHE BOOL "Build invader-scan (scans for unknown values in cache files)")
+    set(INVADER_SCAN false CACHE BOOL "Build invader-scan (scans for unknown values in cache files)")
 endif()
 
 if(${INVADER_SCAN})

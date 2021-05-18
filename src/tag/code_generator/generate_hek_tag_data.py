@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data):
+def make_cpp_save_hek_data(all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data):
     hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagFourCC> generate_header_class = std::nullopt, bool clear_on_save = false) override;\n")
     cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagFourCC> generate_header_class, bool clear_on_save) {{\n".format(struct_name))
     cpp_save_hek_data.write("        this->cache_deformat();\n")
@@ -14,7 +14,7 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
     if len(all_used_structs) > 0:
         cpp_save_hek_data.write("        struct_big b = {};\n")
         for struct in all_used_structs:
-            if (("cache_only" in struct and struct["cache_only"]) or ("unused" in struct and struct["unused"])) and not extract_hidden:
+            if (("cache_only" in struct and struct["cache_only"]) or ("unused" in struct and struct["unused"])):
                 continue
             name = struct["member_name"]
             if "drop_on_extract_hidden" in struct and struct["drop_on_extract_hidden"]:
@@ -62,12 +62,6 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
                 cpp_save_hek_data.write("        if(clear_on_save) {\n")
                 cpp_save_hek_data.write("            this->{} = std::vector<std::byte>();\n".format(name))
                 cpp_save_hek_data.write("        }\n")
-            elif extract_hidden and struct["type"] == "float" and "bounds" not in struct and "count" not in struct:
-                cpp_save_hek_data.write("        union {{ float f; std::uint32_t i; }} {}_discarded;\n".format(name))
-                cpp_save_hek_data.write("        {}_discarded.f = static_cast<std::int32_t>(this->{} * 1000.0F) / 1000.0F;\n".format(name, name)) # first, round to the nearest 0.0001 for rounding errors
-                cpp_save_hek_data.write("        {}_discarded.i &= 0xFFFFFF00;\n".format(name)) # next, discard the last eight bits for rounding errors
-                cpp_save_hek_data.write("        if({}_discarded.i == 0x80000000) {{ {}_discarded.i = 0; }}\n".format(name, name)) # last, if negative 0, set to 0
-                cpp_save_hek_data.write("        b.{} = {}_discarded.f;\n".format(name, name))
             elif "bounds" in struct and struct["bounds"]:
                 cpp_save_hek_data.write("        b.{}.from = this->{}.from;\n".format(name, name))
                 cpp_save_hek_data.write("        b.{}.to = this->{}.to;\n".format(name, name))

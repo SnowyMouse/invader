@@ -18,8 +18,6 @@ Q_IMPORT_PLUGIN(QWindowsAudioPlugin)
 #endif
 
 int main(int argc, char **argv) {
-    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
-
     using namespace Invader;
 
     std::vector<CommandLineOption> options;

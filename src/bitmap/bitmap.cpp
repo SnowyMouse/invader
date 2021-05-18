@@ -427,8 +427,6 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 }
 
 int main(int argc, char *argv[]) {
-    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
-
     BitmapOptions bitmap_options;
 
     std::vector<CommandLineOption> options;
