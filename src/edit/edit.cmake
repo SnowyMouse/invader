@@ -4,7 +4,7 @@ if(NOT DEFINED ${INVADER_EDIT})
     set(INVADER_EDIT true CACHE BOOL "Build invader-edit (edits tags)")
 endif()
 
-if(${INVADER_COMPRESS})
+if(${INVADER_EDIT})
     add_executable(invader-edit
         src/edit/edit.cpp
     )
