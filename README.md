@@ -5,6 +5,7 @@ Evolved.
 Our Discord server is https://discord.gg/RCX3nvw
 
 Our IRC channel is #invader on [Libera Chat](https://libera.chat/)
+(irc.libera.chat/6697 \[TLS\])
 
 The official source code repository is https://github.com/SnowyMouse/invader
 
