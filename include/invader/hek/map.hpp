@@ -13,7 +13,7 @@ namespace Invader::HEK {
         CACHE_FILE_DEMO = 6,
         CACHE_FILE_RETAIL = 7,
         CACHE_FILE_CUSTOM_EDITION = 609,
-        CACHE_FILE_MCC_CEA = 14,
+        CACHE_FILE_MCC_CEA = 13,
         
         CACHE_FILE_NATIVE = 0x1A86
     };
