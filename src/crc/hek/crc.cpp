@@ -53,6 +53,18 @@ namespace Invader {
                     throw OutOfBoundsException();
                 }
                 
+                // If it's MCC, CRC32 the vertex data
+                if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+                    const auto *header = reinterpret_cast<const HEK::ScenarioStructureBSPCompiledHeaderCEA<HEK::LittleEndian> *>(map.get_data() + start);
+                    if(start >= size || start + sizeof(header) > size) {
+                        throw OutOfBoundsException();
+                    }
+                    
+                    if(header->lightmap_vertex_size.read() > 0) {
+                        CRC_DATA(header->lightmap_vertices, header->lightmap_vertices + header->lightmap_vertex_size);
+                    }
+                }
+                
                 // Add it
                 CRC_DATA(start, end);
             }

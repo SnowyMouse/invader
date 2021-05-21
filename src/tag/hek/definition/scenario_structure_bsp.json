@@ -1749,5 +1749,41 @@
         ],
         "type": "struct",
         "size": 24
+    },
+    {
+        "name": "ScenarioStructureBSPCompiledHeaderCEA",
+        "fields": [
+            {
+                "name": "pointer",
+                "type": "Pointer",
+                "comment": "points to the BSP tag struct",
+                "cache_only": true,
+                "endian": "little"
+            },
+            {
+                "name": "lightmap vertex size",
+                "type": "uint32",
+                "comment": "(CEA only): size of vertex data",
+                "cache_only": true
+            },
+            {
+                "name": "lightmap vertices",
+                "type": "uint32",
+                "comment": "(CEA only): file offset to vertex data",
+                "cache_only": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "signature",
+                "type": "TagFourCC",
+                "cache_only": true,
+                "endian": "little"
+            }
+        ],
+        "type": "struct",
+        "size": 24
     }
 ]
