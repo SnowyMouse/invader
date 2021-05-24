@@ -395,7 +395,6 @@ namespace Invader {
             // Lastly, do the header
             header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
             header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
-            header.decompressed_file_size = final_data.size();
             if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
                 header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
@@ -465,6 +464,9 @@ namespace Invader {
             else {
                 header.crc32 = UINT32_MAX;
             }
+            
+            // Set the file size
+            header.decompressed_file_size = final_data.size();
 
             // Copy it again, this time with the new CRC32
             if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
