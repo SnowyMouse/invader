@@ -13,10 +13,9 @@
 #endif
 
 namespace Invader::Compression {
-    constexpr std::size_t HEADER_SIZE = sizeof(HEK::CacheFileHeader);
-
     std::size_t compress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size, int compression_level) {
         const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        auto &header_output = *reinterpret_cast<HEK::CacheFileHeader *>(output);
         
         if(!header.valid()) {
             throw InvalidMapException();
@@ -30,11 +29,10 @@ namespace Invader::Compression {
                 eprintf_error("map size is not divisible by sector size (%zu)", static_cast<std::size_t>(HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE));
                 throw CompressionFailureException();
             }
-            std::memcpy(output, &header, sizeof(header));
 
             // Compress that!
             z_stream deflate_stream = {};
-            auto offset = sizeof(HEK::CacheFileHeader);
+            auto offset = sizeof(header);
             deflate_stream.zalloc = Z_NULL;
             deflate_stream.zfree = Z_NULL;
             deflate_stream.opaque = Z_NULL;
@@ -56,12 +54,11 @@ namespace Invader::Compression {
             }
             
             // Align to 4096 bytes
-            std::size_t padding_required = REQUIRED_PADDING_N_BYTES(deflate_stream.total_out + HEADER_SIZE, 4096);
-            if(padding_required) {
-                reinterpret_cast<HEK::CacheFileHeader *>(output)->compressed_padding = static_cast<std::uint32_t>(padding_required);
-            }
+            header_output = header;
+            std::size_t padding_required = REQUIRED_PADDING_N_BYTES(deflate_stream.total_out + sizeof(header), 4096);
+            header_output.compressed_padding = static_cast<std::uint32_t>(padding_required);
             
-            return deflate_stream.total_out + HEADER_SIZE + padding_required;
+            return deflate_stream.total_out + sizeof(header_output) + padding_required;
             
             #else
             std::terminate();
@@ -76,26 +73,26 @@ namespace Invader::Compression {
 
     std::size_t decompress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size) {
         // Check the header
-        const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
         
-        if(!header->valid()) {
+        if(!header.valid()) {
             throw InvalidMapException();
         }
         
-        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             #ifndef DISABLE_ZLIB
             z_stream inflate_stream = {};
             inflate_stream.zalloc = Z_NULL;
             inflate_stream.zfree = Z_NULL;
             inflate_stream.opaque = Z_NULL;
-            inflate_stream.avail_in = data_size - sizeof(*header);
-            inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + sizeof(*header)));
-            inflate_stream.avail_out = output_size - sizeof(*header);
-            inflate_stream.next_out = reinterpret_cast<Bytef *>(output + sizeof(*header));
+            inflate_stream.avail_in = data_size - sizeof(header);
+            inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + sizeof(header)));
+            inflate_stream.avail_out = output_size - sizeof(header);
+            inflate_stream.next_out = reinterpret_cast<Bytef *>(output + sizeof(header));
             if((inflateInit(&inflate_stream) != Z_OK) || (inflate(&inflate_stream, Z_FINISH) != Z_STREAM_END) || (inflateEnd(&inflate_stream) != Z_OK)) {
                 throw DecompressionFailureException();
             }
-            return inflate_stream.total_out + HEADER_SIZE;
+            return inflate_stream.total_out + sizeof(header);
             #else
             std::terminate();
             #endif
@@ -107,8 +104,9 @@ namespace Invader::Compression {
 
     std::vector<std::byte> compress_map_data(const std::byte *data, std::size_t data_size, int compression_level) {
         // Allocate the data
+        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
         std::vector<std::byte> new_data;
-        if(data_size < HEADER_SIZE) {
+        if(data_size < sizeof(header)) {
             throw InvalidMapException();
         }
         
@@ -126,20 +124,20 @@ namespace Invader::Compression {
 
     std::vector<std::byte> decompress_map_data(const std::byte *data, std::size_t data_size) {
         // Allocate and decompress using data from the header
-        const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
-        if(!header->valid()) {
+        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        if(!header.valid()) {
             throw InvalidMapException();
         }
         
         std::vector<std::byte> new_data;
 
-        new_data.resize(header->decompressed_file_size);
-        if(new_data.size() < sizeof(*header)) {
+        new_data.resize(header.decompressed_file_size);
+        if(new_data.size() < sizeof(header)) {
             throw InvalidMapException();
         }
         
         // Decompress
-        std::memcpy(new_data.data(), header, sizeof(*header));
+        std::memcpy(new_data.data(), &header, sizeof(header));
         auto decompressed_size = decompress_map_data(data, data_size, new_data.data(), new_data.size());
 
         // Shrink the buffer to the new size
