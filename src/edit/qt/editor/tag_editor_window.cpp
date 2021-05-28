@@ -300,7 +300,7 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save_as() {
-        TagTreeDialog d(nullptr, this->parent_window, this->file.tag_fourcc);
+        TagTreeDialog d(nullptr, this->parent_window, this->file.tag_fourcc, std::filesystem::path(this->get_file().tag_path).parent_path().string().c_str());
         if(d.exec() == QMessageBox::Accepted) {
             this->file = *d.get_tag();
             

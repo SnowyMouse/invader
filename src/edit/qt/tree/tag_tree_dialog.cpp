@@ -18,7 +18,7 @@
 #include <QInputDialog>
 
 namespace Invader::EditQt {
-    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, std::optional<HEK::TagFourCC> save_class) : QDialog(parent), save_class(save_class) {
+    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, std::optional<HEK::TagFourCC> save_class, const char *starting_directory) : QDialog(parent), save_class(save_class) {
         // Make a layout and set our flags
         auto *vbox_layout = new QVBoxLayout();
         vbox_layout->setContentsMargins(4, 4, 4, 4);
@@ -53,6 +53,49 @@ namespace Invader::EditQt {
         else {
             this->tree_widget = new TagTreeWidget(nullptr, parent_window, classes);
             connect(this->tree_widget, &TagTreeWidget::itemDoubleClicked, this, &TagTreeDialog::on_double_click);
+        }
+        
+        if(starting_directory) {
+            auto directory = QString(File::preferred_path_to_halo_path(starting_directory).c_str()).split('\\');
+            QTreeWidgetItem *parent_item = nullptr;
+            for(auto &d : directory) {
+                bool found = false;
+                
+                if(parent_item) {
+                    int c = parent_item->childCount();
+                    for(int i = 0; i < c; i++) {
+                        auto *m = parent_item->child(i);
+                        if(m->text(0) == d) {
+                            parent_item = m;
+                            parent_item->setExpanded(true);
+                            break;
+                        }
+                    }
+                    
+                    found = true;
+                }
+                else {
+                    int c = this->tree_widget->topLevelItemCount();
+                    for(int i = 0; i < c; i++) {
+                        auto *m = this->tree_widget->topLevelItem(i);
+                        if(m->text(0) == d) {
+                            parent_item = m;
+                            parent_item->setExpanded(true);
+                            break;
+                        }
+                    }
+                    
+                    found = true;
+                }
+                    
+                // Not found
+                if(!found) {
+                    break;
+                }
+                
+                this->tree_widget->scrollToBottom();
+                this->tree_widget->scrollToItem(parent_item);
+            }
         }
 
         // Set layout
@@ -118,11 +161,11 @@ namespace Invader::EditQt {
         this->tree_widget->set_filter(this->filter_classes, std::nullopt, expr_filters);
     }
 
-    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes) : TagTreeDialog(parent, parent_window, classes, std::nullopt) {
+    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, const char *starting_directory) : TagTreeDialog(parent, parent_window, classes, std::nullopt, starting_directory) {
         this->change_title(classes);
     }
 
-    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, HEK::TagFourCC save_class) : TagTreeDialog(parent, parent_window, std::nullopt, save_class) {
+    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, HEK::TagFourCC save_class, const char *starting_directory) : TagTreeDialog(parent, parent_window, std::nullopt, save_class, starting_directory) {
         this->change_title(save_class);
     }
 

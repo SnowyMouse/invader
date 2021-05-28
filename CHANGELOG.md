@@ -10,6 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
   maps from.
 
 ### Changed
+- invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
+  directories to the tag's current directory.
 - invader-model: "Legacy" mode is now the only option as, while it's not very
   sane, the workflow of making a map currently fully depends on it. -L was also
   removed.

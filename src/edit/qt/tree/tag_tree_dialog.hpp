@@ -18,19 +18,21 @@ namespace Invader::EditQt {
     public:
         /**
          * Instantiate a TagFileDialog
-         * @param parent         parent widget
-         * @param parent_window  parent window
-         * @param classes        an optional array of classes to filter
+         * @param parent             parent widget
+         * @param parent_window      parent window
+         * @param classes            an optional array of classes to filter
+         * @param starting_directory starting directory
          */
-        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes = std::nullopt);
+        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes = std::nullopt, const char *starting_directory = nullptr);
 
         /**
          * Instantiate a TagFileDialog for saving
-         * @param parent         parent widget
-         * @param parent_window  parent window
-         * @param tag_class      tag class to save
+         * @param parent             parent widget
+         * @param parent_window      parent window
+         * @param tag_class          tag class to save
+         * @param starting_directory starting directory
          */
-        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, HEK::TagFourCC save_class);
+        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, HEK::TagFourCC save_class, const char *starting_directory = nullptr);
 
         /**
          * Set the filter, limiting the view to those classes and directories that contain the given classes
@@ -47,7 +49,7 @@ namespace Invader::EditQt {
         ~TagTreeDialog() = default;
 
     private:
-        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, std::optional<HEK::TagFourCC> saving);
+        TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, std::optional<HEK::TagFourCC> saving, const char *starting_directory = nullptr);
         std::optional<File::TagFile> tag;
         TagTreeWidget *tree_widget;
         void match_find_filter(const QString &filter);
