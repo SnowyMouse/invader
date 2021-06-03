@@ -639,7 +639,7 @@ Usage: invader-recover [options] <tag.class>
 Recover source data from tags.
 
 Options:
-  -d --tags <dir>              Use the specified data directory.
+  -d --data <dir>              Use the specified data directory.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -O --overwrite               Overwrite data if it already exists

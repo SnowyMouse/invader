@@ -21,7 +21,7 @@ int main(int argc, const char **argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("tags", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("overwrite", 'O', 0, "Overwrite data if it already exists");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
 
