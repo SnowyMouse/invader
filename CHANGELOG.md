@@ -4,14 +4,14 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
-- invader: Added support for the upcoming MCC: CEA map format.
-- invader-build: Added `mcc-cea` as a build target.
+- invader: Added support for the upcoming MCC: CEA map format
+- invader-build: Added `mcc-cea` as a build target
 - invader-build: Added `-R` which can specify a different path to load resource
-  maps from.
+  maps from
 
 ### Changed
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
-  directories to the tag's current directory.
+  directories to the tag's current directory
 - invader-model: "Legacy" mode is now the only option as, while it's not very
   sane, the workflow of making a map currently fully depends on it. -L was also
   removed.
