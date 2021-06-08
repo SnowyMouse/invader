@@ -528,8 +528,8 @@ namespace Invader::Recover {
             std::exit(EXIT_FAILURE);
         }
 
-        // Models
-        auto scripts_directory = data / std::filesystem::path(path).replace_extension() / "scripts";
+        // Scripts
+        auto scripts_directory = data / std::filesystem::path(path).parent_path() / "scripts";
 
         if(std::filesystem::exists(scripts_directory)) {
             if(!overwrite) {
