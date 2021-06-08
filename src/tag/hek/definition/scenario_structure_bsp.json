@@ -345,7 +345,8 @@
             },
             {
                 "name": "rendered vertices offset",
-                "type": "uint32"
+                "type": "uint32",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -372,7 +373,8 @@
             },
             {
                 "name": "lightmap vertices offset",
-                "type": "uint32"
+                "type": "uint32",
+                "cache_only": true
             },
             {
                 "type": "pad",
