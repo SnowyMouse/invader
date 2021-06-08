@@ -530,10 +530,68 @@ namespace Invader::Recover {
 
         // Scripts
         auto scripts_directory = data / std::filesystem::path(path).parent_path() / "scripts";
-
+        bool found_external_globals_script = false;
+        bool skipped_external_globals_script = false;
+        
+        // "tell_lies" pretends that we recovered it (if it matched what was on disk)
+        auto recover_script = [](const std::filesystem::path &scripts_directory, const auto &script, bool tell_lies) {
+            auto hsc_path = scripts_directory / (std::string(script.name.string) + ".hsc");
+            if(tell_lies || File::save_file(hsc_path, script.source)) {
+                oprintf_success("Recovered %s", hsc_path.string().c_str());
+            }
+            else {
+                eprintf_error("Failed to write to %s", hsc_path.string().c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        };
+        
+        // Extract global_scripts.hsc to data root (special case)
+        const char *global_scripts_name = "global_scripts";
+        for(auto &i : scenario->source_files) {
+            if(std::strcmp(i.name.string, global_scripts_name) == 0) {
+                bool matches;
+                auto script_path = data / (std::string(global_scripts_name) + ".hsc");
+                found_external_globals_script = true;
+                
+                // Check if it exists
+                if(std::filesystem::exists(script_path)) {
+                    if(!overwrite) {
+                        skipped_external_globals_script = true;
+                        break;
+                    }
+                    
+                    // Check if it matches
+                    try {
+                        matches = File::open_file(script_path).value() == i.source;
+                    }
+                    catch(std::exception &e) {
+                        eprintf_error("Failed to open %s: %s", script_path.string().c_str(), e.what());
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                else {
+                    matches = false;
+                }
+                    
+                // Re-extract it
+                recover_script(data, i, matches);
+            }
+        }
+         
+        // No globals_script was found in the scenario
+        if(!found_external_globals_script) {
+            skipped_external_globals_script = true;
+        }
+        
+        // Check if scripts_directory exists
         if(std::filesystem::exists(scripts_directory)) {
             if(!overwrite) {
-                eprintf("Skipped %s\n", scripts_directory.string().c_str());
+                if(skipped_external_globals_script) {
+                    eprintf("Skipped %s\n", scripts_directory.string().c_str());
+                }
+                else {
+                    eprintf_warn("global_scripts was extracted, but %s was skipped.\nScripts may mismatch now!\n", scripts_directory.string().c_str());
+                }
                 std::exit(EXIT_SUCCESS);
             }
             else {
@@ -545,6 +603,12 @@ namespace Invader::Recover {
                 }
             }
         }
+        
+        // If globals_script was extracted and we only have one script, we're done
+        if(!skipped_external_globals_script && scenario->source_files.size() == 1) {
+            oprintf("Scenario only had global scripts");
+            std::exit(EXIT_SUCCESS);
+        }
 
         // Create directories if needed
         std::error_code ec;
@@ -552,14 +616,15 @@ namespace Invader::Recover {
 
         // Write it all
         for(auto &hsc : scenario->source_files) {
-            auto hsc_path = scripts_directory / (std::string(hsc.name.string) + ".hsc");
-            if(File::save_file(hsc_path, hsc.source)) {
-                oprintf_success("Recovered %s", hsc_path.string().c_str());
+            if(std::strcmp(hsc.name.string, global_scripts_name) == 0) {
+                continue;
             }
-            else {
-                eprintf_error("Failed to write to %s", hsc_path.string().c_str());
-                std::exit(EXIT_FAILURE);
-            }
+            recover_script(scripts_directory, hsc, false);
+        }
+        
+        // If we skipped an external_globals script we found, warn
+        if(skipped_external_globals_script && found_external_globals_script) {
+            eprintf_warn("global_scripts was skipped, but %s was extracted.\nScripts may mismatch now!\n", scripts_directory.string().c_str());
         }
 
         std::exit(EXIT_SUCCESS);

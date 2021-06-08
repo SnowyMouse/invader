@@ -17,6 +17,7 @@ This is used for recording Invader's changes. This changelog is based on
   removed.
 - invader-recover: Changed model recovery to follow the (formerly) legacy
   directory structure
+- invader-recover: global_scripts are now extracted to the data folder root
 
 ### Fixed
 - invader: Fixed an issue with symbolic links being followed through, resulting
