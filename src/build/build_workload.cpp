@@ -313,6 +313,11 @@ namespace Invader {
 
             // Add header stuff
             final_data.resize(sizeof(HEK::CacheFileHeader));
+            
+            // Add each BSP data thing
+            for(auto &b : workload.bsp_data) {
+                final_data.insert(final_data.end(), b.begin(), b.end());
+            }
 
             // Go through each BSP and add that stuff
             if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
@@ -824,6 +829,15 @@ namespace Invader {
                     // Populate the vertices/indices index thingy
                     if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         Parser::set_up_xbox_cache_bsp_data(*this, bsp_header_struct_index, new_bsp_struct_index, bsp);
+                    }
+                    
+                    // If it uses CEA memery to store BSP data, then append it
+                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+                        auto *bsp_data_cea = reinterpret_cast<Parser::ScenarioStructureBSPCompiledHeaderCEA::struct_little *>(this->structs[bsp_header_struct_index].data.data());
+                        auto bsp_data_size = this->bsp_data[bsp].size();
+                        bsp_data_cea->lightmap_vertices = this->bsp_offset;
+                        bsp_data_cea->lightmap_vertex_size = bsp_data_size;
+                        this->bsp_offset += bsp_data_size;
                     }
                 }
                 break;
@@ -1350,7 +1364,7 @@ namespace Invader {
         }
 
         // Get this set
-        std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
+        std::size_t bsp_end = this->bsp_offset;
 
         // Get the scenario tag (if we're not on a native map)
         if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {

@@ -362,6 +362,10 @@ namespace Invader {
 
         /** Tags being worked with */
         std::vector<BuildWorkloadTag> tags;
+        
+        /** BSP vertex data (CEA) */
+        std::vector<std::vector<std::byte>> bsp_data;
+        std::size_t bsp_offset = sizeof(HEK::CacheFileHeader);
 
         /** BSP count */
         std::size_t bsp_count = 0;

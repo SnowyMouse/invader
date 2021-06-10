@@ -6,8 +6,59 @@
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void ScenarioStructureBSP::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void ScenarioStructureBSP::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->runtime_decals.clear(); // delete these in case this tag was extracted improperly
+        
+        auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
+        auto cea = engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA;
+        auto compressed = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+        
+        // Check these
+        auto &data = workload.bsp_data.emplace_back();
+        auto lm_count = this->lightmaps.size();
+        
+        for(std::size_t l = 0; l < lm_count; l++) {
+            auto &lm = this->lightmaps[l];
+            auto mat_count = lm.materials.size();
+            
+            for(std::size_t m = 0; m < mat_count; m++) {
+                auto &mat = lm.materials[m];
+                bool fail = false;
+                
+                auto actual_size = compressed ? mat.compressed_vertices.size() : mat.uncompressed_vertices.size();
+                auto rendered_vertex_size = compressed ? sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little) : sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+                auto lightmap_vertex_size = compressed ? sizeof(Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little) : sizeof(Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little);
+                auto expected_size = rendered_vertex_size * mat.rendered_vertices_count + lightmap_vertex_size * mat.lightmap_vertices_count;
+                
+                // Is the size wrong?
+                if(actual_size != expected_size) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s vertices size for material #%zu of lightmap #%zu is incorrect (%zu != %zu)", compressed ? "Compressed" : "Uncompressed", m, l, expected_size, actual_size);
+                    throw InvalidTagDataException();
+                }
+                
+                // Are we missing vertices?
+                if(mat.rendered_vertices_count != mat.lightmap_vertices_count && mat.lightmap_vertices_count != 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Lightmap vertex count for material #%zu of lightmap #%zu is incorrect (%zu != %zu)", m, l, static_cast<std::size_t>(mat.lightmap_vertices_count), static_cast<std::size_t>(mat.rendered_vertices_count));
+                    throw InvalidTagDataException();
+                }
+                
+                if(mat.lightmap_vertices_count == 0 && lm.bitmap != NULL_INDEX) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Material #%zu of lightmap #%zu is missing lightmap vertices, so it will not render", m, l);
+                    eprintf_warn("Rebake your lightmaps to fix this warning.");
+                }
+                
+                // Depending on what engine, we store vertices in a meme way
+                if(!fail) {
+                    if(cea) {
+                        mat.rendered_vertices_offset = data.size();
+                        mat.lightmap_vertices_offset = mat.rendered_vertices_offset + mat.rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+                        data.insert(data.end(), mat.uncompressed_vertices.begin(), mat.uncompressed_vertices.end());
+                        mat.uncompressed_vertices.clear();
+                        mat.compressed_vertices.clear();
+                    }
+                }
+            }
+        }
     }
     
     bool ScenarioStructureBSPMaterial::check_for_nonnormal_vectors_more(bool normalize) {
@@ -56,18 +107,6 @@ namespace Invader::Parser {
         material.material = this->material;
     }
     
-    template <typename RenderedVertex, typename LightmapVertex> static void check_bsp_vertices(const std::byte *vertices, std::size_t vertices_size, std::size_t rendered_vertex_count, std::size_t lightmap_vertex_count, BuildWorkload &workload, std::size_t tag_index) {
-        const auto *lightmap_rendered_vertices = reinterpret_cast<const RenderedVertex *>(vertices);
-        const auto *lightmap_lightmap_vertices = reinterpret_cast<const LightmapVertex *>(lightmap_rendered_vertices + rendered_vertex_count);
-        auto *lightmap_vertices_end = lightmap_lightmap_vertices + lightmap_vertex_count;
-        
-        std::size_t expected_size = reinterpret_cast<const std::byte *>(lightmap_vertices_end) - vertices;
-        if(expected_size != vertices_size) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, vertices_size);
-            throw InvalidTagDataException();
-        }
-    }
-
     void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto lightmap_count = this->lightmaps.size();
         auto lightmap_bitmap = this->lightmaps_bitmap.tag_id;
@@ -330,26 +369,17 @@ namespace Invader::Parser {
         }
     }
     
-    void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        if(workload.disable_error_checking) {
-            return;
-        }
-        
-        if(this->lightmap_vertices_count != 0 && this->lightmap_vertices_count != this->rendered_vertices_count) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material doesn't have equal # of lightmap and rendered vertices");
-            throw InvalidTagDataException();
-        }
+    void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+        auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
 
         // Xbox uses compressed vertices
-        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little>(this->compressed_vertices.data(), this->compressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             this->uncompressed_vertices.clear();
             this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
             this->do_not_screw_up_the_model = 1;
             this->set_this_or_die = 3;
         }
-        else {
-            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little>(this->uncompressed_vertices.data(), this->uncompressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
+        else if(engine != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
             this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
             this->compressed_vertices.clear();
         }
