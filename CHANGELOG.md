@@ -20,6 +20,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-recover: global_scripts are now extracted to the data folder root
 
 ### Fixed
+- invader: Fixed a few fields in the actor tag not being shown in radians
 - invader: Fixed an issue with symbolic links being followed through, resulting
   in errors
 - invader: Fixed duplicate tags across multiple tags directories being
