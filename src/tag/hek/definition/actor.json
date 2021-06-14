@@ -285,12 +285,12 @@
             },
             {
                 "name": "maximum aiming deviation",
-                "type": "Vector2D",
+                "type": "Euler2D",
                 "compound": true
             },
             {
                 "name": "maximum looking deviation",
-                "type": "Vector2D",
+                "type": "Euler2D",
                 "compound": true
             },
             {
@@ -311,12 +311,12 @@
             },
             {
                 "name": "idle aiming range",
-                "type": "Vector2D",
+                "type": "Euler2D",
                 "compound": true
             },
             {
                 "name": "idle looking range",
-                "type": "Vector2D",
+                "type": "Euler2D",
                 "compound": true
             },
             {
@@ -384,14 +384,14 @@
             },
             {
                 "name": "cosine maximum aiming deviation",
-                "type": "Vector2D",
+                "type": "Euler2D",
                 "endian": "little",
                 "compound": true,
                 "cache_only": true
             },
             {
                 "name": "cosine maximum looking deviation",
-                "type": "Vector2D",
+                "type": "Euler2D",
                 "endian": "little",
                 "compound": true,
                 "cache_only": true

@@ -14,10 +14,10 @@ namespace Invader::Parser {
         SET_INVERTED_VALUE(actor->non_combat_perception_time, actor->inverse_non_combat_perception_time);
 
         actor->cosine_begin_moving_angle = actor->begin_moving_angle != 0.0F ? std::cos(actor->begin_moving_angle) : 0.0F;
-        actor->cosine_maximum_aiming_deviation.i = std::cos(actor->maximum_aiming_deviation.i);
-        actor->cosine_maximum_aiming_deviation.j = std::cos(actor->maximum_aiming_deviation.j);
-        actor->cosine_maximum_looking_deviation.i = std::cos(actor->maximum_looking_deviation.i);
-        actor->cosine_maximum_looking_deviation.j = std::cos(actor->maximum_looking_deviation.j);
+        actor->cosine_maximum_aiming_deviation.yaw = std::cos(actor->maximum_aiming_deviation.yaw);
+        actor->cosine_maximum_aiming_deviation.pitch = std::cos(actor->maximum_aiming_deviation.pitch);
+        actor->cosine_maximum_looking_deviation.yaw = std::cos(actor->maximum_looking_deviation.yaw);
+        actor->cosine_maximum_looking_deviation.pitch = std::cos(actor->maximum_looking_deviation.pitch);
     }
     
     void ActorVariant::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
