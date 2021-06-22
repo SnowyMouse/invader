@@ -7,6 +7,7 @@
             "IMA ADPCM",
             "Ogg Vorbis"
         ],
+        "retcon_note": "The fields were originally called none, xbox adpcm, ima adpcm, and ogg, and the field was Compression, not Format.",
         "type": "enum"
     },
     {
@@ -86,6 +87,7 @@
             { "option": "unused18" },
             { "option": "unused19" }
         ],
+        "retcon_note": "These fields originally had underscores, and anything unused was empty.",
         "type": "enum"
     },
     {
@@ -94,6 +96,7 @@
             "22050 Hz",
             "44100 Hz"
         ],
+        "retcon_note": "Originally called 22kHz and 44kHz, but this was inaccurate.",
         "type": "enum"
     },
     {
