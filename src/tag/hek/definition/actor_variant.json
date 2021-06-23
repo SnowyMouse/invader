@@ -113,13 +113,18 @@
                 "compound": true
             },
             {
-                "name": "mcc unit type",
-                "type": "MCCUnitType",
-                "comment": "only used for scoring in Halo: CE Anniversary (MCC only)"
+                "name": "metagame type",
+                "type": "MetagameType",
+                "comment": "used for scoring in Halo: CE Anniversary (MCC only)"
+            },
+            {
+                "name": "metagame class",
+                "type": "MetagameClass",
+                "comment": "used for scoring in Halo: CE Anniversary (MCC only)"
             },
             {
                 "type": "pad",
-                "size": 22
+                "size": 20
             },
             {
                 "name": "movement type",

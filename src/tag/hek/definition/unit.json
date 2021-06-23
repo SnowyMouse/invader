@@ -154,7 +154,7 @@
         "size": 48
     },
     {
-        "name": "MCCUnitType",
+        "name": "MetagameType",
         "type": "enum",
         "options": [
             "brute",
@@ -163,7 +163,7 @@
             "skirmisher",
             "marine",
             "spartan",
-            "drone",
+            "bugger",
             "hunter",
             "flood infection",
             "flood carrier",
@@ -171,7 +171,7 @@
             "flood pure",
             "sentinel",
             "elite",
-            "huragok",
+            "engineer",
             "mule",
             "turret",
             "mongoose",
@@ -185,22 +185,36 @@
             "watchtower",
             "ghost",
             "chopper",
-            "prowler",
+            "mauler",
             "wraith",
             "banshee",
             "phantom",
             "scarab",
             "guntower",
-            "spirit",
+            "tuning_fork",
             "broadsword",
             "mammoth",
             "lich",
             "mantis",
             "wasp",
             "phaeton",
-            "watcher",
+            "bishop",
             "knight",
-            "crawler"
+            "pawn"
+        ]
+    },
+    {
+        "name": "MetagameClass",
+        "type": "enum",
+        "options": [
+            "infantry",
+            "leader",
+            "hero",
+            "specialist",
+            "light vehicle",
+            "heavy vehicle",
+            "giant vehicle",
+            "standard vehicle"
         ]
     },
     {
@@ -597,13 +611,18 @@
                 "size": 2
             },
             {
-                "name": "mcc unit type",
-                "type": "MCCUnitType",
-                "comment": "only used for scoring in Halo: CE Anniversary (MCC only); overridden by actor_variant's unit type if unit is an actor"
+                "name": "metagame type",
+                "type": "MetagameType",
+                "comment": "used for scoring in Halo: CE Anniversary (MCC only)"
+            },
+            {
+                "name": "metagame class",
+                "type": "MetagameClass",
+                "comment": "used for scoring in Halo: CE Anniversary (MCC only)"
             },
             {
                 "type": "pad",
-                "size": 10
+                "size": 8
             },
             {
                 "name": "new hud interfaces",
