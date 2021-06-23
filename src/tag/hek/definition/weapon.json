@@ -431,7 +431,6 @@
             },
             {
                 "name": "distribution angle",
-                "unit": "degrees",
                 "type": "Angle"
             },
             {
