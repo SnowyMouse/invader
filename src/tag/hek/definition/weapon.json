@@ -98,7 +98,8 @@
             "use error when unzoomed",
             "projectile vector cannot be adjusted",
             "projectiles have identical error",
-            "projectile is client side only"
+            "projectile is client side only",
+            "use unit adjust projectile ray from halo1"
         ],
         "width": 32
     },
@@ -431,7 +432,7 @@
             {
                 "name": "distribution angle",
                 "unit": "degrees",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "type": "pad",
