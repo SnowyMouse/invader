@@ -122,7 +122,7 @@ int main(int argc, const char **argv) {
                 build_options.quiet = true;
                 break;
             case '3':
-                build_options.enable_remastered = true;
+                build_options.cea_remastered = true;
                 break;
             case 'w':
                 build_options.index = std::string(arguments[0]);
