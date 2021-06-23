@@ -309,6 +309,17 @@
         "type": "enum"
     },
     {
+        "name": "ScenarioTextFlags",
+        "type": "bitfield",
+        "fields": [
+            "wrap horizontally",
+            "wrap vertically",
+            "center vertically",
+            "bottom justify"
+        ],
+        "width": 32
+    },
+    {
         "name": "ScenarioFunctionFlags",
         "type": "bitfield",
         "fields": [
@@ -2976,8 +2987,8 @@
                 "size": 2
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "text flags",
+                "type": "ScenarioTextFlags"
             },
             {
                 "name": "text color",
