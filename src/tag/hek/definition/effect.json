@@ -1,6 +1,6 @@
 [
     {
-        "name": "EffectCreateIn1",
+        "name": "EffectCreateIn",
         "options": [
             "any environment",
             "air only",
@@ -10,7 +10,7 @@
         "type": "enum"
     },
     {
-        "name": "EffectCreateIn2",
+        "name": "EffectViolenceMode",
         "options": [
             "either mode",
             "violent mode only",
@@ -128,12 +128,12 @@
         "name": "EffectPart",
         "fields": [
             {
-                "name": "create in 1",
-                "type": "EffectCreateIn1"
+                "name": "create in",
+                "type": "EffectCreateIn"
             },
             {
-                "name": "create in 2",
-                "type": "EffectCreateIn2"
+                "name": "violence mode",
+                "type": "EffectViolenceMode"
             },
             {
                 "name": "location",
@@ -213,12 +213,12 @@
         "name": "EffectParticle",
         "fields": [
             {
-                "name": "create in 1",
-                "type": "EffectCreateIn1"
+                "name": "create in",
+                "type": "EffectCreateIn"
             },
             {
-                "name": "create in 2",
-                "type": "EffectCreateIn2"
+                "name": "violence mode",
+                "type": "EffectViolenceMode"
             },
             {
                 "name": "create",
