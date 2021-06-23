@@ -305,6 +305,8 @@ namespace Invader {
             header.engine = workload.parameters->details.build_cache_file_engine;
             header.map_type = *workload.cache_file_type;
             header.name = workload.scenario_name;
+            
+            
 
             if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                 oprintf("Building cache file data...");
@@ -611,20 +613,27 @@ namespace Invader {
             return final_data;
         };
 
-        if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            HEK::NativeCacheFileHeader header = {};
-            
-            // Store the timestamp
-            std::time_t current_time = std::time(nullptr);
-            auto *gmt = std::gmtime(&current_time);
-            std::snprintf(header.timestamp.string, sizeof(header.timestamp.string), "%04u-%02u-%02uT%02u:%02u:%02uZ", gmt->tm_year + 1900, gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
-            
-            // Done
-            return generate_final_data(header);
-        }
-        else {
-            HEK::CacheFileHeader header = {};
-            return generate_final_data(header);
+        switch(this->parameters->details.build_cache_file_engine) {
+            case HEK::CacheFileEngine::CACHE_FILE_NATIVE: {
+                HEK::NativeCacheFileHeader header = {};
+                
+                // Store the timestamp
+                std::time_t current_time = std::time(nullptr);
+                auto *gmt = std::gmtime(&current_time);
+                std::snprintf(header.timestamp.string, sizeof(header.timestamp.string), "%04u-%02u-%02uT%02u:%02u:%02uZ", gmt->tm_year + 1900, gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
+                
+                // Done
+                return generate_final_data(header);
+            }
+            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA: {
+                HEK::CacheFileHeaderCEA header = {};
+                header.flags = this->parameters->details.build_flags_cea;
+                return generate_final_data(header);
+            }
+            default: {
+                HEK::CacheFileHeader header = {};
+                return generate_final_data(header);
+            }
         }
     }
 
@@ -1599,7 +1608,6 @@ namespace Invader {
 
         switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
                 for(auto &t : this->tags) {
                     // Find the tag
                     auto find_tag_index = [](const std::string &path, const std::optional<std::vector<Resource>> &resources, bool every_other) -> std::optional<std::size_t> {

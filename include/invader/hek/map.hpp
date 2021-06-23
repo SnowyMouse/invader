@@ -92,6 +92,35 @@ namespace Invader::HEK {
         bool valid() const noexcept;
     };
     static_assert(sizeof(CacheFileHeader) == 0x800);
+    
+    enum CacheFileHeaderCEAFlags {
+        CACHE_FILE_HEADER_CEA_FLAGS_USE_BITMAPS_CACHE = 0b1,
+        CACHE_FILE_HEADER_CEA_FLAGS_USE_SOUNDS_CACHE = 0b10,
+        CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY = 0b100
+    };
+
+    struct CacheFileHeaderCEA {
+        LittleEndian<CacheFileLiteral> head_literal;
+        LittleEndian<CacheFileEngine> engine;
+        LittleEndian<std::uint32_t> decompressed_file_size;
+        PAD(0x4);
+        LittleEndian<std::uint32_t> tag_data_offset;
+        LittleEndian<std::uint32_t> tag_data_size;
+        PAD(0x8);
+        TagString name;
+        TagString build;
+        LittleEndian<CacheFileType> map_type;
+        PAD(0x2);
+        LittleEndian<std::uint32_t> crc32;
+        LittleEndian<std::uint16_t> flags;
+        PAD(0x792);
+        LittleEndian<CacheFileLiteral> foot_literal;
+
+        bool valid() const noexcept {
+            return reinterpret_cast<const CacheFileHeader *>(this)->valid();
+        };
+    };
+    static_assert(sizeof(CacheFileHeaderCEA) == sizeof(CacheFileHeader));
 
     struct NativeCacheFileHeader {
         constexpr const static bool IS_DEMO = false;
@@ -113,7 +142,7 @@ namespace Invader::HEK {
 
         bool valid() const noexcept;
     };
-    static_assert(sizeof(NativeCacheFileHeader) == 0x800);
+    static_assert(sizeof(NativeCacheFileHeader) == sizeof(CacheFileHeader));
 
     struct CacheFileDemoHeader {
         constexpr const static bool IS_DEMO = true;
@@ -142,7 +171,7 @@ namespace Invader::HEK {
 
         bool valid() const noexcept;
     };
-    static_assert(sizeof(CacheFileDemoHeader) == 0x800);
+    static_assert(sizeof(CacheFileDemoHeader) == sizeof(CacheFileHeader));
 
     struct CacheFileTagDataHeader {
         LittleEndian<Pointer> tag_array_address;

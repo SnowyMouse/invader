@@ -76,6 +76,7 @@ int main(int argc, const char **argv) {
         std::optional<std::uint64_t> max_tag_space;
         std::optional<HEK::CacheFileEngine> auto_forge_target;
         bool do_not_auto_forge = false;
+        bool cea_remastered = false;
         
         std::optional<XboxVariation> variation;
     } build_options;
@@ -104,6 +105,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
     options.emplace_back("build-version", 'B', 1, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
     options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
+    options.emplace_back("remastered", '3', 0, "Enable remastered graphics (CEA only)");
 
     static constexpr char DESCRIPTION[] = "Build a cache file.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
@@ -118,6 +120,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'q':
                 build_options.quiet = true;
+                break;
+            case '3':
+                build_options.enable_remastered = true;
                 break;
             case 'w':
                 build_options.index = std::string(arguments[0]);
@@ -404,6 +409,10 @@ int main(int argc, const char **argv) {
         
         if(build_options.build_version.has_value()) {
             parameters.details.build_version = *build_options.build_version;
+        }
+        
+        if(!build_options.cea_remastered) {
+            parameters.details.build_flags_cea = HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_BITMAPS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_SOUNDS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY;
         }
         
         parameters.details.build_check_custom_edition_resource_map_bounds = build_options.check_custom_edition_resource_bounds;

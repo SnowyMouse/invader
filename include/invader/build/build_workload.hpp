@@ -156,6 +156,11 @@ namespace Invader {
                 std::string build_version;
                 
                 /**
+                 * Flags to use for CEA
+                 */
+                std::uint16_t build_flags_cea = 0;
+                
+                /**
                  * Instantiate some default, working parameters for the target engine
                  * @param engine engine
                  */
