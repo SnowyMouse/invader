@@ -23,7 +23,8 @@
             "not alpha tested",
             "alpha blended decal",
             "true atmospheric fog",
-            "disable two sided culling"
+            "disable two sided culling",
+            "use xbox multipurpose channel order"
         ],
         "width": 16
     },
