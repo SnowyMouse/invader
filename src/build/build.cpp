@@ -84,8 +84,6 @@ int main(int argc, const char **argv) {
     #define VALID_ENGINES_LIST "mcc-cea, pc-custom, pc-demo, pc-retail, xbox-0009, xbox-0135, xbox-2276"
 
     std::vector<CommandLineOption> options;
-    options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
-    options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
@@ -106,17 +104,23 @@ int main(int argc, const char **argv) {
     options.emplace_back("build-version", 'B', 1, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
     options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
     options.emplace_back("remastered", '3', 0, "Enable remastered graphics (CEA only)");
+    options.emplace_back("resource-maps", 'r', 1, "Specify the behavior for using resource maps. Must be: none (don't use resource maps), check (check tags), always (always index tags - Custom Edition only). Default: none", "<method>");
 
     static constexpr char DESCRIPTION[] = "Build a cache file.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
 
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
         switch(opt) {
-            case 'n':
-                build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
-                break;
-            case 'a':
-                build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+            case 'r':
+                if(std::strcmp(arguments[0], "none") == 0) {
+                    build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                }
+                else if(std::strcmp(arguments[0], "check") == 0) {
+                    build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                }
+                else if(std::strcmp(arguments[0], "always") == 0) {
+                    build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+                }
                 break;
             case 'q':
                 build_options.quiet = true;

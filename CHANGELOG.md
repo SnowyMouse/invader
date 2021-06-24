@@ -6,8 +6,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader: Added support for the upcoming MCC: CEA map format
 - invader-build: Added `mcc-cea` as a build target
-- invader-build: Added `-R` which can specify a different path to load resource
-  maps from
+- invader-build: Added `--resource-path` which can specify a different path to
+  load resource maps from
+- invader-build: Added `--resource-maps` which can specify the behavior for
+  using resource maps. By default, resource maps are not used.
 
 ### Changed
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
@@ -46,6 +48,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader: Removed all invader_ tag classes
 - invader: Removed invader-compress
 - invader: Removed support for compressed Gearbox maps
+- invader-build: Removed `-a` (always index) and `-n` (no external assets) in
+  favor of `-r` (use resource maps)
 - invader-build: Removed `-u` (uncompressed) and `-c` (compressed)
 - invader-strip: Removed `-p` (preprocessing) since invader-compare has been
   able to do this anyway
