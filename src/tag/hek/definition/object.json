@@ -539,17 +539,5 @@
         ],
         "type": "struct",
         "size": 380
-    },
-    {
-        "name": "BasicObject",
-        "fields": [
-            {
-                "type": "pad",
-                "size": 128
-            }
-        ],
-        "type": "struct",
-        "inherits": "Object",
-        "size": 508
     }
 ]

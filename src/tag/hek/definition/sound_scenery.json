@@ -1,9 +1,14 @@
 [
     {
         "name": "SoundScenery",
-        "fields": [],
+        "fields": [
+            {
+                "type": "pad",
+                "size": 128
+            }
+        ],
         "type": "struct",
-        "inherits": "BasicObject",
+        "inherits": "Object",
         "pre_compile": true,
         "post_compile": true,
         "size": 508

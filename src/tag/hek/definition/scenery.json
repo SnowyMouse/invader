@@ -1,9 +1,37 @@
 [
     {
+        "name": "SceneryFlags",
+        "options": [
+            "off in pegasus"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "Scenery",
-        "fields": [],
+        "groups": [
+            {
+                "name": "scenery",
+                "description": "Base scenery attributes",
+                "first": "scenery flags"
+            }
+        ],
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "scenery flags",
+                "display_name": "flags",
+                "type": "SceneryFlags"
+            },
+            {
+                "type": "pad",
+                "size": 124
+            }
+        ],
         "type": "struct",
-        "inherits": "BasicObject",
+        "inherits": "Object",
         "pre_compile": true,
         "post_compile": true,
         "postprocess_hek_data": true,
