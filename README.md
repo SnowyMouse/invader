@@ -269,8 +269,7 @@ Usage: invader-build [options] -g <target> <scenario>
 Build a cache file.
 
 Options:
-  -a --always-index-tags       Always index tags when possible. This can speed
-                               up build time, but stock tags can't be modified.
+  -a --anniversary-mode        Enable anniversary graphics and audio (CEA only)
   -A --auto-forge <engine>     Ensure the map will be network compatible with
                                the given target engine. Valid engines are:
                                mcc-cea, pc-custom, pc-demo, pc-retail,
@@ -298,8 +297,6 @@ Options:
   -l --level <level>           Set the compression level (Xbox maps only). Must
                                be between 0 and 9. Default: 9
   -m --maps <dir>              Use the specified maps directory.
-  -n --no-external-tags        Do not use external tags. This can speed up
-                               build time at a cost of a much larger file size.
   -N --rename-scenario <name>  Rename the scenario.
   -o --output <file>           Output to a specific file.
   -O --optimize                Optimize tag space. This will drastically
@@ -307,6 +304,10 @@ Options:
                                the cache file.
   -P --fs-path                 Use a filesystem path for the tag.
   -q --quiet                   Only output error messages.
+  -r --resource-maps <method>  Specify the behavior for using resource maps.
+                               Must be: none (don't use resource maps), check
+                               (check tags), always (always index tags - Custom
+                               Edition only). Default: none
   -R --resource-path <dir>     Specify the directory for loading resource maps.
                                (by default this is the maps directory)
   -t --tags <dir>              Use the specified tags directory. Use multiple
@@ -319,7 +320,6 @@ Options:
                                (for GiB), or specify in hexadecimal the number
                                of bytes (e.g. 0x1000).
   -w --with-index <file>       Use an index file for the tags, ensuring the
-                               map's tags are ordered in the same way.g the
                                map's tags are ordered in the same way.
 ```
 
