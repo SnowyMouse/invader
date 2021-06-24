@@ -60,13 +60,16 @@ namespace Invader::Parser {
     }
     
     static constexpr const std::size_t MAX_SCRIPT_NODE_COUNT = 19001;
+    static constexpr const std::size_t MAX_SCRIPT_NODE_COUNT_CEA = static_cast<std::size_t>(INT16_MAX);
     
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
         // If we don't have any string data, allocate 512 bytes
         if(scenario.script_string_data.size() == 0) {
             scenario.script_string_data.resize(512);
         }
-
+        
+        auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
+        
         // If we don't have any syntax data, let's make some stuff
         static constexpr char SCRIPT_NODE_LITERAL[] = "script node";
         static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
@@ -104,11 +107,23 @@ namespace Invader::Parser {
                 t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
                 *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
                 t.first_element_ptr = 0;
+                
+                // Check the maximum node count here
+                std::size_t max_node_count;
+                switch(engine) {
+                    case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
+                    case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                        max_node_count = MAX_SCRIPT_NODE_COUNT_CEA;
+                        break;
+                    default:
+                        max_node_count = MAX_SCRIPT_NODE_COUNT;
+                        break;
+                }
             
                 // Maximum node count exceeded?
-                if(t.maximum_count > MAX_SCRIPT_NODE_COUNT) {
+                if(static_cast<std::size_t>(t.maximum_count) > max_node_count) {
                     if(!workload.disable_error_checking) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), MAX_SCRIPT_NODE_COUNT);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), max_node_count);
                         throw InvalidTagDataException();
                     }
                 }
