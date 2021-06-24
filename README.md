@@ -304,11 +304,12 @@ Options:
                                the cache file.
   -P --fs-path                 Use a filesystem path for the tag.
   -q --quiet                   Only output error messages.
-  -r --resource-maps <method>  Specify the behavior for using resource maps.
+  -r --resource-usage <usage>  Specify the behavior for using resource maps.
                                Must be: none (don't use resource maps), check
-                               (check tags), always (always index tags - Custom
-                               Edition only). Default: none
-  -R --resource-path <dir>     Specify the directory for loading resource maps.
+                               (check resource maps), always (always index tags
+                               in resource maps - Custom Edition only).
+                               Default: none
+  -R --resource-maps <dir>     Specify the directory for loading resource maps.
                                (by default this is the maps directory)
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by

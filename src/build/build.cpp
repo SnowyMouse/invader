@@ -89,7 +89,6 @@ int main(int argc, const char **argv) {
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
-    options.emplace_back("resource-path", 'R', 1, "Specify the directory for loading resource maps. (by default this is the maps directory)", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
@@ -104,7 +103,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("build-version", 'B', 1, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
     options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
     options.emplace_back("anniversary-mode", 'a', 0, "Enable anniversary graphics and audio (CEA only)");
-    options.emplace_back("resource-maps", 'r', 1, "Specify the behavior for using resource maps. Must be: none (don't use resource maps), check (check tags), always (always index tags - Custom Edition only). Default: none", "<method>");
+    options.emplace_back("resource-maps", 'R', 1, "Specify the directory for loading resource maps. (by default this is the maps directory)", "<dir>");
+    options.emplace_back("resource-usage", 'r', 1, "Specify the behavior for using resource maps. Must be: none (don't use resource maps), check (check resource maps), always (always index tags in resource maps - Custom Edition only). Default: none", "<usage>");
 
     static constexpr char DESCRIPTION[] = "Build a cache file.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";

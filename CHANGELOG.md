@@ -8,7 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Added `mcc-cea` as a build target
 - invader-build: Added `--resource-path` which can specify a different path to
   load resource maps from
-- invader-build: Added `--resource-maps` which can specify the behavior for
+- invader-build: Added `--resource-usage` which can specify the behavior for
   using resource maps. By default, resource maps are not used.
 - invader-build: Added `--anniversary-mode` which specifies if anniversary
   assets should be used
