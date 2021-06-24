@@ -539,5 +539,40 @@
         ],
         "type": "struct",
         "size": 380
+    },
+    {
+        "name": "BaseObjectFlags",
+        "fields": [
+            "off in pegasus"
+        ],
+        "type": "bitfield",
+        "width": 16
+    },
+    {
+        "name": "BasicObject",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "BaseObjectFlags",
+                "name": "more flags",
+                "display_name": "flags",
+                "exclude": [
+                    {
+                        "field": "off in pegasus",
+                        "struct": ["SoundScenery", "Placeholder"]
+                    }
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 124
+            }
+        ],
+        "type": "struct",
+        "inherits": "Object",
+        "size": 508
     }
 ]
