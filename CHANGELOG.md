@@ -10,8 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
   load resource maps from
 - invader-build: Added `--resource-maps` which can specify the behavior for
   using resource maps. By default, resource maps are not used.
-- invader-build: Added `--anniversary` which specifies if anniversary assets
-  should be used
+- invader-build: Added `--anniversary-mode` which specifies if anniversary
+  assets should be used
 
 ### Changed
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
