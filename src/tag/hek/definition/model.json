@@ -454,12 +454,14 @@
                 "name": "prev filthy part index",
                 "type": "uint8",
                 "default": 255,
+                "read_only": false,
                 "endian": null
             },
             {
                 "name": "next filthy part index",
                 "type": "uint8",
                 "default": 255,
+                "read_only": false,
                 "endian": null
             },
             {
