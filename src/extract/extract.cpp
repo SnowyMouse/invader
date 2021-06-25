@@ -141,12 +141,15 @@ int main(int argc, const char **argv) {
                     sounds = open_map_possibly("sounds.map");
                     break;
                 case HEK::CACHE_FILE_MCC_CEA:
-                case HEK::CACHE_FILE_CUSTOM_EDITION: {
+                    if(!(reinterpret_cast<const HEK::CacheFileHeaderCEA *>(&header)->flags & HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY)) {
+                        bitmaps = open_map_possibly("bitmaps.map");
+                    }
+                    break;
+                case HEK::CACHE_FILE_CUSTOM_EDITION:
                     loc = open_map_possibly("loc.map");
                     bitmaps = open_map_possibly("bitmaps.map");
                     sounds = open_map_possibly("sounds.map");
                     break;
-                }
                 default:
                     break; // nothing else gets resource maps
             }
