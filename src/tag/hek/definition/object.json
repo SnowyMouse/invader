@@ -243,7 +243,10 @@
                 "name": "bounds",
                 "bounds": true,
                 "type": "Fraction",
-                "default": [0.0, 1.0]
+                "default": [
+                    0.0,
+                    1.0
+                ]
             },
             {
                 "type": "pad",
@@ -562,7 +565,10 @@
                 "exclude": [
                     {
                         "field": "off in pegasus",
-                        "struct": ["SoundScenery", "Placeholder"]
+                        "struct": [
+                            "SoundScenery",
+                            "Placeholder"
+                        ]
                     }
                 ]
             },

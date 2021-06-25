@@ -32,11 +32,21 @@
             "p8 bump"
         ],
         "exclude": [
-            { "option": "unused1" },
-            { "option": "unused2" },
-            { "option": "unused3" },
-            { "option": "unused4" },
-            { "option": "unused5" }
+            {
+                "option": "unused1"
+            },
+            {
+                "option": "unused2"
+            },
+            {
+                "option": "unused3"
+            },
+            {
+                "option": "unused4"
+            },
+            {
+                "option": "unused5"
+            }
         ],
         "type": "enum"
     },
@@ -363,11 +373,15 @@
                 "exclude": [
                     {
                         "option": "1024x1024",
-                        "struct": ["Bitmap"]
+                        "struct": [
+                            "Bitmap"
+                        ]
                     },
                     {
                         "option": "2048x2048",
-                        "struct": ["Bitmap"]
+                        "struct": [
+                            "Bitmap"
+                        ]
                     }
                 ]
             },

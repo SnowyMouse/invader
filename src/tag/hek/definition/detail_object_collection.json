@@ -17,7 +17,12 @@
             "more colors"
         ],
         "exclude": [
-            { "field": "unused a" }, { "field": "unused b" }
+            {
+                "field": "unused a"
+            },
+            {
+                "field": "unused b"
+            }
         ],
         "width": 8
     },

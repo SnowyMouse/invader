@@ -140,13 +140,19 @@
                 "name": "yaw bounds",
                 "bounds": true,
                 "type": "Angle",
-                "default": [-3.14159265359, 3.14159265359]
+                "default": [
+                    -3.14159265359,
+                    3.14159265359
+                ]
             },
             {
                 "name": "pitch bounds",
                 "bounds": true,
                 "type": "Angle",
-                "default": [-1.57079632679, 1.57079632679]
+                "default": [
+                    -1.57079632679,
+                    1.57079632679
+                ]
             },
             {
                 "name": "distance bounds",

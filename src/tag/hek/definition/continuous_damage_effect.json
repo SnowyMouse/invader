@@ -35,7 +35,6 @@
                 "size": 24
             },
             {
-            
                 "name": "camera shaking random translation",
                 "type": "float",
                 "unit": "world units"

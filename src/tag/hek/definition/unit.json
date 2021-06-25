@@ -68,7 +68,11 @@
             "integrated light cntrls weapon",
             "integrated light lasts forever"
         ],
-        "exclude": [{"field": "unused"}],
+        "exclude": [
+            {
+                "field": "unused"
+            }
+        ],
         "width": 32
     },
     {

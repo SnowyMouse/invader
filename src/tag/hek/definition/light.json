@@ -28,7 +28,10 @@
                 "name": "radius modifer",
                 "bounds": true,
                 "type": "float",
-                "default": [1.0, 1.0]
+                "default": [
+                    1.0,
+                    1.0
+                ]
             },
             {
                 "name": "falloff angle",

@@ -66,26 +66,66 @@
             "game event"
         ],
         "exclude": [
-            { "option": "unused" },
-            { "option": "unused1" },
-            { "option": "unused2" },
-            { "option": "unused3" },
-            { "option": "unused4" },
-            { "option": "unused5" },
-            { "option": "unused6" },
-            { "option": "unused7" },
-            { "option": "unused8" },
-            { "option": "unused9" },
-            { "option": "unused10" },
-            { "option": "unused11" },
-            { "option": "unused12" },
-            { "option": "unused13" },
-            { "option": "unused14" },
-            { "option": "unused15" },
-            { "option": "unused16" },
-            { "option": "unused17" },
-            { "option": "unused18" },
-            { "option": "unused19" }
+            {
+                "option": "unused"
+            },
+            {
+                "option": "unused1"
+            },
+            {
+                "option": "unused2"
+            },
+            {
+                "option": "unused3"
+            },
+            {
+                "option": "unused4"
+            },
+            {
+                "option": "unused5"
+            },
+            {
+                "option": "unused6"
+            },
+            {
+                "option": "unused7"
+            },
+            {
+                "option": "unused8"
+            },
+            {
+                "option": "unused9"
+            },
+            {
+                "option": "unused10"
+            },
+            {
+                "option": "unused11"
+            },
+            {
+                "option": "unused12"
+            },
+            {
+                "option": "unused13"
+            },
+            {
+                "option": "unused14"
+            },
+            {
+                "option": "unused15"
+            },
+            {
+                "option": "unused16"
+            },
+            {
+                "option": "unused17"
+            },
+            {
+                "option": "unused18"
+            },
+            {
+                "option": "unused19"
+            }
         ],
         "retcon_note": "These fields originally had underscores, and anything unused was empty.",
         "type": "enum"
@@ -314,7 +354,10 @@
                 "name": "random pitch bounds",
                 "bounds": true,
                 "type": "float",
-                "default": [ 1.0, 1.0 ],
+                "default": [
+                    1.0,
+                    1.0
+                ],
                 "comment": "This is the base playback rate of the sound, affecting tempo and pitch."
             },
             {

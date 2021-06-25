@@ -28,12 +28,24 @@
             "all except race ctf"
         ],
         "exclude": [
-            {"option": "terminator"},
-            {"option": "stub"},
-            {"option": "ignored1"},
-            {"option": "ignored2"},
-            {"option": "ignored3"},
-            {"option": "ignored4"}
+            {
+                "option": "terminator"
+            },
+            {
+                "option": "stub"
+            },
+            {
+                "option": "ignored1"
+            },
+            {
+                "option": "ignored2"
+            },
+            {
+                "option": "ignored3"
+            },
+            {
+                "option": "ignored4"
+            }
         ],
         "type": "enum"
     },
@@ -371,14 +383,30 @@
             "unused7"
         ],
         "exclude": [
-            { "field": "unused" },
-            { "field": "unused1" },
-            { "field": "unused2" },
-            { "field": "unused3" },
-            { "field": "unused4" },
-            { "field": "unused5" },
-            { "field": "unused6" },
-            { "field": "unused7" }
+            {
+                "field": "unused"
+            },
+            {
+                "field": "unused1"
+            },
+            {
+                "field": "unused2"
+            },
+            {
+                "field": "unused3"
+            },
+            {
+                "field": "unused4"
+            },
+            {
+                "field": "unused5"
+            },
+            {
+                "field": "unused6"
+            },
+            {
+                "field": "unused7"
+            }
         ],
         "width": 16
     },

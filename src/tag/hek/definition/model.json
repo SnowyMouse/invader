@@ -438,7 +438,9 @@
                 "exclude": [
                     {
                         "field": "zoner",
-                        "struct": ["ModelGeometryPart"]
+                        "struct": [
+                            "ModelGeometryPart"
+                        ]
                     }
                 ]
             },
@@ -644,11 +646,15 @@
                 "exclude": [
                     {
                         "field": "parts have local nodes",
-                        "struct": ["Model"]
+                        "struct": [
+                            "Model"
+                        ]
                     },
                     {
                         "field": "ignore skinning",
-                        "struct": ["Model"]
+                        "struct": [
+                            "Model"
+                        ]
                     }
                 ]
             },
@@ -737,7 +743,8 @@
             {
                 "type": "pad",
                 "size": 116
-            },{
+            },
+            {
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "ModelMarker",

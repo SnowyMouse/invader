@@ -36,11 +36,21 @@
             "unused4"
         ],
         "exclude": [
-            { "option": "unused" },
-            { "option": "unused1" },
-            { "option": "unused2" },
-            { "option": "unused3" },
-            { "option": "unused4" }
+            {
+                "option": "unused"
+            },
+            {
+                "option": "unused1"
+            },
+            {
+                "option": "unused2"
+            },
+            {
+                "option": "unused3"
+            },
+            {
+                "option": "unused4"
+            }
         ],
         "type": "enum"
     },
@@ -94,8 +104,12 @@
             "avoid friends line of fire"
         ],
         "exclude": [
-            { "field": "unused" },
-            { "field": "unused 1" }
+            {
+                "field": "unused"
+            },
+            {
+                "field": "unused 1"
+            }
         ],
         "width": 32
     },

@@ -62,7 +62,11 @@
             "direct ip connect update",
             "network settings update"
         ],
-        "exclude": [{"option": "unused"}],
+        "exclude": [
+            {
+                "option": "unused"
+            }
+        ],
         "type": "enum"
     },
     {
@@ -299,7 +303,14 @@
             "load game menu delete request",
             "load game menu delete finish"
         ],
-        "exclude": [{"option": "unused"},{"option": "unused1"}],
+        "exclude": [
+            {
+                "option": "unused"
+            },
+            {
+                "option": "unused1"
+            }
+        ],
         "type": "enum"
     },
     {

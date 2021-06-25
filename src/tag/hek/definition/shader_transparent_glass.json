@@ -45,7 +45,11 @@
                 "name": "background tint color",
                 "type": "ColorRGB",
                 "compound": true,
-                "default": [1.0, 1.0, 1.0]
+                "default": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             },
             {
                 "name": "background tint map scale",
