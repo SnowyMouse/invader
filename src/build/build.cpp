@@ -93,7 +93,6 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
-    options.emplace_back("tag-space", 'T', 1, "Override the tag space. This may result in a map that does not work with the stock games. You can specify the number of bytes, optionally suffixing with K (for KiB), M (for MiB), or G (for GiB), or specify in hexadecimal the number of bytes (e.g. 0x1000).", "<size>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
     options.emplace_back("level", 'l', 1, "Set the compression level (Xbox maps only). Must be between 0 and 9. Default: 9", "<level>");
@@ -151,56 +150,6 @@ int main(int argc, const char **argv) {
                 break;
             case 'E':
                 build_options.increased_file_size_limits = true;
-                break;
-            case 'T':
-                try {
-                    std::string arg = arguments[0];
-                    std::size_t after = 0;
-                    if(arg.size() >= 2 && arg.substr(0, 2) == "0x") {
-                        build_options.max_tag_space = std::stoull(arguments[0] + 2, &after, 16);
-                        if(arg.size() != 2 + after) {
-                            throw std::exception(); // nope!
-                        }
-                    }
-                    else {
-                        unsigned long long tag_space_int = std::stoull(arg, &after);
-                        unsigned long long multiplier = 1;
-                        
-                        if(arg.size() != after) {
-                            if(arg.size() != after + 1) {
-                                throw std::exception(); // nope!
-                            }
-                            char s = arg[after];
-                            switch(s) {
-                                case 'K':
-                                    multiplier = 1024;
-                                    break;
-                                case 'M':
-                                    multiplier = 1024 * 1024;
-                                    break;
-                                case 'G':
-                                    multiplier = 1024 * 1024 * 1024;
-                                    break;
-                                default:
-                                    throw std::exception();
-                            }
-                        }
-                            
-                        // Check if we overflowed
-                        unsigned long long final_tag_space = tag_space_int * multiplier;
-                        if(final_tag_space / multiplier != tag_space_int) {
-                            eprintf_error("overflowed");
-                            throw std::exception();
-                        }
-                        
-                        // Done
-                        build_options.max_tag_space = final_tag_space;
-                    }
-                }
-                catch(std::exception &) {
-                    eprintf_error("Invalid tag space size %s", arguments[0]);
-                    std::exit(EXIT_FAILURE);
-                }
                 break;
             case 'l':
                 try {

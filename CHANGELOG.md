@@ -53,6 +53,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Removed `-a` (always index) and `-n` (no external assets) in
   favor of `-r` (use resource maps)
 - invader-build: Removed `-u` (uncompressed) and `-c` (compressed)
+- invader-build: Removed `-T` (tag space)
 - invader-strip: Removed `-p` (preprocessing) since invader-compare has been
   able to do this anyway
 
