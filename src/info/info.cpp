@@ -64,6 +64,16 @@ namespace Invader::Info {
         else {
             PRINT_LINE(oprintf_success_warn, "Map type:", "%s (mismatched)", type_name(map_type));
         }
+        
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            if(reinterpret_cast<Invader::HEK::CacheFileHeaderCEA *>(header_cache)->flags & HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY) {
+                PRINT_LINE(oprintf_success, "Classic:", "%s", "Yes");
+            }
+            else {
+                PRINT_LINE(oprintf_success_lesser_warn, "Classic:", "%s", "No");
+            }
+        }
+        
         PRINT_LINE(oprintf, "Tags:", "%zu / %zu (%.02f MiB)\n", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
         
         auto crc = map.get_crc32();
