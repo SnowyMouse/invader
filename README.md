@@ -314,12 +314,6 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
-  -T --tag-space <size>        Override the tag space. This may result in a map
-                               that does not work with the stock games. You can
-                               specify the number of bytes, optionally
-                               suffixing with K (for KiB), M (for MiB), or G
-                               (for GiB), or specify in hexadecimal the number
-                               of bytes (e.g. 0x1000).
   -w --with-index <file>       Use an index file for the tags, ensuring the
                                map's tags are ordered in the same way.
 ```
