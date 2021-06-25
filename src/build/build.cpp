@@ -125,7 +125,7 @@ int main(int argc, const char **argv) {
             case 'q':
                 build_options.quiet = true;
                 break;
-            case '3':
+            case 'a':
                 build_options.use_anniverary_mode = true;
                 break;
             case 'w':
