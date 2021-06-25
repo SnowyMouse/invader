@@ -114,12 +114,12 @@
             },
             {
                 "name": "animation loop frame",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "animation speed",
                 "unit": "ticks per frame",
-                "type": "uint16",
+                "type": "int16",
                 "default": 1
             },
             {

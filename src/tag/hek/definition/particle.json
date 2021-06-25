@@ -172,15 +172,15 @@
             },
             {
                 "name": "initial sequence count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "looping sequence count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "final sequence count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",

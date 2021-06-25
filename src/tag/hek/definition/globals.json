@@ -159,11 +159,11 @@
             },
             {
                 "name": "minimum weapon swap ticks",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "minimum autolevelling ticks",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "minimum angle for vehicle flipping",
@@ -1652,26 +1652,26 @@
             },
             {
                 "name": "minimum experience",
-                "type": "uint32"
+                "type": "int32"
             },
             {
                 "name": "maximum experience",
-                "type": "uint32",
+                "type": "int32",
                 "default": 10
             },
             {
                 "name": "minimum player count",
-                "type": "uint32",
+                "type": "int32",
                 "default": 1
             },
             {
                 "name": "maximum player count",
-                "type": "uint32",
+                "type": "int32",
                 "default": 16
             },
             {
                 "name": "rating",
-                "type": "uint32",
+                "type": "int32",
                 "default": 100
             },
             {

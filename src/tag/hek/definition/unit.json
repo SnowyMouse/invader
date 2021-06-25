@@ -554,7 +554,7 @@
             {
                 "name": "spawned actor count",
                 "bounds": true,
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "spawned velocity",
@@ -653,7 +653,7 @@
             },
             {
                 "name": "grenade count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "soft ping interrupt ticks",

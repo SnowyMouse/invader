@@ -137,7 +137,7 @@
             },
             {
                 "name": "count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",

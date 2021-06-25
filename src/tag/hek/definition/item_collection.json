@@ -40,7 +40,7 @@
             },
             {
                 "name": "default spawn time",
-                "type": "uint16",
+                "type": "int16",
                 "unit": "seconds"
             },
             {

@@ -217,7 +217,7 @@
             },
             {
                 "name": "step count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "map to",
@@ -225,7 +225,7 @@
             },
             {
                 "name": "sawtooth count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "add",

@@ -78,7 +78,7 @@
             },
             {
                 "name": "surface reference count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "surface references",
@@ -266,7 +266,7 @@
             },
             {
                 "name": "distant light count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",
@@ -663,7 +663,7 @@
             },
             {
                 "name": "lens flare marker count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "surface indices",

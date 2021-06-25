@@ -528,7 +528,7 @@ namespace Invader::Parser {
                                 auto &sequence = sequences[overlay.sequence_index];
                                 bool not_a_sprite = overlay.flags.read() & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_NOT_A_SPRITE;
                                 std::size_t max_zoom_levels = not_a_sprite ? sequence.bitmap_count.read() : sequence.sprites.count.read();
-                                if(this->zoom_levels > max_zoom_levels) {
+                                if(this->zoom_levels < 0 || static_cast<std::size_t>(this->zoom_levels) > max_zoom_levels) {
                                     const char *noun;
                                     if(not_a_sprite) {
                                         noun = "bitmap";

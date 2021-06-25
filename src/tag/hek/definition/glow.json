@@ -47,7 +47,7 @@
             },
             {
                 "name": "number of particles",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "boundary effect",

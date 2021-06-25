@@ -282,7 +282,7 @@
             {
                 "name": "count",
                 "bounds": true,
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "distribution radius",

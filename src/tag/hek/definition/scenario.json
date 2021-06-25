@@ -712,7 +712,7 @@
             },
             {
                 "name": "step count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "map to",
@@ -720,7 +720,7 @@
             },
             {
                 "name": "sawtooth count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",
@@ -1095,12 +1095,12 @@
             },
             {
                 "name": "rounds reserved",
-                "type": "uint16",
+                "type": "int16",
                 "comment": "does not include loaded rounds; cannot go above maximum rounds"
             },
             {
                 "name": "rounds loaded",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "flags",
@@ -1429,11 +1429,11 @@
             },
             {
                 "name": "primary rounds loaded",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "primary rounds reserved",
-                "type": "uint16",
+                "type": "int16",
                 "comment": "does not include loaded ammo; can go above maximum rounds"
             },
             {
@@ -1446,11 +1446,11 @@
             },
             {
                 "name": "secondary rounds loaded",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "secondary rounds reserved",
-                "type": "uint16",
+                "type": "int16",
                 "comment": "does not include loaded ammo; can go above maximum rounds"
             },
             {
@@ -1625,7 +1625,7 @@
             },
             {
                 "name": "length of animation",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",
@@ -1710,7 +1710,7 @@
             },
             {
                 "name": "spawn time",
-                "type": "uint16",
+                "type": "int16",
                 "unit": "seconds",
                 "comment": "0 = use default spawn time in item_collection"
             },
@@ -2150,11 +2150,11 @@
             },
             {
                 "name": "normal diff count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "insane diff count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "major upgrade",
@@ -2166,15 +2166,15 @@
             },
             {
                 "name": "respawn min actors",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "respawn max actors",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "respawn total",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",

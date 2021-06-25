@@ -612,11 +612,11 @@
             },
             {
                 "name": "milliseconds to auto close",
-                "type": "uint32"
+                "type": "int32"
             },
             {
                 "name": "milliseconds auto close fade time",
-                "type": "uint32"
+                "type": "int32"
             },
             {
                 "name": "background bitmap",

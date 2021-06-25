@@ -229,7 +229,7 @@
             },
             {
                 "name": "hud help number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "hud help flash flags",
@@ -273,7 +273,7 @@
             },
             {
                 "name": "objective number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "objective flash flags",
@@ -289,11 +289,11 @@
             },
             {
                 "name": "objective uptime ticks",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "objective fade ticks",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "top offset",
@@ -433,7 +433,7 @@
             },
             {
                 "name": "not much time left number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "not much time left flash flags",
@@ -469,7 +469,7 @@
             },
             {
                 "name": "time out flash number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "time out flash flash flags",

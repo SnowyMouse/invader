@@ -94,7 +94,7 @@
             },
             {
                 "name": "number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "flash flags",
@@ -264,7 +264,7 @@
             },
             {
                 "name": "background number of flashes",
-                "type": "uint16",
+                "type": "int16",
                 "display_name": "number of flashes"
             },
             {
@@ -558,7 +558,7 @@
             },
             {
                 "name": "hud background number of flashes",
-                "type": "uint16",
+                "type": "int16",
                 "display_name": "number of flashes"
             },
             {
@@ -662,7 +662,7 @@
             },
             {
                 "name": "shield panel background number of flashes",
-                "type": "uint16",
+                "type": "int16",
                 "display_name": "number of flashes"
             },
             {
@@ -902,7 +902,7 @@
             },
             {
                 "name": "health panel background number of flashes",
-                "type": "uint16",
+                "type": "int16",
                 "display_name": "number of flashes"
             },
             {
@@ -1134,7 +1134,7 @@
             },
             {
                 "name": "motion sensor background number of flashes",
-                "type": "uint16",
+                "type": "int16",
                 "display_name": "number of flashes"
             },
             {
@@ -1237,7 +1237,7 @@
             },
             {
                 "name": "motion sensor foreground number of flashes",
-                "type": "uint16",
+                "type": "int16",
                 "display_name": "number of flashes"
             },
             {

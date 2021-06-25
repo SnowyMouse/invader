@@ -68,7 +68,7 @@
             },
             {
                 "name": "number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "flash flags",
@@ -211,7 +211,7 @@
             },
             {
                 "name": "background number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "background flash flags",
@@ -301,7 +301,7 @@
             },
             {
                 "name": "total grenades background number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "total grenades background flash flags",
@@ -383,7 +383,7 @@
             },
             {
                 "name": "total grenades numbers number of flashes",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "total grenades numbers flash flags",
@@ -426,7 +426,7 @@
             },
             {
                 "name": "flash cutoff",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",

@@ -426,7 +426,7 @@
             },
             {
                 "name": "minimum enemy count",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "enemy radius",
@@ -484,7 +484,7 @@
             {
                 "name": "grenade count",
                 "bounds": true,
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "don't drop grenades chance",
@@ -503,7 +503,7 @@
             {
                 "name": "drop weapon ammo",
                 "bounds": true,
-                "type": "uint16",
+                "type": "int16",
                 "unit": "rounds"
             },
             {

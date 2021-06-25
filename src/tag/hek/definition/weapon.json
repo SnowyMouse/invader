@@ -131,7 +131,7 @@
         "fields": [
             {
                 "name": "rounds",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",
@@ -158,21 +158,21 @@
             },
             {
                 "name": "rounds recharged",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "rounds total initial",
-                "type": "uint16",
+                "type": "int16",
                 "comment": "includes loaded ammo"
             },
             {
                 "name": "rounds reserved maximum",
-                "type": "uint16",
+                "type": "int16",
                 "comment": "does not include loaded ammo"
             },
             {
                 "name": "rounds loaded maximum",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",
@@ -184,7 +184,7 @@
             },
             {
                 "name": "rounds reloaded",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",
@@ -240,11 +240,11 @@
         "fields": [
             {
                 "name": "shot count lower bound",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "shot count upper bound",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "type": "pad",
@@ -586,7 +586,7 @@
             },
             {
                 "name": "maximum alternate shots loaded",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "weapon a in",
@@ -724,7 +724,7 @@
             },
             {
                 "name": "zoom levels",
-                "type": "uint16"
+                "type": "int16"
             },
             {
                 "name": "zoom magnification range",
