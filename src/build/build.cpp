@@ -436,8 +436,8 @@ int main(int argc, const char **argv) {
             
             auto bitmaps = resource_target_path / "bitmaps.map";
             auto sounds = resource_target_path / "sounds.map";
-            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-                // Use loc for MCC and Custom Edition
+            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                // Use loc for Custom Edition
                 auto loc = resource_target_path / "loc.map";
                 
                 // Well, guess that's that
