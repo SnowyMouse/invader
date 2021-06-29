@@ -101,7 +101,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     // Set a default level
     if(!sound_options.compression_level.has_value()) {
-        sound_options.compression_level = 1.0F;
+        sound_options.compression_level = 0.8F;
     }
 
     // Error if bullshit compression levels were given
@@ -644,11 +644,11 @@ int main(int argc, const char **argv) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit_pcm, ogg_vorbis, or xbox_adpcm.", "<fmt>");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit_pcm, ogg_vorbis, or xbox_adpcm. Default: 16-bit_pcm", "<fmt>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data or tag.");
     options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
     options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
-    options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
+    options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. Default: 0.8", "<lvl>");
     options.emplace_back("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient_computers, ambient_machinery, ambient_nature, device_computers, device_door, device_force_field, device_machinery, device_nature, first_person_damage, game_event, music, object_impacts, particle_impacts, projectile_impact, projectile_detonation, scripted_dialog_force_unspatialized, scripted_dialog_other, scripted_dialog_player, scripted_effect, slow_particle_impacts, unit_dialog, unit_footsteps, vehicle_collision, vehicle_engine, weapon_charge, weapon_empty, weapon_fire, weapon_idle, weapon_overheat, weapon_ready, weapon_reload", "<class>");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: CPU thread count");
@@ -778,12 +778,6 @@ int main(int argc, const char **argv) {
     auto data_path = std::filesystem::path(sound_options.data) / halo_tag_path;
     if(!std::filesystem::is_directory(data_path)) {
         eprintf_error("No directory exists at %s", data_path.string().c_str());
-        return EXIT_FAILURE;
-    }
-
-    // Make sure format was set
-    if(!sound_options.format.has_value()) {
-        eprintf_error("No sound format set. Use -h for more information.");
         return EXIT_FAILURE;
     }
 
