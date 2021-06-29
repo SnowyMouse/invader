@@ -773,7 +773,7 @@ Options:
                                audio.
   -d --data <dir>              Use the specified data directory.
   -F --format <fmt>            Set the format. Can be: 16-bit_pcm, ogg_vorbis,
-                               or xbox_adpcm.
+                               or xbox_adpcm. Default: 16-bit_pcm
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -j --threads                 Set the number of threads to use for parallel
@@ -781,10 +781,8 @@ Options:
                                count
   -l --compress-level <lvl>    Set the compression level. This can be between
                                0.0 and 1.0. For Ogg Vorbis, higher levels
-                               result in better quality but worse sizes. For
-                               FLAC, higher levels result in better sizes but
-                               longer compression time, clamping from 0.0 to
-                               0.8 (FLAC 0 to FLAC 8). Default: 1.0
+                               result in better quality but worse sizes.
+                               Default: 0.8
   -P --fs-path                 Use a filesystem path for the data or tag.
   -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
                                and 44100. By default, this is determined based

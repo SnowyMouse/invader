@@ -22,6 +22,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-recover: Changed model recovery to follow the (formerly) legacy
   directory structure
 - invader-recover: global_scripts are now extracted to the data folder root
+- invader-sound: The default vorbis quality is now 0.8 and the default encoding
+  is now 16-bit PCM.
 
 ### Fixed
 - invader: Fixed a few fields in the actor tag not being shown in radians
