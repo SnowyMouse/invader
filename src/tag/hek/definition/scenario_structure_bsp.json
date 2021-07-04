@@ -1377,6 +1377,7 @@
         "fields": [
             {
                 "name": "lightmaps bitmap",
+                "read_only": false,
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
