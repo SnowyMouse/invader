@@ -1662,7 +1662,7 @@
                 "type": "ScenarioNetgameFlagType"
             },
             {
-                "name": "team index",
+                "name": "usage id",
                 "type": "Index"
             },
             {
