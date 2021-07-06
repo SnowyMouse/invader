@@ -62,6 +62,14 @@
             "teleport to",
             "hill flag"
         ],
+        "exclude": [
+            {
+                "option": "ctf vehicle"
+            },
+            {
+                "option": "vegas bank"
+            },
+        ],
         "type": "enum"
     },
     {
@@ -1671,6 +1679,7 @@
                 "classes": [
                     "item_collection"
                 ],
+                "unused": true,
                 "compound": true
             },
             {
