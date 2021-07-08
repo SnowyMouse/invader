@@ -89,32 +89,28 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "selected background bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "active background bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "sticky background bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             }
         ],
         "type": "struct",
@@ -128,31 +124,27 @@
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "background bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "special key labels string list",
                 "type": "TagDependency",
                 "classes": [
                     "unicode_string_list"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "virtual keys",
                 "type": "TagReflexive",
                 "struct": "VirtualKeyboardVirtualKey",
-                "hek_maximum": 44,
-                "compound": true
+                "hek_maximum": 44
             }
         ],
         "type": "struct",

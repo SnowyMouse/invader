@@ -7,16 +7,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "sound",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -33,8 +31,7 @@
                 "name": "materials",
                 "type": "TagReflexive",
                 "struct": "MaterialEffectsMaterialEffectMaterial",
-                "hek_maximum": 33,
-                "compound": true
+                "hek_maximum": 33
             },
             {
                 "type": "pad",
@@ -51,8 +48,7 @@
                 "name": "effects",
                 "type": "TagReflexive",
                 "struct": "MaterialEffectsMaterialEffect",
-                "hek_maximum": 13,
-                "compound": true
+                "hek_maximum": 13
             },
             {
                 "type": "pad",

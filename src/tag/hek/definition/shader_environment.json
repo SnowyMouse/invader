@@ -81,8 +81,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "lens_flare"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -105,8 +104,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -130,8 +128,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "secondary detail map scale",
@@ -143,8 +140,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -168,13 +164,11 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "material color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
@@ -190,14 +184,12 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "bump map scale xy",
                 "type": "Point2D",
                 "endian": "little",
-                "compound": true,
                 "cache_only": true
             },
             {
@@ -262,13 +254,11 @@
             },
             {
                 "name": "primary on color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "primary off color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "primary animation function",
@@ -295,13 +285,11 @@
             },
             {
                 "name": "secondary on color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "secondary off color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "secondary animation function",
@@ -328,13 +316,11 @@
             },
             {
                 "name": "plasma on color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "plasma off color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "plasma animation function",
@@ -369,8 +355,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -400,13 +385,11 @@
             },
             {
                 "name": "perpendicular color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "parallel color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
@@ -459,8 +442,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",

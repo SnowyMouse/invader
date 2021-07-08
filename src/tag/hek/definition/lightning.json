@@ -38,8 +38,7 @@
             {
                 "name": "random position bounds",
                 "unit": "world units",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "random jitter",
@@ -53,8 +52,7 @@
             },
             {
                 "name": "tint",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "type": "pad",
@@ -178,8 +176,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -189,15 +186,13 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "LightningMarker",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "shader",
                 "type": "TagReflexive",
                 "struct": "LightningShader",
-                "hek_maximum": 1,
-                "compound": true
+                "hek_maximum": 1
             },
             {
                 "type": "pad",

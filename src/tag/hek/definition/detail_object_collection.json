@@ -87,13 +87,11 @@
             },
             {
                 "name": "minimum color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "maximum color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "ambient color",
@@ -133,14 +131,12 @@
                 "classes": [
                     "bitmap"
                 ],
-                "non_null": true,
-                "compound": true
+                "non_null": true
             },
             {
                 "name": "types",
                 "type": "TagReflexive",
                 "struct": "DetailObjectCollectionObjectType",
-                "compound": true,
                 "hek_maximum": 16
             },
             {

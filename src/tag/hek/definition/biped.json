@@ -92,8 +92,7 @@
                 "classes": [
                     "damage_effect"
                 ],
-                "unused": true,
-                "compound": true
+                "unused": true
             },
             {
                 "name": "bank angle",
@@ -190,8 +189,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "material_effects"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -345,7 +343,6 @@
                 "name": "contact point",
                 "type": "TagReflexive",
                 "struct": "BipedContactPoint",
-                "compound": true,
                 "hek_maximum": 2
             }
         ],

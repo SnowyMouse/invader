@@ -115,8 +115,7 @@
                     "particle_system",
                     "effect",
                     "sound_looping"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "marker",
@@ -155,7 +154,6 @@
             {
                 "name": "reference",
                 "type": "TagDependency",
-                "compound": true,
                 "classes": [
                     "antenna",
                     "glow",
@@ -312,13 +310,11 @@
             },
             {
                 "name": "color lower bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "color upper bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             }
         ],
         "type": "struct",
@@ -341,20 +337,17 @@
             },
             {
                 "name": "color lower bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "color upper bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ObjectChangeColorsPermutation",
-                "hek_maximum": 8,
-                "compound": true
+                "hek_maximum": 8
             }
         ],
         "type": "struct",
@@ -391,13 +384,11 @@
             },
             {
                 "name": "bounding offset",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "origin offset",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "acceleration scale",
@@ -415,16 +406,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "model"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "animation graph",
                 "type": "TagDependency",
                 "classes": [
                     "model_animations"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -435,32 +424,28 @@
                 "type": "TagDependency",
                 "classes": [
                     "model_collision_geometry"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "physics",
                 "type": "TagDependency",
                 "classes": [
                     "physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "modifier shader",
                 "type": "TagDependency",
                 "classes": [
                     "shader"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "creation effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -505,21 +490,18 @@
                 "name": "attachments",
                 "type": "TagReflexive",
                 "struct": "ObjectAttachment",
-                "compound": true,
                 "hek_maximum": 8
             },
             {
                 "name": "widgets",
                 "type": "TagReflexive",
                 "struct": "ObjectWidget",
-                "compound": true,
                 "hek_maximum": 4
             },
             {
                 "name": "functions",
                 "type": "TagReflexive",
                 "struct": "ObjectFunction",
-                "compound": true,
                 "hek_maximum": 4,
                 "maximum": 4
             },
@@ -527,7 +509,6 @@
                 "name": "change colors",
                 "type": "TagReflexive",
                 "struct": "ObjectChangeColors",
-                "compound": true,
                 "hek_maximum": 4,
                 "maximum": 4
             },
@@ -536,7 +517,6 @@
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "cache_only": true,
-                "compound": true,
                 "hek_maximum": 1024
             }
         ],

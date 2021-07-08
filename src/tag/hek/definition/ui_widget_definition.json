@@ -475,16 +475,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "sound effect",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "script",
@@ -519,8 +517,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "name",
@@ -552,8 +549,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "name",
@@ -603,8 +599,7 @@
             },
             {
                 "name": "bounds",
-                "type": "Rectangle2D",
-                "compound": true
+                "type": "Rectangle2D"
             },
             {
                 "name": "flags",
@@ -623,29 +618,25 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "game data inputs",
                 "type": "TagReflexive",
                 "struct": "GameDataInputReference",
-                "hek_maximum": 64,
-                "compound": true
+                "hek_maximum": 64
             },
             {
                 "name": "event handlers",
                 "type": "TagReflexive",
                 "struct": "EventHandlerReference",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "name": "search and replace functions",
                 "type": "TagReflexive",
                 "struct": "SearchAndReplaceReference",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "type": "pad",
@@ -656,21 +647,18 @@
                 "type": "TagDependency",
                 "classes": [
                     "unicode_string_list"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "text font",
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "text color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "justification",
@@ -713,26 +701,22 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "list footer bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "header bounds",
-                "type": "Rectangle2D",
-                "compound": true
+                "type": "Rectangle2D"
             },
             {
                 "name": "footer bounds",
-                "type": "Rectangle2D",
-                "compound": true
+                "type": "Rectangle2D"
             },
             {
                 "type": "pad",
@@ -743,8 +727,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -758,8 +741,7 @@
                 "name": "conditional widgets",
                 "type": "TagReflexive",
                 "struct": "ConditionalWidgetReference",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "type": "pad",
@@ -773,8 +755,7 @@
                 "name": "child widgets",
                 "type": "TagReflexive",
                 "struct": "ChildWidgetReference",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             }
         ],
         "type": "struct",

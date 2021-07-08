@@ -50,14 +50,12 @@
             },
             {
                 "name": "translation",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "rotation",
                 "type": "Quaternion",
-                "normalize": true,
-                "compound": true
+                "normalize": true
             }
         ],
         "type": "struct",
@@ -88,7 +86,6 @@
                 "name": "instances",
                 "type": "TagReflexive",
                 "struct": "ModelMarkerInstance",
-                "compound": true,
                 "hek_maximum": 32
             }
         ],
@@ -129,14 +126,12 @@
             },
             {
                 "name": "default translation",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "default rotation",
                 "normalize": true,
-                "type": "Quaternion",
-                "compound": true
+                "type": "Quaternion"
             },
             {
                 "name": "node distance from parent",
@@ -155,14 +150,12 @@
             {
                 "name": "rotation",
                 "type": "Matrix",
-                "compound": true,
                 "endian": "little",
                 "cache_only": true
             },
             {
                 "name": "translation",
                 "type": "Point3D",
-                "compound": true,
                 "endian": "little",
                 "cache_only": true
             }
@@ -193,13 +186,11 @@
             {
                 "name": "rotation",
                 "type": "Quaternion",
-                "normalize": true,
-                "compound": true
+                "normalize": true
             },
             {
                 "name": "translation",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "type": "pad",
@@ -276,7 +267,6 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "ModelRegionPermutationMarker",
-                "compound": true,
                 "compile_ignore": true,
                 "hek_maximum": 64
             }
@@ -303,7 +293,6 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ModelRegionPermutation",
-                "compound": true,
                 "maximum": 255,
                 "hek_maximum": 32
             }
@@ -318,28 +307,23 @@
         "fields": [
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "normal",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "binormal",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "tangent",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "texture coords",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "name": "node0 index",
@@ -367,8 +351,7 @@
         "fields": [
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "normal",
@@ -486,14 +469,12 @@
             },
             {
                 "name": "centroid",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "uncompressed vertices",
                 "type": "TagReflexive",
                 "struct": "ModelVertexUncompressed",
-                "compound": true,
                 "non_cached": true,
                 "hek_maximum": 65535
             },
@@ -501,7 +482,6 @@
                 "name": "compressed vertices",
                 "type": "TagReflexive",
                 "struct": "ModelVertexCompressed",
-                "compound": true,
                 "non_cached": true,
                 "hek_maximum": 65535
             },
@@ -509,7 +489,6 @@
                 "name": "triangles",
                 "type": "TagReflexive",
                 "struct": "ModelTriangle",
-                "compound": true,
                 "non_cached": true,
                 "hek_maximum": 65535
             },
@@ -594,7 +573,6 @@
                 "name": "parts",
                 "type": "TagReflexive",
                 "struct": "ModelGeometryPart",
-                "compound": true,
                 "hek_maximum": 32
             }
         ],
@@ -611,8 +589,7 @@
                 "classes": [
                     "shader"
                 ],
-                "non_null": true,
-                "compound": true
+                "non_null": true
             },
             {
                 "name": "permutation",
@@ -750,7 +727,6 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "ModelMarker",
-                "compound": true,
                 "maximum": 0,
                 "hidden": true,
                 "hek_maximum": 256
@@ -759,7 +735,6 @@
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelNode",
-                "compound": true,
                 "maximum": 255,
                 "hek_maximum": 64
             },
@@ -767,7 +742,6 @@
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelRegion",
-                "compound": true,
                 "maximum": 255,
                 "hek_maximum": 32
             },
@@ -775,7 +749,6 @@
                 "name": "geometries",
                 "type": "TagReflexive",
                 "struct": "ModelGeometry",
-                "compound": true,
                 "maximum": 65535,
                 "hek_maximum": 256
             },
@@ -783,7 +756,6 @@
                 "name": "shaders",
                 "type": "TagReflexive",
                 "struct": "ModelShaderReference",
-                "compound": true,
                 "hek_maximum": 32
             }
         ],

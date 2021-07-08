@@ -188,8 +188,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "u animation source",
@@ -265,8 +264,7 @@
             },
             {
                 "name": "rotation animation center",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             }
         ],
         "type": "struct",
@@ -300,18 +298,15 @@
             },
             {
                 "name": "color0 animation lower bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color0 animation upper bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color1",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "input a",
@@ -471,21 +466,18 @@
                 "type": "TagDependency",
                 "classes": [
                     "lens_flare"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
-                "hek_maximum": 4,
-                "compound": true
+                "hek_maximum": 4
             },
             {
                 "name": "maps",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericMap",
-                "compound": true,
                 "hek_maximum": 4,
                 "maximum": 4
             },
@@ -493,7 +485,6 @@
                 "name": "stages",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericStage",
-                "compound": true,
                 "hek_maximum": 7,
                 "maximum": 7
             }

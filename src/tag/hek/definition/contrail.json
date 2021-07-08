@@ -75,8 +75,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "point_physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -89,13 +88,11 @@
             },
             {
                 "name": "color lower bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color upper bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "scale flags",
@@ -173,8 +170,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "first sequence index",
@@ -226,8 +222,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "anchor",
@@ -303,8 +298,7 @@
             },
             {
                 "name": "rotation animation center",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "type": "pad",
@@ -322,7 +316,6 @@
                 "name": "point states",
                 "type": "TagReflexive",
                 "struct": "ContrailPointState",
-                "compound": true,
                 "hek_maximum": 16
             }
         ],

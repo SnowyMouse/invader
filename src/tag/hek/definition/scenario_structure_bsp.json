@@ -25,7 +25,6 @@
                 "classes": [
                     "shader"
                 ],
-                "compound": true,
                 "non_null": true
             },
             {
@@ -130,28 +129,23 @@
         "fields": [
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "normal",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "binormal",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "tangent",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "texture coords",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             }
         ],
         "type": "struct",
@@ -162,8 +156,7 @@
         "fields": [
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "normal",
@@ -179,8 +172,7 @@
             },
             {
                 "name": "texture coords",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             }
         ],
         "type": "struct",
@@ -191,13 +183,11 @@
         "fields": [
             {
                 "name": "normal",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "texture coords",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             }
         ],
         "type": "struct",
@@ -232,8 +222,7 @@
                     "shader"
                 ],
                 "non_null": true,
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "shader permutation",
@@ -255,14 +244,12 @@
             {
                 "name": "centroid",
                 "type": "Point3D",
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "ambient color",
                 "type": "ColorRGB",
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "distant light count",
@@ -275,26 +262,22 @@
             {
                 "name": "distant light 0 color",
                 "read_only": false,
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "distant light 0 direction",
                 "read_only": false,
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "distant light 1 color",
                 "read_only": false,
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "distant light 1 direction",
                 "read_only": false,
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "type": "pad",
@@ -303,26 +286,22 @@
             {
                 "name": "reflection tint",
                 "read_only": false,
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "shadow vector",
                 "read_only": false,
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "shadow color",
                 "read_only": false,
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "plane",
                 "type": "Plane3D",
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "breakable surface",
@@ -390,13 +369,11 @@
             {
                 "name": "uncompressed vertices",
                 "type": "TagDataOffset",
-                "compound": true,
                 "ignore_cached": true
             },
             {
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
-                "compound": true,
                 "ignore_cached": true
             }
         ],
@@ -426,8 +403,7 @@
                 "name": "materials",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMaterial",
-                "hek_maximum": 2048,
-                "compound": true
+                "hek_maximum": 2048
             }
         ],
         "type": "struct",
@@ -440,7 +416,6 @@
             {
                 "name": "lens",
                 "type": "TagDependency",
-                "compound": true,
                 "classes": [
                     "lens_flare"
                 ]
@@ -455,8 +430,7 @@
         "fields": [
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "direction i component",
@@ -516,8 +490,7 @@
             {
                 "name": "surface indices",
                 "type": "TagReflexive",
-                "struct": "ScenarioStructureBSPSubclusterSurfaceIndex",
-                "compound": true
+                "struct": "ScenarioStructureBSPSubclusterSurfaceIndex"
             }
         ],
         "type": "struct",
@@ -541,8 +514,7 @@
         "fields": [
             {
                 "name": "point",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             }
         ],
         "type": "struct",
@@ -554,8 +526,7 @@
         "fields": [
             {
                 "name": "plane",
-                "type": "Plane3D",
-                "compound": true
+                "type": "Plane3D"
             },
             {
                 "type": "pad",
@@ -566,15 +537,13 @@
                 "type": "TagDependency",
                 "classes": [
                     "shader"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirrorVertex",
-                "hek_maximum": 512,
-                "compound": true
+                "hek_maximum": 512
             }
         ],
         "type": "struct",
@@ -647,15 +616,13 @@
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "hek_maximum": 1024,
-                "cache_only": true,
-                "compound": true
+                "cache_only": true
             },
             {
                 "name": "subclusters",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSubcluster",
-                "hek_maximum": 4096,
-                "compound": true
+                "hek_maximum": 4096
             },
             {
                 "name": "first lens flare marker index",
@@ -669,22 +636,19 @@
                 "name": "surface indices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterSurfaceIndex",
-                "hek_maximum": 32768,
-                "compound": true
+                "hek_maximum": 32768
             },
             {
                 "name": "mirrors",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirror",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalIndex",
-                "hek_maximum": 128,
-                "compound": true
+                "hek_maximum": 128
             }
         ],
         "type": "struct",
@@ -696,8 +660,7 @@
         "fields": [
             {
                 "name": "point",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             }
         ],
         "type": "struct",
@@ -721,8 +684,7 @@
             },
             {
                 "name": "centroid",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "bounding radius",
@@ -740,8 +702,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalVertex",
-                "hek_maximum": 128,
-                "compound": true
+                "hek_maximum": 128
             }
         ],
         "type": "struct",
@@ -753,8 +714,7 @@
         "fields": [
             {
                 "name": "centroid",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "radius",
@@ -778,8 +738,7 @@
         "fields": [
             {
                 "name": "point",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             }
         ],
         "type": "struct",
@@ -801,15 +760,13 @@
             },
             {
                 "name": "plane",
-                "type": "Plane3D",
-                "compound": true
+                "type": "Plane3D"
             },
             {
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlaneVertex",
-                "hek_maximum": 2048,
-                "compound": true
+                "hek_maximum": 2048
             }
         ],
         "type": "struct",
@@ -855,8 +812,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "fog"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -889,8 +845,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "weather_particle_system"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -910,13 +865,11 @@
                 "type": "TagDependency",
                 "classes": [
                     "wind"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "wind direction",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "wind magnitude",
@@ -945,8 +898,7 @@
         "fields": [
             {
                 "name": "plane",
-                "type": "Plane3D",
-                "compound": true
+                "type": "Plane3D"
             }
         ],
         "type": "struct",
@@ -958,8 +910,7 @@
         "fields": [
             {
                 "name": "bounding sphere center",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "bounding sphere radius",
@@ -973,8 +924,7 @@
                 "name": "planes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedronPlane",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             }
         ],
         "type": "struct",
@@ -1020,8 +970,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound_looping"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -1053,8 +1002,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound_environment"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -1074,13 +1022,11 @@
             },
             {
                 "name": "rotation",
-                "type": "Quaternion",
-                "compound": true
+                "type": "Quaternion"
             },
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             }
         ],
         "type": "struct",
@@ -1197,29 +1143,25 @@
                 "name": "cells",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCell",
-                "hek_maximum": 262144,
-                "compound": true
+                "hek_maximum": 262144
             },
             {
                 "name": "instances",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObject",
-                "hek_maximum": 2097152,
-                "compound": true
+                "hek_maximum": 2097152
             },
             {
                 "name": "counts",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCount",
-                "hek_maximum": 8388608,
-                "compound": true
+                "hek_maximum": 8388608
             },
             {
                 "name": "z reference vectors",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalZReferenceVector",
-                "hek_maximum": 262144,
-                "compound": true
+                "hek_maximum": 262144
             },
             {
                 "name": "bullshit",
@@ -1245,8 +1187,7 @@
         "fields": [
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "decal type",
@@ -1272,8 +1213,7 @@
         "fields": [
             {
                 "name": "vertex",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             }
         ],
         "type": "struct",
@@ -1291,8 +1231,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFaceVertex",
-                "hek_maximum": 64,
-                "compound": true
+                "hek_maximum": 64
             }
         ],
         "type": "struct",
@@ -1318,15 +1257,13 @@
                 "name": "faces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFace",
-                "hek_maximum": 256,
-                "compound": true
+                "hek_maximum": 256
             },
             {
                 "name": "portal indices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafPortalIndex",
-                "hek_maximum": 256,
-                "compound": true
+                "hek_maximum": 256
             }
         ],
         "type": "struct",
@@ -1338,8 +1275,7 @@
         "fields": [
             {
                 "name": "point",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             }
         ],
         "type": "struct",
@@ -1364,8 +1300,7 @@
             {
                 "name": "vertices",
                 "type": "TagReflexive",
-                "struct": "ScenarioStructureBSPLeafPortalVertex",
-                "compound": true
+                "struct": "ScenarioStructureBSPLeafPortalVertex"
             }
         ],
         "type": "struct",
@@ -1381,8 +1316,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "vehicle floor",
@@ -1403,8 +1337,7 @@
             {
                 "name": "default ambient color",
                 "read_only": false,
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
@@ -1413,26 +1346,22 @@
             {
                 "name": "default distant light 0 color",
                 "read_only": false,
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "default distant light 0 direction",
                 "read_only": false,
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "default distant light 1 color",
                 "read_only": false,
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "default distant light 1 direction",
                 "read_only": false,
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "type": "pad",
@@ -1441,20 +1370,17 @@
             {
                 "name": "default reflection tint",
                 "read_only": false,
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "default shadow vector",
                 "read_only": false,
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "default shadow color",
                 "read_only": false,
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
@@ -1464,22 +1390,19 @@
                 "name": "collision materials",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCollisionMaterial",
-                "hek_maximum": 512,
-                "compound": true
+                "hek_maximum": 512
             },
             {
                 "name": "collision bsp",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
-                "hek_maximum": 1,
-                "compound": true
+                "hek_maximum": 1
             },
             {
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPNode",
-                "hek_maximum": 131072,
-                "compound": true
+                "hek_maximum": 131072
             },
             {
                 "name": "world bounds x",
@@ -1500,29 +1423,25 @@
                 "name": "leaves",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLeaf",
-                "hek_maximum": 65536,
-                "compound": true
+                "hek_maximum": 65536
             },
             {
                 "name": "leaf surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurfaceReference",
-                "hek_maximum": 262144,
-                "compound": true
+                "hek_maximum": 262144
             },
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurface",
-                "hek_maximum": 131072,
-                "compound": true
+                "hek_maximum": 131072
             },
             {
                 "name": "lightmaps",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLightmap",
-                "hek_maximum": 128,
-                "compound": true
+                "hek_maximum": 128
             },
             {
                 "type": "pad",
@@ -1532,34 +1451,29 @@
                 "name": "lens flares",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlare",
-                "hek_maximum": 256,
-                "compound": true
+                "hek_maximum": 256
             },
             {
                 "name": "lens flare markers",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlareMarker",
-                "hek_maximum": 65536,
-                "compound": true
+                "hek_maximum": 65536
             },
             {
                 "name": "clusters",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCluster",
-                "hek_maximum": 8192,
-                "compound": true
+                "hek_maximum": 8192
             },
             {
                 "name": "cluster data",
-                "type": "TagDataOffset",
-                "compound": true
+                "type": "TagDataOffset"
             },
             {
                 "name": "cluster portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortal",
-                "hek_maximum": 512,
-                "compound": true
+                "hek_maximum": 512
             },
             {
                 "type": "pad",
@@ -1569,22 +1483,19 @@
                 "name": "breakable surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBreakableSurface",
-                "hek_maximum": 256,
-                "compound": true
+                "hek_maximum": 256
             },
             {
                 "name": "fog planes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlane",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "name": "fog regions",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogRegion",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "name": "fog palette",
@@ -1592,7 +1503,6 @@
                 "struct": "ScenarioStructureBSPFogPalette",
                 "hek_maximum": 32,
                 "read_only": false,
-                "compound": true,
                 "maximum": 65534
             },
             {
@@ -1604,15 +1514,13 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPalette",
                 "hek_maximum": 32,
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "weather polyhedra",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedron",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "type": "pad",
@@ -1622,36 +1530,31 @@
                 "name": "pathfinding surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingSurface",
-                "hek_maximum": 131072,
-                "compound": true
+                "hek_maximum": 131072
             },
             {
                 "name": "pathfinding edges",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingEdge",
-                "hek_maximum": 262144,
-                "compound": true
+                "hek_maximum": 262144
             },
             {
                 "name": "background sound palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBackgroundSoundPalette",
                 "hek_maximum": 64,
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "sound environment palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSoundEnvironmentPalette",
                 "hek_maximum": 64,
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "sound pas data",
-                "type": "TagDataOffset",
-                "compound": true
+                "type": "TagDataOffset"
             },
             {
                 "type": "pad",
@@ -1661,23 +1564,20 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMarker",
-                "hek_maximum": 1024,
-                "compound": true
+                "hek_maximum": 1024
             },
             {
                 "name": "detail objects",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPDetailObjectData",
                 "hek_maximum": 1,
-                "read_only": false,
-                "compound": true
+                "read_only": false
             },
             {
                 "name": "runtime decals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPRuntimeDecal",
                 "hek_maximum": 6144,
-                "compound": true,
                 "cache_only": true
             },
             {
@@ -1692,15 +1592,13 @@
                 "name": "leaf map leaves",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalMapLeaf",
-                "hek_maximum": 65536,
-                "compound": true
+                "hek_maximum": 65536
             },
             {
                 "name": "leaf map portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalLeafPortal",
-                "hek_maximum": 524288,
-                "compound": true
+                "hek_maximum": 524288
             }
         ],
         "type": "struct",

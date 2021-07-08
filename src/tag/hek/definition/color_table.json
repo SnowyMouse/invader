@@ -9,8 +9,7 @@
             },
             {
                 "name": "color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             }
         ],
         "type": "struct",
@@ -23,7 +22,6 @@
                 "name": "colors",
                 "type": "TagReflexive",
                 "struct": "ColorTableColor",
-                "compound": true,
                 "hek_maximum": 512
             }
         ],

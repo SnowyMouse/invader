@@ -43,8 +43,7 @@
         "fields": [
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -73,8 +72,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "default color",
@@ -123,8 +121,7 @@
             {
                 "name": "multitex overlay",
                 "type": "TagReflexive",
-                "struct": "HUDInterfaceMultitextureOverlay",
-                "compound": true
+                "struct": "HUDInterfaceMultitextureOverlay"
             },
             {
                 "type": "pad",
@@ -155,8 +152,7 @@
                 "classes": [
                     "sound",
                     "sound_looping"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "latched to",
@@ -205,7 +201,6 @@
             {
                 "name": "background anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -239,7 +234,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "interface bitmap"
             },
             {
@@ -299,7 +293,6 @@
                 "name": "background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "compound": true,
                 "display_name": "multitex overlay"
             },
             {
@@ -309,7 +302,6 @@
             {
                 "name": "meter anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -343,7 +335,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "meter bitmap"
             },
             {
@@ -499,7 +490,6 @@
             {
                 "name": "hud background anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -533,7 +523,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "interface bitmap"
             },
             {
@@ -593,7 +582,6 @@
                 "name": "hud background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "compound": true,
                 "display_name": "multitex overlay"
             },
             {
@@ -603,7 +591,6 @@
             {
                 "name": "shield panel background anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -637,7 +624,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "interface bitmap"
             },
             {
@@ -697,7 +683,6 @@
                 "name": "shield panel background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "compound": true,
                 "display_name": "multitex overlay"
             },
             {
@@ -707,7 +692,6 @@
             {
                 "name": "shield panel meter anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -741,7 +725,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "meter bitmap"
             },
             {
@@ -843,7 +826,6 @@
             {
                 "name": "health panel background anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -877,7 +859,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "interface bitmap"
             },
             {
@@ -937,7 +918,6 @@
                 "name": "health panel background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "compound": true,
                 "display_name": "multitex overlay"
             },
             {
@@ -947,7 +927,6 @@
             {
                 "name": "health panel meter anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -981,7 +960,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "meter bitmap"
             },
             {
@@ -1075,7 +1053,6 @@
             {
                 "name": "motion sensor background anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -1109,7 +1086,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "interface bitmap"
             },
             {
@@ -1168,8 +1144,7 @@
             {
                 "name": "motion sensor background multitex overlays",
                 "type": "TagReflexive",
-                "struct": "HUDInterfaceMultitextureOverlay",
-                "compound": true
+                "struct": "HUDInterfaceMultitextureOverlay"
             },
             {
                 "type": "pad",
@@ -1178,7 +1153,6 @@
             {
                 "name": "motion sensor foreground anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -1212,7 +1186,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "display_name": "interface bitmap"
             },
             {
@@ -1271,8 +1244,7 @@
             {
                 "name": "motion sensor foreground multitex overlays",
                 "type": "TagReflexive",
-                "struct": "HUDInterfaceMultitextureOverlay",
-                "compound": true
+                "struct": "HUDInterfaceMultitextureOverlay"
             },
             {
                 "type": "pad",
@@ -1285,7 +1257,6 @@
             {
                 "name": "motion sensor center anchor offset",
                 "type": "Point2DInt",
-                "compound": true,
                 "display_name": "anchor offset"
             },
             {
@@ -1328,8 +1299,7 @@
             {
                 "name": "overlays",
                 "type": "TagReflexive",
-                "struct": "UnitHUDInterfaceAuxiliaryOverlay",
-                "compound": true
+                "struct": "UnitHUDInterfaceAuxiliaryOverlay"
             },
             {
                 "type": "pad",
@@ -1338,14 +1308,12 @@
             {
                 "name": "sounds",
                 "type": "TagReflexive",
-                "struct": "UnitHUDInterfaceHUDSound",
-                "compound": true
+                "struct": "UnitHUDInterfaceHUDSound"
             },
             {
                 "name": "meters",
                 "type": "TagReflexive",
-                "struct": "UnitHUDInterfaceAuxiliaryPanel",
-                "compound": true
+                "struct": "UnitHUDInterfaceAuxiliaryPanel"
             },
             {
                 "type": "pad",

@@ -137,8 +137,7 @@
             },
             {
                 "name": "damage instantaneous acceleration",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "dirt",

@@ -38,7 +38,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "non_cached": true,
                 "comment": "Don't use this! This gets dereferenced on map build."
             },
@@ -48,7 +47,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "non_cached": true,
                 "comment": "Don't use this! This gets dereferenced on map build."
             },
@@ -82,13 +80,11 @@
             },
             {
                 "name": "empty color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "full color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "type": "pad",
@@ -109,7 +105,6 @@
             {
                 "name": "encoded stencil",
                 "type": "TagDataOffset",
-                "compound": true,
                 "cache_only": true
             }
         ],

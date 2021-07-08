@@ -49,22 +49,19 @@
                 "type": "TagDependency",
                 "classes": [
                     "lens_flare"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
-                "hek_maximum": 4,
-                "compound": true
+                "hek_maximum": 4
             },
             {
                 "name": "maps 4 stage",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
                 "hek_maximum": 4,
-                "compound": true,
                 "maximum": 4
             },
             {
@@ -72,7 +69,6 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
                 "hek_maximum": 2,
-                "compound": true,
                 "maximum": 2
             },
             {

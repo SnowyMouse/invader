@@ -155,8 +155,7 @@
             },
             {
                 "name": "color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "low frequency vibrate frequency",
@@ -321,8 +320,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",

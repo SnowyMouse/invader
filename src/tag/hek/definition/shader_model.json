@@ -107,13 +107,11 @@
             },
             {
                 "name": "animation color lower bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "animation color upper bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
@@ -134,8 +132,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -146,8 +143,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -171,8 +167,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "detail map v scale",
@@ -257,8 +252,7 @@
             },
             {
                 "name": "rotation animation center",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "type": "pad",
@@ -282,8 +276,7 @@
             },
             {
                 "name": "perpendicular tint color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "parallel brightness",
@@ -293,16 +286,14 @@
             },
             {
                 "name": "parallel tint color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "reflection cube map",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",

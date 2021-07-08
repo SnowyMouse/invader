@@ -105,8 +105,7 @@
             },
             {
                 "name": "color multiplier",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "radius multiplier",
@@ -137,8 +136,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             }
         ],
         "type": "struct",
@@ -170,8 +168,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "sequence index",
@@ -205,13 +202,11 @@
             },
             {
                 "name": "color 1",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color 2",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "radius multiplier",
@@ -222,8 +217,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "point_physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -264,8 +258,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "anchor",
@@ -343,8 +336,7 @@
             },
             {
                 "name": "rotation animation center",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "type": "pad",
@@ -362,8 +354,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             }
         ],
         "type": "struct",
@@ -424,22 +415,19 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeStates",
-                "hek_maximum": 8,
-                "compound": true
+                "hek_maximum": 8
             },
             {
                 "name": "particle states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeParticleState",
-                "hek_maximum": 8,
-                "compound": true
+                "hek_maximum": 8
             }
         ],
         "type": "struct",
@@ -462,8 +450,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "point_physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "system update physics",
@@ -481,15 +468,13 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "hek_maximum": 8,
-                "compound": true
+                "hek_maximum": 8
             },
             {
                 "name": "particle types",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemType",
-                "hek_maximum": 4,
-                "compound": true
+                "hek_maximum": 4
             }
         ],
         "type": "struct",

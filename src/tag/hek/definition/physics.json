@@ -36,8 +36,7 @@
         "fields": [
             {
                 "name": "matrix",
-                "type": "Matrix",
-                "compound": true
+                "type": "Matrix"
             }
         ],
         "type": "struct",
@@ -125,18 +124,15 @@
             },
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "forward",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "up",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "friction type",
@@ -183,8 +179,7 @@
             },
             {
                 "name": "center of mass",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "density",
@@ -258,7 +253,6 @@
                 "name": "inertial matrix and inverse",
                 "type": "TagReflexive",
                 "struct": "PhysicsInertialMatrix",
-                "compound": true,
                 "minimum": 2,
                 "maximum": 2,
                 "hek_maximum": 2,
@@ -268,15 +262,13 @@
                 "name": "powered mass points",
                 "type": "TagReflexive",
                 "struct": "PhysicsPoweredMassPoint",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "name": "mass points",
                 "type": "TagReflexive",
                 "struct": "PhysicsMassPoint",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             }
         ],
         "type": "struct",

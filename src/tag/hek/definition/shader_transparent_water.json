@@ -48,8 +48,7 @@
             },
             {
                 "name": "map offset",
-                "type": "Vector2D",
-                "compound": true
+                "type": "Vector2D"
             },
             {
                 "name": "map repeats",
@@ -88,8 +87,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -103,8 +101,7 @@
             },
             {
                 "name": "view perpendicular tint color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "view parallel brightness",
@@ -115,8 +112,7 @@
             },
             {
                 "name": "view parallel tint color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
@@ -127,8 +123,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -152,8 +147,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "ripple mipmap levels",
@@ -182,7 +176,6 @@
                 "name": "ripples",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentWaterRipple",
-                "compound": true,
                 "hek_maximum": 4,
                 "maximum": 4
             },

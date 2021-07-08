@@ -92,16 +92,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "shader"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "physics",
                 "type": "TagDependency",
                 "classes": [
                     "point_physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "wind noise",
@@ -117,14 +115,12 @@
                 "type": "TagDependency",
                 "classes": [
                     "shader"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "attachment points",
                 "type": "TagReflexive",
                 "struct": "FlagAttachmentPoint",
-                "compound": true,
                 "hek_maximum": 4
             }
         ],

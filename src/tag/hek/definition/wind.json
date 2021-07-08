@@ -10,8 +10,7 @@
             },
             {
                 "name": "variation area",
-                "type": "Euler2D",
-                "compound": true
+                "type": "Euler2D"
             },
             {
                 "name": "local variation weight",

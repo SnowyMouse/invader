@@ -83,8 +83,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -120,8 +119,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -149,8 +147,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -219,8 +216,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "ai perception radius",
@@ -247,8 +243,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "timer",
@@ -314,32 +309,28 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "flyby sound",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "attached detonation damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "impact damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -349,8 +340,7 @@
                 "name": "projectile material response",
                 "type": "TagReflexive",
                 "struct": "ProjectileMaterialResponse",
-                "hek_maximum": 33,
-                "compound": true
+                "hek_maximum": 33
             }
         ],
         "type": "struct",

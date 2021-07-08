@@ -21,13 +21,11 @@
             },
             {
                 "name": "device id",
-                "type": "TagDataOffset",
-                "compound": true
+                "type": "TagDataOffset"
             },
             {
                 "name": "profile",
-                "type": "TagDataOffset",
-                "compound": true
+                "type": "TagDataOffset"
             }
         ],
         "type": "struct",

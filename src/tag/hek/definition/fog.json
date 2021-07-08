@@ -73,8 +73,7 @@
             },
             {
                 "name": "color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "flags 1",
@@ -141,8 +140,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "animation period",
@@ -186,16 +184,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound_looping"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "sound environment",
                 "type": "TagDependency",
                 "classes": [
                     "sound_environment"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",

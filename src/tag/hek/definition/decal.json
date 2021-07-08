@@ -60,8 +60,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "decal"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "radius",
@@ -91,7 +90,6 @@
             {
                 "name": "color lower bounds",
                 "type": "ColorRGB",
-                "compound": true,
                 "default": [
                     1.0,
                     1.0,
@@ -101,7 +99,6 @@
             {
                 "name": "color upper bounds",
                 "type": "ColorRGB",
-                "compound": true,
                 "default": [
                     1.0,
                     1.0,
@@ -171,8 +168,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",

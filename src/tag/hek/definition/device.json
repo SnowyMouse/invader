@@ -87,8 +87,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "close",
@@ -96,8 +95,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "opened",
@@ -105,8 +103,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "closed",
@@ -114,8 +111,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "depowered",
@@ -123,8 +119,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "repowered",
@@ -132,8 +127,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "delay time",
@@ -150,8 +144,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "automatic activation radius",

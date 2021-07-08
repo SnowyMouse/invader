@@ -20,8 +20,7 @@
             },
             {
                 "name": "offset from reference corner",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "override icon color",
@@ -119,8 +118,7 @@
             },
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -147,16 +145,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "multi player font",
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "up time",
@@ -168,13 +164,11 @@
             },
             {
                 "name": "icon color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "text color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "text spacing",
@@ -185,31 +179,27 @@
                 "type": "TagDependency",
                 "classes": [
                     "unicode_string_list"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "icon bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "alternate icon text",
                 "type": "TagDependency",
                 "classes": [
                     "unicode_string_list"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "button icons",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsButtonIcon",
-                "hek_maximum": 18,
-                "compound": true
+                "hek_maximum": 18
             },
             {
                 "name": "hud help default color",
@@ -252,8 +242,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "hud_message_text"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "objective default color",
@@ -320,15 +309,13 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "waypoint arrows",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsWaypointArrow",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "type": "pad",
@@ -347,8 +334,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "weapon_hud_interface"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "motion sensor range",
@@ -364,8 +350,7 @@
             },
             {
                 "name": "default chapter title bounds",
-                "type": "Rectangle2D",
-                "compound": true
+                "type": "Rectangle2D"
             },
             {
                 "type": "pad",
@@ -396,8 +381,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "hud damage sequence index",
@@ -496,8 +480,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "loading begin text",
@@ -520,8 +503,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",

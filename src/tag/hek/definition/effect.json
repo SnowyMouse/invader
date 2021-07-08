@@ -164,8 +164,7 @@
                     "sound",
                     "decal",
                     "light"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -240,18 +239,15 @@
             },
             {
                 "name": "relative direction",
-                "type": "Euler2D",
-                "compound": true
+                "type": "Euler2D"
             },
             {
                 "name": "relative offset",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "relative direction vector",
                 "type": "Vector3D",
-                "compound": true,
                 "endian": "little",
                 "cache_only": true
             },
@@ -264,8 +260,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "particle"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "flags",
@@ -326,13 +321,11 @@
             },
             {
                 "name": "tint lower bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "tint upper bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "type": "pad",
@@ -383,14 +376,12 @@
                 "name": "parts",
                 "type": "TagReflexive",
                 "struct": "EffectPart",
-                "compound": true,
                 "hek_maximum": 32
             },
             {
                 "name": "particles",
                 "type": "TagReflexive",
                 "struct": "EffectParticle",
-                "compound": true,
                 "hek_maximum": 32
             }
         ],
@@ -430,14 +421,12 @@
                 "name": "locations",
                 "type": "TagReflexive",
                 "struct": "EffectLocation",
-                "compound": true,
                 "hek_maximum": 32
             },
             {
                 "name": "events",
                 "type": "TagReflexive",
                 "struct": "EffectEvent",
-                "compound": true,
                 "hek_maximum": 32
             }
         ],

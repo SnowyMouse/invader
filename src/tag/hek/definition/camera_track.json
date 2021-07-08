@@ -4,13 +4,11 @@
         "fields": [
             {
                 "name": "position",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "orientation",
-                "type": "Quaternion",
-                "compound": true
+                "type": "Quaternion"
             },
             {
                 "type": "pad",
@@ -31,7 +29,6 @@
                 "name": "control points",
                 "type": "TagReflexive",
                 "struct": "CameraTrackControlPoint",
-                "compound": true,
                 "hek_maximum": 16
             },
             {

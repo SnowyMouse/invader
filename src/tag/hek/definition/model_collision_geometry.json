@@ -147,16 +147,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryPermutation",
                 "hek_maximum": 32,
-                "read_only": true,
-                "compound": true
+                "read_only": true
             }
         ],
         "type": "struct",
@@ -193,8 +191,7 @@
             },
             {
                 "name": "center",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "radius",
@@ -233,8 +230,7 @@
         "fields": [
             {
                 "name": "plane",
-                "type": "Plane3D",
-                "compound": true
+                "type": "Plane3D"
             }
         ],
         "type": "struct",
@@ -285,8 +281,7 @@
         "fields": [
             {
                 "name": "plane",
-                "type": "Plane2D",
-                "compound": true
+                "type": "Plane2D"
             },
             {
                 "name": "left child",
@@ -373,8 +368,7 @@
         "fields": [
             {
                 "name": "point",
-                "type": "Point3D",
-                "compound": true
+                "type": "Point3D"
             },
             {
                 "name": "first edge",
@@ -392,57 +386,49 @@
                 "name": "bsp3d nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP3DNode",
-                "hek_maximum": 131072,
-                "compound": true
+                "hek_maximum": 131072
             },
             {
                 "name": "planes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPPlane",
-                "hek_maximum": 65536,
-                "compound": true
+                "hek_maximum": 65536
             },
             {
                 "name": "leaves",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPLeaf",
-                "hek_maximum": 65536,
-                "compound": true
+                "hek_maximum": 65536
             },
             {
                 "name": "bsp2d references",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DReference",
-                "hek_maximum": 131072,
-                "compound": true
+                "hek_maximum": 131072
             },
             {
                 "name": "bsp2d nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DNode",
-                "hek_maximum": 65535,
-                "compound": true
+                "hek_maximum": 65535
             },
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPSurface",
-                "hek_maximum": 131072,
-                "compound": true
+                "hek_maximum": 131072
             },
             {
                 "name": "edges",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPEdge",
-                "hek_maximum": 262144,
-                "compound": true
+                "hek_maximum": 262144
             },
             {
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPVertex",
-                "hek_maximum": 131072,
-                "compound": true
+                "hek_maximum": 131072
             }
         ],
         "type": "struct",
@@ -493,8 +479,7 @@
                 "name": "bsps",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             }
         ],
         "type": "struct",
@@ -551,8 +536,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "area damage effect threshold",
@@ -565,8 +549,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "body damaged threshold",
@@ -577,16 +560,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "body depleted effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "body destroyed threshold",
@@ -597,8 +578,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "maximum shield vitality",
@@ -667,24 +647,21 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "shield depleted effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "shield recharging effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -705,24 +682,21 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryMaterial",
                 "read_only": true,
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryRegion",
                 "hek_maximum": 8,
-                "read_only": true,
-                "compound": true
+                "read_only": true
             },
             {
                 "name": "modifiers",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryModifier",
                 "read_only": true,
-                "hek_maximum": 0,
-                "compound": true
+                "hek_maximum": 0
             },
             {
                 "type": "pad",
@@ -748,7 +722,6 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometrySphere",
                 "hek_maximum": 32,
-                "compound": true,
                 "volatile": true
             },
             {
@@ -756,8 +729,7 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryNode",
                 "hek_maximum": 64,
-                "read_only": true,
-                "compound": true
+                "read_only": true
             }
         ],
         "type": "struct",

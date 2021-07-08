@@ -90,7 +90,6 @@
             {
                 "name": "shader",
                 "type": "TagDependency",
-                "compound": true,
                 "classes": [
                     "shader"
                 ]
@@ -122,13 +121,11 @@
             },
             {
                 "name": "color of emitted light",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "tint color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "physics flags",

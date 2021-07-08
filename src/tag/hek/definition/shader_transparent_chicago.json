@@ -77,8 +77,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -158,8 +157,7 @@
             },
             {
                 "name": "rotation animation center",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             }
         ],
         "type": "struct",
@@ -215,21 +213,18 @@
                 "type": "TagDependency",
                 "classes": [
                     "lens_flare"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
-                "hek_maximum": 4,
-                "compound": true
+                "hek_maximum": 4
             },
             {
                 "name": "maps",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
-                "compound": true,
                 "hek_maximum": 4,
                 "maximum": 4
             },

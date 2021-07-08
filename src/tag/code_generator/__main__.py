@@ -18,6 +18,26 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
+compound_structs = [
+    "ColorARGB",
+    "ColorRGB",
+    "Euler2D",
+    "Euler3D",
+    "Matrix",
+    "Plane2D",
+    "Plane3D",
+    "Point2D",
+    "Point2DInt",
+    "Point3D",
+    "Quaternion",
+    "Rectangle2D",
+    "TagDataOffset",
+    "TagDependency",
+    "TagReflexive",
+    "Vector2D",
+    "Vector3D"
+]
+
 for i in range(bitfield_cpp+2, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("(","").replace(")","")
@@ -50,6 +70,7 @@ for i in range(bitfield_cpp+2, len(sys.argv)):
                     sys.exit(1)
                 if f["type"] != "pad":
                     f["member_name"] = make_name_fun(f["name"], False).replace("-", "_")
+                    f["compound"] = f["type"] in compound_structs
                 if "display_name" not in f and "name" in f:
                     f["display_name"] = f["name"]
                 if f["type"] == "TagDependency":

@@ -169,8 +169,7 @@
             },
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -201,8 +200,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "default color",
@@ -252,8 +250,7 @@
                 "name": "multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "hek_maximum": 30,
-                "compound": true
+                "hek_maximum": 30
             },
             {
                 "type": "pad",
@@ -293,8 +290,7 @@
             },
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -325,8 +321,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "color at meter minimum",
@@ -422,8 +417,7 @@
             },
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -524,8 +518,7 @@
         "fields": [
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -635,15 +628,13 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "crosshair overlays",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceCrosshairOverlay",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "type": "pad",
@@ -660,8 +651,7 @@
         "fields": [
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -783,15 +773,13 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "overlays",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceOverlay",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "type": "pad",
@@ -826,16 +814,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "mask splitscreen",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -898,8 +884,7 @@
             },
             {
                 "name": "effect tint",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
@@ -917,8 +902,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "weapon_hud_interface"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "flags",
@@ -964,36 +948,31 @@
                 "name": "static elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceStaticElement",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "meter elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceMeter",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "number elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceNumber",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "crosshairs",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceCrosshair",
-                "hek_maximum": 19,
-                "compound": true
+                "hek_maximum": 19
             },
             {
                 "name": "overlay elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceOverlayElement",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "crosshair types",
@@ -1009,8 +988,7 @@
                 "name": "screen effect",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceScreenEffect",
-                "hek_maximum": 1,
-                "compound": true
+                "hek_maximum": 1
             },
             {
                 "type": "pad",
@@ -1026,8 +1004,7 @@
             },
             {
                 "name": "offset from reference corner",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "override icon color",

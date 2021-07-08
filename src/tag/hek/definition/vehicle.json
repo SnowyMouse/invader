@@ -247,32 +247,28 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "crash sound",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "material effects",
                 "type": "TagDependency",
                 "classes": [
                     "material_effects"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             }
         ],
         "type": "struct",

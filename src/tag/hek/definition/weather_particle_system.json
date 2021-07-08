@@ -84,8 +84,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "point_physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -132,13 +131,11 @@
             },
             {
                 "name": "color lower bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color upper bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "sprite size",
@@ -156,7 +153,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "non_null": true
             },
             {
@@ -202,8 +198,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "anchor",
@@ -280,8 +275,7 @@
             },
             {
                 "name": "rotation animation center",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "type": "pad",
@@ -316,8 +310,7 @@
                 "name": "particle types",
                 "type": "TagReflexive",
                 "struct": "WeatherParticleSystemParticleType",
-                "hek_maximum": 8,
-                "compound": true
+                "hek_maximum": 8
             }
         ],
         "type": "struct",

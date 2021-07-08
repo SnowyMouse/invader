@@ -170,13 +170,11 @@
             },
             {
                 "name": "tint color lower bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "tint color upper bound",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "periodic function",
@@ -253,57 +251,48 @@
             },
             {
                 "name": "primary scale",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "name": "secondary scale",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "name": "tertiary scale",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "name": "primary offset",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "name": "secondary offset",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "name": "tertiary offset",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "name": "primary",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "secondary",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "tertiary",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "primary wrap mode",
@@ -329,8 +318,7 @@
                 "name": "effectors",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlayEffector",
-                "hek_maximum": 30,
-                "compound": true
+                "hek_maximum": 30
             },
             {
                 "type": "pad",

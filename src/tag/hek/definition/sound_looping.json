@@ -61,24 +61,21 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "loop",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "end",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -89,16 +86,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "alternate end",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             }
         ],
         "type": "struct",
@@ -112,8 +107,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "random period bounds",
@@ -213,22 +207,19 @@
                 "type": "TagDependency",
                 "classes": [
                     "continuous_damage_effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "tracks",
                 "type": "TagReflexive",
                 "struct": "SoundLoopingTrack",
-                "hek_maximum": 4,
-                "compound": true
+                "hek_maximum": 4
             },
             {
                 "name": "detail sounds",
                 "type": "TagReflexive",
                 "struct": "SoundLoopingDetail",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             }
         ],
         "type": "struct",

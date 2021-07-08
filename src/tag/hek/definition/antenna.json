@@ -12,8 +12,7 @@
             },
             {
                 "name": "angles",
-                "type": "Euler2D",
-                "compound": true
+                "type": "Euler2D"
             },
             {
                 "name": "length",
@@ -30,13 +29,11 @@
             },
             {
                 "name": "color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "lod color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "type": "pad",
@@ -46,7 +43,6 @@
                 "name": "offset",
                 "type": "Point3D",
                 "endian": "little",
-                "compound": true,
                 "cache_only": true
             }
         ],
@@ -66,16 +62,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "physics",
                 "type": "TagDependency",
                 "classes": [
                     "point_physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -105,8 +99,7 @@
             {
                 "name": "vertices",
                 "type": "TagReflexive",
-                "struct": "AntennaVertex",
-                "compound": true
+                "struct": "AntennaVertex"
             }
         ],
         "type": "struct",

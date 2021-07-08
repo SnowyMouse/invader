@@ -182,13 +182,11 @@
             },
             {
                 "name": "standing gun offset",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "crouching gun offset",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "hearing distance",
@@ -299,13 +297,11 @@
             },
             {
                 "name": "maximum aiming deviation",
-                "type": "Euler2D",
-                "compound": true
+                "type": "Euler2D"
             },
             {
                 "name": "maximum looking deviation",
-                "type": "Euler2D",
-                "compound": true
+                "type": "Euler2D"
             },
             {
                 "name": "noncombat look delta l",
@@ -325,13 +321,11 @@
             },
             {
                 "name": "idle aiming range",
-                "type": "Euler2D",
-                "compound": true
+                "type": "Euler2D"
             },
             {
                 "name": "idle looking range",
-                "type": "Euler2D",
-                "compound": true
+                "type": "Euler2D"
             },
             {
                 "name": "event look time modifier",
@@ -400,14 +394,12 @@
                 "name": "cosine maximum aiming deviation",
                 "type": "Euler2D",
                 "endian": "little",
-                "compound": true,
                 "cache_only": true
             },
             {
                 "name": "cosine maximum looking deviation",
                 "type": "Euler2D",
                 "endian": "little",
-                "compound": true,
                 "cache_only": true
             },
             {
@@ -416,8 +408,7 @@
                 "classes": [
                     "weapon"
                 ],
-                "unused": true,
-                "compound": true
+                "unused": true
             },
             {
                 "type": "pad",
@@ -429,8 +420,7 @@
                 "classes": [
                     "projectile"
                 ],
-                "unused": true,
-                "compound": true
+                "unused": true
             },
             {
                 "name": "unreachable danger trigger",
@@ -789,8 +779,7 @@
                 "classes": [
                     "actor"
                 ],
-                "unused": true,
-                "compound": true
+                "unused": true
             },
             {
                 "type": "pad",

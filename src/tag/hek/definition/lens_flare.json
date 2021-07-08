@@ -124,18 +124,15 @@
             },
             {
                 "name": "tint color",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color lower bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color upper bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "more flags",
@@ -215,8 +212,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "flags",
@@ -266,8 +262,7 @@
                 "name": "reflections",
                 "type": "TagReflexive",
                 "struct": "LensFlareReflection",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "type": "pad",

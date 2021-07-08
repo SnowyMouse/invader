@@ -49,8 +49,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "off",
@@ -58,8 +57,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "deny",
@@ -67,8 +65,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             }
         ],
         "type": "struct",

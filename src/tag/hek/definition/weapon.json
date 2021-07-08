@@ -142,8 +142,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "equipment"
-                ],
-                "compound": true
+                ]
             }
         ],
         "type": "struct",
@@ -208,8 +207,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "chambering effect",
@@ -217,8 +215,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -228,8 +225,7 @@
                 "name": "magazine objects",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazineObject",
-                "hek_maximum": 8,
-                "compound": true
+                "hek_maximum": 8
             }
         ],
         "type": "struct",
@@ -256,8 +252,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "misfire effect",
@@ -265,8 +260,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "empty effect",
@@ -274,32 +268,28 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "firing damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "misfire damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "empty damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
-                ],
-                "compound": true
+                ]
             }
         ],
         "type": "struct",
@@ -417,8 +407,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "distribution function",
@@ -450,7 +439,6 @@
             {
                 "name": "first person offset",
                 "type": "Point3D",
-                "compound": true,
                 "comment": "This is the relative offset from the first person camera the projectile spawns.\nX is front (+) and back (-), Y is left (+) and right (-), Z is up (+) and down (-)."
             },
             {
@@ -463,7 +451,6 @@
                 "classes": [
                     "object"
                 ],
-                "compound": true,
                 "comment": "This is the object that spawns when firing the weapon.\nThe object will spawn facing the same direction as the first person camera (along with any error angle applied, if necessary) with the velocity of the shooter."
             },
             {
@@ -547,8 +534,7 @@
                 "name": "firing effects",
                 "type": "TagReflexive",
                 "struct": "WeaponTriggerFiringEffect",
-                "hek_maximum": 8,
-                "compound": true
+                "hek_maximum": 8
             }
         ],
         "type": "struct",
@@ -614,8 +600,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "heat recovery threshold",
@@ -663,8 +648,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "overheat detonation",
@@ -673,24 +657,21 @@
                     "sound",
                     "effect"
                 ],
-                "comment": "This effect is played when the weapon overheats and is set to detonate as a result",
-                "compound": true
+                "comment": "This effect is played when the weapon overheats and is set to detonate as a result"
             },
             {
                 "name": "player melee damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "player melee response",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -701,8 +682,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "actor_variant"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "near reticle range",
@@ -806,8 +786,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "light power off effect",
@@ -815,8 +794,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "age heat recovery penalty",
@@ -847,16 +825,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "model"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "first person animations",
                 "type": "TagDependency",
                 "classes": [
                     "model_animations"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -867,32 +843,28 @@
                 "type": "TagDependency",
                 "classes": [
                     "weapon_hud_interface"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "pickup sound",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "zoom in sound",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "zoom out sound",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -923,22 +895,19 @@
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "hek_maximum": 1024,
-                "cache_only": true,
-                "compound": true
+                "cache_only": true
             },
             {
                 "name": "magazines",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazine",
-                "hek_maximum": 2,
-                "compound": true
+                "hek_maximum": 2
             },
             {
                 "name": "triggers",
                 "type": "TagReflexive",
                 "struct": "WeaponTrigger",
-                "hek_maximum": 2,
-                "compound": true
+                "hek_maximum": 2
             }
         ],
         "type": "struct",

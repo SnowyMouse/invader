@@ -6,7 +6,6 @@
             {
                 "name": "reference",
                 "type": "TagDependency",
-                "compound": true,
                 "classes": [
                     "*"
                 ]
@@ -22,8 +21,7 @@
                 "name": "tags",
                 "type": "TagReflexive",
                 "struct": "TagCollectionTag",
-                "hek_maximum": 200,
-                "compound": true
+                "hek_maximum": 200
             }
         ],
         "type": "struct",

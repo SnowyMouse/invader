@@ -59,7 +59,6 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true,
                 "non_null": true
             },
             {
@@ -67,16 +66,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "point_physics"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "sir marty exchanged his children for thine",
                 "type": "TagDependency",
                 "classes": [
                     "material_effects"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -102,8 +99,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "death effect",
@@ -111,8 +107,7 @@
                 "classes": [
                     "sound",
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "minimum size",
@@ -235,8 +230,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "anchor",
@@ -314,8 +308,7 @@
             },
             {
                 "name": "rotation animation center",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             },
             {
                 "type": "pad",

@@ -174,8 +174,7 @@
             },
             {
                 "name": "registration point",
-                "type": "Point2D",
-                "compound": true
+                "type": "Point2D"
             }
         ],
         "type": "struct",
@@ -208,7 +207,6 @@
                 "name": "sprites",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSprite",
-                "compound": true,
                 "maximum": 65534,
                 "hek_maximum": 64
             }
@@ -254,8 +252,7 @@
             },
             {
                 "name": "registration point",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "mipmap count",
@@ -408,7 +405,6 @@
             {
                 "name": "compressed color plate data",
                 "type": "TagDataOffset",
-                "compound": true,
                 "non_cached": true,
                 "read_only": true,
                 "volatile": true
@@ -416,7 +412,6 @@
             {
                 "name": "processed pixel data",
                 "type": "TagDataOffset",
-                "compound": true,
                 "non_cached": true,
                 "read_only": true
             },
@@ -454,7 +449,6 @@
                 "name": "bitmap group sequence",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSequence",
-                "compound": true,
                 "maximum": 65534,
                 "read_only": true,
                 "hek_maximum": 256
@@ -463,7 +457,6 @@
                 "name": "bitmap data",
                 "type": "TagReflexive",
                 "struct": "BitmapData",
-                "compound": true,
                 "maximum": 65534,
                 "read_only": true,
                 "hek_maximum": 2048

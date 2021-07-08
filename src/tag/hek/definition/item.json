@@ -72,16 +72,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "material_effects"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "collision sound",
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -98,16 +96,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "detonation effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
-                ],
-                "compound": true
+                ]
             }
         ],
         "type": "struct",

@@ -15,8 +15,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "item"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -35,8 +34,7 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ItemCollectionPermutation",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             },
             {
                 "name": "default spawn time",

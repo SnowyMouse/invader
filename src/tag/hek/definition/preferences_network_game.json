@@ -9,17 +9,14 @@
             },
             {
                 "type": "ColorRGB",
-                "compound": true,
                 "name": "primary color"
             },
             {
                 "type": "ColorRGB",
-                "compound": true,
                 "name": "secondary color"
             },
             {
                 "type": "TagDependency",
-                "compound": true,
                 "name": "pattern",
                 "classes": [
                     "bitmap"
@@ -35,7 +32,6 @@
             },
             {
                 "type": "TagDependency",
-                "compound": true,
                 "name": "decal",
                 "classes": [
                     "bitmap"

@@ -20,8 +20,7 @@
                 "type": "TagReflexive",
                 "struct": "FontCharacterIndex",
                 "maximum": 256,
-                "hek_maximum": 256,
-                "compound": true
+                "hek_maximum": 256
             }
         ],
         "type": "struct",
@@ -105,7 +104,6 @@
                 "name": "character tables",
                 "type": "TagReflexive",
                 "struct": "FontCharacterTables",
-                "compound": true,
                 "cache_only": true,
                 "maximum": 256,
                 "hek_maximum": 256
@@ -115,45 +113,39 @@
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "italic",
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "condense",
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "underline",
                 "type": "TagDependency",
                 "classes": [
                     "font"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "characters",
                 "type": "TagReflexive",
                 "struct": "FontCharacter",
-                "compound": true,
                 "read_only": true,
                 "hek_maximum": 32000
             },
             {
                 "name": "pixels",
-                "type": "TagDataOffset",
-                "compound": true
+                "type": "TagDataOffset"
             }
         ],
         "type": "struct",

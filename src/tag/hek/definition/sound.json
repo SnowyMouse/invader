@@ -224,7 +224,6 @@
             {
                 "name": "samples",
                 "type": "TagDataOffset",
-                "compound": true,
                 "file_offset": true,
                 "external_file_offset": "sounds.map",
                 "compile_ignore": true,
@@ -233,13 +232,11 @@
             {
                 "name": "mouth data",
                 "type": "TagDataOffset",
-                "compound": true,
                 "read_only": true
             },
             {
                 "name": "subtitle data",
                 "type": "TagDataOffset",
-                "compound": true,
                 "read_only": true
             }
         ],
@@ -311,7 +308,6 @@
                 "type": "TagReflexive",
                 "struct": "SoundPermutation",
                 "hek_maximum": 256,
-                "compound": true,
                 "read_only": true
             }
         ],
@@ -435,8 +431,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "sound"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "promotion count",
@@ -473,7 +468,6 @@
                 "name": "pitch ranges",
                 "type": "TagReflexive",
                 "struct": "SoundPitchRange",
-                "compound": true,
                 "read_only": true,
                 "hek_maximum": 8,
                 "zero_on_index": true

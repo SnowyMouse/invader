@@ -25,8 +25,7 @@
         "fields": [
             {
                 "name": "anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "width scale",
@@ -123,8 +122,7 @@
                 "classes": [
                     "sound",
                     "sound_looping"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "latched to",
@@ -160,8 +158,7 @@
             },
             {
                 "name": "background anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "background width scale",
@@ -190,8 +187,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "background default color",
@@ -241,8 +237,7 @@
                 "name": "background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "hek_maximum": 30,
-                "compound": true
+                "hek_maximum": 30
             },
             {
                 "type": "pad",
@@ -250,8 +245,7 @@
             },
             {
                 "name": "total grenades background anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "total grenades background width scale",
@@ -280,8 +274,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "total grenades background default color",
@@ -331,8 +324,7 @@
                 "name": "total grenades background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "hek_maximum": 30,
-                "compound": true
+                "hek_maximum": 30
             },
             {
                 "type": "pad",
@@ -340,8 +332,7 @@
             },
             {
                 "name": "total grenades numbers anchor offset",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "total grenades numbers width scale",
@@ -437,22 +428,19 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "total grenades overlays",
                 "type": "TagReflexive",
                 "struct": "GrenadeHUDInterfaceOverlay",
-                "hek_maximum": 16,
-                "compound": true
+                "hek_maximum": 16
             },
             {
                 "name": "total grenades warning sounds",
                 "type": "TagReflexive",
                 "struct": "GrenadeHUDInterfaceSound",
-                "hek_maximum": 12,
-                "compound": true
+                "hek_maximum": 12
             },
             {
                 "type": "pad",
@@ -468,8 +456,7 @@
             },
             {
                 "name": "messaging information offset from reference corner",
-                "type": "Point2DInt",
-                "compound": true
+                "type": "Point2DInt"
             },
             {
                 "name": "messaging information override icon color",

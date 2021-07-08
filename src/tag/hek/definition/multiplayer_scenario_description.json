@@ -7,16 +7,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "displayed map name",
                 "type": "TagDependency",
                 "classes": [
                     "unicode_string_list"
-                ],
-                "compound": true
+                ]
             },
             {
                 "name": "scenario tag directory path",
@@ -38,8 +36,7 @@
                 "name": "multiplayer scenarios",
                 "type": "TagReflexive",
                 "struct": "MultiplayerScenarioDescriptionScenarioDescription",
-                "hek_maximum": 32,
-                "compound": true
+                "hek_maximum": 32
             }
         ],
         "type": "struct",

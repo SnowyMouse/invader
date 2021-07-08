@@ -82,13 +82,11 @@
             },
             {
                 "name": "color lower bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "name": "color upper bound",
-                "type": "ColorARGB",
-                "compound": true
+                "type": "ColorARGB"
             },
             {
                 "type": "pad",
@@ -99,8 +97,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -120,8 +117,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -174,8 +170,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "lens_flare"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -187,8 +182,7 @@
             },
             {
                 "name": "color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",

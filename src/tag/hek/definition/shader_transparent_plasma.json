@@ -60,8 +60,7 @@
             },
             {
                 "name": "perpendicular tint color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "parallel brightness",
@@ -71,8 +70,7 @@
             },
             {
                 "name": "parallel tint color",
-                "type": "ColorRGB",
-                "compound": true
+                "type": "ColorRGB"
             },
             {
                 "name": "tint color source",
@@ -114,8 +112,7 @@
             },
             {
                 "name": "primary animation direction",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "primary noise map scale",
@@ -126,8 +123,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
@@ -145,8 +141,7 @@
             },
             {
                 "name": "secondary animation direction",
-                "type": "Vector3D",
-                "compound": true
+                "type": "Vector3D"
             },
             {
                 "name": "secondary noise map scale",
@@ -157,8 +152,7 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "compound": true
+                ]
             },
             {
                 "type": "pad",
