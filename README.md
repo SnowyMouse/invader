@@ -25,16 +25,17 @@ To check if you are on an up-to-date version, run one of the tools (e.g.
 invader-info) with the `-i` parameter. On the top of the output is the version
 number that corresponds to the installation of Invader (e.g.
 `Invader 0.26.1.r1776.9db4cc5`). This is the project name (`Invader`), version
-(`0.26.1`), commit number (`r1776`), and commit hash (`9db4cc5`).
+(`0.26.1`), commit number (`r1776`), and a truncated commit hash (`9db4cc5`).
 
 Next, go to the [commits] and check the commit hash against the topmost commit.
-If it is the same, then you are using the latest version of Invader.
+If the commit hash in Invader matches the beginning of the full hash, then you
+are using the latest build of Invader.
+
+[commits]: https://github.com/SnowyMouse/invader/commits/master
 
 Invader is not finished, so it is important to stay up-to-date to obtain the
 latest features and fixes. Staying on an old version means staying on unfinished
 software that likely has known issues.
-
-[commits]: https://github.com/SnowyMouse/invader/commits/master
 
 ## Contributing
 See CONTRIBUTING.md.
@@ -846,6 +847,7 @@ Invader's development.
 - [Who owns my map when I build it?]
 - [Why GPL and not MIT or BSD?]
 - [How can I get Invader under a different license?]
+- [Why is Invader multiple programs?]
 - [Are there any GUI tools?]
 - [Are 32-bit Windows builds available?]
 - [Can invader-build create .yelo maps?]
@@ -917,8 +919,9 @@ case *you* would certainly own it.
 Note, however, that you may be subjected to additional license(s) if you choose
 to use assets you don't own (assuming you even have permission to use them),
 including the assets that came with the Halo Editing Kit. Using Invader does not
-give you permission to use any of these assets. Consult a legal expert if you
-need assurance on your rights.
+give you permission to use any of these assets, nor does it give you permission
+to use any extracted assets (or to even extract those assets). Consult a legal
+expert if you need assurance on your rights.
 
 ### Why GPL and not MIT or BSD?
 Invader uses version 3 of the GNU GPL because we feel that Invader and all
@@ -937,22 +940,23 @@ made them are no longer there to support what they have made.
 Often times, people will say they will release the source code in the future,
 or they will at least consider releasing the source code. In nearly all cases
 of this, the source code was never released. The GNU GPL solves this problem
-by requiring everyone to have access to the source code when binary code is
-released.
+by requiring everyone who has access to binary code have access to the source
+code.
 
 As time goes on, unmaintained, closed-source software becomes more seemingly
 broken, incomplete, or even incompatible. For example, the Halo Editing Kit has
 numerous issues that prevent people from making the content they want to make,
-yet [it is still the only way to fully create maps]. The worst part about this
-is that, in many cases, people do not make any sort of effort to replace this
-software with working software, as they do not feel it is worth the time or
-effort. Therefore, the broken, unmaintained software continues being used. This
-is where Invader comes in.
+yet [it is still the only way to fully create maps].
 
 [it is still the only way to fully create maps]: https://opencarnage.net/index.php?/topic/7765-replacing-the-halo-editing-kit-with-open-source-software/
 
-In our opinion, we feel that modding tools should be open for all to use,
-share, change, and learn from. At the same time, we also feel that a
+The worst part about this is that, in many cases, people do not make any sort of
+effort to replace this software with working software as they either do not know
+how to or they do not feel it is worth the time or effort. Therefore, the
+broken, unmaintained software continues being used. This is where Invader comes in.
+
+In our opinion, we feel that modding tools run by a user should be open for all
+to use, share, change, and learn from. At the same time, we also feel that a
 requirement for people give back to the community the source code to any
 derivatives of our tools they have chosen to share is not too much to ask for,
 as this ensures that modding stays free and open instead of left to stagnation
@@ -969,15 +973,86 @@ closed source projects, or they have been converted to closed source with the
 That is why Invader uses version 3 of the GNU GPL.
 
 ### How can I get Invader under a different license?
-Officially, the only way to obtain Invader is through version 3.0 of the GNU
-General Public License. We will not provide exception to anyone - not even
-Bungie, Microsoft, or our own mothers.
+See LICENSE.md for information.
 
-In order to get Invader under a different license, you will need to write to
-*both* [Snowy Mouse] and [Vaporeon], and you will need *unanimous* approval.
+### Why is Invader multiple programs?
+Invader takes the approach of making each program do one thing well. There are a
+few benefits to this:
 
-[Snowy Mouse]: https://github.com/SnowyMouse
-[Vaporeon]: https://github.com/Vaporeon
+Invader emphasizes good, scriptable tools, as these can drastically increase the
+efficiency of your work. What took hours in the HEK (e.g. refactoring tags or
+regenerating bitmaps as lossless) takes minutes in Invader. As such, command
+line has to be first class!
+
+For example, most shells support tab completion. If Invader is correctly set up
+in your path and you type "inv" and press TAB, it'll autocomplete to "invader-".
+You can then type "de" after that and press TAB again to autocomplete to
+"invader-dependency" (or "invader-dependency.exe" on Windows). This means you've
+typed 18-22 characters in just 7 keystrokes! That's 2x-3x as efficient. But if
+it was just one executable, you would only be able to tab complete the word
+"invader".
+
+Also, if Invader one executable, arguments would need rethought. Consider these
+two commands:
+
+```
+invader-build levels/test/bloodgulch/bloodgulch -g pc-custom -r always
+invader-dependency levels/test/bloodgulch/bloodgulch -r
+```
+
+How would this be done as a single executable? Well, tool.exe does the
+verb-then-argument method:
+
+```
+invader build levels/test/bloodgulch/bloodgulch -g pc-custom -r always -t tags
+invader dependency levels/test/bloodgulch/bloodgulch -r -t tags
+```
+
+But now there's an issue! The -r argument in invader-build takes one argument,
+but it doesn't in invader-dependency! There's no way to know how many arguments
+-r takes or even what -r does UNTIL it has read the first argument.
+
+Invader is written to process hyphenated parameters, first, and then parse any
+remaining arguments second, but you can't just change it to process the
+non-hyphenated arguments since "tags", "always", and "pc-custom" do not start
+with a hyphen but are part of a hyphenated parameter (which, again, it doesn't
+know this yet!). So, it'd have to be written to specifically read the very first
+argument before doing anything. This is certainly doable, but it's much harder
+to document, and having argument order not usually matter is typically more
+elegant to write in - both for developing the tools and actually using them.
+
+We also want to avoid tool.exe-isms as much as possible. The tool.exe way is to
+pass all of the arguments in a set order. Sure, it's faster to write tool.exe
+since you don't have to do any sort of complicated argument parsing, but if you
+get it in the wrong order, it may not work as expected.
+
+For example, these are interpreted differently:
+
+```
+tool lightmaps levels\test\bloodgulch\bloodgulch bloodgulch 1 0.1
+tool lightmaps levels\test\bloodgulch\bloodgulch bloodgulch 0.1 1
+```
+
+Something like "-f -q 0.00001" or "-q 0.00001 -f" is fine. Invader having
+arguments you can usually specify in any order prevents errors! This makes
+Invader far more user friendly, especially for beginners getting into
+command-line and/or CE modding. The tool.exe way is not, and the lack of
+well-made documentation further compounds these issues.
+
+Also, a Vulkan renderer is being developed for Invader's scenario editor, but
+not everyone has Vulkan! You may have an outdated GPU (e.g. an Intel HD 2000) or
+no GPU (i.e. a "headless" system - very common in servers). If a program linked
+against Vulkan (linking is generally the best way to use a library), then unless
+you had Vulkan installed, the program wouldn't run.
+
+For Invader, if you do NOT have Vulkan, then you simply wouldn't be able to run
+the scenario editor. However, if the entire toolkit is a single executable, you
+couldn't run Invader at all! If you just want to do simple tasks such as tag
+extraction or tag stripping, you aren't going to need a renderer. Sure, there
+are ways around this. Invader could be provided in such a way where you had a
+Vulkan-less build, but this would confuse users and create a maintenance burden.
+Invader could load an external renderer library at runtime, but this would
+defeat the point of making Invader into one executable.
 
 ### Are there any GUI tools?
 Officially, only one of these tools has a graphical user interface,
@@ -987,13 +1062,10 @@ graphical interface for some of Invader's other tools.
 
 ### Are 32-bit Windows builds available?
 Only 64-bit builds are uploaded to [Nightly Builds]. You can compile Invader
-for 32-bit x86 Windows.
-
-The reason 32-bit builds are not provided is because 32-bit builds are slower
-and more limited than x86_64 due to architectural differences (e.g. fewer
-registers to hold temporary data). People who are unsure may also download a
-32-bit build even though a 64-build will work better. Nearly all desktop PCs
-made today come with a 64-bit operating system.
+for 32-bit x86 Windows, but due to architectural and performance differences,
+these builds are not recommended. People who are unsure may even download a
+32-bit build even though a 64-build will work better. Nearly all desktop x86 PCs
+made in the past decade come with a 64-bit operating system.
 
 ### Can invader-build create .yelo maps?
 Officially, invader-build only creates maps for officially-released versions of
@@ -1003,7 +1075,8 @@ this does not mean that you can't make a fork of Invader that supports it, and
 there are people who have said they were willing to do this.
 
 ### Can invader-build create Xbox maps?
-Yes. Pass `-g xbox` into invader-build. A guide for making Xbox maps is planned.
+Yes. Pass `-g xbox-2276` into invader-build. You may need to fix some tags if
+using tags for other versions of the game.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this
@@ -1020,8 +1093,10 @@ Sapien will use the lower quality bitmap and load happily, and invader-build
 will use the higher quality bitmap when building.
 
 ### How close to completion is Invader?
-There is still a lot to do in Invader. Check the Issues page for more
+There is still a lot to do in Invader. Check the [Issues] page for more
 information.
+
+[Issues]: https://github.com/SnowyMouse/invader/issues
 
 ### Should I use invader-bitmap or tool.exe?
 In this case, invader-bitmap is either mostly or completely feature-complete,
@@ -1043,7 +1118,7 @@ ironed out before this FAQ can confidently recommend it for *every* use case,
 while tool.exe is basically the reference when it comes to building cache files.
 
 However, we do ask that you consider testing invader-build so we can improve it
-to a point where it can be a solid replacement to tool.exe.
+to a point where it can be a better and free replacement for tool.exe.
 
 [Staying up-to-date]: #staying-up-to-date
 [Contributing]: #contributing
@@ -1056,6 +1131,7 @@ to a point where it can be a solid replacement to tool.exe.
 [Who owns my map when I build it?]: #who-owns-my-map-when-i-build-it
 [Why GPL and not MIT or BSD?]: #why-gpl-and-not-mit-or-bsd
 [How can I get Invader under a different license?]: #how-can-i-get-invader-under-a-different-license
+[Why is Invader multiple programs?]: #why-is-invader-multiple-programs
 [Are there any GUI tools?]: #are-there-any-gui-tools
 [Are 32-bit Windows builds available?]: #are-32-bit-windows-builds-available
 [Can invader-build create .yelo maps?]: #can-invader-build-create-yelo-maps
