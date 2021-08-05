@@ -6,14 +6,17 @@
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
 #include <invader/command_line_option.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/tag_collection.hpp>
 #include <invader/file/file.hpp>
 #include <fstream>
 
 #define INDEX_EXTENSION ".txt"
 
+using namespace Invader;
+using namespace Invader::Parser;
+
 int main(int argc, char * const *argv) {
-    std::vector<Invader::CommandLineOption> options;
+    std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
@@ -28,7 +31,7 @@ int main(int argc, char * const *argv) {
         bool use_filesystem_path = false;
     } collection_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CollectionOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, collection_options, [](char opt, const std::vector<const char *> &arguments, auto &collection) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<CollectionOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, collection_options, [](char opt, const std::vector<const char *> &arguments, auto &collection) {
         switch(opt) {
             case 't':
                 if(collection.tags.has_value()) {
@@ -38,7 +41,7 @@ int main(int argc, char * const *argv) {
                 collection.tags = arguments[0];
                 break;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
             case 'd':
                 collection.data = arguments[0];
@@ -57,7 +60,7 @@ int main(int argc, char * const *argv) {
     std::string string_tag;
     if(collection_options.use_filesystem_path) {
         std::vector<std::filesystem::path> data(&collection_options.data, &collection_options.data + 1);
-        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
+        auto string_tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], data);
         if(string_tag_maybe.has_value()) {
             string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
         }
@@ -78,7 +81,7 @@ int main(int argc, char * const *argv) {
     std::filesystem::path data_path(collection_options.data);
 
     auto input_path = (data_path / string_tag).string() + INDEX_EXTENSION;
-    auto output_path = (tags_path / string_tag).string() + "." + Invader::HEK::tag_fourcc_to_extension(Invader::TagFourCC::TAG_FOURCC_TAG_COLLECTION);
+    auto output_path = (tags_path / string_tag).string() + "." + tag_fourcc_to_extension(TagFourCC::TAG_FOURCC_TAG_COLLECTION);
 
     // Open a file
     std::ifstream input_file = std::ifstream(input_path);
@@ -87,22 +90,22 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     std::string line;
-    Invader::Parser::TagCollection tag;
+    Parser::TagCollection tag;
     std::size_t line_number = 0;
     while(std::getline(input_file, line)) {
         line_number++;
         if(line.size()) {
             auto &entry = tag.tags.emplace_back();
-            auto whole_tag = Invader::File::split_tag_class_extension(line);
+            auto whole_tag = File::split_tag_class_extension(line);
             if(!whole_tag.has_value()) {
                 eprintf_error("Invalid tag path in line #%zu: %s", line_number, line.c_str());
                 return EXIT_FAILURE;
             }
-            entry.reference.path = Invader::File::preferred_path_to_halo_path(whole_tag->path);
+            entry.reference.path = File::preferred_path_to_halo_path(whole_tag->path);
             entry.reference.tag_fourcc = whole_tag->fourcc;
         }
     }
-    auto final_data = tag.generate_hek_tag_data(Invader::TagFourCC::TAG_FOURCC_TAG_COLLECTION, true);
+    auto final_data = tag.generate_hek_tag_data(true);
 
     // Write it all
     std::filesystem::path tag_path(output_path);
@@ -111,7 +114,7 @@ int main(int argc, char * const *argv) {
     std::error_code ec;
     std::filesystem::create_directories(tag_path.parent_path(), ec);
 
-    if(!Invader::File::save_file(output_path.c_str(), final_data)) {
+    if(!File::save_file(output_path.c_str(), final_data)) {
         eprintf_error("Error: Failed to write to %s.", output_path.c_str());
         return EXIT_FAILURE;
     }

@@ -6,6 +6,7 @@
         "inherits": "BasicObject",
         "pre_compile": true,
         "post_compile": true,
-        "size": 508
+        "size": 508,
+        "group": "sound_scenery"
     }
 ]

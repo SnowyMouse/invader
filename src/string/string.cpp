@@ -6,9 +6,9 @@
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/string_list.hpp>
+#include <invader/tag/parser/definition/unicode_string_list.hpp>
 #include <invader/file/file.hpp>
 
 enum Format {
@@ -17,9 +17,7 @@ enum Format {
     STRING_LIST_FORMAT_LATIN1
 };
 
-template <typename T, typename G, Invader::TagFourCC C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
-    using namespace Invader::HEK;
-
+template <typename T, typename G> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
     // Make the file header
     G tag_data = {};
 
@@ -81,7 +79,7 @@ template <typename T, typename G, Invader::TagFourCC C> static std::vector<std::
         }
     }
 
-    return tag_data.generate_hek_tag_data(C, true);
+    return tag_data.generate_hek_tag_data(true);
 }
 
 static std::vector<std::byte> generate_hud_message_text_tag(const std::string &) {
@@ -267,10 +265,10 @@ int main(int argc, char * const *argv) {
     std::vector<std::byte> final_data;
     switch(*string_options.format) {
         case STRING_LIST_FORMAT_UNICODE:
-            final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList>(text);
             break;
         case STRING_LIST_FORMAT_LATIN1:
-            final_data = generate_string_list_tag<char, Invader::Parser::StringList, Invader::TagFourCC::TAG_FOURCC_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char, Invader::Parser::StringList>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
             final_data = generate_hud_message_text_tag(text);

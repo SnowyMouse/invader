@@ -112,6 +112,7 @@
         "pre_compile": true,
         "postprocess_hek_data": true,
         "comment": "This is probably a leftover from pre-CE development. I don't think this tag does anything in modern CE.",
-        "size": 172
+        "size": 172,
+        "group": "meter"
     }
 ]

@@ -3,7 +3,7 @@
 #include <cstring>
 #include <invader/tag/hek/header.hpp>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     std::uint16_t TagFileHeader::version_for_tag(TagFourCC tag_fourcc) {
         switch(tag_fourcc) {
             case TAG_FOURCC_ACTOR:

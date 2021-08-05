@@ -207,6 +207,7 @@
         "post_compile": true,
         "postprocess_hek_data": true,
         "read_only": true,
-        "size": 232
+        "size": 232,
+        "group": "gbx_model"
     }
 ]

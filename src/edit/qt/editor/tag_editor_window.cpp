@@ -14,7 +14,6 @@
 #include <QFrame>
 #include <filesystem>
 #include <invader/file/file.hpp>
-#include <invader/tag/parser/parser.hpp>
 #include "../tree/tag_tree_window.hpp"
 #include "widget/tag_editor_widget.hpp"
 #include "widget/tag_editor_edit_widget_view.hpp"
@@ -26,6 +25,8 @@
 #endif
 #include "subwindow/tag_editor_string_subwindow.hpp"
 #include "subwindow/tag_editor_font_subwindow.hpp"
+
+using namespace Invader::Parser;
 
 namespace Invader::EditQt {
     // Used for scrolling to a specific item
@@ -233,7 +234,7 @@ namespace Invader::EditQt {
         if(dirty) {
             char message_entire_text[512];
             if(this->file.tag_path.size() == 0) {
-                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_fourcc_to_extension(this->file.tag_fourcc));
+                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", tag_fourcc_to_extension(this->file.tag_fourcc));
             }
             else {
                 std::snprintf(message_entire_text, sizeof(message_entire_text), "This file \"%s\" has been modified.\nDo you want to save your changes?", this->file.full_path.string().c_str());
@@ -281,7 +282,7 @@ namespace Invader::EditQt {
 
         // Save; benchmark
         auto start = std::chrono::steady_clock::now();
-        auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_fourcc);
+        auto tag_data = parser_data->generate_hek_tag_data();
         auto str = this->file.full_path.string();
         const auto *c_str = str.c_str();
         auto result = Invader::File::save_file(c_str, tag_data);
@@ -325,7 +326,7 @@ namespace Invader::EditQt {
         // Start writing the title
         std::string title;
         if(this->file.tag_path.empty()) {
-            title = std::string("Untitled ") + HEK::tag_fourcc_to_extension(this->file.tag_fourcc);
+            title = std::string("Untitled ") + tag_fourcc_to_extension(this->file.tag_fourcc);
         }
         else {
             title = std::string(this->file.full_path.string().c_str()) + (dirty ? " *" : "");

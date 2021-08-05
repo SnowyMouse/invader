@@ -62,7 +62,7 @@ namespace Invader {
          * Get the map type
          * @return map type
          */
-        HEK::CacheFileType get_type() const noexcept {
+        Parser::CacheFileType get_type() const noexcept {
             return this->type;
         }
 
@@ -126,7 +126,7 @@ namespace Invader {
          * Get the header's precomputed cache file type. This may not be indicative of the actual cache file type.
          * @return header's precomputed cache file type
          */
-        HEK::CacheFileType get_header_type() const noexcept {
+        Parser::CacheFileType get_header_type() const noexcept {
             return this->header_type;
         }
         
@@ -279,7 +279,7 @@ namespace Invader {
          * @param tag_fourcc tag class to find
          * @return              the index of the first tag found or std::nullopt if not found
          */
-        std::optional<std::size_t> find_tag(const char *tag_path, TagFourCC tag_fourcc) const noexcept;
+        std::optional<std::size_t> find_tag(const char *tag_path, Parser::TagFourCC tag_fourcc) const noexcept;
 
         /**
          * Get the scenario tag ID
@@ -367,13 +367,13 @@ namespace Invader {
         HEK::CacheFileEngine cache_version;
 
         /** Type */
-        HEK::CacheFileType type;
+        Parser::CacheFileType type;
 
         /** Name */
-        HEK::TagString scenario_name;
+        Parser::TagString scenario_name;
 
         /** Build */
-        HEK::TagString build;
+        Parser::TagString build;
 
         /** CRC32 */
         std::optional<std::uint32_t> crc32;
@@ -388,7 +388,7 @@ namespace Invader {
         std::uint64_t header_decompressed_file_size;
         
         /** Header type */
-        HEK::CacheFileType header_type;
+        Parser::CacheFileType header_type;
         
 
         /** Load the map now */

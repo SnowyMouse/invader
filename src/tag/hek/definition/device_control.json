@@ -73,6 +73,7 @@
         "pre_compile": true,
         "post_compile": true,
         "postprocess_hek_data": true,
-        "size": 792
+        "size": 792,
+        "group": "device_control"
     }
 ]

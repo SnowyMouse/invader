@@ -83,6 +83,7 @@
         "type": "struct",
         "inherits": "Shader",
         "pre_compile": true,
-        "size": 120
+        "size": 120,
+        "group": "shader_transparent_chicago_extended"
     }
 ]

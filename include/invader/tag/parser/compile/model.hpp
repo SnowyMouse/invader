@@ -3,17 +3,16 @@
 #ifndef INVADER__TAG__PARSER__COMPILE__MODEL_HPP
 #define INVADER__TAG__PARSER__COMPILE__MODEL_HPP
 
+#include "../definition/model.hpp"
+#include "../definition/gbxmodel.hpp"
+
 #include <cstdint>
 
 namespace Invader::Parser {
-    struct GBXModel;
-    struct GBXModelGeometryPart;
     bool uncache_model_markers(GBXModel &model, bool fix);
     bool regenerate_missing_model_vertices(GBXModelGeometryPart &part, GBXModel &model, bool fix);
     bool regenerate_missing_model_vertices(GBXModel &model, bool fix);
     
-    struct Model;
-    struct ModelGeometryPart;
     bool uncache_model_markers(Model &model, bool fix);
     bool regenerate_missing_model_vertices(ModelGeometryPart &part, Model &model, bool fix);
     bool regenerate_missing_model_vertices(Model &model, bool fix);
@@ -35,6 +34,9 @@ namespace Invader::Parser {
      * @return       converted tag
      */
     Model convert_gbxmodel_to_model(const GBXModel &model);
+    
+    ModelVertexCompressed::C<NativeEndian> compress_model_vertex(const ModelVertexUncompressed::C<NativeEndian> &vertex) noexcept;
+    ModelVertexUncompressed::C<NativeEndian> decompress_model_vertex(const ModelVertexCompressed::C<NativeEndian> &vertex) noexcept;
 }
 
 #endif

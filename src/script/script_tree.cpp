@@ -3,6 +3,8 @@
 #include <optional>
 #include <invader/script/script_tree.hpp>
 
+using namespace Invader::Parser;
+
 namespace Invader::ScriptTree {
     using namespace Tokenizer;
 
@@ -135,26 +137,26 @@ namespace Invader::ScriptTree {
                         c = '-';
                     }
                 }
-                script.script_return_type = HEK::ScenarioScriptValueType_from_string(return_type_value.c_str());
+                script.script_return_type = ScenarioScriptValueType_from_string(return_type_value.c_str()).value();
             }
             catch(std::exception &) {
                 RETURN_ERROR_TOKEN(first_token[3], "Invalid script return type");
             }
-            script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC;
+            script.script_type = ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC;
         }
         else {
-            script.script_return_type = HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID;
+            script.script_return_type = ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID;
             if(script_type_value == "stub") {
-                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB;
+                script.script_type = ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB;
             }
             else if(script_type_value == "startup") {
-                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STARTUP;
+                script.script_type = ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STARTUP;
             }
             else if(script_type_value == "continuous") {
-                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_CONTINUOUS;
+                script.script_type = ScenarioScriptType::SCENARIO_SCRIPT_TYPE_CONTINUOUS;
             }
             else if(script_type_value == "dormant") {
-                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_DORMANT;
+                script.script_type = ScenarioScriptType::SCENARIO_SCRIPT_TYPE_DORMANT;
             }
             else {
                 RETURN_ERROR_TOKEN(first_token[2], "Invalid script type");
@@ -214,7 +216,7 @@ namespace Invader::ScriptTree {
                     c = '-';
                 }
             }
-            global.global_type = HEK::ScenarioScriptValueType_from_string(global_type_value.c_str());
+            global.global_type = ScenarioScriptValueType_from_string(global_type_value.c_str()).value();
         }
         catch(std::exception &) {
             RETURN_ERROR_TOKEN(first_token[2], "Invalid global type");
@@ -362,7 +364,7 @@ namespace Invader::ScriptTree {
                     global_type.column = 0;
                     global_type.line = 0;
                     global_type.type = Tokenizer::Token::Type::TYPE_STRING;
-                    global_type.raw_value = HEK::ScenarioScriptValueType_to_string(global.global_type);
+                    global_type.raw_value = ScenarioScriptValueType_to_string(global.global_type);
                     for(char &c : global_type.raw_value) {
                         if(c == '-') {
                             c = '_';
@@ -402,16 +404,16 @@ namespace Invader::ScriptTree {
                     auto &script_type = r.emplace_back();
                     script_type.column = 0;
                     script_type.line = 0;
-                    script_type.raw_value = HEK::ScenarioScriptType_to_string(script.script_type);
+                    script_type.raw_value = ScenarioScriptType_to_string(script.script_type);
                     script_type.type = Tokenizer::Token::Type::TYPE_STRING;
                     script_type.value = script_type.raw_value;
 
-                    if(script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC || script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB) {
+                    if(script.script_type == ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC || script.script_type == ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB) {
                         auto &script_return_type = r.emplace_back();
                         script_return_type.column = 0;
                         script_return_type.line = 0;
                         script_return_type.type = Tokenizer::Token::Type::TYPE_STRING;
-                        script_return_type.raw_value = HEK::ScenarioScriptValueType_to_string(script.script_return_type);
+                        script_return_type.raw_value = ScenarioScriptValueType_to_string(script.script_return_type);
                         for(char &c : script_return_type.raw_value) {
                             if(c == '-') {
                                 c = '_';

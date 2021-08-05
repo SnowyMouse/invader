@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/scenario.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
@@ -35,17 +35,17 @@ namespace Invader::Parser {
         auto script_data_size = this->script_syntax_data.size();
 
         // If we don't have a script node table, give up
-        if(script_data_size < sizeof(ScenarioScriptNodeTable::struct_little)) {
+        if(script_data_size < sizeof(ScenarioScriptNodeTable::C<LittleEndian>)) {
             eprintf_error("scenario tag has an invalid scenario script node table");
             throw InvalidTagDataException();
         }
 
         // Copy the table header
-        ScenarioScriptNodeTable::struct_big table = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(script_data);
-        *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(script_data) = table;
+        ScenarioScriptNodeTable::C<BigEndian> table = *reinterpret_cast<ScenarioScriptNodeTable::C<LittleEndian> *>(script_data);
+        *reinterpret_cast<ScenarioScriptNodeTable::C<BigEndian> *>(script_data) = table;
 
         // Make sure it's not bullshit
-        auto *script_nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(script_data + sizeof(table));
+        auto *script_nodes = reinterpret_cast<ScenarioScriptNode::C<LittleEndian> *>(script_data + sizeof(table));
         auto table_size = table.maximum_count.read();
         std::size_t expected_size = (reinterpret_cast<std::byte *>(script_nodes + table_size) - script_data);
         if(expected_size != script_data_size) {
@@ -55,8 +55,8 @@ namespace Invader::Parser {
 
         // Copy the rest of the table
         for(std::size_t i = 0; i < table_size; i++) {
-            ScenarioScriptNode::struct_big big = script_nodes[i];
-            *reinterpret_cast<ScenarioScriptNode::struct_big *>(script_nodes + i) = big;
+            ScenarioScriptNode::C<BigEndian> big = script_nodes[i];
+            *reinterpret_cast<ScenarioScriptNode::C<BigEndian> *>(script_nodes + i) = big;
         }
 
         // Put scripts in if need be

@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/build/build_workload.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/gbxmodel.hpp>
+#include <invader/tag/parser/definition/model.hpp>
 #include <invader/tag/parser/compile/model.hpp>
+#include <invader/map/map.hpp>
 
 namespace Invader::Parser {
     template<typename M> static void postprocess_hek_data_model(M &what) {
@@ -13,13 +15,13 @@ namespace Invader::Parser {
         what.super_low_detail_node_count = 0;
 
         auto &geometries = what.geometries;
-        auto find_highest = [&geometries, &what](std::uint16_t &c, HEK::Index what_index) {
+        auto find_highest = [&geometries, &what](std::uint16_t &c, Index what_index) {
             if(what_index >= geometries.size()) {
                 c = 0;
             }
             else {
                 for(auto &p : geometries[what_index].parts) {
-                    bool use_local_nodes = what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES && sizeof(typename std::remove_reference<decltype(p)>::type::struct_little) == sizeof(GBXModelGeometryPart::struct_little);
+                    bool use_local_nodes = what.flags & ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES && sizeof(typename std::remove_reference<decltype(p)>::type::template C<LittleEndian>) == sizeof(GBXModelGeometryPart::C<LittleEndian>);
                 
                     for(auto &v : p.uncompressed_vertices) {
                         std::uint16_t node0 = v.node0_index;
@@ -27,7 +29,7 @@ namespace Invader::Parser {
 
                         // If zoner, use local nodes
                         if(use_local_nodes) {
-                            auto &p_gbx = *reinterpret_cast<Parser::GBXModelGeometryPart *>(&p);
+                            auto &p_gbx = *reinterpret_cast<GBXModelGeometryPart *>(&p);
                             constexpr const std::size_t LOCAL_NODE_COUNT = sizeof(p_gbx.local_node_indices) / sizeof(p_gbx.local_node_indices[0]);
                             node0 = (node0 < LOCAL_NODE_COUNT) ? p_gbx.local_node_indices[node0] : NULL_INDEX;
                             node1 = (node1 < LOCAL_NODE_COUNT) ? p_gbx.local_node_indices[node1] : NULL_INDEX;
@@ -140,7 +142,7 @@ namespace Invader::Parser {
 
         // Generate it
         auto marker_count = what.markers.size();
-        auto &gbxmodel_data = *reinterpret_cast<typename M::struct_little *>(workload.structs[struct_index].data.data() + offset);
+        auto &gbxmodel_data = *reinterpret_cast<typename M::template C<LittleEndian> *>(workload.structs[struct_index].data.data() + offset);
         gbxmodel_data.markers.count = static_cast<std::uint32_t>(marker_count);
 
         if(marker_count > 0) {
@@ -152,7 +154,7 @@ namespace Invader::Parser {
 
             // Make the struct
             auto &markers_struct = workload.structs.emplace_back();
-            ModelMarker::struct_little *markers_struct_arr;
+            ModelMarker::C<LittleEndian> *markers_struct_arr;
             markers_struct.data = std::vector<std::byte>(marker_count * sizeof(*markers_struct_arr));
             markers_struct_arr = reinterpret_cast<decltype(markers_struct_arr)>(markers_struct.data.data());
 
@@ -176,7 +178,7 @@ namespace Invader::Parser {
 
                 // Make the instances
                 auto &instance_struct = workload.structs.emplace_back();
-                ModelMarkerInstance::struct_little *instances_struct_arr;
+                ModelMarkerInstance::C<LittleEndian> *instances_struct_arr;
                 instance_struct.data = std::vector<std::byte>(sizeof(*instances_struct_arr) * instance_count);
                 instances_struct_arr = reinterpret_cast<decltype(instances_struct_arr)>(instance_struct.data.data());
                 for(std::size_t i = 0; i < instance_count; i++) {
@@ -195,7 +197,7 @@ namespace Invader::Parser {
     }
 
     void Model::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
-        if(this->flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES) {
+        if(this->flags & ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Non-Gearbox models are not allowed to have \"parts have local nodes\" set but this model does", tag_index);
             throw InvalidTagDataException();
         }
@@ -213,7 +215,7 @@ namespace Invader::Parser {
             part.uncompressed_vertices.reserve(part.compressed_vertices.size());
             for(auto &v : part.compressed_vertices) {
                 auto before_data = v.generate_hek_tag_data();
-                auto after_data = HEK::decompress_model_vertex(*reinterpret_cast<ModelVertexCompressed::struct_big *>(before_data.data()));
+                auto after_data = decompress_model_vertex(*reinterpret_cast<ModelVertexCompressed::C<BigEndian> *>(before_data.data()));
                 auto &after_data_write = part.uncompressed_vertices.emplace_back();
                 after_data_write.binormal = after_data.binormal;
                 after_data_write.normal = after_data.normal;
@@ -227,9 +229,9 @@ namespace Invader::Parser {
             }
         }
         else if(part.compressed_vertices.size() == 0 && part.uncompressed_vertices.size() > 0) {
-            auto resolve_local_node = [&part, &model](HEK::Index local_index) -> HEK::Index {
+            auto resolve_local_node = [&part, &model](Index local_index) -> Index {
                 // If we don't have any local nodes, just passthrough
-                if((sizeof(typename P::struct_little) != sizeof(GBXModelGeometryPart::struct_little)) || !(model.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES)) {
+                if((sizeof(typename P::template C<LittleEndian>) != sizeof(GBXModelGeometryPart::C<LittleEndian>)) || !(model.flags & ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES)) {
                     return local_index;
                 }
                 
@@ -264,12 +266,12 @@ namespace Invader::Parser {
             
             for(auto &v : part.uncompressed_vertices) {
                 // Resolve local nodes before throwing them into the compressor
-                auto before_data_copy = *reinterpret_cast<ModelVertexUncompressed::struct_big *>(v.generate_hek_tag_data().data());
+                auto before_data_copy = *reinterpret_cast<ModelVertexUncompressed::C<BigEndian> *>(v.generate_hek_tag_data().data());
                 before_data_copy.node0_index = resolve_local_node(before_data_copy.node0_index);
                 before_data_copy.node1_index = resolve_local_node(before_data_copy.node1_index);
                 
                 // Done
-                auto after_data = HEK::compress_model_vertex(before_data_copy);
+                auto after_data = compress_model_vertex(before_data_copy);
                 auto &after_data_write = part.compressed_vertices.emplace_back();
                 after_data_write.binormal = after_data.binormal;
                 after_data_write.normal = after_data.normal;
@@ -319,7 +321,7 @@ namespace Invader::Parser {
         return regenerate_missing_model_vertices_model(model, fix);
     }
     
-    template <class P, typename PS> static void post_cache_parse_model_part(P &what, const PS &part, const Invader::Tag &tag) {
+    template <class P, typename PS> static void post_cache_parse_model_part(P &what, const PS &part, const Tag &tag) {
         const auto &map = tag.get_map();
 
         // Get model vertices and indices count
@@ -327,7 +329,7 @@ namespace Invader::Parser {
         std::size_t index_count = part.triangle_count.read() + 2;
         std::size_t triangle_count = (index_count) / 3;
         std::size_t triangle_modulo = index_count % 3;
-        const HEK::LittleEndian<HEK::Index> *indices = nullptr;
+        const LittleEndian<Index> *indices = nullptr;
 
         // Get vertices
         if(vertex_count > 0) {
@@ -337,22 +339,22 @@ namespace Invader::Parser {
                 const auto *vertices = reinterpret_cast<const ModelVertexCompressed::struct_little *>(tag.data(vertex_pointer, sizeof(ModelVertexCompressed::struct_little) * vertex_count));
                 for(std::size_t v = 0; v < vertex_count; v++) {
                     std::size_t data_read;
-                    ModelVertexCompressed::struct_big vertex_compressed = vertices[v];
+                    ModelVertexCompressed::C<BigEndian> vertex_compressed = vertices[v];
                     what.compressed_vertices.emplace_back(ModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read, true));
                 }
-                indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(tag.data(what.triangle_offset, sizeof(std::uint16_t) * index_count));
+                indices = reinterpret_cast<const LittleEndian<Index> *>(tag.data(what.triangle_offset, sizeof(std::uint16_t) * index_count));
             }
             // Other maps use uncompressed vertices at an offset
             else {
                 auto model_data_offset = map.get_model_data_offset();
                 auto model_index_offset = map.get_model_index_offset() + model_data_offset;
-                const auto *vertices = reinterpret_cast<const ModelVertexUncompressed::struct_little *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(ModelVertexUncompressed::struct_little) * vertex_count));
+                const auto *vertices = reinterpret_cast<const ModelVertexUncompressed::C<LittleEndian> *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(ModelVertexUncompressed::C<LittleEndian>) * vertex_count));
                 for(std::size_t v = 0; v < vertex_count; v++) {
                     std::size_t data_read;
-                    ModelVertexUncompressed::struct_big vertex_uncompressed = vertices[v];
+                    ModelVertexUncompressed::C<BigEndian> vertex_uncompressed = vertices[v];
                     what.uncompressed_vertices.emplace_back(ModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read, true));
                 }
-                indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
+                indices = reinterpret_cast<const LittleEndian<Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
             }
         }
 
@@ -374,12 +376,12 @@ namespace Invader::Parser {
         }
     }
 
-    void GBXModelGeometryPart::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        post_cache_parse_model_part(*this, tag.get_struct_at_pointer<HEK::GBXModelGeometryPart>(*pointer), tag);
+    void GBXModelGeometryPart::post_cache_parse(const Tag &tag, std::optional<Pointer> pointer) {
+        post_cache_parse_model_part(*this, tag.get_struct_at_pointer<GBXModelGeometryPart::C>(*pointer), tag);
     }
 
-    void ModelGeometryPart::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        post_cache_parse_model_part(*this, tag.get_struct_at_pointer<HEK::ModelGeometryPart>(*pointer), tag);
+    void ModelGeometryPart::post_cache_parse(const Tag &tag, std::optional<Pointer> pointer) {
+        post_cache_parse_model_part(*this, tag.get_struct_at_pointer<ModelGeometryPart::C>(*pointer), tag);
     }
 
     template<typename M> static void pre_compile_model(M &what, BuildWorkload &workload, std::size_t tag_index) {
@@ -414,8 +416,8 @@ namespace Invader::Parser {
         }
         
         // Handle blended normals
-        if(what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS) {
-            std::vector<HEK::Point3D<HEK::NativeEndian>> positions;
+        if(what.flags & ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS) {
+            std::vector<Point3D<NativeEndian>> positions;
             
             // Get all of the possible vertex positions
             for(auto &g : what.geometries) {
@@ -445,7 +447,7 @@ namespace Invader::Parser {
                 // Add all the stuff (idk why it does this but lol)
                 for(auto &pos : positions) {
                     // Add up all of the fun stuff
-                    HEK::Vector3D<HEK::NativeEndian> vectors = {};
+                    Vector3D<NativeEndian> vectors = {};
                     for(auto &g : what.geometries) {
                         for(auto &p : g.parts) {
                             for(auto &v : p.uncompressed_vertices) {
@@ -485,7 +487,7 @@ namespace Invader::Parser {
         }
 
         bool model_part_warned = false;
-        bool uses_local_part_nodes = what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        bool uses_local_part_nodes = what.flags & ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
         for(std::size_t gi = 0; gi < geometries_count; gi++) {
             auto &g = what.geometries[gi];
             std::size_t parts_count = g.parts.size();
@@ -508,7 +510,7 @@ namespace Invader::Parser {
                 p.centroid_secondary_weight = 0.0F;
                 
                 // CAN we use local part nodes
-                if(uses_local_part_nodes && sizeof(typename std::remove_reference<decltype(p)>::type::struct_little) != sizeof(GBXModelGeometryPart::struct_little)) {
+                if(uses_local_part_nodes && sizeof(typename std::remove_reference<decltype(p)>::type::template C<LittleEndian>) != sizeof(GBXModelGeometryPart::C<LittleEndian>)) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of geometry #%zu uses local part nodes, but they aren't supported for non-gbxmodels", pi, gi);
                     eprintf_warn("To fix this, rebuild the model tag");
                     throw InvalidTagDataException();
@@ -591,11 +593,11 @@ namespace Invader::Parser {
                     // If we have a centroid primary node, let's hear it
                     if(first_highest_weight > 0.0F) {
                         // Set the centroid primary node
-                        p.centroid_primary_node = static_cast<HEK::Index>(first_highest);
+                        p.centroid_primary_node = static_cast<Index>(first_highest);
 
                         // Next, do we have a secondary node? If so, divide the weight between the two and set the secondary node
                         if(second_highest_weight > 0.0F) {
-                            p.centroid_secondary_node = static_cast<HEK::Index>(second_highest);
+                            p.centroid_secondary_node = static_cast<Index>(second_highest);
                             float total_weight = first_highest_weight + second_highest_weight;
                             p.centroid_primary_weight = first_highest_weight / total_weight;
                             p.centroid_secondary_weight = second_highest_weight / total_weight;
@@ -645,7 +647,7 @@ namespace Invader::Parser {
         std::vector<bool> node_done(node_count);
         auto *nodes = what.nodes.data();
 
-        auto write_node_data = [&node_done, &nodes, &node_count, &workload, &tag_index](HEK::Index node_index, const auto &base_rotation, const auto &base_translation, const auto &recursion) {
+        auto write_node_data = [&node_done, &nodes, &node_count, &workload, &tag_index](Index node_index, const auto &base_rotation, const auto &base_translation, const auto &recursion) {
             if(node_index == NULL_INDEX) {
                 return;
             }
@@ -682,11 +684,11 @@ namespace Invader::Parser {
             recursion(node.first_child_node_index, total_rotation, total_translation, recursion);
         };
 
-        HEK::Matrix<HEK::LittleEndian> identity = {};
+        Matrix<LittleEndian> identity = {};
         for(int i = 0; i < 3; i++) {
             identity.matrix[i][i] = 1.0f;
         }
-        HEK::Vector3D<HEK::LittleEndian> no_translation = {};
+        Vector3D<LittleEndian> no_translation = {};
         write_node_data(0, identity, no_translation, write_node_data);
 
         // exodux compatibility - recalibrate the bitmask using a high pass filter on the exodux compatibility bit
@@ -696,7 +698,7 @@ namespace Invader::Parser {
         for(auto &g : what.geometries) {
             for(auto &p : g.parts) {
                 // exodux compatibility bit; AND zoner flag with the value from the tag data and XOR with the auxiliary rainbow bitmask
-                std::uint32_t zoner = p.flags & HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
+                std::uint32_t zoner = p.flags & ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
                 std::uint32_t exodux_value = (p.bullshit & zoner) ^ 0x7F7F7F7F;
                 if(exodux_handler) {
                     // Since the exodux handler is active, we don't need to deobfuscate the binary rainbow table for this value due to Penn's theory
@@ -724,7 +726,7 @@ namespace Invader::Parser {
     }
 
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(workload.get_build_parameters()->details.build_cache_file_engine == CacheFileEngine::CACHE_FILE_XBOX) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Gearbox model tags do not exist on the target engine", tag_index);
             throw InvalidTagDataException();
         }
@@ -734,10 +736,10 @@ namespace Invader::Parser {
 
     void Model::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         switch(workload.get_build_parameters()->details.build_cache_file_engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+            case CacheFileEngine::CACHE_FILE_DEMO:
+            case CacheFileEngine::CACHE_FILE_RETAIL:
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case CacheFileEngine::CACHE_FILE_MCC_CEA:
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Non-Gearbox model tags do not work on the target engine", tag_index);
                 throw InvalidTagDataException();
             default: break;
@@ -747,9 +749,9 @@ namespace Invader::Parser {
     }
     
     template<class P, class PartVertex, class CacheVertex> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset, const std::vector<PartVertex> &part_vertices, std::vector<CacheVertex> &workload_vertices) {
-        auto uncompressed_vertices = sizeof(CacheVertex) == sizeof(Parser::ModelVertexUncompressed::struct_little);
+        auto uncompressed_vertices = sizeof(CacheVertex) == sizeof(ModelVertexUncompressed::C<LittleEndian>);
         
-        std::vector<HEK::Index> triangle_indices;
+        std::vector<Index> triangle_indices;
 
         // Add it all
         triangle_indices.reserve(what.triangles.size() * 3);
@@ -845,14 +847,14 @@ namespace Invader::Parser {
             mv.tangent = v.tangent;
             
             if(uncompressed_vertices) {
-                auto &uncompressed_cache_vertex = *reinterpret_cast<Parser::ModelVertexUncompressed::struct_little *>(&mv);
-                const auto &uncompressed_parser_vertex = *reinterpret_cast<const Parser::ModelVertexUncompressed *>(&v);
+                auto &uncompressed_cache_vertex = *reinterpret_cast<ModelVertexUncompressed::C<LittleEndian> *>(&mv);
+                const auto &uncompressed_parser_vertex = *reinterpret_cast<const ModelVertexUncompressed *>(&v);
                 uncompressed_cache_vertex.node1_weight = uncompressed_parser_vertex.node1_weight;
                 uncompressed_cache_vertex.texture_coords = uncompressed_parser_vertex.texture_coords;
             }
             else {
-                auto &compressed_cache_vertex = *reinterpret_cast<Parser::ModelVertexCompressed::struct_little *>(&mv);
-                const auto &compressed_parser_vertex = *reinterpret_cast<const Parser::ModelVertexCompressed *>(&v);
+                auto &compressed_cache_vertex = *reinterpret_cast<ModelVertexCompressed::C<LittleEndian> *>(&mv);
+                const auto &compressed_parser_vertex = *reinterpret_cast<const ModelVertexCompressed *>(&v);
                 compressed_cache_vertex.texture_coordinate_u = compressed_parser_vertex.texture_coordinate_u;
                 compressed_cache_vertex.texture_coordinate_v = compressed_parser_vertex.texture_coordinate_v;
             }
@@ -892,7 +894,7 @@ namespace Invader::Parser {
     }
 
     void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
-        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(workload.get_build_parameters()->details.build_cache_file_engine == CacheFileEngine::CACHE_FILE_XBOX) {
             pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, offset, this->compressed_vertices, workload.compressed_model_vertices);
         }
         else {
@@ -913,7 +915,7 @@ namespace Invader::Parser {
             try {
                 permutation_number = std::stoul(last_hyphen, nullptr, 10);
                 if(permutation_number < static_cast<std::size_t>(NULL_INDEX)) {
-                    this->permutation_number = static_cast<HEK::Index>(permutation_number);
+                    this->permutation_number = static_cast<Index>(permutation_number);
                 }
             }
             catch(std::out_of_range &) {
@@ -929,7 +931,7 @@ namespace Invader::Parser {
     }
     
     template <typename M> static void post_cache_deformat_model(M &what) {
-        what.flags &= ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS; // prevent generational loss
+        what.flags &= ~ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS; // prevent generational loss
 
         uncache_model_markers(what, true);
 
@@ -948,11 +950,11 @@ namespace Invader::Parser {
         what.postprocess_hek_data();
     }
 
-    void Invader::Parser::GBXModel::post_cache_deformat() {
+    void GBXModel::post_cache_deformat() {
         post_cache_deformat_model(*this);
     }
 
-    void Invader::Parser::Model::post_cache_deformat() {
+    void Model::post_cache_deformat() {
         post_cache_deformat_model(*this);
     }
     
@@ -1088,10 +1090,10 @@ namespace Invader::Parser {
         auto output = begin_converting_model<GBXModel, Model>(model);
         
         // Check if we have local nodes
-        auto local_nodes = model.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        auto local_nodes = model.flags & ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
         if(local_nodes) {
             // Local nodes don't exist on model tags
-            output.flags = output.flags & ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+            output.flags = output.flags & ~ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
         }
         
         // Do this
@@ -1117,5 +1119,48 @@ namespace Invader::Parser {
         }
         
         return output;
+    }
+    
+    ModelVertexCompressed::C<NativeEndian> compress_model_vertex(const ModelVertexUncompressed::C<NativeEndian> &vertex) noexcept {
+        ModelVertexCompressed::C<NativeEndian> r;
+        r.position = vertex.position;
+        r.node0_index = vertex.node0_index > Parser::MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX ? -3 : vertex.node0_index * 3;
+        r.node0_weight = static_cast<std::int16_t>(compress_float<16>(vertex.node0_weight));
+        r.node1_index = vertex.node1_index > Parser::MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX ? -3 : vertex.node1_index * 3;
+        r.texture_coordinate_u = static_cast<std::int16_t>(compress_float<16>(vertex.texture_coords.x));
+        r.texture_coordinate_v = static_cast<std::int16_t>(compress_float<16>(vertex.texture_coords.y));
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.binormal = compress_vector(vertex.binormal.i, vertex.binormal.j, vertex.binormal.k);
+        r.tangent = compress_vector(vertex.tangent.i, vertex.tangent.j, vertex.tangent.k);
+        return r;
+    }
+
+    ModelVertexUncompressed::C<NativeEndian> decompress_model_vertex(const ModelVertexCompressed::C<NativeEndian> &vertex) noexcept {
+        ModelVertexUncompressed::C<NativeEndian> r;
+        r.position = vertex.position;
+        r.node0_index = vertex.node0_index < 0 ? 65535 : vertex.node0_index / 3;
+        r.node0_weight = decompress_float<16>(vertex.node0_weight);
+        r.node1_index = vertex.node1_index < 0 ? 65535 : vertex.node1_index / 3;
+        r.node1_weight = 1.0F - r.node0_weight; // this is just derived from node0_weight
+        r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_u);
+        r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_v);
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
+
+        decompress_vector(vertex.binormal, normal_i, normal_j, normal_k);
+        r.binormal.i = normal_i;
+        r.binormal.j = normal_j;
+        r.binormal.k = normal_k;
+
+        decompress_vector(vertex.tangent, normal_i, normal_j, normal_k);
+        r.tangent.i = normal_i;
+        r.tangent.j = normal_j;
+        r.tangent.k = normal_k;
+        return r;
     }
 }

@@ -6,14 +6,16 @@
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 #include <invader/file/file.hpp>
+
+using namespace Invader::Parser;
+using namespace Invader::File;
 
 int strip_tag(const std::filesystem::path &file_path) {
     // Open the tag
-    auto tag = Invader::File::open_file(file_path);
+    auto tag = open_file(file_path);
     if(!tag.has_value()) {
         eprintf_error("Failed to open %s", file_path.string().c_str());
         return EXIT_FAILURE;
@@ -22,16 +24,16 @@ int strip_tag(const std::filesystem::path &file_path) {
     // Get the header
     std::vector<std::byte> file_data;
     try {
-        const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
-        Invader::HEK::TagFileHeader::validate_header(header, tag->size());
-        file_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size())->generate_hek_tag_data(header->tag_fourcc, true);
+        const auto *header = reinterpret_cast<const TagFileHeader *>(tag->data());
+        TagFileHeader::validate_header(header, tag->size());
+        file_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size())->generate_hek_tag_data(true);
     }
     catch(std::exception &e) {
         eprintf_error("Error: Failed to strip %s: %s", file_path.string().c_str(), e.what());
         return EXIT_FAILURE;
     }
 
-    if(!Invader::File::save_file(file_path, file_data)) {
+    if(!save_file(file_path, file_data)) {
         eprintf_error("Error: Failed to write to %s.", file_path.string().c_str());
         return EXIT_FAILURE;
     }
@@ -118,7 +120,7 @@ int main(int argc, char * const *argv) {
             file_path = std::string(remaining_arguments[0]);
         }
         else {
-            file_path = std::filesystem::path(*strip_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
+            file_path = std::filesystem::path(*strip_options.tags) / halo_path_to_preferred_path(remaining_arguments[0]);
         }
         std::string file_path_str = file_path.string();
         return strip_tag(file_path_str.c_str());

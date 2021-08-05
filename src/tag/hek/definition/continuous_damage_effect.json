@@ -277,6 +277,7 @@
             }
         ],
         "type": "struct",
-        "size": 512
+        "size": 512,
+        "group": "continuous_damage_effect"
     }
 ]

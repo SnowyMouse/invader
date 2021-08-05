@@ -42,7 +42,7 @@
  */
 #define RADIANS_TO_DEGREES(rad) static_cast<float>(rad * 180.0F / HALO_PI)
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     using Pointer = std::uint32_t;
     using Pointer64 = std::uint64_t;
     using TagEnum = std::uint16_t;
@@ -1035,34 +1035,53 @@ namespace Invader::HEK {
     Vector3D<NativeEndian> multiply_vector(const Vector3D<NativeEndian> &vector, float value) noexcept;
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Quaternion<NativeEndian> &rotation) noexcept;
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Matrix<NativeEndian> &rotation) noexcept;
-
-    ENDIAN_TEMPLATE(EndianType) struct ModelVertexCompressed;
-    ENDIAN_TEMPLATE(EndianType) struct ModelVertexUncompressed;
-
-    ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialCompressedRenderedVertex;
-    ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialUncompressedRenderedVertex;
-
-    ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialCompressedLightmapVertex;
-    ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialUncompressedLightmapVertex;
-
-    ModelVertexCompressed<NativeEndian> compress_model_vertex(const ModelVertexUncompressed<NativeEndian> &vertex) noexcept;
-    ModelVertexUncompressed<NativeEndian> decompress_model_vertex(const ModelVertexCompressed<NativeEndian> &vertex) noexcept;
     
     std::uint32_t compress_vector(float i, float j, float k) noexcept;
-
-    ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> compress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> &vertex) noexcept;
-    ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> decompress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> &vertex) noexcept;
-
-    ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> compress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> &vertex) noexcept;
-    ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> decompress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> &vertex) noexcept;
+    void decompress_vector(std::uint32_t v, float &i, float &j, float &k) noexcept;
 
     bool intersect_plane_with_points(const Plane3D<NativeEndian> &plane, const Point3D<NativeEndian> &point_a, const Point3D<NativeEndian> &point_b, Point3D<NativeEndian> *intersection = nullptr, float epsilon = 0.0001);
 
-    inline float dot3(const Vector3D<NativeEndian> &vector_a, const Vector3D<NativeEndian> &vector_b) {
+    inline float dot3(const Vector3D<NativeEndian> &vector_a, const Vector3D<NativeEndian> &vector_b) noexcept {
         return (vector_a.i * vector_b.i) + (vector_a.j * vector_b.j) + (vector_a.k * vector_b.k);
     }
-    inline float dot3(const Vector3D<NativeEndian> &vector_a, const Point3D<NativeEndian> &point_b) {
+    inline float dot3(const Vector3D<NativeEndian> &vector_a, const Point3D<NativeEndian> &point_b) noexcept {
         return (vector_a.i * point_b.x) + (vector_a.j * point_b.y) + (vector_a.k * point_b.z);
+    }
+    
+    template<unsigned int bits> static inline constexpr std::int32_t compress_float(float f) noexcept {
+        // Clamp to -1 to +1
+        if(f > 1.0F) {
+            f = 1.0F;
+        }
+        else if(f < -1.0F) {
+            f = -1.0F;
+        }
+
+        // Compressing a float basically means taking a -1 to 1 (inclusive) value and turning it into a signed integer.
+        // So, if a float is 1.0 and we need to compress it to a 16-bit integer, the result is 32767.
+        // If a float is -1.0 and we need to compress it to a 16-bit integer, the result is -1 (or 65535). 0 is always 0.
+        if(f >= 0.0F) {
+            constexpr int32_t MAX_VALUE = (1 << (bits - 1)) - 1;
+            return static_cast<std::int32_t>(f * MAX_VALUE + 0.5F);
+        }
+        else {
+            constexpr int32_t MAX_VALUE = (1 << (bits - 1));
+            return static_cast<std::int32_t>((f + 2.0F) * MAX_VALUE + 0.5F);
+        }
+    }
+    
+    template<unsigned int bits> static inline constexpr float decompress_float(std::int32_t f) noexcept {
+        constexpr std::uint32_t MAX_VALUE = (1 << bits) - 1;
+        constexpr std::uint32_t MAX_UNSIGNED = MAX_VALUE >> 1;
+        constexpr std::int32_t MAX_SIGNED = MAX_UNSIGNED + 1;
+
+        std::uint32_t f_unsigned = static_cast<std::uint32_t>(f) & MAX_VALUE;
+        if(f_unsigned > MAX_UNSIGNED) {
+            return static_cast<float>(f_unsigned) / MAX_SIGNED - 2.0F;
+        }
+        else {
+            return static_cast<float>(f_unsigned) / MAX_UNSIGNED;
+        }
     }
 }
 #endif

@@ -735,6 +735,7 @@
         "type": "struct",
         "pre_compile": true,
         "post_compile": true,
-        "size": 664
+        "size": 664,
+        "group": "model_collision_geometry"
     }
 ]

@@ -4,7 +4,11 @@
 #include <invader/build/build_workload.hpp>
 #include <invader/extract/extraction.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
+#include <invader/tag/parser/definition/all.hpp>
+#include <invader/map/map.hpp>
+
+using namespace Invader::Parser;
 
 namespace Invader {
     void ExtractionWorkload::extract_map(const Map &map, const std::string &tags, const std::vector<std::string> &queries, bool recursive, bool overwrite, bool non_mp_globals, ReportingLevel reporting_level) {
@@ -66,13 +70,13 @@ namespace Invader {
 
             // See if we can extract this
             auto tag_fourcc = tag.get_tag_fourcc();
-            const char *tag_extension = Invader::HEK::tag_fourcc_to_extension(tag_fourcc);
+            const char *tag_extension = tag_fourcc_to_extension(tag_fourcc);
             if(!tag.data_is_available()) {
                 return false;
             }
 
             // Get the path
-            auto path = Invader::File::halo_path_to_preferred_path(tag.get_path());
+            auto path = File::halo_path_to_preferred_path(tag.get_path());
             if(path.size() == 0) {
                 workload.report_error(ErrorType::ERROR_TYPE_ERROR, "Tag path is invalid", tag_index);
                 return false;
@@ -85,7 +89,7 @@ namespace Invader {
             }
 
             // Skip globals
-            if(tag_fourcc == Invader::TagFourCC::TAG_FOURCC_GLOBALS && !non_mp_globals && type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
+            if(tag_fourcc == TagFourCC::TAG_FOURCC_GLOBALS && !non_mp_globals && type != CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
                 workload.report_error(ErrorType::ERROR_TYPE_WARNING_PEDANTIC, "Skipping the non-multiplayer map's globals tag", tag_index);
                 return false;
             }
@@ -93,12 +97,12 @@ namespace Invader {
             // Get the tag data
             std::vector<std::byte> new_tag;
             try {
-                new_tag = Invader::ExtractionWorkload::extract_single_tag(tag);
+                new_tag = ExtractionWorkload::extract_single_tag(tag);
 
                 // If we're recursive, we want to also get that stuff, too
                 if(recursive) {
                     auto tag_compiled = BuildWorkload::compile_single_tag(new_tag.data(), new_tag.size(), std::vector<std::filesystem::path>(), false);
-                    std::vector<std::pair<const std::string *, Invader::TagFourCC>> dependencies;
+                    std::vector<std::pair<const std::string *, TagFourCC>> dependencies;
                     for(auto &s : tag_compiled.structs) {
                         for(auto &d : s.dependencies) {
                             auto &tag = tag_compiled.tags[d.tag_index];
@@ -114,44 +118,44 @@ namespace Invader {
                 }
             }
             catch (std::exception &e) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Failed to extract %s.%s: %s", Invader::File::halo_path_to_preferred_path(tag.get_path()).c_str(), tag_extension, e.what());
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Failed to extract %s.%s: %s", File::halo_path_to_preferred_path(tag.get_path()).c_str(), tag_extension, e.what());
                 return false;
             }
 
             // Jason Jones the tag
-            if(type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
+            if(type == CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
                 auto tag_path = tag.get_path();
                 bool changed = false;
                 switch(tag_fourcc) {
-                    case Invader::TagFourCC::TAG_FOURCC_WEAPON: {
+                    case TagFourCC::TAG_FOURCC_WEAPON: {
                         #define ALTER_TAG_DATA(from, to) if(from != to) { from = to; changed = true; } 
                         
                         if(tag_path == "weapons\\pistol\\pistol") {
-                            auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                            auto parsed = Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
                             if(parsed.triggers.size() >= 1) {
                                 auto &first_trigger = parsed.triggers[0];
                                 ALTER_TAG_DATA(first_trigger.minimum_error, DEGREES_TO_RADIANS(0.0F));
                                 ALTER_TAG_DATA(first_trigger.error_angle.from, DEGREES_TO_RADIANS(0.2F));
                                 ALTER_TAG_DATA(first_trigger.error_angle.to, DEGREES_TO_RADIANS(2.0F));
                             }
-                            new_tag = parsed.generate_hek_tag_data(TagFourCC::TAG_FOURCC_WEAPON);
+                            new_tag = parsed.generate_hek_tag_data();
                         }
                         else if(tag_path == "weapons\\plasma rifle\\plasma rifle") {
-                            auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                            auto parsed = Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
                             if(parsed.triggers.size() >= 1) {
                                 auto &first_trigger = parsed.triggers[0];
                                 ALTER_TAG_DATA(first_trigger.error_angle.from, DEGREES_TO_RADIANS(0.5F));
                                 ALTER_TAG_DATA(first_trigger.error_angle.to, DEGREES_TO_RADIANS(5.0F));
                             }
-                            new_tag = parsed.generate_hek_tag_data(TagFourCC::TAG_FOURCC_WEAPON);
+                            new_tag = parsed.generate_hek_tag_data();
                         }
                         break;
                     }
-                    case Invader::TagFourCC::TAG_FOURCC_DAMAGE_EFFECT:
+                    case TagFourCC::TAG_FOURCC_DAMAGE_EFFECT:
                         if(tag_path == "weapons\\pistol\\bullet") {
-                            auto parsed = Invader::Parser::DamageEffect::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                            auto parsed = DamageEffect::parse_hek_tag_file(new_tag.data(), new_tag.size());
                             ALTER_TAG_DATA(parsed.elite_energy_shield, 1.0F);
-                            new_tag = parsed.generate_hek_tag_data(TagFourCC::TAG_FOURCC_DAMAGE_EFFECT);
+                            new_tag = parsed.generate_hek_tag_data();
                         }
                         break;
                     default:
@@ -166,11 +170,11 @@ namespace Invader {
             }
 
             // Warn if we had to generate mipmaps
-            if(engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX && tag_fourcc == Invader::HEK::TagFourCC::TAG_FOURCC_BITMAP) {
-                auto bitmap_tag = Invader::Parser::Bitmap::parse_hek_tag_file(new_tag.data(), new_tag.size());
+            if(engine == CacheFileEngine::CACHE_FILE_XBOX && tag_fourcc == TagFourCC::TAG_FOURCC_BITMAP) {
+                auto bitmap_tag = Bitmap::parse_hek_tag_file(new_tag.data(), new_tag.size());
                 for(auto &data : bitmap_tag.bitmap_data) {
                     // Skip uncompressed bitmaps
-                    if(!(data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED)) {
+                    if(!(data.flags & BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED)) {
                         continue;
                     }
                     
@@ -201,7 +205,7 @@ namespace Invader {
 
             // Save it
             auto tag_path_str = tag_path_to_write_to.string();
-            if(!Invader::File::save_file(tag_path_str.c_str(), new_tag)) {
+            if(!File::save_file(tag_path_str.c_str(), new_tag)) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Failed to save %s", tag_path_str.c_str());
                 return false;
             }
@@ -232,7 +236,7 @@ namespace Invader {
                 }
 
                 const auto &tag = map->get_tag(t);
-                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_fourcc_to_extension(tag.get_tag_fourcc());
+                auto full_tag_path = File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_fourcc_to_extension(tag.get_tag_fourcc());
 
                 for(auto &query : queries) {
                     if(File::path_matches(full_tag_path.c_str(), query.c_str())) {
@@ -259,11 +263,11 @@ namespace Invader {
             }
             const auto &tag_map = map->get_tag(tag);
             if(extract_tag(tag)) {
-                oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
+                oprintf_success("Extracted %s.%s", File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
                 extracted++;
             }
             else {
-                eprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
+                eprintf("Skipped %s.%s\n", File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
             }
         }
         
@@ -291,19 +295,19 @@ namespace Invader {
         ExtractionWorkload workload(tag.get_map(), reporting_level);
         auto result = workload.extract_tag(tag.get_tag_index());
         if(result.has_value()) {
-            return result->get()->generate_hek_tag_data(tag.get_tag_fourcc());
+            return result->get()->generate_hek_tag_data();
         }
         else {
             throw InvalidTagDataException();
         }
     }
     
-    std::optional<std::unique_ptr<Parser::ParserStruct>> ExtractionWorkload::extract_tag(std::size_t tag_index) {
+    std::optional<std::unique_ptr<ParserStruct>> ExtractionWorkload::extract_tag(std::size_t tag_index) {
         auto &tag = this->map.get_tag(tag_index);
         auto tag_fourcc = tag.get_tag_fourcc();
 
         #define EXTRACT_TAG_CLASS(class_struct, fourcc) case TagFourCC::fourcc: { \
-            return std::make_unique<Parser::class_struct>(Parser::class_struct::parse_cache_file_data(tag)); \
+            return std::make_unique<class_struct>(class_struct::parse_cache_file_data(tag));  \
         }
 
         switch(tag_fourcc) {
@@ -394,11 +398,11 @@ namespace Invader {
                     return std::make_unique<Parser::ScenarioStructureBSP>(Parser::ScenarioStructureBSP::parse_cache_file_data(tag));
                 }
                 else {
-                    HEK::TagFileHeader tag_data_header(TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP);
+                    TagFileHeader tag_data_header(TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP);
                     std::vector<std::byte> data(reinterpret_cast<std::byte *>(&tag_data_header), reinterpret_cast<std::byte *>(&tag_data_header + 1));
-                    auto sbsp_header_data = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
+                    auto sbsp_header_data = tag.get_base_struct<ScenarioStructureBSPCompiledHeader::C>();
                     auto sbsp_header_pointer = sbsp_header_data.pointer.read();
-                    return std::make_unique<Parser::ScenarioStructureBSP>(Parser::ScenarioStructureBSP::parse_cache_file_data(tag, sbsp_header_pointer));
+                    return std::make_unique<ScenarioStructureBSP>(ScenarioStructureBSP::parse_cache_file_data(tag, sbsp_header_pointer));
                 }
             }
 

@@ -8,14 +8,16 @@
 #include <cstdint>
 #include <filesystem>
 #include <vector>
-#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/parser/definition/font.hpp>
 #include <invader/tag/hek/header.hpp>
 #include <invader/printf.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
-#include <invader/tag/parser/parser.hpp>
 #include <invader/version.hpp>
 #include FT_FREETYPE_H
+
+using namespace Invader::Parser;
+using namespace Invader::File;
 
 struct RenderedCharacter {
     std::vector<std::byte> data;
@@ -102,8 +104,8 @@ int main(int argc, char *argv[]) {
     FontExtension found_format = static_cast<FontExtension>(0);
     if(font_options.use_filesystem_path) {
         auto path = std::filesystem::path(remaining_arguments[0]);
-        auto font_tag_maybe = Invader::File::file_path_to_tag_path(path, font_options.tags);
-        auto font_data_maybe = Invader::File::file_path_to_tag_path(path, font_options.data);
+        auto font_tag_maybe = file_path_to_tag_path(path, font_options.tags);
+        auto font_data_maybe = file_path_to_tag_path(path, font_options.data);
         if(font_tag_maybe.has_value()) {
             if(std::filesystem::path(*font_tag_maybe).extension() == ".font") {
                 font_tag = *font_tag_maybe;
@@ -208,8 +210,8 @@ int main(int argc, char *argv[]) {
     FT_Done_FreeType(library);
 
     // Create
-    Invader::Parser::Font font= {};
-    std::vector<Invader::HEK::FontCharacter<Invader::HEK::BigEndian>> tag_characters;
+    Font font = {};
+    std::vector<FontCharacter::C<BigEndian>> tag_characters;
     auto &pixels = font.pixels;
 
     // Set up the character stuff
@@ -291,7 +293,7 @@ int main(int argc, char *argv[]) {
     // Write
     std::error_code ec;
     std::filesystem::create_directories(tag_path.parent_path(), ec);
-    if(!Invader::File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(Invader::TagFourCC::TAG_FOURCC_FONT, true))) {
+    if(!save_file(final_tag_path.c_str(), font.generate_hek_tag_data(true))) {
         eprintf_error("Failed to save %s.", final_tag_path.c_str());
         return EXIT_FAILURE;
     }

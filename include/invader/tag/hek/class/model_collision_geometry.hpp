@@ -4,30 +4,31 @@
 #define INVADER__TAG__HEK__CLASS__MODEL_COLLISION_GEOMETRY_HPP
 
 #include "../../../hek/data_type.hpp"
-#include "../definition.hpp"
+#include "../../parser/definition/model_collision_geometry.hpp"
+#include "../../parser/definition/scenario_structure_bsp.hpp"
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     /**
      * Struct for containing all information required to find intersections among other things
      */
     struct BSPData {
-        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes = nullptr;
+        const ModelCollisionGeometryBSP3DNode::C<LittleEndian> *bsp3d_nodes = nullptr;
         std::uint32_t bsp3d_node_count = 0;
-        const ModelCollisionGeometryBSPPlane<LittleEndian> *planes = nullptr;
+        const ModelCollisionGeometryBSPPlane::C<LittleEndian> *planes = nullptr;
         std::uint32_t plane_count = 0;
-        const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves = nullptr;
+        const ModelCollisionGeometryBSPLeaf::C<LittleEndian> *leaves = nullptr;
         std::uint32_t leaf_count = 0;
-        const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes = nullptr;
+        const ModelCollisionGeometryBSP2DNode::C<LittleEndian> *bsp2d_nodes = nullptr;
         std::uint32_t bsp2d_node_count = 0;
-        const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references = nullptr;
+        const ModelCollisionGeometryBSP2DReference::C<LittleEndian> *bsp2d_references = nullptr;
         std::uint32_t bsp2d_reference_count = 0;
-        const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces = nullptr;
+        const ModelCollisionGeometryBSPSurface::C<LittleEndian> *surfaces = nullptr;
         std::uint32_t surface_count = 0;
-        const ModelCollisionGeometryBSPEdge<LittleEndian> *edges = nullptr;
+        const ModelCollisionGeometryBSPEdge::C<LittleEndian> *edges = nullptr;
         std::uint32_t edge_count = 0;
-        const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices = nullptr;
+        const ModelCollisionGeometryBSPVertex::C<LittleEndian> *vertices = nullptr;
         std::uint32_t vertex_count = 0;
-        const ScenarioStructureBSPLeaf<LittleEndian> *render_leaves = nullptr;
+        const ScenarioStructureBSPLeaf::C<LittleEndian> *render_leaves = nullptr;
         std::uint32_t render_leaf_count = 0;
         
         /**

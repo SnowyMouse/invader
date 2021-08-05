@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     enum TagFourCC : std::uint32_t {
         TAG_FOURCC_ACTOR = 0x61637472,
         TAG_FOURCC_ACTOR_VARIANT = 0x61637476,
@@ -318,10 +318,6 @@ namespace Invader::HEK {
      * @return           This is the equivalent tag class int of the extesion or TagClass::TAG_FOURCC_NULL if failed.
      */
     TagFourCC tag_extension_to_fourcc(const char *extension) noexcept;
-}
-
-namespace Invader {
-    using TagFourCC = HEK::TagFourCC;
 }
 
 #endif

@@ -104,6 +104,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "size": 208
+        "size": 208,
+        "group": "antenna"
     }
 ]

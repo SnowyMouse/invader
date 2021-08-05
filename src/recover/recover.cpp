@@ -2,15 +2,15 @@
 
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
 #include "recover_method.hpp"
 
+using namespace Invader;
+using namespace Invader::Parser;
+
 int main(int argc, const char **argv) {
-    using namespace Invader;
-    using namespace Invader::HEK;
-    
     struct RecoverOptions {
         std::filesystem::path tags = "tags";
         std::filesystem::path data = "data";
@@ -80,5 +80,5 @@ int main(int argc, const char **argv) {
     
     // Load it
     auto tag_data = Parser::ParserStruct::parse_hek_tag_file(file->data(), file->size());
-    Recover::recover(*tag_data, std::filesystem::path(tag).replace_extension().string(), recover_options.data, reinterpret_cast<const HEK::TagFileHeader *>(file->data())->tag_fourcc, recover_options.overwrite);
+    Recover::recover(*tag_data, std::filesystem::path(tag).replace_extension().string(), recover_options.data, reinterpret_cast<const TagFileHeader *>(file->data())->tag_fourcc, recover_options.overwrite);
 }

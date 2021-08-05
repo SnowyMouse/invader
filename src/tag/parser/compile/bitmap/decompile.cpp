@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/bitmap/swizzle.hpp>
 #include <invader/bitmap/pixel.hpp>
+#include <invader/map/map.hpp>
+#include <invader/map/tag.hpp>
 
 namespace Invader::Parser {
-    void Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<Pointer>) {
         this->postprocess_hek_data();
 
         auto &map = tag.get_map();
@@ -15,7 +17,7 @@ namespace Invader::Parser {
         auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
         
         // Un-zero out these if we're sprites (again, this is completely *insane* but compiled maps have this zeroed out for whatever reason which can completely FUCK things up if this were to not be "sprites" all of a sudden)
-        if(this->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+        if(this->type == BitmapType::BITMAP_TYPE_SPRITES) {
             for(auto &sequence : this->bitmap_group_sequence) {
                 // Default
                 sequence.first_bitmap_index = NULL_INDEX;
@@ -40,13 +42,13 @@ namespace Invader::Parser {
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
                 std::size_t size = bitmap_data.pixel_data_size;
                 
-                bool compressed = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+                bool compressed = bitmap_data.flags & BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
                 bool should_be_compressed = false;
                 
                 switch(bitmap_data.format) {
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+                    case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+                    case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+                    case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
                         should_be_compressed = true;
                         break;
                     default:
@@ -65,7 +67,7 @@ namespace Invader::Parser {
                 }
                 
                 // Also check if it needs deswizzled (don't do it yet)
-                bool swizzled = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+                bool swizzled = bitmap_data.flags & BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
                 if(swizzled) {
                     if(compressed) {
                         eprintf_error("Bitmap is incorrectly marked as compressed AND swizzled; tag is corrupt");
@@ -74,18 +76,18 @@ namespace Invader::Parser {
                 }
                 
                 // Nope
-                if(bitmap_data.depth != 1 && bitmap_data.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
+                if(bitmap_data.depth != 1 && bitmap_data.type != BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
                     eprintf_error("Bitmap has depth but is not a 3D texture");
                     throw InvalidTagDataException();
                 }
-                if(!HEK::is_power_of_two(bitmap_data.depth)) {
+                if(!is_power_of_two(bitmap_data.depth)) {
                     eprintf_error("Bitmap depth is non-power-of-two");
                     throw InvalidTagDataException();
                 }
                 
                 // Get it!
                 const std::byte *bitmap_data_ptr;
-                if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
+                if(bitmap_data_le.flags.read() & BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
                     bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, size, Map::DATA_MAP_BITMAP);
                 }
                 else {
@@ -97,10 +99,10 @@ namespace Invader::Parser {
                 
                 if(xbox) {
                     // Set flag as unswizzled
-                    bitmap_data.flags = bitmap_data.flags & ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+                    bitmap_data.flags = bitmap_data.flags & ~BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
                     
                     // Set our buffer up
-                    xbox_to_pc_buffer.resize(HEK::size_of_bitmap(bitmap_data));
+                    xbox_to_pc_buffer.resize(size_of_bitmap(bitmap_data));
                     
                     auto *bitmap = this;
                     
@@ -191,9 +193,9 @@ namespace Invader::Parser {
                             std::byte dxt_block[16] = {};
                             std::byte *color_data = dxt_block + ((block_size == 16) ? 8 : 0);
                             
-                            auto &first_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data);
-                            auto &second_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data + sizeof(std::uint16_t));
-                            auto &color_interpolate = *reinterpret_cast<HEK::LittleEndian<std::uint32_t> *>(color_data + 4);
+                            auto &first_color = *reinterpret_cast<LittleEndian<std::uint16_t> *>(color_data);
+                            auto &second_color = *reinterpret_cast<LittleEndian<std::uint16_t> *>(color_data + sizeof(std::uint16_t));
+                            auto &color_interpolate = *reinterpret_cast<LittleEndian<std::uint32_t> *>(color_data + 4);
                             
                             std::memcpy(dxt_block, input - block_size, block_size);
                             
@@ -212,7 +214,7 @@ namespace Invader::Parser {
                                 
                                 // If usage is detail map, do fade-to-gray (copied from color_plate_scanner.cpp)
                                 // TODODILE: refactor this maybe?
-                                if(bitmap->usage == HEK::BitmapUsage::BITMAP_USAGE_DETAIL_MAP && bitmap->detail_fade_factor > 0.0F) {
+                                if(bitmap->usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP && bitmap->detail_fade_factor > 0.0F) {
                                     auto color_a = Pixel::convert_from_16_bit<0,5,6,5>(first_color);
                                     auto color_b = Pixel::convert_from_16_bit<0,5,6,5>(second_color);
                                     
@@ -279,19 +281,19 @@ namespace Invader::Parser {
                             offset += copy_texture(offset, to_i);
                             
                             // Add some padding since bitmaps are stored with sizes module 128
-                            offset += REQUIRED_PADDING_N_BYTES(offset, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY);
+                            offset += REQUIRED_PADDING_N_BYTES(offset, CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY);
                         }
                     };
                     
                     switch(bitmap_data.type) {
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                        case BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
                             copy_cube_map();
                             break;
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                        case BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
                             copy_texture();
                             break;
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
+                        case BitmapDataType::BITMAP_DATA_TYPE_WHITE:
+                        case BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
                             copy_texture();
                             break;
                         default:

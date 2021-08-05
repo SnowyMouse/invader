@@ -217,6 +217,7 @@
             }
         ],
         "type": "struct",
-        "size": 208
+        "size": 208,
+        "group": "sky"
     }
 ]

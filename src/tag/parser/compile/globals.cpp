@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/globals.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
@@ -14,9 +15,9 @@ namespace Invader::Parser {
             return;
         }
         
-        if(*workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
+        if(*workload.cache_file_type == CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
             this->unit.path.clear();
-            this->unit.tag_id = HEK::TagID::null_tag_id();
+            this->unit.tag_id = TagID::null_tag_id();
             this->unit.tag_fourcc = TagFourCC::TAG_FOURCC_NONE;
         }
         else if(this->unit.path.size() == 0 && !workload.disable_error_checking) {
@@ -29,7 +30,7 @@ namespace Invader::Parser {
             return;
         }
         
-        if(*workload.cache_file_type != HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
+        if(*workload.cache_file_type != CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
             this->multiplayer_information.clear();
             this->cheat_powerups.clear();
             this->weapon_list.clear();
@@ -42,8 +43,8 @@ namespace Invader::Parser {
             
             // Check for this stuff
             auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
-            if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                std::size_t required_weapons = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX ? 14 : 16;
+            if(engine != CacheFileEngine::CACHE_FILE_NATIVE) {
+                std::size_t required_weapons = workload.get_build_parameters()->details.build_cache_file_engine == CacheFileEngine::CACHE_FILE_XBOX ? 14 : 16;
                 if(this->weapon_list.size() < required_weapons) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Globals tag does not have at least %zu weapons blocks which is required for the map type", required_weapons);
                     throw InvalidTagDataException();
@@ -51,7 +52,7 @@ namespace Invader::Parser {
             }
         }
 
-        if(*workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
+        if(*workload.cache_file_type == CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
             this->falling_damage.clear();
             this->materials.clear();
         }
@@ -74,14 +75,14 @@ namespace Invader::Parser {
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
         
         if(
-            workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER &&
-            (engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || 
-            engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-            engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) &&
+            workload.cache_file_type == CacheFileType::SCENARIO_TYPE_MULTIPLAYER &&
+            (engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || 
+            engine_target == CacheFileEngine::CACHE_FILE_RETAIL ||
+            engine_target == CacheFileEngine::CACHE_FILE_DEMO) &&
             !workload.disable_error_checking
         ) {
             #define CHECK_NADE_ON_MP_COUNT(what) if(static_cast<std::size_t>(this->what) > max_grenades_mp_gbx) { \
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(struct_little), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(C<LittleEndian>), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
                 throw InvalidTagDataException(); \
             }
             CHECK_NADE_ON_MP_COUNT(maximum_count);
@@ -90,32 +91,32 @@ namespace Invader::Parser {
     }
     void GlobalsMultiplayerInformation::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
-        const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
+        const auto &globals_multiplayer_information_data = *reinterpret_cast<const C<LittleEndian> *>(globals_multiplayer_information_struct.data.data() + offset);
         
         auto target_engine = workload.get_build_parameters()->details.build_cache_file_engine;
         const std::size_t sound_count = globals_multiplayer_information_data.sounds.count;
         std::size_t required_sounds;
         
         // Xbox doesn't have ting (required_sounds is exclusive)
-        if(target_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            required_sounds = HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING;
+        if(target_engine == CacheFileEngine::CACHE_FILE_XBOX) {
+            required_sounds = MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING;
         }
         else {
-            required_sounds = HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT;
+            required_sounds = MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT;
             
             // See if we have the ting sound. If so, make it louder on custom edition.
-            if(sound_count > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
-                const float TING_VOLUME = target_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
-                const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
+            if(sound_count > MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
+                const float TING_VOLUME = target_engine == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
+                const auto sound_id = reinterpret_cast<const GlobalsSound::C<LittleEndian> *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
                 if(!sound_id.is_null()) {
-                    reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = TING_VOLUME;
+                    reinterpret_cast<Sound::C<LittleEndian> *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = TING_VOLUME;
                 }
             }
         }
 
         // See if we have all sounds, too
         if(sound_count < required_sounds && workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Some sounds are missing from multiplayer information #%zu (%zu / %zu sounds present)", offset / sizeof(struct_little), sound_count, static_cast<std::size_t>(HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Some sounds are missing from multiplayer information #%zu (%zu / %zu sounds present)", offset / sizeof(C<LittleEndian>), sound_count, static_cast<std::size_t>(MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT));
         }
     }
 }

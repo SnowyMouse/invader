@@ -23,6 +23,7 @@
             }
         ],
         "type": "struct",
-        "size": 12
+        "size": 12,
+        "group": "string_list"
     }
 ]

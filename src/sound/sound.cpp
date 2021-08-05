@@ -4,7 +4,7 @@
 #include <invader/command_line_option.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
 #include <invader/sound/sound_encoder.hpp>
 #include <invader/sound/sound_reader.hpp>
 #include <invader/version.hpp>
@@ -14,7 +14,7 @@
 #include <thread>
 
 using namespace Invader;
-using namespace Invader::HEK;
+using namespace Invader::Parser;
 
 struct SoundOptions {
     const char *data = "data";
@@ -120,13 +120,13 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     // Same with whether to split
     if(sound_options.split.has_value()) {
         if(*sound_options.split) {
-            sound_tag.flags |= HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+            sound_tag.flags |= Parser::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
         }
         else {
-            sound_tag.flags &= ~HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+            sound_tag.flags &= ~Parser::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
         }
     }
-    bool split = sound_tag.flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+    bool split = sound_tag.flags & Parser::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
 
     // Check to see if we have either just directories (so multiple pitch ranges) or just files (one pitch range)
     bool contains_files = false;
@@ -628,7 +628,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
     }
 
-    auto sound_tag_data = sound_tag.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SOUND, true);
+    auto sound_tag_data = sound_tag.generate_hek_tag_data(true);
 
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0);
 
@@ -786,7 +786,7 @@ int main(int argc, const char **argv) {
     auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
 
     try {
-        sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
+        sound_tag_data = make_sound_tag<Sound>(tag_path, data_path, sound_options);
     }
     catch(std::exception &e) {
         eprintf_error("Failed to create sound tag due to an exception error: %s", e.what());
@@ -836,8 +836,8 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
         // Get the permutation name
         auto filename = path.filename().string();
         sound.name = filename.substr(0, filename.size() - extension.size());
-        if(sound.name.size() >= sizeof(HEK::TagString)) {
-            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(HEK::TagString));
+        if(sound.name.size() >= sizeof(TagString)) {
+            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(TagString));
             std::exit(EXIT_FAILURE);
         }
 

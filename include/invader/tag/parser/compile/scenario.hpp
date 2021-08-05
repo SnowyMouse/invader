@@ -3,7 +3,7 @@
 #ifndef INVADER__TAG__PARSER__COMPILE__SCENARIO_HPP
 #define INVADER__TAG__PARSER__COMPILE__SCENARIO_HPP
 
-#include "../parser.hpp"
+#include "../definition/scenario.hpp"
 
 namespace Invader::Parser {
     /**

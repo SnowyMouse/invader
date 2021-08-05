@@ -6,11 +6,13 @@
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
+#include <invader/tag/parser/definition/all.hpp>
 #include <invader/file/file.hpp>
 #include <invader/map/map.hpp>
+
+using namespace Invader::Parser;
 
 int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
@@ -40,8 +42,8 @@ int main(int argc, char * const *argv) {
             continue;
         }
         
-        #define DO_TAG_CLASS(c, v) case Invader::HEK::v: {\
-            Invader::Parser::c::scan_padding(tag);\
+        #define DO_TAG_CLASS(c, v) case v: {\
+            c::scan_padding(tag);\
             break;\
         }
         

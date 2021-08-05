@@ -6,9 +6,8 @@
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 #include <invader/file/file.hpp>
 #include <thread>
 #include <mutex>
@@ -97,7 +96,7 @@ static std::mutex bad_code_design_mutex;
 
 static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fixes, bool &bludgeoned) {
     using namespace Invader::Bludgeoner;
-    using namespace Invader::HEK;
+    using namespace Invader::Parser;
     using namespace Invader::File;
 
     bludgeoned = false;
@@ -113,8 +112,8 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
     std::vector<std::byte> file_data;
     try {
         const auto *header = reinterpret_cast<const TagFileHeader *>(tag->data());
-        Invader::HEK::TagFileHeader::validate_header(header, tag->size());
-        auto parsed_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
+        TagFileHeader::validate_header(header, tag->size());
+        auto parsed_data = ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
 
         // No fixes; try to detect things
         bool issues_present = false;
@@ -174,7 +173,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
         }
 
         // Do it!
-        file_data = parsed_data->generate_hek_tag_data(header->tag_fourcc, true);
+        file_data = parsed_data->generate_hek_tag_data(true);
         if(!Invader::File::save_file(file_path, file_data)) {
             badly_designed_printf(eprintf_error, "Error: Failed to write to %s.", file_path.string().c_str());
             return EXIT_FAILURE;

@@ -112,6 +112,7 @@
         "type": "struct",
         "inherits": "Shader",
         "pre_compile": true,
-        "size": 260
+        "size": 260,
+        "group": "shader_transparent_meter"
     }
 ]

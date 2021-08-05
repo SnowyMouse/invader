@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <exception>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     #define ENDIAN_TEMPLATE(tname) template <template<typename> class tname>
     #define COPY_THIS(what) copy . what = this -> what;
     #define COPY_THIS_ARRAY(what) for(std::size_t copy_this_array_iterator = 0; copy_this_array_iterator < sizeof(this -> what)/sizeof(this -> what[0]); copy_this_array_iterator++) { copy . what [copy_this_array_iterator] = this -> what [copy_this_array_iterator]; }

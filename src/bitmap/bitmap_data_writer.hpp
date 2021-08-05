@@ -7,7 +7,7 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader {
-    using BitmapFormat = HEK::BitmapFormat;
+    using BitmapFormat = Parser::BitmapFormat;
 
     /**
      * if format is nullopt, it will determine one

@@ -1,19 +1,35 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/biped.hpp>
+#include <invader/tag/parser/definition/vehicle.hpp>
+#include <invader/tag/parser/definition/scenery.hpp>
+#include <invader/tag/parser/definition/placeholder.hpp>
+#include <invader/tag/parser/definition/device_control.hpp>
+#include <invader/tag/parser/definition/device_machine.hpp>
+#include <invader/tag/parser/definition/device_light_fixture.hpp>
+#include <invader/tag/parser/definition/garbage.hpp>
+#include <invader/tag/parser/definition/sound_scenery.hpp>
+#include <invader/tag/parser/definition/equipment.hpp>
+#include <invader/tag/parser/definition/weapon.hpp>
+#include <invader/tag/parser/definition/projectile.hpp>
+#include <invader/tag/parser/definition/model_collision_geometry.hpp>
+#include <invader/tag/parser/definition/weapon_hud_interface.hpp>
+#include <invader/tag/parser/definition/model.hpp>
+#include <invader/tag/parser/definition/gbxmodel.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
 #include <invader/build/build_workload.hpp>
 
 #include "hud_interface.hpp"
 
 namespace Invader::Parser {
-    template <typename T> static void fix_render_bounding_radius(T &tag) {
+    static void fix_render_bounding_radius(Object &tag) {
         tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
 
-    template <typename T> static void compile_object(T &tag, BuildWorkload &workload, std::size_t tag_index) {
+    static void compile_object(Object &tag, BuildWorkload &workload, std::size_t tag_index) {
         tag.scales_change_colors = 0;
         for(auto &c : tag.change_colors) {
-            if(c.scale_by != HEK::FunctionScaleBy::FUNCTION_SCALE_BY_NONE) {
+            if(c.scale_by != FunctionScaleBy::FUNCTION_SCALE_BY_NONE) {
                 tag.scales_change_colors = 1;
                 break;
             }
@@ -147,13 +163,13 @@ namespace Invader::Parser {
         fix_render_bounding_radius(*this);
     }
 
-    template <typename T> void compile_unit(T &tag) {
+    void compile_unit(Unit &tag) {
         tag.soft_ping_interrupt_ticks = static_cast<std::int16_t>(tag.soft_ping_interrupt_time * TICK_RATE);
         tag.hard_ping_interrupt_ticks = static_cast<std::int16_t>(tag.hard_ping_interrupt_time * TICK_RATE);
     }
 
     void Biped::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_BIPED;
+        this->object_type = ObjectType::OBJECT_TYPE_BIPED;
         compile_object(*this, workload, tag_index);
         compile_unit(*this);
         this->cosine_stationary_turning_threshold = std::cos(this->stationary_turning_threshold);
@@ -165,19 +181,19 @@ namespace Invader::Parser {
         this->sine_uphill_cutoff_angle = static_cast<float>(std::sin(this->uphill_cutoff_angle));
     }
     void Vehicle::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_VEHICLE;
+        this->object_type = ObjectType::OBJECT_TYPE_VEHICLE;
         compile_object(*this, workload, tag_index);
         compile_unit(*this);
     }
     void Weapon::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
+        this->object_type = ObjectType::OBJECT_TYPE_WEAPON;
         compile_object(*this, workload, tag_index);
         
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
 
         // Jason jones autoaim for the rocket warthog
         if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\rwarthog\\rwarthog_gun")) {
-            bool native_or_custom_edition = engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+            bool native_or_custom_edition = engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || engine_target == CacheFileEngine::CACHE_FILE_NATIVE;
             float new_autoaim_angle = native_or_custom_edition ? DEGREES_TO_RADIANS(6.0F) : DEGREES_TO_RADIANS(1.0F);
             float new_deviation_angle = native_or_custom_edition ? DEGREES_TO_RADIANS(12.0F) : DEGREES_TO_RADIANS(1.0F);
 
@@ -190,43 +206,43 @@ namespace Invader::Parser {
         }
     }
     void Equipment::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_EQUIPMENT;
+        this->object_type = ObjectType::OBJECT_TYPE_EQUIPMENT;
         compile_object(*this, workload, tag_index);
     }
     void Garbage::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_GARBAGE;
+        this->object_type = ObjectType::OBJECT_TYPE_GARBAGE;
         compile_object(*this, workload, tag_index);
     }
     void Projectile::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_PROJECTILE;
+        this->object_type = ObjectType::OBJECT_TYPE_PROJECTILE;
         compile_object(*this, workload, tag_index);
         this->initial_velocity /= TICK_RATE;
         this->final_velocity /= TICK_RATE;
     }
     void Scenery::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_SCENERY;
+        this->object_type = ObjectType::OBJECT_TYPE_SCENERY;
         compile_object(*this, workload, tag_index);
     }
     void Placeholder::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_PLACEHOLDER;
+        this->object_type = ObjectType::OBJECT_TYPE_PLACEHOLDER;
         compile_object(*this, workload, tag_index);
     }
     void SoundScenery::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_SOUND_SCENERY;
+        this->object_type = ObjectType::OBJECT_TYPE_SOUND_SCENERY;
         compile_object(*this, workload, tag_index);
     }
 
     void DeviceMachine::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_MACHINE;
+        this->object_type = ObjectType::OBJECT_TYPE_DEVICE_MACHINE;
         compile_object(*this, workload, tag_index);
         this->door_open_time_ticks = static_cast<std::uint32_t>(this->door_open_time * TICK_RATE);
     }
     void DeviceControl::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_CONTROL;
+        this->object_type = ObjectType::OBJECT_TYPE_DEVICE_CONTROL;
         compile_object(*this, workload, tag_index);
     }
     void DeviceLightFixture::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_LIGHT_FIXTURE;
+        this->object_type = ObjectType::OBJECT_TYPE_DEVICE_LIGHT_FIXTURE;
         compile_object(*this, workload, tag_index);
     }
 
@@ -252,7 +268,7 @@ namespace Invader::Parser {
         this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->error_deceleration_time;
 
         // Jason Jones the accuracy of the weapon
-        if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
+        if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
             auto &tag = workload.tags[tag_index];
             if(tag.path == "weapons\\pistol\\pistol") {
                 this->minimum_error = DEGREES_TO_RADIANS(0.2F);
@@ -267,20 +283,20 @@ namespace Invader::Parser {
         
         // Warn if we're trying to fire a negative number of projectiles per shot
         if(this->projectiles_per_shot < 0) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles per shot, thus no projectiles will spawn. Set it to 0 to silence this warning.", offset / sizeof(struct_little));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles per shot, thus no projectiles will spawn. Set it to 0 to silence this warning.", offset / sizeof(C<LittleEndian>));
         }
         
         // Warn if we have rounds per shot set but no magazine
         if(this->rounds_per_shot != 0 && this->magazine == NULL_INDEX) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has rounds per shot set with no magazine, thus it will not actually use any rounds per shot. Set it to 0 or set a magazine to silence this warning.", offset / sizeof(struct_little));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has rounds per shot set with no magazine, thus it will not actually use any rounds per shot. Set it to 0 or set a magazine to silence this warning.", offset / sizeof(C<LittleEndian>));
         }
         
         // Warn if the weapon doesn't fire automatically but we have projectiles per contrail set or we have a meme value.
         if(this->projectiles_between_contrails < 0) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles between contrails, thus all projectiles will have contrails. Set it to 0 to silence this warning.", offset / sizeof(struct_little));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles between contrails, thus all projectiles will have contrails. Set it to 0 to silence this warning.", offset / sizeof(C<LittleEndian>));
         }
-        else if(this->projectiles_between_contrails > 0 && (this->flags & HEK::WeaponTriggerFlagsFlag::WEAPON_TRIGGER_FLAGS_FLAG_DOES_NOT_REPEAT_AUTOMATICALLY)) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a nonzero number of projectiles between contrails, but this is ignored because the trigger is set to not fire automatically. Set it to 0 to silence this warning.", offset / sizeof(struct_little));
+        else if(this->projectiles_between_contrails > 0 && (this->flags & WeaponTriggerFlagsFlag::WEAPON_TRIGGER_FLAGS_FLAG_DOES_NOT_REPEAT_AUTOMATICALLY)) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a nonzero number of projectiles between contrails, but this is ignored because the trigger is set to not fire automatically. Set it to 0 to silence this warning.", offset / sizeof(C<LittleEndian>));
         }
     }
 
@@ -345,10 +361,10 @@ namespace Invader::Parser {
             auto &predicted_resource_pointer = s.pointers.emplace_back();
             predicted_resource_pointer.struct_index = workload.structs.size();
 
-            auto &object = *reinterpret_cast<Parser::Object::struct_little *>(s.data.data());
+            auto &object = *reinterpret_cast<Parser::Object::C<LittleEndian> *>(s.data.data());
             predicted_resource_pointer.offset = reinterpret_cast<const std::byte *>(&object.predicted_resources.pointer) - reinterpret_cast<const std::byte *>(&object);
             object.predicted_resources.count = static_cast<std::uint32_t>(resources_count);
-            std::vector<HEK::PredictedResource<HEK::LittleEndian>> predicted_resources;
+            std::vector<PredictedResource::C<LittleEndian>> predicted_resources;
 
             auto &prs = workload.structs.emplace_back();
             predicted_resources.reserve(resources_count);
@@ -356,8 +372,8 @@ namespace Invader::Parser {
             for(std::size_t r : resources) {
                 auto &resource = predicted_resources.emplace_back();
                 auto &resource_tag = workload.tags[r];
-                resource.type = resource_tag.tag_fourcc == TagFourCC::TAG_FOURCC_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_SOUND;
-                resource.tag = HEK::TagID { static_cast<std::uint32_t>(r) };
+                resource.type = resource_tag.tag_fourcc == TagFourCC::TAG_FOURCC_BITMAP ? PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP : PredictedResourceType::PREDICTED_RESOURCE_TYPE_SOUND;
+                resource.tag = TagID { static_cast<std::uint32_t>(r) };
                 resource.resource_index = 0;
                 auto &resource_dep = prs.dependencies.emplace_back();
                 resource_dep.tag_id_only = true;
@@ -376,7 +392,7 @@ namespace Invader::Parser {
         
         // Get our object
         auto &object_struct = workload.structs[struct_index];
-        auto &object_data = *reinterpret_cast<Object::struct_little *>(object_struct.data.data());
+        auto &object_data = *reinterpret_cast<Object::C<LittleEndian> *>(object_struct.data.data());
         
         // Do we have a collision model?
         auto collision_id = object_data.collision_model.tag_id.read();
@@ -387,7 +403,7 @@ namespace Invader::Parser {
         // Get what we need
         auto &collision_struct = workload.structs[*workload.tags[collision_id.index].base_struct];
         auto *collision_data_ptr = collision_struct.data.data();
-        auto &collision_data = *reinterpret_cast<ModelCollisionGeometry::struct_little *>(collision_data_ptr);
+        auto &collision_data = *reinterpret_cast<ModelCollisionGeometry::C<LittleEndian> *>(collision_data_ptr);
         
         // Do we already have pathfinding spheres?
         if(collision_data.pathfinding_spheres.count.read() != 0) {
@@ -396,7 +412,7 @@ namespace Invader::Parser {
         
         // Start finding the thing, then
         float x = 0.0F, y = 0.0F, z = 0.0F;
-        HEK::Index node_index;
+        Index node_index;
         
         // If we don't have a value set, set one.
         float sphere_radius;
@@ -436,8 +452,8 @@ namespace Invader::Parser {
         collision_data.pathfinding_spheres.count = 1;
         
         auto &pathfinding_struct = workload.structs.emplace_back();
-        pathfinding_struct.data.resize(sizeof(ModelCollisionGeometrySphere::struct_little));
-        auto &sphere = *reinterpret_cast<ModelCollisionGeometrySphere::struct_little *>(pathfinding_struct.data.data());
+        pathfinding_struct.data.resize(sizeof(ModelCollisionGeometrySphere::C<LittleEndian>));
+        auto &sphere = *reinterpret_cast<ModelCollisionGeometrySphere::C<LittleEndian> *>(pathfinding_struct.data.data());
         sphere.radius = sphere_radius;
         sphere.center.x = x;
         sphere.center.y = y;
@@ -450,7 +466,7 @@ namespace Invader::Parser {
             return; // if recursion is disabled, doing any of this will be a meme
         }
 
-        auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+        auto &struct_val = *reinterpret_cast<C<LittleEndian> *>(workload.structs[struct_index].data.data() + offset);
         auto &model_id = this->model.tag_id;
 
         struct_val.head_model_node_index = NULL_INDEX;
@@ -459,22 +475,40 @@ namespace Invader::Parser {
         if(struct_val.animation_graph.tag_id.read().is_null()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
         }
-        else {
+        else if(!model_id.is_null()) {
             auto &model_tag = workload.tags[model_id.index];
             auto &model_tag_header = workload.structs[*model_tag.base_struct];
-            auto &model_tag_header_struct = *reinterpret_cast<GBXModel::struct_little *>(model_tag_header.data.data());
-            std::size_t node_count = model_tag_header_struct.nodes.count.read();
-            if(node_count) {
-                auto *nodes = reinterpret_cast<ModelNode::struct_little *>(workload.structs[*model_tag_header.resolve_pointer(&model_tag_header_struct.nodes.pointer)].data.data());
-                for(std::size_t n = 0; n < node_count; n++) {
-                    auto &node = nodes[n];
-                    if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {
-                        struct_val.head_model_node_index = static_cast<HEK::Index>(n);
-                    }
-                    if(std::strncmp(node.name.string, "bip01 pelvis", sizeof(node.name.string) - 1) == 0) {
-                        struct_val.pelvis_model_node_index = static_cast<HEK::Index>(n);
+            auto model_fourcc = this->model.tag_fourcc;
+            
+            // Find the head and pelvis nodes
+            auto set_head_pelvis = [&struct_val, &workload, &model_tag_header](auto &model_tag_header_struct) {
+                std::size_t node_count = model_tag_header_struct.nodes.count.read();
+                if(node_count) {
+                    auto *nodes = reinterpret_cast<ModelNode::C<LittleEndian> *>(workload.structs[*model_tag_header.resolve_pointer(&model_tag_header_struct.nodes.pointer)].data.data());
+                    for(std::size_t n = 0; n < node_count; n++) {
+                        auto &node = nodes[n];
+                        if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {
+                            struct_val.head_model_node_index = static_cast<Index>(n);
+                        }
+                        if(std::strncmp(node.name.string, "bip01 pelvis", sizeof(node.name.string) - 1) == 0) {
+                            struct_val.pelvis_model_node_index = static_cast<Index>(n);
+                        }
                     }
                 }
+            };
+            
+            // Note that we should use a different struct depending on if it's a model or gbxmodel (the code is the same however)
+            auto *model_tag_data = model_tag_header.data.data();
+            if(model_fourcc == TagFourCC::TAG_FOURCC_MODEL) {
+                set_head_pelvis(*reinterpret_cast<Model::C<LittleEndian> *>(model_tag_data));
+            }
+            else if(model_fourcc == TagFourCC::TAG_FOURCC_GBXMODEL) {
+                set_head_pelvis(*reinterpret_cast<GBXModel::C<LittleEndian> *>(model_tag_data));
+            }
+            else {
+                // bad - we don't have a struct implemented
+                eprintf_error("Cannot get bip01 head/pelvis from a %s", tag_fourcc_to_extension(model_fourcc));
+                std::terminate();
             }
         }
 
@@ -482,7 +516,7 @@ namespace Invader::Parser {
         set_pathfinding_spheres(workload, struct_index, struct_val.collision_radius);
     }
     void Vehicle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
-        auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+        auto &struct_val = *reinterpret_cast<C<LittleEndian> *>(workload.structs[struct_index].data.data() + offset);
 
         if(struct_val.animation_graph.tag_id.read().is_null()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Vehicle has no animation graph, so the vehicle will not spawn", tag_index);
@@ -496,26 +530,26 @@ namespace Invader::Parser {
         if(this->zoom_levels && !this->hud_interface.tag_id.is_null()) {
             auto &weapon_hud_interface_tag = workload.tags[this->hud_interface.tag_id.index];
             auto &weapon_hud_interface_struct = workload.structs[*weapon_hud_interface_tag.base_struct];
-            auto &weapon_hud_interface = *reinterpret_cast<const WeaponHUDInterface::struct_little *>(weapon_hud_interface_struct.data.data());
+            auto &weapon_hud_interface = *reinterpret_cast<const WeaponHUDInterface::C<LittleEndian> *>(weapon_hud_interface_struct.data.data());
             std::size_t crosshair_count = weapon_hud_interface.crosshairs.count;
             if(crosshair_count) {
                 auto &crosshairs_struct = workload.structs[weapon_hud_interface_struct.resolve_pointer(&weapon_hud_interface.crosshairs.pointer).value()];
-                auto *crosshairs = reinterpret_cast<const WeaponHUDInterfaceCrosshair::struct_little *>(crosshairs_struct.data.data());
+                auto *crosshairs = reinterpret_cast<const WeaponHUDInterfaceCrosshair::C<LittleEndian> *>(crosshairs_struct.data.data());
                 for(std::size_t c = 0; c < crosshair_count; c++) {
                     auto &crosshair = crosshairs[c];
-                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM_LEVEL) {
+                    if(crosshair.crosshair_type != WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM_LEVEL) {
                         continue;
                     }
 
                     std::size_t overlay_count = crosshair.crosshair_overlays.count;
                     if(overlay_count) {
-                        const BitmapGroupSequence::struct_little *sequences;
+                        const BitmapGroupSequence::C<LittleEndian> *sequences;
                         std::size_t sequence_count;
                         char bitmap_tag_path[512];
-                        HEK::BitmapType bitmap_type;
+                        BitmapType bitmap_type;
                         get_sequence_data(workload, crosshair.crosshair_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
                         auto &crosshair_overlays_struct = workload.structs[*crosshairs_struct.resolve_pointer(&crosshair.crosshair_overlays.pointer)];
-                        auto *crosshair_overlays = reinterpret_cast<const WeaponHUDInterfaceCrosshairOverlay::struct_little *>(crosshair_overlays_struct.data.data());
+                        auto *crosshair_overlays = reinterpret_cast<const WeaponHUDInterfaceCrosshairOverlay::C<LittleEndian> *>(crosshair_overlays_struct.data.data());
 
                         // Make sure stuff is there
                         for(std::size_t o = 0; o < overlay_count; o++) {
@@ -526,7 +560,7 @@ namespace Invader::Parser {
                             // if this is false, the HUD interface tag will error on building anyway - no need to make multiple errors that are the same thing if we can help it
                             else if(overlay.sequence_index < sequence_count) {
                                 auto &sequence = sequences[overlay.sequence_index];
-                                bool not_a_sprite = overlay.flags.read() & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_NOT_A_SPRITE;
+                                bool not_a_sprite = overlay.flags.read() & WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_NOT_A_SPRITE;
                                 std::size_t max_zoom_levels = not_a_sprite ? sequence.bitmap_count.read() : sequence.sprites.count.read();
                                 if(this->zoom_levels < 0 || static_cast<std::size_t>(this->zoom_levels) > max_zoom_levels) {
                                     const char *noun;
@@ -569,7 +603,7 @@ namespace Invader::Parser {
     }
     
     void device_post_compile(BuildWorkload &workload, ::size_t struct_index, std::size_t struct_offset) {
-        auto &device = *reinterpret_cast<Device::struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
+        auto &device = *reinterpret_cast<Device::C<LittleEndian> *>(workload.structs[struct_index].data.data() + struct_offset);
         
         auto set_inverse = [](auto &from, auto &to) {
             if(from.read() != 0) {

@@ -7,6 +7,8 @@
 
 #include <filesystem>
 
+using namespace Invader::Parser;
+
 namespace Invader {
     static std::vector<File::TagFilePath> get_dependencies(const BuildWorkload &tag_compiled) {
         std::vector<File::TagFilePath> dependencies;
@@ -25,12 +27,12 @@ namespace Invader {
         return dependencies;
     }
 
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, TagFourCC tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
 
         if(!reverse) {
-            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, auto recursion) -> void {
+            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, TagFourCC tag_int_to_find, auto recursion) -> void {
                 std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
 
                 // See if we can open the tag
@@ -111,18 +113,18 @@ namespace Invader {
                         }
                         else if(file.is_regular_file()) {
                             std::string dir_tag_path = current_path + file.path().filename().stem().string();
-                            auto fourcc = Invader::HEK::tag_extension_to_fourcc(file.path().extension().string().c_str() + 1);
+                            auto fourcc = tag_extension_to_fourcc(file.path().extension().string().c_str() + 1);
 
                             // Skip some obvious stuff as well as null tag class ints
                             if(
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_NULL ||
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_BITMAP ||
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_CAMERA_TRACK ||
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT ||
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_PHYSICS ||
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_SOUND_ENVIRONMENT ||
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST ||
-                                fourcc == Invader::TagFourCC::TAG_FOURCC_WIND) {
+                                fourcc == TagFourCC::TAG_FOURCC_NULL ||
+                                fourcc == TagFourCC::TAG_FOURCC_BITMAP ||
+                                fourcc == TagFourCC::TAG_FOURCC_CAMERA_TRACK ||
+                                fourcc == TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT ||
+                                fourcc == TagFourCC::TAG_FOURCC_PHYSICS ||
+                                fourcc == TagFourCC::TAG_FOURCC_SOUND_ENVIRONMENT ||
+                                fourcc == TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST ||
+                                fourcc == TagFourCC::TAG_FOURCC_WIND) {
                                 continue;
                             }
 

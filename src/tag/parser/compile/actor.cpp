@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/actor.hpp>
+#include <invader/tag/parser/definition/actor_variant.hpp>
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
     void Actor::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
-        auto *actor = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
+        auto *actor = reinterpret_cast<C<LittleEndian> *>(workload.structs[struct_index].data.data() + struct_offset);
         
         #define SET_INVERTED_VALUE(normal,inverted) { if(normal.read() > 0.0F) { inverted = 1.0F / (TICK_RATE * normal.read()); } else { inverted = 0.0F; } }
 
@@ -21,7 +22,7 @@ namespace Invader::Parser {
     }
     
     void ActorVariant::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
-        auto *actor_variant = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
+        auto *actor_variant = reinterpret_cast<C<LittleEndian> *>(workload.structs[struct_index].data.data() + struct_offset);
         actor_variant->grenade_velocity = actor_variant->grenade_velocity.read() / TICK_RATE;
     }
 }

@@ -44,9 +44,6 @@ static std::uint32_t read_str32(const char *err, const char *s) {
 }
 
 int main(int argc, const char **argv) {
-    using namespace Invader;
-    using namespace Invader::HEK;
-    
     using RawDataHandling = BuildWorkload::BuildParameters::BuildParametersDetails::RawDataHandling;
 
     // Parameters
@@ -208,7 +205,7 @@ int main(int argc, const char **argv) {
     }
 
     if(build_options.use_filesystem_path) {
-        auto scenario_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], build_options.tags);
+        auto scenario_maybe = file_path_to_tag_path(remaining_arguments[0], build_options.tags);
         if(scenario_maybe.has_value()) std::printf("%s\n", scenario_maybe->c_str());
         if(scenario_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
             scenario = std::filesystem::path(*scenario_maybe).replace_extension().string();
@@ -219,14 +216,14 @@ int main(int argc, const char **argv) {
         }
     }
     else {
-        scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
+        scenario = halo_path_to_preferred_path(remaining_arguments[0]);
     }
 
     try {
         // Get the index
-        std::optional<std::vector<File::TagFilePath>> with_index;
+        std::optional<std::vector<TagFilePath>> with_index;
         if(build_options.index.size()) {
-            with_index = std::vector<File::TagFilePath>();
+            with_index = std::vector<TagFilePath>();
             
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;
@@ -258,7 +255,7 @@ int main(int argc, const char **argv) {
                 auto substr = tag.substr(0, extension - tag.c_str() - 1);
                 const char *substr_c = substr.c_str();
                 std::vector<char> substr_v(substr_c, substr_c + substr.size() + 1);
-                File::preferred_path_to_halo_path_chars(substr_v.data());
+                preferred_path_to_halo_path_chars(substr_v.data());
 
                 // Lowercase everything
                 for(char &c : substr) {
@@ -294,7 +291,7 @@ int main(int argc, const char **argv) {
         }
         
         if(!build_options.use_anniverary_mode) {
-            parameters.details.build_flags_cea = HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_BITMAPS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_SOUNDS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY;
+            parameters.details.build_flags_cea = CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_BITMAPS_CACHE | CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_SOUNDS_CACHE | CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY;
         }
         
         parameters.details.build_check_custom_edition_resource_map_bounds = build_options.check_custom_edition_resource_bounds;
@@ -329,7 +326,7 @@ int main(int argc, const char **argv) {
             bool error = false;
             
             auto try_open = [](const std::filesystem::path &path) {
-                auto file = File::open_file(path);
+                auto file = open_file(path);
                 if(!file.has_value()) {
                     eprintf_error("Failed to open %s", path.string().c_str());
                     std::exit(EXIT_FAILURE);
@@ -357,7 +354,7 @@ int main(int argc, const char **argv) {
             
             auto bitmaps = resource_target_path / "bitmaps.map";
             auto sounds = resource_target_path / "sounds.map";
-            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            if(parameters.details.build_cache_file_engine == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 // Use loc for Custom Edition
                 auto loc = resource_target_path / "loc.map";
                 
@@ -405,7 +402,7 @@ int main(int argc, const char **argv) {
             map_name = *build_options.rename_scenario;
         }
         else {
-            map_name = File::base_name(scenario.c_str());
+            map_name = base_name(scenario.c_str());
         }
         
         // CRC32 spoofing, indexing, etc.
@@ -530,7 +527,7 @@ int main(int argc, const char **argv) {
         }
         
         // Save the file
-        if(!File::save_file(final_file, map)) {
+        if(!save_file(final_file, map)) {
             eprintf_error("Failed to save %s", final_file.string().c_str());
             return EXIT_FAILURE;
         }

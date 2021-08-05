@@ -5,27 +5,27 @@
 
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     class IntersectionCheck {
     public:
         static bool check_for_intersection(
             const Point3D<LittleEndian> &point_a,
             const Point3D<LittleEndian> &point_b,
-            const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
+            const ModelCollisionGeometryBSP3DNode::C<LittleEndian> *bsp3d_nodes,
             std::uint32_t bsp3d_node_count,
-            const ModelCollisionGeometryBSPPlane<LittleEndian> *planes,
+            const ModelCollisionGeometryBSPPlane::C<LittleEndian> *planes,
             std::uint32_t plane_count,
-            const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves,
+            const ModelCollisionGeometryBSPLeaf::C<LittleEndian> *leaves,
             std::uint32_t leaf_count,
-            const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
+            const ModelCollisionGeometryBSP2DNode::C<LittleEndian> *bsp2d_nodes,
             std::uint32_t bsp2d_node_count,
-            const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
+            const ModelCollisionGeometryBSP2DReference::C<LittleEndian> *bsp2d_references,
             std::uint32_t bsp2d_reference_count,
-            const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces,
+            const ModelCollisionGeometryBSPSurface::C<LittleEndian> *surfaces,
             std::uint32_t surface_count,
-            const ModelCollisionGeometryBSPEdge<LittleEndian> *edges,
+            const ModelCollisionGeometryBSPEdge::C<LittleEndian> *edges,
             std::uint32_t edge_count,
-            const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices,
+            const ModelCollisionGeometryBSPVertex::C<LittleEndian> *vertices,
             std::uint32_t vertex_count,
             Point3D<LittleEndian> &intersection_point,
             std::uint32_t &surface_index,
@@ -35,21 +35,21 @@ namespace Invader::HEK {
     private:
         const Point3D<LittleEndian> &original_point_a;
         const Point3D<LittleEndian> &original_point_b;
-        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes;
+        const ModelCollisionGeometryBSP3DNode::C<LittleEndian> *bsp3d_nodes;
         std::uint32_t bsp3d_node_count;
-        const ModelCollisionGeometryBSPPlane<LittleEndian> *planes;
+        const ModelCollisionGeometryBSPPlane::C<LittleEndian> *planes;
         std::uint32_t plane_count;
-        const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves;
+        const ModelCollisionGeometryBSPLeaf::C<LittleEndian> *leaves;
         std::uint32_t leaf_count;
-        const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes;
+        const ModelCollisionGeometryBSP2DNode::C<LittleEndian> *bsp2d_nodes;
         std::uint32_t bsp2d_node_count;
-        const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references;
+        const ModelCollisionGeometryBSP2DReference::C<LittleEndian> *bsp2d_references;
         std::uint32_t bsp2d_reference_count;
-        const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces;
+        const ModelCollisionGeometryBSPSurface::C<LittleEndian> *surfaces;
         std::uint32_t surface_count;
-        const ModelCollisionGeometryBSPEdge<LittleEndian> *edges;
+        const ModelCollisionGeometryBSPEdge::C<LittleEndian> *edges;
         std::uint32_t edge_count;
-        const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices;
+        const ModelCollisionGeometryBSPVertex::C<LittleEndian> *vertices;
         std::uint32_t vertex_count;
 
         bool check_for_intersection_bsp2d_node (
@@ -70,26 +70,26 @@ namespace Invader::HEK {
         IntersectionCheck(
             const Point3D<LittleEndian> &original_point_a,
             const Point3D<LittleEndian> &original_point_b,
-            const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
+            const ModelCollisionGeometryBSP3DNode::C<LittleEndian> *bsp3d_nodes,
             std::uint32_t bsp3d_node_count,
-            const ModelCollisionGeometryBSPPlane<LittleEndian> *planes,
+            const ModelCollisionGeometryBSPPlane::C<LittleEndian> *planes,
             std::uint32_t plane_count,
-            const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves,
+            const ModelCollisionGeometryBSPLeaf::C<LittleEndian> *leaves,
             std::uint32_t leaf_count,
-            const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
+            const ModelCollisionGeometryBSP2DNode::C<LittleEndian> *bsp2d_nodes,
             std::uint32_t bsp2d_node_count,
-            const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
+            const ModelCollisionGeometryBSP2DReference::C<LittleEndian> *bsp2d_references,
             std::uint32_t bsp2d_reference_count,
-            const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces,
+            const ModelCollisionGeometryBSPSurface::C<LittleEndian> *surfaces,
             std::uint32_t surface_count,
-            const ModelCollisionGeometryBSPEdge<LittleEndian> *edges,
+            const ModelCollisionGeometryBSPEdge::C<LittleEndian> *edges,
             std::uint32_t edge_count,
-            const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices,
+            const ModelCollisionGeometryBSPVertex::C<LittleEndian> *vertices,
             std::uint32_t vertex_count
         );
     };
     
-    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(const Point3D<LittleEndian> &point, const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes, std::uint32_t bsp3d_node_count, const ModelCollisionGeometryBSPPlane<LittleEndian> *planes, std::uint32_t plane_count);
+    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(const Point3D<LittleEndian> &point, const ModelCollisionGeometryBSP3DNode::C<LittleEndian> *bsp3d_nodes, std::uint32_t bsp3d_node_count, const ModelCollisionGeometryBSPPlane::C<LittleEndian> *planes, std::uint32_t plane_count);
 }
 
 #endif

@@ -6,7 +6,7 @@
 
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
-#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
 #include <invader/tag/hek/header.hpp>
 #include "image_loader.hpp"
 #include <invader/bitmap/color_plate_scanner.hpp>
@@ -14,7 +14,6 @@
 #include "bitmap_data_writer.hpp"
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
-#include <invader/tag/parser/parser.hpp>
 
 enum SupportedFormatsInt {
     SUPPORTED_FORMATS_TIF = 0,
@@ -37,7 +36,7 @@ static const char *SUPPORTED_FORMATS[] = {
 static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTED_FORMATS_INT_COUNT);
 
 using namespace Invader;
-using namespace Invader::HEK;
+using namespace Invader::Parser;
 
 struct BitmapOptions {
     // Data directory
@@ -140,7 +139,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bitmap_options.usage = bitmap_tag_data.usage;
         }
         if(!bitmap_options.palettize.has_value()) {
-            bitmap_options.palettize = !(bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
+            bitmap_options.palettize = !(bitmap_tag_data.flags & Parser::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
         }
         if(!bitmap_options.bump_height.has_value()) {
             bitmap_options.bump_height = bitmap_tag_data.bump_height;
@@ -204,7 +203,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         
         // Get the size of the data we're going to decompress
         auto *data = bitmap_tag_data.compressed_color_plate_data.data();
-        image_size = reinterpret_cast<HEK::BigEndian<std::uint32_t> *>(data)->read();
+        image_size = reinterpret_cast<Parser::BigEndian<std::uint32_t> *>(data)->read();
         if((image_size % sizeof(Pixel)) != 0) {
             eprintf_error("Cannot regenerate due the compressed color plate data size being wrong");
             return EXIT_FAILURE;
@@ -386,7 +385,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     bitmap_tag_data.encoding_format = bitmap_options.format.value();
     bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
     bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
-    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
+    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~Parser::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | (*bitmap_options.palettize ? 0 : Parser::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
     if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
         bitmap_tag_data.mipmap_count = 0;
     }
@@ -430,7 +429,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     std::error_code ec;
     std::filesystem::create_directories(tag_path.parent_path(), ec);
     
-    if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(tag_fourcc, true))) {
+    if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(true))) {
         eprintf_error("Error: Failed to write to %s.", final_path.string().c_str());
         return EXIT_FAILURE;
     }

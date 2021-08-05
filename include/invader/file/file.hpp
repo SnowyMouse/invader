@@ -73,16 +73,16 @@ namespace Invader::File {
         std::string path;
 
         /** Class of the tag */
-        TagFourCC fourcc;
+        Parser::TagFourCC fourcc;
         
         /** Join the path and class into one path */
         std::string join() const {
-            return path + "." + HEK::tag_fourcc_to_extension(fourcc);
+            return path + "." + Parser::tag_fourcc_to_extension(fourcc);
         }
         
         TagFilePath() = default;
         TagFilePath(const TagFilePath &copy) = default;
-        TagFilePath(const std::string &path, TagFourCC fourcc) : path(path), fourcc(fourcc) {}
+        TagFilePath(const std::string &path, Parser::TagFourCC fourcc) : path(path), fourcc(fourcc) {}
         bool operator==(const TagFilePath &other) const noexcept {
             return other.fourcc == this->fourcc && other.path == this->path;
         }
@@ -116,7 +116,7 @@ namespace Invader::File {
         std::size_t tag_directory = {};
 
         /** Tag class of this tag */
-        HEK::TagFourCC tag_fourcc = {};
+        Parser::TagFourCC tag_fourcc = {};
 
         /**
          * Split the tag path

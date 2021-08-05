@@ -12,6 +12,8 @@
 #include <cstring>
 #include <climits>
 
+using namespace Invader::Parser;
+
 namespace Invader::File {
     std::optional<std::vector<std::byte>> open_file(const std::filesystem::path &path) {
         // Attempt to open it
@@ -240,12 +242,12 @@ namespace Invader::File {
             return std::nullopt;
         }
 
-        auto tag_class = HEK::tag_extension_to_fourcc(extension);
-        if(tag_class == TagFourCC::TAG_FOURCC_NONE || tag_class == TagFourCC::TAG_FOURCC_NULL) {
+        auto tag_class = Parser::tag_extension_to_fourcc(extension);
+        if(tag_class == Parser::TagFourCC::TAG_FOURCC_NONE || tag_class == Parser::TagFourCC::TAG_FOURCC_NULL) {
             return std::nullopt;
         }
         else {
-            return TagFilePath { std::string(tag_path, (extension - 1) - tag_path), HEK::tag_extension_to_fourcc(extension) };
+            return TagFilePath { std::string(tag_path, (extension - 1) - tag_path), Parser::tag_extension_to_fourcc(extension) };
         }
     }
 
@@ -291,10 +293,10 @@ namespace Invader::File {
                     }
                     else {
                         auto extension = file_path.extension().string();
-                        auto tag_fourcc = HEK::tag_extension_to_fourcc(extension.c_str() + 1);
+                        auto tag_fourcc = tag_extension_to_fourcc(extension.c_str() + 1);
 
                         // First, make sure it's valid
-                        if(tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL || tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NONE) {
+                        if(tag_fourcc == TagFourCC::TAG_FOURCC_NULL || tag_fourcc == TagFourCC::TAG_FOURCC_NONE) {
                             goto spaghetti_next_tag;
                         }
 
@@ -337,10 +339,10 @@ namespace Invader::File {
                 }
                 else if(file_path.has_extension() && std::filesystem::is_regular_file(file_path)) {
                     auto extension = file_path.extension().string();
-                    auto tag_fourcc = HEK::tag_extension_to_fourcc(extension.c_str() + 1);
+                    auto tag_fourcc = Parser::tag_extension_to_fourcc(extension.c_str() + 1);
 
                     // First, make sure it's valid
-                    if(tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL || tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NONE) {
+                    if(tag_fourcc == Parser::TagFourCC::TAG_FOURCC_NULL || tag_fourcc == Parser::TagFourCC::TAG_FOURCC_NONE) {
                         continue;
                     }
 

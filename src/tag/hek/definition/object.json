@@ -521,7 +521,8 @@
             }
         ],
         "type": "struct",
-        "size": 380
+        "size": 380,
+        "group": "object"
     },
     {
         "name": "BaseObjectFlags",

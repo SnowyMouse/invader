@@ -1,5 +1,10 @@
 #include "bludgeoner.hpp"
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/model.hpp>
+#include <invader/tag/parser/definition/gbxmodel.hpp>
+#include <invader/tag/parser/definition/scenario_structure_bsp.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
+#include <invader/tag/parser/definition/string_list.hpp>
+#include <invader/tag/parser/definition/unicode_string_list.hpp>
 #include <invader/tag/parser/compile/model.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
@@ -61,7 +66,7 @@ namespace Invader::Bludgeoner {
     #ifndef DISABLE_AUDIO
     
     static bool broken_sound_buffer(Parser::SoundPermutation &pe, bool fix) {
-        using SoundFormat = Invader::HEK::SoundFormat;
+        using SoundFormat = Parser::SoundFormat;
         auto &samples = pe.samples;
         auto &buffer_size = pe.buffer_size;
         

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/hek/definition.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
 #include <invader/bitmap/bitmap_encode.hpp>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     const char *BITMAP_DATA_FORMAT_NAMES[] = {
         "A8 (8-bit monochrome)",
         "Y8 (8-bit monochrome)",
@@ -30,31 +29,31 @@ namespace Invader::HEK {
         return format >= (sizeof(BITMAP_DATA_FORMAT_NAMES) / sizeof(*BITMAP_DATA_FORMAT_NAMES)) ? nullptr : BITMAP_DATA_FORMAT_NAMES[format];
     }
     
-    std::size_t calculate_bits_per_pixel(HEK::BitmapDataFormat format) noexcept {
+    std::size_t calculate_bits_per_pixel(BitmapDataFormat format) noexcept {
         switch(format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
                 return 32;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                 return 16;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                 return 8;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+            case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
                 return 4;
             default:
                 return 0; // unknown
         }
     }
 
-    std::size_t size_of_bitmap(const Parser::BitmapData &data) noexcept {
+    std::size_t size_of_bitmap(const BitmapData &data) noexcept {
         return BitmapEncode::bitmap_data_size(data.width, data.height, data.depth, data.mipmap_count, data.format, data.type);
     }
 }

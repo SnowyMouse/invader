@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/physics.hpp>
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
@@ -29,7 +29,7 @@ namespace Invader::Parser {
         float neg_xy = 0.0f;
         float neg_yz = 0.0f;
 
-        HEK::Point3D<HEK::NativeEndian> com = this->center_of_mass;
+        Point3D<NativeEndian> com = this->center_of_mass;
 
         // Iterate once to get density and masses as well as to get inertial stuff.
         for(auto &mp : this->mass_points) {
@@ -41,7 +41,7 @@ namespace Invader::Parser {
                 density_scale_co += mp.relative_mass / mp.relative_density;
             }
 
-            HEK::Point3D<HEK::NativeEndian> pos = mp.position;
+            Point3D<NativeEndian> pos = mp.position;
 
             float dist_xx = std::pow(com.y - pos.y, 2.0f) + std::pow(com.z - pos.z, 2.0f);
             float dist_yy = std::pow(com.x - pos.x, 2.0f) + std::pow(com.z - pos.z, 2.0f);
@@ -81,7 +81,7 @@ namespace Invader::Parser {
         }
 
         // ...And matrix stuff
-        HEK::Matrix<HEK::LittleEndian> m;
+        Matrix<LittleEndian> m;
         m.matrix[0][0] = xx;
         m.matrix[0][1] = neg_xy;
         m.matrix[0][2] = neg_zx;

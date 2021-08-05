@@ -189,6 +189,7 @@
         ],
         "type": "struct",
         "postprocess_hek_data": true,
-        "size": 268
+        "size": 268,
+        "group": "decal"
     }
 ]

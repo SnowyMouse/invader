@@ -6,12 +6,12 @@
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 #include <invader/file/file.hpp>
 
 using namespace Invader::File;
+using namespace Invader::Parser;
 
 std::size_t refactor_tags(const std::filesystem::path &file_path, const std::vector<std::pair<TagFilePath, TagFilePath>> &replacements, bool check_only, bool dry_run) {
     // Open the tag
@@ -26,13 +26,13 @@ std::size_t refactor_tags(const std::filesystem::path &file_path, const std::vec
     std::size_t count = 0;
 
     try {
-        const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
-        Invader::HEK::TagFileHeader::validate_header(header, tag->size());
+        const auto *header = reinterpret_cast<const TagFileHeader *>(tag->data());
+        TagFileHeader::validate_header(header, tag->size());
 
-        auto tag_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
+        auto tag_data = ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
         count = tag_data->refactor_references(replacements);
         if(count) {
-            file_data = tag_data->generate_hek_tag_data(header->tag_fourcc);
+            file_data = tag_data->generate_hek_tag_data();
         }
         else {
             return count;
@@ -85,14 +85,14 @@ int main(int argc, char * const *argv) {
 
         std::vector<std::pair<std::string, std::string>> string_replacements;
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
-        std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> class_replacements;
-        std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> reverse_class_replacements;
+        std::vector<std::pair<TagFourCC, TagFourCC>> class_replacements;
+        std::vector<std::pair<TagFourCC, TagFourCC>> reverse_class_replacements;
         std::optional<std::pair<std::string, std::string>> recursive;
     } refactor_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
-        auto get_class = [](auto *argument) -> Invader::HEK::TagFourCC {
-            auto tag_class = Invader::HEK::tag_extension_to_fourcc(argument);
+        auto get_class = [](auto *argument) -> TagFourCC {
+            auto tag_class = tag_extension_to_fourcc(argument);
             if(!tag_class) {
                 eprintf_error("Error: %s is not a valid tag class", argument);
                 std::exit(EXIT_FAILURE);
@@ -199,13 +199,13 @@ int main(int argc, char * const *argv) {
         for(auto &i : refactor_options.replacements) {
             bool nonexistant = true;
             for(auto &t : refactor_options.tags) {
-                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + Invader::HEK::tag_fourcc_to_extension(i.second.fourcc)))) {
+                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + tag_fourcc_to_extension(i.second.fourcc)))) {
                     nonexistant = false;
                     break;
                 }
             }
             if(nonexistant) {
-                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), Invader::HEK::tag_fourcc_to_extension(i.first.fourcc), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), Invader::HEK::tag_fourcc_to_extension(i.second.fourcc));
+                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), tag_fourcc_to_extension(i.first.fourcc), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), tag_fourcc_to_extension(i.second.fourcc));
                 failed = true;
             }
         }
@@ -502,11 +502,11 @@ int main(int argc, char * const *argv) {
         
         // Skip some tags that cannot reference anything
         switch(tag.tag_fourcc) {
-            case Invader::HEK::TagFourCC::TAG_FOURCC_BITMAP:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_PHYSICS:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_STRING_LIST:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
+            case TagFourCC::TAG_FOURCC_BITMAP:
+            case TagFourCC::TAG_FOURCC_PHYSICS:
+            case TagFourCC::TAG_FOURCC_STRING_LIST:
+            case TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
+            case TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
                 skip = true;
                 break;
             default:

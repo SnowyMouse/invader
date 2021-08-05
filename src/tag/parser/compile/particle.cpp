@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
+#include <invader/tag/parser/definition/particle.hpp>
+#include <invader/tag/parser/definition/particle_system.hpp>
+#include <invader/tag/parser/definition/weather_particle_system.hpp>
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
@@ -10,7 +13,7 @@ namespace Invader::Parser {
         }
 
         auto &bitmap_tag_struct = workload.structs[*workload.tags[bitmap_tag_index].base_struct];
-        auto &bitmap_tag_data = *reinterpret_cast<Bitmap::struct_little *>(bitmap_tag_struct.data.data());
+        auto &bitmap_tag_data = *reinterpret_cast<Bitmap::C<LittleEndian> *>(bitmap_tag_struct.data.data());
         float pixel_size = 1.0F;
 
         // Get the dimensions of the bitmaps
@@ -19,7 +22,7 @@ namespace Invader::Parser {
 
         if(bitmap_data_index.has_value()) {
             std::vector<std::pair<std::uint16_t, std::uint16_t>> bitmap_dimensions(bitmap_count);
-            auto *bitmap_data = reinterpret_cast<BitmapData::struct_little *>(workload.structs[*bitmap_data_index].data.data());
+            auto *bitmap_data = reinterpret_cast<BitmapData::C<LittleEndian> *>(workload.structs[*bitmap_data_index].data.data());
             for(std::uint32_t b = 0; b < bitmap_count; b++) {
                 bitmap_dimensions[b].first = bitmap_data[b].width;
                 bitmap_dimensions[b].second = bitmap_data[b].height;
@@ -29,14 +32,14 @@ namespace Invader::Parser {
             auto sequence_offset = bitmap_tag_struct.resolve_pointer(&bitmap_tag_data.bitmap_group_sequence.pointer);
             if(sequence_offset.has_value()) {
                 auto &sequences_struct = workload.structs[*sequence_offset];
-                auto *sequences = reinterpret_cast<BitmapGroupSequence::struct_little *>(sequences_struct.data.data());
+                auto *sequences = reinterpret_cast<BitmapGroupSequence::C<LittleEndian> *>(sequences_struct.data.data());
 
                 for(std::size_t sequence_index = 0; sequence_index < bitmap_tag_data.bitmap_group_sequence.count; sequence_index++) {
                     auto &sequence = sequences[sequence_index];
                     auto sprites_offset = sequences_struct.resolve_pointer(&sequence.sprites.pointer);
 
                     if(sprites_offset.has_value()) {
-                        auto *sprites = reinterpret_cast<BitmapGroupSprite::struct_little *>(workload.structs[*sprites_offset].data.data());
+                        auto *sprites = reinterpret_cast<BitmapGroupSprite::C<LittleEndian> *>(workload.structs[*sprites_offset].data.data());
 
                         // We'll need to iterate through all of the sprites
                         std::size_t sprite_count = sequence.sprites.count;
@@ -64,13 +67,13 @@ namespace Invader::Parser {
         this->contact_deterioration = 0.0F;
     }
     void Particle::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
-        auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+        auto &particle = *reinterpret_cast<C<LittleEndian> *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->bitmap.tag_id.index);
         particle.sprite_size = this->sprite_size;
         particle.make_it_actually_work = 1;
     }
     void WeatherParticleSystemParticleType::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
-        auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+        auto &particle = *reinterpret_cast<C<LittleEndian> *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->sprite_bitmap.tag_id.index);
         particle.sprite_size = this->sprite_size;
         particle.not_broken = 1;

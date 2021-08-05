@@ -134,24 +134,24 @@ namespace Invader {
         return arr;
     }
     
-    static std::string vector_to_string(const HEK::Vector3D<HEK::NativeEndian> &vector) {
+    static std::string vector_to_string(const Parser::Vector3D<Parser::NativeEndian> &vector) {
         return precise_double_str(vector.i.read()) + TAB + precise_double_str(vector.j.read()) + TAB + precise_double_str(vector.k.read());
     }
     
-    static std::string vector_to_string(const HEK::Point3D<HEK::NativeEndian> &vector) {
+    static std::string vector_to_string(const Parser::Point3D<Parser::NativeEndian> &vector) {
         return precise_double_str(vector.x.read()) + TAB + precise_double_str(vector.y.read()) + TAB + precise_double_str(vector.z.read());
     }
     
-    static std::string vector_to_string(const HEK::Point2D<HEK::NativeEndian> &vector) {
+    static std::string vector_to_string(const Parser::Point2D<Parser::NativeEndian> &vector) {
         return precise_double_str(vector.x.read()) + TAB + precise_double_str(vector.y.read());
     }
     
-    static std::string vector_to_string(const HEK::Quaternion<HEK::NativeEndian> &vector) {
+    static std::string vector_to_string(const Parser::Quaternion<Parser::NativeEndian> &vector) {
         return precise_double_str(vector.i.read()) + TAB + precise_double_str(vector.j.read())+ TAB + precise_double_str(vector.k.read())+ TAB + precise_double_str(vector.w.read());
     }
     
-    static HEK::Quaternion<HEK::NativeEndian> quaternion_from_string(const char *&string) {
-        HEK::Quaternion<HEK::NativeEndian> v;
+    static Parser::Quaternion<Parser::NativeEndian> quaternion_from_string(const char *&string) {
+        Parser::Quaternion<Parser::NativeEndian> v;
         v.i = read_next_float(string);
         v.j = read_next_float(string);
         v.k = read_next_float(string);
@@ -159,23 +159,23 @@ namespace Invader {
         return v;
     }
     
-    static HEK::Vector3D<HEK::NativeEndian> vector3d_from_string(const char *&string) {
-        HEK::Vector3D<HEK::NativeEndian> v;
+    static Parser::Vector3D<Parser::NativeEndian> vector3d_from_string(const char *&string) {
+        Parser::Vector3D<Parser::NativeEndian> v;
         v.i = read_next_float(string);
         v.j = read_next_float(string);
         v.k = read_next_float(string);
         return v;
     }
     
-    static HEK::Point2D<HEK::NativeEndian> point2d_from_string(const char *&string) {
-        HEK::Point2D<HEK::NativeEndian> v;
+    static Parser::Point2D<Parser::NativeEndian> point2d_from_string(const char *&string) {
+        Parser::Point2D<Parser::NativeEndian> v;
         v.x = read_next_float(string);
         v.y = read_next_float(string);
         return v;
     }
     
-    static HEK::Point3D<HEK::NativeEndian> point3d_from_string(const char *&string) {
-        HEK::Point3D<HEK::NativeEndian> v;
+    static Parser::Point3D<Parser::NativeEndian> point3d_from_string(const char *&string) {
+        Parser::Point3D<Parser::NativeEndian> v;
         v.x = read_next_float(string);
         v.y = read_next_float(string);
         v.z = read_next_float(string);

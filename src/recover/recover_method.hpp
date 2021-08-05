@@ -20,7 +20,7 @@ namespace Invader::Recover {
      * @param tag_fourcc tag class fourcc
      * @param overwrite  overwrite data
      */
-    void recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc, bool overwrite);
+    void recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, Parser::TagFourCC tag_fourcc, bool overwrite);
 }
 
 #endif

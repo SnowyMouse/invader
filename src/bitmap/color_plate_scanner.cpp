@@ -7,6 +7,8 @@
 #include <invader/bitmap/color_plate_scanner.hpp>
 #include <invader/printf.hpp>
 
+using namespace Invader::Parser;
+
 namespace Invader {
     static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";
     static constexpr char ERROR_INVALID_BITMAP_HEIGHT[] = "Error: Found a bitmap with an invalid height: %u\n";

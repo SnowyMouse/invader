@@ -51,6 +51,7 @@
             }
         ],
         "type": "struct",
-        "size": 92
+        "size": 92,
+        "group": "item_collection"
     }
 ]

@@ -6,13 +6,13 @@
 #include <cstdint>
 #include <vector>
 #include <optional>
-#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
 #include <invader/bitmap/pixel.hpp>
 
 namespace Invader {
-    using BitmapType = HEK::BitmapType;
-    using BitmapSpriteUsage = HEK::BitmapSpriteUsage;
-    using BitmapUsage = HEK::BitmapUsage;
+    using BitmapType = Parser::BitmapType;
+    using BitmapSpriteUsage = Parser::BitmapSpriteUsage;
+    using BitmapUsage = Parser::BitmapUsage;
     
     enum BitmapMipmapScaleType {
         BITMAP_MIPMAP_SCALE_TYPE_LINEAR,

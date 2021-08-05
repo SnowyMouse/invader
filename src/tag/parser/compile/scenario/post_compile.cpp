@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/scenario.hpp>
+#include <invader/tag/parser/definition/scenario_structure_bsp.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
@@ -8,18 +9,16 @@
 #include <invader/tag/parser/compile/scenario.hpp>
 
 namespace Invader::Parser {
-    using BSPData = HEK::BSPData;
-    
     void ScenarioNetgameEquipment::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
-        reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->unknown_ffffffff = 0xFFFFFFFF;
+        reinterpret_cast<C<LittleEndian> *>(workload.structs[struct_index].data.data() + struct_offset)->unknown_ffffffff = 0xFFFFFFFF;
     }
     
     // Functions for finding stuff
     static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload);
-    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
-    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::C<LittleEndian> &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::C<LittleEndian> &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
     static void find_decals(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data);
-    static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data);
+    static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::C<LittleEndian> &scenario_data);
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         if(workload.disable_recursion) {
@@ -30,7 +29,7 @@ namespace Invader::Parser {
 
         // Get the struct information here
         auto &scenario_struct = workload.structs[struct_index];
-        const auto &scenario_data = *reinterpret_cast<const struct_little *>(scenario_struct.data.data() + struct_offset);
+        const auto &scenario_data = *reinterpret_cast<const C<LittleEndian> *>(scenario_struct.data.data() + struct_offset);
 
         // Get the bsp data; saves us from having to get it again
         auto bsp_data = get_bsp_data(*this, workload);
@@ -41,22 +40,22 @@ namespace Invader::Parser {
             std::size_t object_count = this->objects.size(); \
             if(object_count) { \
                 auto &object_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.objects.pointer)]; \
-                auto *object_array = reinterpret_cast<array_type::struct_little *>(object_struct.data.data()); \
+                auto *object_array = reinterpret_cast<array_type::C<LittleEndian> *>(object_struct.data.data()); \
                 for(std::size_t o = 0; o < object_count; o++) { \
                     std::uint32_t bsp_indices = 0; \
                     std::uint32_t bsp_indices_technically_inside = 0; \
                     auto &object = object_array[o]; \
                     if(object.type != NULL_INDEX) { \
                         auto &type = this->palette[object.type].name; \
-                        auto &object_data = *reinterpret_cast<Object::struct_little *>(workload.structs[*workload.tags[type.tag_id.index].base_struct].data.data()); \
+                        auto &object_data = *reinterpret_cast<Object::C<LittleEndian> *>(workload.structs[*workload.tags[type.tag_id.index].base_struct].data.data()); \
                         auto object_bounding_offset = object_data.bounding_offset; \
                         /* check if we have a model to add the default translation to */ \
                         auto model_index = object_data.model.tag_id.read(); \
                         auto model_present = !model_index.is_null(); \
                         if(model_present) { \
                             auto &model_struct = workload.structs[*workload.tags[model_index.index].base_struct]; \
-                            auto &model_data = *reinterpret_cast<Model::struct_little *>(model_struct.data.data()); \
-                            auto &node = *reinterpret_cast<ModelNode::struct_little *>(workload.structs[*model_struct.resolve_pointer(&model_data.nodes.pointer)].data.data()); \
+                            auto &model_data = *reinterpret_cast<Model::C<LittleEndian> *>(model_struct.data.data()); \
+                            auto &node = *reinterpret_cast<ModelNode::C<LittleEndian> *>(workload.structs[*model_struct.resolve_pointer(&model_data.nodes.pointer)].data.data()); \
                             object_bounding_offset = object_bounding_offset + node.default_translation; \
                         } \
                         auto rotation = object.rotation; \
@@ -120,17 +119,17 @@ namespace Invader::Parser {
             auto *bsp_tag_struct = &workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()];
             
             // If we're not on native, we need to read the pointer at the beginning of the struct
-            if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(workload.get_build_parameters()->details.build_cache_file_engine != CacheFileEngine::CACHE_FILE_NATIVE) {
                 bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
             }
 
-            auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct->data.data());
+            auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::C<LittleEndian> *>(bsp_tag_struct->data.data());
             if(bsp_tag_data.collision_bsp.count == 0) {
                 continue;
             }
 
             auto &collision_bsp_struct = workload.structs[bsp_tag_struct->resolve_pointer(&bsp_tag_data.collision_bsp.pointer).value()];
-            auto &collision_bsp_data = *reinterpret_cast<const ModelCollisionGeometryBSP::struct_little *>(collision_bsp_struct.data.data());
+            auto &collision_bsp_data = *reinterpret_cast<const ModelCollisionGeometryBSP::C<LittleEndian> *>(collision_bsp_struct.data.data());
 
             bsp_data_s.bsp3d_node_count = collision_bsp_data.bsp3d_nodes.count;
             bsp_data_s.plane_count = collision_bsp_data.planes.count;
@@ -143,31 +142,31 @@ namespace Invader::Parser {
             bsp_data_s.render_leaf_count = bsp_tag_data.leaves.count;
 
             if(bsp_data_s.bsp3d_node_count) {
-                bsp_data_s.bsp3d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP3DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp3d_nodes.pointer)].data.data());
+                bsp_data_s.bsp3d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP3DNode::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp3d_nodes.pointer)].data.data());
             }
             if(bsp_data_s.plane_count) {
-                bsp_data_s.planes = reinterpret_cast<const ModelCollisionGeometryBSPPlane::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.planes.pointer)].data.data());
+                bsp_data_s.planes = reinterpret_cast<const ModelCollisionGeometryBSPPlane::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.planes.pointer)].data.data());
             }
             if(bsp_data_s.leaf_count) {
-                bsp_data_s.leaves = reinterpret_cast<const ModelCollisionGeometryBSPLeaf::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.leaves.pointer)].data.data());
+                bsp_data_s.leaves = reinterpret_cast<const ModelCollisionGeometryBSPLeaf::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.leaves.pointer)].data.data());
             }
             if(bsp_data_s.bsp2d_node_count) {
-                bsp_data_s.bsp2d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP2DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_nodes.pointer)].data.data());
+                bsp_data_s.bsp2d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP2DNode::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_nodes.pointer)].data.data());
             }
             if(bsp_data_s.bsp2d_reference_count) {
-                bsp_data_s.bsp2d_references = reinterpret_cast<const ModelCollisionGeometryBSP2DReference::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_references.pointer)].data.data());
+                bsp_data_s.bsp2d_references = reinterpret_cast<const ModelCollisionGeometryBSP2DReference::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_references.pointer)].data.data());
             }
             if(bsp_data_s.surface_count) {
-                bsp_data_s.surfaces = reinterpret_cast<const ModelCollisionGeometryBSPSurface::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.surfaces.pointer)].data.data());
+                bsp_data_s.surfaces = reinterpret_cast<const ModelCollisionGeometryBSPSurface::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.surfaces.pointer)].data.data());
             }
             if(bsp_data_s.edge_count) {
-                bsp_data_s.edges = reinterpret_cast<const ModelCollisionGeometryBSPEdge::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.edges.pointer)].data.data());
+                bsp_data_s.edges = reinterpret_cast<const ModelCollisionGeometryBSPEdge::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.edges.pointer)].data.data());
             }
             if(bsp_data_s.vertex_count) {
-                bsp_data_s.vertices = reinterpret_cast<const ModelCollisionGeometryBSPVertex::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.vertices.pointer)].data.data());
+                bsp_data_s.vertices = reinterpret_cast<const ModelCollisionGeometryBSPVertex::C<LittleEndian> *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.vertices.pointer)].data.data());
             }
             if(bsp_data_s.render_leaf_count) {
-                bsp_data_s.render_leaves = reinterpret_cast<const ScenarioStructureBSPLeaf::struct_little *>(workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.leaves.pointer)].data.data());
+                bsp_data_s.render_leaves = reinterpret_cast<const ScenarioStructureBSPLeaf::C<LittleEndian> *>(workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.leaves.pointer)].data.data());
             }
         }
         
@@ -176,12 +175,12 @@ namespace Invader::Parser {
     
     
     
-    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::C<LittleEndian> &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
         // Determine which BSP the encounters fall in
         std::size_t encounter_list_count = scenario.encounters.size();
         if(encounter_list_count != 0) {
             auto &encounter_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)];
-            auto *encounter_array = reinterpret_cast<ScenarioEncounter::struct_little *>(encounter_struct.data.data());
+            auto *encounter_array = reinterpret_cast<ScenarioEncounter::C<LittleEndian> *>(encounter_struct.data.data());
             auto bsp_count = bsp_data.size();
             
             for(std::size_t i = 0; i < encounter_list_count; i++) {
@@ -194,7 +193,7 @@ namespace Invader::Parser {
                 // If we have a manual BSP index, set this stuff here
                 std::size_t start_bsp = 0;
                 std::size_t best_bsp;
-                bool manual_bsp_index_specified = encounter.flags & HEK::ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG_MANUAL_BSP_INDEX_SPECIFIED;
+                bool manual_bsp_index_specified = encounter.flags & ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG_MANUAL_BSP_INDEX_SPECIFIED;
                 if(manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
                     start_bsp = encounter_data.manual_bsp_index;
@@ -212,7 +211,7 @@ namespace Invader::Parser {
 
                 // We also need to find firing position indices
                 struct FiringPositionIndex {
-                    HEK::Index cluster_index = NULL_INDEX;
+                    Index cluster_index = NULL_INDEX;
                     std::uint32_t surface_index = 0;
                     bool found = false;
                 };
@@ -223,7 +222,7 @@ namespace Invader::Parser {
                 struct SquadPositionFound {
                     std::size_t squad = ~0;
                     std::size_t starting_position = ~0;
-                    HEK::Index cluster_index = NULL_INDEX;
+                    Index cluster_index = NULL_INDEX;
                     bool found = false;
                 };
                 
@@ -239,7 +238,7 @@ namespace Invader::Parser {
                 std::size_t squad_position_count = best_squad_positions_found.size();
 
                 // Also, are we raycasting?
-                bool raycast = !(encounter.flags & HEK::ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG__3D_FIRING_POSITIONS);
+                bool raycast = !(encounter.flags & ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG_3D_FIRING_POSITIONS);
 
                 // Go through each BSP
                 std::vector<FiringPositionIndex> firing_positions_indices = best_firing_positions_indices;
@@ -276,7 +275,7 @@ namespace Invader::Parser {
                             }
                             
                             // Set the cluster index
-                            HEK::Index cluster_index;
+                            Index cluster_index;
                             if(leaf_index.has_value()) {
                                 cluster_index = bsp.render_leaves[*leaf_index].cluster;
                             }
@@ -345,7 +344,7 @@ namespace Invader::Parser {
                 }
 
                 // Set our best BSP
-                encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                encounter_data.precomputed_bsp_index = static_cast<Index>(best_bsp);
                 
                 auto best_possible_hits = squad_position_count + firing_position_count;
                 
@@ -418,7 +417,7 @@ namespace Invader::Parser {
 
                 // Set all the cluster and surface indices
                 if(firing_position_count > 0) {
-                    auto *firing_positions_data = reinterpret_cast<HEK::ScenarioFiringPosition<HEK::LittleEndian> *>(workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)].data.data());
+                    auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::C<LittleEndian> *>(workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)].data.data());
                     for(std::size_t fp = 0; fp < firing_position_count; fp++) {
                         auto &f = firing_positions_data[fp];
                         auto &indices = best_firing_positions_indices[fp];
@@ -432,7 +431,7 @@ namespace Invader::Parser {
                 if(squad_position_count > 0) {
                     std::size_t position_index_found = 0;
                     auto &squad_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.squads.pointer)];
-                    auto *squad_data = reinterpret_cast<Parser::ScenarioSquad::struct_little *>(squad_struct.data.data());
+                    auto *squad_data = reinterpret_cast<Parser::ScenarioSquad::C<LittleEndian> *>(squad_struct.data.data());
                     
                     auto *found_bsp = total_best_bsps > 0 ? (bsp_data.data() + best_bsp) : nullptr;
                     std::vector<std::vector<std::size_t>> missing_squad_positions(squad_count);
@@ -442,7 +441,7 @@ namespace Invader::Parser {
                         auto &squad = squad_data[s];
                         std::size_t position_count = squad.starting_locations.count.read();
                         if(position_count) {
-                            auto *position_data = reinterpret_cast<Parser::ScenarioActorStartingLocation::struct_little *>(workload.structs[*squad_struct.resolve_pointer(&squad.starting_locations.pointer)].data.data());
+                            auto *position_data = reinterpret_cast<Parser::ScenarioActorStartingLocation::C<LittleEndian> *>(workload.structs[*squad_struct.resolve_pointer(&squad.starting_locations.pointer)].data.data());
                             for(std::size_t p = 0; p < position_count; p++) {
                                 auto &found_index = best_squad_positions_found[position_index_found++];
                                 position_data[p].cluster_index = found_index.cluster_index;
@@ -451,7 +450,7 @@ namespace Invader::Parser {
                         
                         std::size_t move_position_count = squad.move_positions.count.read();
                         if(move_position_count) {
-                            auto *move_position_data = reinterpret_cast<Parser::ScenarioMovePosition::struct_little *>(workload.structs[*squad_struct.resolve_pointer(&squad.move_positions.pointer)].data.data());
+                            auto *move_position_data = reinterpret_cast<Parser::ScenarioMovePosition::C<LittleEndian> *>(workload.structs[*squad_struct.resolve_pointer(&squad.move_positions.pointer)].data.data());
                             for(std::size_t p = 0; p < move_position_count; p++) {
                                 if(!found_bsp) {
                                     move_position_data[p].cluster_index = NULL_INDEX;
@@ -476,7 +475,7 @@ namespace Invader::Parser {
                                 }
                                 
                                 // Set the cluster index
-                                HEK::Index cluster_index;
+                                Index cluster_index;
                                 if(leaf_index.has_value()) {
                                     cluster_index = found_bsp->render_leaves[*leaf_index].cluster;
                                 }
@@ -523,11 +522,11 @@ namespace Invader::Parser {
         }
     }
     
-    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::C<LittleEndian> &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
         std::size_t command_list_count = scenario.command_lists.size();
         if(command_list_count != 0) {
             auto &command_list_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.command_lists.pointer)];
-            auto *command_list_array = reinterpret_cast<ScenarioCommandList::struct_little *>(command_list_struct.data.data());
+            auto *command_list_array = reinterpret_cast<ScenarioCommandList::C<LittleEndian> *>(command_list_struct.data.data());
             auto bsp_count = bsp_data.size();
             for(std::size_t i = 0; i < command_list_count; i++) {
                 auto &command_list = scenario.command_lists[i];
@@ -544,7 +543,7 @@ namespace Invader::Parser {
                 std::size_t best_bsp_hits = 0;
                 std::size_t total_best_bsps = 0;
                 std::size_t start = 0;
-                bool manual_bsp_index_specified = command_list.flags & HEK::ScenarioCommandListFlagsFlag::SCENARIO_COMMAND_LIST_FLAGS_FLAG_MANUAL_BSP_INDEX;
+                bool manual_bsp_index_specified = command_list.flags & ScenarioCommandListFlagsFlag::SCENARIO_COMMAND_LIST_FLAGS_FLAG_MANUAL_BSP_INDEX;
 
                 // If manually specifying a BSP, don't bother checking every BSP
                 if(manual_bsp_index_specified) {
@@ -602,7 +601,7 @@ namespace Invader::Parser {
                 // Write the surface indices we found
                 if(point_count > 0) {
                     auto &points_struct = workload.structs[*command_list_struct.resolve_pointer(&command_list_data.points.pointer)];
-                    auto *points_array = reinterpret_cast<ScenarioCommandPoint::struct_little *>(points_struct.data.data());
+                    auto *points_array = reinterpret_cast<ScenarioCommandPoint::C<LittleEndian> *>(points_struct.data.data());
                     for(std::size_t p = 0; p < point_count; p++) {
                         points_array[p].surface_index = best_surface_indices[p].value_or(0);
                     }
@@ -610,7 +609,7 @@ namespace Invader::Parser {
                 
                 // Command lists are all-or-nothing here
                 if(manual_bsp_index_specified || point_count == best_bsp_hits) {
-                    command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                    command_list_data.precomputed_bsp_index = static_cast<Index>(best_bsp);
                 }
                 else {
                     command_list_data.precomputed_bsp_index = NULL_INDEX;
@@ -670,11 +669,11 @@ namespace Invader::Parser {
                     auto *bsp_tag_struct = &workload.structs[workload.tags[bsp_id.index].base_struct.value()];
                     
                     // If we're not on native, we need to read the pointer at the beginning of the struct
-                    if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(workload.get_build_parameters()->details.build_cache_file_engine != CacheFileEngine::CACHE_FILE_NATIVE) {
                         bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
                     }
                     
-                    auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::struct_little *>(bsp_tag_struct->data.data());
+                    auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::C<LittleEndian> *>(bsp_tag_struct->data.data());
                     std::size_t bsp_cluster_count = bsp_tag_data.clusters.count.read();
 
                     if(bsp_cluster_count == 0) {
@@ -686,7 +685,7 @@ namespace Invader::Parser {
 
                     // Now let's go do stuff
                     auto &bsp_cluster_struct = workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.clusters.pointer)];
-                    auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster::struct_little *>(bsp_cluster_struct.data.data());
+                    auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster::C<LittleEndian> *>(bsp_cluster_struct.data.data());
 
                     // Go through each decal; see what we can come up with
                     std::vector<std::pair<std::size_t, std::size_t>> cluster_decals;
@@ -701,7 +700,7 @@ namespace Invader::Parser {
                     }
 
                     // Get clusters
-                    std::vector<ScenarioStructureBSPRuntimeDecal::struct_little> runtime_decals;
+                    std::vector<ScenarioStructureBSPRuntimeDecal::C<LittleEndian>> runtime_decals;
 
                     for(std::size_t c = 0; c < bsp_cluster_count; c++) {
                         auto &cluster = clusters[c];
@@ -747,11 +746,11 @@ namespace Invader::Parser {
         }
     }
     
-    static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data) {
+    static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::C<LittleEndian> &scenario_data) {
         std::size_t ai_conversation_count = scenario.ai_conversations.size();
         if(ai_conversation_count) {
             auto &ai_conversation_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.ai_conversations.pointer)];
-            auto *ai_conversation_data = reinterpret_cast<Parser::ScenarioAIConversation::struct_little *>(ai_conversation_struct.data.data());
+            auto *ai_conversation_data = reinterpret_cast<Parser::ScenarioAIConversation::C<LittleEndian> *>(ai_conversation_struct.data.data());
             auto encounter_list_count = scenario.encounters.size();
             for(std::size_t aic = 0; aic < ai_conversation_count; aic++) {
                 auto &convo = ai_conversation_data[aic];
@@ -759,7 +758,7 @@ namespace Invader::Parser {
                 std::size_t line_count = convo.lines.count.read();
                 if(participation_count) {
                     auto &participation_struct = workload.structs[*ai_conversation_struct.resolve_pointer(&convo.participants.pointer)];
-                    auto *participation_data = reinterpret_cast<Parser::ScenarioAIConversationParticipant::struct_little *>(participation_struct.data.data());
+                    auto *participation_data = reinterpret_cast<Parser::ScenarioAIConversationParticipant::C<LittleEndian> *>(participation_struct.data.data());
                     for(std::size_t p = 0; p < participation_count; p++) {
                         auto &participant = participation_data[p];
                         std::optional<std::uint32_t> encounter_index;
@@ -794,7 +793,7 @@ namespace Invader::Parser {
                             }
                             
                             // Matching by tag paths and hardcoding these things is insane, but here we are.
-                            auto set_variant = [&participant, &tag_index, &workload, &aic, &p, &warned_variants, &convo](std::size_t variant, Dependency &what) {
+                            auto set_variant = [&participant, &tag_index, &workload, &aic, &p, &warned_variants, &convo](std::size_t variant, ParsedTagDependency &what) {
                                 // If null, do nothing
                                 if(what.path.size() == 0) {
                                     return;
@@ -857,7 +856,7 @@ namespace Invader::Parser {
                         #undef MAX_VARIANT_COUNT
                         
                         // Will it even play???
-                        if(participant.selection_type != HEK::ScenarioSelectionType::SCENARIO_SELECTION_TYPE_DISEMBODIED && !(participant.flags & HEK::ScenarioAIConversationParticipantFlagsFlag::SCENARIO_A_I_CONVERSATION_PARTICIPANT_FLAGS_FLAG_OPTIONAL)) {
+                        if(participant.selection_type != ScenarioSelectionType::SCENARIO_SELECTION_TYPE_DISEMBODIED && !(participant.flags & ScenarioAIConversationParticipantFlagsFlag::SCENARIO_A_I_CONVERSATION_PARTICIPANT_FLAGS_FLAG_OPTIONAL)) {
                             bool has_dialogue_present = false;
                             for(auto &i : participant.variant_numbers) {
                                 if(i != 0xFFFF) {

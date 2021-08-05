@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/font.hpp>
 #include <invader/tag/parser/compile/font.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/bitmap/pixel.hpp>

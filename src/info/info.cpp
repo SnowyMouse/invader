@@ -6,7 +6,6 @@
 #include <invader/command_line_option.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/version.hpp>
-#include <invader/tag/parser/parser.hpp>
 #include <invader/hek/map.hpp>
 #include <invader/compress/compression.hpp>
 
@@ -15,6 +14,8 @@
 
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
+using namespace Invader::Parser;
+
 struct DisplayValue {
     const char * const name;
     void (* const calculate_value)(const Invader::Map &map);
@@ -22,7 +23,7 @@ struct DisplayValue {
 
 #define MAKE_DISPLAY_VALUE(name) {# name, Invader::Info::name }
 
-static std::byte header_cache[sizeof(Invader::HEK::NativeCacheFileHeader)];
+static std::byte header_cache[sizeof(NativeCacheFileHeader)];
 static std::size_t file_size = 0;
 
 // Calculating compression ratio:
@@ -33,8 +34,8 @@ static std::size_t file_size = 0;
 //        So, if a map is 15 MiB compressed and 20 MiB uncompressed, the compression ratio is 0.75.
 //
 static double calculate_compression_ratio(const Invader::Map &map) {
-    auto uncompressed_length = map.get_data_length() - sizeof(Invader::HEK::CacheFileHeader);
-    auto compressed_length = file_size - sizeof(Invader::HEK::CacheFileHeader);
+    auto uncompressed_length = map.get_data_length() - sizeof(CacheFileHeader);
+    auto compressed_length = file_size - sizeof(CacheFileHeader);
     return static_cast<double>(compressed_length) / uncompressed_length;
 }
 

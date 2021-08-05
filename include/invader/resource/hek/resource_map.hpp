@@ -5,7 +5,7 @@
 
 #include "../../hek/data_type.hpp"
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     enum ResourceMapType : std::uint32_t {
         RESOURCE_MAP_BITMAP = 1,
         RESOURCE_MAP_SOUND = 2,

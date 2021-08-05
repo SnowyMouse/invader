@@ -150,6 +150,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "size": 156
+        "size": 156,
+        "group": "font"
     }
 ]

@@ -1,30 +1,32 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <algorithm>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
+#include <invader/tag/parser/definition/sound_looping.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/map/tag.hpp>
 
 namespace Invader::Parser {
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
-        auto permutation_index = offset / sizeof(struct_little);
+        auto permutation_index = offset / sizeof(C<LittleEndian>);
         
         // Flip the endianness of the 16-bit PCM stream
-        if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+        if(this->format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             std::size_t size = this->samples.size() / 2;
             if(size * 2 != this->samples.size()) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size.", permutation_index);
                 throw InvalidTagDataException();
             }
 
-            auto *samples = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
-            auto *samples_big = reinterpret_cast<HEK::BigEndian<std::uint16_t> *>(this->samples.data());
+            auto *samples = reinterpret_cast<LittleEndian<std::uint16_t> *>(this->samples.data());
+            auto *samples_big = reinterpret_cast<BigEndian<std::uint16_t> *>(this->samples.data());
             for(std::size_t i = 0; i < size; i++) {
                 samples_big[i] = samples[i];
             }
         }
 
         // Warn about this
-        bool buffer_size_required = (this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM || this->format == HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS);
+        bool buffer_size_required = (this->format == SoundFormat::SOUND_FORMAT_16_BIT_PCM || this->format == SoundFormat::SOUND_FORMAT_OGG_VORBIS);
         if(buffer_size_required) {
             bool stock_halo_wont_play_it = false;
             if(this->buffer_size == 0) {
@@ -32,7 +34,7 @@ namespace Invader::Parser {
                 stock_halo_wont_play_it = true;
             }
             // Make sure the value is set
-            else if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->buffer_size != this->samples.size()) {
+            else if(this->format == SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->buffer_size != this->samples.size()) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", permutation_index);
                 stock_halo_wont_play_it = true;
             }
@@ -48,20 +50,20 @@ namespace Invader::Parser {
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
         
         switch(this->format) {
-            case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
-                if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
+                if(engine_target == CacheFileEngine::CACHE_FILE_XBOX) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
                 }
                 break;
-            case HEK::SoundFormat::SOUND_FORMAT_IMA_ADPCM:
+            case SoundFormat::SOUND_FORMAT_IMA_ADPCM:
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine", permutation_index);
                 break;
-            case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+                if(engine_target != CacheFileEngine::CACHE_FILE_NATIVE && engine_target != CacheFileEngine::CACHE_FILE_MCC_CEA) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the original target engine", permutation_index);
                 }
                 break;
-            case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+            case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
                 // Xbox ADPCM works on everything
                 break;
             default:
@@ -71,7 +73,7 @@ namespace Invader::Parser {
 
         // Add the two lone IDs and set the sample size
         auto *data = workload.structs[struct_index].data.data();
-        auto &this_struct = *reinterpret_cast<struct_little *>(data + offset);
+        auto &this_struct = *reinterpret_cast<C<LittleEndian> *>(data + offset);
         this_struct.samples.size = static_cast<std::uint32_t>(this->samples.size());
 
         // Who am I??
@@ -107,14 +109,14 @@ namespace Invader::Parser {
         
         // If our bend bounds was changed, but they weren't zero, then that means bullshit happened
         if((old_bend_bounds.from != 0.0F || old_bend_bounds.to != 0.0F) && ((this->bend_bounds.from != old_bend_bounds.from) || (this->bend_bounds.to != old_bend_bounds.to))) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Natural pitch (%f) in pitch range #%zu falls outside of bend bounds (%f - %f) so the bounds were changed to %f - %f", actual_natural_pitch, struct_offset / sizeof(struct_little), old_bend_bounds.from, old_bend_bounds.to, this->bend_bounds.from, this->bend_bounds.to);
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Natural pitch (%f) in pitch range #%zu falls outside of bend bounds (%f - %f) so the bounds were changed to %f - %f", actual_natural_pitch, struct_offset / sizeof(C<LittleEndian>), old_bend_bounds.from, old_bend_bounds.to, this->bend_bounds.from, this->bend_bounds.to);
         }
 
         // Make sure all of the permutations are valid
         std::size_t permutation_count = this->permutations.size();
         std::size_t actual_permutation_count = this->actual_permutation_count;
         if(actual_permutation_count > permutation_count) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Actual permutation count in pitch range #%zu exceeds the number of permutations (%zu >= %zu)", struct_offset / sizeof(struct_little), actual_permutation_count, permutation_count);
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Actual permutation count in pitch range #%zu exceeds the number of permutations (%zu >= %zu)", struct_offset / sizeof(C<LittleEndian>), actual_permutation_count, permutation_count);
             throw InvalidTagDataException();
         }
 
@@ -128,7 +130,7 @@ namespace Invader::Parser {
                 continue;
             }
             else if(next_permutation >= permutation_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Permutation #%zu in pitch range #%zu has an invalid next index (%zu >= %zu)", i, struct_offset / sizeof(struct_little), next_permutation, permutation_count);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Permutation #%zu in pitch range #%zu has an invalid next index (%zu >= %zu)", i, struct_offset / sizeof(C<LittleEndian>), next_permutation, permutation_count);
                 throw InvalidTagDataException();
             }
             else {
@@ -139,7 +141,7 @@ namespace Invader::Parser {
         // List unused permutations
         for(std::size_t i = 0; i < permutation_count; i++) {
             if(!referenced[i]) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Permutation #%zu in pitch range #%zu is unused", i, struct_offset / sizeof(struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Permutation #%zu in pitch range #%zu is unused", i, struct_offset / sizeof(C<LittleEndian>));
             }
         }
 
@@ -154,7 +156,7 @@ namespace Invader::Parser {
             // Keep going until we hit a null index or we loop forever
             while(permutation_index != NULL_INDEX) {
                 if(referenced[permutation_index]) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Actual permutation #%zu (%s) in pitch range #%zu will never end", a, this->permutations[a].name.string, struct_offset / sizeof(struct_little));
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Actual permutation #%zu (%s) in pitch range #%zu will never end", a, this->permutations[a].name.string, struct_offset / sizeof(C<LittleEndian>));
                     throw InvalidTagDataException();
                 }
                 referenced[permutation_index] = true;
@@ -181,12 +183,12 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
 
-        if(sound->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && sound->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(sound->channel_count == SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && sound->sample_rate == SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.get_build_parameters()->details.build_cache_file_engine != CacheFileEngine::CACHE_FILE_NATIVE) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound is 44.1 kHz AND mono. The target engine will not play this.");
         }
 
         // If we didn't split long sounds into permutations, go through each permutation and Jason Jones it
-        if(!(sound->flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS)) {
+        if(!(sound->flags & SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS)) {
             for(auto &pr : sound->pitch_ranges) {
                 pr.actual_permutation_count = static_cast<std::uint16_t>(pr.permutations.size());
                 for(auto &p : pr.permutations) {
@@ -205,18 +207,18 @@ namespace Invader::Parser {
         
             // Set default zero gain modifier based on class
             switch(sound->sound_class) {
-                case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
-                case HEK::SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
-                case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
-                case HEK::SoundClass::SOUND_CLASS_UNIT_DIALOG:
-                case HEK::SoundClass::SOUND_CLASS_MUSIC:
-                case HEK::SoundClass::SOUND_CLASS_AMBIENT_NATURE:
-                case HEK::SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
-                case HEK::SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
-                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
-                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
-                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
-                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
+                case SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
+                case SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
+                case SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
+                case SoundClass::SOUND_CLASS_UNIT_DIALOG:
+                case SoundClass::SOUND_CLASS_MUSIC:
+                case SoundClass::SOUND_CLASS_AMBIENT_NATURE:
+                case SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
+                case SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
+                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
+                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
+                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
+                case SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
                     sound->zero_gain_modifier = 0.0F;
                     break;
                 default:
@@ -246,7 +248,7 @@ namespace Invader::Parser {
                 for(auto &p : pr.permutations) {
                     std::size_t sample_count = 0;
                     switch(p.format) {
-                        case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                        case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
                             sample_count = (p.samples.size() / 36 * 130) / sizeof(std::uint16_t);
                             break;
                         default:
@@ -254,7 +256,7 @@ namespace Invader::Parser {
                             break;
                     }
                     
-                    double potential_seconds = sample_count / (this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1.0 : 2.0) / (this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ ? 44100.0 : 22050.0) * pr.natural_pitch;
+                    double potential_seconds = sample_count / (this->channel_count == SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1.0 : 2.0) / (this->sample_rate == SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ ? 44100.0 : 22050.0) * pr.natural_pitch;
                     
                     if(potential_seconds > seconds) {
                         seconds = potential_seconds;
@@ -265,10 +267,10 @@ namespace Invader::Parser {
         }
     }
 
-    void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<Pointer>) {
         this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, TICK_RATE);
         if(tag.is_indexed()) {
-            auto &tag_data = *(reinterpret_cast<const struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(static_cast<HEK::Pointer>(0), 0)) - 1);
+            auto &tag_data = *(reinterpret_cast<const C<LittleEndian> *>(&tag.get_struct_at_pointer<SoundPitchRange::C>(static_cast<Pointer>(0), 0)) - 1);
             this->format = tag_data.format;
             this->channel_count = tag_data.channel_count;
             this->sample_rate = tag_data.sample_rate;
@@ -276,12 +278,12 @@ namespace Invader::Parser {
     }
 
     void SoundPermutation::post_cache_deformat() {
-        if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-            auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
+        if(this->format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+            auto *start = reinterpret_cast<LittleEndian<std::uint16_t> *>(this->samples.data());
             auto *end = start + this->samples.size() / sizeof(*start);
 
             while(start < end) {
-                *reinterpret_cast<HEK::BigEndian<std::uint16_t> *>(start) = *start;
+                *reinterpret_cast<BigEndian<std::uint16_t> *>(start) = *start;
                 start++;
             }
         }
@@ -300,62 +302,62 @@ namespace Invader::Parser {
     }
 
     void SoundLooping::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
-        auto &maximum_distance = reinterpret_cast<SoundLooping::struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->maximum_distance;
+        auto &maximum_distance = reinterpret_cast<SoundLooping::C<LittleEndian> *>(workload.structs[struct_index].data.data() + struct_offset)->maximum_distance;
         
-        auto get_max_distance_of_sound_tag = [&workload](const Dependency &tag) {
+        auto get_max_distance_of_sound_tag = [&workload](const ParsedTagDependency &tag) {
             if(tag.tag_id.is_null()) {
                 return 0.0F;
             }
             
-            auto &sound_tag_data = *reinterpret_cast<const Sound::struct_little *>(workload.structs[*workload.tags[tag.tag_id.index].base_struct].data.data());
+            auto &sound_tag_data = *reinterpret_cast<const Sound::C<LittleEndian> *>(workload.structs[*workload.tags[tag.tag_id.index].base_struct].data.data());
             float max = sound_tag_data.maximum_distance.read();
             if(max == 0.0F) {
                 switch(sound_tag_data.sound_class) {
-                    case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
-                    case HEK::SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
-                    case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_COMPUTERS:
-                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
-                    case HEK::SoundClass::SOUND_CLASS_FIRST_PERSON_DAMAGE:
+                    case SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
+                    case SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
+                    case SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
+                    case SoundClass::SOUND_CLASS_DEVICE_COMPUTERS:
+                    case SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
+                    case SoundClass::SOUND_CLASS_FIRST_PERSON_DAMAGE:
                         return 3.0F;
 
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_DOOR:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_FORCE_FIELD:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_MACHINERY:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_NATURE:
-                    case HEK::SoundClass::SOUND_CLASS_MUSIC:
-                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_NATURE:
-                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
+                    case SoundClass::SOUND_CLASS_DEVICE_DOOR:
+                    case SoundClass::SOUND_CLASS_DEVICE_FORCE_FIELD:
+                    case SoundClass::SOUND_CLASS_DEVICE_MACHINERY:
+                    case SoundClass::SOUND_CLASS_DEVICE_NATURE:
+                    case SoundClass::SOUND_CLASS_MUSIC:
+                    case SoundClass::SOUND_CLASS_AMBIENT_NATURE:
+                    case SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
+                    case SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
                         return 5.0F;
 
-                    case HEK::SoundClass::SOUND_CLASS_PROJECTILE_IMPACT:
-                    case HEK::SoundClass::SOUND_CLASS_VEHICLE_COLLISION:
-                    case HEK::SoundClass::SOUND_CLASS_VEHICLE_ENGINE:
+                    case SoundClass::SOUND_CLASS_PROJECTILE_IMPACT:
+                    case SoundClass::SOUND_CLASS_VEHICLE_COLLISION:
+                    case SoundClass::SOUND_CLASS_VEHICLE_ENGINE:
                         return 8.0F;
 
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_READY:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_RELOAD:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_EMPTY:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_CHARGE:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_OVERHEAT:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_IDLE:
+                    case SoundClass::SOUND_CLASS_WEAPON_READY:
+                    case SoundClass::SOUND_CLASS_WEAPON_RELOAD:
+                    case SoundClass::SOUND_CLASS_WEAPON_EMPTY:
+                    case SoundClass::SOUND_CLASS_WEAPON_CHARGE:
+                    case SoundClass::SOUND_CLASS_WEAPON_OVERHEAT:
+                    case SoundClass::SOUND_CLASS_WEAPON_IDLE:
                         return 9.0F;
 
-                    case HEK::SoundClass::SOUND_CLASS_UNIT_FOOTSTEPS:
+                    case SoundClass::SOUND_CLASS_UNIT_FOOTSTEPS:
                         return 10.0F;
 
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
-                    case HEK::SoundClass::SOUND_CLASS_GAME_EVENT:
-                    case HEK::SoundClass::SOUND_CLASS_UNIT_DIALOG:
+                    case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
+                    case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
+                    case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
+                    case SoundClass::SOUND_CLASS_GAME_EVENT:
+                    case SoundClass::SOUND_CLASS_UNIT_DIALOG:
                         return 20.0F;
 
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_FIRE:
+                    case SoundClass::SOUND_CLASS_WEAPON_FIRE:
                         return 70.0F;
 
-                    case HEK::SoundClass::SOUND_CLASS_PROJECTILE_DETONATION:
+                    case SoundClass::SOUND_CLASS_PROJECTILE_DETONATION:
                         return 120.0F;
                         
                     default:

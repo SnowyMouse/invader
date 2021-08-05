@@ -6,7 +6,7 @@
 
 #include <cstddef>
 #include <vector>
-#include "../tag/hek/definition.hpp"
+#include "../tag/parser/definition/bitmap.hpp"
 
 namespace Invader::BitmapEncode {
     /**
@@ -22,7 +22,7 @@ namespace Invader::BitmapEncode {
      * @param dither_blue   dither blue channel
      * @output              encoded data
      */
-    std::vector<std::byte> encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
+    std::vector<std::byte> encode_bitmap(const std::byte *input_data, Parser::BitmapDataFormat input_format, Parser::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
     
     /**
      * Encode the pixel data to another format. Use bitmap_data_size() to determine how big output_data should be.
@@ -38,7 +38,7 @@ namespace Invader::BitmapEncode {
      * @param dither_blue   dither blue channel
      * @output              encoded data
      */
-    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
+    void encode_bitmap(const std::byte *input_data, Parser::BitmapDataFormat input_format, std::byte *output_data, Parser::BitmapDataFormat output_format, std::size_t width, std::size_t height, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
     
     /**
      * Encode the pixel data to another format
@@ -56,7 +56,7 @@ namespace Invader::BitmapEncode {
      * @param dither_blue   dither blue channel
      * @output              encoded data
      */
-    std::vector<std::byte> encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapDataType type, std::size_t mipmap_count, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
+    std::vector<std::byte> encode_bitmap(const std::byte *input_data, Parser::BitmapDataFormat input_format, Parser::BitmapDataFormat output_format, std::size_t width, std::size_t height, std::size_t depth, Parser::BitmapDataType type, std::size_t mipmap_count, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
     
     /**
      * Encode the pixel data to another format. Use bitmap_data_size() to determine how big output_data should be.
@@ -74,7 +74,7 @@ namespace Invader::BitmapEncode {
      * @param dither_blue   dither blue channel
      * @output              encoded data
      */
-    void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapDataType type, std::size_t mipmap_count, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
+    void encode_bitmap(const std::byte *input_data, Parser::BitmapDataFormat input_format, std::byte *output_data, Parser::BitmapDataFormat output_format, std::size_t width, std::size_t height, std::size_t depth, Parser::BitmapDataType type, std::size_t mipmap_count, bool dither_alpha = false, bool dither_red = false, bool dither_green = false, bool dither_blue = false);
     
     /**
      * Calculate the size of a bitmap
@@ -86,7 +86,7 @@ namespace Invader::BitmapEncode {
      * @param type         type of the bitmap
      * @return             size in bytes
      */
-    std::size_t bitmap_data_size(std::size_t width, std::size_t height, std::size_t depth, std::size_t mipmap_count, HEK::BitmapDataFormat format, HEK::BitmapDataType type) noexcept;
+    std::size_t bitmap_data_size(std::size_t width, std::size_t height, std::size_t depth, std::size_t mipmap_count, Parser::BitmapDataFormat format, Parser::BitmapDataType type) noexcept;
     
     /**
      * Find the most efficient format without any loss in data. The input bitmap MUST be in 32-bit BGRA (A8R8G8B8) format.
@@ -95,7 +95,7 @@ namespace Invader::BitmapEncode {
      * @param height     height of the bitmap in pixels
      * @param category   category of formats to use
      */
-    HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, HEK::BitmapFormat category) noexcept;
+    Parser::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, Parser::BitmapFormat category) noexcept;
     
     /**
      * Find the most efficient format without any loss in data. The input bitmap MUST be in 32-bit BGRA (A8R8G8B8) format.
@@ -107,7 +107,7 @@ namespace Invader::BitmapEncode {
      * @param type         type of bitmap
      * @param mipmap_count number of mipmaps (by default, just check the base bitmap)
      */
-    HEK::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, std::size_t depth, HEK::BitmapFormat category, HEK::BitmapDataType type, std::size_t mipmap_count = 0) noexcept;
+    Parser::BitmapDataFormat most_efficient_format(const std::byte *input_data, std::size_t width, std::size_t height, std::size_t depth, Parser::BitmapFormat category, Parser::BitmapDataType type, std::size_t mipmap_count = 0) noexcept;
 }
 
 #endif

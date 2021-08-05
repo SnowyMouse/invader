@@ -12,21 +12,23 @@
 #include <zlib.h>
 #endif
 
+using namespace Invader::Parser;
+
 namespace Invader::Compression {
     std::size_t compress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size, int compression_level) {
-        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
-        auto &header_output = *reinterpret_cast<HEK::CacheFileHeader *>(output);
+        const auto &header = *reinterpret_cast<const CacheFileHeader *>(data);
+        auto &header_output = *reinterpret_cast<CacheFileHeader *>(output);
         
         if(!header.valid()) {
             throw InvalidMapException();
         }
         
         // If we're Xbox, we use a DEFLATE stream
-        if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(header.engine == CacheFileEngine::CACHE_FILE_XBOX) {
             #ifndef DISABLE_ZLIB
-            auto input_padding_required = REQUIRED_PADDING_N_BYTES(data_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
+            auto input_padding_required = REQUIRED_PADDING_N_BYTES(data_size, CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
             if(input_padding_required) {
-                eprintf_error("map size is not divisible by sector size (%zu)", static_cast<std::size_t>(HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE));
+                eprintf_error("map size is not divisible by sector size (%zu)", static_cast<std::size_t>(CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE));
                 throw CompressionFailureException();
             }
 
@@ -73,13 +75,13 @@ namespace Invader::Compression {
 
     std::size_t decompress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size) {
         // Check the header
-        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        const auto &header = *reinterpret_cast<const CacheFileHeader *>(data);
         
         if(!header.valid()) {
             throw InvalidMapException();
         }
         
-        if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(header.engine == CacheFileEngine::CACHE_FILE_XBOX) {
             #ifndef DISABLE_ZLIB
             z_stream inflate_stream = {};
             inflate_stream.zalloc = Z_NULL;
@@ -104,7 +106,7 @@ namespace Invader::Compression {
 
     std::vector<std::byte> compress_map_data(const std::byte *data, std::size_t data_size, int compression_level) {
         // Allocate the data
-        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        const auto &header = *reinterpret_cast<const CacheFileHeader *>(data);
         std::vector<std::byte> new_data;
         if(data_size < sizeof(header)) {
             throw InvalidMapException();
@@ -124,7 +126,7 @@ namespace Invader::Compression {
 
     std::vector<std::byte> decompress_map_data(const std::byte *data, std::size_t data_size) {
         // Allocate and decompress using data from the header
-        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        const auto &header = *reinterpret_cast<const CacheFileHeader *>(data);
         if(!header.valid()) {
             throw InvalidMapException();
         }
