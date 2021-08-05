@@ -202,8 +202,134 @@ namespace Invader {
             }
         }
         
+        // If we have alpha blend, we have to crop the bitmaps
+        if(usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND) {
+            std::vector<std::size_t> bitmaps_to_remove;
+            auto bitmap_count = generated_bitmap.bitmaps.size();
+            
+            for(std::size_t b = 0; b < bitmap_count; b++) {
+                auto &bitmap = generated_bitmap.bitmaps[b];
+                
+                std::size_t width = bitmap.width;
+                std::size_t height = bitmap.height;
+                
+                std::size_t new_start_x;
+                std::size_t new_end_x;
+                std::size_t new_start_y;
+                std::size_t new_end_y;
+                
+                // Remove from the left
+                for(new_start_x = 0; new_start_x < width; new_start_x++) {
+                    for(std::size_t y = 0; y < height; y++) {
+                        auto &pixel = bitmap.pixels[new_start_x + y * width];
+                        if(pixel.alpha != 0) {
+                            goto top_check;
+                        }
+                    }
+                }
+                
+                // Remove from the top
+                top_check:
+                for(new_start_y = 0; new_start_y < height; new_start_y++) {
+                    for(std::size_t x = 0; x < width; x++) {
+                        auto &pixel = bitmap.pixels[new_start_y * width + x];
+                        if(pixel.alpha != 0) {
+                            goto right_check;
+                        }
+                    }
+                }
+                
+                // Remove from the right
+                right_check:
+                for(new_end_x = width; new_end_x > new_start_x; new_end_x--) {
+                    for(std::size_t y = 0; y < height; y++) {
+                        auto &pixel = bitmap.pixels[(new_end_x - 1) + y * width];
+                        if(pixel.alpha != 0) {
+                            goto bottom_check;
+                        }
+                    }
+                }
+                
+                // Remove from the bottom
+                bottom_check:
+                for(new_end_y = height; new_end_y > new_start_y; new_end_y--) {
+                    for(std::size_t x = 0; x < width; x++) {
+                        auto &pixel = bitmap.pixels[(new_end_y - 1) * width + x];
+                        if(pixel.alpha != 0) {
+                            goto done_check;
+                        }
+                    }
+                }
+                
+                // Check dimensions
+                done_check:
+                if(new_end_x != width || new_end_y != height || new_start_x != 0 || new_start_y != 0) {
+                    if(new_end_x == new_start_x) {
+                        eprintf_warn("Bitmap #%zu was deleted due to zero alpha (alpha blend usage)", b);
+                        bitmaps_to_remove.emplace_back(b);
+                    }
+                    else {
+                        std::size_t new_width = new_end_x - new_start_x;
+                        std::size_t new_height = new_end_y - new_start_y;
+                        eprintf_warn("Bitmap #%zu was resized to %zux%zu due to zero alpha on edge (alpha blend usage)", b, new_width, new_height);
+                        
+                        // Overwrite pixels
+                        std::vector<Pixel> new_pixels(new_width * new_height);
+                        for(std::size_t y = new_start_y; y < new_end_y; y++) {
+                            const auto *first_pixel = bitmap.pixels.data() + y * width + new_start_x;
+                            const auto *last_pixel = first_pixel + new_width;
+                            std::copy(first_pixel, last_pixel, new_pixels.data() + (y - new_start_y) * new_width);
+                        }
+                        
+                        bitmap.width = new_width;
+                        bitmap.height = new_height;
+                        bitmap.pixels = new_pixels;
+                        
+                        // Check if power-of-two
+                        if(scanner.power_of_two && (!is_power_of_two(new_width) || !is_power_of_two(new_height))) {
+                            eprintf_error("This is non-power-of-two, but the bitmap type requires power-of-two");
+                            throw InvalidInputBitmapException();
+                        }
+                    }
+                }
+            }
+            
+            // Remove any empty bitmaps
+            auto bitmap_removal_count = bitmaps_to_remove.size();
+            if(bitmap_removal_count) {
+                eprintf_warn("%zu bitmaps were deleted due to no alpha (usage is set to alpha blend)", bitmap_removal_count);
+                
+                for(std::size_t i = 0; i < bitmap_removal_count; i++) {
+                    // Get the index
+                    auto bitmap_index = bitmaps_to_remove[i];
+                    
+                    // We're removing the bitmap, so decrement all indices after this
+                    for(std::size_t j = i + 1; j < bitmap_removal_count; j++) {
+                        bitmaps_to_remove[j]--;
+                    }
+                    
+                    // Fix indices
+                    for(auto &s : generated_bitmap.sequences) {
+                        auto range_length = s.bitmap_count;
+                        auto range_start = s.first_bitmap;
+                        auto range_end = range_start + range_length;
+                        
+                        if(range_start > bitmap_index) {
+                            s.first_bitmap--;
+                        }
+                        else if(bitmap_index >= range_start && bitmap_index < range_end) {
+                            s.bitmap_count--;
+                        }
+                    }
+                    
+                    // Delete the bitmap now
+                    generated_bitmap.bitmaps.erase(generated_bitmap.bitmaps.begin() + bitmap_index);
+                }
+            }
+        }
+        
         // If we have zero bitmaps, error
-        if(generated_bitmap.bitmaps.size() == 0) {
+        if(generated_bitmap.bitmaps.empty()) {
             eprintf_error("Error: No bitmaps were found in the color plate");
             throw InvalidInputBitmapException();
         }

@@ -14,6 +14,10 @@ This is used for recording Invader's changes. This changelog is based on
   assets should be used
 
 ### Changed
+- invader-bitmap: If usage is set to alpha blend, bitmaps are now cropped if an
+  edge has zero alpha and a warning will be displayed. If the resulting bitmap
+  is non-power-of-two, then it will fail to generate a bitmap tag (unless the
+  bitmap type is interface or sprites)
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
   directories to the tag's current directory
 - invader-model: "Legacy" mode is now the only option as, while it's not very
