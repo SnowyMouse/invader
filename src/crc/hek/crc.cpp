@@ -3,9 +3,12 @@
 #include <vector>
 #include "../crc32.h"
 #include "../crc_spoof.h"
-#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/parser/definition/scenario.hpp>
+#include <invader/tag/parser/definition/scenario_structure_bsp.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/map/map.hpp>
+
+using namespace Invader::Parser;
 
 namespace Invader {
     std::uint32_t calculate_map_crc(const Invader::Map &map, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
@@ -25,7 +28,7 @@ namespace Invader {
         }
         
         auto engine = map.get_engine();
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(engine == CacheFileEngine::CACHE_FILE_XBOX) {
             return 0;
         }
 
@@ -38,9 +41,9 @@ namespace Invader {
             }
 
         auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
-        auto &scenario = scenario_tag.get_base_struct<HEK::Scenario>();
+        auto &scenario = scenario_tag.get_base_struct<Parser::Scenario::C>();
 
-        if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(engine != CacheFileEngine::CACHE_FILE_NATIVE) {
             std::size_t bsp_count = scenario.structure_bsps.count.read();
             auto *bsps = scenario_tag.resolve_reflexive(scenario.structure_bsps);
 
@@ -54,8 +57,8 @@ namespace Invader {
                 }
                 
                 // If it's MCC, CRC32 the vertex data
-                if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-                    const auto *header = reinterpret_cast<const HEK::ScenarioStructureBSPCompiledHeaderCEA<HEK::LittleEndian> *>(map.get_data() + start);
+                if(engine == CacheFileEngine::CACHE_FILE_MCC_CEA) {
+                    const auto *header = reinterpret_cast<const Parser::ScenarioStructureBSPCompiledHeaderCEA::C<LittleEndian> *>(map.get_data() + start);
                     if(start >= size || start + sizeof(header) > size) {
                         throw OutOfBoundsException();
                     }
@@ -87,7 +90,7 @@ namespace Invader {
         }
 
         // Find out where we're going to be doing CRC32 stuff
-        auto *tag_file_checksums = &reinterpret_cast<const HEK::CacheFileTagDataHeader *>(map.get_tag_data_at_offset(0, sizeof(HEK::CacheFileTagDataHeader)))->tag_file_checksums;
+        auto *tag_file_checksums = &reinterpret_cast<const CacheFileTagDataHeader *>(map.get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeader)))->tag_file_checksums;
         const std::byte *tag_file_checksums_ptr = reinterpret_cast<const std::byte *>(tag_file_checksums);
         std::size_t tag_file_checksums_offset_in_memory = tag_file_checksums_ptr - tag_data + data_crc.size();
         CRC_DATA(tag_data_start, tag_data_end);

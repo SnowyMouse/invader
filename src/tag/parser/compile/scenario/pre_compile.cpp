@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/scenario.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
@@ -16,7 +16,7 @@ namespace Invader::Parser {
 
         if(!workload.cache_file_type.has_value()) {
             workload.cache_file_type = this->type;
-            workload.demo_ui = this->flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_USE_DEMO_UI;
+            workload.demo_ui = this->flags & ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_USE_DEMO_UI;
         }
 
         // Check some things
@@ -51,9 +51,9 @@ namespace Invader::Parser {
             }
             else {
                 auto &bsp_switch_trigger_volume = scenario.bsp_switch_trigger_volumes.emplace_back();
-                bsp_switch_trigger_volume.trigger_volume = static_cast<HEK::Index>(tv);
-                bsp_switch_trigger_volume.source = static_cast<HEK::Index>(bsp_from);
-                bsp_switch_trigger_volume.destination = static_cast<HEK::Index>(bsp_to);
+                bsp_switch_trigger_volume.trigger_volume = static_cast<Index>(tv);
+                bsp_switch_trigger_volume.source = static_cast<Index>(bsp_from);
+                bsp_switch_trigger_volume.destination = static_cast<Index>(bsp_to);
                 bsp_switch_trigger_volume.unknown = 0xFFFF;
             }
         }
@@ -72,9 +72,9 @@ namespace Invader::Parser {
         
         // If we don't have any syntax data, let's make some stuff
         static constexpr char SCRIPT_NODE_LITERAL[] = "script node";
-        static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
+        static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::C<LittleEndian>);
         if(scenario.script_syntax_data.size() == 0) {
-            ScenarioScriptNodeTable::struct_little t = {};
+            ScenarioScriptNodeTable::C<LittleEndian> t = {};
             static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 128;
             t.count = 0;
             t.data = 0x64407440;
@@ -86,7 +86,7 @@ namespace Invader::Parser {
             std::copy(SCRIPT_NODE_LITERAL, SCRIPT_NODE_LITERAL + sizeof(SCRIPT_NODE_LITERAL), t.name.string);
 
             scenario.script_syntax_data.resize(sizeof(t) + SCRIPT_ELEMENT_SIZE * DEFAULT_SCRIPT_NODE_COUNT);
-            auto *first_node = reinterpret_cast<ScenarioScriptNode::struct_little *>(scenario.script_syntax_data.data() + sizeof(t));
+            auto *first_node = reinterpret_cast<ScenarioScriptNode::C<LittleEndian> *>(scenario.script_syntax_data.data() + sizeof(t));
             for(std::size_t i = 0; i < DEFAULT_SCRIPT_NODE_COUNT; i++) {
                 auto &node = first_node[i];
                 std::memset(reinterpret_cast<std::uint8_t *>(&node), 0xCA, sizeof(node));
@@ -96,7 +96,7 @@ namespace Invader::Parser {
             std::copy(reinterpret_cast<const std::byte *>(&t), reinterpret_cast<const std::byte *>(&t + 1), scenario.script_syntax_data.data());
         }
         else {
-            ScenarioScriptNodeTable::struct_little t;
+            ScenarioScriptNodeTable::C<LittleEndian> t;
             if(scenario.script_syntax_data.size() < sizeof(t)) {
                 if(!workload.disable_error_checking) {
                     workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script syntax data is invalid", tag_index);
@@ -104,15 +104,15 @@ namespace Invader::Parser {
                 }
             }
             else {
-                t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
-                *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
+                t = *reinterpret_cast<ScenarioScriptNodeTable::C<BigEndian> *>(scenario.script_syntax_data.data());
+                *reinterpret_cast<ScenarioScriptNodeTable::C<LittleEndian> *>(scenario.script_syntax_data.data()) = t;
                 t.first_element_ptr = 0;
                 
                 // Check the maximum node count here
                 std::size_t max_node_count;
                 switch(engine) {
-                    case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                    case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                    case CacheFileEngine::CACHE_FILE_NATIVE:
+                    case CacheFileEngine::CACHE_FILE_MCC_CEA:
                         max_node_count = MAX_SCRIPT_NODE_COUNT_CEA;
                         break;
                     default:
@@ -128,8 +128,8 @@ namespace Invader::Parser {
                     }
                 }
                 else {
-                    auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
-                    auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
+                    auto *start_big = reinterpret_cast<ScenarioScriptNode::C<BigEndian> *>(scenario.script_syntax_data.data() + sizeof(t));
+                    auto *start_little = reinterpret_cast<ScenarioScriptNode::C<LittleEndian> *>(start_big);
                     if(t.element_size != SCRIPT_ELEMENT_SIZE) {
                         if(!workload.disable_error_checking) {
                             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script node table header is invalid", tag_index);
@@ -188,9 +188,9 @@ namespace Invader::Parser {
 
         const char *string_data_end = string_data + string_data_length;
         auto *syntax_data = script_data_struct.data.data();
-        auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
+        auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::C<LittleEndian> *>(syntax_data);
         std::uint16_t element_count = table_header.size.read();
-        auto *nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(&table_header + 1);
+        auto *nodes = reinterpret_cast<ScenarioScriptNode::C<LittleEndian> *>(&table_header + 1);
 
         for(std::uint16_t i = 0; i < element_count; i++) {
             // Check if we know the class
@@ -199,36 +199,36 @@ namespace Invader::Parser {
 
             // Check the class type
             switch(node.type.read()) {
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
-                    tag_class = HEK::TAG_FOURCC_SOUND;
+                case SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
+                    tag_class = TAG_FOURCC_SOUND;
                     break;
 
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
-                    tag_class = HEK::TAG_FOURCC_EFFECT;
+                case SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
+                    tag_class = TAG_FOURCC_EFFECT;
                     break;
 
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
-                    tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
+                case SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
+                    tag_class = TAG_FOURCC_DAMAGE_EFFECT;
                     break;
 
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
-                    tag_class = HEK::TAG_FOURCC_SOUND_LOOPING;
+                case SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
+                    tag_class = TAG_FOURCC_SOUND_LOOPING;
                     break;
 
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
-                    tag_class = HEK::TAG_FOURCC_MODEL_ANIMATIONS;
+                case SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
+                    tag_class = TAG_FOURCC_MODEL_ANIMATIONS;
                     break;
 
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
-                    tag_class = HEK::TAG_FOURCC_ACTOR_VARIANT;
+                case SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
+                    tag_class = TAG_FOURCC_ACTOR_VARIANT;
                     break;
 
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
-                    tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
+                case SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
+                    tag_class = TAG_FOURCC_DAMAGE_EFFECT;
                     break;
 
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
-                    tag_class = HEK::TAG_FOURCC_OBJECT;
+                case SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
+                    tag_class = TAG_FOURCC_OBJECT;
                     break;
 
                 default:
@@ -239,8 +239,8 @@ namespace Invader::Parser {
                 // Check if we should leave it alone
                 auto flags = node.flags.read();
                 if(
-                    (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL) ||
-                    (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL)
+                    (flags & ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL) ||
+                    (flags & ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL)
                 ) {
                     continue;
                 }
@@ -257,7 +257,7 @@ namespace Invader::Parser {
                 // Add it to the list
                 std::size_t dependency_offset = reinterpret_cast<const std::byte *>(&node.data) - syntax_data;
                 std::size_t new_id = workload.compile_tag_recursively(string, *tag_class);
-                node.data = HEK::TagID { static_cast<std::uint32_t>(new_id) };
+                node.data = TagID { static_cast<std::uint32_t>(new_id) };
                 auto &dependency = script_data_struct.dependencies.emplace_back();
                 dependency.offset = dependency_offset;
                 dependency.tag_id_only = true;
@@ -276,14 +276,14 @@ namespace Invader::Parser {
                     auto &reference = scenario.references.emplace_back().reference;
                     reference.tag_fourcc = new_tag.tag_fourcc;
                     reference.path = new_tag.path;
-                    reference.tag_id = HEK::TagID { static_cast<std::uint32_t>(new_id) };
+                    reference.tag_id = TagID { static_cast<std::uint32_t>(new_id) };
                 }
             }
         }
 
         // Add the new structs
         auto &new_ptr = workload.structs[struct_index].pointers.emplace_back();
-        auto &scenario_struct = *reinterpret_cast<Scenario::struct_little *>(workload.structs[struct_index].data.data());
+        auto &scenario_struct = *reinterpret_cast<Scenario::C<LittleEndian> *>(workload.structs[struct_index].data.data());
         scenario_struct.script_syntax_data.size = static_cast<std::uint32_t>(script_data_struct.data.size());
         new_ptr.offset = reinterpret_cast<std::byte *>(&scenario_struct.script_syntax_data.pointer) - reinterpret_cast<std::byte *>(&scenario_struct);
         new_ptr.struct_index = workload.structs.size();
@@ -315,8 +315,8 @@ namespace Invader::Parser {
                     else { \
                         name_used[name_index].emplace_back(object_type_str, i); \
                         auto &name = scenario.object_names[name_index]; \
-                        name.object_index = static_cast<HEK::Index>(i); \
-                        name.object_type = HEK::ObjectType::object_type_int; \
+                        name.object_index = static_cast<Index>(i); \
+                        name.object_type = ObjectType::object_type_int; \
                     } \
                 } \
                 std::size_t type_index = r.type; \
@@ -341,7 +341,7 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (null) is unused", i); \
                     } \
                     else { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_fourcc_to_extension(palette.tag_fourcc)); \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), tag_fourcc_to_extension(palette.tag_fourcc)); \
                     } \
                 } \
                 else if(is_null) { \
@@ -464,7 +464,7 @@ namespace Invader::Parser {
         MERGE_PALETTE(sound_scenery_palette);
         
         // Make some lambdas for finding stuff quickly
-        #define TRANSLATE_PALETTE(what, match_comparison) [&base_scenario, &scenario_to_merge, &workload, &tag_index, &child_scenario_path](HEK::Index old_index) -> HEK::Index { \
+        #define TRANSLATE_PALETTE(what, match_comparison) [&base_scenario, &scenario_to_merge, &workload, &tag_index, &child_scenario_path](Index old_index) -> Index { \
             /* If we're null, return null */ \
             if(old_index == NULL_INDEX) { \
                 return NULL_INDEX; \
@@ -635,7 +635,7 @@ namespace Invader::Parser {
                     // If this isn't even a scenario tag... what
                     if(first_scenario.tag_fourcc != TagFourCC::TAG_FOURCC_SCENARIO) {
                         // This should fail even if we aren't checking for errors because this is invalid
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), tag_fourcc_to_extension(first_scenario.tag_fourcc));
                         throw InvalidTagDataException();
                     }
                     
@@ -644,7 +644,7 @@ namespace Invader::Parser {
                         // This should fail even if we aren't checking for errors because this is invalid
                         if(m == first_scenario.path) {
                             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Duplicate or cyclical child scenario references are present", tag_index);
-                            eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
+                            eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), tag_fourcc_to_extension(first_scenario.tag_fourcc));
                             throw InvalidTagDataException();
                         }
                     }
@@ -654,7 +654,7 @@ namespace Invader::Parser {
                     
                     // Find it
                     char file_path_cstr[1024];
-                    std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
+                    std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), tag_fourcc_to_extension(first_scenario.tag_fourcc));
                     auto file_path = File::tag_path_to_file_path(file_path_cstr, workload.get_build_parameters()->tags_directories);
                     if(!file_path.has_value() || !std::filesystem::exists(*file_path)) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Child scenario %s not found", file_path_cstr);
@@ -672,14 +672,14 @@ namespace Invader::Parser {
                     try {
                         auto child = Scenario::parse_hek_tag_file(data->data(), data->size());
                         data.reset(); // clear it
-                        merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc)).c_str());
+                        merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + tag_fourcc_to_extension(first_scenario.tag_fourcc)).c_str());
                     }
                     catch(std::exception &) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to merge %s%s into %s.%s",
                                             File::halo_path_to_preferred_path(first_scenario.path).c_str(),
-                                            HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc),
+                                            tag_fourcc_to_extension(first_scenario.tag_fourcc),
                                             workload.tags[tag_index].path.c_str(),
-                                            HEK::tag_fourcc_to_extension(workload.tags[tag_index].tag_fourcc)
+                                            tag_fourcc_to_extension(workload.tags[tag_index].tag_fourcc)
                                            );
                         throw;
                     }
@@ -707,17 +707,17 @@ namespace Invader::Parser {
             return false;
         }
         else {
-            ScenarioScriptNodeTable::struct_big *t;
+            ScenarioScriptNodeTable::C<BigEndian> *t;
             if(scenario.script_syntax_data.size() < sizeof(*t)) {
                 return false; // invalid
             }
-            t = reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
+            t = reinterpret_cast<ScenarioScriptNodeTable::C<BigEndian> *>(scenario.script_syntax_data.data());
             
             // Maximum node count exceeded? And can we safely resize it?
             if(t->maximum_count > MAX_SCRIPT_NODE_COUNT && static_cast<std::size_t>(t->size) + 128 < MAX_SCRIPT_NODE_COUNT) {
                 if(fix) {
                     t->maximum_count = MAX_SCRIPT_NODE_COUNT;
-                    scenario.script_syntax_data.resize(sizeof(*t) + sizeof(ScenarioScriptNode::struct_big) * t->maximum_count);
+                    scenario.script_syntax_data.resize(sizeof(*t) + sizeof(ScenarioScriptNode::C<BigEndian>) * t->maximum_count);
                 }
                 return true;
             }

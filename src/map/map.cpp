@@ -3,13 +3,16 @@
 #include "../util/assert.hpp"
 
 #include <invader/hek/map.hpp>
-#include <invader/tag/hek/definition.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/compress/compression.hpp>
 #include <invader/resource/resource_map.hpp>
+#include <invader/tag/parser/definition/scenario.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 #include <invader/crc/hek/crc.hpp>
+
+using namespace Invader::Parser;
 
 namespace Invader {
     Map Map::map_with_copy(const std::byte *data, std::size_t data_size,
@@ -26,7 +29,7 @@ namespace Invader {
                            std::vector<std::byte> &&bitmaps_data,
                            std::vector<std::byte> &&loc_data,
                            std::vector<std::byte> &&sounds_data) {
-        if(data.size() < sizeof(HEK::CacheFileHeader)) {
+        if(data.size() < sizeof(CacheFileHeader)) {
             throw InvalidMapException(); // no
         }
         
@@ -50,8 +53,6 @@ namespace Invader {
     }
 
     bool Map::decompress_if_needed(const std::byte *data, std::size_t data_size) {
-        using namespace Invader::HEK;
-        
         const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(data);
         CompressionType compression_type = CompressionType::COMPRESSION_TYPE_NONE;
         
@@ -150,11 +151,11 @@ namespace Invader {
         return const_cast<Map *>(this)->get_tag_data_at_offset(offset, minimum_size);
     }
 
-    std::byte *Map::resolve_tag_data_pointer(HEK::Pointer pointer, std::size_t minimum_size) {
+    std::byte *Map::resolve_tag_data_pointer(Pointer pointer, std::size_t minimum_size) {
         return this->get_tag_data_at_offset(pointer - this->base_memory_address, minimum_size);
     }
 
-    const std::byte *Map::resolve_tag_data_pointer(HEK::Pointer pointer, std::size_t minimum_size) const {
+    const std::byte *Map::resolve_tag_data_pointer(Pointer pointer, std::size_t minimum_size) const {
         return const_cast<Map *>(this)->resolve_tag_data_pointer(pointer, minimum_size);
     }
 
@@ -180,8 +181,6 @@ namespace Invader {
     }
 
     void Map::load_map() {
-        using namespace Invader::HEK;
-        
         // Get header
         auto *header_maybe = reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
         auto data_length = this->data.size();
@@ -199,7 +198,7 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_NATIVE:
                     break;
                 case CacheFileEngine::CACHE_FILE_MCC_CEA:
-                    if(reinterpret_cast<const HEK::CacheFileHeader &>(header).compressed_padding != 0) { // if this is non-zero then we can't open it
+                    if(reinterpret_cast<const CacheFileHeader &>(header).compressed_padding != 0) { // if this is non-zero then we can't open it
                         throw InvalidMapException();
                     }
                     
@@ -221,21 +220,21 @@ namespace Invader {
             // Get tag data
             switch(map.engine) {
                 case CacheFileEngine::CACHE_FILE_NATIVE:
-                    map.base_memory_address = HEK::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
+                    map.base_memory_address = CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
                     break;
                 case CacheFileEngine::CACHE_FILE_DEMO:
-                    map.base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+                    map.base_memory_address = CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
                     break;
                 case CacheFileEngine::CACHE_FILE_XBOX:
-                    map.base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
+                    map.base_memory_address = CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
                     break;
                 case CacheFileEngine::CACHE_FILE_MCC_CEA: {
-                    auto *tag_data_header = reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(map.tag_data);
+                    auto *tag_data_header = reinterpret_cast<CacheFileTagDataHeaderPC *>(map.tag_data);
                     map.base_memory_address = tag_data_header->tag_array_address - sizeof(*tag_data_header);
                     break;
                 }
                 default:
-                    map.base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+                    map.base_memory_address = CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                     break;
             }
 
@@ -269,8 +268,6 @@ namespace Invader {
     }
 
     void Map::populate_tag_array() {
-        using namespace Invader::HEK;
-
         auto &map = *this;
         map.type = CacheFileType::SCENARIO_TYPE_SINGLEPLAYER;
 
@@ -291,12 +288,12 @@ namespace Invader {
             map.model_data_size = header.model_data_size;
             map.model_index_offset = header.vertex_size;
         };
-        if(this->get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->get_engine() == CacheFileEngine::CACHE_FILE_NATIVE) {
             auto &native_header = *reinterpret_cast<const NativeCacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(NativeCacheFileTagDataHeader)));
             set_model_stuff(native_header);
             this->asset_indices_offset = native_header.raw_data_indices;
         }
-        else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        else if(this->get_engine() != CacheFileEngine::CACHE_FILE_XBOX) {
             set_model_stuff(*reinterpret_cast<const CacheFileTagDataHeaderPC *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeaderPC))));
         }
 
@@ -313,7 +310,7 @@ namespace Invader {
                 
                 // Set the map type
                 if(i == map.scenario_tag_id) {
-                    map.type = reinterpret_cast<Scenario<LittleEndian> *>(map.resolve_tag_data_pointer(tags[i].tag_data, sizeof(Scenario<LittleEndian>)))->type;
+                    map.type = reinterpret_cast<Scenario::C<LittleEndian> *>(map.resolve_tag_data_pointer(tags[i].tag_data, sizeof(Scenario::C<LittleEndian>)))->type;
                 }
 
                 try {
@@ -364,10 +361,10 @@ namespace Invader {
                     tag.path = new_path;
                 }
 
-                if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.engine != CacheFileEngine::CACHE_FILE_NATIVE) {
                     continue;
                 }
-                else if(sizeof(tags->tag_data) == sizeof(HEK::Pointer) && reinterpret_cast<const CacheFileTagDataTag *>(tags)[i].indexed) {
+                else if(sizeof(tags->tag_data) == sizeof(Pointer) && reinterpret_cast<const CacheFileTagDataTag *>(tags)[i].indexed) {
                     tag.indexed = true;
 
                     // Indexed sound tags still use tag data (until you use reflexives)
@@ -423,13 +420,13 @@ namespace Invader {
                     
                     // Do we even have an index?
                     if(!tag.resource_index.has_value()) {
-                        eprintf_error("Tag %s.%s could not be found in the resource map file", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.tag_fourcc));
+                        eprintf_error("Tag %s.%s could not be found in the resource map file", File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.tag_fourcc));
                         throw OutOfBoundsException();
                     }
 
                     // Make sure it's valid
                     if(*tag.resource_index >= count) {
-                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.tag_fourcc), *tag.resource_index, static_cast<std::size_t>(count));
+                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.tag_fourcc), *tag.resource_index, static_cast<std::size_t>(count));
                         throw OutOfBoundsException();
                     }
 
@@ -437,7 +434,7 @@ namespace Invader {
                     auto &index = indices[*tag.resource_index];
                     tag.tag_data_size = index.size;
                     if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SOUND) {
-                        tag.base_struct_offset = index.data_offset + sizeof(HEK::Sound<HEK::LittleEndian>);
+                        tag.base_struct_offset = index.data_offset + sizeof(Sound::C<LittleEndian>);
                     }
                     else {
                         tag.base_struct_offset = index.data_offset;
@@ -449,7 +446,7 @@ namespace Invader {
             }
         };
 
-        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->engine == CacheFileEngine::CACHE_FILE_NATIVE) {
             try {
                 do_populate_the_array(reinterpret_cast<const NativeCacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
             }
@@ -477,10 +474,8 @@ namespace Invader {
     }
 
     void Map::get_bsps() {
-        using namespace Invader::HEK;
-
         auto &scenario_tag = this->tags[this->scenario_tag_id];
-        auto &tag = scenario_tag.get_base_struct<Scenario>();
+        auto &tag = scenario_tag.get_base_struct<Scenario::C>();
         std::size_t bsp_count = tag.structure_bsps.count;
         auto *bsps = scenario_tag.resolve_reflexive(tag.structure_bsps);
 
@@ -504,8 +499,6 @@ namespace Invader {
     }
 
     bool Map::is_protected() const noexcept {
-        using namespace HEK;
-        
         // Invalid paths?
         if(this->invalid_paths_detected) {
             return true;
@@ -575,8 +568,8 @@ namespace Invader {
     }
 
     std::byte *Map::get_internal_asset(std::size_t offset, std::size_t minimum_size) {
-        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            auto *data = reinterpret_cast<HEK::LittleEndian<std::uint64_t> *>(this->get_data_at_offset(this->asset_indices_offset, (1 + offset) * sizeof(HEK::LittleEndian<std::uint64_t>))) + offset;
+        if(this->engine == CacheFileEngine::CACHE_FILE_NATIVE) {
+            auto *data = reinterpret_cast<LittleEndian<std::uint64_t> *>(this->get_data_at_offset(this->asset_indices_offset, (1 + offset) * sizeof(LittleEndian<std::uint64_t>))) + offset;
             offset = *data;
         }
 
@@ -587,14 +580,14 @@ namespace Invader {
         if(this->get_crc32() != this->get_header_crc32() || this->is_protected() || this->data.size() != this->get_header_decompressed_file_size() || this->get_type() != this->get_header_type()) {
             return false;
         }
-        else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        else if(this->get_engine() != CacheFileEngine::CACHE_FILE_NATIVE) {
             auto tag_count = this->get_tag_count();
             for(std::size_t i = 0; i < tag_count; i++) {
                 auto &tag = this->get_tag(i);
                 auto &index = tag.get_tag_data_index();
                 
                 // BSP tags are NOT supposed to have this set
-                if(tag.get_tag_fourcc() == HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && index.tag_data != 0) {
+                if(tag.get_tag_fourcc() == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && index.tag_data != 0) {
                     return false;
                 }
             }

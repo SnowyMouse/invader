@@ -4,10 +4,18 @@
 #include <tiffio.h>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser_struct.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/tag_collection.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
+#include <invader/tag/parser/definition/scenario.hpp>
+#include <invader/tag/parser/definition/model.hpp>
+#include <invader/tag/parser/definition/gbxmodel.hpp>
+#include <invader/tag/parser/definition/string_list.hpp>
+#include <invader/tag/parser/definition/unicode_string_list.hpp>
 #include <invader/model/jms.hpp>
 #include <invader/tag/parser/compile/string_list.hpp>
 #include "recover_method.hpp"
+
+using namespace Invader::Parser;
 
 namespace Invader::Recover {
     static void create_directories_for_path(const std::filesystem::path &path) {
@@ -28,8 +36,8 @@ namespace Invader::Recover {
         std::exit(EXIT_SUCCESS);
     }
 
-    static void recover_tag_collection(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
-        auto *tag_collection = dynamic_cast<const Parser::TagCollection *>(&tag);
+    static void recover_tag_collection(const ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+        auto *tag_collection = dynamic_cast<const TagCollection *>(&tag);
         if(!tag_collection) {
             return;
         }
@@ -37,7 +45,7 @@ namespace Invader::Recover {
         // Output it
         std::string output;
         for(auto &i : tag_collection->tags) {
-            output += i.reference.path + "." + HEK::tag_fourcc_to_extension(i.reference.tag_fourcc) + "\n";
+            output += i.reference.path + "." + tag_fourcc_to_extension(i.reference.tag_fourcc) + "\n";
         }
 
         // Create directories
@@ -52,8 +60,8 @@ namespace Invader::Recover {
         create_directories_save_and_quit(file_path, std::vector<std::byte>(reinterpret_cast<const std::byte *>(output_data), reinterpret_cast<const std::byte *>(output_data + output.size())));
     }
 
-    static void recover_bitmap(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
-        auto *bitmap = dynamic_cast<const Parser::Bitmap *>(&tag);
+    static void recover_bitmap(const ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+        auto *bitmap = dynamic_cast<const Bitmap *>(&tag);
         auto file_path = data / (path + ".tif");
 
         const std::vector<std::byte> *input;
@@ -68,7 +76,7 @@ namespace Invader::Recover {
         }
 
         // Do we have color plate data?
-        if(width == 0 || height == 0 || input->size() <= sizeof(HEK::BigEndian<std::uint32_t>)) {
+        if(width == 0 || height == 0 || input->size() <= sizeof(BigEndian<std::uint32_t>)) {
             eprintf_warn("No color plate data to recover from - tag likely extracted");
             std::exit(EXIT_FAILURE);
         }
@@ -81,7 +89,7 @@ namespace Invader::Recover {
 
         // Get the size of the data we're going to decompress
         const auto *color_plate_data = input->data();
-        auto image_size = reinterpret_cast<const HEK::BigEndian<std::uint32_t> *>(color_plate_data)->read();
+        auto image_size = reinterpret_cast<const BigEndian<std::uint32_t> *>(color_plate_data)->read();
         const auto *compressed_data = color_plate_data + sizeof(image_size);
         auto compressed_size = input->size() - sizeof(image_size);
 
@@ -89,7 +97,7 @@ namespace Invader::Recover {
             eprintf_error("Color plate size is wrong");
             std::exit(EXIT_FAILURE);
         }
-        std::vector<HEK::LittleEndian<std::uint32_t>> pixels(image_size);
+        std::vector<LittleEndian<std::uint32_t>> pixels(image_size);
 
         // Inflate if regular
         if(bitmap) {
@@ -285,7 +293,7 @@ namespace Invader::Recover {
 
                             // Handle local nodes
                             if(local_nodes) {
-                                auto *memes = reinterpret_cast<const Parser::GBXModelGeometryPart *>(&p);
+                                auto *memes = reinterpret_cast<const GBXModelGeometryPart *>(&p);
                                 if(memes->local_node_count > sizeof(memes->local_node_indices) / sizeof(*memes->local_node_indices)) {
                                     eprintf_error("Local nodes overflow");
                                     throw Invader::InvalidTagDataException();
@@ -328,7 +336,7 @@ namespace Invader::Recover {
                         }
 
                         // Add indices
-                        std::vector<HEK::Index> indices;
+                        std::vector<Index> indices;
                         for(auto &t : p.triangles) {
                             indices.emplace_back(t.vertex0_index);
                             indices.emplace_back(t.vertex1_index);
@@ -391,7 +399,7 @@ namespace Invader::Recover {
         }
     }
 
-    template<typename T> static void recover_jms(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+    template<typename T> static void recover_jms(const ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *model = dynamic_cast<const T *>(&tag);
         if(!model) {
             return;
@@ -433,7 +441,7 @@ namespace Invader::Recover {
             throw Invader::InvalidTagDataException();
         }
 
-        bool local_nodes = model->flags == HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        bool local_nodes = model->flags == ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
 
         // Get all permutations
         std::vector<std::string> permutations;
@@ -462,9 +470,9 @@ namespace Invader::Recover {
         std::exit(EXIT_SUCCESS);
     }
 
-    static void recover_string_list(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
-        auto *unicode_string_list = dynamic_cast<const Parser::UnicodeStringList *>(&tag);
-        auto *string_list = dynamic_cast<const Parser::StringList *>(&tag);
+    static void recover_string_list(const ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+        auto *unicode_string_list = dynamic_cast<const UnicodeStringList *>(&tag);
+        auto *string_list = dynamic_cast<const StringList *>(&tag);
 
         auto data_path = data / (path + ".txt");
 
@@ -476,7 +484,7 @@ namespace Invader::Recover {
         if(string_list) {
             std::string result;
 
-            if(Parser::check_for_broken_strings(*string_list)) {
+            if(check_for_broken_strings(*string_list)) {
                 eprintf_error("String list has broken strings - tag is corrupt or edited improperly");
                 std::exit(EXIT_FAILURE);
             }
@@ -495,7 +503,7 @@ namespace Invader::Recover {
             std::u16string result = u"\xFEFF";
 
             // Oh... also, is this broken?
-            if(Parser::check_for_broken_strings(*unicode_string_list)) {
+            if(check_for_broken_strings(*unicode_string_list)) {
                 eprintf_error("String list has broken strings - tag is corrupt or edited improperly");
                 std::exit(EXIT_FAILURE);
             }
@@ -517,8 +525,8 @@ namespace Invader::Recover {
         }
     }
 
-    static void recover_scripts(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
-        auto *scenario = dynamic_cast<const Parser::Scenario *>(&tag);
+    static void recover_scripts(const ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+        auto *scenario = dynamic_cast<const Scenario *>(&tag);
         if(!scenario) {
             return;
         }
@@ -630,19 +638,19 @@ namespace Invader::Recover {
         std::exit(EXIT_SUCCESS);
     }
 
-    void recover_model(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
-        recover_jms<Parser::Model>(tag, path, data, overwrite);
-        recover_jms<Parser::GBXModel>(tag, path, data, overwrite);
+    void recover_model(const ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+        recover_jms<Model>(tag, path, data, overwrite);
+        recover_jms<GBXModel>(tag, path, data, overwrite);
     }
 
-    void recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc, bool overwrite) {
+    void recover(const ParserStruct &tag, const std::string &path, const std::filesystem::path &data, TagFourCC tag_fourcc, bool overwrite) {
         recover_bitmap(tag, path, data, overwrite);
         recover_tag_collection(tag, path, data, overwrite);
         recover_model(tag, path, data, overwrite);
         recover_string_list(tag, path, data, overwrite);
         recover_scripts(tag, path, data, overwrite);
 
-        eprintf_warn("Data cannot be recovered from tag class %s", HEK::tag_fourcc_to_extension(tag_fourcc));
+        eprintf_warn("Data cannot be recovered from tag class %s", tag_fourcc_to_extension(tag_fourcc));
         std::exit(EXIT_FAILURE);
     }
 }

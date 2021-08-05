@@ -9,17 +9,16 @@
 #include <optional>
 #include <variant>
 #include <memory>
-#include "../hek/definition.hpp"
+#include "../../hek/data_type.hpp"
 
 namespace Invader {
     class BuildWorkload;
+    class Tag;
 }
 
 namespace Invader::File {
     struct TagFilePath;
 }
-
-
 
 #define DO_BASED_ON_TAG_CLASS DO_TAG_CLASS(Actor, TAG_FOURCC_ACTOR) \
                                 DO_TAG_CLASS(ActorVariant, TAG_FOURCC_ACTOR_VARIANT) \
@@ -107,16 +106,16 @@ namespace Invader::File {
 namespace Invader::Parser {
     struct ParserStruct;
 
-    struct Dependency {
+    struct ParsedTagDependency {
         TagFourCC tag_fourcc;
         std::string path;
-        HEK::TagID tag_id = HEK::TagID::null_tag_id();
+        TagID tag_id = TagID::null_tag_id();
         
-        bool operator==(const Dependency &other) const {
+        bool operator==(const ParsedTagDependency &other) const {
             return this->path == other.path && (this->path.size() == 0 || this->tag_fourcc == other.tag_fourcc);
         }
         
-        bool operator!=(const Dependency &other) const {
+        bool operator!=(const ParsedTagDependency &other) const {
             return !(*this == other);
         }
     };
@@ -236,16 +235,16 @@ namespace Invader::Parser {
          * Get the dependency
          * @return dependency
          */
-        const Dependency &get_dependency() const noexcept {
-            return *reinterpret_cast<const Dependency *>(this->address);
+        const ParsedTagDependency &get_dependency() const noexcept {
+            return *reinterpret_cast<const ParsedTagDependency *>(this->address);
         }
 
         /**
          * Get the dependency
          * @return dependency
          */
-        Dependency &get_dependency() noexcept {
-            return *reinterpret_cast<Dependency *>(this->address);
+        ParsedTagDependency &get_dependency() noexcept {
+            return *reinterpret_cast<ParsedTagDependency *>(this->address);
         }
         
         /**
@@ -293,7 +292,7 @@ namespace Invader::Parser {
          * @return string value
          */
         const char *get_string() const noexcept {
-            return reinterpret_cast<HEK::TagString *>(this->address)->string;
+            return reinterpret_cast<TagString *>(this->address)->string;
         }
 
         /**
@@ -317,7 +316,7 @@ namespace Invader::Parser {
          * @param string string value
          */
         void set_string(const char *string) {
-            auto &str_to_write = reinterpret_cast<HEK::TagString *>(this->address)->string;
+            auto &str_to_write = reinterpret_cast<TagString *>(this->address)->string;
             std::fill(str_to_write, str_to_write + sizeof(str_to_write), 0);
             std::strncpy(str_to_write, string, sizeof(str_to_write) - 1);
         }
@@ -415,7 +414,7 @@ namespace Invader::Parser {
          * @return string
          */
         const char *read_string() const noexcept {
-            return reinterpret_cast<HEK::TagString *>(this->address)->string;
+            return reinterpret_cast<TagString *>(this->address)->string;
         }
 
         /**
@@ -423,7 +422,7 @@ namespace Invader::Parser {
          * @param string new string
          */
         void write_string(const char *string) const noexcept {
-            std::strncpy(reinterpret_cast<HEK::TagString *>(this->address)->string, string, sizeof(HEK::TagString::string) - 1);
+            std::strncpy(reinterpret_cast<TagString *>(this->address)->string, string, sizeof(TagString::string) - 1);
         }
 
         /**
@@ -740,13 +739,13 @@ namespace Invader::Parser {
          * @param read_only       value is read only
          */
         ParserStructValue(
-            const char *       name,
-            const char *       member_name,
-            const char *       comment,
-            Dependency *       dependency,
-            const TagFourCC *allowed_classes,
-            std::size_t        count,
-            bool               read_only
+            const char *         name,
+            const char *         member_name,
+            const char *         comment,
+            ParsedTagDependency *dependency,
+            const TagFourCC *    allowed_classes,
+            std::size_t          count,
+            bool                 read_only
         );
 
         /**
@@ -793,7 +792,7 @@ namespace Invader::Parser {
             const char *    name,
             const char *    member_name,
             const char *    comment,
-            HEK::TagString *string,
+            TagString *string,
             bool            read_only
         );
 
@@ -1029,11 +1028,10 @@ namespace Invader::Parser {
 
         /**
          * Convert the struct into HEK tag data to be built into a cache file.
-         * @param  generate_header_class generate a cache file header with the class, too
-         * @param  clear_on_save         clear data as it's being saved (reduces memory usage but you can't work on the tag anymore)
+         * @param  clear_on_save   clear data as it's being saved (reduces memory usage but you can't work on the tag anymore)
          * @return cache file data
          */
-        virtual std::vector<std::byte> generate_hek_tag_data(std::optional<TagFourCC> generate_header_class = std::nullopt, bool clear_on_save = false) = 0;
+        virtual std::vector<std::byte> generate_hek_tag_data(bool clear_on_save = false) = 0;
 
         /**
          * Refactor the tag reference, replacing all references with the given reference. Paths must use Halo path separators.
@@ -1078,19 +1076,19 @@ namespace Invader::Parser {
          * Get whether or not the struct has a title
          * @return true if struct has title
          */
-        virtual bool has_title() const;
+        virtual bool has_title() const noexcept;
 
         /**
          * Get the title of the struct
          * @return title of the struct
          */
-        virtual const char *title() const;
+        virtual const char *title() const noexcept;
 
         /**
          * Get the name of the struct
          * @return name of the struct
          */
-        virtual const char *struct_name() const = 0;
+        virtual const char *struct_name() const noexcept = 0;
         
         /**
          * Compare the struct against another struct

@@ -511,6 +511,7 @@
             }
         ],
         "type": "struct",
-        "size": 1104
+        "size": 1104,
+        "group": "hud_globals"
     }
 ]

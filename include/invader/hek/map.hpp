@@ -5,9 +5,9 @@
 
 #include <cstdint>
 #include "data_type.hpp"
-#include "../tag/hek/definition.hpp"
+#include "../tag/parser/definition/scenario.hpp"
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     enum CacheFileEngine : std::uint32_t {
         CACHE_FILE_XBOX = 5,
         CACHE_FILE_DEMO = 6,

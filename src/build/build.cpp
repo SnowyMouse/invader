@@ -15,6 +15,10 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/index/index.hpp>
 
+using namespace Invader;
+using namespace Invader::Parser;
+using namespace Invader::File;
+
 static std::uint32_t read_str32(const char *err, const char *s) {
     // Make sure it starts with '0x'
     if(std::strncmp(s, "0x", 2) != 0) {
@@ -47,9 +51,6 @@ enum XboxVariation {
 };
 
 int main(int argc, const char **argv) {
-    using namespace Invader;
-    using namespace Invader::HEK;
-    
     using RawDataHandling = BuildWorkload::BuildParameters::BuildParametersDetails::RawDataHandling;
 
     // Parameters
@@ -60,7 +61,7 @@ int main(int argc, const char **argv) {
         std::optional<std::filesystem::path> output;
         std::string last_argument;
         std::string index;
-        std::optional<HEK::CacheFileEngine> engine;
+        std::optional<CacheFileEngine> engine;
         bool handled = true;
         bool quiet = false;
         RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
@@ -74,7 +75,7 @@ int main(int argc, const char **argv) {
         std::optional<std::string> build_version;
         bool check_custom_edition_resource_bounds = false;
         std::optional<std::uint64_t> max_tag_space;
-        std::optional<HEK::CacheFileEngine> auto_forge_target;
+        std::optional<CacheFileEngine> auto_forge_target;
         bool do_not_auto_forge = false;
         bool use_anniverary_mode = false;
         
@@ -166,35 +167,35 @@ int main(int argc, const char **argv) {
                 break;
             case 'A':
             case 'g': {
-                HEK::CacheFileEngine engine;
+                CacheFileEngine engine;
                 std::optional<XboxVariation> variation;
                 
                 variation = std::nullopt;
                 if(std::strcmp(arguments[0], "mcc-cea") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_MCC_CEA;
+                    engine = CacheFileEngine::CACHE_FILE_MCC_CEA;
                 }
                 else if(std::strcmp(arguments[0], "pc-custom") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                    engine = CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
                 else if(std::strcmp(arguments[0], "pc-retail") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                    engine = CacheFileEngine::CACHE_FILE_RETAIL;
                 }
                 else if(std::strcmp(arguments[0], "pc-demo") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                    engine = CacheFileEngine::CACHE_FILE_DEMO;
                 }
                 else if(std::strcmp(arguments[0], "xbox-2276") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    engine = CacheFileEngine::CACHE_FILE_XBOX;
                 }
                 else if(std::strcmp(arguments[0], "xbox-0009") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    engine = CacheFileEngine::CACHE_FILE_XBOX;
                     variation = XboxVariation::XBOX_JP;
                 }
                 else if(std::strcmp(arguments[0], "xbox-0135") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    engine = CacheFileEngine::CACHE_FILE_XBOX;
                     variation = XboxVariation::XBOX_TW;
                 }
                 else if(std::strcmp(arguments[0], "native") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+                    engine = CacheFileEngine::CACHE_FILE_NATIVE;
                 }
                 else if(std::strcmp(arguments[0], "none") == 0 && opt == 'A') {
                     build_options.do_not_auto_forge = true;
@@ -267,7 +268,7 @@ int main(int argc, const char **argv) {
     }
 
     if(build_options.use_filesystem_path) {
-        auto scenario_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], build_options.tags);
+        auto scenario_maybe = file_path_to_tag_path(remaining_arguments[0], build_options.tags);
         if(scenario_maybe.has_value()) std::printf("%s\n", scenario_maybe->c_str());
         if(scenario_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
             scenario = std::filesystem::path(*scenario_maybe).replace_extension().string();
@@ -278,14 +279,14 @@ int main(int argc, const char **argv) {
         }
     }
     else {
-        scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
+        scenario = halo_path_to_preferred_path(remaining_arguments[0]);
     }
 
     try {
         // Get the index
-        std::optional<std::vector<File::TagFilePath>> with_index;
+        std::optional<std::vector<TagFilePath>> with_index;
         if(build_options.index.size()) {
-            with_index = std::vector<File::TagFilePath>();
+            with_index = std::vector<TagFilePath>();
             
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;
@@ -317,7 +318,7 @@ int main(int argc, const char **argv) {
                 auto substr = tag.substr(0, extension - tag.c_str() - 1);
                 const char *substr_c = substr.c_str();
                 std::vector<char> substr_v(substr_c, substr_c + substr.size() + 1);
-                File::preferred_path_to_halo_path_chars(substr_v.data());
+                preferred_path_to_halo_path_chars(substr_v.data());
 
                 // Lowercase everything
                 for(char &c : substr) {
@@ -365,13 +366,13 @@ int main(int argc, const char **argv) {
         }
         
         if(!build_options.use_anniverary_mode) {
-            parameters.details.build_flags_cea = HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_BITMAPS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_SOUNDS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY;
+            parameters.details.build_flags_cea = CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_BITMAPS_CACHE | CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_SOUNDS_CACHE | CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY;
         }
         
         parameters.details.build_check_custom_edition_resource_map_bounds = build_options.check_custom_edition_resource_bounds;
         
         if(build_options.increased_file_size_limits) {
-            if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(build_options.engine != CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
         }
@@ -382,8 +383,8 @@ int main(int argc, const char **argv) {
         // Do we need resource maps?
         bool require_resource_maps;
         switch(*build_options.engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+            case CacheFileEngine::CACHE_FILE_NATIVE:
+            case CacheFileEngine::CACHE_FILE_XBOX:
                 require_resource_maps = false;
                 break;
             default:
@@ -408,7 +409,7 @@ int main(int argc, const char **argv) {
             bool error = false;
             
             auto try_open = [](const std::filesystem::path &path) {
-                auto file = File::open_file(path);
+                auto file = open_file(path);
                 if(!file.has_value()) {
                     eprintf_error("Failed to open %s", path.string().c_str());
                     std::exit(EXIT_FAILURE);
@@ -436,7 +437,7 @@ int main(int argc, const char **argv) {
             
             auto bitmaps = resource_target_path / "bitmaps.map";
             auto sounds = resource_target_path / "sounds.map";
-            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            if(parameters.details.build_cache_file_engine == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 // Use loc for Custom Edition
                 auto loc = resource_target_path / "loc.map";
                 
@@ -484,7 +485,7 @@ int main(int argc, const char **argv) {
             map_name = *build_options.rename_scenario;
         }
         else {
-            map_name = File::base_name(scenario.c_str());
+            map_name = base_name(scenario.c_str());
         }
         
         // CRC32 spoofing, indexing, etc.
@@ -493,20 +494,20 @@ int main(int argc, const char **argv) {
             
             if(!parameters.index.has_value()) {
                 switch(auto_forge_target) {
-                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                    case CacheFileEngine::CACHE_FILE_RETAIL:
                         parameters.index = retail_indices(map_name.c_str());
                         break;
-                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                         parameters.index = custom_edition_indices(map_name.c_str());
                         break;
-                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                    case CacheFileEngine::CACHE_FILE_DEMO:
                         parameters.index = demo_indices(map_name.c_str());
                         break;
                     default: break;
                 }
             }
             
-            if(!parameters.forge_crc.has_value() && auto_forge_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            if(!parameters.forge_crc.has_value() && auto_forge_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 if(map_name == "beavercreek") {
                     parameters.forge_crc = 0x07B3876A;
                 }
@@ -589,7 +590,7 @@ int main(int argc, const char **argv) {
             }
             
             // If we are not building for MCC and the scenario name is mismatched, warn
-            if(final_file_name_no_extension_string != map_name && build_options.engine != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            if(final_file_name_no_extension_string != map_name && build_options.engine != CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 eprintf_warn("The base name (%s) does not match the scenario (%s)", final_file_name_no_extension_string.c_str(), map_name.c_str());
                 eprintf_warn("The map will fail to load correctly in the target engine with this file name.");
                 
@@ -607,7 +608,7 @@ int main(int argc, const char **argv) {
         }
         
         // Save the file
-        if(!File::save_file(final_file, map)) {
+        if(!save_file(final_file, map)) {
             eprintf_error("Failed to save %s", final_file.string().c_str());
             return EXIT_FAILURE;
         }

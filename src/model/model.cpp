@@ -11,8 +11,12 @@
 #include <invader/file/file.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/model/jms.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/model.hpp>
+#include <invader/tag/parser/definition/gbxmodel.hpp>
 #include <invader/tag/parser/compile/model.hpp>
+
+using namespace Invader;
+using namespace Invader::Parser;
 
 enum ModelType {
     MODEL_TYPE_MODEL = 0,
@@ -24,9 +28,7 @@ const char *MODEL_EXTENSIONS[] = {
     ".gbxmodel"
 };
 
-template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> make_model_tag(const std::filesystem::path &path, const std::vector<std::filesystem::path> &tags, const Invader::JMSMap &map) {
-    using namespace Invader;
-    
+template <typename T, TagFourCC fourcc> std::vector<std::byte> make_model_tag(const std::filesystem::path &path, const std::vector<std::filesystem::path> &tags, const JMSMap &map) {
     // Load the tag if possible
     std::unique_ptr<Parser::ParserStruct> tag;
     if(std::filesystem::exists(path)) {
@@ -52,12 +54,12 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     // Is it valid?
     auto *model_tag = dynamic_cast<T *>(tag.get());
     if(model_tag == nullptr) {
-        eprintf_error("Failed to parse %s (probably not a %s tag)", path.string().c_str(), HEK::tag_fourcc_to_extension(fourcc));
+        eprintf_error("Failed to parse %s (probably not a %s tag)", path.string().c_str(), tag_fourcc_to_extension(fourcc));
         std::exit(EXIT_FAILURE);
     }
     
     // We don't use local nodes
-    model_tag->flags &= ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+    model_tag->flags &= ~ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
     
     // Clear this stuff
     model_tag->markers.clear();
@@ -236,7 +238,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             }
             
             // Find any trailing numbers at the end
-            HEK::Index shader_index = 0;
+            Index shader_index = 0;
             bool trailing_numbers = false;
             for(std::size_t q = shader_name.size() - 1; q > 0; q--) {
                 if(shader_name[q] >= '0' && shader_name[q] <= '9') {
@@ -378,7 +380,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             }
             
             // Calculate this
-            child_node.node_distance_from_parent = child_node.default_translation.distance_from_point(HEK::Point3D<HEK::NativeEndian> {});
+            child_node.node_distance_from_parent = child_node.default_translation.distance_from_point(Point3D<NativeEndian> {});
             child_node.parent_node_index = n;
             
             // Next node?
@@ -607,7 +609,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     // On average, it saves a decent amount of space... as far as 16-bit integers go at least.
                     
                     // Add the first triangle
-                    std::vector<HEK::Index> triangle_man = { all_triangles_here[0].vertices[0], all_triangles_here[0].vertices[1], all_triangles_here[0].vertices[2] };
+                    std::vector<Index> triangle_man = { all_triangles_here[0].vertices[0], all_triangles_here[0].vertices[1], all_triangles_here[0].vertices[2] };
                     
                     // Our remaining triangles
                     std::list<JMS::Triangle> remaining_triangles = std::list<JMS::Triangle>(all_triangles_here.begin() + 1, all_triangles_here.end());
@@ -616,7 +618,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     while(remaining_triangles.size() > 0) {
                         bool normals_flipped = (triangle_man.size() % 2) == 1;
                         
-                        HEK::Index current_triangle[3] = {};
+                        Index current_triangle[3] = {};
                         auto a_index = 0;
                         
                         auto b_index = normals_flipped ? 2 : 1;
@@ -749,7 +751,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     }
     
     // Get everything
-    std::vector<Invader::File::TagFile> all_tags_shaders;
+    std::vector<File::TagFile> all_tags_shaders;
     std::vector<std::filesystem::path> all_shader_dirs;
     auto shaders_path = std::filesystem::path(File::file_path_to_tag_path(path, tags[0]).value()).parent_path() / "shaders";
     
@@ -765,7 +767,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         i.tag_path = (shaders_path / i.tag_path).string();
     }
     
-    std::optional<std::vector<Invader::File::TagFile>> all_tags;
+    std::optional<std::vector<File::TagFile>> all_tags;
     auto prefer_shaders = path.parent_path() / "shaders";
     
     // Resolve shaders
@@ -829,7 +831,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             
             // Check if we have a higher priority shader
             for(auto p : priorities) {
-                if(File::tag_path_to_file_path(s.shader.path + "." + HEK::tag_fourcc_to_extension(p), tags).has_value()) {
+                if(File::tag_path_to_file_path(s.shader.path + "." + tag_fourcc_to_extension(p), tags).has_value()) {
                     s.shader.tag_fourcc = p;
                     break;
                 }
@@ -845,7 +847,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             for(auto &i : all_shaders_found) {
                 eprintf_warn("    %s", File::halo_path_to_preferred_path(i.join()).c_str());
             }
-            eprintf_warn("Using %s.%s", File::halo_path_to_preferred_path(s.shader.path).c_str(), HEK::tag_fourcc_to_extension(s.shader.tag_fourcc));
+            eprintf_warn("Using %s.%s", File::halo_path_to_preferred_path(s.shader.path).c_str(), tag_fourcc_to_extension(s.shader.tag_fourcc));
         }
     }
     
@@ -860,7 +862,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             
             // Set this flag
             if(p.name.string[0] == '~') {
-                p.flags = HEK::ModelRegionPermutationFlagsFlag::MODEL_REGION_PERMUTATION_FLAGS_FLAG_CANNOT_BE_CHOSEN_RANDOMLY;
+                p.flags = ModelRegionPermutationFlagsFlag::MODEL_REGION_PERMUTATION_FLAGS_FLAG_CANNOT_BE_CHOSEN_RANDOMLY;
             }
         }
     }
@@ -902,7 +904,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         }
     }
     
-    auto rval = tag->generate_hek_tag_data(fourcc);
+    auto rval = tag->generate_hek_tag_data();
     
     std::size_t vertex_count = 0;
     std::size_t vertex_size_uncompressed = 0;
@@ -912,23 +914,20 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     for(auto &g : model_tag->geometries) {
         for(auto &p : g.parts) {
             vertex_count += p.uncompressed_vertices.size();
-            vertex_size_uncompressed += p.uncompressed_vertices.size() * sizeof(Parser::ModelVertexUncompressed::struct_big);
-            vertex_size_compressed += p.compressed_vertices.size() * sizeof(Parser::ModelVertexCompressed::struct_big);
+            vertex_size_uncompressed += p.uncompressed_vertices.size() * sizeof(Parser::ModelVertexUncompressed::C<BigEndian>);
+            vertex_size_compressed += p.compressed_vertices.size() * sizeof(Parser::ModelVertexCompressed::C<BigEndian>);
             triangle_size += p.triangles.size() * sizeof(p.triangles[0]);
         }
     }
     
     oprintf("Total: %zu vertices (%0.03f KiB uncompressed; %0.03f KiB compressed)\n", vertex_count, vertex_size_uncompressed / 1024.0F, vertex_size_compressed / 1024.0F);
-    oprintf("       %zu triangle strips (%0.03f KiB)\n", triangle_count, triangle_count * sizeof(HEK::Index) / 1024.0F);
-    oprintf("Output: %s, %0.03f KiB\n", HEK::tag_fourcc_to_extension(fourcc), rval.size() / 1024.0F);
+    oprintf("       %zu triangle strips (%0.03f KiB)\n", triangle_count, triangle_count * sizeof(Index) / 1024.0F);
+    oprintf("Output: %s, %0.03f KiB\n", tag_fourcc_to_extension(fourcc), rval.size() / 1024.0F);
     
     return rval;
 }
 
 int main(int argc, const char **argv) {
-    using namespace Invader;
-    using namespace Invader::HEK;
-    
     struct ModelOptions {
         std::optional<ModelType> type;
         std::vector<std::filesystem::path> tags;
@@ -936,7 +935,7 @@ int main(int argc, const char **argv) {
         bool filesystem_path = false;
     } model_options;
 
-    std::vector<Invader::CommandLineOption> options;
+    std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path or data directory.");
     options.emplace_back("type", 'T', 1, "Specify the type of model. Can be: model, gbxmodel", "<type>");
@@ -946,10 +945,10 @@ int main(int argc, const char **argv) {
     static constexpr char DESCRIPTION[] = "Compile a model tag.";
     static constexpr char USAGE[] = "[options] <model-tag>";
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ModelOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, model_options, [](char opt, const auto &args, ModelOptions &model_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ModelOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, model_options, [](char opt, const auto &args, ModelOptions &model_options) {
         switch(opt) {
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
             case 'P':
                 model_options.filesystem_path = true;

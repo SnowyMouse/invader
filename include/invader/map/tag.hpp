@@ -12,7 +12,7 @@
 
 namespace Invader {
     class Map;
-    namespace HEK {
+    namespace Parser {
         struct CacheFileTagDataTag;
     }
 
@@ -50,7 +50,7 @@ namespace Invader {
          * Get the class of the tag
          * @return class of the tag
          */
-        TagFourCC get_tag_fourcc() const noexcept {
+        Parser::TagFourCC get_tag_fourcc() const noexcept {
             return this->tag_fourcc;
         }
 
@@ -94,13 +94,13 @@ namespace Invader {
          * Get the tag data index
          * @return tag data index
          */
-        HEK::CacheFileTagDataTag &get_tag_data_index() noexcept;
+        Parser::CacheFileTagDataTag &get_tag_data_index() noexcept;
 
         /**
          * Get the tag data index
          * @return tag data index
          */
-        const HEK::CacheFileTagDataTag &get_tag_data_index() const noexcept;
+        const Parser::CacheFileTagDataTag &get_tag_data_index() const noexcept;
 
         /**
          * Get a pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
@@ -109,7 +109,7 @@ namespace Invader {
          * @return         pointer to the data; nullptr if no data and minimum is not set
          * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
          */
-        std::byte *data(HEK::Pointer pointer, std::size_t minimum = 0);
+        std::byte *data(Parser::Pointer pointer, std::size_t minimum = 0);
 
         /**
          * Get a const pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
@@ -118,7 +118,7 @@ namespace Invader {
          * @return         const pointer to the data; nullptr if no data and minimum is not set
          * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
          */
-        const std::byte *data(HEK::Pointer pointer, std::size_t minimum = 0) const {
+        const std::byte *data(Parser::Pointer pointer, std::size_t minimum = 0) const {
             return const_cast<Tag *>(this)->data(pointer, minimum);
         }
 
@@ -129,7 +129,7 @@ namespace Invader {
          * @return         pointer to the data; nullptr if no data and minimum is not set
          * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
          */
-        std::byte *data(HEK::Pointer64 pointer, std::size_t minimum = 0);
+        std::byte *data(Parser::Pointer64 pointer, std::size_t minimum = 0);
 
         /**
          * Get a const pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
@@ -138,7 +138,7 @@ namespace Invader {
          * @return         const pointer to the data; nullptr if no data and minimum is not set
          * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
          */
-        const std::byte *data(HEK::Pointer64 pointer, std::size_t minimum = 0) const {
+        const std::byte *data(Parser::Pointer64 pointer, std::size_t minimum = 0) const {
             return const_cast<Tag *>(this)->data(pointer, minimum);
         }
 
@@ -150,8 +150,8 @@ namespace Invader {
          * @throws throw if out of bounds
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) {
-            return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(pointer, minimum));
+        StructType<Parser::LittleEndian> &get_struct_at_pointer(Parser::Pointer pointer, std::size_t minimum = sizeof(StructType<Parser::LittleEndian>)) {
+            return *reinterpret_cast<StructType<Parser::LittleEndian> *>(this->data(pointer, minimum));
         }
 
         /**
@@ -162,8 +162,8 @@ namespace Invader {
          * @throws throw if out of bounds
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer64 pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) {
-            return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(pointer, minimum));
+        StructType<Parser::LittleEndian> &get_struct_at_pointer(Parser::Pointer64 pointer, std::size_t minimum = sizeof(StructType<Parser::LittleEndian>)) {
+            return *reinterpret_cast<StructType<Parser::LittleEndian> *>(this->data(pointer, minimum));
         }
 
         /**
@@ -171,7 +171,7 @@ namespace Invader {
          * @return a reference to the base struct
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> &get_base_struct() {
+        StructType<Parser::LittleEndian> &get_base_struct() {
             return get_struct_at_pointer<StructType>(this->base_struct_pointer);
         }
 
@@ -183,7 +183,7 @@ namespace Invader {
          * @throws throw if out of bounds
          */
         template <template<template<typename> typename> typename StructType>
-        const StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) const {
+        const StructType<Parser::LittleEndian> &get_struct_at_pointer(Parser::Pointer pointer, std::size_t minimum = sizeof(StructType<Parser::LittleEndian>)) const {
             return const_cast<Tag *>(this)->get_struct_at_pointer<StructType>(pointer, minimum);
         }
 
@@ -195,7 +195,7 @@ namespace Invader {
          * @throws throw if out of bounds
          */
         template <template<template<typename> typename> typename StructType>
-        const StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer64 pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) const {
+        const StructType<Parser::LittleEndian> &get_struct_at_pointer(Parser::Pointer64 pointer, std::size_t minimum = sizeof(StructType<Parser::LittleEndian>)) const {
             return const_cast<Tag *>(this)->get_struct_at_pointer<StructType>(pointer, minimum);
         }
 
@@ -204,7 +204,7 @@ namespace Invader {
          * @return a reference to the base struct
          */
         template <template<template<typename> typename> typename StructType>
-        const StructType<HEK::LittleEndian> &get_base_struct() const {
+        const StructType<Parser::LittleEndian> &get_base_struct() const {
             return const_cast<Tag *>(this)->get_base_struct<StructType>();
         }
 
@@ -214,11 +214,11 @@ namespace Invader {
          * @return pointer to the first object or nullptr if the reflexive has 0 items
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> *resolve_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive) {
+        StructType<Parser::LittleEndian> *resolve_reflexive(const Parser::TagReflexive<Parser::LittleEndian, StructType> &reflexive) {
             if(reflexive.count == 0) {
                 return nullptr;
             }
-            return &get_struct_at_pointer<StructType>(reflexive.pointer.read(), sizeof(StructType<HEK::LittleEndian>) * reflexive.count);
+            return &get_struct_at_pointer<StructType>(reflexive.pointer.read(), sizeof(StructType<Parser::LittleEndian>) * reflexive.count);
         }
 
         /**
@@ -227,7 +227,7 @@ namespace Invader {
          * @return pointer to the first object or nullptr if the reflexive has 0 items
          */
         template <template<template<typename> typename> typename StructType>
-        const StructType<HEK::LittleEndian> *resolve_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive) const {
+        const StructType<Parser::LittleEndian> *resolve_reflexive(const Parser::TagReflexive<Parser::LittleEndian, StructType> &reflexive) const {
             return const_cast<Tag *>(this)->resolve_reflexive(reflexive);
         }
 
@@ -237,7 +237,7 @@ namespace Invader {
          * @param index     the index
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) {
+        StructType<Parser::LittleEndian> &get_struct_from_reflexive(const Parser::TagReflexive<Parser::LittleEndian, StructType> &reflexive, std::size_t index) {
             if(reflexive.count <= index) {
                 throw OutOfBoundsException();
             }
@@ -250,7 +250,7 @@ namespace Invader {
          * @param index     the index
          */
         template <template<template<typename> typename> typename StructType>
-        const StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) const {
+        const StructType<Parser::LittleEndian> &get_struct_from_reflexive(const Parser::TagReflexive<Parser::LittleEndian, StructType> &reflexive, std::size_t index) const {
             return const_cast<Tag *>(this)->get_struct_from_reflexive(reflexive, index);
         }
 
@@ -262,13 +262,13 @@ namespace Invader {
         std::string path;
 
         /** Class of tag */
-        TagFourCC tag_fourcc;
+        Parser::TagFourCC tag_fourcc;
 
         /** This is indexed and not in the map? */
         bool indexed = false;
 
         /** Base struct pointer */
-        HEK::Pointer base_struct_pointer;
+        Parser::Pointer base_struct_pointer;
 
         /** Base struct offset */
         std::size_t base_struct_offset = 0;

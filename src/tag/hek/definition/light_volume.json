@@ -186,6 +186,7 @@
             }
         ],
         "type": "struct",
-        "size": 332
+        "size": 332,
+        "group": "light_volume"
     }
 ]

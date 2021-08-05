@@ -7,10 +7,10 @@
 #include <algorithm>
 #include <squish.h>
 
+using namespace Invader::Parser;
+
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
-        using namespace Invader::HEK;
-
         auto bitmap_count = scanned_color_plate.bitmaps.size();
         for(std::size_t i = 0; i < bitmap_count; i++) {
             // Write all of the fields here
@@ -68,17 +68,17 @@ namespace Invader {
 
             BitmapDataFlags flags = {};
             if(compressed) {
-                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+                flags |= BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
             }
             if(bitmap_type == BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
-                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
+                flags |= BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
             }
             
             if(is_power_of_two(bitmap.width) && is_power_of_two(bitmap.height)) {
-                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
+                flags |= BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
             }
             if(palettized) {
-                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_PALETTIZED;
+                flags |= BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_PALETTIZED;
             }
             bitmap.flags = flags;
 

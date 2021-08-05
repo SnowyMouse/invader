@@ -10,7 +10,7 @@
 #include "../../hek/data_type.hpp"
 #include "../../hek/endian.hpp"
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     /**
      * This header takes up the first 64 bytes of a Halo Editing Kit tag file.
      */

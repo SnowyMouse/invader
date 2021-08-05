@@ -4,7 +4,7 @@
 
 #include <invader/hek/fourcc.hpp>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     #define MATCH_TAG_CLASS(check_extension,tag_fourcc) else if(std::strcmp(extension, check_extension) == 0) return TagFourCC::tag_fourcc;
 
     /**

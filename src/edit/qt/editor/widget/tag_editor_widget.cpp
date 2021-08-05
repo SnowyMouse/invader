@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 #include "tag_editor_widget.hpp"
 #include "../tag_editor_window.hpp"
 #include "tag_editor_edit_widget.hpp"

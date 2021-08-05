@@ -466,6 +466,7 @@
         "pre_compile": true,
         "post_cache_parse": true,
         "postprocess_hek_data": true,
-        "size": 108
+        "size": 108,
+        "group": "bitmap"
     }
 ]

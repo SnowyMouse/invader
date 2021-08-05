@@ -17,8 +17,10 @@
 #include <QAction>
 #include <QInputDialog>
 
+using namespace Invader::Parser;
+
 namespace Invader::EditQt {
-    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, std::optional<HEK::TagFourCC> save_class, const char *starting_directory) : QDialog(parent), save_class(save_class) {
+    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<TagFourCC>> &classes, std::optional<TagFourCC> save_class, const char *starting_directory) : QDialog(parent), save_class(save_class) {
         // Make a layout and set our flags
         auto *vbox_layout = new QVBoxLayout();
         vbox_layout->setContentsMargins(4, 4, 4, 4);
@@ -46,7 +48,7 @@ namespace Invader::EditQt {
 
             // Add some path stuff
             this->path_to_enter = new QLineEdit();
-            this->tree_widget = new TagTreeWidget(nullptr, parent_window, std::vector<HEK::TagFourCC>(&*save_class, &*save_class + 1), std::nullopt, true);
+            this->tree_widget = new TagTreeWidget(nullptr, parent_window, std::vector<TagFourCC>(&*save_class, &*save_class + 1), std::nullopt, true);
             connect(this->tree_widget, &TagTreeWidget::itemClicked, this, &TagTreeDialog::on_click);
             connect(this->tree_widget, &TagTreeWidget::itemDoubleClicked, this, &TagTreeDialog::on_double_click);
         }
@@ -161,11 +163,11 @@ namespace Invader::EditQt {
         this->tree_widget->set_filter(this->filter_classes, std::nullopt, expr_filters);
     }
 
-    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes, const char *starting_directory) : TagTreeDialog(parent, parent_window, classes, std::nullopt, starting_directory) {
+    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<TagFourCC>> &classes, const char *starting_directory) : TagTreeDialog(parent, parent_window, classes, std::nullopt, starting_directory) {
         this->change_title(classes);
     }
 
-    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, HEK::TagFourCC save_class, const char *starting_directory) : TagTreeDialog(parent, parent_window, std::nullopt, save_class, starting_directory) {
+    TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, TagFourCC save_class, const char *starting_directory) : TagTreeDialog(parent, parent_window, std::nullopt, save_class, starting_directory) {
         this->change_title(save_class);
     }
 
@@ -173,15 +175,15 @@ namespace Invader::EditQt {
         return this->tag;
     }
 
-    void TagTreeDialog::set_filter(const std::optional<std::vector<HEK::TagFourCC>> &classes) {
+    void TagTreeDialog::set_filter(const std::optional<std::vector<TagFourCC>> &classes) {
         this->filter_classes = classes;
         this->refresh_filter();
         this->change_title(classes);
     }
 
-    void TagTreeDialog::change_title(HEK::TagFourCC save_class) {
+    void TagTreeDialog::change_title(TagFourCC save_class) {
         char title_text[512];
-        std::snprintf(title_text, sizeof(title_text), "Select a location to save the %s tag", HEK::tag_fourcc_to_extension(save_class));
+        std::snprintf(title_text, sizeof(title_text), "Select a location to save the %s tag", tag_fourcc_to_extension(save_class));
         this->setWindowTitle(title_text);
     }
 
@@ -272,7 +274,7 @@ namespace Invader::EditQt {
 
         // Generate the thing
         char extension[256];
-        std::snprintf(extension, sizeof(extension), ".%s", HEK::tag_fourcc_to_extension(*this->save_class));
+        std::snprintf(extension, sizeof(extension), ".%s", tag_fourcc_to_extension(*this->save_class));
         if(!potential_halo_path.endsWith(extension)) {
             potential_halo_path_std_str = potential_halo_path_std_str + extension;
         }
@@ -286,7 +288,7 @@ namespace Invader::EditQt {
         this->done(QDialog::Accepted);
     }
 
-    void TagTreeDialog::change_title(const std::optional<std::vector<HEK::TagFourCC>> &classes) {
+    void TagTreeDialog::change_title(const std::optional<std::vector<TagFourCC>> &classes) {
         std::size_t class_count = classes.has_value() ? classes->size() : 0;
 
         // If we have classes filtered, format them into a list
@@ -297,7 +299,7 @@ namespace Invader::EditQt {
             std::size_t pos = std::snprintf(title_text, sizeof(title_text), "Select a");
             std::size_t i = 0;
             while(pos < sizeof(title_text) && i < class_count) {
-                pos += std::snprintf(title_text + pos, sizeof(title_text) - pos, " %s", HEK::tag_fourcc_to_extension(classes_v[i]));
+                pos += std::snprintf(title_text + pos, sizeof(title_text) - pos, " %s", tag_fourcc_to_extension(classes_v[i]));
 
                 if(pos + 3 < sizeof(title_text) && i + 2 <= class_count && class_count > 2) {
                     pos += std::snprintf(title_text + pos, sizeof(title_text) - pos, ",");

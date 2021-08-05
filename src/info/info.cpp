@@ -6,7 +6,6 @@
 #include <invader/command_line_option.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/version.hpp>
-#include <invader/tag/parser/parser.hpp>
 #include <invader/hek/map.hpp>
 #include <invader/compress/compression.hpp>
 
@@ -15,6 +14,8 @@
 
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
+using namespace Invader::Parser;
+
 struct DisplayValue {
     const char * const name;
     void (* const calculate_value)(const Invader::Map &map);
@@ -22,7 +23,7 @@ struct DisplayValue {
 
 #define MAKE_DISPLAY_VALUE(name) {# name, Invader::Info::name }
 
-static std::byte header_cache[sizeof(Invader::HEK::NativeCacheFileHeader)];
+static std::byte header_cache[sizeof(NativeCacheFileHeader)];
 static std::size_t file_size = 0;
 
 // Calculating compression ratio:
@@ -33,8 +34,8 @@ static std::size_t file_size = 0;
 //        So, if a map is 15 MiB compressed and 20 MiB uncompressed, the compression ratio is 0.75.
 //
 static double calculate_compression_ratio(const Invader::Map &map) {
-    auto uncompressed_length = map.get_data_length() - sizeof(Invader::HEK::CacheFileHeader);
-    auto compressed_length = file_size - sizeof(Invader::HEK::CacheFileHeader);
+    auto uncompressed_length = map.get_data_length() - sizeof(CacheFileHeader);
+    auto compressed_length = file_size - sizeof(CacheFileHeader);
     return static_cast<double>(compressed_length) / uncompressed_length;
 }
 
@@ -52,8 +53,8 @@ namespace Invader::Info {
         auto engine = map.get_engine();
         PRINT_LINE(oprintf, "Engine:", "%s\n", engine_name(engine));
         
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            PRINT_LINE(oprintf, "Timestamp:", "%s\n", reinterpret_cast<Invader::HEK::NativeCacheFileHeader *>(header_cache)->timestamp.string);
+        if(engine == CacheFileEngine::CACHE_FILE_NATIVE) {
+            PRINT_LINE(oprintf, "Timestamp:", "%s\n", reinterpret_cast<NativeCacheFileHeader *>(header_cache)->timestamp.string);
         }
         
         auto map_type = map.get_type();
@@ -65,8 +66,8 @@ namespace Invader::Info {
             PRINT_LINE(oprintf_success_warn, "Map type:", "%s (mismatched)", type_name(map_type));
         }
         
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-            if(reinterpret_cast<Invader::HEK::CacheFileHeaderCEA *>(header_cache)->flags & HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY) {
+        if(engine == CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            if(reinterpret_cast<CacheFileHeaderCEA *>(header_cache)->flags & CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY) {
                 PRINT_LINE(oprintf_success, "Classic:", "%s", "Yes");
             }
             else {
@@ -74,13 +75,13 @@ namespace Invader::Info {
             }
         }
         
-        PRINT_LINE(oprintf, "Tags:", "%zu / %zu (%.02f MiB)\n", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
+        PRINT_LINE(oprintf, "Tags:", "%zu / %zu (%.02f MiB)\n", map.get_tag_count(), CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
         
         auto crc = map.get_crc32();
         auto crc_matches = map.get_header_crc32() == crc;
         
         // TODODILE: Figure out how to check an Xbox map's integrity
-        if(engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(engine != CacheFileEngine::CACHE_FILE_XBOX) {
             // CRC32
             if(crc_matches) {
                 PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches header)", crc);
@@ -111,11 +112,11 @@ namespace Invader::Info {
         std::size_t external_loc = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, true).size();
         std::size_t total_external = external_bitmaps + external_sounds + external_loc;
         
-        if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(engine != CacheFileEngine::CACHE_FILE_NATIVE && engine != CacheFileEngine::CACHE_FILE_XBOX) {
             if(total_external == 0) {
                 PRINT_LINE(oprintf_success, "External tags:", "%s", "None");
             }
-            else if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            else if(engine == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || engine == CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 PRINT_LINE(oprintf_success_lesser_warn, "External tags:", "%zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_external, external_bitmaps, external_bitmaps == 1 ? "" : "s", external_loc, external_sounds, external_sounds == 1 ? "" : "s");
                 
                 // If we're custom edition or cea, we need to see if they're at least all indexed
@@ -138,7 +139,7 @@ namespace Invader::Info {
         }
         
         // Languages?
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+        if(engine == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
             bool any;
             auto languages = find_languages_for_map(map, any);
             if(any) {
@@ -187,34 +188,34 @@ namespace Invader::Info {
         }
         
         // Uncompressed size
-        std::optional<HEK::CacheFileLimits> max_uncompressed_size;
+        std::optional<CacheFileLimits> max_uncompressed_size;
         switch(map.get_engine()) {
-            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_MCC_CEA;
+            case CacheFileEngine::CACHE_FILE_MCC_CEA:
+                max_uncompressed_size = CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_MCC_CEA;
                 break;
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_PC;
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case CacheFileEngine::CACHE_FILE_RETAIL:
+            case CacheFileEngine::CACHE_FILE_DEMO:
+                max_uncompressed_size = CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_PC;
                 break;
-            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+            case CacheFileEngine::CACHE_FILE_XBOX:
                 switch(map_type) {
-                    case HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
-                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER;
+                    case CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
+                        max_uncompressed_size = CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER;
                         break;
-                    case HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
-                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER;
+                    case CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
+                        max_uncompressed_size = CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER;
                         break;
-                    case HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
-                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE;
+                    case CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
+                        max_uncompressed_size = CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE;
                         break;
                     default:
                         break;
                 }
                 break;
-            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
+            case CacheFileEngine::CACHE_FILE_NATIVE:
                 // pretty much useless to show max file size
-                // max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
+                // max_uncompressed_size = CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
                 break;
             default:
                 break;

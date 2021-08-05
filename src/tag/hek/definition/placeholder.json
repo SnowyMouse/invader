@@ -7,6 +7,7 @@
         "pre_compile": true,
         "post_compile": true,
         "postprocess_hek_data": true,
-        "size": 508
+        "size": 508,
+        "group": "placeholder"
     }
 ]

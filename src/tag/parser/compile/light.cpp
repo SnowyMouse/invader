@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/light.hpp>
 
 namespace Invader::Parser {
     void Light::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {

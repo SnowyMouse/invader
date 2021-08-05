@@ -37,6 +37,7 @@
             }
         ],
         "type": "struct",
-        "size": 48
+        "size": 48,
+        "group": "camera_track"
     }
 ]

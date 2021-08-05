@@ -75,6 +75,7 @@
             }
         ],
         "type": "struct",
-        "size": 128
+        "size": 128,
+        "group": "hud_message_text"
     }
 ]

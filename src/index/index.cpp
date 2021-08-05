@@ -14,7 +14,7 @@
 
 int main(int argc, const char **argv) {
     using namespace Invader;
-    using namespace Invader::HEK;
+    using namespace Invader::Parser;
 
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");

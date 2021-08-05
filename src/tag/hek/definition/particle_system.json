@@ -478,6 +478,7 @@
             }
         ],
         "type": "struct",
-        "size": 104
+        "size": 104,
+        "group": "particle_system"
     }
 ]

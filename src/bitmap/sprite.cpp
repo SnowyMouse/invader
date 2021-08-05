@@ -3,6 +3,8 @@
 #include "color_plate_scanner.hpp"
 #include <invader/hek/data_type.hpp>
 
+using namespace Invader::Parser;
+
 namespace Invader {
     struct SpriteReference {
         std::size_t x, y, width, height;
@@ -545,7 +547,7 @@ namespace Invader {
             }
             
             // If sheet length isn't power of two, round up to the next power of two then
-            if(!HEK::is_power_of_two(max_sheet_length)) {
+            if(!is_power_of_two(max_sheet_length)) {
                 std::size_t n = 0;
                 while(max_sheet_length) {
                     max_sheet_length >>= 1;

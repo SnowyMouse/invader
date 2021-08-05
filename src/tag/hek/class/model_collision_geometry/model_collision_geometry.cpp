@@ -3,7 +3,7 @@
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
 #include "intersection_check.hpp"
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     bool BSPData::check_for_intersection(const Point3D<LittleEndian> &point_a, const Point3D<LittleEndian> &point_b, Point3D<LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) const {
         // Set our variables up
         Point3D<LittleEndian> new_intersection_point;
@@ -42,7 +42,7 @@ namespace Invader::HEK {
         struct PositionFound {
             std::uint32_t leaf_index_found;
             std::uint32_t surface_index_found;
-            HEK::Point3D<HEK::LittleEndian> intersection_point_found;
+            Point3D<LittleEndian> intersection_point_found;
         };
         std::vector<PositionFound> positions_found;
         
@@ -53,7 +53,7 @@ namespace Invader::HEK {
         while(current_position.z.read() > position_below.z.read()) {
             std::uint32_t leaf_index_found;
             std::uint32_t surface_index_found;
-            HEK::Point3D<HEK::LittleEndian> intersection_point_found;
+            Point3D<LittleEndian> intersection_point_found;
             auto val = this->check_for_intersection(
                 current_position,
                 position_below,
@@ -105,7 +105,7 @@ namespace Invader::HEK {
     }
     
     bool BSPData::check_if_point_inside_bsp(const Point3D<LittleEndian> &point, std::uint32_t *leaf_index) const {
-        auto result = HEK::leaf_for_point_of_bsp_tree(point, this->bsp3d_nodes, this->bsp3d_node_count, this->planes, this->plane_count);
+        auto result = leaf_for_point_of_bsp_tree(point, this->bsp3d_nodes, this->bsp3d_node_count, this->planes, this->plane_count);
         
         // If null, then we don't have anything
         if(result.is_null()) {

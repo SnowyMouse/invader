@@ -2,7 +2,7 @@
 
 #include <invader/hek/map.hpp>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     const char *engine_name(CacheFileEngine engine) noexcept {
         switch(engine) {
             case CacheFileEngine::CACHE_FILE_NATIVE:

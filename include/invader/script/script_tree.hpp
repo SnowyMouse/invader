@@ -3,7 +3,7 @@
 #ifndef INVADER__SCRIPT__SCRIPT_TREE_HPP
 #define INVADER__SCRIPT__SCRIPT_TREE_HPP
 
-#include "../tag/parser/parser.hpp"
+#include "../tag/parser/definition/scenario.hpp"
 #include "tokenizer.hpp"
 
 namespace Invader::ScriptTree {
@@ -23,7 +23,7 @@ namespace Invader::ScriptTree {
 
         struct Global {
             std::string global_name;
-            HEK::ScenarioScriptValueType global_type;
+            Parser::ScenarioScriptValueType global_type;
             Block block;
         };
 
@@ -34,8 +34,8 @@ namespace Invader::ScriptTree {
 
         struct Script {
             std::string script_name;
-            HEK::ScenarioScriptType script_type;
-            HEK::ScenarioScriptValueType script_return_type;
+            Parser::ScenarioScriptType script_type;
+            Parser::ScenarioScriptValueType script_return_type;
             Block block;
         };
 

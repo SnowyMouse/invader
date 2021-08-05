@@ -148,6 +148,7 @@
             }
         ],
         "type": "struct",
-        "size": 60
+        "size": 60,
+        "group": "virtual_keyboard"
     }
 ]

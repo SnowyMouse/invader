@@ -108,6 +108,7 @@
         ],
         "type": "struct",
         "inherits": "Object",
-        "size": 776
+        "size": 776,
+        "group": "item"
     }
 ]

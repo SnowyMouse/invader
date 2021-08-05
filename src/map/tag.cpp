@@ -2,12 +2,11 @@
 
 #include <invader/map/tag.hpp>
 #include <invader/map/map.hpp>
-#include <invader/tag/hek/definition.hpp>
+
+using namespace Invader::Parser;
 
 namespace Invader {
     bool Tag::data_is_available() const noexcept {
-        using namespace HEK;
-
         // If it's indexed, check if the corresponding data is available
         if(this->is_indexed()) {
             switch(this->tag_fourcc) {
@@ -37,23 +36,21 @@ namespace Invader {
         }
         
         // If we're native we're using 64-bit pointers
-        if(this->get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            return reinterpret_cast<const HEK::NativeCacheFileTagDataTag &>(this->get_tag_data_index()).tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE;
+        if(this->get_map().get_engine() == CacheFileEngine::CACHE_FILE_NATIVE) {
+            return reinterpret_cast<const NativeCacheFileTagDataTag &>(this->get_tag_data_index()).tag_data == CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE;
         }
         
         // Otherwise... do the thing!
         else {
-            return this->get_tag_data_index().tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS;
+            return this->get_tag_data_index().tag_data == CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS;
         }
     }
     
-    std::byte *Tag::data(HEK::Pointer64 pointer, std::size_t minimum) {
-        using namespace HEK;
-        
+    std::byte *Tag::data(Pointer64 pointer, std::size_t minimum) {
         auto engine = this->get_map().get_engine();
 
         // Limit the pointer to 32-bit
-        if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(engine != CacheFileEngine::CACHE_FILE_NATIVE) {
             pointer &= UINT32_MAX;
         }
 
@@ -67,7 +64,7 @@ namespace Invader {
             }
         }
 
-        if(this->indexed || (engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
+        if(this->indexed || (engine != CacheFileEngine::CACHE_FILE_NATIVE && this->tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
             auto edge = this->base_struct_offset + this->tag_data_size;
             auto offset = this->base_struct_offset + pointer - this->base_struct_pointer;
 
@@ -100,15 +97,15 @@ namespace Invader {
         }
     }
 
-    std::byte *Tag::data(HEK::Pointer pointer, std::size_t minimum) {
-        return this->data(static_cast<HEK::Pointer64>(pointer), minimum);
+    std::byte *Tag::data(Pointer pointer, std::size_t minimum) {
+        return this->data(static_cast<Pointer64>(pointer), minimum);
     }
 
-    HEK::CacheFileTagDataTag &Tag::get_tag_data_index() noexcept {
-        return *reinterpret_cast<HEK::CacheFileTagDataTag *>(this->map.get_tag_data_at_offset(this->tag_data_index_offset, sizeof(HEK::CacheFileTagDataTag)));
+    CacheFileTagDataTag &Tag::get_tag_data_index() noexcept {
+        return *reinterpret_cast<CacheFileTagDataTag *>(this->map.get_tag_data_at_offset(this->tag_data_index_offset, sizeof(CacheFileTagDataTag)));
     }
 
-    const HEK::CacheFileTagDataTag &Tag::get_tag_data_index() const noexcept {
+    const CacheFileTagDataTag &Tag::get_tag_data_index() const noexcept {
         return const_cast<Tag *>(this)->get_tag_data_index();
     }
 

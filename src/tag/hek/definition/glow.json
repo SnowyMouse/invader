@@ -264,6 +264,7 @@
         "post_cache_deformat": true,
         "type": "struct",
         "pre_compile": true,
-        "size": 340
+        "size": 340,
+        "group": "glow"
     }
 ]

@@ -10,7 +10,8 @@
 #include <chrono>
 #include "../hek/map.hpp"
 #include "../resource/resource_map.hpp"
-#include "../tag/parser/parser.hpp"
+#include "../tag/parser/definition/scenario.hpp"
+#include "../tag/parser/definition/model.hpp"
 #include "../error_handler/error_handler.hpp"
 
 namespace Invader {
@@ -108,7 +109,7 @@ namespace Invader {
                 /**
                  * Cache file engine to put in the header
                  */
-                HEK::CacheFileEngine build_cache_file_engine;
+                Parser::CacheFileEngine build_cache_file_engine;
                  
                 /**
                  * Tag data address to use
@@ -164,7 +165,7 @@ namespace Invader {
                  * Instantiate some default, working parameters for the target engine
                  * @param engine engine
                  */
-                BuildParametersDetails(HEK::CacheFileEngine engine) noexcept;
+                BuildParametersDetails(Parser::CacheFileEngine engine) noexcept;
                 
                 BuildParametersDetails(const BuildParametersDetails &) = default;
                 BuildParametersDetails(BuildParametersDetails &&) = default;
@@ -176,13 +177,13 @@ namespace Invader {
              * @param tags     tags directories to use
              * @param engine   engine target to use
              */
-            BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::CacheFileEngine engine);
+            BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, Parser::CacheFileEngine engine);
                 
             /**
              * Instantiate a simple set of parameters
              * @param engine engine target to use
              */
-            BuildParameters(HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE) noexcept;
+            BuildParameters(Parser::CacheFileEngine engine = Parser::CacheFileEngine::CACHE_FILE_NATIVE) noexcept;
             
             BuildParameters(const BuildParameters &) = default;
             BuildParameters(BuildParameters &&) = default;
@@ -202,7 +203,7 @@ namespace Invader {
          * @param recursion         should use recursion
          * @param error_checking    have error checking besides completely invalid tags
          */
-        static BuildWorkload compile_single_tag(const char *tag, TagFourCC tag_fourcc, const std::vector<std::filesystem::path> &tags_directories, bool recursion = false, bool error_checking = false);
+        static BuildWorkload compile_single_tag(const char *tag, Parser::TagFourCC tag_fourcc, const std::vector<std::filesystem::path> &tags_directories, bool recursion = false, bool error_checking = false);
 
         /**
          * Compile a single tag
@@ -288,7 +289,7 @@ namespace Invader {
              * @param pointer_pointer pointer to look at
              * @return                the struct index if found
              */
-            std::optional<std::size_t> resolve_pointer(const HEK::LittleEndian<HEK::Pointer> *pointer_pointer) const noexcept {
+            std::optional<std::size_t> resolve_pointer(const Parser::LittleEndian<Parser::Pointer> *pointer_pointer) const noexcept {
                 return this->resolve_pointer(reinterpret_cast<const std::byte *>(pointer_pointer) - this->data.data());
             }
 
@@ -297,7 +298,7 @@ namespace Invader {
              * @param pointer_pointer pointer to look at
              * @return                the struct index if found
              */
-            std::optional<std::size_t> resolve_pointer(const HEK::LittleEndian<HEK::Pointer64> *pointer_pointer) const noexcept {
+            std::optional<std::size_t> resolve_pointer(const Parser::LittleEndian<Parser::Pointer64> *pointer_pointer) const noexcept {
                 return this->resolve_pointer(reinterpret_cast<const std::byte *>(pointer_pointer) - this->data.data());
             }
 
@@ -315,10 +316,10 @@ namespace Invader {
             std::string path;
 
             /** Class of the tag */
-            TagFourCC tag_fourcc;
+            Parser::TagFourCC tag_fourcc;
 
             /** Original tag class, if applicable */
-            std::optional<TagFourCC> alias;
+            std::optional<Parser::TagFourCC> alias;
 
             /** Asset data structs */
             std::vector<std::size_t> asset_data;
@@ -343,13 +344,13 @@ namespace Invader {
         std::vector<BuildWorkloadStruct> structs;
 
         /** Uncompressed vertices for models */
-        std::vector<Parser::ModelVertexUncompressed::struct_little> uncompressed_model_vertices;
+        std::vector<Parser::ModelVertexUncompressed::C<Parser::LittleEndian>> uncompressed_model_vertices;
 
         /** Compressed vertices for models */
-        std::vector<Parser::ModelVertexCompressed::struct_little> compressed_model_vertices;
+        std::vector<Parser::ModelVertexCompressed::C<Parser::LittleEndian>> compressed_model_vertices;
 
         /** Indices for models */
-        std::vector<HEK::LittleEndian<HEK::Index>> model_indices;
+        std::vector<Parser::LittleEndian<Parser::Index>> model_indices;
         
         struct BuildWorkloadModelPart {
             /** index of the struct the part is in */
@@ -370,13 +371,13 @@ namespace Invader {
         
         /** BSP vertex data (CEA) */
         std::vector<std::vector<std::byte>> bsp_data;
-        std::size_t bsp_offset = sizeof(HEK::CacheFileHeader);
+        std::size_t bsp_offset = sizeof(Parser::CacheFileHeader);
 
         /** BSP count */
         std::size_t bsp_count = 0;
 
         /** Cache file type */
-        std::optional<HEK::CacheFileType> cache_file_type;
+        std::optional<Parser::CacheFileType> cache_file_type;
         
         /** Use the demo UI? */
         bool demo_ui = false;
@@ -404,7 +405,7 @@ namespace Invader {
          * @param tag_fourcc    class of the tag
          * @return              index of the tag
          */
-        std::size_t compile_tag_recursively(const char *tag_path, TagFourCC tag_fourcc);
+        std::size_t compile_tag_recursively(const char *tag_path, Parser::TagFourCC tag_fourcc);
 
         /**
          * Compile the tag data
@@ -413,7 +414,7 @@ namespace Invader {
          * @param tag_index     index of the tag
          * @param tag_fourcc    explicitly give a tag class
          */
-        void compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagFourCC> tag_fourcc = std::nullopt);
+        void compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<Parser::TagFourCC> tag_fourcc = std::nullopt);
         
         ~BuildWorkload() override = default;
 
@@ -431,7 +432,7 @@ namespace Invader {
         std::vector<std::byte> all_raw_data;
         std::size_t generate_tag_data();
         void generate_bitmap_sound_data(std::size_t file_offset);
-        HEK::TagString scenario_name = {};
+        Parser::TagString scenario_name = {};
         void set_scenario_name(const char *name);
         std::size_t raw_bitmap_size = 0;
         std::size_t raw_sound_size = 0;

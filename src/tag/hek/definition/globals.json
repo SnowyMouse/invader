@@ -1710,6 +1710,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "size": 428
+        "size": 428,
+        "group": "globals"
     }
 ]

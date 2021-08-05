@@ -5,12 +5,16 @@
 #include <invader/file/file.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/model.hpp>
+#include <invader/tag/parser/definition/gbxmodel.hpp>
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/tag/parser/compile/model.hpp>
 #include <invader/tag/parser/compile/shader.hpp>
+#include <invader/tag/parser/definition/shader_transparent_chicago.hpp>
+#include <invader/tag/parser/definition/shader_transparent_chicago_extended.hpp>
 
 using namespace Invader;
+using namespace Invader::Parser;
 
 enum Conversion {
     GBXMODEL_TO_MODEL,
@@ -111,20 +115,20 @@ int main(int argc, const char **argv) {
         convert_options.output_tags = convert_options.tags;
     }
     
-    HEK::TagFourCC input_class, output_class;
+    TagFourCC input_class, output_class;
     
     switch(*convert_options.conversion) {
         case Conversion::GBXMODEL_TO_MODEL:
-            input_class = HEK::TagFourCC::TAG_FOURCC_GBXMODEL;
-            output_class = HEK::TagFourCC::TAG_FOURCC_MODEL;
+            input_class = TagFourCC::TAG_FOURCC_GBXMODEL;
+            output_class = TagFourCC::TAG_FOURCC_MODEL;
             break;
         case Conversion::MODEL_TO_GBXMODEL:
-            input_class = HEK::TagFourCC::TAG_FOURCC_MODEL;
-            output_class = HEK::TagFourCC::TAG_FOURCC_GBXMODEL;
+            input_class = TagFourCC::TAG_FOURCC_MODEL;
+            output_class = TagFourCC::TAG_FOURCC_GBXMODEL;
             break;
         case Conversion::CHICAGO_EXTENDED_TO_CHICAGO:
-            input_class = HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
-            output_class = HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO;
+            input_class = TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
+            output_class = TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO;
             break;
         default:
             std::terminate();
@@ -207,7 +211,7 @@ int main(int argc, const char **argv) {
             }
             
             // Build
-            auto final_data = output_struct->generate_hek_tag_data(output_class);
+            auto final_data = output_struct->generate_hek_tag_data();
             
             // Make directories
             std::error_code ec;

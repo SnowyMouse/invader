@@ -7,16 +7,18 @@
 #include <fstream>
 #include <invader/version.hpp>
 #include <invader/build/build_workload.hpp>
-#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
 #include <invader/resource/resource_map.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/resource/list/resource_list.hpp>
 #include <invader/command_line_option.hpp>
+#include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 #include <invader/printf.hpp>
 
 int main(int argc, const char **argv) {
-    using namespace Invader::HEK;
+    using namespace Invader::Parser;
     using namespace Invader;
 
     std::vector<CommandLineOption> options;
@@ -43,7 +45,7 @@ int main(int argc, const char **argv) {
         std::optional<ResourceMapType> type;
 
         // Engine target
-        std::optional<HEK::CacheFileEngine> engine_target;
+        std::optional<CacheFileEngine> engine_target;
 
         const char * const *(*default_fn)() = get_default_bitmap_resources;
         std::vector<std::pair<const char *, bool>> index; // path, and is it a map?
@@ -72,10 +74,10 @@ int main(int argc, const char **argv) {
 
             case 'g':
                 if(std::strcmp(arguments[0], "pc-custom") == 0 || std::strcmp(arguments[0], "mcc-cea") == 0) {
-                    resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                    resource_options.engine_target = CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
                 else if(std::strcmp(arguments[0], "pc-retail") == 0 || std::strcmp(arguments[0], "pc-demo") == 0) {
-                    resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                    resource_options.engine_target = CacheFileEngine::CACHE_FILE_RETAIL;
                 }
                 else {
                     eprintf_error("Invalid engine %s. Use --help for more information.", arguments[0]);
@@ -122,7 +124,7 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
-    bool retail = *resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+    bool retail = *resource_options.engine_target == CacheFileEngine::CACHE_FILE_RETAIL;
     if(retail && resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
         eprintf_error("Only bitmaps.map and sounds.map can be made for retail/demo engines.");
         return EXIT_FAILURE;
@@ -142,7 +144,7 @@ int main(int argc, const char **argv) {
     std::vector<File::TagFilePath> tags_list;
     
     // First, add all default indices if we're Custom Edition
-    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+    if(resource_options.engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
         for(const char * const *i = resource_options.default_fn(); *i; i++) {
             tags_list.emplace_back(File::split_tag_class_extension(*i).value());
         }
@@ -163,13 +165,13 @@ int main(int argc, const char **argv) {
                         auto tag_class = tag.get_tag_fourcc();
                         switch(*resource_options.type) {
                             case ResourceMapType::RESOURCE_MAP_BITMAP:
-                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_BITMAP;
+                                allowed = tag_class == TagFourCC::TAG_FOURCC_BITMAP;
                                 break;
                             case ResourceMapType::RESOURCE_MAP_SOUND:
-                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_SOUND;
+                                allowed = tag_class == TagFourCC::TAG_FOURCC_SOUND;
                                 break;
                             case ResourceMapType::RESOURCE_MAP_LOC:
-                                allowed = tag_class == HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT || tag_class == HEK::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST || tag_class == HEK::TagFourCC::TAG_FOURCC_FONT;
+                                allowed = tag_class == TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT || tag_class == TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST || tag_class == TagFourCC::TAG_FOURCC_FONT;
                                 break;
                         }
                         if(allowed) {
@@ -340,7 +342,7 @@ int main(int argc, const char **argv) {
                     data.insert(data.end(), s.data.begin(), s.data.end());
                 }
 
-                std::size_t offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
+                std::size_t offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Parser::Bitmap::C<LittleEndian>) : 0;
                 for(auto &s : compiled_tag.structs) {
                     for(auto &ptr : s.pointers) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(data.data() + structs[&s - compiled_tag.structs.data()] + ptr.offset) = structs[ptr.struct_index] - offset;
@@ -352,12 +354,12 @@ int main(int argc, const char **argv) {
             switch(*resource_options.type) {
                 case ResourceMapType::RESOURCE_MAP_BITMAP: {
                     // Do stuff to the tag data
-                    auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag_data);
+                    auto &bitmap = *reinterpret_cast<Parser::Bitmap::C<LittleEndian> *>(compiled_tag_data);
                     std::size_t bitmap_count = bitmap.bitmap_data.count;
                     
                     // Combine all data into one blob if custom edition
                     auto bitmap_data_offset_custom = resource_data.size();
-                    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                    if(resource_options.engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                         bool append = true;
                         std::vector<std::byte> data_custom;
                         
@@ -385,7 +387,7 @@ int main(int argc, const char **argv) {
                     }
                     
                     if(bitmap_count) {
-                        auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&bitmap.bitmap_data.pointer)].data.data());
+                        auto *bitmaps = reinterpret_cast<Parser::BitmapData::C<LittleEndian> *>(compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&bitmap.bitmap_data.pointer)].data.data());
                         for(std::size_t b = 0; b < bitmap_count; b++) {
                             auto *bitmap_data = bitmaps + b;
 
@@ -417,7 +419,7 @@ int main(int argc, const char **argv) {
                             // Otherwise set the sizes
                             else {
                                 bitmap_data->pixel_data_offset = bitmap_data_offset_custom + bitmap_data->pixel_data_offset;
-                                bitmap_data->flags = bitmap_data->flags.read() | BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
+                                bitmap_data->flags = bitmap_data->flags.read() | Parser::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
                             }
                             
                             next_bitmap_data: continue;
@@ -441,14 +443,14 @@ int main(int argc, const char **argv) {
                 }
                 case ResourceMapType::RESOURCE_MAP_SOUND: {
                     // Do stuff to the tag data
-                    auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag_struct.data.data());
+                    auto &sound = *reinterpret_cast<Parser::Sound::C<LittleEndian> *>(compiled_tag_struct.data.data());
                     std::size_t pitch_range_count = sound.pitch_ranges.count;
                     std::size_t b = 0;
                     std::size_t expected_offset = 0;
                     
                     // Combine all data into one blob if custom edition
                     auto sound_data_offset_custom = resource_data.size();
-                    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                    if(resource_options.engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                         bool append = true;
                         std::vector<std::byte> data_custom;
                         
@@ -477,12 +479,12 @@ int main(int argc, const char **argv) {
                     
                     if(pitch_range_count) {
                         auto &pitch_range_struct = compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&sound.pitch_ranges.pointer)];
-                        auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(pitch_range_struct.data.data());
+                        auto *pitch_ranges = reinterpret_cast<Parser::SoundPitchRange::C<LittleEndian> *>(pitch_range_struct.data.data());
                         for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
                             auto &pitch_range = pitch_ranges[pr];
                             std::size_t permutation_count = pitch_range.permutations.count;
                             if(permutation_count) {
-                                auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(compiled_tag.structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].data.data());
+                                auto *permutations = reinterpret_cast<Parser::SoundPermutation::C<LittleEndian> *>(compiled_tag.structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].data.data());
                                 for(std::size_t p = 0; p < permutation_count; p++) {
                                     auto &permutation = permutations[p];
                                     if(retail) {

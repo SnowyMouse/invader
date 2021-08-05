@@ -25,6 +25,7 @@
             }
         ],
         "type": "struct",
-        "size": 12
+        "size": 12,
+        "group": "tag_collection"
     }
 ]

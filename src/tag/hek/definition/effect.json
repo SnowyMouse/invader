@@ -432,6 +432,7 @@
         ],
         "type": "struct",
         "post_compile": true,
-        "size": 64
+        "size": 64,
+        "group": "effect"
     }
 ]

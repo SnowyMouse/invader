@@ -3,12 +3,19 @@
 #include <invader/file/file.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/map/map.hpp>
+#include <invader/tag/parser/definition/scenery.hpp>
+#include <invader/tag/parser/definition/scenario_structure_bsp.hpp>
+#include <invader/tag/parser/definition/model.hpp>
+#include <invader/tag/parser/definition/gbxmodel.hpp>
+#include <invader/tag/parser/definition/sky.hpp>
+#include <invader/tag/parser/definition/shader.hpp>
 
 #include <cstdio>
 #include <cstdlib>
 #include <map>
 
 using namespace Invader;
+using namespace Invader::Parser;
 
 static constexpr const std::size_t MESH_FORMAT_VERSION = 1;
 
@@ -79,7 +86,7 @@ struct ExportedObject {
 
 static std::size_t add_shader_to_materials(const Tag &tag, std::vector<ExportedMaterial> &materials) {
     auto fourcc = tag.get_tag_fourcc();
-    auto full_path = tag.get_path() + "." + HEK::tag_fourcc_to_extension(fourcc);
+    auto full_path = tag.get_path() + "." + tag_fourcc_to_extension(fourcc);
     auto mat_count = materials.size();
     for(std::size_t m = 0; m < mat_count; m++) {
         if(materials[m].path == full_path) {
@@ -88,8 +95,8 @@ static std::size_t add_shader_to_materials(const Tag &tag, std::vector<ExportedM
     }
     
     // Get the shader of fun
-    auto &shader = tag.get_base_struct<HEK::Shader>();
-    bool opaque = fourcc == HEK::TagFourCC::TAG_FOURCC_SHADER_MODEL || fourcc == HEK::TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT;
+    auto &shader = tag.get_base_struct<Shader::C>();
+    bool opaque = fourcc == TagFourCC::TAG_FOURCC_SHADER_MODEL || fourcc == TagFourCC::TAG_FOURCC_SHADER_ENVIRONMENT;
     
     // Add the material
     auto &material = materials.emplace_back();
@@ -109,29 +116,29 @@ static std::size_t add_shader_to_materials(const Tag &tag, std::vector<ExportedM
 
 static ExportedModel read_bsp(const Tag &tag, std::vector<ExportedMaterial> &materials_arr, std::vector<ExportedSky> &skies_arr) {
     ExportedModel exported_model;
-    exported_model.path = tag.get_path() + "." + HEK::tag_fourcc_to_extension(tag.get_tag_fourcc());
+    exported_model.path = tag.get_path() + "." + tag_fourcc_to_extension(tag.get_tag_fourcc());
     
-    auto &base_struct = tag.get_base_struct<HEK::ScenarioStructureBSP>();
+    auto &base_struct = tag.get_base_struct<ScenarioStructureBSP::C>();
     
     std::size_t triangle_count = base_struct.surfaces.count;
-    const Parser::ScenarioStructureBSPSurface::struct_little *triangles = reinterpret_cast<const Parser::ScenarioStructureBSPSurface::struct_little *>(tag.data(base_struct.surfaces.pointer, sizeof(*triangles) * triangle_count));
+    const ScenarioStructureBSPSurface::C<LittleEndian> *triangles = reinterpret_cast<const ScenarioStructureBSPSurface::C<LittleEndian> *>(tag.data(base_struct.surfaces.pointer, sizeof(*triangles) * triangle_count));
     
     std::size_t lightmaps_count = base_struct.lightmaps.count;
-    const Parser::ScenarioStructureBSPLightmap::struct_little *lightmaps = reinterpret_cast<const Parser::ScenarioStructureBSPLightmap::struct_little *>(tag.data(base_struct.lightmaps.pointer, sizeof(*lightmaps) * lightmaps_count));
+    const ScenarioStructureBSPLightmap::C<LittleEndian> *lightmaps = reinterpret_cast<const ScenarioStructureBSPLightmap::C<LittleEndian> *>(tag.data(base_struct.lightmaps.pointer, sizeof(*lightmaps) * lightmaps_count));
     
     auto &map = tag.get_map();
     
     for(std::size_t l = 0; l < lightmaps_count; l++) {
         auto &lightmap = lightmaps[l];
         std::size_t materials_count = lightmap.materials.count;
-        const Parser::ScenarioStructureBSPMaterial::struct_little *materials = reinterpret_cast<const Parser::ScenarioStructureBSPMaterial::struct_little *>(tag.data(lightmap.materials.pointer, sizeof(*materials) * materials_count));
+        const ScenarioStructureBSPMaterial::C<LittleEndian> *materials = reinterpret_cast<const ScenarioStructureBSPMaterial::C<LittleEndian> *>(tag.data(lightmap.materials.pointer, sizeof(*materials) * materials_count));
         auto first_triangle_index_this_lightmap = exported_model.triangles.size();
         
         // Go through each lightmap
         for(std::size_t m = 0; m < materials_count; m++) {
             auto &material = materials[m];
             std::size_t rendered_vertices_count = material.rendered_vertices_count;
-            const Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *uncompressed_vertices = reinterpret_cast<const Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(tag.data(material.uncompressed_vertices.pointer, sizeof(*uncompressed_vertices) * rendered_vertices_count));
+            const ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian> *uncompressed_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian> *>(tag.data(material.uncompressed_vertices.pointer, sizeof(*uncompressed_vertices) * rendered_vertices_count));
             
             std::size_t material_index = add_shader_to_materials(map.get_tag(material.shader.tag_id.read().index), materials_arr);
             std::size_t offset = exported_model.vertices.size();
@@ -170,9 +177,9 @@ static ExportedModel read_bsp(const Tag &tag, std::vector<ExportedMaterial> &mat
     
     // Clusters
     std::size_t cluster_count = base_struct.clusters.count;
-    const Parser::ScenarioStructureBSPCluster::struct_little *clusters = reinterpret_cast<const Parser::ScenarioStructureBSPCluster::struct_little *>(tag.data(base_struct.clusters.pointer, sizeof(*clusters) * cluster_count));
+    const ScenarioStructureBSPCluster::C<LittleEndian> *clusters = reinterpret_cast<const ScenarioStructureBSPCluster::C<LittleEndian> *>(tag.data(base_struct.clusters.pointer, sizeof(*clusters) * cluster_count));
     auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
-    auto &scenario_tag_struct = scenario_tag.get_base_struct<HEK::Scenario>();
+    auto &scenario_tag_struct = scenario_tag.get_base_struct<Scenario::C>();
     
     std::map<std::size_t, bool> sky_tag_added;
     
@@ -189,8 +196,8 @@ static ExportedModel read_bsp(const Tag &tag, std::vector<ExportedMaterial> &mat
         // Add the sky
         auto &sky_entry = scenario_tag.get_struct_from_reflexive(scenario_tag_struct.skies, sky);
         auto &sky_tag = map.get_tag(sky_entry.sky.tag_id.read().index);
-        auto &sky_tag_struct = sky_tag.get_base_struct<HEK::Sky>();
-        sky_in_array.path = sky_tag.get_path() + "." + HEK::tag_fourcc_to_extension(sky_tag.get_tag_fourcc());
+        auto &sky_tag_struct = sky_tag.get_base_struct<Sky::C>();
+        sky_in_array.path = sky_tag.get_path() + "." + tag_fourcc_to_extension(sky_tag.get_tag_fourcc());
         
         sky_in_array.outdoor_power = sky_tag_struct.outdoor_ambient_radiosity_power;
         sky_in_array.outdoor_red = sky_tag_struct.outdoor_ambient_radiosity_color.red;
@@ -222,14 +229,14 @@ static ExportedModel read_bsp(const Tag &tag, std::vector<ExportedMaterial> &mat
 
 template<typename GeometryStruct, typename PartStruct, typename ModelStruct> static ExportedModel read_model(const Tag &tag, const ModelStruct &base_struct, std::vector<ExportedMaterial> &materials) {
     ExportedModel exported_model;
-    exported_model.path = tag.get_path() + "." + HEK::tag_fourcc_to_extension(tag.get_tag_fourcc());
+    exported_model.path = tag.get_path() + "." + tag_fourcc_to_extension(tag.get_tag_fourcc());
     
     // Are we doing memes?
-    // bool use_local_nodes = tag.get_tag_fourcc() == HEK::TagFourCC::TAG_FOURCC_GBXMODEL && (base_struct.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES);
+    // bool use_local_nodes = tag.get_tag_fourcc() == TagFourCC::TAG_FOURCC_GBXMODEL && (base_struct.flags & ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES);
     
     // Add all materials first
     std::size_t shader_count = base_struct.shaders.count.read();
-    const Parser::ModelShaderReference::struct_little *shaders = reinterpret_cast<decltype(shaders)>(tag.data(base_struct.shaders.pointer, sizeof(*shaders) * shader_count));
+    const ModelShaderReference::C<LittleEndian> *shaders = reinterpret_cast<decltype(shaders)>(tag.data(base_struct.shaders.pointer, sizeof(*shaders) * shader_count));
     
     std::map<std::size_t, std::size_t> material_map; // map local shader A to material B
     for(std::size_t s = 0; s < shader_count; s++) {
@@ -241,7 +248,7 @@ template<typename GeometryStruct, typename PartStruct, typename ModelStruct> sta
     const GeometryStruct *geometries = reinterpret_cast<decltype(geometries)>(tag.data(base_struct.geometries.pointer, sizeof(*geometries) * geometry_count));
     
     // Did we add this stuff already? (in case the model was deduped on generation, we don't *need* to add the same geometry over and over then)
-    std::map<HEK::Index, bool> added_already;
+    std::map<Index, bool> added_already;
     added_already[NULL_INDEX] = true;
     
     auto model_data_offset = tag.get_map().get_model_data_offset();
@@ -249,11 +256,11 @@ template<typename GeometryStruct, typename PartStruct, typename ModelStruct> sta
     
     // Next, add the geometries
     std::size_t region_count = base_struct.regions.count.read();
-    const Parser::ModelRegion::struct_little *regions = reinterpret_cast<const Parser::ModelRegion::struct_little *>(tag.data(base_struct.regions.pointer, sizeof(*regions) * region_count));
+    const ModelRegion::C<LittleEndian> *regions = reinterpret_cast<const ModelRegion::C<LittleEndian> *>(tag.data(base_struct.regions.pointer, sizeof(*regions) * region_count));
     for(std::size_t r = 0; r < region_count; r++) {
         auto &region = regions[r];
         std::size_t permutation_count = region.permutations.count.read();
-        const Parser::ModelRegionPermutation::struct_little *permutations = reinterpret_cast<decltype(permutations)>(tag.data(region.permutations.pointer, sizeof(*permutations) * permutation_count));
+        const ModelRegionPermutation::C<LittleEndian> *permutations = reinterpret_cast<decltype(permutations)>(tag.data(region.permutations.pointer, sizeof(*permutations) * permutation_count));
         if(permutation_count == 0) {
             continue;
         }
@@ -276,10 +283,10 @@ template<typename GeometryStruct, typename PartStruct, typename ModelStruct> sta
         // Go through each part. Add it!
         for(std::size_t a = 0; a < part_count; a++) {
             const auto &part = parts[a];
-            // const std::uint8_t *local_nodes = use_local_nodes ? reinterpret_cast<const Parser::GBXModelGeometryPart::struct_little *>(&part)->local_node_indices : nullptr;
+            // const std::uint8_t *local_nodes = use_local_nodes ? reinterpret_cast<const GBXModelGeometryPart::C<LittleEndian> *>(&part)->local_node_indices : nullptr;
             
             auto vertex_count = static_cast<std::size_t>(part.vertex_count);
-            const Parser::ModelVertexUncompressed::struct_little *vertices = reinterpret_cast<decltype(vertices)>(tag.get_map().get_data_at_offset(model_data_offset + part.vertex_offset, vertex_count * sizeof(*vertices)));
+            const ModelVertexUncompressed::C<LittleEndian> *vertices = reinterpret_cast<decltype(vertices)>(tag.get_map().get_data_at_offset(model_data_offset + part.vertex_offset, vertex_count * sizeof(*vertices)));
             
             std::size_t offset = exported_model.vertices.size();
             
@@ -297,7 +304,7 @@ template<typename GeometryStruct, typename PartStruct, typename ModelStruct> sta
             
             // Now indices
             auto triangle_count = static_cast<std::size_t>(part.triangle_count);
-            const HEK::LittleEndian<HEK::Index> *triangles = reinterpret_cast<decltype(triangles)>(tag.get_map().get_data_at_offset(model_index_offset + part.triangle_offset, (triangle_count + 2) * sizeof(*triangles)));
+            const LittleEndian<Index> *triangles = reinterpret_cast<decltype(triangles)>(tag.get_map().get_data_at_offset(model_index_offset + part.triangle_offset, (triangle_count + 2) * sizeof(*triangles)));
             bool flipped = false;
             auto material = material_map[part.shader_index];
             
@@ -342,12 +349,12 @@ std::string Invader::Lightmap::export_lightmap_mesh(const char *scenario, const 
     try {
         auto map = Map::map_with_move(BuildWorkload::compile_map(parameters));
         auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
-        auto &scenario_struct = scenario_tag.get_base_struct<HEK::Scenario>();
+        auto &scenario_struct = scenario_tag.get_base_struct<Scenario::C>();
         
         // Find the BSP
         std::optional<std::size_t> bsp_index;
         std::size_t bsp_count = scenario_struct.structure_bsps.count;
-        const Parser::ScenarioBSP::struct_little *scenario_bsps = reinterpret_cast<decltype(scenario_bsps)>(scenario_tag.data(scenario_struct.structure_bsps.pointer, sizeof(*scenario_bsps) * bsp_count));
+        const ScenarioBSP::C<LittleEndian> *scenario_bsps = reinterpret_cast<decltype(scenario_bsps)>(scenario_tag.data(scenario_struct.structure_bsps.pointer, sizeof(*scenario_bsps) * bsp_count));
         for(std::size_t b = 0; b < bsp_count; b++) {
             auto tag_id = scenario_bsps[b].structure_bsp.tag_id.read();
             if(tag_id.is_null()) {
@@ -386,8 +393,8 @@ std::string Invader::Lightmap::export_lightmap_mesh(const char *scenario, const 
         if(scenery_count && scenery_palette_count) {
             std::map<std::size_t, std::optional<std::size_t>> model_tag_id_to_exported_model_id;
             
-            const Parser::ScenarioScenery::struct_little *scenery = reinterpret_cast<decltype(scenery)>(scenario_tag.data(scenario_struct.scenery.pointer, sizeof(*scenery) * scenery_count));
-            const Parser::ScenarioSceneryPalette::struct_little *scenery_palette = reinterpret_cast<decltype(scenery_palette)>(scenario_tag.data(scenario_struct.scenery_palette.pointer, sizeof(*scenery_palette) * scenery_palette_count));
+            const ScenarioScenery::C<LittleEndian> *scenery = reinterpret_cast<decltype(scenery)>(scenario_tag.data(scenario_struct.scenery.pointer, sizeof(*scenery) * scenery_count));
+            const ScenarioSceneryPalette::C<LittleEndian> *scenery_palette = reinterpret_cast<decltype(scenery_palette)>(scenario_tag.data(scenario_struct.scenery_palette.pointer, sizeof(*scenery_palette) * scenery_palette_count));
             
             for(std::size_t s = 0; s < scenery_count; s++) {
                 auto &scenery_entry = scenery[s];
@@ -406,7 +413,7 @@ std::string Invader::Lightmap::export_lightmap_mesh(const char *scenario, const 
                     
                     // Check the model of the scenery
                     auto &scenery_tag = map.get_tag(scenery_tag_id.index);
-                    auto &scenery_base_struct = scenery_tag.get_base_struct<HEK::Scenery>();
+                    auto &scenery_base_struct = scenery_tag.get_base_struct<Scenery::C>();
                     auto model_tag_id = scenery_base_struct.model.tag_id.read();
                     if(model_tag_id.is_null()) {
                         continue;
@@ -419,11 +426,11 @@ std::string Invader::Lightmap::export_lightmap_mesh(const char *scenario, const 
                         auto &model_tag = map.get_tag(model_tag_id.index);
                         
                         switch(model_tag.get_tag_fourcc()) {
-                            case HEK::TagFourCC::TAG_FOURCC_GBXMODEL:
-                                models.emplace_back(read_model<Parser::GBXModelGeometry::struct_little, Parser::GBXModelGeometryPart::struct_little>(model_tag, model_tag.get_base_struct<HEK::GBXModel>(), materials));
+                            case TagFourCC::TAG_FOURCC_GBXMODEL:
+                                models.emplace_back(read_model<GBXModelGeometry::C<LittleEndian>, GBXModelGeometryPart::C<LittleEndian>>(model_tag, model_tag.get_base_struct<GBXModel::C>(), materials));
                                 break;
-                            case HEK::TagFourCC::TAG_FOURCC_MODEL:
-                                models.emplace_back(read_model<Parser::ModelGeometry::struct_little, Parser::ModelGeometryPart::struct_little>(model_tag, model_tag.get_base_struct<HEK::Model>(), materials));
+                            case TagFourCC::TAG_FOURCC_MODEL:
+                                models.emplace_back(read_model<ModelGeometry::C<LittleEndian>, ModelGeometryPart::C<LittleEndian>>(model_tag, model_tag.get_base_struct<Model::C>(), materials));
                                 break;
                             default:
                                 std::fprintf(stderr, "Unknown model fourcc");
@@ -760,10 +767,10 @@ void Invader::Lightmap::import_lightmap_mesh(const std::string &mesh_data, const
     }
     
     // Parse that shit
-    std::unique_ptr<Parser::ParserStruct> scenario_tag_data_struct;
-    Parser::Scenario *scenario_tag;
+    std::unique_ptr<ParserStruct> scenario_tag_data_struct;
+    Scenario *scenario_tag;
     try {
-        scenario_tag_data_struct = Parser::ParserStruct::parse_hek_tag_file(scenario_tag_data->data(), scenario_tag_data->size());
+        scenario_tag_data_struct = ParserStruct::parse_hek_tag_file(scenario_tag_data->data(), scenario_tag_data->size());
         scenario_tag = dynamic_cast<decltype(scenario_tag)>(scenario_tag_data_struct.get());
     }
     catch(std::exception &e) {
@@ -780,7 +787,7 @@ void Invader::Lightmap::import_lightmap_mesh(const std::string &mesh_data, const
         }
         auto base_name = File::base_name(path);
         if(base_name == bsp_name) {
-            bsp_path = path + "." + HEK::tag_fourcc_to_extension(b.structure_bsp.tag_fourcc);
+            bsp_path = path + "." + tag_fourcc_to_extension(b.structure_bsp.tag_fourcc);
             break;
         }
     }
@@ -807,10 +814,10 @@ void Invader::Lightmap::import_lightmap_mesh(const std::string &mesh_data, const
         std::exit(EXIT_FAILURE);
     }
     
-    std::unique_ptr<Parser::ParserStruct> scenario_bsp_struct;
-    Parser::ScenarioStructureBSP *scenario_bsp;
+    std::unique_ptr<ParserStruct> scenario_bsp_struct;
+    ScenarioStructureBSP *scenario_bsp;
     try {
-        scenario_bsp_struct = Parser::ParserStruct::parse_hek_tag_file(scenario_bsp_data->data(), scenario_bsp_data->size());
+        scenario_bsp_struct = ParserStruct::parse_hek_tag_file(scenario_bsp_data->data(), scenario_bsp_data->size());
         scenario_bsp = dynamic_cast<decltype(scenario_bsp)>(scenario_bsp_struct.get());
     }
     catch(std::exception &e) {
@@ -841,8 +848,8 @@ void Invader::Lightmap::import_lightmap_mesh(const std::string &mesh_data, const
         }
         
         for(auto &mat : lm.materials) {
-            std::vector<Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little> uncompressed_vertices_duped;
-            std::vector<Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little> uncompressed_lightmap_vertices_duped;
+            std::vector<ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian>> uncompressed_vertices_duped;
+            std::vector<ScenarioStructureBSPMaterialUncompressedLightmapVertex::C<LittleEndian>> uncompressed_lightmap_vertices_duped;
             
             auto &rendered_vertices_count = mat.rendered_vertices_count;
             auto *uncompressed_vertices = reinterpret_cast<decltype(uncompressed_vertices_duped.data())>(mat.uncompressed_vertices.data());
@@ -866,7 +873,7 @@ void Invader::Lightmap::import_lightmap_mesh(const std::string &mesh_data, const
             
             for(auto *t = triangles; t < triangles_end; t++, imported_triangles++) {
                 // Blow it up
-                auto dupe_it_all_to_hell = [&uncompressed_vertices_duped, &uncompressed_vertices, &rendered_vertices_count, &uncompressed_lightmap_vertices_duped, &uvs](HEK::Index &index, std::size_t vertex_index) {
+                auto dupe_it_all_to_hell = [&uncompressed_vertices_duped, &uncompressed_vertices, &rendered_vertices_count, &uncompressed_lightmap_vertices_duped, &uvs](Index &index, std::size_t vertex_index) {
                     if(index >= rendered_vertices_count) {
                         eprintf_error("BSP surface vertices are out of bounds");
                         std::exit(EXIT_FAILURE);
@@ -899,5 +906,5 @@ void Invader::Lightmap::import_lightmap_mesh(const std::string &mesh_data, const
         }
     }
     
-    File::save_file(*bsp_path_file, scenario_bsp->generate_hek_tag_data(HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP));
+    File::save_file(*bsp_path_file, scenario_bsp->generate_hek_tag_data());
 }

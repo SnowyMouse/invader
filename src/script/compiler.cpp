@@ -2,6 +2,8 @@
 
 #include <invader/script/compiler.hpp>
 
+using namespace Invader::Parser;
+
 namespace Invader::Compiler {
     void compile_script_tree(const std::vector<ScriptTree::Object> &, Parser::Scenario &, bool &error, std::string &error_message) {
         error = true;
@@ -20,8 +22,8 @@ namespace Invader::Compiler {
     }
 
     ScriptTree::Object decompile_scenario_script(const Parser::Scenario &scenario, const char *name) {
-        HEK::ScenarioScriptValueType return_type = {};
-        HEK::ScenarioScriptType script_type = {};
+        ScenarioScriptValueType return_type = {};
+        ScenarioScriptType script_type = {};
         std::uint32_t expression_index = 0;
 
         // Find the global
@@ -51,7 +53,7 @@ namespace Invader::Compiler {
     }
 
     ScriptTree::Object decompile_scenario_global(const Parser::Scenario &scenario, const char *name) {
-        HEK::ScenarioScriptValueType global_type = {};
+        ScenarioScriptValueType global_type = {};
         std::uint32_t expression_index = 0;
 
         // Find the global
@@ -207,8 +209,8 @@ namespace Invader::Compiler {
     static std::optional<ScriptTree::Object> decompile_node(std::size_t index, const Parser::Scenario &scenario) {
         // Get these values
         const auto *script_syntax_data_data = scenario.script_syntax_data.data();
-        const auto *table = reinterpret_cast<const Parser::ScenarioScriptNodeTable::struct_big *>(script_syntax_data_data);
-        const auto *nodes = reinterpret_cast<const Parser::ScenarioScriptNode::struct_big *>(table + 1);
+        const auto *table = reinterpret_cast<const Parser::ScenarioScriptNodeTable::C<BigEndian> *>(script_syntax_data_data);
+        const auto *nodes = reinterpret_cast<const Parser::ScenarioScriptNode::C<BigEndian> *>(table + 1);
         std::size_t node_count = table->size;
 
         // Make sure we're in bounds
@@ -236,7 +238,7 @@ namespace Invader::Compiler {
         auto flags = n.flags.read();
 
         // Globals are just strings
-        if(flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL) {
+        if(flags & ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL) {
             ScriptTree::Object o = {};
             Tokenizer::Token t = {};
             t.type = Tokenizer::Token::Type::TYPE_STRING;
@@ -248,15 +250,15 @@ namespace Invader::Compiler {
         
         // Handle script calls as so
         else if(
-            (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL) || 
-            !(flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE)) {
+            (flags & ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL) || 
+            !(flags & ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE)) {
             return decompile_node(static_cast<std::size_t>(n.data.read().long_int), scenario);
         }
 
         switch(type) {
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID:
+            case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID:
                 return decompile_node(n.data.read().long_int, scenario);
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_FUNCTION_NAME: {
+            case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_FUNCTION_NAME: {
                 ScriptTree::Object object = {};
                 ScriptTree::Object::FunctionCall function_call = {};
                 ScriptTree::Object::Block block;
@@ -299,27 +301,27 @@ namespace Invader::Compiler {
                 return object;
             }
 
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_REAL:
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SHORT:
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LONG:
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_BOOLEAN: {
+            case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_REAL:
+            case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SHORT:
+            case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LONG:
+            case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_BOOLEAN: {
                 ScriptTree::Object o = {};
                 o.type = ScriptTree::Object::Type::TYPE_TOKEN;
                 Tokenizer::Token t = {};
                 switch(type) {
-                    case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_REAL:
+                    case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_REAL:
                         t.type = Tokenizer::Token::Type::TYPE_DECIMAL;
                         t.value = n.data.read().real;
                         break;
-                    case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SHORT:
+                    case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SHORT:
                         t.type = Tokenizer::Token::Type::TYPE_INTEGER;
                         t.value = n.data.read().short_int;
                         break;
-                    case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LONG:
+                    case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LONG:
                         t.type = Tokenizer::Token::Type::TYPE_INTEGER;
                         t.value = n.data.read().long_int;
                         break;
-                    case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_BOOLEAN:
+                    case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_BOOLEAN:
                         t.type = Tokenizer::Token::Type::TYPE_INTEGER;
                         t.value = n.data.read().bool_int;
                         break;
@@ -330,7 +332,7 @@ namespace Invader::Compiler {
                 return o;
             }
             
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_UNPARSED:
+            case ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_UNPARSED:
                 return std::nullopt;
 
             default: {

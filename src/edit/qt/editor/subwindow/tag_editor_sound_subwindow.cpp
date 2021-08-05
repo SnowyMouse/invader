@@ -12,13 +12,17 @@
 #include <QCheckBox>
 #include <invader/printf.hpp>
 #include "../tag_editor_window.hpp"
-#include <invader/tag/parser/parser.hpp>
 #include "tag_editor_sound_subwindow.hpp"
 #include <invader/sound/sound_encoder.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
 #include <invader/sound/sound_reader.hpp>
 
 #undef LittleEndian
 #undef BigEndian
+
+#include <invader/hek/fourcc.hpp>
+
+using namespace Invader::Parser;
 
 namespace Invader::EditQt {
     void TagEditorSoundSubwindow::update() {
@@ -250,13 +254,13 @@ namespace Invader::EditQt {
             auto *sound_data = permutation.samples.data();
             auto sound_size = permutation.samples.size();
             switch(permutation.format) {
-                case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+                case Parser::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                     add_to_pcm(SoundReader::sound_from_16_bit_pcm_big_endian(sound_data, sound_size, this->channel_count, this->sample_rate));
                     break;
-                case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
+                case Parser::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                     add_to_pcm(SoundReader::sound_from_ogg(sound_data, sound_size));
                     break;
-                case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                case Parser::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
                     add_to_pcm(SoundReader::sound_from_xbox_adpcm(sound_data, sound_size, this->channel_count, this->sample_rate));
                     break;
                 default:
@@ -329,20 +333,20 @@ namespace Invader::EditQt {
         
         auto get_it = [&channel_count, &sample_rate, &index](auto *what) -> Parser::SoundPitchRange * {
             switch(what->sample_rate) {
-                case HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ:
+                case Parser::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ:
                     sample_rate = 44100;
                     break;
-                case HEK::SoundSampleRate::SOUND_SAMPLE_RATE_22050_HZ:
+                case Parser::SoundSampleRate::SOUND_SAMPLE_RATE_22050_HZ:
                     sample_rate = 22050;
                     break;
                 default:
                     std::terminate();
             }
             switch(what->channel_count) {
-                case HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO:
+                case Parser::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO:
                     channel_count = 1;
                     break;
-                case HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_STEREO:
+                case Parser::SoundChannelCount::SOUND_CHANNEL_COUNT_STEREO:
                     channel_count = 2;
                     break;
                 default:

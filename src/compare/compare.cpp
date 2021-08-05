@@ -12,7 +12,7 @@
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 #include <invader/extract/extraction.hpp>
 #include <invader/command_line_option.hpp>
 
@@ -51,11 +51,11 @@ enum ByPath {
 
 static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose, std::size_t job_count);
 
-int main(int argc, const char **argv) {
-    using namespace Invader::HEK;
+using namespace Invader::Parser;
 
+int main(int argc, const char **argv) {
     struct CompareOptions {
-        std::vector<HEK::TagFourCC> class_to_check;
+        std::vector<TagFourCC> class_to_check;
         Input *top_input = nullptr;
         std::vector<Input> inputs;
         bool exhaustive = false;
@@ -282,13 +282,13 @@ int main(int argc, const char **argv) {
             // Warn if we failed to open some resource maps
             if(!i.ignore_resource_maps) {
                 switch(map.get_engine()) {
-                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                         if(map.get_data_length(Invader::Map::DATA_MAP_LOC) == 0) {
                             eprintf_warn("Failed to find or read a loc.map");
                         }
                         // fallthrough
-                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                    case CacheFileEngine::CACHE_FILE_DEMO:
+                    case CacheFileEngine::CACHE_FILE_RETAIL:
                         if(map.get_data_length(Invader::Map::DATA_MAP_BITMAP) == 0) {
                             eprintf_warn("Failed to find or read a bitmaps.map");
                         }
@@ -458,7 +458,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 
                 bool first_input = true;
                 bool only_finding_same_tag = true;
-                auto path_unsplit = File::halo_path_to_preferred_path(tag.path + "." + HEK::tag_fourcc_to_extension(tag.fourcc)); // combine this
+                auto path_unsplit = File::halo_path_to_preferred_path(tag.path + "." + tag_fourcc_to_extension(tag.fourcc)); // combine this
                 
                 // Go through each input
                 for(auto &i : *inputs) {
@@ -530,7 +530,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 
                 // Just for setting counter/debugging
                 auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs, &log_mutex](bool did_match, std::size_t i) {
-                    auto *extension = HEK::tag_fourcc_to_extension(tag.fourcc);
+                    auto *extension = tag_fourcc_to_extension(tag.fourcc);
                     auto other_path = File::halo_path_to_preferred_path(struct_paths[i]);
                     bool show_different_input = inputs->size() > 2; // only need to show differing inputs if we have more than two inputs
                     std::size_t input_of_other = 1;
@@ -550,7 +550,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         if(show & Show::SHOW_MATCHED) {
                             log_mutex->lock();
                             if(by_path == ByPath::BY_PATH_SAME) {
-                                oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc));
+                                oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.fourcc));
                             }
                             else if(show_different_input) {
                                 oprintf_success(MATCHED_TO_DIFFERENT_INPUT("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
@@ -566,7 +566,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         if(show & Show::SHOW_MISMATCHED) {
                             log_mutex->lock();
                             if(by_path == ByPath::BY_PATH_SAME) {
-                                oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc));
+                                oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.fourcc));
                             }
                             else if(show_different_input) {
                                 oprintf_success_warn(MATCHED_TO_DIFFERENT_INPUT("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
@@ -583,7 +583,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 if(functional) {
                     try {
                         auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
-                            auto hdata = struct_v.generate_hek_tag_data(tag.fourcc);
+                            auto hdata = struct_v.generate_hek_tag_data();
                             std::vector<std::uint8_t> meme_data;
                             
                             // Compile it
@@ -612,7 +612,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                             // Process each tag
                             for(auto &t : compiled.tags) {
                                 char o[1024] = {};
-                                auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
+                                auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), tag_fourcc_to_extension(t.tag_fourcc));
                                 meme_data.insert(meme_data.end(), o, o + len);
                                 
                                 // Raw data pointers
@@ -643,7 +643,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     }
                     catch(std::exception &e) {
                         log_mutex->lock();
-                        eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc), e.what());
+                        eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), tag_fourcc_to_extension(tag.fourcc), e.what());
                         log_mutex->unlock();
                     }
                 }

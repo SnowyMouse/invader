@@ -760,6 +760,7 @@
         ],
         "type": "struct",
         "title": "name",
-        "size": 1004
+        "size": 1004,
+        "group": "ui_widget_definition"
     }
 ]

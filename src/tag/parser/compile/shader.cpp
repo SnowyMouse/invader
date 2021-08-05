@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/build/build_workload.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/shader.hpp>
+#include <invader/tag/parser/definition/shader_transparent_chicago.hpp>
+#include <invader/tag/parser/definition/shader_transparent_chicago_extended.hpp>
+#include <invader/tag/parser/definition/shader_transparent_plasma.hpp>
+#include <invader/tag/parser/definition/shader_transparent_generic.hpp>
+#include <invader/tag/parser/definition/shader_transparent_meter.hpp>
+#include <invader/tag/parser/definition/shader_transparent_glass.hpp>
+#include <invader/tag/parser/definition/shader_transparent_water.hpp>
+#include <invader/tag/parser/definition/shader_model.hpp>
+#include <invader/tag/parser/definition/shader_environment.hpp>
 
 namespace Invader::Parser {
-    static std::uint16_t convert_shader_type(const BuildWorkload &workload, HEK::ShaderType pc_input) noexcept {
-        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX && pc_input >= HEK::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED) { // xbox version doesn't have this
+    static std::uint16_t convert_shader_type(const BuildWorkload &workload, ShaderType pc_input) noexcept {
+        if(workload.get_build_parameters()->details.build_cache_file_engine == CacheFileEngine::CACHE_FILE_XBOX && pc_input >= SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED) { // xbox version doesn't have this
             return pc_input - 1;
         }
         else {
@@ -29,7 +38,7 @@ namespace Invader::Parser {
     }
     
     void ShaderEnvironment::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_ENVIRONMENT);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_ENVIRONMENT);
         this->bump_map_scale_xy.x = this->bump_map_scale;
         this->bump_map_scale_xy.y = this->bump_map_scale;
         if(this->material_color.red == 0.0F && this->material_color.green == 0.0F && this->material_color.blue == 0.0F) {
@@ -39,7 +48,7 @@ namespace Invader::Parser {
         }
     }
     void ShaderModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_MODEL);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_MODEL);
         this->unknown = 1.0F;
         
         if(this->reflection_falloff_distance >= this->reflection_cutoff_distance && (this->reflection_cutoff_distance != 0.0F && this->reflection_falloff_distance != 0.0F)) {
@@ -50,47 +59,47 @@ namespace Invader::Parser {
     }
     
     void ShaderTransparentChicago::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO);
         default_maps(this->maps);
     }
     void ShaderTransparentChicagoExtended::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Error if the target engine can't use it
-        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(workload.get_build_parameters()->details.build_cache_file_engine == CacheFileEngine::CACHE_FILE_XBOX) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "shader_transparent_chicago_extended tags do not exist on the target engine. Use shader_transparent_chicago, instead.", tag_index);
             throw InvalidTagDataException();
         }
         
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED);
-        this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED);
+        this->shader_type = ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
         default_maps(this->maps_4_stage);
         default_maps(this->maps_2_stage);
     }
     
     void ShaderTransparentWater::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_WATER);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_WATER);
     }
     void ShaderTransparentGlass::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GLASS);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GLASS);
     }
     void ShaderTransparentMeter::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_METER);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_METER);
     }
     void ShaderTransparentPlasma::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_PLASMA);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_PLASMA);
     }
     void ShaderTransparentGeneric::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Warn if the target engine can't render it
         switch(workload.get_build_parameters()->details.build_cache_file_engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case CacheFileEngine::CACHE_FILE_DEMO:
+            case CacheFileEngine::CACHE_FILE_RETAIL:
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "shader_transparent_generic tags will not render on the target engine", tag_index);
                 break;
             default: break;
         }
         default_maps(this->maps);
         
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC);
+        this->shader_type = convert_shader_type(workload, ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC);
     }
     
     ShaderTransparentChicago convert_shader_transparent_chicago_extended_to_shader_transparent_chicago(const ShaderTransparentChicagoExtended &shader) {

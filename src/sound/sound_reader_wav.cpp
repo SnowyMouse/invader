@@ -9,8 +9,6 @@
 #include "wav.hpp"
 
 namespace Invader::SoundReader {
-    using namespace HEK;
-
     Sound sound_from_wav(const std::byte *data, std::size_t data_length) {
         Sound result = {};
         std::size_t offset = 0;

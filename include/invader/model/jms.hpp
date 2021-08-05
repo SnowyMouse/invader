@@ -15,10 +15,10 @@ namespace Invader {
         
         struct Node {
             std::string name;
-            HEK::Index first_child;
-            HEK::Index sibling_node;
-            HEK::Quaternion<HEK::NativeEndian> rotation;
-            HEK::Point3D<HEK::NativeEndian> position;
+            Parser::Index first_child;
+            Parser::Index sibling_node;
+            Parser::Quaternion<Parser::NativeEndian> rotation;
+            Parser::Point3D<Parser::NativeEndian> position;
             
             std::string string() const;
             static Node from_string(const char *string, const char **end);
@@ -47,10 +47,10 @@ namespace Invader {
         
         struct Marker {
             std::string name;
-            HEK::Index region;
-            HEK::Index node;
-            HEK::Quaternion<HEK::NativeEndian> rotation;
-            HEK::Point3D<HEK::NativeEndian> position;
+            Parser::Index region;
+            Parser::Index node;
+            Parser::Quaternion<Parser::NativeEndian> rotation;
+            Parser::Point3D<Parser::NativeEndian> position;
             float radius;
             
             std::string string() const;
@@ -67,12 +67,12 @@ namespace Invader {
         std::vector<Region> regions;
         
         struct Vertex {
-            HEK::Index node0;
-            HEK::Point3D<HEK::NativeEndian> position;
-            HEK::Vector3D<HEK::NativeEndian> normal;
-            HEK::Index node1;
+            Parser::Index node0;
+            Parser::Point3D<Parser::NativeEndian> position;
+            Parser::Vector3D<Parser::NativeEndian> normal;
+            Parser::Index node1;
             float node1_weight;
-            HEK::Point2D<HEK::NativeEndian> texture_coordinates;
+            Parser::Point2D<Parser::NativeEndian> texture_coordinates;
             
             std::string string() const;
             static Vertex from_string(const char *string, const char **end);
@@ -93,9 +93,9 @@ namespace Invader {
         std::vector<Vertex> vertices;
         
         struct Triangle {
-            HEK::Index region;
-            HEK::Index shader;
-            HEK::Index vertices[3];
+            Parser::Index region;
+            Parser::Index shader;
+            Parser::Index vertices[3];
             
             std::string string() const;
             static Triangle from_string(const char *string, const char **end);

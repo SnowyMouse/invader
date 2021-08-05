@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/model_collision_geometry.hpp>
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
@@ -9,11 +9,11 @@ namespace Invader::Parser {
     }
     void ModelCollisionGeometry::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &s = workload.structs[struct_index];
-        auto &mcg = *reinterpret_cast<struct_little *>(s.data.data() + offset);
+        auto &mcg = *reinterpret_cast<C<LittleEndian> *>(s.data.data() + offset);
         std::size_t node_count = mcg.nodes.count;
         if(node_count != 0) {
             auto &resolved = workload.structs[*s.resolve_pointer(&mcg.nodes.pointer)];
-            auto *nodes = reinterpret_cast<ModelCollisionGeometryNode::struct_little *>(resolved.data.data());
+            auto *nodes = reinterpret_cast<ModelCollisionGeometryNode::C<LittleEndian> *>(resolved.data.data());
             
             for(std::size_t n = 0; n < node_count; n++) {
                 auto *node_to_check = nodes + n;

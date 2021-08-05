@@ -162,6 +162,7 @@
         "type": "struct",
         "inherits": "Shader",
         "pre_compile": true,
-        "size": 332
+        "size": 332,
+        "group": "shader_transparent_plasma"
     }
 ]

@@ -1,17 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/scenario_structure_bsp.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
+#include <invader/tag/parser/compile/shader.hpp>
+#include <invader/tag/parser/definition/fog.hpp>
+#include <invader/tag/parser/definition/shader.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/map/map.hpp>
 
 namespace Invader::Parser {
     void ScenarioStructureBSP::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->runtime_decals.clear(); // delete these in case this tag was extracted improperly
         
         auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
-        auto cea = engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA;
-        auto compressed = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+        auto cea = engine == CacheFileEngine::CACHE_FILE_MCC_CEA;
+        auto compressed = engine == CacheFileEngine::CACHE_FILE_XBOX;
         
         // Check these
         auto &data = workload.bsp_data.emplace_back();
@@ -26,8 +30,8 @@ namespace Invader::Parser {
                 bool fail = false;
                 
                 auto actual_size = compressed ? mat.compressed_vertices.size() : mat.uncompressed_vertices.size();
-                auto rendered_vertex_size = compressed ? sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little) : sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
-                auto lightmap_vertex_size = compressed ? sizeof(Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little) : sizeof(Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little);
+                auto rendered_vertex_size = compressed ? sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::C<LittleEndian>) : sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian>);
+                auto lightmap_vertex_size = compressed ? sizeof(Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::C<LittleEndian>) : sizeof(Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::C<LittleEndian>);
                 auto expected_size = rendered_vertex_size * mat.rendered_vertices_count + lightmap_vertex_size * mat.lightmap_vertices_count;
                 
                 // Is the size wrong?
@@ -51,7 +55,7 @@ namespace Invader::Parser {
                 if(!fail) {
                     if(cea) {
                         mat.rendered_vertices_offset = data.size();
-                        mat.lightmap_vertices_offset = mat.rendered_vertices_offset + mat.rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+                        mat.lightmap_vertices_offset = mat.rendered_vertices_offset + mat.rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian>);
                         data.insert(data.end(), mat.uncompressed_vertices.begin(), mat.uncompressed_vertices.end());
                         mat.uncompressed_vertices.clear();
                         mat.compressed_vertices.clear();
@@ -65,8 +69,8 @@ namespace Invader::Parser {
         auto *vertices = this->uncompressed_vertices.data();
         auto uncompressed_vertices_size = this->uncompressed_vertices.size();
 
-        auto *lightmap_rendered_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(vertices);
-        auto *lightmap_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(lightmap_rendered_vertices + this->rendered_vertices_count);
+        auto *lightmap_rendered_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian> *>(vertices);
+        auto *lightmap_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::C<LittleEndian> *>(lightmap_rendered_vertices + this->rendered_vertices_count);
         
         auto *lightmap_vertices_end = lightmap_lightmap_vertices + this->lightmap_vertices_count;
         std::size_t expected_size = reinterpret_cast<std::byte *>(lightmap_vertices_end) - vertices;
@@ -96,14 +100,14 @@ namespace Invader::Parser {
 
     void ScenarioStructureBSPCollisionMaterial::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         auto *data = workload.structs[struct_index].data.data();
-        auto &material = *reinterpret_cast<struct_little *>(data + offset);
+        auto &material = *reinterpret_cast<C<LittleEndian> *>(data + offset);
 
         if(workload.disable_recursion) {
-            material.material = static_cast<HEK::MaterialType>(0xFFFF);
+            material.material = static_cast<MaterialType>(0xFFFF);
             return;
         }
 
-        this->material = reinterpret_cast<Shader::struct_little *>(workload.structs[(*workload.tags[this->shader.tag_id.index].base_struct)].data.data())->material_type;
+        this->material = reinterpret_cast<Shader::C<LittleEndian> *>(workload.structs[(*workload.tags[this->shader.tag_id.index].base_struct)].data.data())->material_type;
         material.material = this->material;
     }
     
@@ -116,7 +120,7 @@ namespace Invader::Parser {
             // How many lightmap bitmaps do we have
             std::size_t lightmap_bitmap_count;
             if(!lightmap_bitmap.is_null()) {
-                lightmap_bitmap_count = reinterpret_cast<Bitmap::struct_little *>(workload.structs[*workload.tags[lightmap_bitmap.index].base_struct].data.data())->bitmap_data.count.read();
+                lightmap_bitmap_count = reinterpret_cast<Bitmap::C<LittleEndian> *>(workload.structs[*workload.tags[lightmap_bitmap.index].base_struct].data.data())->bitmap_data.count.read();
             }
             else {
                 lightmap_bitmap_count = 0;
@@ -131,13 +135,13 @@ namespace Invader::Parser {
                 // Do we even have lightmaps?
                 for(auto &m : lm.materials) {
                     switch(m.shader.tag_fourcc) {
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO:
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA:
-                        case HEK::TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
+                        case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO:
+                        case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+                        case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GENERIC:
+                        case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_GLASS:
+                        case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_METER:
+                        case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_PLASMA:
+                        case TagFourCC::TAG_FOURCC_SHADER_TRANSPARENT_WATER:
                             break;
                         default:
                             if(m.lightmap_vertices_count) {
@@ -177,7 +181,7 @@ namespace Invader::Parser {
 
         // Handle the fog palette
         auto &tag_struct = workload.structs[struct_index];
-        auto &tag_data = *reinterpret_cast<struct_little *>(tag_struct.data.data() + offset);
+        auto &tag_data = *reinterpret_cast<C<LittleEndian> *>(tag_struct.data.data() + offset);
 
         std::size_t fog_plane_count = this->fog_planes.size();
         std::size_t fog_region_count = this->fog_regions.size();
@@ -187,17 +191,17 @@ namespace Invader::Parser {
         if(fog_plane_count) {
             // Null these out by default (this is complete bullshit, but the game may crash if they aren't nulled without materials)
             auto fog_plane_index = *tag_struct.resolve_pointer(&tag_data.fog_planes.pointer);
-            auto *fog_planes = reinterpret_cast<ScenarioStructureBSPFogPlane::struct_little *>(workload.structs[fog_plane_index].data.data());
+            auto *fog_planes = reinterpret_cast<ScenarioStructureBSPFogPlane::C<LittleEndian> *>(workload.structs[fog_plane_index].data.data());
             for(std::size_t i = 0; i < fog_plane_count; i++) {
-                fog_planes[i].material_type = static_cast<HEK::MaterialType>(0xFFFF);
+                fog_planes[i].material_type = static_cast<MaterialType>(0xFFFF);
             }
             
             // If we *do* have fog palettes, regions, planes then we can determine their material
             if(fog_palette_count && fog_region_count) {
                 auto fog_palette_index = *tag_struct.resolve_pointer(&tag_data.fog_palette.pointer);
                 auto fog_region_index = *tag_struct.resolve_pointer(&tag_data.fog_regions.pointer);
-                auto *fog_regions = reinterpret_cast<ScenarioStructureBSPFogRegion::struct_little *>(workload.structs[fog_region_index].data.data());
-                auto *fog_palette = reinterpret_cast<ScenarioStructureBSPFogPalette::struct_little *>(workload.structs[fog_palette_index].data.data());
+                auto *fog_regions = reinterpret_cast<ScenarioStructureBSPFogRegion::C<LittleEndian> *>(workload.structs[fog_region_index].data.data());
+                auto *fog_palette = reinterpret_cast<ScenarioStructureBSPFogPalette::C<LittleEndian> *>(workload.structs[fog_palette_index].data.data());
 
                 // Go through each fog plane
                 for(std::size_t i = 0; i < fog_plane_count; i++) {
@@ -224,9 +228,9 @@ namespace Invader::Parser {
                         continue;
                     }
 
-                    auto &fog = *reinterpret_cast<Fog::struct_little *>(workload.structs[*workload.tags[fog_id.index].base_struct].data.data());
-                    if(fog.flags & HEK::FogFlagsFlag::FOG_FLAGS_FLAG_IS_WATER) {
-                        plane.material_type = HEK::MaterialType::MATERIAL_TYPE_WATER;
+                    auto &fog = *reinterpret_cast<Fog::C<LittleEndian> *>(workload.structs[*workload.tags[fog_id.index].base_struct].data.data());
+                    if(fog.flags & FogFlagsFlag::FOG_FLAGS_FLAG_IS_WATER) {
+                        plane.material_type = MaterialType::MATERIAL_TYPE_WATER;
                     }
                 }
             }
@@ -246,8 +250,8 @@ namespace Invader::Parser {
 
         #define PROCESS_VERTICES(from,to,rendered_type_from,rendered_type_to,lightmap_type_from,lightmap_type_to,convert_rendered,convert_lightmap) \
             /* Extract vertices */ \
-            std::size_t vertices_size = material.rendered_vertices_count * sizeof(rendered_type_from::struct_little); \
-            std::size_t lightmap_vertices_size = material.lightmap_vertices_count * sizeof(lightmap_type_from::struct_little); \
+            std::size_t vertices_size = material.rendered_vertices_count * sizeof(rendered_type_from::C<LittleEndian>); \
+            std::size_t lightmap_vertices_size = material.lightmap_vertices_count * sizeof(lightmap_type_from::C<LittleEndian>); \
             std::size_t total_vertices_size = lightmap_vertices_size + vertices_size; \
      \
             /* Make sure it isn't bullshit */ \
@@ -261,13 +265,13 @@ namespace Invader::Parser {
             } \
      \
             const std::byte *bsp_vertices_start = material.from.data(); \
-            const std::byte *lightmap_vertices_start = bsp_vertices_start + material.rendered_vertices_count * sizeof(rendered_type_from::struct_little); \
-            const auto *bsp_vertices = reinterpret_cast<const rendered_type_from::struct_little *>(bsp_vertices_start); \
+            const std::byte *lightmap_vertices_start = bsp_vertices_start + material.rendered_vertices_count * sizeof(rendered_type_from::C<LittleEndian>); \
+            const auto *bsp_vertices = reinterpret_cast<const rendered_type_from::C<LittleEndian> *>(bsp_vertices_start); \
      \
-            auto *new_bsp_vertices = reinterpret_cast<rendered_type_to::struct_little *>( \
+            auto *new_bsp_vertices = reinterpret_cast<rendered_type_to::C<LittleEndian> *>( \
                 material.to.insert( \
                     material.to.end(), \
-                    material.rendered_vertices_count * sizeof(rendered_type_to::struct_little), \
+                    material.rendered_vertices_count * sizeof(rendered_type_to::C<LittleEndian>), \
                     std::byte() \
                 ).base() \
             ); \
@@ -277,13 +281,13 @@ namespace Invader::Parser {
      \
             /* Add lightmap vertices */ \
             if(material.lightmap_vertices_count == material.rendered_vertices_count) { \
-                const auto *bsp_lightmap_vertices = reinterpret_cast<const lightmap_type_from::struct_little *>(lightmap_vertices_start); \
+                const auto *bsp_lightmap_vertices = reinterpret_cast<const lightmap_type_from::C<LittleEndian> *>(lightmap_vertices_start); \
      \
                 /* Decompress them as well */ \
-                auto *new_bsp_lightmap_vertices = reinterpret_cast<lightmap_type_to::struct_little *>( \
+                auto *new_bsp_lightmap_vertices = reinterpret_cast<lightmap_type_to::C<LittleEndian> *>( \
                     material.to.insert( \
                         material.to.end(), \
-                        material.lightmap_vertices_count * sizeof(lightmap_type_to::struct_little), \
+                        material.lightmap_vertices_count * sizeof(lightmap_type_to::C<LittleEndian>), \
                         std::byte() \
                     ).base() \
                 ); \
@@ -314,7 +318,7 @@ namespace Invader::Parser {
         return return_value;
     }
 
-    void ScenarioStructureBSPMaterial::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+    void ScenarioStructureBSPMaterial::post_cache_parse(const Invader::Tag &tag, std::optional<Pointer> pointer) {
         // Do nothing if there is nothing to do
         if(this->rendered_vertices_count == 0) {
             this->lightmap_vertices_count = 0;
@@ -322,14 +326,14 @@ namespace Invader::Parser {
         }
 
         // Material
-        auto &bsp_material = tag.get_struct_at_pointer<HEK::ScenarioStructureBSPMaterial>(*pointer);
+        auto &bsp_material = tag.get_struct_at_pointer<ScenarioStructureBSPMaterial::C>(*pointer);
 
         // If it's Xbox, it's compressed
         auto engine = tag.get_map().get_engine();
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(engine == CacheFileEngine::CACHE_FILE_XBOX) {
             // Extract vertices
-            std::size_t compressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
-            std::size_t lightmap_vertices_size = this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little);
+            std::size_t compressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedRenderedVertex::C<LittleEndian>);
+            std::size_t lightmap_vertices_size = this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedLightmapVertex::C<LittleEndian>);
             std::size_t total_vertices_size = lightmap_vertices_size + compressed_vertices_size;
             const std::byte *compressed_bsp_vertices_start = tag.data(bsp_material.compressed_vertices.pointer, total_vertices_size);
             this->compressed_vertices = std::vector<std::byte>(compressed_bsp_vertices_start, compressed_bsp_vertices_start + total_vertices_size);
@@ -340,23 +344,23 @@ namespace Invader::Parser {
         }
         else {
             // Extract vertices
-            std::size_t uncompressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
-            std::size_t lightmap_vertices_size = this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little);
+            std::size_t uncompressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian>);
+            std::size_t lightmap_vertices_size = this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex::C<LittleEndian>);
             std::size_t total_vertices_size = lightmap_vertices_size + uncompressed_vertices_size;
             
             const std::byte *uncompressed_bsp_vertices_start;
             const std::byte *uncompressed_lightmap_vertices_start;
 
             // CE Anniversary stuff!
-            if(bsp_material.uncompressed_vertices.pointer == 0 && tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-                auto &base_struct = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeaderCEA>();
+            if(bsp_material.uncompressed_vertices.pointer == 0 && tag.get_map().get_engine() == CacheFileEngine::CACHE_FILE_MCC_CEA) {
+                auto &base_struct = tag.get_base_struct<ScenarioStructureBSPCompiledHeaderCEA::C>();
                 uncompressed_bsp_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices + this->rendered_vertices_offset, uncompressed_vertices_size);
                 uncompressed_lightmap_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices + this->lightmap_vertices_offset, lightmap_vertices_size);
             }
             // Not CE Anniversary stuff
             else {
                 uncompressed_bsp_vertices_start = tag.data(bsp_material.uncompressed_vertices.pointer, total_vertices_size);
-                uncompressed_lightmap_vertices_start = uncompressed_bsp_vertices_start + this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+                uncompressed_lightmap_vertices_start = uncompressed_bsp_vertices_start + this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian>);
             }
             
             this->uncompressed_vertices = std::vector<std::byte>(uncompressed_bsp_vertices_start, uncompressed_bsp_vertices_start + uncompressed_vertices_size);
@@ -373,14 +377,14 @@ namespace Invader::Parser {
         auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
 
         // Xbox uses compressed vertices
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(engine == CacheFileEngine::CACHE_FILE_XBOX) {
             this->uncompressed_vertices.clear();
-            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
+            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::C<LittleEndian>);
             this->do_not_screw_up_the_model = 1;
             this->set_this_or_die = 3;
         }
-        else if(engine != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+        else if(engine != CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<LittleEndian>);
             this->compressed_vertices.clear();
         }
     }
@@ -394,29 +398,29 @@ namespace Invader::Parser {
         
         // Let's get the header and base struct
         auto &bsp_header_struct = workload.structs[bsp_header_struct_index];
-        auto &bsp_header = *reinterpret_cast<Parser::ScenarioStructureBSPCompiledHeader::struct_little *>(bsp_header_struct.data.data());
+        auto &bsp_header = *reinterpret_cast<Parser::ScenarioStructureBSPCompiledHeader::C<LittleEndian> *>(bsp_header_struct.data.data());
         auto &bsp_struct = workload.structs[bsp_struct_index];
-        auto &bsp_data = *reinterpret_cast<Parser::ScenarioStructureBSP::struct_little *>(bsp_struct.data.data());
+        auto &bsp_data = *reinterpret_cast<Parser::ScenarioStructureBSP::C<LittleEndian> *>(bsp_struct.data.data());
         
         // Go through all of the lightmap materials now?
         std::size_t lightmap_count = bsp_data.lightmaps.count;
         
         struct LightmapMaterialTemp {
             BuildWorkload::BuildWorkloadStruct *material_struct;
-            Parser::ScenarioStructureBSPMaterial::struct_little *material;
+            Parser::ScenarioStructureBSPMaterial::C<LittleEndian> *material;
         };
         std::vector<LightmapMaterialTemp> lightmap_materials; // hold the struct index and an offset
         
         if(lightmap_count > 0) {
             auto &lightmap_struct = workload.structs[*bsp_struct.resolve_pointer(&bsp_data.lightmaps.pointer)];
-            auto *lightmap_data = reinterpret_cast<Parser::ScenarioStructureBSPLightmap::struct_little *>(lightmap_struct.data.data());
+            auto *lightmap_data = reinterpret_cast<Parser::ScenarioStructureBSPLightmap::C<LittleEndian> *>(lightmap_struct.data.data());
             for(std::size_t lm = 0; lm < lightmap_count; lm++) {
                 auto &lightmap = lightmap_data[lm];
                 std::size_t material_count = lightmap.materials.count;
                 
                 if(material_count > 0) {
                     auto &materials_struct = workload.structs[*lightmap_struct.resolve_pointer(&lightmap.materials.pointer)];
-                    auto *materials = reinterpret_cast<Parser::ScenarioStructureBSPMaterial::struct_little *>(materials_struct.data.data());
+                    auto *materials = reinterpret_cast<Parser::ScenarioStructureBSPMaterial::C<LittleEndian> *>(materials_struct.data.data());
                     
                     for(std::size_t mat = 0; mat < material_count; mat++) {
                         lightmap_materials.emplace_back(LightmapMaterialTemp { &materials_struct, materials + mat });
@@ -428,7 +432,7 @@ namespace Invader::Parser {
         // Add these things
         struct MemeBSPPointer {
             PAD(4);
-            HEK::LittleEndian<HEK::Pointer> pointer;
+            LittleEndian<Pointer> pointer;
             PAD(4);
         };
         
@@ -487,5 +491,71 @@ namespace Invader::Parser {
             lmp_from_material.struct_index = lightmap_vertices_struct_index;
             lmp_from_material.struct_data_offset = reinterpret_cast<std::byte *>(&lm) - reinterpret_cast<std::byte *>(lightmap_pointers);
         }
+    }
+    
+    
+
+    ScenarioStructureBSPMaterialCompressedRenderedVertex::C<NativeEndian> compress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialCompressedRenderedVertex::C<NativeEndian> r;
+        r.position = vertex.position;
+        r.texture_coords = vertex.texture_coords;
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.binormal = compress_vector(vertex.binormal.i, vertex.binormal.j, vertex.binormal.k);
+        r.tangent = compress_vector(vertex.tangent.i, vertex.tangent.j, vertex.tangent.k);
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<NativeEndian> decompress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialCompressedRenderedVertex::C<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialUncompressedRenderedVertex::C<NativeEndian> r;
+        r.position = vertex.position;
+        r.texture_coords = vertex.texture_coords;
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
+        r.normal = r.normal.normalize();
+
+        decompress_vector(vertex.binormal, normal_i, normal_j, normal_k);
+        r.binormal.i = normal_i;
+        r.binormal.j = normal_j;
+        r.binormal.k = normal_k;
+        r.binormal = r.binormal.normalize();
+
+        decompress_vector(vertex.tangent, normal_i, normal_j, normal_k);
+        r.tangent.i = normal_i;
+        r.tangent.j = normal_j;
+        r.tangent.k = normal_k;
+        r.tangent = r.tangent.normalize();
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialCompressedLightmapVertex::C<NativeEndian> compress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialUncompressedLightmapVertex::C<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialCompressedLightmapVertex::C<NativeEndian> r;
+
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.texture_coordinate_x = compress_float<16>(vertex.texture_coords.x);
+        r.texture_coordinate_y = compress_float<16>(vertex.texture_coords.y);
+
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialUncompressedLightmapVertex::C<NativeEndian> decompress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialCompressedLightmapVertex::C<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialUncompressedLightmapVertex::C<NativeEndian> r;
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
+        r.normal = r.normal.normalize();
+
+        r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_x);
+        r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_y);
+
+        return r;
     }
 }

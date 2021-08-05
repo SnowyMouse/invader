@@ -2,7 +2,7 @@
 
 #include <invader/map/map.hpp>
 #include <invader/map/tag.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/all.hpp>
 #include <invader/file/file.hpp>
 
 namespace Invader::Parser {
@@ -15,12 +15,12 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::Glow::post_cache_deformat() {
-        this->attachment_0 = static_cast<HEK::FunctionOut>(this->attachment_0 + 1);
-        this->attachment_1 = static_cast<HEK::FunctionOut>(this->attachment_1 + 1);
-        this->attachment_2 = static_cast<HEK::FunctionOut>(this->attachment_2 + 1);
-        this->attachment_3 = static_cast<HEK::FunctionOut>(this->attachment_3 + 1);
-        this->attachment_4 = static_cast<HEK::FunctionOut>(this->attachment_4 + 1);
-        this->attachment_5 = static_cast<HEK::FunctionOut>(this->attachment_5 + 1);
+        this->attachment_0 = static_cast<FunctionOut>(this->attachment_0 + 1);
+        this->attachment_1 = static_cast<FunctionOut>(this->attachment_1 + 1);
+        this->attachment_2 = static_cast<FunctionOut>(this->attachment_2 + 1);
+        this->attachment_3 = static_cast<FunctionOut>(this->attachment_3 + 1);
+        this->attachment_4 = static_cast<FunctionOut>(this->attachment_4 + 1);
+        this->attachment_5 = static_cast<FunctionOut>(this->attachment_5 + 1);
     }
 
     void Invader::Parser::PointPhysics::post_cache_deformat() {
@@ -51,7 +51,7 @@ namespace Invader::Parser {
 
     void Invader::Parser::ModelAnimationsAnimation::post_cache_deformat() {
         // Get whether or not it's compressed
-        bool compressed = this->flags & HEK::ModelAnimationsAnimationFlagsFlag::MODEL_ANIMATIONS_ANIMATION_FLAGS_FLAG_COMPRESSED_DATA;
+        bool compressed = this->flags & ModelAnimationsAnimationFlagsFlag::MODEL_ANIMATIONS_ANIMATION_FLAGS_FLAG_COMPRESSED_DATA;
         std::vector<std::byte> frame_data = this->frame_data;
         std::vector<std::byte> frame_info = this->frame_info;
         std::vector<std::byte> default_data = this->default_data;
@@ -59,17 +59,17 @@ namespace Invader::Parser {
         // Frame info
         std::size_t required_frame_info_size;
         switch(this->frame_info_type) {
-            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_NONE:
+            case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_NONE:
                 required_frame_info_size = 0;
                 break;
-            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
-                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDy::struct_little);
+            case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
+                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDy::C<LittleEndian>);
                 break;
-            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
-                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDyDyaw::struct_little);
+            case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
+                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDyDyaw::C<LittleEndian>);
                 break;
-            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
-                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDyDzDyaw::struct_little);
+            case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
+                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDyDzDyaw::C<LittleEndian>);
                 break;
             default:
                 eprintf_error("unknown frame info type");
@@ -82,24 +82,24 @@ namespace Invader::Parser {
         // Convert endianness
         if(frame_info.size() > 0) {
             switch(this->frame_info_type) {
-                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
+                case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
                     swap_endian_array(
-                        reinterpret_cast<ModelAnimationsFrameInfoDxDy::struct_big *>(this->frame_info.data()),
-                        reinterpret_cast<ModelAnimationsFrameInfoDxDy::struct_little *>(frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDy::C<BigEndian> *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDy::C<LittleEndian> *>(frame_info.data()),
                         this->frame_count
                     );
                     break;
-                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
+                case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
                     swap_endian_array(
-                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDyaw::struct_big *>(this->frame_info.data()),
-                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDyaw::struct_little *>(frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDyaw::C<BigEndian> *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDyaw::C<LittleEndian> *>(frame_info.data()),
                         this->frame_count
                     );
                     break;
-                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
+                case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
                     swap_endian_array(
-                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDzDyaw::struct_big *>(this->frame_info.data()),
-                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDzDyaw::struct_little *>(frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDzDyaw::C<BigEndian> *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDzDyaw::C<LittleEndian> *>(frame_info.data()),
                         this->frame_count
                     );
                     break;
@@ -144,13 +144,13 @@ namespace Invader::Parser {
             }
 
             if(has_rotation) {
-                frame_data_size_expected += sizeof(ModelAnimationsRotation::struct_little) * frame_count;
+                frame_data_size_expected += sizeof(ModelAnimationsRotation::C<LittleEndian>) * frame_count;
             }
             if(has_transform) {
-                frame_data_size_expected += sizeof(ModelAnimationsTransform::struct_little) * frame_count;
+                frame_data_size_expected += sizeof(ModelAnimationsTransform::C<LittleEndian>) * frame_count;
             }
             if(has_scale) {
-                frame_data_size_expected += sizeof(ModelAnimationscale::struct_little) * frame_count;
+                frame_data_size_expected += sizeof(ModelAnimationscale::C<LittleEndian>) * frame_count;
             }
 
             rotation_count += has_rotation;
@@ -163,8 +163,8 @@ namespace Invader::Parser {
         }
 
         // Make sure frame and default size is correct
-        std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::struct_big) + scale_count * sizeof(ModelAnimationscale::struct_big) + transform_count * sizeof(ModelAnimationsTransform::struct_big);
-        std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::struct_big) + sizeof(ModelAnimationscale::struct_big) + sizeof(ModelAnimationsTransform::struct_big));
+        std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::C<BigEndian>) + scale_count * sizeof(ModelAnimationscale::C<BigEndian>) + transform_count * sizeof(ModelAnimationsTransform::C<BigEndian>);
+        std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::C<BigEndian>) + sizeof(ModelAnimationscale::C<BigEndian>) + sizeof(ModelAnimationsTransform::C<BigEndian>));
         if(frame_size != total_frame_size) {
             eprintf_error("Frame size is invalid (%zu != %zu)", static_cast<std::size_t>(frame_size), total_frame_size);
             throw InvalidTagDataException();
@@ -186,22 +186,22 @@ namespace Invader::Parser {
 
                     for(std::size_t node = 0; node < this->node_count; node++) {
                         if(!rotate[node]) {
-                            auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_big *>(default_data_big);
-                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_little *>(default_data_little);
+                            auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::C<BigEndian> *>(default_data_big);
+                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::C<LittleEndian> *>(default_data_little);
                             rotation_big = rotation_little;
                             default_data_big += sizeof(rotation_big);
                             default_data_little += sizeof(rotation_big);
                         }
                         if(!transform[node]) {
-                            auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_big *>(default_data_big);
-                            const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_little *>(default_data_little);
+                            auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::C<BigEndian> *>(default_data_big);
+                            const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::C<LittleEndian> *>(default_data_little);
                             transform_big = transform_little;
                             default_data_big += sizeof(transform_big);
                             default_data_little += sizeof(transform_big);
                         }
                         if(!scale[node]) {
-                            auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_big *>(default_data_big);
-                            const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_little *>(default_data_little);
+                            auto &scale_big = *reinterpret_cast<ModelAnimationscale::C<BigEndian> *>(default_data_big);
+                            const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::C<LittleEndian> *>(default_data_little);
                             scale_big = scale_little;
                             default_data_big += sizeof(scale_big);
                             default_data_little += sizeof(scale_big);
@@ -232,22 +232,22 @@ namespace Invader::Parser {
                 for(std::size_t frame = 0; frame < frame_count; frame++) {
                     for(std::size_t node = 0; node < this->node_count; node++) {
                         if(rotate[node]) {
-                            auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_little *>(frame_data_big);
-                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_big *>(frame_data_little);
+                            auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::C<LittleEndian> *>(frame_data_big);
+                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::C<BigEndian> *>(frame_data_little);
                             rotation_big = rotation_little;
                             frame_data_big += sizeof(rotation_big);
                             frame_data_little += sizeof(rotation_big);
                         }
                         if(transform[node]) {
-                            auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_little *>(frame_data_big);
-                            const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_big *>(frame_data_little);
+                            auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::C<LittleEndian> *>(frame_data_big);
+                            const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::C<BigEndian> *>(frame_data_little);
                             transform_big = transform_little;
                             frame_data_big += sizeof(transform_big);
                             frame_data_little += sizeof(transform_big);
                         }
                         if(scale[node]) {
-                            auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_little *>(frame_data_big);
-                            const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_big *>(frame_data_little);
+                            auto &scale_big = *reinterpret_cast<ModelAnimationscale::C<LittleEndian> *>(frame_data_big);
+                            const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::C<BigEndian> *>(frame_data_little);
                             scale_big = scale_little;
                             frame_data_big += sizeof(scale_big);
                             frame_data_little += sizeof(scale_big);

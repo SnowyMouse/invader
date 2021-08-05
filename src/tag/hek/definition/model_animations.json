@@ -915,6 +915,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "size": 128
+        "size": 128,
+        "group": "model_animations"
     }
 ]

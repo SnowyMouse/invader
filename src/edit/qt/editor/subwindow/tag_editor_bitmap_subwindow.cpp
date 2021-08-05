@@ -12,11 +12,12 @@
 #include "tag_editor_bitmap_subwindow.hpp"
 #include "tag_editor_subwindow.hpp"
 #include "../../../../bitmap/color_plate_scanner.hpp"
-#include <invader/tag/parser/parser.hpp>
-#include <invader/bitmap/swizzle.hpp>
 #include <invader/bitmap/bitmap_encode.hpp>
+#include <invader/hek/fourcc.hpp>
 
 #define GET_PIXEL(x,y) (x + y * real_width)
+
+using namespace Invader::Parser;
 
 namespace Invader::EditQt {
     void TagEditorBitmapSubwindow::set_values(TagEditorBitmapSubwindow *what, QComboBox *bitmaps, QComboBox *mipmaps, QComboBox *colors, QComboBox *scale, QComboBox *sequence, QComboBox *sprite, QScrollArea *images, std::vector<Parser::BitmapGroupSequence> *all_sequences) {
@@ -203,10 +204,10 @@ namespace Invader::EditQt {
                 char resolution[128];
                 auto resolution_ending = static_cast<std::size_t>(std::snprintf(resolution, sizeof(resolution), "%zu x %zu", width, height));
                 switch(bitmap_data->type) {
-                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                    case Parser::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
                         std::snprintf(resolution + resolution_ending, sizeof(resolution) - resolution_ending, " x %zu", depth);
                         break;
-                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                    case Parser::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
                         std::snprintf(resolution + resolution_ending, sizeof(resolution) - resolution_ending, " x 6");
                         break;
                     default:
@@ -257,30 +258,30 @@ namespace Invader::EditQt {
         bool compressed = false;
 
         switch(bitmap_data->format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                 bits_per_pixel = 16;
                 break;
 
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
                 bits_per_pixel = 32;
                 break;
 
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                 compressed = true;
                 // fallthrough
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
                 bits_per_pixel = 8;
                 break;
 
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
                 bits_per_pixel = 4;
                 compressed = true;
                 break;
@@ -289,7 +290,7 @@ namespace Invader::EditQt {
                 return nullptr;
         }
 
-        std::size_t stride = bitmap_data->type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
+        std::size_t stride = bitmap_data->type == Parser::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
 
         // Find the offset
         std::size_t pixels_required = ((depth * width * height) * (bits_per_pixel) / 8);
@@ -344,7 +345,7 @@ namespace Invader::EditQt {
         const auto *bytes = pixel_data->data() + offset;
         std::vector<std::uint32_t> data(real_width * real_height);
         std::fill(data.begin(), data.end(), 0xFFFF00FF);
-        BitmapEncode::encode_bitmap(bytes, bitmap_data->format, reinterpret_cast<std::byte *>(data.data()), HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, real_width, real_height);
+        BitmapEncode::encode_bitmap(bytes, bitmap_data->format, reinterpret_cast<std::byte *>(data.data()), Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, real_width, real_height);
 
         // Scale if needed
         if(scale != 0) {
@@ -653,10 +654,10 @@ namespace Invader::EditQt {
         
         // Set the monochrome stuff depending on what we're doing
         switch(bitmap_data->format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+            case Parser::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                 this->generate_colors_array(true);
                 break;
             default:
@@ -677,13 +678,13 @@ namespace Invader::EditQt {
         auto make_row = [&make_widget, &bitmap_data, &layout](std::size_t mip) {
             std::size_t elements;
             switch(bitmap_data->type) {
-                case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                case Parser::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
                     elements = bitmap_data->depth >> mip;
                     if(elements == 0) {
                         elements = 1;
                     }
                     break;
-                case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                case Parser::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
                     elements = 6;
                     break;
                 default:

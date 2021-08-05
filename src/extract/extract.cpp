@@ -9,11 +9,12 @@
 #include <invader/version.hpp>
 #include <invader/extract/extraction.hpp>
 #include <invader/build/build_workload.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 #include <regex>
 
 int main(int argc, const char **argv) {
     using namespace Invader;
+    using namespace Parser;
 
     // Options struct
     struct ExtractOptions {
@@ -29,7 +30,7 @@ int main(int argc, const char **argv) {
     } extract_options;
 
     // Command line options
-    std::vector<Invader::CommandLineOption> options;
+    std::vector<CommandLineOption> options;
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory to find bitmaps.map, sounds.map, and/or loc.map.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory to save tags.", "<dir>");
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
@@ -43,7 +44,7 @@ int main(int argc, const char **argv) {
     static constexpr char USAGE[] = "[options] <map>";
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ExtractOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, extract_options, [](char opt, const auto &args, auto &extract_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ExtractOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, extract_options, [](char opt, const auto &args, auto &extract_options) {
         switch(opt) {
             case 'I':
                 extract_options.ignore_resource_maps = true;
@@ -72,7 +73,7 @@ int main(int argc, const char **argv) {
                 extract_options.search_all_tags = false;
                 break;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
         }
     });
@@ -109,7 +110,7 @@ int main(int argc, const char **argv) {
     if(extract_options.maps_directory.has_value() && !extract_options.ignore_resource_maps) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
-            auto potential_map = Invader::File::open_file(maps_directory / map);
+            auto potential_map = File::open_file(maps_directory / map);
             if(potential_map.has_value()) {
                 return *potential_map;
             }
@@ -119,7 +120,7 @@ int main(int argc, const char **argv) {
         };
 
         // Get its header
-        Invader::HEK::CacheFileHeader header;
+        CacheFileHeader header;
         std::FILE *f = std::fopen(remaining_arguments[0], "rb");
         if(!f) {
             eprintf_error("Failed to open %s to determine its version", remaining_arguments[0]);
@@ -135,17 +136,17 @@ int main(int argc, const char **argv) {
         // Check if we can do things to it
         if(header.valid()) {
             switch(header.engine.read()) {
-                case HEK::CACHE_FILE_DEMO:
-                case HEK::CACHE_FILE_RETAIL:
+                case CACHE_FILE_DEMO:
+                case CACHE_FILE_RETAIL:
                     bitmaps = open_map_possibly("bitmaps.map");
                     sounds = open_map_possibly("sounds.map");
                     break;
-                case HEK::CACHE_FILE_MCC_CEA:
-                    if(!(reinterpret_cast<const HEK::CacheFileHeaderCEA *>(&header)->flags & HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY)) {
+                case CACHE_FILE_MCC_CEA:
+                    if(!(reinterpret_cast<const CacheFileHeaderCEA *>(&header)->flags & CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY)) {
                         bitmaps = open_map_possibly("bitmaps.map");
                     }
                     break;
-                case HEK::CACHE_FILE_CUSTOM_EDITION:
+                case CACHE_FILE_CUSTOM_EDITION:
                     loc = open_map_possibly("loc.map");
                     bitmaps = open_map_possibly("bitmaps.map");
                     sounds = open_map_possibly("sounds.map");
@@ -155,7 +156,7 @@ int main(int argc, const char **argv) {
             }
         }
         // Maybe it's a demo map?
-        else if(reinterpret_cast<Invader::HEK::CacheFileDemoHeader *>(&header)->valid()) {
+        else if(reinterpret_cast<CacheFileDemoHeader *>(&header)->valid()) {
             bitmaps = open_map_possibly("bitmaps.map");
             sounds = open_map_possibly("sounds.map");
         }

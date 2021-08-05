@@ -225,6 +225,7 @@
         "type": "struct",
         "pre_compile": true,
         "post_compile": true,
-        "size": 84
+        "size": 84,
+        "group": "sound_looping"
     }
 ]

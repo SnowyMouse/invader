@@ -1354,6 +1354,7 @@
             }
         ],
         "type": "struct",
-        "size": 4112
+        "size": 4112,
+        "group": "dialogue"
     }
 ]

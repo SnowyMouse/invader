@@ -200,6 +200,7 @@
             }
         ],
         "type": "struct",
-        "size": 264
+        "size": 264,
+        "group": "lightning"
     }
 ]

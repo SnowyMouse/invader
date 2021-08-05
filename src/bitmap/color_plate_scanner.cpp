@@ -7,6 +7,8 @@
 #include "color_plate_scanner.hpp"
 #include <invader/printf.hpp>
 
+using namespace Invader::Parser;
+
 namespace Invader {
     static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";
     static constexpr char ERROR_INVALID_BITMAP_HEIGHT[] = "Error: Found a bitmap with an invalid height: %u\n";
@@ -556,7 +558,7 @@ namespace Invader {
                     float x_intensity = (right_up_pixel + 2.0F * right_pixel + right_down_pixel) - (left_up_pixel + 2.0F * left_pixel + left_down_pixel);
                     float y_intensity = (left_down_pixel + 2.0F * down_pixel + right_down_pixel) - (left_up_pixel + 2.0F * up_pixel + right_up_pixel);
                     float z_intensity = bump_scale / (bump_height / 0.02F);
-                    HEK::Vector3D<HEK::NativeEndian> v;
+                    Vector3D<NativeEndian> v;
                     v.i = x_intensity;
                     v.j = y_intensity;
                     v.k = z_intensity;

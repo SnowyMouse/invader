@@ -21,7 +21,7 @@ namespace Invader::EditQt {
          * @param classes          optional array of classes to filter in
          * @param show_directories show all directories even if empty
          */
-        TagTreeWidget(QWidget *widget, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagFourCC>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt, bool show_directories = false);
+        TagTreeWidget(QWidget *widget, TagTreeWindow *parent_window, const std::optional<std::vector<Parser::TagFourCC>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt, bool show_directories = false);
 
         /**
          * Set the filter, limiting the view to those classes and directories that contain the given classes
@@ -29,7 +29,7 @@ namespace Invader::EditQt {
          * @param tags_directories   tag directories to list
          * @param expression_filters expressions to show
          */
-        void set_filter(const std::optional<std::vector<HEK::TagFourCC>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt, const std::optional<std::vector<std::string>> &expression_filters = std::nullopt);
+        void set_filter(const std::optional<std::vector<Parser::TagFourCC>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt, const std::optional<std::vector<std::string>> &expression_filters = std::nullopt);
 
         /**
          * Get the total tags found
@@ -55,7 +55,7 @@ namespace Invader::EditQt {
         void resort_elements();
     private:
         std::size_t total_tags = 0;
-        std::optional<std::vector<HEK::TagFourCC>> filter;
+        std::optional<std::vector<Parser::TagFourCC>> filter;
         std::optional<std::vector<std::size_t>> tag_arrays_to_show;
         std::optional<std::vector<std::string>> expressions;
         TagTreeWindow *last_window;

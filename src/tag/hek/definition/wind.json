@@ -30,6 +30,7 @@
             }
         ],
         "type": "struct",
-        "size": 64
+        "size": 64,
+        "group": "wind"
     }
 ]

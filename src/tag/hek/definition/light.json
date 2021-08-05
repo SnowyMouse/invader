@@ -213,6 +213,7 @@
         "type": "struct",
         "post_cache_deformat": "true",
         "pre_compile": true,
-        "size": 352
+        "size": 352,
+        "group": "light"
     }
 ]

@@ -1605,7 +1605,8 @@
         "pre_compile": true,
         "post_compile": true,
         "read_only": true,
-        "size": 648
+        "size": 648,
+        "group": "scenario_structure_bsp"
     },
     {
         "name": "ScenarioStructureBSPCompiledHeader",

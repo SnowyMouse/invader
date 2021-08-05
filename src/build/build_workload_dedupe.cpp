@@ -1,4 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <invader/build/build_workload.hpp>
+
+using namespace Invader::Parser;
 
 namespace Invader {
     bool BuildWorkload::BuildWorkloadStruct::can_dedupe(const BuildWorkload::BuildWorkloadStruct &other) const noexcept {
@@ -14,7 +18,7 @@ namespace Invader {
             std::vector<BuildWorkloadDependency> this_dep_small;
             for(auto &td : this->dependencies) {
                 if(td.offset < other_size) {
-                    if(td.offset + sizeof(HEK::TagDependency<HEK::LittleEndian>) > other_size) { // other struct only contains part of the dependency
+                    if(td.offset + sizeof(TagDependency<LittleEndian>) > other_size) { // other struct only contains part of the dependency
                         return false;
                     }
                     this_dep_small.emplace_back(td);

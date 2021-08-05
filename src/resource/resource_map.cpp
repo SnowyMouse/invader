@@ -4,9 +4,10 @@
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/file/file.hpp>
 
+using namespace Invader::Parser;
+
 namespace Invader {
     std::vector<Resource> load_resource_map(const std::byte *data, std::size_t size) {
-        using namespace HEK;
         if(size < sizeof(ResourceMapHeader)) {
             throw OutOfBoundsException();
         }
