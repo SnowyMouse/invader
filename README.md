@@ -204,8 +204,9 @@ Options:
                                or argb. Default: none
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
-                               monochrome, dxt5, dxt3, or dxt1. Default (new
-                               tag): 32-bit
+                               monochrome, dxt5, dxt3, dxt1, or auto. 'auto'
+                               will be replaced with the best lossless format.
+                               Default (new tag): auto
   -h --help                    Show this list of options.
   -H --bump-height <height>    Set the apparent bumpmap height from 0 to 1.
                                Default (new tag): 0.026

@@ -5,6 +5,9 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Added
 - invader: Added support for the upcoming MCC: CEA map format
+- invader-bitmap: Added `auto` to `--format` which will default to the smallest,
+  lossless output (i.e. monochrome if input is monochrome, 16-bit if it fits in
+  a 16-bit color space, 32-bit otherwise)
 - invader-build: Added `mcc-cea` as a build target
 - invader-build: Added `--resource-path` which can specify a different path to
   load resource maps from
@@ -14,6 +17,7 @@ This is used for recording Invader's changes. This changelog is based on
   assets should be used
 
 ### Changed
+- invader-bitmap: Changed the default format to `auto`
 - invader-bitmap: If usage is set to alpha blend, bitmaps are now cropped if an
   edge has zero alpha and a warning will be displayed. If the resulting bitmap
   is non-power-of-two, then it will fail to generate a bitmap tag (unless the

@@ -50,6 +50,9 @@ struct BitmapOptions {
 
     // Format?
     std::optional<BitmapFormat> format;
+    
+    // Find format automatically
+    std::optional<bool> auto_format;
 
     // Usage?
     std::optional<BitmapUsage> usage;
@@ -104,8 +107,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         bitmap_tag_data = T::parse_hek_tag_file(tag_data.data(), tag_data.size());
 
         // Set some default values
-        if(!bitmap_options.format.has_value()) {
+        if(!bitmap_options.format.has_value() && !bitmap_options.auto_format.value_or(false)) {
             bitmap_options.format = bitmap_tag_data.encoding_format;
+            bitmap_options.auto_format = false;
         }
         if(!bitmap_options.mipmap_fade.has_value()) {
             bitmap_options.mipmap_fade = bitmap_tag_data.detail_fade_factor;
@@ -146,13 +150,12 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(!bitmap_options.blur.has_value() && bitmap_tag_data.blur_filter_size > 0.0F) {
             bitmap_options.blur = bitmap_tag_data.blur_filter_size;
         }
-
+        
         // Clear existing data
         bitmap_tag_data.bitmap_data.clear();
         bitmap_tag_data.bitmap_group_sequence.clear();
         bitmap_tag_data.processed_pixel_data.clear();
     }
-    
     else if(bitmap_options.regenerate) {
         eprintf_error("Cannot regenerate. No bitmap tag exists at %s", final_path.string().c_str());
         std::exit(EXIT_FAILURE);
@@ -160,8 +163,11 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     // If these values weren't set, set them
     #define DEFAULT_VALUE(what, default) if(!what.has_value()) { what = default; }
+    
+    if(!bitmap_options.auto_format.has_value()) {
+        bitmap_options.auto_format = true;
+    }
 
-    DEFAULT_VALUE(bitmap_options.format,BitmapFormat::BITMAP_FORMAT_32_BIT);
     DEFAULT_VALUE(bitmap_options.bitmap_type,BitmapType::BITMAP_TYPE_2D_TEXTURES);
     DEFAULT_VALUE(bitmap_options.max_mipmap_count,INT16_MAX);
     DEFAULT_VALUE(bitmap_options.sprite_usage,BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX);
@@ -279,7 +285,6 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     };
 
     auto scanned_color_plate = try_to_scan_color_plate();
-    std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Compress the original input blob
     if(!bitmap_options.regenerate) {
@@ -317,9 +322,13 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
     // Add our bitmap data
-    oprintf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
     try {
-        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value());
+        // If we don't have a format, set it to null (it will determine it instead)
+        if(*bitmap_options.auto_format) {
+            bitmap_options.format = std::nullopt;
+        }
+        
+        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format, bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value());
     }
     catch (std::exception &e) {
         eprintf_error("Failed to generate bitmap data: %s", e.what());
@@ -435,7 +444,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit", "<type>");
+    options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, dxt1, or auto. 'auto' will be replaced with the best lossless format. Default (new tag): auto", "<type>");
     options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d_textures, 3d_textures, cube_maps, interface_bitmaps, or sprites. Default (new tag): 2d", "<type>");
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
     options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. This does not save in .bitmap tags. Can be: linear, nearest_alpha, nearest. Default (new tag): linear", "<type>");
@@ -500,7 +509,14 @@ int main(int argc, char *argv[]) {
 
             case 'F':
                 try {
-                    bitmap_options.format = BitmapFormat_from_string(arguments[0]);
+                    if(std::strcmp(arguments[0], "auto") == 0) {
+                        bitmap_options.format = std::nullopt;
+                        bitmap_options.auto_format = true;
+                    }
+                    else {
+                        bitmap_options.format = BitmapFormat_from_string(arguments[0]);
+                        bitmap_options.auto_format = false;
+                    }
                 }
                 catch(std::exception &) {
                     eprintf_error("Invalid bitmap format %s", arguments[0]);
