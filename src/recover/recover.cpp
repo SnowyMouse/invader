@@ -68,6 +68,7 @@ int main(int argc, const char **argv) {
     else {
         tag = remaining_arguments[0];
     }
+    tag = File::halo_path_to_preferred_path(tag);
     
     // read it
     auto file_path = File::tag_path_to_file_path(tag, recover_options.tags);
