@@ -42,6 +42,8 @@ enum FontExtension {
 static_assert(FONT_EXTENSION_COUNT == sizeof(FONT_EXTENSION_STR) / sizeof(*FONT_EXTENSION_STR));
 
 int main(int argc, char *argv[]) {
+    Invader::setup_output();
+    
     // Options struct
     struct FontOptions {
         std::filesystem::path data = "data/";

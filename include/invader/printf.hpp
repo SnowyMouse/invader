@@ -133,4 +133,8 @@ static inline int oprintf(...) {}
 static inline void oflush() {}
 #endif
 
+namespace Invader {
+    void setup_output();
+}
+
 #endif

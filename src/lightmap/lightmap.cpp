@@ -18,6 +18,8 @@ enum LightmapMode {
 };
 
 int main(int argc, const char **argv) {
+    Invader::setup_output();
+    
     using namespace Invader;
     using namespace Invader::Lightmap;
     

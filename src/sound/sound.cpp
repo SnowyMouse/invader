@@ -636,6 +636,8 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 }
 
 int main(int argc, const char **argv) {
+    Invader::setup_output();
+    
     SoundOptions sound_options;
 
     std::vector<CommandLineOption> options;

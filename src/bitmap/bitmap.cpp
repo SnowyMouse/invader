@@ -436,6 +436,8 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 }
 
 int main(int argc, char *argv[]) {
+    Invader::setup_output();
+    
     BitmapOptions bitmap_options;
 
     std::vector<CommandLineOption> options;

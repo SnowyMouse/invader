@@ -90,6 +90,8 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::string &)
 }
 
 int main(int argc, char * const *argv) {
+    Invader::setup_output();
+    
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");

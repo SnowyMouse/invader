@@ -10,6 +10,8 @@
 #include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
+    Invader::setup_output();
+    
     using namespace Invader;
     //using namespace Invader::HEK;
 

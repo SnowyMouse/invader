@@ -16,6 +16,8 @@
 #include <invader/printf.hpp>
 
 int main(int argc, const char **argv) {
+    Invader::setup_output();
+    
     using namespace Invader::HEK;
     using namespace Invader;
 

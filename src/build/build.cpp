@@ -51,6 +51,8 @@ int main(int argc, const char **argv) {
     using namespace Invader::HEK;
     
     using RawDataHandling = BuildWorkload::BuildParameters::BuildParametersDetails::RawDataHandling;
+    
+    setup_output();
 
     // Parameters
     struct BuildOptions {

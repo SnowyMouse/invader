@@ -19,6 +19,8 @@ enum Conversion {
 };
 
 int main(int argc, const char **argv) {
+    Invader::setup_output();
+    
     struct ConvertOptions {
         std::optional<Conversion> conversion;
         std::filesystem::path tags = "tags";
