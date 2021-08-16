@@ -272,10 +272,8 @@ Build a cache file.
 
 Options:
   -a --anniversary-mode        Enable anniversary graphics and audio (CEA only)
-  -A --auto-forge <engine>     Ensure the map will be network compatible with
-                               the given target engine. Valid engines are:
-                               mcc-cea, pc-custom, pc-demo, pc-retail,
-                               xbox-0009, xbox-0135, xbox-2276
+  -A --auto-forge              Ensure the map will be network compatible with
+                               the target engine.
   -b --stock-resource-bounds   Only index tags if the tag's index is within
                                stock Custom Edition's resource map bounds.
                                (Custom Edition only)

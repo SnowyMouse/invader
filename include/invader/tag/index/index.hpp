@@ -30,6 +30,13 @@ namespace Invader {
      * @return         indices, if present
      */
     std::optional<std::vector<File::TagFilePath>> custom_edition_indices(const char *map_name);
+
+    /**
+     * Get the stock indices for the given map for CEA (MCC)
+     * @param map_name scenario name
+     * @return         indices, if present
+     */
+    std::optional<std::vector<File::TagFilePath>> mcc_cea_indices(const char *map_name);
 }
 
 #endif

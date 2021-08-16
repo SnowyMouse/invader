@@ -74,7 +74,7 @@ int main(int argc, const char **argv) {
         std::optional<std::string> build_version;
         bool check_custom_edition_resource_bounds = false;
         std::optional<std::uint64_t> max_tag_space;
-        std::optional<HEK::CacheFileEngine> auto_forge_target;
+        bool auto_forge = false;
         bool do_not_auto_forge = false;
         bool use_anniverary_mode = false;
         
@@ -91,7 +91,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
-    options.emplace_back("auto-forge", 'A', 1, "Ensure the map will be network compatible with the given target engine. Valid engines are: " VALID_ENGINES_LIST, "<engine>");
+    options.emplace_back("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine.");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
@@ -165,6 +165,9 @@ int main(int argc, const char **argv) {
                 }
                 break;
             case 'A':
+                build_options.auto_forge = true;
+                break;
+                
             case 'g': {
                 HEK::CacheFileEngine engine;
                 std::optional<XboxVariation> variation;
@@ -196,11 +199,6 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(arguments[0], "native") == 0) {
                     engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
                 }
-                else if(std::strcmp(arguments[0], "none") == 0 && opt == 'A') {
-                    build_options.do_not_auto_forge = true;
-                    build_options.auto_forge_target = std::nullopt;
-                    break;
-                }
                 else {
                     eprintf_error("Unknown engine type: %s", arguments[0]);
                     
@@ -230,9 +228,6 @@ int main(int argc, const char **argv) {
                 if(opt == 'g') {
                     build_options.engine = engine;
                     build_options.variation = variation;
-                }
-                if(opt == 'A' || (!build_options.auto_forge_target.has_value() && build_options.do_not_auto_forge)) {
-                    build_options.auto_forge_target = engine;
                 }
                 
                 break;
@@ -488,11 +483,9 @@ int main(int argc, const char **argv) {
         }
         
         // CRC32 spoofing, indexing, etc.
-        if(build_options.auto_forge_target.has_value()) {
-            auto auto_forge_target = *build_options.auto_forge_target;
-            
+        if(build_options.auto_forge) {
             if(!parameters.index.has_value()) {
-                switch(auto_forge_target) {
+                switch(*build_options.engine) {
                     case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
                         parameters.index = retail_indices(map_name.c_str());
                         break;
@@ -502,11 +495,14 @@ int main(int argc, const char **argv) {
                     case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                         parameters.index = demo_indices(map_name.c_str());
                         break;
+                    case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                        parameters.index = mcc_cea_indices(map_name.c_str());
+                        break;
                     default: break;
                 }
             }
             
-            if(!parameters.forge_crc.has_value() && auto_forge_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            if(!parameters.forge_crc.has_value() && *build_options.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 if(map_name == "beavercreek") {
                     parameters.forge_crc = 0x07B3876A;
                 }

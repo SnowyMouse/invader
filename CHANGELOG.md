@@ -22,6 +22,8 @@ This is used for recording Invader's changes. This changelog is based on
   edge has zero alpha and a warning will be displayed. If the resulting bitmap
   is non-power-of-two, then it will fail to generate a bitmap tag (unless the
   bitmap type is interface or sprites)
+- invader-build: `--auto-forge-target` no longer takes a parameter (it forges
+  based on the input of `--game-engine`)
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
   directories to the tag's current directory
 - invader-model: "Legacy" mode is now the only option as, while it's not very

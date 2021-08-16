@@ -45,6 +45,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcc-cea-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/color_code.cpp"
 
@@ -205,6 +206,11 @@ add_custom_command(
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp" "custom_edition" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/custom_edition/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
+)
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcc-cea-getter.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/mcc-cea-getter.cpp" "mcc_cea" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/mcc_cea/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
 )
 
