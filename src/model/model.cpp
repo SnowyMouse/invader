@@ -926,8 +926,6 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
 }
 
 int main(int argc, const char **argv) {
-    Invader::setup_output();
-    
     using namespace Invader;
     using namespace Invader::HEK;
     

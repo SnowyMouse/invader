@@ -727,8 +727,6 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::
 }
 
 int main(int argc, char * const *argv) {
-    Invader::setup_output();
-    
     #ifdef _WIN32
     SetConsoleOutputCP(65001);
     #endif

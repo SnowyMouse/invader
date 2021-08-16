@@ -18,8 +18,6 @@ Q_IMPORT_PLUGIN(QWindowsAudioPlugin)
 #endif
 
 int main(int argc, char **argv) {
-    Invader::setup_output();
-    
     using namespace Invader;
 
     std::vector<CommandLineOption> options;

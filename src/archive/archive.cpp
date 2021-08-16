@@ -14,8 +14,6 @@
 #include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
-    Invader::setup_output();
-    
     struct ArchiveOptions {
         bool single_tag = false;
         std::vector<std::filesystem::path> tags;

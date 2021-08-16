@@ -52,8 +52,6 @@ enum ByPath {
 static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path, bool verbose, std::size_t job_count);
 
 int main(int argc, const char **argv) {
-    Invader::setup_output();
-    
     using namespace Invader::HEK;
 
     struct CompareOptions {

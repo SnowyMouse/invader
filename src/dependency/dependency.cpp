@@ -12,8 +12,6 @@
 #include <invader/file/file.hpp>
 
 int main(int argc, char * const *argv) {
-    Invader::setup_output();
-    
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");

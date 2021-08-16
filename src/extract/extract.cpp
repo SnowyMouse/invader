@@ -13,8 +13,6 @@
 #include <regex>
 
 int main(int argc, const char **argv) {
-    Invader::setup_output();
-    
     using namespace Invader;
 
     // Options struct

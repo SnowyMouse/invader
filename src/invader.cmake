@@ -65,7 +65,6 @@ set(INVADER_SOURCE_FILES
 
     ${INVADER_AUDIO_FILES}
 
-    src/printf.cpp
     src/error.cpp
     src/hek/fourcc.cpp
     src/hek/data_type.cpp

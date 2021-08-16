@@ -189,8 +189,6 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
 }
 
 int main(int argc, char * const *argv) {
-    Invader::setup_output();
-    
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
