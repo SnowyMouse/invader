@@ -3,7 +3,7 @@
 #ifndef INVADER__BITMAP__BITMAP_DATA_WRITER_HPP
 #define INVADER__BITMAP__BITMAP_DATA_WRITER_HPP
 
-#include "color_plate_scanner.hpp"
+#include <invader/bitmap/color_plate_scanner.hpp>
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader {

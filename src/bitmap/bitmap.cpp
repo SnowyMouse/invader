@@ -9,7 +9,8 @@
 #include <invader/tag/hek/definition.hpp>
 #include <invader/tag/hek/header.hpp>
 #include "image_loader.hpp"
-#include "color_plate_scanner.hpp"
+#include <invader/bitmap/color_plate_scanner.hpp>
+#include <invader/bitmap/bitmap_processor.hpp>
 #include "bitmap_data_writer.hpp"
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
@@ -264,9 +265,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     }
 
     // Set up sprite parameters
-    std::optional<ColorPlateScannerSpriteParameters> sprite_parameters;
+    std::optional<BitmapProcessorSpriteParameters> sprite_parameters;
     if(bitmap_options.bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
-        sprite_parameters = ColorPlateScannerSpriteParameters {};
+        sprite_parameters = {};
         auto &p = sprite_parameters.value();
         p.sprite_budget = bitmap_options.sprite_budget.value();
         p.sprite_budget_count = bitmap_options.sprite_budget_count.value();
@@ -276,7 +277,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Do it!
     auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
         try {
-            return ColorPlateScanner::scan_color_plate(reinterpret_cast<const Pixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
+            auto scanned_data = ColorPlateScanner::scan_color_plate(reinterpret_cast<const Pixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value());
+            BitmapProcessor::process_bitmap_data(scanned_data, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
+            return scanned_data;
         }
         catch (std::exception &e) {
             eprintf_error("Failed to process the image: %s", e.what());
@@ -392,7 +395,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     }
 
     // Set sprite stuff
-    bitmap_tag_data.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;
+    bitmap_tag_data.sprite_spacing = sprite_parameters.value_or(BitmapProcessorSpriteParameters{}).sprite_spacing;
     bitmap_tag_data.sprite_budget_count = bitmap_options.sprite_budget_count.value();
     bitmap_tag_data.sprite_usage = bitmap_options.sprite_usage.value();
     auto &sprite_budget_value = bitmap_options.sprite_budget.value();

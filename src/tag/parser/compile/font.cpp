@@ -3,7 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/font.hpp>
 #include <invader/build/build_workload.hpp>
-#include "../../../bitmap/color_plate_scanner.hpp"
+#include <invader/bitmap/pixel.hpp>
 
 namespace Invader::Parser {
     #define CALCULATE_LEADING_WIDTH(font) ((static_cast<std::int32_t>((font).ascending_height) + static_cast<std::int32_t>((font).descending_height)) / 5)

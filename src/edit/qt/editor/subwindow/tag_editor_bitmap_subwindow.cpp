@@ -11,7 +11,7 @@
 #include "../tag_editor_window.hpp"
 #include "tag_editor_bitmap_subwindow.hpp"
 #include "tag_editor_subwindow.hpp"
-#include "../../../../bitmap/color_plate_scanner.hpp"
+#include <invader/bitmap/pixel.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/bitmap/swizzle.hpp>
 #include <invader/bitmap/bitmap_encode.hpp>
@@ -108,11 +108,11 @@ namespace Invader::EditQt {
         main_layout->addWidget(generate_text_widget("Bitmap:", &bitmaps));
         main_layout->addWidget(generate_text_widget("Mipmap:", &mipmaps));
         main_layout->addWidget(generate_text_widget("Channels:", &colors));
-        BitmapType type = bitmap_data->type;
+        HEK::BitmapType type = bitmap_data->type;
         main_layout->addWidget(generate_text_widget("Scale:", &scale));
 
         // Add this if we have sprites
-        if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+        if(type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             main_layout->addWidget(generate_text_widget("Sequence:", &sequence));
             main_layout->addWidget(generate_text_widget("Sprite:", &sprite));
 

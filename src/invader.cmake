@@ -79,6 +79,9 @@ set(INVADER_SOURCE_FILES
     src/build/build_workload_dedupe.cpp
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
+    src/bitmap/color_plate_scanner.cpp
+    src/bitmap/bitmap_processor.cpp
+    src/bitmap/sprite.cpp
     src/error_handler/error_handler.cpp
     src/model/jms.cpp
     src/script/compiler.cpp

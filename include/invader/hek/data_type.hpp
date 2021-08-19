@@ -64,6 +64,20 @@ namespace Invader::HEK {
         }
         return value & 1;
     }
+    
+    /**
+     * Get the base-2 logarithm of an integer
+     * @param value input value
+     * @return      log2 of the input
+     */
+    template<typename T> [[maybe_unused]] static constexpr inline T log2_int(T value) noexcept {
+        T log2_value = 0;
+        while(value > 1) {
+            value >>= 1;
+            log2_value++;
+        }
+        return log2_value;
+    }
 
     #define NULL_INDEX (0xFFFF)
 

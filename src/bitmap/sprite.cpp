@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "color_plate_scanner.hpp"
+#include <invader/bitmap/bitmap_processor.hpp>
 #include <invader/hek/data_type.hpp>
 
 namespace Invader {
@@ -520,7 +520,7 @@ namespace Invader {
         throw std::exception();
     }
     
-    void ColorPlateScanner::process_sprites(GeneratedBitmapData &generated_bitmap, ColorPlateScannerSpriteParameters &parameters, std::int16_t &mipmap_count) {
+    void BitmapProcessor::process_sprites(GeneratedBitmapData &generated_bitmap, BitmapProcessorSpriteParameters &parameters, std::int16_t &mipmap_count) {
         // Get our parameters
         unsigned int half_spacing = 1 << mipmap_count;
         parameters.sprite_spacing = half_spacing;

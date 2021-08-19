@@ -10,7 +10,7 @@
 #include <QScrollArea>
 #include <QLabel>
 #include "tag_editor_font_subwindow.hpp"
-#include "../../../../bitmap/color_plate_scanner.hpp"
+#include <invader/bitmap/pixel.hpp>
 #include <invader/tag/parser/compile/font.hpp>
 #include "../tag_editor_window.hpp"
 
