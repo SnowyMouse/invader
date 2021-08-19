@@ -81,7 +81,6 @@ set(INVADER_SOURCE_FILES
     src/bitmap/bitmap_encode.cpp
     src/bitmap/color_plate_scanner.cpp
     src/bitmap/bitmap_processor.cpp
-    src/bitmap/image_loader.cpp
     src/bitmap/sprite.cpp
     src/error_handler/error_handler.cpp
     src/model/jms.cpp
