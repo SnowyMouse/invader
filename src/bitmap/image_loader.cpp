@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <tiffio.h>
-#include "image_loader.hpp"
+#include <invader/bitmap/image_loader.hpp>
 #include <invader/printf.hpp>
 #include "stb/stb_image.h"
 
 namespace Invader {
-    #define ALLOCATE_PIXELS(count) reinterpret_cast<Invader::Pixel *>(calloc(sizeof(Invader::Pixel) * pixel_count, 1))
-
-    static Invader::Pixel *rgba_to_pixel(const std::uint8_t *data, std::size_t pixel_count) {
-        auto *pixel_data = ALLOCATE_PIXELS(pixel_count);
+    static std::vector<Pixel> rgba_to_pixel(const std::uint8_t *data, std::size_t pixel_count) {
+        auto pixel_data = std::vector<Pixel>(pixel_count);
 
         for(std::size_t i = 0; i < pixel_count; i++) {
             pixel_data[i].alpha = data[3];
@@ -24,7 +22,7 @@ namespace Invader {
 
     #undef ALLOCATE_PIXELS
 
-    Invader::Pixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
+    std::vector<Pixel> load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
         // Load it
         int x = 0, y = 0, channels = 0;
         auto *image_buffer = stbi_load(path, &x, &y, &channels, 4);
@@ -39,7 +37,7 @@ namespace Invader {
         image_size = image_width * image_height * sizeof(Invader::Pixel);
 
         // Do the thing
-        Invader::Pixel *return_value = rgba_to_pixel(reinterpret_cast<std::uint8_t *>(image_buffer), image_width * image_height);
+        auto return_value = rgba_to_pixel(reinterpret_cast<std::uint8_t *>(image_buffer), image_width * image_height);
 
         // Free the buffer
         stbi_image_free(image_buffer);
@@ -47,7 +45,7 @@ namespace Invader {
         return return_value;
     }
 
-    Invader::Pixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
+    std::vector<Pixel> load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
         TIFF *image_tiff = TIFFOpen(path, "r");
         if(!image_tiff) {
             eprintf_error("Cannot open %s", path);
@@ -69,8 +67,8 @@ namespace Invader {
 
         // Read it all
         image_size = image_width * image_height * sizeof(Invader::Pixel);
-        auto *image_pixels = reinterpret_cast<Invader::Pixel *>(std::calloc(image_size, 1));
-        TIFFReadRGBAImageOriented(image_tiff, image_width, image_height, reinterpret_cast<std::uint32_t *>(image_pixels), ORIENTATION_TOPLEFT);
+        auto image_pixels = std::vector<Invader::Pixel>(image_size);
+        TIFFReadRGBAImageOriented(image_tiff, image_width, image_height, reinterpret_cast<std::uint32_t *>(image_pixels.data()), ORIENTATION_TOPLEFT);
 
         // Close the TIFF
         TIFFClose(image_tiff);

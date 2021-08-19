@@ -8,7 +8,7 @@
 #include <invader/version.hpp>
 #include <invader/tag/hek/definition.hpp>
 #include <invader/tag/hek/header.hpp>
-#include "image_loader.hpp"
+#include <invader/bitmap/image_loader.hpp>
 #include <invader/bitmap/color_plate_scanner.hpp>
 #include <invader/bitmap/bitmap_processor.hpp>
 #include "bitmap_data_writer.hpp"
@@ -189,7 +189,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Have these variables handy
     std::uint32_t image_width = 0, image_height = 0;
     std::size_t image_size = 0;
-    Pixel *image_pixels = nullptr;
+    std::vector<Pixel> image_pixels;
 
     // If we're regenerating, our color plate data is in the tag
     if(bitmap_options.regenerate) {
@@ -209,7 +209,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             eprintf_error("Cannot regenerate due the compressed color plate data size being wrong");
             return EXIT_FAILURE;
         }
-        image_pixels = new Pixel[image_size / sizeof(Pixel)];
+        image_pixels = std::vector<Pixel>(image_size / sizeof(Pixel));
         
         data += sizeof(std::uint32_t);
         size -= sizeof(std::uint32_t);
@@ -219,7 +219,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         inflate_stream.zfree = Z_NULL;
         inflate_stream.opaque = Z_NULL;
         inflate_stream.avail_out = image_size;
-        inflate_stream.next_out = reinterpret_cast<Bytef *>(image_pixels);
+        inflate_stream.next_out = reinterpret_cast<Bytef *>(image_pixels.data());
         inflate_stream.avail_in = size;
         inflate_stream.next_in = reinterpret_cast<Bytef *>(data);
 
@@ -254,7 +254,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             }
         }
 
-        if(image_pixels == nullptr) {
+        if(image_pixels.empty()) {
             eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data.string().c_str());
             eprintf("Valid formats are:\n");
             for(auto *format : SUPPORTED_FORMATS) {
@@ -277,7 +277,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Do it!
     auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
         try {
-            auto scanned_data = ColorPlateScanner::scan_color_plate(reinterpret_cast<const Pixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value());
+            auto scanned_data = ColorPlateScanner::scan_color_plate(image_pixels.data(), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value());
             BitmapProcessor::process_bitmap_data(scanned_data, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
             return scanned_data;
         }
@@ -310,7 +310,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         deflate_stream.zfree = Z_NULL;
         deflate_stream.opaque = Z_NULL;
         deflate_stream.avail_in = image_size;
-        deflate_stream.next_in = const_cast<Bytef *>(reinterpret_cast<const Bytef *>(image_pixels));
+        deflate_stream.next_in = const_cast<Bytef *>(reinterpret_cast<const Bytef *>(image_pixels.data()));
         deflate_stream.avail_out = compressed_data.size();
         deflate_stream.next_out = reinterpret_cast<Bytef *>(compressed_data.data());
 

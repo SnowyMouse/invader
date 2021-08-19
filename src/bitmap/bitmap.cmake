@@ -14,7 +14,6 @@ if(${INVADER_BITMAP})
     add_executable(invader-bitmap
         src/bitmap/bitmap.cpp
         src/bitmap/stb/stb_impl.c
-        src/bitmap/image_loader.cpp
         src/bitmap/bitmap_data_writer.cpp
     )
 
