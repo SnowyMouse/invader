@@ -267,7 +267,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Set up sprite parameters
     std::optional<BitmapProcessorSpriteParameters> sprite_parameters;
     if(bitmap_options.bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
-        sprite_parameters = {};
+        sprite_parameters = BitmapProcessorSpriteParameters {};
         auto &p = sprite_parameters.value();
         p.sprite_budget = bitmap_options.sprite_budget.value();
         p.sprite_budget_count = bitmap_options.sprite_budget_count.value();
