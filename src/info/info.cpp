@@ -137,6 +137,27 @@ namespace Invader::Info {
             }
         }
         
+        // Check tag order
+        switch(check_tag_order(map)) {
+            case CHECK_TAG_ORDER_RESULT_UNKNOWN:
+                break;
+            case CHECK_TAG_ORDER_RESULT_MATCHED:
+                PRINT_LINE(oprintf_success, "Stock tag order:", "%s", "Matched");
+                break;
+            case CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED:
+                PRINT_LINE(oprintf_success_lesser_warn, "Stock tag order:", "%s", "Network compatible (probably) but tags do not match");
+                break;
+            case CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_HOST:
+                PRINT_LINE(oprintf_success_warn, "Stock tag order:", "%s", "Host only (may crash if joining a stock host as a client)");
+                break;
+            case CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_CLIENT:
+                PRINT_LINE(oprintf_success_warn, "Stock tag order:", "%s", "Client only (may crash clients if joining with stock map)");
+                break;
+            case CHECK_TAG_ORDER_RESULT_MISMATCHED_TAGS:
+                PRINT_LINE(oprintf_fail, "Stock tag order:", "%s", "Mismatched (game may crash)");
+                break;
+        }
+        
         // Languages?
         if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
             bool any;
@@ -279,6 +300,7 @@ static DisplayValue all_values[] = {
     MAKE_DISPLAY_VALUE(tags_external_pointers),
     MAKE_DISPLAY_VALUE(tags_external_sound_indices),
     MAKE_DISPLAY_VALUE(tags_external_indices),
+    MAKE_DISPLAY_VALUE(tag_order_match),
     MAKE_DISPLAY_VALUE(uncompressed_size)
 };
 

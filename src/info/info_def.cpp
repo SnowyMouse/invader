@@ -5,6 +5,7 @@
 #include <invader/file/file.hpp>
 #include <invader/hek/map.hpp>
 #include <invader/resource/list/resource_list.hpp>
+#include <invader/tag/index/index.hpp>
 #include "language/language.hpp"
 #include "info_def.hpp"
 
@@ -116,6 +117,98 @@ namespace Invader::Info {
             }
         }
         return stub_count;
+    }
+    
+    CheckTagOrderResult check_tag_order(const Invader::Map &map) {
+        // Find the engine and get the indices
+        const auto *scenario_name = map.get_scenario_name();
+        std::optional<std::vector<File::TagFilePath>> indices;
+        switch(map.get_engine()) {
+            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                indices = custom_edition_indices(scenario_name);
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                indices = demo_indices(scenario_name);
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                indices = retail_indices(scenario_name);
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                indices = mcc_cea_indices(scenario_name);
+                break;
+            default:
+                return CheckTagOrderResult::CHECK_TAG_ORDER_RESULT_UNKNOWN;
+        }
+        
+        // No known indices
+        if(!indices.has_value()) {
+            return CheckTagOrderResult::CHECK_TAG_ORDER_RESULT_UNKNOWN;
+        }
+        
+        std::size_t tag_count = map.get_tag_count();
+        
+        std::vector<File::TagFilePath> input, stock = *indices;
+        input.reserve(tag_count);
+        for(std::size_t t = 0; t < tag_count; t++) {
+            auto &tag = map.get_tag(t);
+            input.emplace_back(File::TagFilePath { tag.get_path(), tag.get_tag_fourcc() });
+        }
+        
+        // Perfect match
+        if(input == stock) {
+            return CheckTagOrderResult::CHECK_TAG_ORDER_RESULT_MATCHED;
+        }
+        
+        auto a_joins_b = [](const std::vector<File::TagFilePath> &a, const std::vector<File::TagFilePath> &b) {
+            std::size_t a_length = a.size();
+            std::size_t b_length = b.size();
+            std::size_t check_length = a_length > b_length ? b_length : a_length;
+            
+            for(std::size_t c = 0; c < check_length; c++) {
+                auto a_tag = a[c].fourcc;
+                auto b_tag = b[c].fourcc;
+                
+                // B is object tag but A is not the same as B
+                if(IS_OBJECT_TAG(b_tag) && a_tag != b_tag) {
+                    return false;
+                }
+                
+                // B is damage effect tag but A is not the same as B (crash)
+                if(b_tag == HEK::TagFourCC::TAG_FOURCC_DAMAGE_EFFECT && a_tag != b_tag) {
+                    return false;
+                }
+            }
+            
+            for(std::size_t c = check_length; c < b_length; c++) {
+                auto b_tag = b[c].fourcc;
+                
+                // Network object that a doesn't have
+                if(IS_OBJECT_TAG(b_tag) || b_tag == HEK::TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
+                    return false;
+                }
+            }
+            
+            return true;
+        };
+        
+        auto input_joins_stock = a_joins_b(input, stock);
+        auto stock_joins_input = a_joins_b(stock, input);
+        
+        if(!input_joins_stock && !stock_joins_input) {
+            return CheckTagOrderResult::CHECK_TAG_ORDER_RESULT_MISMATCHED_TAGS;
+        }
+        else if(input_joins_stock && stock_joins_input) {
+            return CheckTagOrderResult::CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED;
+        }
+        else if(input_joins_stock) {
+            return CheckTagOrderResult::CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_CLIENT;
+        }
+        else if(stock_joins_input) {
+            return CheckTagOrderResult::CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_HOST;
+        }
+        
+        eprintf_error("oh no what happened now ;-;\n");
+        std::terminate();
     }
     
     bool check_if_valid_indexed_tags_for_stock_custom_edition(const Invader::Map &map) {
@@ -331,5 +424,28 @@ namespace Invader::Info {
     
     void uncompressed_size(const Invader::Map &map) {
         oprintf("%zu\n", map.get_data_length());
+    }
+    
+    void tag_order_match(const Invader::Map &map) {
+        switch(check_tag_order(map)) {
+            case CHECK_TAG_ORDER_RESULT_UNKNOWN:
+                oprintf("unknown\n");
+                break;
+            case CHECK_TAG_ORDER_RESULT_MISMATCHED_TAGS:
+                oprintf("mismatched\n");
+                break;
+            case CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_CLIENT:
+                oprintf("client-only\n");
+                break;
+            case CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_HOST:
+                oprintf("host-only\n");
+                break;
+            case CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED:
+                oprintf("network-matched\n");
+                break;
+            case CHECK_TAG_ORDER_RESULT_MATCHED:
+                oprintf("matched\n");
+                break;
+        }
     }
 }

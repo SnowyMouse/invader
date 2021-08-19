@@ -43,6 +43,33 @@ namespace Invader::Info {
      */
     std::vector<std::string> find_languages_for_map(const Invader::Map &map, bool &all);
     
+    enum CheckTagOrderResult {
+        /** No index stored for this map and cache version */
+        CHECK_TAG_ORDER_RESULT_UNKNOWN,
+        
+        /** Tag order does not match at all */
+        CHECK_TAG_ORDER_RESULT_MISMATCHED_TAGS,
+        
+        /** Tag order does not completely match but is network compatible if the stock map is being hosted and you are joining with the input map */
+        CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_CLIENT,
+        
+        /** Tag order does not completely match but is network compatible if the input map is being hosted and you are joining with the stock map */
+        CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED_AS_HOST,
+        
+        /** Tag order does not completely match but is network compatible both ways */
+        CHECK_TAG_ORDER_RESULT_NETWORK_MATCHED,
+        
+        /** Tag order completely matches */
+        CHECK_TAG_ORDER_RESULT_MATCHED
+    };
+    
+    /**
+     * Check if tag order matches
+     * @param map to check
+     * @return    whether or not the map matches or is at least network compatible
+     */
+    CheckTagOrderResult check_tag_order(const Invader::Map &map);
+    
     void overview(const Invader::Map &);
     void build(const Invader::Map &);
     void compressed(const Invader::Map &);
@@ -71,6 +98,7 @@ namespace Invader::Info {
     void tags_external_pointers(const Invader::Map &);
     void tags_external_sound_indices(const Invader::Map &);
     void tags_external_indices(const Invader::Map &);
+    void tag_order_match(const Invader::Map &);
     void uncompressed_size(const Invader::Map &);
 }
 

@@ -15,6 +15,8 @@ This is used for recording Invader's changes. This changelog is based on
   using resource maps. By default, resource maps are not used.
 - invader-build: Added `--anniversary-mode` which specifies if anniversary
   assets should be used
+- invader-info: Added `tag_order_match` which checks if a map has the same tag
+  order as stock and, if not, whether it may (probably) be network compatible
 
 ### Changed
 - invader-bitmap: Changed the default format to `auto`

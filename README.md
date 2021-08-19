@@ -585,7 +585,8 @@ Options:
                                tags_external_loc_indices,
                                tags_external_pointers,
                                tags_external_sound_indices,
-                               tags_external_indices, uncompressed_size
+                               tags_external_indices, tag_order_match,
+                               uncompressed_size
 ```
 
 ### invader-model
