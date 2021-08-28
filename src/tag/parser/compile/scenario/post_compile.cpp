@@ -811,22 +811,13 @@ namespace Invader::Parser {
                                 auto &variant_to_set = participant.variant_numbers[variant];
                                 
                                 // Basically we're checking the tag paths for keywords
-                                auto path_length = what.path.size();
                                 auto *path_cstr = what.path.c_str();
                                 
-                                auto contains_thing = [](const char *haystack, std::size_t haystack_length, const char *needle, std::size_t needle_length) -> bool {
-                                    if(haystack_length < needle_length) {
-                                        return false;
-                                    }
-                                    for(std::size_t h = 0; h <= haystack_length - needle_length; h++) {
-                                        if(std::strncmp(haystack + h, needle, needle_length) == 0) {
-                                            return true;
-                                        }
-                                    }
-                                    return false;
+                                auto contains_thing = [](const char *haystack, const char *needle) -> bool {
+                                    return std::strstr(haystack, needle) != nullptr;
                                 };
                                 
-                                #define IF_THING_IS_CONTAINED_IN_THE_THING(thing, to) if(contains_thing(path_cstr, path_length, thing, std::strlen(thing))) {\
+                                #define IF_THING_IS_CONTAINED_IN_THE_THING(thing, to) if(contains_thing(path_cstr, thing)) {\
                                                                                           variant_matched = to;\
                                                                                       }
                                         
