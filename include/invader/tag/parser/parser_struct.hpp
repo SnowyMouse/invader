@@ -1118,6 +1118,9 @@ namespace Invader::Parser {
         
         virtual std::vector<ParserStructValue> get_values_internal() = 0;
         
+        virtual void write_tag_data_to_vector(std::vector<std::byte> &vector, std::size_t struct_offset);
+        //virtual void read_tag_data_from_bytes(const std::byte *input, std::size_t input_length, std::size_t cursor_offset, std::size_t struct_offset);
+        
     private:
         bool compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const;
         

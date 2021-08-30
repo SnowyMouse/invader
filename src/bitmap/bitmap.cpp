@@ -90,7 +90,7 @@ struct BitmapOptions {
     bool regenerate = false;
 };
 
-template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagFourCC tag_fourcc) {
+template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format) {
     // Let's begin
     std::filesystem::path data_path = bitmap_options.data;
 
@@ -647,5 +647,5 @@ int main(int argc, char *argv[]) {
 
     auto tag_path = bitmap_options.tags / bitmap_tag;
     auto final_path_bitmap = std::filesystem::path(tag_path) += ".bitmap";
-    return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format, TagFourCC::TAG_FOURCC_BITMAP);
+    return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format);
 }
