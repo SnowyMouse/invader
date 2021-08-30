@@ -189,7 +189,9 @@ def generate_headers(definitions, header_dir):
                 append_line()
                 append_line("static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess = false);".format(i["name"]))
                 append_line("static {} parse_cache_file_data(const Invader::Tag &tag, std::optional<Pointer> pointer = std::nullopt);".format(i["name"]))
-                append_line("static {} parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, bool postprocess = false, const C<BigEndian> *data_this = nullptr);".format(i["name"]))
+                
+                append_line("static {} parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &cursor, const C<BigEndian> &struct_ref);".format(i["name"]))
+                
                 append_line("static void scan_padding(const Invader::Tag &tag, std::optional<Pointer> pointer = std::nullopt);")
                 
                 def append_if_true(text, what):

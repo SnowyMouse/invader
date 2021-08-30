@@ -338,9 +338,9 @@ namespace Invader::Parser {
                 const auto vertex_pointer = reinterpret_cast<const HEK::CacheFileModelPartVerticesXbox *>(tag.data(what.vertex_offset, sizeof(HEK::CacheFileModelPartVerticesXbox)))->vertices;
                 const auto *vertices = reinterpret_cast<const ModelVertexCompressed::struct_little *>(tag.data(vertex_pointer, sizeof(ModelVertexCompressed::struct_little) * vertex_count));
                 for(std::size_t v = 0; v < vertex_count; v++) {
-                    std::size_t data_read;
+                    std::size_t cursor = 0;
                     ModelVertexCompressed::C<BigEndian> vertex_compressed = vertices[v];
-                    what.compressed_vertices.emplace_back(ModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read, true));
+                    what.compressed_vertices.emplace_back(ModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), cursor, vertex_compressed));
                 }
                 indices = reinterpret_cast<const LittleEndian<Index> *>(tag.data(what.triangle_offset, sizeof(std::uint16_t) * index_count));
             }
@@ -350,9 +350,9 @@ namespace Invader::Parser {
                 auto model_index_offset = map.get_model_index_offset() + model_data_offset;
                 const auto *vertices = reinterpret_cast<const ModelVertexUncompressed::C<LittleEndian> *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(ModelVertexUncompressed::C<LittleEndian>) * vertex_count));
                 for(std::size_t v = 0; v < vertex_count; v++) {
-                    std::size_t data_read;
+                    std::size_t cursor = 0;
                     ModelVertexUncompressed::C<BigEndian> vertex_uncompressed = vertices[v];
-                    what.uncompressed_vertices.emplace_back(ModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read, true));
+                    what.uncompressed_vertices.emplace_back(ModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), cursor, vertex_uncompressed));
                 }
                 indices = reinterpret_cast<const LittleEndian<Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
             }

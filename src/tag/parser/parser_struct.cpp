@@ -986,6 +986,10 @@ namespace Invader::Parser {
         return result;
     }
     
+    void ParserStruct::write_tag_data_to_vector(std::vector<std::byte> &, std::size_t) {
+        throw std::exception();
+    }
+    
     std::vector<ParserStructValue> &ParserStruct::get_values() {
         if(!this->values.has_value()) {
             this->values = this->get_values_internal();
