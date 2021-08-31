@@ -27,7 +27,7 @@ if(${INVADER_WIN32_EXE_STATIC_LINK})
     
     set(ZLIB_LIBRARIES z)
     set(TIFF_LIBRARIES tiff jpeg lzma)
-    set(FREETYPE_LIBRARIES freetype png bz2 harfbuzz graphite2 freetype)
+    set(FREETYPE_LIBRARIES freetype png brotlidec-static brotlicommon-static bz2 harfbuzz graphite2 freetype)
     set(LibArchive_LIBRARIES archive bcrypt bz2 lzma iconv)
     set(SQUISH_LIBRARIES squish gomp)
 else()
