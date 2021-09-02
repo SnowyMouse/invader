@@ -79,7 +79,8 @@
             "interpolate between min max flash colors as state changes",
             "interpolate color along hsv space",
             "more colors for hsv interpolation",
-            "invert interpolation"
+            "invert interpolation",
+            "unknown classic hud flag"
         ],
         "width": 8
     },

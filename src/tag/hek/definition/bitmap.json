@@ -135,7 +135,8 @@
             "enable diffusion dithering",
             "disable height map compression",
             "uniform sprite sequences",
-            "filthy sprite bug fix"
+            "filthy sprite bug fix",
+            "unknown classic hud flag"
         ],
         "width": 16
     },
@@ -368,12 +369,6 @@
                 "name": "sprite budget size",
                 "type": "BitmapSpriteBudgetSize",
                 "exclude": [
-                    {
-                        "option": "1024x1024",
-                        "struct": [
-                            "Bitmap"
-                        ]
-                    },
                     {
                         "option": "2048x2048",
                         "struct": [
