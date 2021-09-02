@@ -136,7 +136,7 @@
             "disable height map compression",
             "uniform sprite sequences",
             "filthy sprite bug fix",
-            "unknown classic hud flag"
+            "render at half dimensions"
         ],
         "width": 16
     },

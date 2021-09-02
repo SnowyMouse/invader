@@ -80,7 +80,7 @@
             "interpolate color along hsv space",
             "more colors for hsv interpolation",
             "invert interpolation",
-            "unknown classic hud flag"
+            "use xbox meter channel order"
         ],
         "width": 8
     },
