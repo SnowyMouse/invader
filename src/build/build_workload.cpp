@@ -1110,25 +1110,6 @@ namespace Invader {
             this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagFourCC::TAG_FOURCC_BITMAP);
             this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagFourCC::TAG_FOURCC_BITMAP);
         }
-        
-        #ifdef EXPERIMENTAL_MCC_S8
-        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_ammo_alphas_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_ammo_meters_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_ammo_outlines_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_ammo_type_icons_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_counter_numbers_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_msg_icons_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_reticle_warnings_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_reticles_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_unit_backgrounds_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_unit_meters_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_waypoints_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\combined\\hud_weapon_backgrounds_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\sniper\\caption_r", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\hud\\bitmaps\\sniper\\hud_reticles_scope_r", TagFourCC::TAG_FOURCC_BITMAP);
-        }
-        #endif
 
         // Mark stubs
         std::size_t warned = 0;

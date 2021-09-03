@@ -45,6 +45,43 @@
         "size": 16
     },
     {
+        "name": "MCCHUDGlobalsAnniversaryHUDBitmapReplacement",
+        "fields": [
+            {
+                "type": "TagDependency",
+                "classes": [ "bitmap" ],
+                "name": "source"
+            },
+            {
+                "name": "unknown1",
+                "type": "int16"
+            },
+            {
+                "name": "unknown2",
+                "type": "int16"
+            }
+        ],
+        "type": "struct",
+        "size": 20
+    },
+    {
+        "name": "MCCHUDGlobalsAnniversaryHUDBitmap",
+        "fields": [
+            {
+                "type": "TagDependency",
+                "classes": [ "bitmap" ],
+                "name": "source"
+            },
+            {
+                "type": "TagReflexive",
+                "name": "replacements",
+                "struct": "MCCHUDGlobalsAnniversaryHUDBitmapReplacement"
+            }
+        ],
+        "type": "struct",
+        "size": 28
+    },
+    {
         "name": "HUDGlobalsWaypointArrow",
         "fields": [
             {
@@ -506,8 +543,13 @@
                 ]
             },
             {
+                "name": "anniversary hud bitmaps",
+                "type": "TagReflexive",
+                "struct": "MCCHUDGlobalsAnniversaryHUDBitmap"
+            },
+            {
                 "type": "pad",
-                "size": 96
+                "size": 84
             }
         ],
         "type": "struct",
