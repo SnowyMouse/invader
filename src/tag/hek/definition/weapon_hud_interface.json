@@ -160,8 +160,9 @@
                 "type": "WeaponHUDInterfaceViewType"
             },
             {
-                "type": "pad",
-                "size": 2
+                "name": "unknown",
+                "type": "int16",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -408,8 +409,9 @@
                 "type": "WeaponHUDInterfaceViewType"
             },
             {
-                "type": "pad",
-                "size": 2
+                "name": "unknown",
+                "type": "int16",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",

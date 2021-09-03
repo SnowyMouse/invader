@@ -545,6 +545,7 @@
             {
                 "name": "anniversary hud bitmaps",
                 "type": "TagReflexive",
+                "engines": [ "mcc" ],
                 "struct": "MCCHUDGlobalsAnniversaryHUDBitmap"
             },
             {
