@@ -26,7 +26,7 @@ This is used for recording Invader's changes. This changelog is based on
   bitmap type is interface or sprites)
 - invader-build: `--auto-forge-target` no longer takes a parameter (it forges
   based on the input of `--game-engine`)
-- invader-build: Scenarios with no scripts or globals no have their syntax and
+- invader-build: Scenarios with no scripts or globals now have their syntax and
   string data initialized
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
   directories to the tag's current directory

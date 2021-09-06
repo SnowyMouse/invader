@@ -71,9 +71,9 @@ namespace Invader::Parser {
             scenario.script_string_data.clear();
         }
         
-        // If we don't have any string data, allocate 512 bytes
+        // If we don't have any string data, allocate 1024 bytes
         if(scenario.script_string_data.size() == 0) {
-            scenario.script_string_data.resize(512);
+            scenario.script_string_data.resize(1024);
         }
         
         auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
@@ -83,7 +83,7 @@ namespace Invader::Parser {
         static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
         if(scenario.script_syntax_data.size() == 0) {
             ScenarioScriptNodeTable::struct_little t = {};
-            static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 256;
+            std::size_t DEFAULT_SCRIPT_NODE_COUNT = (engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA || engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) ? 32767 : 19001;
             t.count = 0;
             t.data = 0x64407440;
             t.element_size = SCRIPT_ELEMENT_SIZE;
