@@ -63,6 +63,14 @@ namespace Invader::Parser {
     static constexpr const std::size_t MAX_SCRIPT_NODE_COUNT_CEA = static_cast<std::size_t>(INT16_MAX);
     
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
+        // TODO: Properly compile scripts here. If there are no scripts, then we'd get DEFAULT_SCRIPT_NODE_COUNT nodes anyway!
+        
+        // If we have no scripts, initialize it (hack to fix MCC and OS edited cache files for now until we have script compilation done)
+        if(scenario.scripts.size() == 0 && scenario.globals.size() == 0) {
+            scenario.script_syntax_data.clear();
+            scenario.script_string_data.clear();
+        }
+        
         // If we don't have any string data, allocate 512 bytes
         if(scenario.script_string_data.size() == 0) {
             scenario.script_string_data.resize(512);
@@ -75,7 +83,7 @@ namespace Invader::Parser {
         static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
         if(scenario.script_syntax_data.size() == 0) {
             ScenarioScriptNodeTable::struct_little t = {};
-            static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 128;
+            static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 256;
             t.count = 0;
             t.data = 0x64407440;
             t.element_size = SCRIPT_ELEMENT_SIZE;
