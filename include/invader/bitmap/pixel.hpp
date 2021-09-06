@@ -192,11 +192,11 @@ namespace Invader {
 
         /**
          * Convert the color from alpha
-         * @param  color alpha value
+         * @param  alpha alpha value
          * @return       color
          */
-        static Pixel convert_from_a8(std::uint8_t color) noexcept {
-            return Pixel { 0x00, 0x00, 0x00, color };
+        static Pixel convert_from_a8(std::uint8_t alpha) noexcept {
+            return Pixel { 0xFF, 0xFF, 0xFF, alpha };
         }
 
         /**
@@ -209,12 +209,12 @@ namespace Invader {
 
         /**
          * Convert from A8Y8
-         * @param  color A8Y8 color pixel
-         * @return       color
+         * @param  alpha_luminosity alpha-luminosity of the pixel
+         * @return                  color
          */
-        static Pixel convert_from_a8y8(std::uint16_t color) noexcept {
-            auto luminosity = static_cast<std::uint8_t>(color);
-            return Pixel { luminosity, luminosity, luminosity, static_cast<std::uint8_t>(color >> 8) };
+        static Pixel convert_from_a8y8(std::uint16_t alpha_luminosity) noexcept {
+            auto luminosity = static_cast<std::uint8_t>(alpha_luminosity);
+            return Pixel { luminosity, luminosity, luminosity, static_cast<std::uint8_t>(alpha_luminosity >> 8) };
         }
 
         /**

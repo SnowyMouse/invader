@@ -412,7 +412,7 @@ namespace Invader::BitmapEncode {
             ALPHA_PRESENT_MULTI_BIT = 2
         } alpha_present = AlphaPresent::ALPHA_PRESENT_NONE;
         
-        bool all_black = true;
+        bool all_white = true;
         bool luminosity_equals_alpha = true;
         
         // Analyze each pixel
@@ -429,8 +429,8 @@ namespace Invader::BitmapEncode {
                 luminosity_equals_alpha = false;
             }
             
-            if(starting_pixel->red != 0 || starting_pixel->green != 0 || starting_pixel->blue != 0) {
-                all_black = false;
+            if(starting_pixel->red != 0xFF || starting_pixel->green != 0xFF || starting_pixel->blue != 0xFF) {
+                all_white = false;
             }
         }
         
@@ -453,7 +453,7 @@ namespace Invader::BitmapEncode {
                 if(alpha_present == AlphaPresent::ALPHA_PRESENT_NONE) {
                     return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8;
                 }
-                else if(all_black) {
+                else if(all_white) {
                     return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8;
                 }
                 else if(luminosity_equals_alpha) {
