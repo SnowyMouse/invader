@@ -66,6 +66,15 @@ namespace Invader::HEK {
         /** Tick rate in Hz */
         double tick_rate = 30.0;
         
+        
+        bool bsps_occupy_tag_space = true;
+        bool supports_external_bitmaps_map = false;
+        bool supports_external_sounds_map = false;
+        bool supports_external_loc_map = false;
+        bool uses_indexing = false;
+        bool uses_compression = false;
+        
+        
         /**
          * Retrieve the build string
          * 
