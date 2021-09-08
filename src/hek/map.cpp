@@ -1,8 +1,181 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/hek/map.hpp>
+#include <invader/version.hpp>
+#include <variant>
+#include <optional>
 
 namespace Invader::HEK {
+    static constexpr const Pointer64 GEARBOX_TAG_SPACE_LENGTH = (23 * 1024 * 1024);
+    static constexpr const Pointer64 GEARBOX_MAX_FILE_SIZE = (384 * 1024 * 1024);
+    static constexpr const Pointer64 GEARBOX_BASE_MEMORY_ADDRESS = 0x40440000;
+    static constexpr const Pointer64 XBOX_BASE_MEMORY_ADDRESS = 0x803A6000;
+    static constexpr const Pointer64 XBOX_TAG_SPACE_LENGTH = (22 * 1024 * 1024);
+    
+    static constexpr Pointer64 xbox_max_file_size(CacheFileType type) {
+        switch(type) {
+            case CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
+                return 278 * 1024 * 1024;
+            case CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
+                return 47 * 1024 * 1024;
+            case CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
+                return 35 * 1024 * 1024;
+            case CacheFileType::SCENARIO_TYPE_ENUM_COUNT:
+                break;
+        }
+        std::terminate();
+    }
+    
+    static constexpr const GameEngineInfo engine_infos[] = {
+        { 
+            .name = "Invader",
+            .engine = GameEngine::GAME_ENGINE_NATIVE,
+            .cache_version = CacheFileEngine::CACHE_FILE_NATIVE,
+            .build_string = full_version,
+            .build_string_is_enforced = true,
+            .base_memory_address = 0,
+            .tag_space_length = UINT64_MAX,
+            .maximum_file_size = UINT64_MAX
+        },
+        { 
+            .name = "Halo: Combat Evolved Anniversary (MCC)",
+            .engine = GameEngine::GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY,
+            .cache_version = CacheFileEngine::CACHE_FILE_MCC_CEA,
+            .build_string = "01.03.43.0000",
+            .build_string_is_enforced = false,
+            .base_memory_address = 0x50000000,
+            .tag_space_length = 64 * 1024 * 1024,
+            .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
+            .base_memory_address_is_inferred = true
+        },
+        {
+            .name = "Halo Demo / Trial (Gearbox)",
+            .engine = GameEngine::GAME_ENGINE_GEARBOX_DEMO,
+            .cache_version = CacheFileEngine::CACHE_FILE_DEMO,
+            .build_string = "01.00.00.0576",
+            .build_string_is_enforced = false,
+            .base_memory_address = 0x4BF10000,
+            .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = GEARBOX_MAX_FILE_SIZE
+        },
+        {
+            .name = "Halo Custom Edition (Gearbox)",
+            .engine = GameEngine::GAME_ENGINE_GEARBOX_CUSTOM_EDITION,
+            .cache_version = CacheFileEngine::CACHE_FILE_CUSTOM_EDITION,
+            .build_string = "01.00.00.0609",
+            .build_string_is_enforced = false,
+            .base_memory_address = GEARBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = GEARBOX_MAX_FILE_SIZE
+        },
+        {
+            .name = "Halo: Combat Evolved (Gearbox)",
+            .engine = GameEngine::GAME_ENGINE_GEARBOX_RETAIL,
+            .cache_version = CacheFileEngine::CACHE_FILE_RETAIL,
+            .build_string = "01.00.00.0564",
+            .build_string_is_enforced = false,
+            .base_memory_address = GEARBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = GEARBOX_MAX_FILE_SIZE
+        },
+        {
+            .name = "Halo: Combat Evolved (Xbox NTSC-US)",
+            .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_US,
+            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
+            .build_string = "01.10.12.2276",
+            .build_string_is_enforced = true,
+            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = XBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = xbox_max_file_size
+        },
+        {
+            .name = "Halo: Combat Evolved (Xbox NTSC-JP)",
+            .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_JP,
+            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
+            .build_string = "01.03.14.0009",
+            .build_string_is_enforced = true,
+            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = static_cast<Pointer64>(XBOX_TAG_SPACE_LENGTH + 288 * 1024),
+            .maximum_file_size = xbox_max_file_size
+        },
+        {
+            .name = "Halo: Combat Evolved (Xbox NTSC-TW)",
+            .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_TW,
+            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
+            .build_string = "01.12.09.0135",
+            .build_string_is_enforced = true,
+            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = static_cast<Pointer64>(XBOX_TAG_SPACE_LENGTH + 500 * 1024),
+            .maximum_file_size = xbox_max_file_size
+        },
+        {
+            .name = "Halo: Combat Evolved (Xbox PAL)",
+            .engine = GameEngine::GAME_ENGINE_XBOX_PAL,
+            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
+            .build_string = "01.01.14.2342",
+            .build_string_is_enforced = true,
+            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = XBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = xbox_max_file_size,
+            .tick_rate = 25.0
+        }
+    };
+    
+    static constexpr bool engine_info_error_check() {
+        return true;
+    }
+    static_assert(engine_info_error_check());
+    
+    const GameEngineInfo &GameEngineInfo::get_game_engine_info(GameEngine engine) noexcept {
+        for(auto &e : engine_infos) {
+            if(e.engine == engine) {
+                return e;
+            }
+        }
+        std::terminate();
+    }
+    
+    const GameEngineInfo *GameEngineInfo::get_game_engine_info(CacheFileEngine cache_version, const char *build_string) noexcept {
+        for(auto &e : engine_infos) {
+            if(e.cache_version == cache_version && (!e.build_string_is_enforced || std::strcmp(e.get_build_string(), build_string) == 0)) {
+                return &e;
+            }
+        }
+        return nullptr;
+    }
+    
+    const char *GameEngineInfo::get_build_string() const noexcept {
+        // If it's a string pointer...
+        if(const char * const *build_string_maybe = std::get_if<const char *>(&this->build_string)) {
+            return *build_string_maybe;
+        }
+        
+        // Or maybe it's a function that gets a string pointer?
+        else if(const char *(*const *build_string_maybe)() = std::get_if<const char *(*)()>(&this->build_string)) {
+            return (*build_string_maybe)();
+        }
+        
+        else {
+            std::terminate();
+        }
+    }
+    
+    Pointer64 GameEngineInfo::get_maximum_file_size(CacheFileType type) const noexcept {
+        // If it's simple size
+        if(const Pointer64 *max_file_size_maybe = std::get_if<Pointer64>(&this->maximum_file_size)) {
+            return *max_file_size_maybe;
+        }
+        
+        // Or maybe it's a function that takes a file type?
+        else if(Pointer64 (*const *max_file_size_maybe)(CacheFileType) = std::get_if<Pointer64 (*)(CacheFileType)>(&this->maximum_file_size)) {
+            return (*max_file_size_maybe)(type);
+        }
+        
+        else {
+            std::terminate();
+        }
+    }
+    
     const char *engine_name(CacheFileEngine engine) noexcept {
         switch(engine) {
             case CacheFileEngine::CACHE_FILE_NATIVE:

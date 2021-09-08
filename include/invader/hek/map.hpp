@@ -4,6 +4,7 @@
 #define INVADER__HEK__MAP_HPP
 
 #include <cstdint>
+#include <variant>
 #include "data_type.hpp"
 #include "../tag/hek/definition.hpp"
 
@@ -17,11 +18,86 @@ namespace Invader::HEK {
         
         CACHE_FILE_NATIVE = 0x1A86
     };
-
+    
     const char *engine_name(CacheFileEngine engine) noexcept;
-
     using CacheFileType = ScenarioType;
     const char *type_name(CacheFileType type) noexcept;
+    
+    enum GameEngine {
+        GAME_ENGINE_NATIVE,
+        GAME_ENGINE_XBOX_NTSC_US,
+        GAME_ENGINE_XBOX_NTSC_JP,
+        GAME_ENGINE_XBOX_NTSC_TW,
+        GAME_ENGINE_XBOX_PAL,
+        GAME_ENGINE_GEARBOX_DEMO,
+        GAME_ENGINE_GEARBOX_RETAIL,
+        GAME_ENGINE_GEARBOX_CUSTOM_EDITION,
+        GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY
+    };
+    
+    struct GameEngineInfo {
+        /** Human-readable identifier */
+        const char *name;
+        
+        /** Engine enumerator. Note that this should NOT be stored in a file as this can and will change! */
+        GameEngine engine;
+        
+        /** Cache version */
+        CacheFileEngine cache_version;
+        
+        /** Build string, or a function to get the build string - use get_build_string() to retrieve it */
+        std::variant<const char *, const char *(*)()> build_string;
+        
+        /** The build string must be exact */
+        bool build_string_is_enforced;
+        
+        /** Base memory address for tag space */
+        Pointer64 base_memory_address;
+        
+        /** Tag space length */
+        Pointer64 tag_space_length;
+        
+        /** Maximum file size, or a function to get the maximum file size - use get_maximum_file_size() to retrieve it */
+        std::variant<Pointer64, Pointer64 (*)(CacheFileType)> maximum_file_size;
+        
+        /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
+        bool base_memory_address_is_inferred = false;
+        
+        /** Tick rate in Hz */
+        double tick_rate = 30.0;
+        
+        /**
+         * Retrieve the build string
+         * 
+         * @return build string
+         */
+        const char *get_build_string() const noexcept;
+        
+        /**
+         * Retrieve the maximum file size
+         * 
+         * @param type cache file type
+         * @return     maximum file size
+         */
+        Pointer64 get_maximum_file_size(CacheFileType type) const noexcept;
+    
+        /**
+         * Get the game engine info given a game engine enumerator
+         * 
+         * @param engine engine enumerator to look for
+         * @return       reference to game engine
+         */
+        static const GameEngineInfo &get_game_engine_info(GameEngine engine) noexcept;
+        
+        /**
+         * Get the game engine info given a cache version and a build string
+         * 
+         * @param cache_version cache version
+         * @param build_string  build string version
+         * @return              reference to game engine info if found, or nullptr if not found
+         */
+        static const GameEngineInfo *get_game_engine_info(CacheFileEngine cache_version, const char *build_string) noexcept;
+    };
 
     enum CacheFileLiteral : std::uint32_t {
         CACHE_FILE_HEAD = 0x68656164,
