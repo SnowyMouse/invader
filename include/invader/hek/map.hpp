@@ -63,9 +63,6 @@ namespace Invader::HEK {
         /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
         bool base_memory_address_is_inferred = false;
         
-        /** Tick rate in Hz */
-        double tick_rate = 30.0;
-        
         
         bool bsps_occupy_tag_space = true;
         bool supports_external_bitmaps_map = false;

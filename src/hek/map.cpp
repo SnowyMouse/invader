@@ -130,7 +130,6 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_max_file_size,
-            .tick_rate = 25.0,
             .uses_compression = true
         }
     };

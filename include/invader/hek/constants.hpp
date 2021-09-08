@@ -4,7 +4,9 @@
 #define INVADER__HEK__CONSTANTS_HPP
 
 /**
- * Number of times the game performs most of its logic (physics, etc.)
+ * Number of times the game performs most of its logic (physics, etc.). This applies to everything (INCLUDING PAL - see comment*).
+ * 
+ * *While the game runs at 25 Hz on PAL, Bungie never changed tool.exe to account for this when building cache files. Instead, they changed a few select values and a few animations.
  */
 #define TICK_RATE 30.0
 
