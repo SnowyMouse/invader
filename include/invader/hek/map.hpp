@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <variant>
+#include <list>
 #include "data_type.hpp"
 #include "../tag/hek/definition.hpp"
 
@@ -68,6 +69,7 @@ namespace Invader::HEK {
         /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
         bool base_memory_address_is_inferred = false;
         
+        bool scenario_name_and_file_name_must_be_equal = true;
         bool bsps_occupy_tag_space = true;
         bool supports_external_bitmaps_map = false;
         bool supports_external_sounds_map = false;
@@ -126,7 +128,7 @@ namespace Invader::HEK {
          * Get all shorthands
          * @return shorthands
          */
-        static std::list<std::string> get_all_shorthands;
+        static std::list<const char *> get_all_shorthands();
     };
 
     enum CacheFileLiteral : std::uint32_t {

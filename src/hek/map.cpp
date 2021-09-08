@@ -50,6 +50,7 @@ namespace Invader::HEK {
             .tag_space_length = 64 * 1024 * 1024,
             .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
             .base_memory_address_is_inferred = true,
+            .scenario_name_and_file_name_must_be_equal = false,
             .supports_external_bitmaps_map = true
         },
         {
