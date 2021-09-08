@@ -89,6 +89,13 @@ namespace Invader::HEK {
          * @return     maximum file size
          */
         Pointer64 get_maximum_file_size(CacheFileType type) const noexcept;
+        
+        /**
+         * Get whether or not external resource maps are supported
+         * 
+         * @return true if external resource maps are supported, false if not
+         */
+        bool supports_external_resource_maps() const noexcept { return this->supports_external_bitmaps_map || this->supports_external_sounds_map || this->supports_external_loc_map; }
     
         /**
          * Get the game engine info given a game engine enumerator
