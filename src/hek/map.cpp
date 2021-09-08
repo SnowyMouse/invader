@@ -28,7 +28,8 @@ namespace Invader::HEK {
     
     static constexpr const GameEngineInfo engine_infos[] = {
         { 
-            .name = "Invader",
+            .name = "Invader (Native)",
+            .shorthand = "native",
             .engine = GameEngine::GAME_ENGINE_NATIVE,
             .cache_version = CacheFileEngine::CACHE_FILE_NATIVE,
             .build_string = full_version,
@@ -40,6 +41,7 @@ namespace Invader::HEK {
         },
         { 
             .name = "Halo: Combat Evolved Anniversary (MCC)",
+            .shorthand = "mcc-cea",
             .engine = GameEngine::GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY,
             .cache_version = CacheFileEngine::CACHE_FILE_MCC_CEA,
             .build_string = "01.03.43.0000",
@@ -52,6 +54,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo Demo / Trial (Gearbox)",
+            .shorthand = "gbx-demo",
             .engine = GameEngine::GAME_ENGINE_GEARBOX_DEMO,
             .cache_version = CacheFileEngine::CACHE_FILE_DEMO,
             .build_string = "01.00.00.0576",
@@ -64,6 +67,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo Custom Edition (Gearbox)",
+            .shorthand = "gbx-custom",
             .engine = GameEngine::GAME_ENGINE_GEARBOX_CUSTOM_EDITION,
             .cache_version = CacheFileEngine::CACHE_FILE_CUSTOM_EDITION,
             .build_string = "01.00.00.0609",
@@ -78,6 +82,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Gearbox)",
+            .shorthand = "gbx-retail",
             .engine = GameEngine::GAME_ENGINE_GEARBOX_RETAIL,
             .cache_version = CacheFileEngine::CACHE_FILE_RETAIL,
             .build_string = "01.00.00.0564",
@@ -90,6 +95,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-US)",
+            .shorthand = "xbox-2276",
             .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_US,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.10.12.2276",
@@ -101,6 +107,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-JP)",
+            .shorthand = "xbox-0009",
             .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_JP,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.03.14.0009",
@@ -112,6 +119,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-TW)",
+            .shorthand = "xbox-0135",
             .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_TW,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.12.09.0135",
@@ -123,6 +131,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Xbox PAL)",
+            .shorthand = "xbox-2342",
             .engine = GameEngine::GAME_ENGINE_XBOX_PAL,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.01.14.2342",
@@ -148,6 +157,15 @@ namespace Invader::HEK {
         std::terminate();
     }
     
+    const GameEngineInfo *GameEngineInfo::get_game_engine_info(const char *shorthand) noexcept {
+        for(auto &e : engine_infos) {
+            if(std::strcmp(e.shorthand, shorthand) == 0) {
+                return &e;
+            }
+        }
+        return nullptr;
+    }
+    
     const GameEngineInfo *GameEngineInfo::get_game_engine_info(CacheFileEngine cache_version, const char *build_string) noexcept {
         for(auto &e : engine_infos) {
             if(e.cache_version == cache_version && (!e.build_string_is_enforced || std::strcmp(e.get_build_string(), build_string) == 0)) {
@@ -171,6 +189,20 @@ namespace Invader::HEK {
         else {
             std::terminate();
         }
+    }
+    
+    std::list<const char *> GameEngineInfo::get_all_shorthands() {
+        // Add everything to a list
+        std::list<const char *> shorthands;
+        for(auto &e : engine_infos) {
+            shorthands.emplace_back(e.shorthand);
+        }
+        
+        // Sort alphabetically
+        shorthands.sort([](const char * const &a, const char * const &b) -> bool { return std::strcmp(a, b) < 0; });
+        
+        // Done
+        return shorthands;
     }
     
     Pointer64 GameEngineInfo::get_maximum_file_size(CacheFileType type) const noexcept {

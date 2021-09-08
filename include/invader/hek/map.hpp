@@ -32,12 +32,17 @@ namespace Invader::HEK {
         GAME_ENGINE_GEARBOX_DEMO,
         GAME_ENGINE_GEARBOX_RETAIL,
         GAME_ENGINE_GEARBOX_CUSTOM_EDITION,
-        GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY
+        GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY,
+        
+        GAME_ENGINE_ENUM_COUNT
     };
     
     struct GameEngineInfo {
         /** Human-readable identifier */
         const char *name;
+        
+        /** Human-readable shorthand identifier */
+        const char *shorthand;
         
         /** Engine enumerator. Note that this should NOT be stored in a file as this can and will change! */
         GameEngine engine;
@@ -63,14 +68,12 @@ namespace Invader::HEK {
         /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
         bool base_memory_address_is_inferred = false;
         
-        
         bool bsps_occupy_tag_space = true;
         bool supports_external_bitmaps_map = false;
         bool supports_external_sounds_map = false;
         bool supports_external_loc_map = false;
         bool uses_indexing = false;
         bool uses_compression = false;
-        
         
         /**
          * Retrieve the build string
@@ -101,6 +104,14 @@ namespace Invader::HEK {
          * @return       reference to game engine
          */
         static const GameEngineInfo &get_game_engine_info(GameEngine engine) noexcept;
+    
+        /**
+         * Get the game engine info given a game engine shorthand
+         * 
+         * @param shorthand shorthand to look for
+         * @return          reference to game engine if found, or nullptr if not found
+         */
+        static const GameEngineInfo *get_game_engine_info(const char *shorthand) noexcept;
         
         /**
          * Get the game engine info given a cache version and a build string
@@ -110,6 +121,12 @@ namespace Invader::HEK {
          * @return              reference to game engine info if found, or nullptr if not found
          */
         static const GameEngineInfo *get_game_engine_info(CacheFileEngine cache_version, const char *build_string) noexcept;
+        
+        /**
+         * Get all shorthands
+         * @return shorthands
+         */
+        static std::list<std::string> get_all_shorthands;
     };
 
     enum CacheFileLiteral : std::uint32_t {
