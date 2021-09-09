@@ -138,6 +138,7 @@ namespace Invader::HEK {
         CACHE_FILE_FOOT_DEMO = 0x47666F74
     };
 
+    // TODO: remove many of these constants since they've been refactored to GameEngineInfo
     enum CacheFileTagDataBaseMemoryAddress : Pointer64 {
         CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
         CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,

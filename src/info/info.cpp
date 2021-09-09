@@ -50,7 +50,8 @@ namespace Invader::Info {
         PRINT_LINE(oprintf, "Scenario name:", "%s\n", map.get_scenario_name());
         PRINT_LINE(oprintf, "Build:", "%s\n", map.get_build());
         auto cache_version = map.get_cache_version();
-        PRINT_LINE(oprintf, "Engine:", "%s\n", HEK::GameEngineInfo::get_game_engine_info(map.get_game_engine()).name);
+        auto &game_engine_info = HEK::GameEngineInfo::get_game_engine_info(map.get_game_engine());
+        PRINT_LINE(oprintf, "Engine:", "%s\n", game_engine_info.name);
         
         if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             PRINT_LINE(oprintf, "Timestamp:", "%s\n", reinterpret_cast<Invader::HEK::NativeCacheFileHeader *>(header_cache)->timestamp.string);
@@ -208,44 +209,12 @@ namespace Invader::Info {
         }
         
         // Uncompressed size
-        std::optional<HEK::CacheFileLimits> max_uncompressed_size;
-        switch(map.get_cache_version()) {
-            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_MCC_CEA;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_PC;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                switch(map_type) {
-                    case HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
-                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER;
-                        break;
-                    case HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
-                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER;
-                        break;
-                    case HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
-                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE;
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                // pretty much useless to show max file size
-                // max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
-                break;
-            default:
-                break;
-        }
-        
+        auto max_uncompressed_size = game_engine_info.get_maximum_file_size(map_type);
         bool size_mismatched = map.get_data_length() != map.get_header_decompressed_file_size();
         
-        if(max_uncompressed_size.has_value()) {
+        if(max_uncompressed_size <= UINT32_MAX) {
             auto num = BYTES_TO_MiB(map.get_data_length());
-            auto den = BYTES_TO_MiB(*max_uncompressed_size);
+            auto den = BYTES_TO_MiB(max_uncompressed_size);
             
             char uncompressed_size[128];
             std::snprintf(uncompressed_size, sizeof(uncompressed_size), "%.02f / %.02f MiB (%.02f %%)%s", num, den, 100.0 * num / den, size_mismatched ? " (mismatched)" : " (matches header)");
