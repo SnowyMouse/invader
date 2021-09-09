@@ -46,7 +46,7 @@ int main(int argc, char * const *argv) {
         }
         
         auto tci = tag.get_tag_fourcc();
-        if(tci == Invader::HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.get_engine() != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(tci == Invader::HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.get_cache_version() != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             Invader::Parser::ScenarioStructureBSP::scan_padding(tag, tag.get_base_struct<Invader::HEK::ScenarioStructureBSPCompiledHeader>().pointer);
             continue;
         }

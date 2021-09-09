@@ -106,9 +106,14 @@ namespace Invader {
                 };
                 
                 /**
-                 * Cache file engine to put in the header
+                 * Cache file version to put in the header
                  */
                 HEK::CacheFileEngine build_cache_file_engine;
+                
+                /**
+                 * Game engine to use
+                 */
+                HEK::GameEngine build_game_engine;
                  
                 /**
                  * Tag data address to use

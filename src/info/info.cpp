@@ -49,10 +49,10 @@ namespace Invader::Info {
         // Basic metadata
         PRINT_LINE(oprintf, "Scenario name:", "%s\n", map.get_scenario_name());
         PRINT_LINE(oprintf, "Build:", "%s\n", map.get_build());
-        auto engine = map.get_engine();
-        PRINT_LINE(oprintf, "Engine:", "%s\n", engine_name(engine));
+        auto cache_version = map.get_cache_version();
+        PRINT_LINE(oprintf, "Engine:", "%s\n", HEK::GameEngineInfo::get_game_engine_info(map.get_game_engine()).name);
         
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             PRINT_LINE(oprintf, "Timestamp:", "%s\n", reinterpret_cast<Invader::HEK::NativeCacheFileHeader *>(header_cache)->timestamp.string);
         }
         
@@ -65,7 +65,7 @@ namespace Invader::Info {
             PRINT_LINE(oprintf_success_warn, "Map type:", "%s (mismatched)", type_name(map_type));
         }
         
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+        if(cache_version == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
             if(reinterpret_cast<Invader::HEK::CacheFileHeaderCEA *>(header_cache)->flags & HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY) {
                 PRINT_LINE(oprintf_success, "Classic:", "%s", "Yes");
             }
@@ -80,7 +80,7 @@ namespace Invader::Info {
         auto crc_matches = map.get_header_crc32() == crc;
         
         // TODODILE: Figure out how to check an Xbox map's integrity
-        if(engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(cache_version != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             // CRC32
             if(crc_matches) {
                 PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches header)", crc);
@@ -111,11 +111,11 @@ namespace Invader::Info {
         std::size_t external_loc = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, true).size();
         std::size_t total_external = external_bitmaps + external_sounds + external_loc;
         
-        if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE && cache_version != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             if(total_external == 0) {
                 PRINT_LINE(oprintf_success, "External tags:", "%s", "None");
             }
-            else if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            else if(cache_version == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || cache_version == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 PRINT_LINE(oprintf_success_lesser_warn, "External tags:", "%zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_external, external_bitmaps, external_bitmaps == 1 ? "" : "s", external_loc, external_sounds, external_sounds == 1 ? "" : "s");
                 
                 // If we're custom edition or cea, we need to see if they're at least all indexed
@@ -159,7 +159,7 @@ namespace Invader::Info {
         }
         
         // Languages?
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+        if(cache_version == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
             bool any;
             auto languages = find_languages_for_map(map, any);
             if(any) {
@@ -209,7 +209,7 @@ namespace Invader::Info {
         
         // Uncompressed size
         std::optional<HEK::CacheFileLimits> max_uncompressed_size;
-        switch(map.get_engine()) {
+        switch(map.get_cache_version()) {
             case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
                 max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_MCC_CEA;
                 break;

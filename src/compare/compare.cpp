@@ -281,7 +281,7 @@ int main(int argc, const char **argv) {
             
             // Warn if we failed to open some resource maps
             if(!i.ignore_resource_maps) {
-                switch(map.get_engine()) {
+                switch(map.get_cache_version()) {
                     case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                         if(map.get_data_length(Invader::Map::DATA_MAP_LOC) == 0) {
                             eprintf_warn("Failed to find or read a loc.map");

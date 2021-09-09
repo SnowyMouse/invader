@@ -24,7 +24,7 @@ namespace Invader {
             data_crc.reserve(size);
         }
         
-        auto engine = map.get_engine();
+        auto engine = map.get_cache_version();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             return 0;
         }

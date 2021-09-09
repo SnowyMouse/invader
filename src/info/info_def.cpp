@@ -123,7 +123,7 @@ namespace Invader::Info {
         // Find the engine and get the indices
         const auto *scenario_name = map.get_scenario_name();
         std::optional<std::vector<File::TagFilePath>> indices;
-        switch(map.get_engine()) {
+        switch(map.get_cache_version()) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 indices = custom_edition_indices(scenario_name);
                 break;
@@ -258,7 +258,7 @@ namespace Invader::Info {
         auto tag_count = map.get_tag_count();
         std::vector<std::string> languages;
         all = false;
-        auto engine = map.get_engine();
+        auto engine = map.get_cache_version();
         
         // If Custom Edition, check if we have external offsets or invalid indices
         if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
@@ -318,7 +318,7 @@ namespace Invader::Info {
     }
     
     void engine(const Invader::Map &map) {
-        oprintf("%s\n", engine_name(map.get_engine()));
+        oprintf("%s\n", HEK::GameEngineInfo::get_game_engine_info(map.get_game_engine()).name);
     }
     
     void external_bitmap_indices(const Invader::Map &map) {

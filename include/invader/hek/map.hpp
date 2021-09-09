@@ -20,7 +20,6 @@ namespace Invader::HEK {
         CACHE_FILE_NATIVE = 0x1A86
     };
     
-    const char *engine_name(CacheFileEngine engine) noexcept;
     using CacheFileType = ScenarioType;
     const char *type_name(CacheFileType type) noexcept;
     

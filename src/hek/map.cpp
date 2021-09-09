@@ -221,25 +221,6 @@ namespace Invader::HEK {
             std::terminate();
         }
     }
-    
-    const char *engine_name(CacheFileEngine engine) noexcept {
-        switch(engine) {
-            case CacheFileEngine::CACHE_FILE_NATIVE:
-                return "Invader (native)";
-            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                return "Halo Custom Edition";
-            case CacheFileEngine::CACHE_FILE_RETAIL:
-                return "Halo: Combat Evolved (PC)";
-            case CacheFileEngine::CACHE_FILE_XBOX:
-                return "Halo: Combat Evolved (Xbox)";
-            case CacheFileEngine::CACHE_FILE_DEMO:
-                return "Halo Demo / Trial";
-            case CacheFileEngine::CACHE_FILE_MCC_CEA:
-                return "Halo: Combat Evolved Anniversary (MCC)";
-            default:
-                return "Unknown";
-        }
-    }
 
     const char *type_name(CacheFileType type) noexcept {
         switch(type) {

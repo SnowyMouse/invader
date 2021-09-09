@@ -10,7 +10,7 @@ namespace Invader::Parser {
         this->postprocess_hek_data();
 
         auto &map = tag.get_map();
-        auto engine = map.get_engine();
+        auto engine = map.get_cache_version();
         auto xbox = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
         auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
         

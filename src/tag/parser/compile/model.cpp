@@ -332,7 +332,7 @@ namespace Invader::Parser {
         // Get vertices
         if(vertex_count > 0) {
             // Xbox maps use compressed vertices at a given address
-            if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(tag.get_map().get_cache_version() == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 const auto vertex_pointer = reinterpret_cast<const HEK::CacheFileModelPartVerticesXbox *>(tag.data(what.vertex_offset, sizeof(HEK::CacheFileModelPartVerticesXbox)))->vertices;
                 const auto *vertices = reinterpret_cast<const ModelVertexCompressed::struct_little *>(tag.data(vertex_pointer, sizeof(ModelVertexCompressed::struct_little) * vertex_count));
                 for(std::size_t v = 0; v < vertex_count; v++) {

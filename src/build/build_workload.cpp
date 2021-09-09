@@ -33,6 +33,7 @@ namespace Invader {
         }
         
         this->build_cache_file_engine = engine_info.cache_version;
+        this->build_game_engine = engine_info.engine;
     }
     
     BuildWorkload::BuildParameters::BuildParameters::BuildParameters(HEK::GameEngine engine) noexcept : details(engine) {}
@@ -78,7 +79,8 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         // Yay
         File::check_working_directory("./toolbeta.map");
-        auto engine_target = this->parameters->details.build_cache_file_engine;
+        auto cache_version = this->parameters->details.build_cache_file_engine;
+        auto engine_target = this->parameters->details.build_game_engine;
         
         // Update scenario name if needed
         auto scenario_name_fixed = File::preferred_path_to_halo_path(this->parameters->scenario);
@@ -142,7 +144,7 @@ namespace Invader {
             tag_data_ptr.struct_index = 1;
             tag_data_ptr.limit_to_32_bits = true;
         };
-        switch(engine_target) {
+        switch(cache_version) {
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::NativeCacheFileTagDataHeader));
                 break;
@@ -169,7 +171,7 @@ namespace Invader {
         }
         
         // Generate memes on Xbox
-        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             this->generate_compressed_model_tag_array();
         }
 
@@ -197,7 +199,7 @@ namespace Invader {
 
         // Calculate total BSP size (pointless on native maps)
         std::vector<std::size_t> bsp_sizes(this->bsp_count);
-        if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             for(std::size_t i = 1; i <= this->bsp_count; i++) {
                 // Determine the index.
                 auto &this_bsp_size = bsp_sizes[i - 1];
@@ -231,7 +233,7 @@ namespace Invader {
         
         auto max_size_ref = this->parameters->details.build_maximum_cache_file_size;
         if(!max_size_ref.has_value()) {
-            switch(engine_target) {
+            switch(cache_version) {
                 case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                     switch(*this->cache_file_type) {
                         case HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
@@ -261,7 +263,7 @@ namespace Invader {
         }
 
         auto &workload = *this;
-        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &engine_target, &largest_bsp_size, &largest_bsp_count, &bsp_sizes, &max_size_ref](auto &header) {
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &cache_version, &engine_target, &largest_bsp_size, &largest_bsp_count, &bsp_sizes, &max_size_ref](auto &header) {
             auto max_size = *max_size_ref;
             std::vector<std::byte> final_data;
             std::strncpy(header.build.string, workload.parameters->details.build_version.c_str(), sizeof(header.build.string) - 1);
@@ -285,7 +287,7 @@ namespace Invader {
             }
 
             // Go through each BSP and add that stuff
-            if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 for(std::size_t b = 0; b < workload.bsp_count; b++) {
                     final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
@@ -303,7 +305,7 @@ namespace Invader {
             std::size_t tag_data_offset;
             
             // If we're not on Xbox, we put the model data here
-            if(engine_target != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(cache_version != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 // Let's get the model data there
                 model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
                 final_data.resize(model_offset, std::byte());
@@ -334,7 +336,7 @@ namespace Invader {
             std::size_t tag_data_size = workload.map_data_structs[0].size();
             final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
             auto part_count = workload.model_parts.size();
-            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::NativeCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
@@ -344,7 +346,7 @@ namespace Invader {
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
                 tag_data_struct.raw_data_indices = workload.raw_data_indices_offset;
             }
-            else if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            else if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderXbox *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
@@ -365,7 +367,7 @@ namespace Invader {
             // Lastly, do the header
             header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
             header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
-            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            if(cache_version == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
                 header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
                 *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
@@ -381,7 +383,7 @@ namespace Invader {
             }
             
             // Resize to ye ol' sector
-            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 final_data.insert(final_data.end(), REQUIRED_PADDING_N_BYTES(final_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE), std::byte());
             }
 
@@ -408,7 +410,7 @@ namespace Invader {
             
             // If we can calculate the CRC32, do it
             std::uint32_t new_crc = 0;
-            bool can_calculate_crc = engine_target != CacheFileEngine::CACHE_FILE_XBOX;
+            bool can_calculate_crc = cache_version != CacheFileEngine::CACHE_FILE_XBOX;
             
             if(can_calculate_crc) {
                 if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
@@ -441,7 +443,7 @@ namespace Invader {
             header.decompressed_file_size = final_data.size();
 
             // Copy it again, this time with the new CRC32
-            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            if(cache_version == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
             }
             else {
@@ -485,7 +487,7 @@ namespace Invader {
 
                 // Show some useful metadata
                 oprintf("Scenario:          %s\n", workload.scenario_name.string);
-                oprintf("Engine:            %s\n", HEK::engine_name(engine_target));
+                oprintf("Engine:            %s\n", HEK::GameEngineInfo::get_game_engine_info(engine_target).name);
                 oprintf("Map type:          %s\n", HEK::type_name(*workload.cache_file_type));
                 oprintf("Tags:              %zu / %zu (%.02f MiB)", workload.tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(workload.map_data_structs[0].size()));
                 if(workload.stubbed_tag_count) {
@@ -495,7 +497,7 @@ namespace Invader {
 
                 // Show the BSP count and/or size
                 oprintf("BSPs:              %zu", workload.bsp_count);
-                if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("\n");
                 }
                 else {
@@ -532,7 +534,7 @@ namespace Invader {
                 }
 
                 // Show the total tag space (if applicable)
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.parameters->details.build_maximum_tag_space), 100.0 * tag_space_usage / workload.parameters->details.build_maximum_tag_space);
                 }
 
@@ -772,10 +774,10 @@ namespace Invader {
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
                 std::size_t bsp = this->bsp_count++;
                 
-                auto engine_target = this->parameters->details.build_cache_file_engine;
+                auto cache_version = this->parameters->details.build_cache_file_engine;
 
                 // Next, if we're making a native map, we need to only do this
-                if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     do_compile_tag(std::move(tag_data_parsed));
                 }
 
@@ -801,12 +803,12 @@ namespace Invader {
                     tag_data_parsed.compile(*this, tag_index, new_ptr.struct_index, bsp);
                     
                     // Populate the vertices/indices index thingy
-                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                    if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         Parser::set_up_xbox_cache_bsp_data(*this, bsp_header_struct_index, new_bsp_struct_index, bsp);
                     }
                     
                     // If it uses CEA memery to store BSP data, then append it
-                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+                    if(cache_version == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                         auto *bsp_data_cea = reinterpret_cast<Parser::ScenarioStructureBSPCompiledHeaderCEA::struct_little *>(this->structs[bsp_header_struct_index].data.data());
                         auto bsp_data_size = this->bsp_data[bsp].size();
                         bsp_data_cea->lightmap_vertices = this->bsp_offset;
@@ -990,10 +992,10 @@ namespace Invader {
 
         this->compile_tag_recursively("globals\\globals", TagFourCC::TAG_FOURCC_GLOBALS);
         
-        auto engine_target = this->parameters->details.build_cache_file_engine;
+        auto cache_version = this->parameters->details.build_cache_file_engine;
         
         // Xbox maps don't have tag collection tags, so we have to add each individual tag
-        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             this->compile_tag_recursively("ui\\shell\\bitmaps\\white", TagFourCC::TAG_FOURCC_BITMAP);
             this->compile_tag_recursively("ui\\multiplayer_game_text", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST); // yes, this tag is in all scenario types, even singleplayer. why? idk lol
             
@@ -1041,7 +1043,7 @@ namespace Invader {
         }
         
         // Use tag collection tags if we aren't on Xbox
-        else if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        else if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             if(this->demo_ui && !this->disable_error_checking) {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine");
                 throw InvalidTagDataException();
@@ -1267,9 +1269,9 @@ namespace Invader {
             return static_cast<HEK::Pointer64>(name_tag_data_pointer + *tag_array_struct.offset + tags[tag_index].path_offset);
         };
 
-        auto &engine_target = this->parameters->details.build_cache_file_engine;
+        auto &cache_version = this->parameters->details.build_cache_file_engine;
 
-        auto recursively_generate_data = [&structs, &tags, &pointers, &pointers_64_bit, &pointer_of_tag_path, &engine_target](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) {
+        auto recursively_generate_data = [&structs, &tags, &pointers, &pointers_64_bit, &pointer_of_tag_path, &cache_version](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) {
             auto &s = structs[struct_index];
 
             // Return the pointer thingy
@@ -1286,7 +1288,7 @@ namespace Invader {
             for(auto &pointer : s.pointers) {
                 recursively_generate_data(data, pointer.struct_index, recursively_generate_data);
                 PointerInternal pointer_internal { pointer.offset + offset, pointer.struct_index, pointer.struct_data_offset };
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE || pointer.limit_to_32_bits) {
+                if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE || pointer.limit_to_32_bits) {
                     pointers.emplace_back(pointer_internal);
                 }
                 else {
@@ -1307,7 +1309,7 @@ namespace Invader {
                     auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + offset + dependency.offset);
                     dependency_struct.tag_fourcc = tags[tag_index].tag_fourcc;
                     dependency_struct.tag_id = new_tag_id;
-                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         dependency_struct.path_pointer = pointer_of_tag_path(tag_index);
                     }
                 }
@@ -1341,7 +1343,7 @@ namespace Invader {
         std::size_t bsp_end = this->bsp_offset;
 
         // Get the scenario tag (if we're not on a native map)
-        if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             auto &scenario_tag = tags[this->scenario_index];
             auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
             std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
@@ -1374,7 +1376,7 @@ namespace Invader {
                     std::size_t bsp_size = bsp_data_struct.size();
                     
                     // Resize the BSP to 2048 bytes alignment if on Xbox
-                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                    if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         bsp_size = bsp_size + REQUIRED_PADDING_N_BYTES(bsp_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE * 4);
                         bsp_data_struct.resize(bsp_size);
                     }
@@ -1386,7 +1388,7 @@ namespace Invader {
                     }
 
                     HEK::Pointer64 tag_data_base;
-                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         tag_data_base = this->parameters->details.build_tag_data_address + this->parameters->details.build_maximum_tag_space - bsp_size;
                         if(static_cast<std::uint32_t>(tag_data_base + bsp_size) != static_cast<std::uint64_t>(tag_data_base + bsp_size)) {
                             oprintf("\n");
@@ -1443,12 +1445,12 @@ namespace Invader {
         }
         auto &all_raw_data = this->all_raw_data;
         all_raw_data.reserve(total_raw_data_size);
-        auto engine_target = this->parameters->details.build_cache_file_engine;
+        auto cache_version = this->parameters->details.build_cache_file_engine;
 
         // Offset followed by size
         std::vector<std::pair<std::size_t, std::size_t>> all_assets;
 
-        auto add_or_dedupe_asset = [&all_assets, &all_raw_data, &engine_target](const std::vector<std::byte> &raw_data, std::size_t &counter) -> std::uint32_t {
+        auto add_or_dedupe_asset = [&all_assets, &all_raw_data, &cache_version](const std::vector<std::byte> &raw_data, std::size_t &counter) -> std::uint32_t {
             std::size_t raw_data_size = raw_data.size();
             for(auto &a : all_assets) {
                 if(a.second == raw_data_size && std::memcmp(raw_data.data(), all_raw_data.data() + a.first, raw_data_size) == 0) {
@@ -1458,7 +1460,7 @@ namespace Invader {
 
             // Pad to 512 bytes if Xbox
             auto all_raw_data_offset = all_raw_data.size();
-            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 all_raw_data_offset += REQUIRED_PADDING_N_BYTES(all_raw_data_offset, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
                 all_raw_data.resize(all_raw_data_offset);
             }
@@ -1493,7 +1495,7 @@ namespace Invader {
 
                     // Put it in its place
                     auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_bitmap_size);
-                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         bitmap_data.pixel_data_offset = resource_index;
                     }
                     else {
@@ -1501,7 +1503,7 @@ namespace Invader {
                     }
                     
                     // Set this size to be correct
-                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                    if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         bitmap_data.pixel_data_size = bitmap_data.pixel_data_size + REQUIRED_PADDING_N_BYTES(bitmap_data.pixel_data_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY);
                     }
                 }
@@ -1525,7 +1527,7 @@ namespace Invader {
 
                         // Put it in its place
                         auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_sound_size);
-                        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                        if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                             permutation.samples.file_offset = resource_index;
                         }
                         else {

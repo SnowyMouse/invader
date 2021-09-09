@@ -325,7 +325,7 @@ namespace Invader::Parser {
         auto &bsp_material = tag.get_struct_at_pointer<HEK::ScenarioStructureBSPMaterial>(*pointer);
 
         // If it's Xbox, it's compressed
-        auto engine = tag.get_map().get_engine();
+        auto engine = tag.get_map().get_cache_version();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             // Extract vertices
             std::size_t compressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
@@ -348,7 +348,7 @@ namespace Invader::Parser {
             const std::byte *uncompressed_lightmap_vertices_start;
 
             // CE Anniversary stuff!
-            if(bsp_material.uncompressed_vertices.pointer == 0 && tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            if(bsp_material.uncompressed_vertices.pointer == 0 && tag.get_map().get_cache_version() == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                 auto &base_struct = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeaderCEA>();
                 uncompressed_bsp_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices + this->rendered_vertices_offset, uncompressed_vertices_size);
                 uncompressed_lightmap_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices + this->lightmap_vertices_offset, lightmap_vertices_size);

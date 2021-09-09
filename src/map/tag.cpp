@@ -37,7 +37,7 @@ namespace Invader {
         }
         
         // If we're native we're using 64-bit pointers
-        if(this->get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->get_map().get_cache_version() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             return reinterpret_cast<const HEK::NativeCacheFileTagDataTag &>(this->get_tag_data_index()).tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE;
         }
         
@@ -50,7 +50,7 @@ namespace Invader {
     std::byte *Tag::data(HEK::Pointer64 pointer, std::size_t minimum) {
         using namespace HEK;
         
-        auto engine = this->get_map().get_engine();
+        auto engine = this->get_map().get_cache_version();
 
         // Limit the pointer to 32-bit
         if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {

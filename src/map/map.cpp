@@ -187,12 +187,19 @@ namespace Invader {
         auto data_length = this->data.size();
 
         auto continue_loading_map = [&data_length](Map &map, auto &header) {
-            // Set the engine and type
-            map.engine = header.engine;
+            // Set the cache_version and type
+            map.cache_version = header.engine;
             map.header_type = header.map_type;
+            
+            // Check if it's valid
+            const auto *game_engine_info_maybe = GameEngineInfo::get_game_engine_info(map.cache_version, header.build.string);
+            if(game_engine_info_maybe == nullptr) {
+                throw UnsupportedMapEngineException();
+            }
+            map.game_engine = game_engine_info_maybe->engine;
 
             // If we don't know the type of engine, bail
-            switch(map.engine) {
+            switch(map.cache_version) {
                 case CacheFileEngine::CACHE_FILE_DEMO:
                 case CacheFileEngine::CACHE_FILE_RETAIL:
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
@@ -219,7 +226,7 @@ namespace Invader {
             map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
 
             // Get tag data
-            switch(map.engine) {
+            switch(map.cache_version) {
                 case CacheFileEngine::CACHE_FILE_NATIVE:
                     map.base_memory_address = HEK::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
                     break;
@@ -291,12 +298,12 @@ namespace Invader {
             map.model_data_size = header.model_data_size;
             map.model_index_offset = header.vertex_size;
         };
-        if(this->get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->get_cache_version() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             auto &native_header = *reinterpret_cast<const NativeCacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(NativeCacheFileTagDataHeader)));
             set_model_stuff(native_header);
             this->asset_indices_offset = native_header.raw_data_indices;
         }
-        else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        else if(this->get_cache_version() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             set_model_stuff(*reinterpret_cast<const CacheFileTagDataHeaderPC *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeaderPC))));
         }
 
@@ -364,7 +371,7 @@ namespace Invader {
                     tag.path = new_path;
                 }
 
-                if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(tag.tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     continue;
                 }
                 else if(sizeof(tags->tag_data) == sizeof(HEK::Pointer) && reinterpret_cast<const CacheFileTagDataTag *>(tags)[i].indexed) {
@@ -449,7 +456,7 @@ namespace Invader {
             }
         };
 
-        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             try {
                 do_populate_the_array(reinterpret_cast<const NativeCacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
             }
@@ -566,7 +573,7 @@ namespace Invader {
         this->bitmap_data = std::move(move.bitmap_data);
         this->loc_data = std::move(move.loc_data);
         this->sound_data = std::move(move.sound_data);
-        this->engine = move.engine;
+        this->cache_version = move.cache_version;
         this->load_map();
         this->compressed = move.compressed;
         
@@ -575,7 +582,7 @@ namespace Invader {
     }
 
     std::byte *Map::get_internal_asset(std::size_t offset, std::size_t minimum_size) {
-        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             auto *data = reinterpret_cast<HEK::LittleEndian<std::uint64_t> *>(this->get_data_at_offset(this->asset_indices_offset, (1 + offset) * sizeof(HEK::LittleEndian<std::uint64_t>))) + offset;
             offset = *data;
         }
@@ -587,7 +594,7 @@ namespace Invader {
         if(this->get_crc32() != this->get_header_crc32() || this->is_protected() || this->data.size() != this->get_header_decompressed_file_size() || this->get_type() != this->get_header_type()) {
             return false;
         }
-        else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        else if(this->get_cache_version() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             auto tag_count = this->get_tag_count();
             for(std::size_t i = 0; i < tag_count; i++) {
                 auto &tag = this->get_tag(i);
@@ -600,5 +607,9 @@ namespace Invader {
             }
         }
         return true;
+    }
+    
+    HEK::GameEngine Map::get_game_engine() const noexcept {
+        return this->game_engine;
     }
 }
