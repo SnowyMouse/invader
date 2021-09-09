@@ -162,9 +162,15 @@ namespace Invader {
                 
                 /**
                  * Instantiate some default, working parameters for the target engine
+                 * @param engine_info engine info
+                 */
+                BuildParametersDetails(const HEK::GameEngineInfo &engine_info) noexcept;
+                
+                /**
+                 * Instantiate some default, working parameters for the target engine
                  * @param engine engine
                  */
-                BuildParametersDetails(HEK::CacheFileEngine engine) noexcept;
+                BuildParametersDetails(HEK::GameEngine engine) noexcept : BuildParametersDetails(HEK::GameEngineInfo::get_game_engine_info(engine)) {};
                 
                 BuildParametersDetails(const BuildParametersDetails &) = default;
                 BuildParametersDetails(BuildParametersDetails &&) = default;
@@ -176,13 +182,13 @@ namespace Invader {
              * @param tags     tags directories to use
              * @param engine   engine target to use
              */
-            BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::CacheFileEngine engine);
+            BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::GameEngine engine);
                 
             /**
              * Instantiate a simple set of parameters
              * @param engine engine target to use
              */
-            BuildParameters(HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE) noexcept;
+            BuildParameters(HEK::GameEngine engine = HEK::GameEngine::GAME_ENGINE_NATIVE) noexcept;
             
             BuildParameters(const BuildParameters &) = default;
             BuildParameters(BuildParameters &&) = default;

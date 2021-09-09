@@ -18,63 +18,26 @@
 namespace Invader {
     using namespace HEK;
     
-    BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine) {
-        switch(engine) {
-            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_PC;
-                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
-                this->build_compress = false;
-                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
-                this->build_bsps_occupy_tag_space = true;
-                this->build_version = full_version();
-                break;
-            case CacheFileEngine::CACHE_FILE_RETAIL:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_PC;
-                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
-                this->build_compress = false;
-                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
-                this->build_bsps_occupy_tag_space = true;
-                this->build_version = full_version();
-                break;
-            case CacheFileEngine::CACHE_FILE_DEMO:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_PC;
-                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
-                this->build_compress = false;
-                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
-                this->build_bsps_occupy_tag_space = true;
-                this->build_version = full_version();
-                break;
-            case CacheFileEngine::CACHE_FILE_MCC_CEA:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_MCC_CEA;
-                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_MCC_CEA_BASE_MEMORY_ADDRESS;
-                this->build_compress = false;
-                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
-                this->build_bsps_occupy_tag_space = true;
-                this->build_version = full_version();
-                break;
-            case CacheFileEngine::CACHE_FILE_XBOX:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_XBOX;
-                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
-                this->build_compress = true;
-                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
-                this->build_bsps_occupy_tag_space = true;
-                this->build_version = "01.10.12.2276"; // NTSC
-                break;
-            case CacheFileEngine::CACHE_FILE_NATIVE:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_NATIVE;
-                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
-                this->build_compress = false;
-                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
-                this->build_bsps_occupy_tag_space = false; // technically they do, but they are treated as regular tags
-                this->build_version = full_version();
-                break;
-            default: std::terminate(); // unimplemented
+    BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(const HEK::GameEngineInfo &engine_info) noexcept {
+        this->build_maximum_tag_space = engine_info.tag_space_length;
+        this->build_tag_data_address = engine_info.base_memory_address;
+        this->build_compress = engine_info.uses_compression;
+        this->build_version = engine_info.get_build_string();
+        this->build_bsps_occupy_tag_space = engine_info.bsps_occupy_tag_space;
+        
+        if(engine_info.supports_external_resource_maps()) {
+            this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
         }
+        else {
+            this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+        }
+        
+        this->build_cache_file_engine = engine_info.cache_version;
     }
     
-    BuildWorkload::BuildParameters::BuildParameters::BuildParameters(HEK::CacheFileEngine engine) noexcept : details(engine) {}
+    BuildWorkload::BuildParameters::BuildParameters::BuildParameters(HEK::GameEngine engine) noexcept : details(engine) {}
     
-    BuildWorkload::BuildParameters::BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::CacheFileEngine engine) : 
+    BuildWorkload::BuildParameters::BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::GameEngine engine) : 
         scenario(scenario),
         tags_directories(tags_directories),
         details(engine) {}
@@ -452,6 +415,8 @@ namespace Invader {
                     oprintf("Calculating CRC32...");
                     oflush();
                 }
+                
+                File::save_file("raichu.bin", final_data);
                 
                 // Calculate the CRC32 and/or forge one if we must
                 if(workload.parameters->forge_crc.has_value()) {

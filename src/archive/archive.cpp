@@ -13,7 +13,11 @@
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
 
+#include "../build/build.hpp"
+
 int main(int argc, const char **argv) {
+    using namespace Invader;
+    
     struct ArchiveOptions {
         bool single_tag = false;
         std::vector<std::filesystem::path> tags;
@@ -23,13 +27,15 @@ int main(int argc, const char **argv) {
         bool use_filesystem_path = false;
         bool copy = false;
         bool overwrite = false;
-        std::optional<Invader::HEK::CacheFileEngine> engine;
+        std::optional<HEK::GameEngine> engine;
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
     static constexpr char USAGE[] = "[options] <scenario | -s tag.class>";
+    
+    std::string game_engine_arguments = std::string("Specify the game engine. This option is required. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
 
-    std::vector<Invader::CommandLineOption> options;
+    std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
@@ -39,9 +45,9 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required if -s is not specified. Valid engines are: pc-custom, pc-demo, pc-retail, xbox-2276", "<id>");
+    options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<id>");
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
             case 't':
                 archive_options.tags.push_back(arguments[0]);
@@ -59,7 +65,7 @@ int main(int argc, const char **argv) {
                 archive_options.overwrite = true;
                 break;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
             case 's':
                 archive_options.single_tag = true;
@@ -67,26 +73,17 @@ int main(int argc, const char **argv) {
             case 'P':
                 archive_options.use_filesystem_path = true;
                 break;
-            case 'g':
-                if(std::strcmp(arguments[0], "mcc-cea") == 0) {
-                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_MCC_CEA;
+            case 'g': {
+                if(const auto *engine_maybe = HEK::GameEngineInfo::get_game_engine_info(arguments[0])) {
+                    archive_options.engine = engine_maybe->engine;
                 }
-                else if(std::strcmp(arguments[0], "pc-custom") == 0) {
-                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                else {
+                    eprintf_error("Unknown engine %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
-                else if(std::strcmp(arguments[0], "pc-retail") == 0) {
-                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_RETAIL;
-                }
-                else if(std::strcmp(arguments[0], "pc-demo") == 0) {
-                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_DEMO;
-                }
-                else if(std::strcmp(arguments[0], "native") == 0) {
-                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE;
-                }
-                else if(std::strcmp(arguments[0], "xbox-2276") == 0) {
-                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX;
-                }
+                
                 break;
+            }
             case 'C':
                 archive_options.copy = true;
                 break;
@@ -110,7 +107,7 @@ int main(int argc, const char **argv) {
         // See if the tag path is valid
         std::optional<std::string> base_tag_maybe;
         if(std::filesystem::exists(remaining_arguments[0])) {
-            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags);
+            base_tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags);
         }
         if(base_tag_maybe.has_value()) {
             base_tag = *base_tag_maybe;
@@ -141,7 +138,7 @@ int main(int argc, const char **argv) {
     static const char extension[] = ".tar.xz";
     if(archive_options.output.size() == 0) {
         // Set output
-        archive_options.output = Invader::File::base_name(base_tag.data()) + ((archive_options.copy) ? "" : extension);
+        archive_options.output = File::base_name(base_tag.data()) + ((archive_options.copy) ? "" : extension);
     }
     else {
         bool fail = true;
@@ -163,30 +160,30 @@ int main(int argc, const char **argv) {
     }
 
     // Fix this a bit
-    Invader::File::halo_path_to_preferred_path_chars(base_tag.data());
-    Invader::File::remove_duplicate_slashes_chars(base_tag.data());
+    File::halo_path_to_preferred_path_chars(base_tag.data());
+    File::remove_duplicate_slashes_chars(base_tag.data());
 
     if(!archive_options.single_tag) {
         // Build the map
         std::vector<std::byte> map;
 
         try {
-            Invader::BuildWorkload::BuildParameters parameters(*archive_options.engine);
+            BuildWorkload::BuildParameters parameters(*archive_options.engine);
             parameters.scenario = base_tag;
             parameters.tags_directories = archive_options.tags;
-            if(archive_options.engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(archive_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 parameters.details.build_compress = true;
                 parameters.details.build_compression_level = 0;
             }
             else {
                 parameters.details.build_compress = false;
             }
-            if(archive_options.engine != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(archive_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
-            parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
+            parameters.verbosity = BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
 
-            map = Invader::BuildWorkload::compile_map(parameters);
+            map = BuildWorkload::compile_map(parameters);
         }
         catch(std::exception &e) {
             eprintf_error("Failed to compile scenario %s into a map", base_tag.data());
@@ -194,9 +191,9 @@ int main(int argc, const char **argv) {
         }
 
         // Parse the map
-        std::unique_ptr<Invader::Map> parsed_map;
+        std::unique_ptr<Map> parsed_map;
         try {
-            parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_move(std::move(map)));
+            parsed_map = std::make_unique<Map>(Map::map_with_move(std::move(map)));
         }
         catch(std::exception &e) {
             eprintf_error("Failed to parse the map file generated with scenario %s: %s", base_tag.data(), e.what());
@@ -209,7 +206,7 @@ int main(int argc, const char **argv) {
         for(std::size_t i = 0; i < tag_count; i++) {
             // Get the tag path information
             auto &tag = parsed_map->get_tag(i);
-            std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_fourcc_to_extension(tag.get_tag_fourcc()));
+            std::string full_tag_path = File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_fourcc_to_extension(tag.get_tag_fourcc()));
 
             // Check each tags directory if it exists. If so, archive it
             bool exists = false;
@@ -230,7 +227,7 @@ int main(int argc, const char **argv) {
     }
     else {
         // Turn it into something the filesystem can understand
-        auto base_tag_split_maybe = Invader::File::split_tag_class_extension_chars(base_tag.data());
+        auto base_tag_split_maybe = File::split_tag_class_extension_chars(base_tag.data());
 
         // Split the extension
         if(!base_tag_split_maybe.has_value()) {
@@ -257,7 +254,7 @@ int main(int argc, const char **argv) {
         // Now find its dependencies
         bool success;
         auto &base_tag_split = base_tag_split_maybe.value();
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_split.path.c_str(), base_tag_split.fourcc, archive_options.tags, false, true, success);
+        auto dependencies = FoundTagDependency::find_dependencies(base_tag_split.path.c_str(), base_tag_split.fourcc, archive_options.tags, false, true, success);
         if(!success) {
             eprintf_error("Failed to find dependencies for %s. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
@@ -270,7 +267,7 @@ int main(int argc, const char **argv) {
                 return EXIT_FAILURE;
             }
 
-            std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_fourcc_to_extension(dependency.fourcc));
+            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_fourcc_to_extension(dependency.fourcc));
             archive_list.emplace_back(*dependency.file_path, path_copy);
         }
     }
@@ -279,7 +276,7 @@ int main(int argc, const char **argv) {
     for(auto &i : archive_options.tags_excluded) {
         for(std::size_t t = 0; t < archive_list.size(); t++) {
             // First check if it exists
-            auto path_to_test = i / Invader::File::halo_path_to_preferred_path(archive_list[t].second);
+            auto path_to_test = i / File::halo_path_to_preferred_path(archive_list[t].second);
             if(std::filesystem::exists(path_to_test)) {
                 // Exclude
                 archive_list.erase(archive_list.begin() + t);
@@ -290,15 +287,15 @@ int main(int argc, const char **argv) {
     for(auto &i : archive_options.tags_excluded_same) {
         for(std::size_t t = 0; t < archive_list.size(); t++) {
             // First check if it exists
-            auto path_to_test = i / Invader::File::halo_path_to_preferred_path(archive_list[t].second);
+            auto path_to_test = i / File::halo_path_to_preferred_path(archive_list[t].second);
             if(std::filesystem::exists(path_to_test)) {
                 // Okay it exists. Open both then
                 try {
-                    auto tag_archive_data = Invader::File::open_file(archive_list[t].first).value();
-                    auto tag_archive = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_archive_data.data(), tag_archive_data.size(), true);
+                    auto tag_archive_data = File::open_file(archive_list[t].first).value();
+                    auto tag_archive = Parser::ParserStruct::parse_hek_tag_file(tag_archive_data.data(), tag_archive_data.size(), true);
 
-                    auto tag_exclude_data = Invader::File::open_file(path_to_test).value();
-                    auto tag_exclude = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_exclude_data.data(), tag_exclude_data.size(), true);
+                    auto tag_exclude_data = File::open_file(path_to_test).value();
+                    auto tag_exclude = Parser::ParserStruct::parse_hek_tag_file(tag_exclude_data.data(), tag_exclude_data.size(), true);
 
                     // Do a functional comparison
                     if(!tag_archive->compare(tag_exclude.get(), true, true)) {
@@ -336,7 +333,7 @@ int main(int argc, const char **argv) {
             archive_entry_set_perm(entry, 0644);
             archive_entry_set_filetype(entry, AE_IFREG);
 
-            auto data_maybe = Invader::File::open_file(path);
+            auto data_maybe = File::open_file(path);
             if(!data_maybe.has_value()) {
                 eprintf_error("Failed to open %s\n", path);
                 return EXIT_FAILURE;
