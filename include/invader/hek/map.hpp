@@ -39,6 +39,8 @@ namespace Invader::HEK {
     };
     
     struct GameEngineInfo {
+        using maximum_file_size_t = std::variant<Pointer64, Pointer64 (*)(CacheFileType)>;
+        
         /** Human-readable identifier */
         const char *name;
         
@@ -64,7 +66,7 @@ namespace Invader::HEK {
         Pointer64 tag_space_length;
         
         /** Maximum file size, or a function to get the maximum file size - use get_maximum_file_size() to retrieve it */
-        std::variant<Pointer64, Pointer64 (*)(CacheFileType)> maximum_file_size;
+        maximum_file_size_t maximum_file_size;
         
         /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
         bool base_memory_address_is_inferred = false;

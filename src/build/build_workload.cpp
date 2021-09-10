@@ -34,6 +34,7 @@ namespace Invader {
         
         this->build_cache_file_engine = engine_info.cache_version;
         this->build_game_engine = engine_info.engine;
+        this->build_maximum_cache_file_size = engine_info.maximum_file_size;
     }
     
     BuildWorkload::BuildParameters::BuildParameters::BuildParameters(HEK::GameEngine engine) noexcept : details(engine) {}
@@ -231,47 +232,23 @@ namespace Invader {
             oprintf(" done\n");
         }
         
-        auto max_size_ref = this->parameters->details.build_maximum_cache_file_size;
-        if(!max_size_ref.has_value()) {
-            switch(cache_version) {
-                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    switch(*this->cache_file_type) {
-                        case HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
-                            max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER;
-                            break;
-                        case HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
-                            max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER;
-                            break;
-                        case HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
-                            max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE;
-                            break;
-                        default:
-                            throw std::exception();
-                            break;
-                    }
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
-                    max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_MCC_CEA;
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                    max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
-                    break;
-                default:
-                    max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_PC;
-                    break;
-            }
+        // Query the maximum file size
+        auto &max_size_ref = this->parameters->details.build_maximum_cache_file_size;
+        Pointer64 max_size = UINT64_MAX;
+        if(auto *size = std::get_if<Pointer64>(&max_size_ref)) {
+            max_size = *size;
+        }
+        else if(auto *size = std::get_if<Pointer64 (*)(CacheFileType)>(&max_size_ref)) {
+            max_size = (*size)(*this->cache_file_type);
         }
 
         auto &workload = *this;
-        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &cache_version, &engine_target, &largest_bsp_size, &largest_bsp_count, &bsp_sizes, &max_size_ref](auto &header) {
-            auto max_size = *max_size_ref;
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &cache_version, &engine_target, &largest_bsp_size, &largest_bsp_count, &bsp_sizes, &max_size](auto &header) {
             std::vector<std::byte> final_data;
             std::strncpy(header.build.string, workload.parameters->details.build_version.c_str(), sizeof(header.build.string) - 1);
             header.engine = workload.parameters->details.build_cache_file_engine;
             header.map_type = *workload.cache_file_type;
             header.name = workload.scenario_name;
-            
-            
 
             if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                 oprintf("Building cache file data...");
