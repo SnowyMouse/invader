@@ -22,7 +22,7 @@ namespace Invader {
         this->build_maximum_tag_space = engine_info.tag_space_length;
         this->build_tag_data_address = engine_info.base_memory_address;
         this->build_compress = engine_info.uses_compression;
-        this->build_version = engine_info.get_build_string();
+        this->build_version = engine_info.build_string_is_enforced ? engine_info.get_build_string() : full_version();
         this->build_bsps_occupy_tag_space = engine_info.bsps_occupy_tag_space;
         
         if(engine_info.supports_external_resource_maps()) {
