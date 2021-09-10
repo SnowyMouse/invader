@@ -161,7 +161,7 @@ namespace Invader::HEK {
             .name = "Halo: Combat Evolved (Xbox Unknown)",
             .engine = GameEngine::GAME_ENGINE_XBOX_GENERIC,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
-            .build_string = "",
+            .build_string = "MISSINGNO.",
             .build_string_is_enforced = false,
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
