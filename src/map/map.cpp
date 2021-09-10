@@ -226,10 +226,10 @@ namespace Invader {
             map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
             map.base_memory_address = game_engine_info_maybe->base_memory_address;
             
-            // Eschaton the base memory address
+            // Eschaton the base memory address (base memory address is inferred with the tag data address)
             if(game_engine_info_maybe->base_memory_address_is_inferred) {
-                auto *tag_data_header = reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(map.tag_data);
-                map.base_memory_address = tag_data_header->tag_array_address - sizeof(*tag_data_header);
+                auto *tag_data_header = reinterpret_cast<HEK::CacheFileTagDataHeader *>(map.tag_data);
+                map.base_memory_address = tag_data_header->tag_array_address - (map.cache_version == CacheFileEngine::CACHE_FILE_XBOX ? sizeof(HEK::CacheFileTagDataHeaderXbox) : sizeof(HEK::CacheFileTagDataHeaderPC));
             }
 
             map.scenario_name = header.name;
