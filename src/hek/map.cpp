@@ -12,33 +12,22 @@ namespace Invader::HEK {
     static constexpr const Pointer64 XBOX_BASE_MEMORY_ADDRESS = 0x803A6000;
     static constexpr const Pointer64 XBOX_TAG_SPACE_LENGTH = (22 * 1024 * 1024);
     
-    static constexpr Pointer64 xbox_max_file_size(CacheFileType type) {
+    template<Pointer64 singleplayer_size, Pointer64 multiplayer_size, Pointer64 user_interface_size> static constexpr Pointer64 max_file_size_fn(CacheFileType type) {
         switch(type) {
             case CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
-                return 278 * 1024 * 1024;
+                return singleplayer_size;
             case CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
-                return 47 * 1024 * 1024;
+                return multiplayer_size;
             case CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
-                return 35 * 1024 * 1024;
+                return user_interface_size;
             case CacheFileType::SCENARIO_TYPE_ENUM_COUNT:
                 break;
         }
         std::terminate();
     }
     
-    static constexpr Pointer64 xbox_demo_max_file_size(CacheFileType type) {
-        switch(type) {
-            case CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
-                return 215 * 1024 * 1024;
-            case CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
-                return static_cast<Pointer64>(INT32_MAX); // There is no defined size limit for MP maps in the engine.
-            case CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
-                return 23 * 1024 * 1024;
-            case CacheFileType::SCENARIO_TYPE_ENUM_COUNT:
-                break;
-        }
-        std::terminate();
-    }
+    #define xbox_max_file_size max_file_size_fn<static_cast<Pointer64>(278 * 1024 * 1024), static_cast<Pointer64>(47 * 1024 * 1024), static_cast<Pointer64>(35 * 1024 * 1024)>
+    #define xbox_demo_max_file_size max_file_size_fn<static_cast<Pointer64>(215 * 1024 * 1024), static_cast<Pointer64>(INT32_MAX), static_cast<Pointer64>(23 * 1024 * 1024)>
     
     static constexpr const GameEngineInfo engine_infos[] = {
         { 
