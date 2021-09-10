@@ -25,6 +25,7 @@ namespace Invader::HEK {
     
     enum GameEngine {
         GAME_ENGINE_NATIVE,
+        GAME_ENGINE_XBOX_GENERIC,
         GAME_ENGINE_XBOX_DEMO,
         GAME_ENGINE_XBOX_NTSC_US,
         GAME_ENGINE_XBOX_NTSC_JP,
@@ -45,7 +46,7 @@ namespace Invader::HEK {
         const char *name;
         
         /** Human-readable shorthand identifier */
-        const char *shorthand;
+        const char *shorthand = nullptr;
         
         /** Engine enumerator. Note that this should NOT be stored in a file as this can and will change! */
         GameEngine engine;

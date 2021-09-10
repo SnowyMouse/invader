@@ -156,6 +156,17 @@ namespace Invader::HEK {
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_max_file_size,
             .uses_compression = true
+        },
+        {
+            .name = "Halo: Combat Evolved (Xbox Unknown)",
+            .engine = GameEngine::GAME_ENGINE_XBOX_GENERIC,
+            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
+            .build_string = "",
+            .build_string_is_enforced = false,
+            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = XBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = xbox_max_file_size,
+            .uses_compression = true
         }
     };
     
@@ -183,12 +194,23 @@ namespace Invader::HEK {
     }
     
     const GameEngineInfo *GameEngineInfo::get_game_engine_info(CacheFileEngine cache_version, const char *build_string) noexcept {
+        const GameEngineInfo *info = nullptr;
+        
         for(auto &e : engine_infos) {
-            if(e.cache_version == cache_version && (!e.build_string_is_enforced || std::strcmp(e.get_build_string(), build_string) == 0)) {
-                return &e;
+            if(e.cache_version == cache_version) {
+                // Exact match - we can return this!
+                if(std::strcmp(e.get_build_string(), build_string) == 0) {
+                    return &e;
+                }
+                
+                // Hold onto this for now (matching cache version, but not build string, however build string is not enforced)
+                else if(!e.build_string_is_enforced) {
+                    info = &e;
+                }
             }
         }
-        return nullptr;
+        
+        return info;
     }
     
     const char *GameEngineInfo::get_build_string() const noexcept {
@@ -211,7 +233,9 @@ namespace Invader::HEK {
         // Add everything to a list
         std::list<const char *> shorthands;
         for(auto &e : engine_infos) {
-            shorthands.emplace_back(e.shorthand);
+            if(e.shorthand != nullptr) {
+                shorthands.emplace_back(e.shorthand);
+            }
         }
         
         // Sort alphabetically
