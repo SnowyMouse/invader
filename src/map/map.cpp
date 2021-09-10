@@ -224,26 +224,12 @@ namespace Invader {
             
             map.tag_data_length = header.tag_data_size;
             map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
-
-            // Get tag data
-            switch(map.cache_version) {
-                case CacheFileEngine::CACHE_FILE_NATIVE:
-                    map.base_memory_address = HEK::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
-                    break;
-                case CacheFileEngine::CACHE_FILE_DEMO:
-                    map.base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
-                    break;
-                case CacheFileEngine::CACHE_FILE_XBOX:
-                    map.base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
-                    break;
-                case CacheFileEngine::CACHE_FILE_MCC_CEA: {
-                    auto *tag_data_header = reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(map.tag_data);
-                    map.base_memory_address = tag_data_header->tag_array_address - sizeof(*tag_data_header);
-                    break;
-                }
-                default:
-                    map.base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
-                    break;
+            map.base_memory_address = game_engine_info_maybe->base_memory_address;
+            
+            // Eschaton the base memory address
+            if(game_engine_info_maybe->base_memory_address_is_inferred) {
+                auto *tag_data_header = reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(map.tag_data);
+                map.base_memory_address = tag_data_header->tag_array_address - sizeof(*tag_data_header);
             }
 
             map.scenario_name = header.name;

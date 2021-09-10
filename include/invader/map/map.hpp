@@ -352,7 +352,7 @@ namespace Invader {
         std::size_t tag_data_length = 0;
 
         /** Base memory address */
-        std::uint32_t base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+        std::uint32_t base_memory_address = 0;
         
         /** Invalid paths? */
         bool invalid_paths_detected = false;
