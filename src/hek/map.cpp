@@ -165,7 +165,7 @@ namespace Invader::HEK {
             .build_string_is_enforced = false,
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
-            .maximum_file_size = xbox_max_file_size,
+            .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
             .base_memory_address_is_inferred = true,
             .uses_compression = true
         }
