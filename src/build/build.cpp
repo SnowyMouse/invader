@@ -85,7 +85,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
-    options.emplace_back("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine.");
+    options.emplace_back("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine's stock maps.");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");

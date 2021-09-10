@@ -273,14 +273,10 @@ Build a cache file.
 Options:
   -a --anniversary-mode        Enable anniversary graphics and audio (CEA only)
   -A --auto-forge              Ensure the map will be network compatible with
-                               the target engine.
+                               the target engine's stock maps.
   -b --stock-resource-bounds   Only index tags if the tag's index is within
                                stock Custom Edition's resource map bounds.
                                (Custom Edition only)
-  -B --build-version           Set the build version. This is used on the Xbox
-                               version of the game (by default it's
-                               01.10.12.2276 on Xbox and the Invader version on
-                               other engines)
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
   -E --extend-file-limits      Extend file size limits beyond what is allowed
@@ -288,9 +284,10 @@ Options:
                                size. This may create a map that will not work
                                without a mod.
   -g --game-engine <engine>    Specify the game engine. This option is
-                               required. Valid engines are: mcc-cea, pc-custom,
-                               pc-demo, pc-retail, xbox-0009, xbox-0135,
-                               xbox-2276
+                               required. Valid engines are: gbx-custom,
+                               gbx-demo, gbx-retail, mcc-cea, native,
+                               xbox-demo, xbox-ntsc, xbox-ntsc-jp,
+                               xbox-ntsc-tw, xbox-pal
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
