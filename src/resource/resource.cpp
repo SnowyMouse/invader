@@ -24,7 +24,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either -w or -M to be specified at least once. Valid engines are: mcc-cea, pc-custom, pc-demo, pc-retail", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either -w or -M to be specified at least once. Valid engines are: gbx-custom, gbx-demo, gbx-retail, mcc-cea.", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>");
     options.emplace_back("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>");
     options.emplace_back("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>");
@@ -71,10 +71,10 @@ int main(int argc, const char **argv) {
                 break;
 
             case 'g':
-                if(std::strcmp(arguments[0], "pc-custom") == 0 || std::strcmp(arguments[0], "mcc-cea") == 0) {
+                if(std::strcmp(arguments[0], "gbx-custom") == 0) {
                     resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
-                else if(std::strcmp(arguments[0], "pc-retail") == 0 || std::strcmp(arguments[0], "pc-demo") == 0) {
+                else if(std::strcmp(arguments[0], "gbx-retail") == 0 || std::strcmp(arguments[0], "gbx-demo") == 0 || std::strcmp(arguments[0], "mcc-cea") == 0) {
                     resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 }
                 else {
@@ -124,12 +124,12 @@ int main(int argc, const char **argv) {
 
     bool retail = *resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL;
     if(retail && resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
-        eprintf_error("Only bitmaps.map and sounds.map can be made for retail/demo engines.");
+        eprintf_error("Only bitmaps.map and sounds.map can be made for gbx-demo, gbx-retail, or mcc-cea engines.");
         return EXIT_FAILURE;
     }
     
     if(retail && resource_options.index.size() == 0) {
-        eprintf_error("A map or index is required for building retail/demo maps.");
+        eprintf_error("A map or index is required for building gbx-demo, gbx-retail, or mcc-cea maps.");
         return EXIT_FAILURE;
     }
 

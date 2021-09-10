@@ -163,9 +163,11 @@ Options:
                                in the specified directory and are functionally
                                the same. Use multiple times to exclude multiple
                                directories.
-  -g --game-engine <id>        Specify the game engine. This option is required
-                               if -s is not specified. Valid engines are:
-                               pc-custom, pc-demo, pc-retail, xbox-2276
+  -g --game-engine <id>        Specify the game engine. This option is
+                               required. Valid engines are: gbx-custom,
+                               gbx-demo, gbx-retail, mcc-cea, native,
+                               xbox-demo, xbox-ntsc, xbox-ntsc-jp,
+                               xbox-ntsc-tw, xbox-pal
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -o --output <file>           Output to a specific file. Extension must be
@@ -710,8 +712,8 @@ Options:
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Demo and retail maps also require
                                either -w or -M to be specified at least once.
-                               Valid engines are: mcc-cea, pc-custom, pc-demo,
-                               pc-retail
+                               Valid engines are: gbx-custom, gbx-demo,
+                               gbx-retail, mcc-cea.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Set the maps directory.
@@ -993,7 +995,7 @@ Also, if Invader one executable, arguments would need rethought. Consider these
 two commands:
 
 ```
-invader-build levels/test/bloodgulch/bloodgulch -g pc-custom -r always
+invader-build levels/test/bloodgulch/bloodgulch -g gbx-custom -r always
 invader-dependency levels/test/bloodgulch/bloodgulch -r
 ```
 
@@ -1001,7 +1003,7 @@ How would this be done as a single executable? Well, tool.exe does the
 verb-then-argument method:
 
 ```
-invader build levels/test/bloodgulch/bloodgulch -g pc-custom -r always -t tags
+invader build levels/test/bloodgulch/bloodgulch -g gbx-custom -r always -t tags
 invader dependency levels/test/bloodgulch/bloodgulch -r -t tags
 ```
 
@@ -1011,7 +1013,7 @@ but it doesn't in invader-dependency! There's no way to know how many arguments
 
 Invader is written to process hyphenated parameters, first, and then parse any
 remaining arguments second, but you can't just change it to process the
-non-hyphenated arguments since "tags", "always", and "pc-custom" do not start
+non-hyphenated arguments since "tags", "always", and "gbx-custom" do not start
 with a hyphen but are part of a hyphenated parameter (which, again, it doesn't
 know this yet!). So, it'd have to be written to specifically read the very first
 argument before doing anything. This is certainly doable, but it's much harder
