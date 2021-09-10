@@ -26,6 +26,20 @@ namespace Invader::HEK {
         std::terminate();
     }
     
+    static constexpr Pointer64 xbox_demo_max_file_size(CacheFileType type) {
+        switch(type) {
+            case CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
+                return 215 * 1024 * 1024;
+            case CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
+                return static_cast<Pointer64>(INT32_MAX); // There is no defined size limit for MP maps in the engine.
+            case CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
+                return 23 * 1024 * 1024;
+            case CacheFileType::SCENARIO_TYPE_ENUM_COUNT:
+                break;
+        }
+        std::terminate();
+    }
+    
     static constexpr const GameEngineInfo engine_infos[] = {
         { 
             .name = "Invader (Native)",
@@ -95,8 +109,20 @@ namespace Invader::HEK {
             .supports_external_sounds_map = true
         },
         {
+            .name = "Halo: Combat Evolved (Xbox OXM Demo)",
+            .shorthand = "xbox-demo",
+            .engine = GameEngine::GAME_ENGINE_XBOX_DEMO,
+            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
+            .build_string = "",
+            .build_string_is_enforced = true,
+            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = XBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = xbox_demo_max_file_size,
+            .uses_compression = true
+        },
+        {
             .name = "Halo: Combat Evolved (Xbox NTSC-US)",
-            .shorthand = "xbox-2276",
+            .shorthand = "xbox-ntsc",
             .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_US,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.10.12.2276",
@@ -108,7 +134,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-JP)",
-            .shorthand = "xbox-0009",
+            .shorthand = "xbox-ntsc-jp",
             .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_JP,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.03.14.0009",
@@ -120,7 +146,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-TW)",
-            .shorthand = "xbox-0135",
+            .shorthand = "xbox-ntsc-tw",
             .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_TW,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.12.09.0135",
@@ -132,7 +158,7 @@ namespace Invader::HEK {
         },
         {
             .name = "Halo: Combat Evolved (Xbox PAL)",
-            .shorthand = "xbox-2342",
+            .shorthand = "xbox-pal",
             .engine = GameEngine::GAME_ENGINE_XBOX_PAL,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
             .build_string = "01.01.14.2342",

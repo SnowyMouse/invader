@@ -25,6 +25,7 @@ namespace Invader::HEK {
     
     enum GameEngine {
         GAME_ENGINE_NATIVE,
+        GAME_ENGINE_XBOX_DEMO,
         GAME_ENGINE_XBOX_NTSC_US,
         GAME_ENGINE_XBOX_NTSC_JP,
         GAME_ENGINE_XBOX_NTSC_TW,
