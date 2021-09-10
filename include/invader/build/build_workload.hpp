@@ -128,7 +128,7 @@ namespace Invader {
                 /**
                  * Maximum cache file size to use. If null, it will determine it based on the map type on Xbox or the maximum allowed file size on other versions (without modding).
                  */
-                std::optional<std::uint64_t> build_maximum_cache_file_size;
+                HEK::GameEngineInfo::maximum_file_size_t build_maximum_cache_file_size;
                 
                 /**
                  * Compress?
