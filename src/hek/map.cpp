@@ -268,7 +268,7 @@ namespace Invader::HEK {
     
     const GameEngineInfo *GameEngineInfo::get_game_engine_info(const char *shorthand) noexcept {
         for(auto &e : engine_infos) {
-            if(std::strcmp(e.shorthand, shorthand) == 0) {
+            if(e.shorthand != nullptr && std::strcmp(e.shorthand, shorthand) == 0) {
                 return &e;
             }
         }
