@@ -166,6 +166,11 @@ namespace Invader {
                 std::uint16_t build_flags_cea = 0;
                 
                 /**
+                 * Required tags to import
+                 */
+                HEK::GameEngineInfo::RequiredTags build_required_tags;
+                
+                /**
                  * Instantiate some default, working parameters for the target engine
                  * @param engine_info engine info
                  */

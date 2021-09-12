@@ -35,6 +35,7 @@ namespace Invader {
         this->build_cache_file_engine = engine_info.cache_version;
         this->build_game_engine = engine_info.engine;
         this->build_maximum_cache_file_size = engine_info.maximum_file_size;
+        this->build_required_tags = engine_info.required_tags;
     }
     
     BuildWorkload::BuildParameters::BuildParameters::BuildParameters(HEK::GameEngine engine) noexcept : details(engine) {}
@@ -966,94 +967,78 @@ namespace Invader {
             }
         }
         this->tags[this->scenario_index].path = std::string(first_char, last_slash - first_char) + this->scenario_name.string;
-
-        this->compile_tag_recursively("globals\\globals", TagFourCC::TAG_FOURCC_GLOBALS);
         
-        auto cache_version = this->parameters->details.build_cache_file_engine;
+        const auto &required_tags = this->parameters->details.build_required_tags;
+        auto &workload = *this;
         
-        // Xbox maps don't have tag collection tags, so we have to add each individual tag
-        if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            this->compile_tag_recursively("ui\\shell\\bitmaps\\white", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\multiplayer_game_text", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST); // yes, this tag is in all scenario types, even singleplayer. why? idk lol
-            
+        auto import_all = [&workload](auto &what) {
+            std::size_t count = what.count;
+            auto *arr = what.ptr;
+            for(std::size_t c = 0; c < count; c++) {
+                auto &tag = arr[c];
+                workload.compile_tag_recursively(tag.path, tag.fourcc);
+            }
+        };
+        
+        // Check if we have a demo UI if one was requested
+        if(this->demo_ui && !this->disable_error_checking) {
             switch(*this->cache_file_type) {
+                case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
+                    if(required_tags.singleplayer_demo.count == 0) {
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine for singleplayer scenarios");
+                        throw InvalidTagDataException();
+                    }
+                    break;
                 case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
-                    if(this->demo_ui && !this->disable_error_checking) {
+                    if(required_tags.multiplayer_demo.count == 0) {
                         REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine for multiplayer scenarios");
                         throw InvalidTagDataException();
                     }
-                    this->compile_tag_recursively("ui\\shell\\multiplayer", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
-                    break;
-                case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
-                    if(this->demo_ui) {
-                        this->compile_tag_recursively("ui\\shell\\solo_demo", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
-                        this->compile_tag_recursively("ui\\shell\\strings\\temp_strings", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    }
-                    else {
-                        this->compile_tag_recursively("ui\\shell\\solo", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
-                    }
                     break;
                 case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
-                    this->compile_tag_recursively("ui\\default_multiplayer_game_setting_names", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\saved_game_file_strings", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\multiplayer_scenarios", TagFourCC::TAG_FOURCC_MULTIPLAYER_SCENARIO_DESCRIPTION);
-                    this->compile_tag_recursively("ui\\random_player_names", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\english", TagFourCC::TAG_FOURCC_VIRTUAL_KEYBOARD);
-                    this->compile_tag_recursively("ui\\shell\\strings\\default_player_profile_names", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\strings\\game_variant_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\joystick_set_short_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_short_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_long_descriptions", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-                    if(this->demo_ui) {
-                        this->compile_tag_recursively("ui\\shell\\main_menu_demo", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
+                    if(required_tags.user_interface_demo.count == 0) {
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine for user interface scenarios");
+                        throw InvalidTagDataException();
                     }
-                    else {
-                        this->compile_tag_recursively("ui\\shell\\main_menu", TagFourCC::TAG_FOURCC_UI_WIDGET_COLLECTION);
-                    }
-                    this->compile_tag_recursively("sound\\music\\title1\\title1", TagFourCC::TAG_FOURCC_SOUND_LOOPING);
-                    this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagFourCC::TAG_FOURCC_SOUND);
-                    this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagFourCC::TAG_FOURCC_SOUND);
                     break;
                 case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
                     std::terminate();
             }
         }
         
-        // Use tag collection tags if we aren't on Xbox
-        else if(cache_version != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            if(this->demo_ui && !this->disable_error_checking) {
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine");
-                throw InvalidTagDataException();
-            }
-            
-            this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
-
-            // Load the correct tag collection tag
-            switch(*this->cache_file_type) {
-                case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
-                    this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
-                    break;
-                case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
-                    this->compile_tag_recursively("ui\\ui_tags_loaded_multiplayer_scenario_type", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
-                    break;
-                case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
-                    this->compile_tag_recursively("ui\\ui_tags_loaded_mainmenu_scenario_type", TagFourCC::TAG_FOURCC_TAG_COLLECTION);
-                    break;
-                case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
-                    std::terminate();
-            }
-
-            // These are required for UI elements and other things
-            this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagFourCC::TAG_FOURCC_SOUND);
-            this->compile_tag_recursively("sound\\sfx\\ui\\back", TagFourCC::TAG_FOURCC_SOUND);
-            this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagFourCC::TAG_FOURCC_SOUND);
-            
-            // WHY ARE THESE IN SINGLEPLAYER?
-            this->compile_tag_recursively("ui\\shell\\main_menu\\mp_map_list", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-            this->compile_tag_recursively("ui\\shell\\strings\\loading", TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST);
-            this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagFourCC::TAG_FOURCC_BITMAP);
-            this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagFourCC::TAG_FOURCC_BITMAP);
-        }
+        // Import all required tags
+        import_all(required_tags.all);
+        switch(*this->cache_file_type) {
+            case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
+                import_all(required_tags.singleplayer);
+                if(this->demo_ui) {
+                    import_all(required_tags.singleplayer_demo);
+                }
+                else {
+                    import_all(required_tags.singleplayer_full);
+                }
+                break;
+            case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
+                import_all(required_tags.multiplayer);
+                if(this->demo_ui) {
+                    import_all(required_tags.multiplayer_demo);
+                }
+                else {
+                    import_all(required_tags.multiplayer_full);
+                }
+                break;
+            case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
+                import_all(required_tags.user_interface);
+                if(this->demo_ui) {
+                    import_all(required_tags.user_interface_demo);
+                }
+                else {
+                    import_all(required_tags.user_interface_full);
+                }
+                break;
+            case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
+                std::terminate();
+        };
 
         // Mark stubs
         std::size_t warned = 0;

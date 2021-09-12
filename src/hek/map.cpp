@@ -4,6 +4,7 @@
 #include <invader/version.hpp>
 #include <variant>
 #include <optional>
+#include <array>
 
 namespace Invader::HEK {
     static constexpr const Pointer64 GEARBOX_TAG_SPACE_LENGTH = (23 * 1024 * 1024);
@@ -29,6 +30,74 @@ namespace Invader::HEK {
     #define xbox_max_file_size max_file_size_fn<static_cast<Pointer64>(278 * 1024 * 1024), static_cast<Pointer64>(47 * 1024 * 1024), static_cast<Pointer64>(35 * 1024 * 1024)>
     #define xbox_demo_max_file_size max_file_size_fn<static_cast<Pointer64>(215 * 1024 * 1024), static_cast<Pointer64>(INT32_MAX), static_cast<Pointer64>(23 * 1024 * 1024)>
     
+    #define TAG(path,fourcc) GameEngineInfo::RequiredTags::TagPairPtr {path, HEK::TagFourCC::fourcc}
+    
+    #define GLOBALS_TAG TAG("globals\\globals", TAG_FOURCC_GLOBALS)
+    
+    static constexpr std::array INVADER_REQUIRED_TAGS = {GLOBALS_TAG};
+    
+    #define XBOX_REQUIRED_TAGS_ALL GLOBALS_TAG, TAG("ui\\shell\\bitmaps\\white", TAG_FOURCC_BITMAP), TAG("ui\\multiplayer_game_text", TAG_FOURCC_UNICODE_STRING_LIST)
+    
+    static constexpr std::array XBOX_REQUIRED_TAGS_ALL_2276 = { XBOX_REQUIRED_TAGS_ALL };
+    static constexpr std::array XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE = { XBOX_REQUIRED_TAGS_ALL, TAG("ui\\shell\\strings\\temp_strings", TAG_FOURCC_UNICODE_STRING_LIST) };
+    
+    static constexpr std::array XBOX_REQUIRED_TAGS_SP_FULL = { TAG("ui\\shell\\solo", TAG_FOURCC_UI_WIDGET_COLLECTION) };
+    static constexpr std::array XBOX_REQUIRED_TAGS_SP_DEMO = { TAG("ui\\shell\\solo_demo", TAG_FOURCC_UI_WIDGET_COLLECTION) };
+    static constexpr std::array XBOX_REQUIRED_TAGS_MP = { TAG("ui\\shell\\multiplayer", TAG_FOURCC_UI_WIDGET_COLLECTION) };
+    static constexpr std::array XBOX_REQUIRED_TAGS_UI = {
+        TAG("ui\\default_multiplayer_game_setting_names", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\saved_game_file_strings", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\multiplayer_scenarios", TAG_FOURCC_MULTIPLAYER_SCENARIO_DESCRIPTION),
+        TAG("ui\\random_player_names", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\english", TAG_FOURCC_VIRTUAL_KEYBOARD),
+        TAG("ui\\shell\\strings\\default_player_profile_names", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\shell\\strings\\game_variant_descriptions", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\shell\\main_menu\\player_profiles_select\\joystick_set_short_descriptions", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\shell\\main_menu\\player_profiles_select\\button_set_short_descriptions", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\shell\\main_menu\\player_profiles_select\\button_set_long_descriptions", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("sound\\music\\title1\\title1", TAG_FOURCC_SOUND_LOOPING),
+        TAG("sound\\sfx\\ui\\flag_failure", TAG_FOURCC_SOUND),
+        TAG("sound\\sfx\\ui\\cursor", TAG_FOURCC_SOUND),
+    };
+    static constexpr std::array XBOX_REQUIRED_TAGS_UI_DEMO = { TAG("ui\\shell\\main_menu_demo", TAG_FOURCC_UI_WIDGET_COLLECTION) };
+    static constexpr std::array XBOX_REQUIRED_TAGS_UI_FULL = { TAG("ui\\shell\\main_menu", TAG_FOURCC_UI_WIDGET_COLLECTION) };
+    
+    #define USE_TAG_ARRAY(tag_array) { tag_array.data(), tag_array.size() }
+    #define XBOX_BOILERPLATE(REQUIRED_TAGS) \
+        .required_tags = { \
+            .all = USE_TAG_ARRAY(REQUIRED_TAGS), \
+            .singleplayer_demo = USE_TAG_ARRAY(XBOX_REQUIRED_TAGS_SP_DEMO), \
+            .singleplayer_full = USE_TAG_ARRAY(XBOX_REQUIRED_TAGS_SP_FULL), \
+            .multiplayer = USE_TAG_ARRAY(XBOX_REQUIRED_TAGS_MP), \
+            .user_interface = USE_TAG_ARRAY(XBOX_REQUIRED_TAGS_UI), \
+            .user_interface_demo = USE_TAG_ARRAY(XBOX_REQUIRED_TAGS_UI_DEMO), \
+            .user_interface_full = USE_TAG_ARRAY(XBOX_REQUIRED_TAGS_UI_FULL) \
+        }
+    
+    static constexpr std::array PC_REQUIRED_TAGS = {
+        GLOBALS_TAG,
+        TAG("ui\\ui_tags_loaded_all_scenario_types", TAG_FOURCC_TAG_COLLECTION),
+        TAG("sound\\sfx\\ui\\cursor", TAG_FOURCC_SOUND),
+        TAG("sound\\sfx\\ui\\back", TAG_FOURCC_SOUND),
+        TAG("sound\\sfx\\ui\\flag_failure", TAG_FOURCC_SOUND),
+        // WHY ARE THESE IN SINGLEPLAYER?
+        TAG("ui\\shell\\main_menu\\mp_map_list", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\shell\\strings\\loading", TAG_FOURCC_UNICODE_STRING_LIST),
+        TAG("ui\\shell\\bitmaps\\trouble_brewing", TAG_FOURCC_BITMAP),
+        TAG("ui\\shell\\bitmaps\\background", TAG_FOURCC_BITMAP)
+    };
+    static constexpr std::array PC_REQUIRED_TAGS_SP = { TAG("ui\\ui_tags_loaded_solo_scenario_type", TAG_FOURCC_TAG_COLLECTION) };
+    static constexpr std::array PC_REQUIRED_TAGS_MP = { TAG("ui\\ui_tags_loaded_multiplayer_scenario_type", TAG_FOURCC_TAG_COLLECTION) };
+    static constexpr std::array PC_REQUIRED_TAGS_UI = { TAG("ui\\ui_tags_loaded_mainmenu_scenario_type", TAG_FOURCC_TAG_COLLECTION) };
+    
+    #define PC_BOILERPLATE \
+        .required_tags = { \
+            .all = USE_TAG_ARRAY(PC_REQUIRED_TAGS), \
+            .singleplayer = USE_TAG_ARRAY(PC_REQUIRED_TAGS_SP), \
+            .multiplayer = USE_TAG_ARRAY(PC_REQUIRED_TAGS_MP), \
+            .user_interface = USE_TAG_ARRAY(PC_REQUIRED_TAGS_UI) \
+        }
+    
     static constexpr const GameEngineInfo engine_infos[] = {
         { 
             .name = "Invader (Native)",
@@ -40,7 +109,10 @@ namespace Invader::HEK {
             .base_memory_address = 0,
             .tag_space_length = UINT64_MAX,
             .maximum_file_size = UINT64_MAX,
-            .bsps_occupy_tag_space = false
+            .bsps_occupy_tag_space = false,
+            .required_tags = {
+                .all = USE_TAG_ARRAY(INVADER_REQUIRED_TAGS)
+            }
         },
         { 
             .name = "Halo: Combat Evolved Anniversary (MCC)",
@@ -54,7 +126,8 @@ namespace Invader::HEK {
             .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
             .base_memory_address_is_inferred = true,
             .scenario_name_and_file_name_must_be_equal = false,
-            .supports_external_bitmaps_map = true
+            .supports_external_bitmaps_map = true,
+            PC_BOILERPLATE
         },
         {
             .name = "Halo Demo / Trial (Gearbox)",
@@ -67,7 +140,8 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .supports_external_bitmaps_map = true,
-            .supports_external_sounds_map = true
+            .supports_external_sounds_map = true,
+            PC_BOILERPLATE
         },
         {
             .name = "Halo Custom Edition (Gearbox)",
@@ -82,7 +156,8 @@ namespace Invader::HEK {
             .supports_external_bitmaps_map = true,
             .supports_external_sounds_map = true,
             .supports_external_loc_map = true,
-            .uses_indexing = true
+            .uses_indexing = true,
+            PC_BOILERPLATE
         },
         {
             .name = "Halo: Combat Evolved (Gearbox)",
@@ -95,7 +170,8 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .supports_external_bitmaps_map = true,
-            .supports_external_sounds_map = true
+            .supports_external_sounds_map = true,
+            PC_BOILERPLATE
         },
         {
             .name = "Halo: Combat Evolved (Xbox OXM Demo)",
@@ -107,7 +183,8 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_demo_max_file_size,
-            .uses_compression = true
+            .uses_compression = true,
+            XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-US)",
@@ -119,7 +196,8 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_max_file_size,
-            .uses_compression = true
+            .uses_compression = true,
+            XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_2276)
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-JP)",
@@ -131,7 +209,8 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = static_cast<Pointer64>(XBOX_TAG_SPACE_LENGTH + 288 * 1024),
             .maximum_file_size = xbox_max_file_size,
-            .uses_compression = true
+            .uses_compression = true,
+            XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
             .name = "Halo: Combat Evolved (Xbox NTSC-TW)",
@@ -143,7 +222,8 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = static_cast<Pointer64>(XBOX_TAG_SPACE_LENGTH + 500 * 1024),
             .maximum_file_size = xbox_max_file_size,
-            .uses_compression = true
+            .uses_compression = true,
+            XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
             .name = "Halo: Combat Evolved (Xbox PAL)",
@@ -155,7 +235,8 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_max_file_size,
-            .uses_compression = true
+            .uses_compression = true,
+            XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
             .name = "Halo: Combat Evolved (Xbox Unknown)",
