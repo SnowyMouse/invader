@@ -279,6 +279,7 @@ Options:
   -b --stock-resource-bounds   Only index tags if the tag's index is within
                                stock Custom Edition's resource map bounds.
                                (Custom Edition only)
+  -B --build-string <ver>      Set the build string in the header.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
   -E --extend-file-limits      Extend file size limits beyond what is allowed

@@ -68,6 +68,7 @@ int main(int argc, const char **argv) {
         bool hide_pedantic_warnings = false;
         std::optional<int> compression_level;
         bool increased_file_size_limits = false;
+        std::optional<std::string> build_version;
         bool check_custom_edition_resource_bounds = false;
         std::optional<std::uint64_t> max_tag_space;
         bool auto_forge = false;
@@ -93,6 +94,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
     options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
+    options.emplace_back("build-string", 'B', 1, "Set the build string in the header.", "<ver>");
     options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
     options.emplace_back("anniversary-mode", 'a', 0, "Enable anniversary graphics and audio (CEA only)");
     options.emplace_back("resource-maps", 'R', 1, "Specify the directory for loading resource maps. (by default this is the maps directory)", "<dir>");
@@ -134,6 +136,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'R':
                 build_options.resource_map_path = std::string(arguments[0]);
+                break;
+            case 'B':
+                build_options.build_version = std::string(arguments[0]);
                 break;
             case 'b':
                 build_options.check_custom_edition_resource_bounds = true;
@@ -278,6 +283,10 @@ int main(int argc, const char **argv) {
         
         if(build_options.max_tag_space.has_value()) {
             parameters.details.build_maximum_tag_space = *build_options.max_tag_space;
+        }
+        
+        if(build_options.build_version.has_value()) {
+            parameters.details.build_version = *build_options.build_version;
         }
         
         if(!build_options.use_anniverary_mode) {
