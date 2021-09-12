@@ -139,6 +139,10 @@ int main(int argc, const char **argv) {
                 break;
             case 'B':
                 build_options.build_version = std::string(arguments[0]);
+                if(build_options.build_version->size() >= 32) {
+                    eprintf_error("Build string must be fewer than 32 characters.");
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
             case 'b':
                 build_options.check_custom_edition_resource_bounds = true;
