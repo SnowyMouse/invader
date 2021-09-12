@@ -136,7 +136,7 @@
             "disable height map compression",
             "uniform sprite sequences",
             "filthy sprite bug fix",
-            "render at half dimensions"
+            "draw at half dimensions"
         ],
         "width": 16
     },
