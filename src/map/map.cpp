@@ -436,6 +436,47 @@ namespace Invader {
                 }
                 else {
                     tag.base_struct_pointer = tags[i].tag_data;
+                    
+                    // Check if there are external pointers
+                    switch(tag.tag_fourcc) {
+                        case TagFourCC::TAG_FOURCC_BITMAP: {
+                            auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
+                            std::size_t bitmap_data_count = base_struct.bitmap_data.count;
+                            if(bitmap_data_count) {
+                                auto *bitmaps = tag.resolve_reflexive(base_struct.bitmap_data);
+                                for(std::size_t b = 0; b < bitmap_data_count; b++) {
+                                    if(bitmaps[b].flags & BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
+                                        tag.external_pointers = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        case TagFourCC::TAG_FOURCC_SOUND: {
+                            auto &base_struct = tag.get_base_struct<HEK::Sound>();
+                            std::size_t pitch_range_count = base_struct.pitch_ranges.count;
+                            if(pitch_range_count) {
+                                auto *pitch_ranges = tag.resolve_reflexive(base_struct.pitch_ranges);
+                                for(std::size_t pr = 0; pr < pitch_range_count && !tag.external_pointers; pr++) {
+                                    auto &pitch_range = pitch_ranges[pr];
+                                    std::size_t permutation_count = pitch_range.permutations.count;
+                                    if(permutation_count) {
+                                        auto *permutations = tag.resolve_reflexive(pitch_range.permutations);
+                                        for(std::size_t p = 0; p < permutation_count; p++) {
+                                            if(permutations[p].samples.external & 1) {
+                                                tag.external_pointers = true;
+                                                break; // breaks out of outer loop too due to the check
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
                 }
             }
         };

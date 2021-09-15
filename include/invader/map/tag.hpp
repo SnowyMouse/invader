@@ -266,6 +266,9 @@ namespace Invader {
 
         /** This is indexed and not in the map? */
         bool indexed = false;
+        
+        /** It uses external pointers */
+        bool external_pointers = false;
 
         /** Base struct pointer */
         HEK::Pointer base_struct_pointer;

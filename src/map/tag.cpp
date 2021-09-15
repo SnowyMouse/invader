@@ -9,7 +9,7 @@ namespace Invader {
         using namespace HEK;
 
         // If it's indexed, check if the corresponding data is available
-        if(this->is_indexed()) {
+        if(this->is_indexed() || this->external_pointers) {
             switch(this->tag_fourcc) {
                 case TagFourCC::TAG_FOURCC_BITMAP:
                     return this->map.bitmap_data.size() > 0;
