@@ -122,10 +122,10 @@ namespace Invader::Info {
             if(total_external == 0) {
                 PRINT_LINE(oprintf_success, "External tags:", "%s", "None");
             }
-            else if(cache_version == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || cache_version == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            else if(cache_version == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 PRINT_LINE(oprintf_success_lesser_warn, "External tags:", "%zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_external, external_bitmaps, external_bitmaps == 1 ? "" : "s", external_loc, external_sounds, external_sounds == 1 ? "" : "s");
                 
-                // If we're custom edition or cea, we need to see if they're at least all indexed
+                // If we're custom edition we need to see if they're at least all indexed
                 std::size_t indexed_bitmaps = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, false).size();
                 std::size_t indexed_sounds = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, false).size();
                 std::size_t indexed_loc = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false).size();
