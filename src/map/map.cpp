@@ -374,26 +374,24 @@ namespace Invader {
 
                     // Find where it's located
                     DataMapType type;
+                    bool unavailable = false;
                     switch(tag.tag_fourcc) {
                         case TagFourCC::TAG_FOURCC_BITMAP:
                             type = DataMapType::DATA_MAP_BITMAP;
+                            unavailable = map.bitmap_data.size() == 0;
                             break;
                         case TagFourCC::TAG_FOURCC_SOUND:
                             type = DataMapType::DATA_MAP_SOUND;
+                            unavailable = map.sound_data.size() == 0;
                             break;
                         default:
                             type = DataMapType::DATA_MAP_LOC;
+                            unavailable = map.loc_data.size() == 0;
                             break;
                     }
-
-                    // Next, check if we have that
-                    if(type == DataMapType::DATA_MAP_BITMAP && map.bitmap_data.size() == 0) {
-                        continue;
-                    }
-                    else if(type == DataMapType::DATA_MAP_SOUND && map.sound_data.size() == 0) {
-                        continue;
-                    }
-                    else if(type == DataMapType::DATA_MAP_LOC && map.loc_data.size() == 0) {
+                    
+                    // If we don't have the corresponding map, continue
+                    if(unavailable) {
                         continue;
                     }
 
