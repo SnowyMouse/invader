@@ -289,6 +289,7 @@ int main(int argc, const char **argv) {
                         // fallthrough
                     case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                     case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                    case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
                         if(map.get_data_length(Invader::Map::DATA_MAP_BITMAP) == 0) {
                             eprintf_warn("Failed to find or read a bitmaps.map");
                         }
