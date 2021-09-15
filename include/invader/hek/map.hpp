@@ -87,28 +87,28 @@ namespace Invader::HEK {
             };
             
             struct TagPairPtrArray {
-                const TagPairPtr *ptr = nullptr;
-                std::size_t count = 0;
+                const TagPairPtr *ptr;
+                std::size_t count;
             };
             
             /** An array of required tags for all types */
-            TagPairPtrArray all;
+            TagPairPtrArray all = {};
             
             /** An array of required tags for singleplayer */
-            TagPairPtrArray singleplayer;
-            TagPairPtrArray singleplayer_demo;
-            TagPairPtrArray singleplayer_full;
+            TagPairPtrArray singleplayer = {};
+            TagPairPtrArray singleplayer_demo = {};
+            TagPairPtrArray singleplayer_full = {};
             
             /** An array of required tags for multiplayer */
-            TagPairPtrArray multiplayer;
-            TagPairPtrArray multiplayer_demo;
-            TagPairPtrArray multiplayer_full;
+            TagPairPtrArray multiplayer = {};
+            TagPairPtrArray multiplayer_demo = {};
+            TagPairPtrArray multiplayer_full = {};
             
             /** An array of required tags for user interface */
-            TagPairPtrArray user_interface;
-            TagPairPtrArray user_interface_demo;
-            TagPairPtrArray user_interface_full;
-        } required_tags;
+            TagPairPtrArray user_interface = {};
+            TagPairPtrArray user_interface_demo = {};
+            TagPairPtrArray user_interface_full = {};
+        } required_tags = {};
         
         /**
          * Retrieve the build string
