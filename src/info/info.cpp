@@ -81,7 +81,15 @@ namespace Invader::Info {
             }
         }
         
-        PRINT_LINE(oprintf, "Tags:", "%zu / %zu (%.02f MiB)\n", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
+        // Tag count, are any stubbed?
+        auto stubs = calculate_stub_count(map);
+        
+        if(stubs == 0) {
+            PRINT_LINE(oprintf_success, "Tags:", "%zu / %zu (%.02f MiB)", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
+        }
+        else {
+            PRINT_LINE(oprintf_success_lesser_warn, "Tags:", "%zu / %zu (%.02f MiB), %zu stubbed", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()), stubs);
+        }
         
         auto crc = map.get_crc32();
         auto crc_matches = map.get_header_crc32() == crc;

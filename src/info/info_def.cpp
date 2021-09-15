@@ -112,7 +112,7 @@ namespace Invader::Info {
         std::size_t stub_count = 0;
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map.get_tag(i);
-            if(!tag.is_stub()) {
+            if(tag.is_stub()) {
                 stub_count++;
             }
         }
