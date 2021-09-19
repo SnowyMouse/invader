@@ -74,10 +74,10 @@ int main(int argc, const char **argv) {
 
             case 'g':
                 if(std::strcmp(arguments[0], "gbx-custom") == 0) {
-                    resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                    resource_options.engine_target = CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
                 else if(std::strcmp(arguments[0], "gbx-retail") == 0 || std::strcmp(arguments[0], "gbx-demo") == 0 || std::strcmp(arguments[0], "mcc-cea") == 0) {
-                    resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                    resource_options.engine_target = CacheFileEngine::CACHE_FILE_RETAIL;
                 }
                 else {
                     eprintf_error("Invalid engine %s. Use --help for more information.", arguments[0]);

@@ -5,6 +5,8 @@
 #include <invader/file/file.hpp>
 #include <invader/hek/map.hpp>
 #include <invader/resource/list/resource_list.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
+#include <invader/tag/parser/definition/sound.hpp>
 #include <invader/tag/index/index.hpp>
 #include "language/language.hpp"
 #include "info_def.hpp"
@@ -126,16 +128,16 @@ namespace Invader::Info {
         const auto *scenario_name = map.get_scenario_name();
         std::optional<std::vector<File::TagFilePath>> indices;
         switch(map.get_cache_version()) {
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 indices = custom_edition_indices(scenario_name);
                 break;
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+            case CacheFileEngine::CACHE_FILE_DEMO:
                 indices = demo_indices(scenario_name);
                 break;
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+            case CacheFileEngine::CACHE_FILE_RETAIL:
                 indices = retail_indices(scenario_name);
                 break;
-            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+            case CacheFileEngine::CACHE_FILE_MCC_CEA:
                 indices = mcc_cea_indices(scenario_name);
                 break;
             default:
@@ -176,7 +178,7 @@ namespace Invader::Info {
                 }
                 
                 // B is damage effect tag but A is not the same as B (crash)
-                if(b_tag == HEK::TagFourCC::TAG_FOURCC_DAMAGE_EFFECT && a_tag != b_tag) {
+                if(b_tag == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT && a_tag != b_tag) {
                     return false;
                 }
             }
@@ -185,7 +187,7 @@ namespace Invader::Info {
                 auto b_tag = b[c].fourcc;
                 
                 // Network object that a doesn't have
-                if(IS_OBJECT_TAG(b_tag) || b_tag == HEK::TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
+                if(IS_OBJECT_TAG(b_tag) || b_tag == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
                     return false;
                 }
             }
@@ -320,7 +322,7 @@ namespace Invader::Info {
     }
     
     void engine(const Invader::Map &map) {
-        oprintf("%s\n", HEK::GameEngineInfo::get_game_engine_info(map.get_game_engine()).name);
+        oprintf("%s\n", GameEngineInfo::get_game_engine_info(map.get_game_engine()).name);
     }
     
     void external_bitmap_indices(const Invader::Map &map) {

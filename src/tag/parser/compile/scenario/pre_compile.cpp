@@ -83,7 +83,7 @@ namespace Invader::Parser {
         static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::C<LittleEndian>);
         if(scenario.script_syntax_data.size() == 0) {
             ScenarioScriptNodeTable::C<LittleEndian> t = {};
-            std::size_t DEFAULT_SCRIPT_NODE_COUNT = (engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA || engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) ? 32767 : 19001;
+            std::size_t DEFAULT_SCRIPT_NODE_COUNT = (engine == CacheFileEngine::CACHE_FILE_MCC_CEA || engine == CacheFileEngine::CACHE_FILE_NATIVE) ? 32767 : 19001;
             t.count = 0;
             t.data = 0x64407440;
             t.element_size = SCRIPT_ELEMENT_SIZE;

@@ -282,14 +282,14 @@ int main(int argc, const char **argv) {
             // Warn if we failed to open some resource maps
             if(!i.ignore_resource_maps) {
                 switch(map.get_cache_version()) {
-                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                         if(map.get_data_length(Invader::Map::DATA_MAP_LOC) == 0) {
                             eprintf_warn("Failed to find or read a loc.map");
                         }
                         // fallthrough
-                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                    case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                    case CacheFileEngine::CACHE_FILE_DEMO:
+                    case CacheFileEngine::CACHE_FILE_RETAIL:
+                    case CacheFileEngine::CACHE_FILE_MCC_CEA:
                         if(map.get_data_length(Invader::Map::DATA_MAP_BITMAP) == 0) {
                             eprintf_warn("Failed to find or read a bitmaps.map");
                         }
@@ -583,7 +583,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 
                 if(functional) {
                     try {
-                        auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
+                        auto meme_up_struct = [](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
                             auto hdata = struct_v.generate_hek_tag_data();
                             std::vector<std::uint8_t> meme_data;
                             

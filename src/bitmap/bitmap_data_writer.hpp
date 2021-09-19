@@ -4,7 +4,7 @@
 #define INVADER__BITMAP__BITMAP_DATA_WRITER_HPP
 
 #include <invader/bitmap/color_plate_scanner.hpp>
-#include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/definition/bitmap.hpp>
 
 namespace Invader {
     using BitmapFormat = Parser::BitmapFormat;

@@ -83,7 +83,7 @@ namespace Invader::Parser {
         struct RequiredTags {
             struct TagPairPtr {
                 const char *path;
-                HEK::TagFourCC fourcc;
+                TagFourCC fourcc;
             };
             
             struct TagPairPtrArray {

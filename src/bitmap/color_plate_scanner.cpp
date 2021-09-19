@@ -298,11 +298,11 @@ namespace Invader {
 
                     // If we require power-of-two, check
                     if(power_of_two) {
-                        if(!HEK::is_power_of_two(bitmap_width)) {
+                        if(!is_power_of_two(bitmap_width)) {
                             eprintf(ERROR_INVALID_BITMAP_WIDTH, bitmap_width);
                             throw InvalidInputBitmapException();
                         }
-                        if(!HEK::is_power_of_two(bitmap_height)) {
+                        if(!is_power_of_two(bitmap_height)) {
                             eprintf(ERROR_INVALID_BITMAP_HEIGHT, bitmap_height);
                             throw InvalidInputBitmapException();
                         }
@@ -352,7 +352,7 @@ namespace Invader {
         std::uint32_t face_width = width / 4;
         std::uint32_t face_height = height / 3;
 
-        if(face_height != face_width || !HEK::is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
+        if(face_height != face_width || !is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
             eprintf_error("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
             throw InvalidInputBitmapException();
         }
@@ -411,11 +411,11 @@ namespace Invader {
 
     void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const {
         if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
-            if(!HEK::is_power_of_two(width)) {
+            if(!is_power_of_two(width)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
                 throw InvalidInputBitmapException();
             }
-            if(!HEK::is_power_of_two(height)) {
+            if(!is_power_of_two(height)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, height);
                 throw InvalidInputBitmapException();
             }

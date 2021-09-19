@@ -111,11 +111,11 @@ namespace Invader::EditQt {
         main_layout->addWidget(generate_text_widget("Bitmap:", &bitmaps));
         main_layout->addWidget(generate_text_widget("Mipmap:", &mipmaps));
         main_layout->addWidget(generate_text_widget("Channels:", &colors));
-        HEK::BitmapType type = bitmap_data->type;
+        BitmapType type = bitmap_data->type;
         main_layout->addWidget(generate_text_widget("Scale:", &scale));
 
         // Add this if we have sprites
-        if(type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+        if(type == BitmapType::BITMAP_TYPE_SPRITES) {
             main_layout->addWidget(generate_text_widget("Sequence:", &sequence));
             main_layout->addWidget(generate_text_widget("Sprite:", &sprite));
 

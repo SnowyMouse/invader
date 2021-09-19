@@ -114,7 +114,7 @@ namespace Invader {
                 /**
                  * Game engine to use
                  */
-                HEK::GameEngine build_game_engine;
+                Parser::GameEngine build_game_engine;
                  
                 /**
                  * Tag data address to use
@@ -129,7 +129,7 @@ namespace Invader {
                 /**
                  * Maximum cache file size to use. If null, it will determine it based on the map type on Xbox or the maximum allowed file size on other versions (without modding).
                  */
-                HEK::GameEngineInfo::maximum_file_size_t build_maximum_cache_file_size;
+                Parser::GameEngineInfo::maximum_file_size_t build_maximum_cache_file_size;
                 
                 /**
                  * Compress?
@@ -169,19 +169,19 @@ namespace Invader {
                 /**
                  * Required tags to import
                  */
-                HEK::GameEngineInfo::RequiredTags build_required_tags;
+                Parser::GameEngineInfo::RequiredTags build_required_tags;
                 
                 /**
                  * Instantiate some default, working parameters for the target engine
                  * @param engine_info engine info
                  */
-                BuildParametersDetails(const HEK::GameEngineInfo &engine_info) noexcept;
+                BuildParametersDetails(const Parser::GameEngineInfo &engine_info) noexcept;
                 
                 /**
                  * Instantiate some default, working parameters for the target engine
                  * @param engine engine
                  */
-                BuildParametersDetails(HEK::GameEngine engine) noexcept : BuildParametersDetails(HEK::GameEngineInfo::get_game_engine_info(engine)) {};
+                BuildParametersDetails(Parser::GameEngine engine) noexcept : BuildParametersDetails(Parser::GameEngineInfo::get_game_engine_info(engine)) {};
                 
                 BuildParametersDetails(const BuildParametersDetails &) = default;
                 BuildParametersDetails(BuildParametersDetails &&) = default;
@@ -193,13 +193,13 @@ namespace Invader {
              * @param tags     tags directories to use
              * @param engine   engine target to use
              */
-            BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, Parser::CacheFileEngine engine);
+            BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, Parser::GameEngine engine);
                 
             /**
              * Instantiate a simple set of parameters
              * @param engine engine target to use
              */
-            BuildParameters(Parser::CacheFileEngine engine = Parser::CacheFileEngine::CACHE_FILE_NATIVE) noexcept;
+            BuildParameters(Parser::GameEngine engine = Parser::GameEngine::GAME_ENGINE_NATIVE) noexcept;
             
             BuildParameters(const BuildParameters &) = default;
             BuildParameters(BuildParameters &&) = default;

@@ -456,7 +456,7 @@ namespace Invader::BitmapEncode {
                     return BitmapDataFormat::BITMAP_DATA_FORMAT_Y8;
                 }
                 else if(all_white) {
-                    return HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8;
+                    return BitmapDataFormat::BITMAP_DATA_FORMAT_A8;
                 }
                 else if(luminosity_equals_alpha) {
                     return BitmapDataFormat::BITMAP_DATA_FORMAT_AY8;

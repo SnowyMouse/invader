@@ -54,7 +54,7 @@ namespace Invader {
          * Get the cache version
          * @return cache version
          */
-        HEK::CacheFileEngine get_cache_version() const noexcept {
+        Parser::CacheFileEngine get_cache_version() const noexcept {
             return this->cache_version;
         }
 
@@ -309,7 +309,7 @@ namespace Invader {
          * Get the game engine
          * @return game engine
          */
-        HEK::GameEngine get_game_engine() const noexcept;
+        Parser::GameEngine get_game_engine() const noexcept;
 
         Map(Map &&);
     private:
@@ -361,10 +361,10 @@ namespace Invader {
         CompressionType compressed = CompressionType::COMPRESSION_TYPE_NONE;
 
         /** Engine */
-        HEK::GameEngine game_engine;
+        Parser::GameEngine game_engine;
         
         /** Cache version */
-        HEK::CacheFileEngine cache_version;
+        Parser::CacheFileEngine cache_version;
 
         /** Type */
         Parser::CacheFileType type;

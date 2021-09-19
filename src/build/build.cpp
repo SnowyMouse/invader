@@ -17,6 +17,10 @@
 
 #include "build.hpp"
 
+using namespace Invader;
+using namespace Invader::Parser;
+using namespace Invader::File;
+
 static std::uint32_t read_str32(const char *err, const char *s) {
     // Make sure it starts with '0x'
     if(std::strncmp(s, "0x", 2) != 0) {
@@ -54,7 +58,7 @@ int main(int argc, const char **argv) {
         std::optional<std::filesystem::path> output;
         std::string last_argument;
         std::string index;
-        std::optional<const HEK::GameEngineInfo *> engine;
+        std::optional<const GameEngineInfo *> engine;
         bool handled = true;
         bool quiet = false;
         RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
@@ -165,7 +169,7 @@ int main(int argc, const char **argv) {
                 break;
                 
             case 'g': {
-                if(const auto *engine_maybe = HEK::GameEngineInfo::get_game_engine_info(arguments[0])) {
+                if(const auto *engine_maybe = GameEngineInfo::get_game_engine_info(arguments[0])) {
                     build_options.engine = engine_maybe;
                 }
                 else {
@@ -297,7 +301,7 @@ int main(int argc, const char **argv) {
         parameters.details.build_check_custom_edition_resource_map_bounds = build_options.check_custom_edition_resource_bounds;
         
         if(build_options.increased_file_size_limits) {
-            if(engine_info.engine != HEK::GameEngine::GAME_ENGINE_NATIVE) {
+            if(engine_info.engine != GameEngine::GAME_ENGINE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
         }
@@ -409,10 +413,10 @@ int main(int argc, const char **argv) {
         if(build_options.auto_forge) {
             if(!parameters.index.has_value()) {
                 switch(engine_info.engine) {
-                    case HEK::GameEngine::GAME_ENGINE_GEARBOX_RETAIL:
+                    case GameEngine::GAME_ENGINE_GEARBOX_RETAIL:
                         parameters.index = retail_indices(map_name.c_str());
                         break;
-                    case HEK::GameEngine::GAME_ENGINE_GEARBOX_CUSTOM_EDITION:
+                    case GameEngine::GAME_ENGINE_GEARBOX_CUSTOM_EDITION:
                         parameters.index = custom_edition_indices(map_name.c_str());
                         
                         if(!parameters.forge_crc.has_value()) {
@@ -476,10 +480,10 @@ int main(int argc, const char **argv) {
                         }
                         
                         break;
-                    case HEK::GameEngine::GAME_ENGINE_GEARBOX_DEMO:
+                    case GameEngine::GAME_ENGINE_GEARBOX_DEMO:
                         parameters.index = demo_indices(map_name.c_str());
                         break;
-                    case HEK::GameEngine::GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY:
+                    case GameEngine::GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY:
                         parameters.index = mcc_cea_indices(map_name.c_str());
                         break;
                     default: break;
@@ -488,7 +492,7 @@ int main(int argc, const char **argv) {
         }
 
         // Build!
-        auto map = Invader::BuildWorkload::compile_map(parameters);
+        auto map = BuildWorkload::compile_map(parameters);
         
         static const char MAP_EXTENSION[] = ".map"; 
         auto map_name_with_extension = std::string(map_name) + MAP_EXTENSION;

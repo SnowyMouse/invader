@@ -2,6 +2,8 @@
 
 #include <invader/bitmap/bitmap_processor.hpp>
 
+using namespace Invader::Parser;
+
 namespace Invader {
     void BitmapProcessor::process_bitmap_data(
         GeneratedBitmapData &generated_bitmap,
@@ -102,7 +104,7 @@ namespace Invader {
                         bitmap.pixels = new_pixels;
                         
                         // Check if power-of-two
-                        if(processor.power_of_two && (!HEK::is_power_of_two(new_width) || !HEK::is_power_of_two(new_height))) {
+                        if(processor.power_of_two && (!is_power_of_two(new_width) || !is_power_of_two(new_height))) {
                             eprintf_error("This is non-power-of-two, but the bitmap type requires power-of-two");
                             throw InvalidInputBitmapException();
                         }
@@ -236,7 +238,7 @@ namespace Invader {
                     float x_intensity = (right_up_pixel + 2.0F * right_pixel + right_down_pixel) - (left_up_pixel + 2.0F * left_pixel + left_down_pixel);
                     float y_intensity = (left_down_pixel + 2.0F * down_pixel + right_down_pixel) - (left_up_pixel + 2.0F * up_pixel + right_up_pixel);
                     float z_intensity = bump_scale / (bump_height / 0.02F);
-                    HEK::Vector3D<HEK::NativeEndian> v;
+                    Vector3D<NativeEndian> v;
                     v.i = x_intensity;
                     v.j = y_intensity;
                     v.k = z_intensity;
@@ -259,7 +261,7 @@ namespace Invader {
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
             std::uint32_t mipmap_height = bitmap.height;
-            std::uint32_t max_mipmap_count = mipmap_width > mipmap_height ? HEK::log2_int(mipmap_width) : HEK::log2_int(mipmap_height);
+            std::uint32_t max_mipmap_count = mipmap_width > mipmap_height ? log2_int(mipmap_width) : log2_int(mipmap_height);
             if(max_mipmap_count > mipmaps_unsigned) {
                 max_mipmap_count = mipmaps_unsigned;
             }
@@ -271,7 +273,7 @@ namespace Invader {
                     max_mipmap_count = 0;
                 }
                 else {
-                    auto max_mipmaps_sprites = HEK::log2_int(sprite_parameters.value().sprite_spacing);
+                    auto max_mipmaps_sprites = log2_int(sprite_parameters.value().sprite_spacing);
                     if(max_mipmap_count > max_mipmaps_sprites) {
                         max_mipmap_count = max_mipmaps_sprites;
                     }
@@ -603,7 +605,7 @@ namespace Invader {
                 }
             }
             else if(generated_bitmap.type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
-                if(!FACES || !HEK::is_power_of_two(FACES)) {
+                if(!FACES || !is_power_of_two(FACES)) {
                     eprintf_error("Error: 3D texture depth must be a power of two. Got %u\n", FACES);
                     throw InvalidInputBitmapException();
                 }

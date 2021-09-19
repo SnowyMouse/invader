@@ -11,8 +11,6 @@ using namespace Invader::Parser;
 
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, std::optional<BitmapFormat> &format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
-        using namespace Invader::HEK;
-
         auto bitmap_count = scanned_color_plate.bitmaps.size();
         
         // If format is nullopt, automatically determine a format

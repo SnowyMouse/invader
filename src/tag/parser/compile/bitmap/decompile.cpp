@@ -13,8 +13,8 @@ namespace Invader::Parser {
 
         auto &map = tag.get_map();
         auto engine = map.get_cache_version();
-        auto xbox = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
-        auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
+        auto xbox = engine == CacheFileEngine::CACHE_FILE_XBOX;
+        auto &base_struct = tag.get_base_struct<Bitmap::C>();
         
         // Un-zero out these if we're sprites (again, this is completely *insane* but compiled maps have this zeroed out for whatever reason which can completely FUCK things up if this were to not be "sprites" all of a sudden)
         if(this->type == BitmapType::BITMAP_TYPE_SPRITES) {

@@ -6,7 +6,7 @@
 #include <optional>
 #include <array>
 
-namespace Invader::HEK {
+namespace Invader::Parser {
     static constexpr const Pointer64 GEARBOX_TAG_SPACE_LENGTH = (23 * 1024 * 1024);
     static constexpr const Pointer64 GEARBOX_MAX_FILE_SIZE = (384 * 1024 * 1024);
     static constexpr const Pointer64 GEARBOX_BASE_MEMORY_ADDRESS = 0x40440000;
@@ -30,7 +30,7 @@ namespace Invader::HEK {
     #define xbox_max_file_size max_file_size_fn<static_cast<Pointer64>(278 * 1024 * 1024), static_cast<Pointer64>(47 * 1024 * 1024), static_cast<Pointer64>(35 * 1024 * 1024)>
     #define xbox_demo_max_file_size max_file_size_fn<static_cast<Pointer64>(215 * 1024 * 1024), static_cast<Pointer64>(INT32_MAX), static_cast<Pointer64>(23 * 1024 * 1024)>
     
-    #define TAG(path,fourcc) GameEngineInfo::RequiredTags::TagPairPtr {path, HEK::TagFourCC::fourcc}
+    #define TAG(path,fourcc) GameEngineInfo::RequiredTags::TagPairPtr {path, TagFourCC::fourcc}
     
     #define GLOBALS_TAG TAG("globals\\globals", TAG_FOURCC_GLOBALS)
     

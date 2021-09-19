@@ -28,7 +28,7 @@ namespace Invader {
         }
         
         auto engine = map.get_cache_version();
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(engine == CacheFileEngine::CACHE_FILE_XBOX) {
             return 0;
         }
 

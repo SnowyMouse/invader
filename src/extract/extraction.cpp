@@ -394,7 +394,7 @@ namespace Invader {
             EXTRACT_TAG_CLASS(WeaponHUDInterface, TAG_FOURCC_WEAPON_HUD_INTERFACE)
 
             case TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP: {
-                if(tag.get_map().get_cache_version() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(tag.get_map().get_cache_version() == CacheFileEngine::CACHE_FILE_NATIVE) {
                     return std::make_unique<Parser::ScenarioStructureBSP>(Parser::ScenarioStructureBSP::parse_cache_file_data(tag));
                 }
                 else {

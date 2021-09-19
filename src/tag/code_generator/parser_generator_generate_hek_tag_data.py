@@ -33,8 +33,8 @@ def make_generate_hek_tag_data(definition, append_line):
                         append_line("        }", 2)
                         append_line("    }", 1)
                         if struct["classes"][0] != "*":
-                            append_line("    else if(this->{}.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL) {{".format(name), 1)
-                            append_line("        b.{}.tag_fourcc = HEK::TagFourCC::TAG_FOURCC_{};".format(name, struct["classes"][0].upper()), 2)
+                            append_line("    else if(this->{}.tag_fourcc == TagFourCC::TAG_FOURCC_NULL) {{".format(name), 1)
+                            append_line("        b.{}.tag_fourcc = TagFourCC::TAG_FOURCC_{};".format(name, struct["classes"][0].upper()), 2)
                             append_line("    }", 1)
                             
                     elif struct["type"] == "TagReflexive":

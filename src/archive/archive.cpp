@@ -17,6 +17,7 @@
 
 int main(int argc, const char **argv) {
     using namespace Invader;
+    using namespace Invader::Parser;
     
     struct ArchiveOptions {
         bool single_tag = false;
@@ -27,7 +28,7 @@ int main(int argc, const char **argv) {
         bool use_filesystem_path = false;
         bool copy = false;
         bool overwrite = false;
-        std::optional<HEK::GameEngine> engine;
+        std::optional<GameEngine> engine;
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
@@ -74,7 +75,7 @@ int main(int argc, const char **argv) {
                 archive_options.use_filesystem_path = true;
                 break;
             case 'g': {
-                if(const auto *engine_maybe = HEK::GameEngineInfo::get_game_engine_info(arguments[0])) {
+                if(const auto *engine_maybe = GameEngineInfo::get_game_engine_info(arguments[0])) {
                     archive_options.engine = engine_maybe->engine;
                 }
                 else {
@@ -171,14 +172,14 @@ int main(int argc, const char **argv) {
             BuildWorkload::BuildParameters parameters(*archive_options.engine);
             parameters.scenario = base_tag;
             parameters.tags_directories = archive_options.tags;
-            if(archive_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(archive_options.engine == CacheFileEngine::CACHE_FILE_XBOX) {
                 parameters.details.build_compress = true;
                 parameters.details.build_compression_level = 0;
             }
             else {
                 parameters.details.build_compress = false;
             }
-            if(archive_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(archive_options.engine != CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
             parameters.verbosity = BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
