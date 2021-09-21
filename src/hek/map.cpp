@@ -174,19 +174,6 @@ namespace Invader::HEK {
             PC_BOILERPLATE
         },
         {
-            .name = "Halo: Combat Evolved (Xbox OXM Demo)",
-            .shorthand = "xbox-demo",
-            .engine = GameEngine::GAME_ENGINE_XBOX_DEMO,
-            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
-            .build_string = "",
-            .build_string_is_enforced = true,
-            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
-            .tag_space_length = XBOX_TAG_SPACE_LENGTH,
-            .maximum_file_size = xbox_demo_max_file_size,
-            .uses_compression = true,
-            XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
-        },
-        {
             .name = "Halo: Combat Evolved (Xbox NTSC-US)",
             .shorthand = "xbox-ntsc",
             .engine = GameEngine::GAME_ENGINE_XBOX_NTSC_US,
@@ -239,16 +226,29 @@ namespace Invader::HEK {
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
-            .name = "Halo: Combat Evolved (Xbox Unknown)",
+            .name = "Untracked cache file (Xbox)",
             .engine = GameEngine::GAME_ENGINE_XBOX_GENERIC,
             .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
-            .build_string = "MISSINGNO.",
+            .build_string = "",
             .build_string_is_enforced = false,
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
             .base_memory_address_is_inferred = true,
             .uses_compression = true
+        },
+        {
+            .name = "Halo: Combat Evolved (Xbox OXM Demo)",
+            .shorthand = "xbox-demo",
+            .engine = GameEngine::GAME_ENGINE_XBOX_DEMO,
+            .cache_version = CacheFileEngine::CACHE_FILE_XBOX,
+            .build_string = "",
+            .build_string_is_enforced = true,
+            .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .tag_space_length = XBOX_TAG_SPACE_LENGTH,
+            .maximum_file_size = xbox_demo_max_file_size,
+            .uses_compression = true,
+            XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         }
     };
     
