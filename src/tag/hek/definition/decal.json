@@ -32,7 +32,8 @@
             "sapien snap to axis",
             "sapien incremental counter",
             "animation loop",
-            "preserve aspect"
+            "preserve aspect",
+            "disabled in remastered by blood setting"
         ],
         "width": 16
     },
@@ -176,7 +177,9 @@
             },
             {
                 "name": "maximum sprite extent",
-                "type": "float"
+                "type": "float",
+                "unit": "pixels",
+                "cache_only": true
             },
             {
                 "type": "pad",
