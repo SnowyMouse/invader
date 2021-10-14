@@ -196,7 +196,7 @@ Create or modify a bitmap tag.
 
 Options:
   -B --budget <length>         Set max length of sprite sheet. Can be 32, 64,
-                               128, 256, or 512. Default (new tag): 32
+                               128, 256, 512, or 1024. Default (new tag): 32
   -C --budget-count <count>    Set maximum number of sprite sheets. Setting
                                this to 0 disables budgeting. Default (new tag):
                                0
