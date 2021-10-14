@@ -53,7 +53,21 @@
         "name": "LensFlareFlags",
         "type": "bitfield",
         "fields": [
-            "sun"
+            "sun",
+            "no occlusion test",
+            "only render in first person",
+            "only render in third person",
+            "fade in more quickly",
+            "fade out more quickly",
+            "scale by marker"
+        ],
+        "exclude": [
+            {
+                "field": "fade in more quickly"
+            },
+            {
+                "field": "fade out more quickly"
+            }
         ],
         "width": 16
     },
@@ -145,13 +159,13 @@
             {
                 "name": "animation period",
                 "type": "float",
-                "unit": "world units",
+                "unit": "seconds",
                 "default": 1.0
             },
             {
                 "name": "animation phase",
-                "unit": "world units",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",
@@ -262,6 +276,7 @@
                 "name": "reflections",
                 "type": "TagReflexive",
                 "struct": "LensFlareReflection",
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
