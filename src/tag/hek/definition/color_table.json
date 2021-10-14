@@ -22,7 +22,8 @@
                 "name": "colors",
                 "type": "TagReflexive",
                 "struct": "ColorTableColor",
-                "hek_maximum": 512
+                "hek_maximum": 512,
+                "maximum": 512
             }
         ],
         "type": "struct",
