@@ -45,37 +45,66 @@
         "size": 16
     },
     {
-        "name": "MCCHUDGlobalsAnniversaryHUDBitmapReplacement",
+        "name": "HUDGlobalsAnniversaryRemapTargetLanguage",
+        "options": [
+            "english",
+            "french",
+            "spanish",
+            "italian",
+            "german",
+            "traditional chinese",
+            "japanese",
+            "korean",
+            "portuguese",
+            "latam spanish",
+            "polish",
+            "russian",
+            "simplified chinese"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDGlobalsAnniversaryRemapTargetFlags",
+        "type": "bitfield",
+        "fields": [
+            "legacy mode"
+        ],
+        "width": 16
+    },
+    {
+        "name": "HUDGlobalsAnniversaryRemapTarget",
         "fields": [
             {
                 "type": "TagDependency",
                 "classes": [ "bitmap" ],
-                "name": "source"
+                "name": "target bitmap"
             },
             {
-                "name": "unknown1",
-                "type": "int16"
+                "name": "language",
+                "type": "HUDGlobalsAnniversaryRemapTargetLanguage"
             },
             {
-                "name": "unknown2",
-                "type": "int16"
+                "name": "flags",
+                "type": "HUDGlobalsAnniversaryRemapTargetFlags"
             }
         ],
         "type": "struct",
         "size": 20
     },
     {
-        "name": "MCCHUDGlobalsAnniversaryHUDBitmap",
+        "name": "HUDGlobalsAnniversaryRemap",
         "fields": [
             {
                 "type": "TagDependency",
                 "classes": [ "bitmap" ],
-                "name": "source"
+                "name": "source bitmap"
             },
             {
                 "type": "TagReflexive",
-                "name": "replacements",
-                "struct": "MCCHUDGlobalsAnniversaryHUDBitmapReplacement"
+                "name": "targets",
+                "struct": "HUDGlobalsAnniversaryRemapTarget",
+                "maximum": 26,
+                "hek_maximum": 26
             }
         ],
         "type": "struct",
@@ -236,6 +265,7 @@
                 "name": "button icons",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsButtonIcon",
+                "maximum": 18,
                 "hek_maximum": 18
             },
             {
@@ -352,6 +382,7 @@
                 "name": "waypoint arrows",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsWaypointArrow",
+                "maximum": 16,
                 "hek_maximum": 16
             },
             {
@@ -543,10 +574,12 @@
                 ]
             },
             {
-                "name": "anniversary hud bitmaps",
+                "name": "anniversary hud remaps",
                 "type": "TagReflexive",
                 "engines": [ "mcc" ],
-                "struct": "MCCHUDGlobalsAnniversaryHUDBitmap"
+                "struct": "HUDGlobalsAnniversaryRemap",
+                "maximum": 32,
+                "hek_maximum": 32
             },
             {
                 "type": "pad",

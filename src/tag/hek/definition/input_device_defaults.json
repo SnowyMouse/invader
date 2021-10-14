@@ -9,6 +9,14 @@
         "type": "enum"
     },
     {
+        "name": "InputDeviceDefaultsFlags",
+        "type": "bitfield",
+        "fields": [
+            "unused"
+        ],
+        "width": 16
+    },
+    {
         "name": "InputDeviceDefaults",
         "fields": [
             {
@@ -16,8 +24,9 @@
                 "type": "InputDeviceDefaultsDeviceType"
             },
             {
-                "name": "unused",
-                "type": "int16"
+                "name": "flags",
+                "type": "InputDeviceDefaultsFlags",
+                "unused": true
             },
             {
                 "name": "device id",

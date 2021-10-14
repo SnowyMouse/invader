@@ -319,6 +319,7 @@
                 "name": "effectors",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlayEffector",
+                "maximum": 30,
                 "hek_maximum": 30
             },
             {
