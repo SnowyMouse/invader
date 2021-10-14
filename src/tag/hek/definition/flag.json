@@ -48,7 +48,8 @@
         "fields": [
             {
                 "name": "flags",
-                "type": "IsUnusedFlag"
+                "type": "IsUnusedFlag",
+                "unused": true
             },
             {
                 "name": "trailing edge shape",
@@ -121,7 +122,8 @@
                 "name": "attachment points",
                 "type": "TagReflexive",
                 "struct": "FlagAttachmentPoint",
-                "hek_maximum": 4
+                "hek_maximum": 5,
+                "maximum": 5
             }
         ],
         "type": "struct",
