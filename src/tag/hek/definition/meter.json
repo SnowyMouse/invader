@@ -30,7 +30,8 @@
         "fields": [
             {
                 "name": "flags",
-                "type": "IsUnusedFlag"
+                "type": "IsUnusedFlag",
+                "unused": true
             },
             {
                 "name": "stencil bitmaps",
@@ -92,11 +93,13 @@
             },
             {
                 "name": "unmask distance",
-                "type": "float"
+                "type": "float",
+                "unit": "meter units"
             },
             {
                 "name": "mask distance",
-                "type": "float"
+                "type": "float",
+                "unit": "meter units"
             },
             {
                 "type": "pad",

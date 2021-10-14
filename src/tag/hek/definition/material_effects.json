@@ -31,6 +31,7 @@
                 "name": "materials",
                 "type": "TagReflexive",
                 "struct": "MaterialEffectsMaterialEffectMaterial",
+                "maximum": 33,
                 "hek_maximum": 33
             },
             {
@@ -48,6 +49,7 @@
                 "name": "effects",
                 "type": "TagReflexive",
                 "struct": "MaterialEffectsMaterialEffect",
+                "maximum": 13,
                 "hek_maximum": 13
             },
             {

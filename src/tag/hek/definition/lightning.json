@@ -186,12 +186,14 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "LightningMarker",
+                "maximum": 16,
                 "hek_maximum": 16
             },
             {
                 "name": "shader",
                 "type": "TagReflexive",
                 "struct": "LightningShader",
+                "maximum": 1,
                 "hek_maximum": 1
             },
             {

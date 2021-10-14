@@ -153,6 +153,7 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryPermutation",
+                "maximum": 32,
                 "hek_maximum": 32,
                 "read_only": true
             }
@@ -386,48 +387,56 @@
                 "name": "bsp3d nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP3DNode",
+                "maximum": 131072,
                 "hek_maximum": 131072
             },
             {
                 "name": "planes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPPlane",
+                "maximum": 65536,
                 "hek_maximum": 65536
             },
             {
                 "name": "leaves",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPLeaf",
+                "maximum": 65536,
                 "hek_maximum": 65536
             },
             {
                 "name": "bsp2d references",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DReference",
+                "maximum": 131072,
                 "hek_maximum": 131072
             },
             {
                 "name": "bsp2d nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DNode",
+                "maximum": 65535,
                 "hek_maximum": 65535
             },
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPSurface",
+                "maximum": 131072,
                 "hek_maximum": 131072
             },
             {
                 "name": "edges",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPEdge",
+                "maximum": 262144,
                 "hek_maximum": 262144
             },
             {
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPVertex",
+                "maximum": 131072,
                 "hek_maximum": 131072
             }
         ],
@@ -479,6 +488,7 @@
                 "name": "bsps",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
+                "maximum": 32,
                 "hek_maximum": 32
             }
         ],
@@ -682,12 +692,14 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryMaterial",
                 "read_only": true,
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryRegion",
+                "maximum": 8,
                 "hek_maximum": 8,
                 "read_only": true
             },
@@ -696,6 +708,7 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryModifier",
                 "read_only": true,
+                "maximum": 0,
                 "hek_maximum": 0
             },
             {
@@ -721,6 +734,7 @@
                 "name": "pathfinding spheres",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometrySphere",
+                "maximum": 32,
                 "hek_maximum": 32,
                 "volatile": true
             },
@@ -728,6 +742,7 @@
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryNode",
+                "maximum": 64,
                 "hek_maximum": 64,
                 "read_only": true
             }
