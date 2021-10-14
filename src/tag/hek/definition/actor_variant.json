@@ -52,11 +52,19 @@
             "can shoot while flying",
             "interpolate color in hsv",
             "has unlimited grenades",
-            "moveswitch stay w friends",
+            "movement switching try to stay with friends",
             "active camouflage",
             "super active camouflage",
             "cannot use ranged weapons",
             "prefer passenger seat"
+        ],
+        "exclude": [
+            {
+                "field": "interpolate color in hsv"
+            },
+            {
+                "field": "has unlimited grenades"
+            }
         ],
         "width": 32
     },
