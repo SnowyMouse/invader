@@ -12,8 +12,8 @@
     {
         "name": "DeviceTriggersWhen",
         "options": [
-            "triggers when touched by player",
-            "triggers when destroyed"
+            "touched by player",
+            "destroyed"
         ],
         "type": "enum"
     },

@@ -5,6 +5,6 @@
 namespace Invader::Parser {
     void Decal::postprocess_hek_data() {
         this->radius.to = std::max(this->radius.from, this->radius.to);
-        this->maximum_sprite_extent = 16.0f;
+        this->maximum_sprite_extent = 16.0F;
     }
 }
