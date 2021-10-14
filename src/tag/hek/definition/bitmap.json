@@ -93,8 +93,7 @@
             "128x128",
             "256x256",
             "512x512",
-            "1024x1024",
-            "2048x2048"
+            "1024x1024"
         ],
         "type": "enum"
     },
@@ -136,7 +135,7 @@
             "disable height map compression",
             "uniform sprite sequences",
             "filthy sprite bug fix",
-            "draw at half dimensions"
+            "draw at half dimensions in hud"
         ],
         "width": 16
     },
@@ -367,15 +366,7 @@
             },
             {
                 "name": "sprite budget size",
-                "type": "BitmapSpriteBudgetSize",
-                "exclude": [
-                    {
-                        "option": "2048x2048",
-                        "struct": [
-                            "Bitmap"
-                        ]
-                    }
-                ]
+                "type": "BitmapSpriteBudgetSize"
             },
             {
                 "name": "sprite budget count",
