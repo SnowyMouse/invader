@@ -546,7 +546,8 @@
                 "name": "change colors",
                 "type": "TagReflexive",
                 "struct": "ActorVariantChangeColors",
-                "hek_maximum": 4
+                "hek_maximum": 4,
+                "maximum": 4
             }
         ],
         "type": "struct",
