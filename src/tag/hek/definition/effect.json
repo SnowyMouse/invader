@@ -104,10 +104,11 @@
         "fields": [
             "deleted when attachment deactivates",
             "required for gameplay cannot optimize out",
-            "do not cull"
+            "must be deterministic",
+            "disabled in remastered by blood setting"
         ],
         "cache_only": [
-            "do not cull"
+            "must be deterministic"
         ],
         "width": 32
     },

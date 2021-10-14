@@ -9,7 +9,7 @@ namespace Invader::Parser {
     }
 
     void Effect::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
-        bool do_not_cull = false;
+        bool must_be_deterministic = false;
         auto &effect_struct = workload.structs[struct_index];
         auto &effect = *reinterpret_cast<struct_little *>(effect_struct.data.data() + struct_offset);
         std::size_t event_count = effect.events.count;
@@ -36,7 +36,7 @@ namespace Invader::Parser {
                             else {
                                 part.type_class = r;
                                 if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT || r == TagFourCC::TAG_FOURCC_LIGHT) {
-                                    do_not_cull = true;
+                                    must_be_deterministic = true;
                                 }
                                 
                                 // Find the maximum radius
@@ -54,11 +54,11 @@ namespace Invader::Parser {
         }
         
         auto flags = effect.flags.read();
-        if(do_not_cull) {
-            flags |= HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_DO_NOT_CULL;
+        if(must_be_deterministic) {
+            flags |= HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC;
         }
         else {
-            flags &= ~HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_DO_NOT_CULL;
+            flags &= ~HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC;
         }
         effect.flags = flags;
     }
