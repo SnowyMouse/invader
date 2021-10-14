@@ -55,7 +55,8 @@
         "fields": [
             {
                 "name": "moving turning speed",
-                "type": "Angle"
+                "type": "Angle",
+                "unit": "degrees per second"
             },
             {
                 "name": "biped flags",
@@ -343,7 +344,8 @@
                 "name": "contact point",
                 "type": "TagReflexive",
                 "struct": "BipedContactPoint",
-                "hek_maximum": 2
+                "hek_maximum": 2,
+                "maximum": 2
             }
         ],
         "type": "struct",
