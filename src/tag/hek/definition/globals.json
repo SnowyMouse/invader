@@ -170,7 +170,9 @@
             {
                 "name": "look function",
                 "type": "TagReflexive",
-                "struct": "GlobalsLookFunction"
+                "struct": "GlobalsLookFunction",
+                "maximum": 16,
+                "hek_maximum": 16
             }
         ],
         "type": "struct",
@@ -1068,7 +1070,9 @@
             {
                 "name": "vehicles",
                 "type": "TagReflexive",
-                "struct": "GlobalsVehicle"
+                "struct": "GlobalsVehicle",
+                "maximum": 20,
+                "hek_maximum": 20
             },
             {
                 "name": "hill shader",
@@ -1096,7 +1100,9 @@
             {
                 "name": "sounds",
                 "type": "TagReflexive",
-                "struct": "GlobalsSound"
+                "struct": "GlobalsSound",
+                "maximum": 60,
+                "hek_maximum": 60
             },
             {
                 "type": "pad",
@@ -1544,7 +1550,9 @@
             {
                 "name": "particle effects",
                 "type": "TagReflexive",
-                "struct": "GlobalsBreakableSurfaceParticleEffect"
+                "struct": "GlobalsBreakableSurfaceParticleEffect",
+                "maximum": 8,
+                "hek_maximum": 8
             },
             {
                 "type": "pad",
@@ -1619,6 +1627,7 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsSound",
                 "minimum": 2,
+                "maximum": 2,
                 "hek_maximum": 2
             },
             {
@@ -1626,6 +1635,7 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsCamera",
                 "minimum": 1,
+                "maximum": 1,
                 "hek_maximum": 1
             },
             {
@@ -1633,6 +1643,7 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsPlayerControl",
                 "minimum": 1,
+                "maximum": 1,
                 "hek_maximum": 1
             },
             {
@@ -1640,6 +1651,7 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsDifficulty",
                 "minimum": 1,
+                "maximum": 1,
                 "hek_maximum": 1
             },
             {
@@ -1655,6 +1667,7 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsRasterizerData",
                 "minimum": 1,
+                "maximum": 1,
                 "hek_maximum": 1
             },
             {
@@ -1662,50 +1675,66 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsInterfaceBitmaps",
                 "minimum": 1,
+                "maximum": 1,
                 "hek_maximum": 1
             },
             {
                 "name": "weapon list",
                 "type": "TagReflexive",
                 "struct": "GlobalsWeapon",
+                "maximum": 20,
                 "hek_maximum": 20
             },
             {
                 "name": "cheat powerups",
                 "type": "TagReflexive",
-                "struct": "GlobalsCheatPowerup"
+                "struct": "GlobalsCheatPowerup",
+                "maximum": 20,
+                "hek_maximum": 20
             },
             {
                 "name": "multiplayer information",
                 "type": "TagReflexive",
-                "struct": "GlobalsMultiplayerInformation"
+                "struct": "GlobalsMultiplayerInformation",
+                "maximum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "player information",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlayerInformation",
-                "minimum": 1
+                "minimum": 1,
+                "maximum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "first person interface",
                 "type": "TagReflexive",
                 "struct": "GlobalsFirstPersonInterface",
-                "minimum": 1
+                "minimum": 1,
+                "maximum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "falling damage",
                 "type": "TagReflexive",
-                "struct": "GlobalsFallingDamage"
+                "struct": "GlobalsFallingDamage",
+                "maximum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "materials",
                 "type": "TagReflexive",
-                "struct": "GlobalsMaterial"
+                "struct": "GlobalsMaterial",
+                "maximum": 33,
+                "hek_maximum": 33
             },
             {
                 "name": "playlist members",
                 "type": "TagReflexive",
-                "struct": "GlobalsPlaylistMember"
+                "struct": "GlobalsPlaylistMember",
+                "maximum": 20,
+                "hek_maximum": 20
             }
         ],
         "type": "struct",
