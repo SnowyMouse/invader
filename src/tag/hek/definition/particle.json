@@ -226,7 +226,7 @@
                 "size": 28
             },
             {
-                "name": "bitmap1",
+                "name": "secondary bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
@@ -237,7 +237,7 @@
                 "type": "ParticleAnchor"
             },
             {
-                "name": "map flags1",
+                "name": "secondary map flags",
                 "type": "IsUnfilteredFlag"
             },
             {
