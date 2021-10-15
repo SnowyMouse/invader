@@ -92,7 +92,8 @@
             {
                 "name": "name",
                 "type": "TagString",
-                "endian": null
+                "endian": null,
+                "read_only": true
             },
             {
                 "name": "powered mass point",
@@ -100,7 +101,8 @@
             },
             {
                 "name": "model node",
-                "type": "int16"
+                "type": "int16",
+                "read_only": true
             },
             {
                 "name": "flags",
@@ -112,7 +114,8 @@
             },
             {
                 "name": "mass",
-                "type": "float"
+                "type": "float",
+                "read_only": true
             },
             {
                 "name": "relative density",
@@ -120,7 +123,8 @@
             },
             {
                 "name": "density",
-                "type": "float"
+                "type": "float",
+                "read_only": true
             },
             {
                 "name": "position",
@@ -179,7 +183,8 @@
             },
             {
                 "name": "center of mass",
-                "type": "Point3D"
+                "type": "Point3D",
+                "read_only": true
             },
             {
                 "name": "density",
@@ -262,12 +267,14 @@
                 "name": "powered mass points",
                 "type": "TagReflexive",
                 "struct": "PhysicsPoweredMassPoint",
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
                 "name": "mass points",
                 "type": "TagReflexive",
                 "struct": "PhysicsMassPoint",
+                "maximum": 32,
                 "hek_maximum": 32
             }
         ],
