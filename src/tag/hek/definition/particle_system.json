@@ -51,8 +51,8 @@
             "scale scales with effect",
             "animation rate scales with effect",
             "rotation rate scales with effect",
-            "don't draw in first person",
-            "don't draw in third person"
+            "do not draw in first person",
+            "do not draw in third person"
         ],
         "width": 32
     },
@@ -136,6 +136,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "maximum": 16,
                 "hek_maximum": 16
             }
         ],
@@ -354,6 +355,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "maximum": 16,
                 "hek_maximum": 16
             }
         ],
@@ -409,24 +411,28 @@
             },
             {
                 "name": "physics flags",
-                "type": "IsUnusedFlag"
+                "type": "IsUnusedFlag",
+                "unused": true
             },
             {
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "maximum": 16,
                 "hek_maximum": 16
             },
             {
                 "name": "states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeStates",
+                "maximum": 8,
                 "hek_maximum": 8
             },
             {
                 "name": "particle states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeParticleState",
+                "maximum": 8,
                 "hek_maximum": 8
             }
         ],
@@ -462,18 +468,21 @@
             },
             {
                 "name": "physics flags",
-                "type": "IsUnusedFlag"
+                "type": "IsUnusedFlag",
+                "unused": true
             },
             {
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "maximum": 8,
                 "hek_maximum": 8
             },
             {
                 "name": "particle types",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemType",
+                "maximum": 4,
                 "hek_maximum": 4
             }
         ],
