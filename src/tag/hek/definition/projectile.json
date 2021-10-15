@@ -63,7 +63,8 @@
         "name": "ProjectileMaterialResponsePotentialFlags",
         "type": "bitfield",
         "fields": [
-            "only against units"
+            "only against units",
+            "never against units"
         ],
         "width": 16
     },
@@ -340,6 +341,7 @@
                 "name": "projectile material response",
                 "type": "TagReflexive",
                 "struct": "ProjectileMaterialResponse",
+                "maximum": 33,
                 "hek_maximum": 33
             }
         ],
