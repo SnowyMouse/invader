@@ -15,7 +15,8 @@
         "type": "bitfield",
         "fields": [
             "don't fade active camouflage",
-            "numeric countdown timer"
+            "numeric countdown timer",
+            "custom edition blending"
         ],
         "width": 32
     },
@@ -219,6 +220,7 @@
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
+                "maximum": 4,
                 "hek_maximum": 4
             },
             {
