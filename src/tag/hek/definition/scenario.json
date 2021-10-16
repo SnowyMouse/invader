@@ -357,7 +357,8 @@
             "automatically",
             "on easy",
             "on normal",
-            "on hard"
+            "on hard",
+            "use player appearance"
         ],
         "width": 16
     },
@@ -619,7 +620,7 @@
         "fields": [
             "cortana hack",
             "use demo ui",
-            "disable color correction"
+            "color correction"
         ],
         "width": 16
     },
@@ -671,6 +672,7 @@
     },
     {
         "name": "ScenarioFunction",
+        "type": "struct",
         "fields": [
             {
                 "name": "flags",
@@ -688,7 +690,9 @@
             },
             {
                 "name": "scale period by",
-                "type": "FunctionScaleBy"
+                "type": "Index",
+                "reflexive": "functions",
+                "struct": "Scenario"
             },
             {
                 "name": "function",
@@ -696,7 +700,9 @@
             },
             {
                 "name": "scale function by",
-                "type": "FunctionScaleBy"
+                "type": "Index",
+                "reflexive": "functions",
+                "struct": "Scenario"
             },
             {
                 "name": "wobble function",
@@ -734,7 +740,9 @@
             },
             {
                 "name": "scale result by",
-                "type": "FunctionScaleBy"
+                "type": "Index",
+                "reflexive": "functions",
+                "struct": "Scenario"
             },
             {
                 "name": "bounds mode",
@@ -755,7 +763,9 @@
             },
             {
                 "name": "turn off with",
-                "type": "FunctionScaleBy"
+                "type": "Index",
+                "reflexive": "functions",
+                "struct": "Scenario"
             },
             {
                 "type": "pad",
@@ -766,11 +776,11 @@
                 "size": 16
             }
         ],
-        "type": "struct",
         "size": 120
     },
     {
         "name": "ScenarioEditorComment",
+        "type": "struct",
         "fields": [
             {
                 "name": "position",
@@ -785,11 +795,11 @@
                 "type": "TagDataOffset"
             }
         ],
-        "type": "struct",
         "size": 48
     },
     {
         "name": "ScenarioObjectName",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -809,16 +819,18 @@
                 "cache_only": true
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 36
     },
     {
-        "name": "SpawnPrelude",
+        "name": "ScenarioScenery",
+        "type": "struct",
         "fields": [
             {
                 "name": "type",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "scenery palette",
+                "struct": "Scenario"
             },
             {
                 "name": "name",
@@ -832,7 +844,8 @@
             },
             {
                 "name": "desired permutation",
-                "type": "Index"
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
             },
             {
                 "name": "position",
@@ -841,23 +854,25 @@
             {
                 "name": "rotation",
                 "type": "Euler3D"
-            }
-        ],
-        "type": "struct",
-        "size": 32
-    },
-    {
-        "name": "ScenarioScenery",
-        "fields": [
+            },
             {
                 "type": "uint16",
                 "name": "bsp indices",
                 "cache_only": true,
-                "comment": "unused in Halo PC; bitmask"
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
             },
             {
                 "type": "pad",
-                "size": 6
+                "size": 3
             },
             {
                 "type": "pad",
@@ -872,8 +887,6 @@
                 "size": 8
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 72
     },
     {
@@ -898,10 +911,55 @@
     },
     {
         "name": "ScenarioBiped",
+        "type": "struct",
         "fields": [
             {
+                "name": "type",
+                "type": "Index",
+                "reflexive": "biped palette",
+                "struct": "Scenario"
+            },
+            {
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
+            {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 3
             },
             {
                 "type": "pad",
@@ -933,8 +991,6 @@
                 "size": 32
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 120
     },
     {
@@ -959,10 +1015,55 @@
     },
     {
         "name": "ScenarioVehicle",
+        "type": "struct",
         "fields": [
             {
+                "name": "type",
+                "type": "Index",
+                "reflexive": "vehicle palette",
+                "struct": "Scenario"
+            },
+            {
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
+            {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 3
             },
             {
                 "type": "pad",
@@ -1008,8 +1109,6 @@
                 "size": 28
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 120
     },
     {
@@ -1034,22 +1133,56 @@
     },
     {
         "name": "ScenarioEquipment",
+        "type": "struct",
         "fields": [
             {
-                "type": "pad",
-                "size": 2
+                "name": "type",
+                "type": "Index",
+                "reflexive": "equipment palette",
+                "struct": "Scenario"
             },
             {
-                "name": "flags",
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
+            {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
                 "type": "ScenarioItemFlags"
             },
             {
+                "name": "appearance player index",
+                "type": "int8"
+            },
+            {
                 "type": "pad",
-                "size": 4
+                "size": 3
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 40
     },
     {
@@ -1074,10 +1207,55 @@
     },
     {
         "name": "ScenarioWeapon",
+        "type": "struct",
         "fields": [
             {
+                "name": "type",
+                "type": "Index",
+                "reflexive": "weapon palette",
+                "struct": "Scenario"
+            },
+            {
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
+            {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 3
             },
             {
                 "type": "pad",
@@ -1113,8 +1291,6 @@
                 "size": 12
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 92
     },
     {
@@ -1139,6 +1315,7 @@
     },
     {
         "name": "ScenarioDeviceGroup",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -1161,16 +1338,60 @@
                 "size": 12
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 52
     },
     {
         "name": "ScenarioMachine",
+        "type": "struct",
         "fields": [
             {
+                "name": "type",
+                "type": "Index",
+                "reflexive": "machine palette",
+                "struct": "Scenario"
+            },
+            {
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
+            {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 3
             },
             {
                 "name": "power group",
@@ -1197,8 +1418,6 @@
                 "size": 12
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 64
     },
     {
@@ -1223,10 +1442,55 @@
     },
     {
         "name": "ScenarioControl",
+        "type": "struct",
         "fields": [
             {
+                "name": "type",
+                "type": "Index",
+                "reflexive": "control palette",
+                "struct": "Scenario"
+            },
+            {
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
+            {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 3
             },
             {
                 "name": "power group",
@@ -1261,8 +1525,6 @@
                 "size": 8
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 64
     },
     {
@@ -1287,16 +1549,55 @@
     },
     {
         "name": "ScenarioLightFixture",
+        "type": "struct",
         "fields": [
+            {
+                "name": "type",
+                "type": "Index",
+                "reflexive": "light fixture palette",
+                "struct": "Scenario"
+            },
+            {
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
             {
                 "type": "uint16",
                 "name": "bsp indices",
                 "cache_only": true,
-                "comment": "unused in Halo PC; bitmask"
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
             },
             {
                 "type": "pad",
-                "size": 6
+                "size": 3
             },
             {
                 "name": "power group",
@@ -1335,8 +1636,6 @@
                 "size": 16
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 88
     },
     {
@@ -1361,14 +1660,57 @@
     },
     {
         "name": "ScenarioSoundScenery",
+        "type": "struct",
         "fields": [
             {
+                "name": "type",
+                "type": "Index",
+                "reflexive": "sound scenery palette",
+                "struct": "Scenario"
+            },
+            {
+                "name": "name",
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "int16",
+                "comment": "when non-zero the game will try use model permutations with a matching number suffix"
+            },
+            {
+                "name": "position",
+                "type": "Point3D"
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D"
+            },
+            {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+            },
+            {
+                "name": "misc flags",
+                "type": "ScenarioItemFlags",
+                "unused": true
+            },
+            {
+                "name": "appearance player index",
+                "type": "int8"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 3
             }
         ],
-        "type": "struct",
-        "inherits": "SpawnPrelude",
         "size": 40
     },
     {
@@ -1393,6 +1735,7 @@
     },
     {
         "name": "ScenarioPlayerStartingProfile",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -1468,12 +1811,12 @@
                 "size": 20
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 104
     },
     {
         "name": "ScenarioPlayerStartingLocation",
+        "type": "struct",
         "fields": [
             {
                 "name": "position",
@@ -1514,11 +1857,11 @@
                 "size": 24
             }
         ],
-        "type": "struct",
         "size": 52
     },
     {
         "name": "ScenarioTriggerVolume",
+        "type": "struct",
         "fields": [
             {
                 "name": "unknown",
@@ -1579,12 +1922,12 @@
                 "type": "Point3D"
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 96
     },
     {
         "name": "ScenarioRecordedAnimation",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -1627,12 +1970,12 @@
                 "type": "TagDataOffset"
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 64
     },
     {
         "name": "ScenarioNetgameFlags",
+        "type": "struct",
         "fields": [
             {
                 "name": "position",
@@ -1663,11 +2006,11 @@
                 "size": 112
             }
         ],
-        "type": "struct",
         "size": 148
     },
     {
         "name": "ScenarioNetgameEquipment",
+        "type": "struct",
         "fields": [
             {
                 "name": "flags",
@@ -1729,13 +2072,13 @@
                 "size": 48
             }
         ],
-        "type": "struct",
         "title": "item collection",
         "post_compile": true,
         "size": 144
     },
     {
         "name": "ScenarioStartingEquipment",
+        "type": "struct",
         "fields": [
             {
                 "name": "flags",
@@ -1808,11 +2151,11 @@
                 "size": 48
             }
         ],
-        "type": "struct",
         "size": 204
     },
     {
         "name": "ScenarioBSPSwitchTriggerVolume",
+        "type": "struct",
         "fields": [
             {
                 "name": "trigger volume",
@@ -1838,11 +2181,11 @@
                 "endian": "little"
             }
         ],
-        "type": "struct",
         "size": 8
     },
     {
         "name": "ScenarioDecal",
+        "type": "struct",
         "fields": [
             {
                 "name": "decal type",
@@ -1865,7 +2208,6 @@
                 "type": "Point3D"
             }
         ],
-        "type": "struct",
         "size": 16
     },
     {
@@ -1919,6 +2261,7 @@
     },
     {
         "name": "ScenarioMovePosition",
+        "type": "struct",
         "fields": [
             {
                 "name": "position",
@@ -1974,11 +2317,11 @@
                 "endian": "little"
             }
         ],
-        "type": "struct",
         "size": 80
     },
     {
         "name": "ScenarioActorStartingLocation",
+        "type": "struct",
         "fields": [
             {
                 "name": "position",
@@ -2024,11 +2367,11 @@
                 "struct": "Scenario"
             }
         ],
-        "type": "struct",
         "size": 28
     },
     {
         "name": "ScenarioSquad",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2048,11 +2391,11 @@
                 "struct": "ScenarioEncounter"
             },
             {
-                "name": "Tinitial state",
+                "name": "initial state",
                 "type": "ScenarioReturnState"
             },
             {
-                "name": "Treturn state",
+                "name": "return state",
                 "type": "ScenarioReturnState"
             },
             {
@@ -2165,12 +2508,14 @@
                 "name": "move positions",
                 "type": "TagReflexive",
                 "struct": "ScenarioMovePosition",
-                "hek_maximum": 64
+                "maximum": 32,
+                "hek_maximum": 32
             },
             {
                 "name": "starting locations",
                 "type": "TagReflexive",
                 "struct": "ScenarioActorStartingLocation",
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
@@ -2178,12 +2523,12 @@
                 "size": 12
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 232
     },
     {
         "name": "ScenarioPlatoon",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2243,12 +2588,12 @@
                 "size": 36
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 172
     },
     {
         "name": "ScenarioFiringPosition",
+        "type": "struct",
         "fields": [
             {
                 "name": "position",
@@ -2275,12 +2620,12 @@
                 "cache_only": true
             }
         ],
-        "type": "struct",
         "size": 24,
         "pre_compile": true
     },
     {
         "name": "ScenarioEncounter",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2331,33 +2676,37 @@
                 "name": "squads",
                 "type": "TagReflexive",
                 "struct": "ScenarioSquad",
+                "maximum": 64,
                 "hek_maximum": 64
             },
             {
                 "name": "platoons",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlatoon",
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
                 "name": "firing positions",
                 "type": "TagReflexive",
                 "struct": "ScenarioFiringPosition",
+                "maximum": 512,
                 "hek_maximum": 512
             },
             {
                 "name": "player starting locations",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingLocation",
+                "maximum": 256,
                 "hek_maximum": 256
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 176
     },
     {
         "name": "ScenarioCommand",
+        "type": "struct",
         "fields": [
             {
                 "name": "atom type",
@@ -2422,11 +2771,11 @@
                 "size": 6
             }
         ],
-        "type": "struct",
         "size": 32
     },
     {
         "name": "ScenarioCommandPoint",
+        "type": "struct",
         "fields": [
             {
                 "name": "position",
@@ -2443,11 +2792,11 @@
                 "size": 4
             }
         ],
-        "type": "struct",
         "size": 20
     },
     {
         "name": "ScenarioCommandList",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2478,14 +2827,14 @@
                 "name": "commands",
                 "type": "TagReflexive",
                 "struct": "ScenarioCommand",
-                "maximum": 65534,
+                "maximum": 64,
                 "hek_maximum": 64
             },
             {
                 "name": "points",
                 "type": "TagReflexive",
                 "struct": "ScenarioCommandPoint",
-                "maximum": 65534,
+                "maximum": 64,
                 "hek_maximum": 64
             },
             {
@@ -2493,12 +2842,12 @@
                 "size": 24
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 96
     },
     {
         "name": "ScenarioAIAnimationReference",
+        "type": "struct",
         "fields": [
             {
                 "name": "animation name",
@@ -2517,11 +2866,11 @@
                 "size": 12
             }
         ],
-        "type": "struct",
         "size": 60
     },
     {
         "name": "ScenarioAIScriptReference",
+        "type": "struct",
         "fields": [
             {
                 "name": "script name",
@@ -2533,12 +2882,12 @@
                 "size": 8
             }
         ],
-        "type": "struct",
         "title": "script name",
         "size": 40
     },
     {
         "name": "ScenarioAIRecordingReference",
+        "type": "struct",
         "fields": [
             {
                 "name": "recording name",
@@ -2550,12 +2899,12 @@
                 "size": 8
             }
         ],
-        "type": "struct",
         "title": "recording name",
         "size": 40
     },
     {
         "name": "ScenarioAIConversationParticipant",
+        "type": "struct",
         "fields": [
             {
                 "type": "pad",
@@ -2613,11 +2962,11 @@
                 "size": 12
             }
         ],
-        "type": "struct",
         "size": 84
     },
     {
         "name": "ScenarioAIConversationLine",
+        "type": "struct",
         "fields": [
             {
                 "name": "flags",
@@ -2696,11 +3045,11 @@
                 ]
             }
         ],
-        "type": "struct",
         "size": 124
     },
     {
         "name": "ScenarioAIConversation",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2733,12 +3082,14 @@
                 "name": "participants",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIConversationParticipant",
+                "maximum": 8,
                 "hek_maximum": 8
             },
             {
                 "name": "lines",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIConversationLine",
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
@@ -2746,12 +3097,12 @@
                 "size": 12
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 116
     },
     {
         "name": "ScenarioScript",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2775,13 +3126,13 @@
                 "size": 52
             }
         ],
-        "type": "struct",
         "title": "name",
         "read_only": true,
         "size": 92
     },
     {
         "name": "ScenarioGlobal",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2809,13 +3160,13 @@
                 "size": 48
             }
         ],
-        "type": "struct",
         "title": "name",
         "read_only": true,
         "size": 92
     },
     {
         "name": "ScenarioReference",
+        "type": "struct",
         "fields": [
             {
                 "type": "pad",
@@ -2829,13 +3180,13 @@
                 ]
             }
         ],
-        "type": "struct",
         "title": "reference",
         "read_only": true,
         "size": 40
     },
     {
         "name": "ScenarioSourceFile",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -2847,13 +3198,13 @@
                 "type": "TagDataOffset"
             }
         ],
-        "type": "struct",
         "title": "name",
         "read_only": true,
         "size": 52
     },
     {
         "name": "ScenarioCutsceneFlag",
+        "type": "struct",
         "fields": [
             {
                 "name": "unknown",
@@ -2879,12 +3230,12 @@
                 "size": 36
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 92
     },
     {
         "name": "ScenarioCutsceneCameraPoint",
+        "type": "struct",
         "fields": [
             {
                 "name": "unknown",
@@ -2918,11 +3269,11 @@
                 "size": 36
             }
         ],
-        "type": "struct",
         "size": 104
     },
     {
         "name": "ScenarioCutsceneTitle",
+        "type": "struct",
         "fields": [
             {
                 "name": "unknown",
@@ -2988,13 +3339,13 @@
                 "size": 16
             }
         ],
-        "type": "struct",
         "post_cache_deformat": true,
         "pre_compile": true,
         "size": 96
     },
     {
         "name": "ScenarioBSP",
+        "type": "struct",
         "fields": [
             {
                 "name": "bsp start",
@@ -3029,11 +3380,11 @@
                 ]
             }
         ],
-        "type": "struct",
         "size": 32
     },
     {
         "name": "ScenarioScriptNode",
+        "type": "struct",
         "fields": [
             {
                 "name": "salt",
@@ -3064,11 +3415,11 @@
                 "type": "ScenarioScriptNodeValue"
             }
         ],
-        "type": "struct",
         "size": 20
     },
     {
         "name": "ScenarioScriptNodeTable",
+        "type": "struct",
         "fields": [
             {
                 "name": "name",
@@ -3117,12 +3468,12 @@
                 "type": "uint32"
             }
         ],
-        "type": "struct",
         "title": "name",
         "size": 56
     },
     {
         "name": "Scenario",
+        "type": "struct",
         "fields": [
             {
                 "name": "don't use",
@@ -3152,6 +3503,7 @@
                 "name": "skies",
                 "type": "TagReflexive",
                 "struct": "ScenarioSky",
+                "maximum": 8,
                 "hek_maximum": 8
             },
             {
@@ -3166,6 +3518,7 @@
                 "name": "child scenarios",
                 "type": "TagReflexive",
                 "struct": "ScenarioChildScenario",
+                "maximum": 16,
                 "hek_maximum": 16,
                 "ignore_cached": true
             },
@@ -3185,6 +3538,7 @@
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "maximum": 1024,
                 "hek_maximum": 1024,
                 "cache_only": true
             },
@@ -3192,6 +3546,7 @@
                 "name": "functions",
                 "type": "TagReflexive",
                 "struct": "ScenarioFunction",
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
@@ -3202,6 +3557,7 @@
                 "name": "comments",
                 "type": "TagReflexive",
                 "struct": "ScenarioEditorComment",
+                "maximum": 1024,
                 "hek_maximum": 1024
             },
             {
@@ -3212,142 +3568,142 @@
                 "name": "object names",
                 "type": "TagReflexive",
                 "struct": "ScenarioObjectName",
+                "maximum": 640,
                 "hek_maximum": 512,
-                "read_only": true,
-                "maximum": 65534
+                "read_only": true
             },
             {
                 "name": "scenery",
                 "type": "TagReflexive",
                 "struct": "ScenarioScenery",
-                "hek_maximum": 2000,
-                "maximum": 65535
+                "maximum": 2000,
+                "hek_maximum": 2000
             },
             {
                 "name": "scenery palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioSceneryPalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 100
             },
             {
                 "name": "bipeds",
                 "type": "TagReflexive",
                 "struct": "ScenarioBiped",
-                "hek_maximum": 128,
-                "maximum": 65535
+                "maximum": 128,
+                "hek_maximum": 128
             },
             {
                 "name": "biped palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioBipedPalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 100
             },
             {
                 "name": "vehicles",
                 "type": "TagReflexive",
                 "struct": "ScenarioVehicle",
-                "hek_maximum": 80,
-                "maximum": 65535
+                "maximum": 256,
+                "hek_maximum": 80
             },
             {
                 "name": "vehicle palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioVehiclePalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 100
             },
             {
                 "name": "equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipment",
-                "hek_maximum": 256,
-                "maximum": 65535
+                "maximum": 256,
+                "hek_maximum": 256
             },
             {
                 "name": "equipment palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipmentPalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 256
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ScenarioWeapon",
-                "hek_maximum": 128,
-                "maximum": 65535
+                "maximum": 128,
+                "hek_maximum": 128
             },
             {
                 "name": "weapon palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioWeaponPalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 100
             },
             {
                 "name": "device groups",
                 "type": "TagReflexive",
                 "struct": "ScenarioDeviceGroup",
-                "hek_maximum": 128,
-                "maximum": 65534
+                "maximum": 128,
+                "hek_maximum": 128
             },
             {
                 "name": "machines",
                 "type": "TagReflexive",
                 "struct": "ScenarioMachine",
-                "hek_maximum": 400,
-                "maximum": 65535
+                "maximum": 400,
+                "hek_maximum": 400
             },
             {
                 "name": "machine palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioMachinePalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 100
             },
             {
                 "name": "controls",
                 "type": "TagReflexive",
                 "struct": "ScenarioControl",
-                "hek_maximum": 100,
-                "maximum": 65535
+                "maximum": 100,
+                "hek_maximum": 100
             },
             {
                 "name": "control palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioControlPalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 100
             },
             {
                 "name": "light fixtures",
                 "type": "TagReflexive",
                 "struct": "ScenarioLightFixture",
-                "hek_maximum": 500,
-                "maximum": 65535
+                "maximum": 500,
+                "hek_maximum": 500
             },
             {
                 "name": "light fixture palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioLightFixturePalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 100
             },
             {
                 "name": "sound scenery",
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundScenery",
-                "hek_maximum": 256,
-                "maximum": 65535
+                "maximum": 256,
+                "hek_maximum": 256
             },
             {
                 "name": "sound scenery palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundSceneryPalette",
-                "hek_maximum": 100,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 256
             },
             {
                 "type": "pad",
@@ -3357,43 +3713,49 @@
                 "name": "player starting profile",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingProfile",
+                "maximum": 256,
                 "hek_maximum": 256
             },
             {
                 "name": "player starting locations",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingLocation",
+                "maximum": 256,
                 "hek_maximum": 256
             },
             {
                 "name": "trigger volumes",
                 "type": "TagReflexive",
                 "struct": "ScenarioTriggerVolume",
-                "hek_maximum": 256,
-                "maximum": 65534
+                "maximum": 256,
+                "hek_maximum": 256
             },
             {
                 "name": "recorded animations",
                 "type": "TagReflexive",
                 "struct": "ScenarioRecordedAnimation",
+                "maximum": 1024,
                 "hek_maximum": 1024
             },
             {
                 "name": "netgame flags",
                 "type": "TagReflexive",
                 "struct": "ScenarioNetgameFlags",
+                "maximum": 200,
                 "hek_maximum": 200
             },
             {
                 "name": "netgame equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioNetgameEquipment",
+                "maximum": 200,
                 "hek_maximum": 200
             },
             {
                 "name": "starting equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioStartingEquipment",
+                "maximum": 200,
                 "hek_maximum": 200
             },
             {
@@ -3413,12 +3775,14 @@
                 "name": "decal palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioDecalPalette",
+                "maximum": 128,
                 "hek_maximum": 128
             },
             {
                 "name": "detail object collection palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioDetailObjectCollectionPalette",
+                "maximum": 32,
                 "hek_maximum": 32
             },
             {
@@ -3429,42 +3793,49 @@
                 "name": "actor palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioActorPalette",
+                "maximum": 64,
                 "hek_maximum": 64
             },
             {
                 "name": "encounters",
                 "type": "TagReflexive",
                 "struct": "ScenarioEncounter",
+                "maximum": 128,
                 "hek_maximum": 128
             },
             {
                 "name": "command lists",
                 "type": "TagReflexive",
                 "struct": "ScenarioCommandList",
+                "maximum": 256,
                 "hek_maximum": 256
             },
             {
                 "name": "ai animation references",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIAnimationReference",
+                "maximum": 128,
                 "hek_maximum": 128
             },
             {
                 "name": "ai script references",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIScriptReference",
+                "maximum": 128,
                 "hek_maximum": 128
             },
             {
                 "name": "ai recording references",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIRecordingReference",
+                "maximum": 128,
                 "hek_maximum": 128
             },
             {
                 "name": "ai conversations",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIConversation",
+                "maximum": 128,
                 "hek_maximum": 128
             },
             {
@@ -3480,6 +3851,7 @@
                 "name": "scripts",
                 "type": "TagReflexive",
                 "struct": "ScenarioScript",
+                "maximum": 1024,
                 "hek_maximum": 512,
                 "read_only": true
             },
@@ -3487,6 +3859,7 @@
                 "name": "globals",
                 "type": "TagReflexive",
                 "struct": "ScenarioGlobal",
+                "maximum": 512,
                 "hek_maximum": 128,
                 "read_only": true
             },
@@ -3494,6 +3867,7 @@
                 "name": "references",
                 "type": "TagReflexive",
                 "struct": "ScenarioReference",
+                "maximum": 512,
                 "hek_maximum": 256,
                 "read_only": true
             },
@@ -3501,6 +3875,7 @@
                 "name": "source files",
                 "type": "TagReflexive",
                 "struct": "ScenarioSourceFile",
+                "maximum": 16,
                 "hek_maximum": 8,
                 "non_cached": true,
                 "read_only": true,
@@ -3514,17 +3889,20 @@
                 "name": "cutscene flags",
                 "type": "TagReflexive",
                 "struct": "ScenarioCutsceneFlag",
+                "maximum": 512,
                 "hek_maximum": 512
             },
             {
                 "name": "cutscene camera points",
                 "type": "TagReflexive",
                 "struct": "ScenarioCutsceneCameraPoint",
+                "maximum": 512,
                 "hek_maximum": 512
             },
             {
                 "name": "cutscene titles",
                 "type": "TagReflexive",
+                "maximum": 64,
                 "hek_maximum": 64,
                 "struct": "ScenarioCutsceneTitle"
             },
@@ -3557,11 +3935,10 @@
                 "name": "structure bsps",
                 "type": "TagReflexive",
                 "struct": "ScenarioBSP",
-                "hek_maximum": 32,
-                "maximum": 16
+                "maximum": 16,
+                "hek_maximum": 16
             }
         ],
-        "type": "struct",
         "post_cache_deformat": true,
         "pre_compile": true,
         "post_compile": true,
