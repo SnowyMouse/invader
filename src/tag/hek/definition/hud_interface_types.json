@@ -72,6 +72,18 @@
         "type": "enum"
     },
     {
+        "name": "HUDInterfaceChildAnchor",
+        "options": [
+            "from parent",
+            "top left",
+            "top right",
+            "bottom left",
+            "bottom right",
+            "center"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "HUDInterfaceMeterFlags",
         "type": "bitfield",
         "fields": [
@@ -228,7 +240,7 @@
             },
             {
                 "name": "primary anchor",
-                "type": "HUDInterfaceAnchor"
+                "type": "HUDInterfaceMultitextureOverlayAnchor"
             },
             {
                 "name": "secondary anchor",

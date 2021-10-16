@@ -160,8 +160,8 @@
                 "type": "WeaponHUDInterfaceViewType"
             },
             {
-                "name": "unknown",
-                "type": "int16",
+                "name": "anchor",
+                "type": "HUDInterfaceChildAnchor",
                 "engines": [ "mcc" ]
             },
             {
@@ -282,8 +282,9 @@
                 "type": "WeaponHUDInterfaceViewType"
             },
             {
-                "type": "pad",
-                "size": 2
+                "name": "anchor",
+                "type": "HUDInterfaceChildAnchor",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -409,8 +410,8 @@
                 "type": "WeaponHUDInterfaceViewType"
             },
             {
-                "name": "unknown",
-                "type": "int16",
+                "name": "anchor",
+                "type": "HUDInterfaceChildAnchor",
                 "engines": [ "mcc" ]
             },
             {
@@ -763,8 +764,9 @@
                 "type": "WeaponHUDInterfaceViewType"
             },
             {
-                "type": "pad",
-                "size": 2
+                "name": "anchor",
+                "type": "HUDInterfaceChildAnchor",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
