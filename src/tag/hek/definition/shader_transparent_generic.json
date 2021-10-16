@@ -472,6 +472,7 @@
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
+                "maximum": 4,
                 "hek_maximum": 4
             },
             {

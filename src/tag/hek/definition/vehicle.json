@@ -73,7 +73,19 @@
             "ai driver enable",
             "ai driver flying",
             "ai driver can sidestep",
-            "ai driver hovering"
+            "ai driver hovering",
+            "vehicle steers directly",
+            "unused",
+            "has ebrake",
+            "noncombat vehicle",
+            "no friction with driver",
+            "can trigger automatic opening doors",
+            "autoaim when teamless"
+        ],
+        "exclude": [
+            {
+                "field": "unused"
+            }
         ],
         "width": 32
     },

@@ -56,6 +56,15 @@
         "type": "enum"
     },
     {
+        "name": "WeaponPredictionType",
+        "options": [
+            "none",
+            "continuous",
+            "instant"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "WeaponOverchargedAction",
         "options": [
             "none",
@@ -99,7 +108,7 @@
             "projectile vector cannot be adjusted",
             "projectiles have identical error",
             "projectile is client side only",
-            "use unit adjust projectile ray from halo1"
+            "use original unit adjust projectile ray"
         ],
         "width": 32
     },
@@ -353,7 +362,12 @@
             },
             {
                 "type": "pad",
-                "size": 6
+                "size": 4
+            },
+            {
+                "name": "prediction type",
+                "type": "WeaponPredictionType",
+                "comment": "behavior of the trigger in a network synced game."
             },
             {
                 "name": "firing noise",

@@ -152,7 +152,8 @@
         "type": "bitfield",
         "fields": [
             "fit to adpcm blocksize",
-            "split long sound into permutations"
+            "split long sound into permutations",
+            "thirsty grunt"
         ],
         "width": 32
     },
