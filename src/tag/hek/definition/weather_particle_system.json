@@ -300,7 +300,8 @@
         "fields": [
             {
                 "name": "flags",
-                "type": "IsUnusedFlag"
+                "type": "IsUnusedFlag",
+                "unused": true
             },
             {
                 "type": "pad",
