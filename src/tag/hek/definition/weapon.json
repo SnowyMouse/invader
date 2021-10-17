@@ -367,7 +367,7 @@
             {
                 "name": "prediction type",
                 "type": "WeaponPredictionType",
-                "comment": "behavior of the trigger in a network synced game.",
+                "comment": "behavior of the trigger in a network predicted game.",
                 "engines": [
                     "mcc"
                 ]
