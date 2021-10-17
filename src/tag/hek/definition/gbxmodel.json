@@ -179,14 +179,14 @@
                 "type": "TagReflexive",
                 "struct": "ModelNode",
                 "maximum": 64,
-                "extended_maximum": 32767
+                "extended_maximum": 255
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelRegion",
                 "maximum": 32,
-                "extended_maximum": 32767
+                "extended_maximum": 255
             },
             {
                 "name": "geometries",
