@@ -135,7 +135,7 @@
             "disable height map compression",
             "uniform sprite sequences",
             "filthy sprite bug fix",
-            "draw at half dimensions in hud"
+            "half hud scale"
         ],
         "width": 16
     },
