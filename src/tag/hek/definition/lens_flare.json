@@ -61,14 +61,6 @@
             "fade out more quickly",
             "scale by marker"
         ],
-        "exclude": [
-            {
-                "field": "fade in more quickly"
-            },
-            {
-                "field": "fade out more quickly"
-            }
-        ],
         "width": 16
     },
     {

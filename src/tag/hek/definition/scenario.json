@@ -862,13 +862,13 @@
                 "comment": "Unused in Gearbox versions of Halo PC; bitmask"
             },
             {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 2
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -943,19 +943,13 @@
                 "type": "Euler3D"
             },
             {
-                "type": "uint16",
-                "name": "bsp indices",
-                "cache_only": true,
-                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
-            },
-            {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 4
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -1047,19 +1041,13 @@
                 "type": "Euler3D"
             },
             {
-                "type": "uint16",
-                "name": "bsp indices",
-                "cache_only": true,
-                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
-            },
-            {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 4
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -1165,10 +1153,8 @@
                 "type": "Euler3D"
             },
             {
-                "type": "uint16",
-                "name": "bsp indices",
-                "cache_only": true,
-                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
+                "type": "pad",
+                "size": 2
             },
             {
                 "name": "misc flags",
@@ -1176,7 +1162,8 @@
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -1239,19 +1226,13 @@
                 "type": "Euler3D"
             },
             {
-                "type": "uint16",
-                "name": "bsp indices",
-                "cache_only": true,
-                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
-            },
-            {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 4
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -1375,19 +1356,13 @@
                 "type": "Euler3D"
             },
             {
-                "type": "uint16",
-                "name": "bsp indices",
-                "cache_only": true,
-                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
-            },
-            {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 4
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -1474,19 +1449,13 @@
                 "type": "Euler3D"
             },
             {
-                "type": "uint16",
-                "name": "bsp indices",
-                "cache_only": true,
-                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
-            },
-            {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 4
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -1587,13 +1556,13 @@
                 "comment": "Unused in Gearbox versions of Halo PC; bitmask"
             },
             {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 2
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
@@ -1692,19 +1661,13 @@
                 "type": "Euler3D"
             },
             {
-                "type": "uint16",
-                "name": "bsp indices",
-                "cache_only": true,
-                "comment": "Unused in Gearbox versions of Halo PC; bitmask"
-            },
-            {
-                "name": "misc flags",
-                "type": "ScenarioItemFlags",
-                "unused": true
+                "type": "pad",
+                "size": 4
             },
             {
                 "name": "appearance player index",
-                "type": "int8"
+                "type": "int8",
+                "engines": [ "mcc" ]
             },
             {
                 "type": "pad",
