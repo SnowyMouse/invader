@@ -749,6 +749,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("move", 'M', 2, "Swap the selected structs with the structs at the given index or \"end\" if the end of the array. The regions must not intersect.", "<key> <pos>");
     options.emplace_back("erase", 'E', 1, "Delete the selected struct(s).", "<key>");
     options.emplace_back("copy", 'c', 2, "Copy the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
+    options.emplace_back("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)");
 
     static constexpr char DESCRIPTION[] = "Edit tags via command-line.";
     static constexpr char USAGE[] = "[options] <tag.class>";
@@ -811,6 +812,9 @@ int main(int argc, char * const *argv) {
                 break;
             case 'N':
                 edit_options.new_tag = true;
+                break;
+            case 'n':
+                edit_options.check_read_only = false;
                 break;
             case 'o':
                 edit_options.overwrite_path = std::filesystem::path(arguments[0]);
