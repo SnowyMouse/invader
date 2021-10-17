@@ -87,7 +87,8 @@
                 "type": "TagReflexive",
                 "struct": "ModelMarkerInstance",
                 "maximum": 32,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             }
         ],
         "type": "struct",
@@ -270,7 +271,8 @@
                 "struct": "ModelRegionPermutationMarker",
                 "compile_ignore": true,
                 "maximum": 64,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             }
         ],
         "type": "struct",
@@ -296,7 +298,8 @@
                 "type": "TagReflexive",
                 "struct": "ModelRegionPermutation",
                 "maximum": 32,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             }
         ],
         "type": "struct",
@@ -576,7 +579,8 @@
                 "type": "TagReflexive",
                 "struct": "ModelGeometryPart",
                 "maximum": 32,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             }
         ],
         "type": "struct",
@@ -739,28 +743,32 @@
                 "type": "TagReflexive",
                 "struct": "ModelNode",
                 "maximum": 64,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelRegion",
                 "maximum": 32,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             },
             {
                 "name": "geometries",
                 "type": "TagReflexive",
                 "struct": "ModelGeometry",
                 "maximum": 256,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             },
             {
                 "name": "shaders",
                 "type": "TagReflexive",
                 "struct": "ModelShaderReference",
                 "maximum": 32,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             }
         ],
         "type": "struct",

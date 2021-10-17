@@ -38,9 +38,12 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             continue
         name = struct["member_name"]
         minimum = struct["minimum"] if "minimum" in struct else None
-        maximum = struct["maximum"] if "maximum" in struct else None
 
-        if "maximum_enforced" in struct and not struct["maximum_enforced"]:
+        if "extended_maximum" in struct:
+            maximum = struct["extended_maximum"]
+        elif "maximum" in struct:
+            maximum = struct["maximum"]
+        else:
             maximum = None
 
         if struct["type"] == "TagDependency":
@@ -110,7 +113,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, \"{}::{} exceeds the legacy stock limit of {} block{} and may not work as intended on the target engine\", tag_index);\n".format(struct_name, name, struct["legacy_maximum"], "" if struct["legacy_maximum"] == 1 else "s"))
                 cpp_cache_format_data.write("        }\n")
 
-            if "maximum" in struct:
+            if "maximum" in struct and not "extended_maximum" in struct:
                 cpp_cache_format_data.write("        if(check_stock_limits && t_{}_count > {}) {{\n".format(name, struct["maximum"]))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, \"{}::{} exceeds the stock limit of {} block{} and may not work as intended on the target engine\", tag_index);\n".format(struct_name, name, struct["maximum"], "" if struct["maximum"] == 1 else "s"))
                 cpp_cache_format_data.write("        }\n")

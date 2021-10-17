@@ -310,7 +310,8 @@
                 "struct": "SoundPermutation",
                 "read_only": true,
                 "maximum": 256,
-                "maximum_enforced": false
+                "maximum_enforced": false,
+                "extended_maximum": 32767
             }
         ],
         "type": "struct",
