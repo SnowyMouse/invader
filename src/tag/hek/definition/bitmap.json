@@ -207,8 +207,8 @@
                 "name": "sprites",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSprite",
-                "maximum": 65534,
-                "hek_maximum": 64
+                "maximum": 64,
+                "maximum_enforced": false
             }
         ],
         "type": "struct",
@@ -435,9 +435,9 @@
                 "name": "bitmap group sequence",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSequence",
-                "maximum": 65534,
                 "read_only": true,
-                "hek_maximum": 256
+                "maximum": 256,
+                "maximum_enforced": false
             },
             {
                 "name": "bitmap data",
@@ -445,7 +445,7 @@
                 "struct": "BitmapData",
                 "maximum": 65534,
                 "read_only": true,
-                "hek_maximum": 2048
+                "legacy_maximum": 2048
             }
         ],
         "type": "struct",

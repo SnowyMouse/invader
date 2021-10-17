@@ -122,7 +122,6 @@
                 "name": "attachment points",
                 "type": "TagReflexive",
                 "struct": "FlagAttachmentPoint",
-                "hek_maximum": 5,
                 "maximum": 5
             }
         ],

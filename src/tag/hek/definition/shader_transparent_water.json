@@ -176,7 +176,6 @@
                 "name": "ripples",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentWaterRipple",
-                "hek_maximum": 4,
                 "maximum": 4
             },
             {

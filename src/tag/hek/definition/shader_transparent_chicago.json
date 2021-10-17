@@ -220,14 +220,12 @@
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
-                "maximum": 4,
-                "hek_maximum": 4
+                "maximum": 4
             },
             {
                 "name": "maps",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
-                "hek_maximum": 4,
                 "maximum": 4
             },
             {

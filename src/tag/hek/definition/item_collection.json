@@ -34,7 +34,7 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ItemCollectionPermutation",
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "name": "default spawn time",

@@ -403,8 +403,7 @@
                 "name": "materials",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMaterial",
-                "maximum": 2048,
-                "hek_maximum": 2048
+                "maximum": 2048
             }
         ],
         "type": "struct",
@@ -544,8 +543,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirrorVertex",
-                "maximum": 512,
-                "hek_maximum": 512
+                "maximum": 512
             }
         ],
         "type": "struct",
@@ -618,15 +616,13 @@
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "maximum": 1024,
-                "hek_maximum": 1024,
                 "cache_only": true
             },
             {
                 "name": "subclusters",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSubcluster",
-                "maximum": 4096,
-                "hek_maximum": 4096
+                "maximum": 4096
             },
             {
                 "name": "first lens flare marker index",
@@ -640,22 +636,19 @@
                 "name": "surface indices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterSurfaceIndex",
-                "maximum": 32768,
-                "hek_maximum": 32768
+                "maximum": 32768
             },
             {
                 "name": "mirrors",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirror",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "name": "portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalIndex",
-                "maximum": 128,
-                "hek_maximum": 128
+                "maximum": 128
             }
         ],
         "type": "struct",
@@ -709,8 +702,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalVertex",
-                "maximum": 128,
-                "hek_maximum": 128
+                "maximum": 128
             }
         ],
         "type": "struct",
@@ -774,8 +766,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlaneVertex",
-                "maximum": 2048,
-                "hek_maximum": 2048
+                "maximum": 2048
             }
         ],
         "type": "struct",
@@ -933,8 +924,7 @@
                 "name": "planes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedronPlane",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             }
         ],
         "type": "struct",
@@ -1157,29 +1147,25 @@
                 "name": "cells",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCell",
-                "maximum": 262144,
-                "hek_maximum": 262144
+                "maximum": 262144
             },
             {
                 "name": "instances",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObject",
-                "maximum": 2097152,
-                "hek_maximum": 2097152
+                "maximum": 2097152
             },
             {
                 "name": "counts",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCount",
-                "maximum": 8388608,
-                "hek_maximum": 8388608
+                "maximum": 8388608
             },
             {
                 "name": "z reference vectors",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalZReferenceVector",
-                "maximum": 262144,
-                "hek_maximum": 262144
+                "maximum": 262144
             },
             {
                 "name": "bullshit",
@@ -1250,8 +1236,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFaceVertex",
-                "maximum": 64,
-                "hek_maximum": 64
+                "maximum": 64
             }
         ],
         "type": "struct",
@@ -1277,15 +1262,13 @@
                 "name": "faces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFace",
-                "maximum": 256,
-                "hek_maximum": 256
+                "maximum": 256
             },
             {
                 "name": "portal indices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafPortalIndex",
-                "maximum": 256,
-                "hek_maximum": 256
+                "maximum": 256
             }
         ],
         "type": "struct",
@@ -1412,22 +1395,19 @@
                 "name": "collision materials",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCollisionMaterial",
-                "maximum": 512,
-                "hek_maximum": 512
+                "maximum": 512
             },
             {
                 "name": "collision bsp",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
-                "maximum": 1,
-                "hek_maximum": 1
+                "maximum": 1
             },
             {
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPNode",
-                "maximum": 131072,
-                "hek_maximum": 131072
+                "maximum": 131072
             },
             {
                 "name": "world bounds x",
@@ -1448,29 +1428,25 @@
                 "name": "leaves",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLeaf",
-                "maximum": 65536,
-                "hek_maximum": 65536
+                "maximum": 65536
             },
             {
                 "name": "leaf surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurfaceReference",
-                "maximum": 262144,
-                "hek_maximum": 262144
+                "maximum": 262144
             },
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurface",
-                "maximum": 131072,
-                "hek_maximum": 131072
+                "maximum": 131072
             },
             {
                 "name": "lightmaps",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLightmap",
-                "maximum": 128,
-                "hek_maximum": 128
+                "maximum": 128
             },
             {
                 "type": "pad",
@@ -1480,22 +1456,19 @@
                 "name": "lens flares",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlare",
-                "maximum": 256,
-                "hek_maximum": 256
+                "maximum": 256
             },
             {
                 "name": "lens flare markers",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlareMarker",
-                "maximum": 65536,
-                "hek_maximum": 65536
+                "maximum": 65536
             },
             {
                 "name": "clusters",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCluster",
-                "maximum": 8192,
-                "hek_maximum": 8192
+                "maximum": 8192
             },
             {
                 "name": "cluster data",
@@ -1505,8 +1478,7 @@
                 "name": "cluster portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortal",
-                "maximum": 512,
-                "hek_maximum": 512
+                "maximum": 512
             },
             {
                 "type": "pad",
@@ -1516,29 +1488,25 @@
                 "name": "breakable surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBreakableSurface",
-                "maximum": 256,
-                "hek_maximum": 256
+                "maximum": 256
             },
             {
                 "name": "fog planes",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlane",
-                "maximum": 32,
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "name": "fog regions",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogRegion",
-                "maximum": 32,
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "name": "fog palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPalette",
                 "maximum": 32,
-                "hek_maximum": 32,
                 "read_only": false
             },
             {
@@ -1550,15 +1518,13 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPalette",
                 "maximum": 32,
-                "hek_maximum": 32,
                 "read_only": false
             },
             {
                 "name": "weather polyhedra",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedron",
-                "maximum": 32,
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "type": "pad",
@@ -1568,22 +1534,19 @@
                 "name": "pathfinding surfaces",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingSurface",
-                "maximum": 131072,
-                "hek_maximum": 131072
+                "maximum": 131072
             },
             {
                 "name": "pathfinding edges",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingEdge",
-                "maximum": 262144,
-                "hek_maximum": 262144
+                "maximum": 262144
             },
             {
                 "name": "background sound palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBackgroundSoundPalette",
                 "maximum": 64,
-                "hek_maximum": 64,
                 "read_only": false
             },
             {
@@ -1591,7 +1554,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSoundEnvironmentPalette",
                 "maximum": 64,
-                "hek_maximum": 64,
                 "read_only": false
             },
             {
@@ -1607,22 +1569,19 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMarker",
                 "maximum": 1024,
-                "hek_maximum": 1024,
                 "read_only": false
             },
             {
                 "name": "detail objects",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPDetailObjectData",
-                "maximum": 1,
-                "hek_maximum": 1
+                "maximum": 1
             },
             {
                 "name": "runtime decals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPRuntimeDecal",
                 "maximum": 6144,
-                "hek_maximum": 6144,
                 "cache_only": true
             },
             {
@@ -1637,15 +1596,13 @@
                 "name": "leaf map leaves",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalMapLeaf",
-                "maximum": 65536,
-                "hek_maximum": 65536
+                "maximum": 65536
             },
             {
                 "name": "leaf map portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalLeafPortal",
-                "maximum": 524288,
-                "hek_maximum": 524288
+                "maximum": 524288
             }
         ],
         "type": "struct",

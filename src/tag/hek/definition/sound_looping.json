@@ -214,13 +214,13 @@
                 "name": "tracks",
                 "type": "TagReflexive",
                 "struct": "SoundLoopingTrack",
-                "hek_maximum": 4
+                "maximum": 4
             },
             {
                 "name": "detail sounds",
                 "type": "TagReflexive",
                 "struct": "SoundLoopingDetail",
-                "hek_maximum": 32
+                "maximum": 32
             }
         ],
         "type": "struct",

@@ -136,8 +136,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             }
         ],
         "type": "struct",
@@ -355,8 +354,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             }
         ],
         "type": "struct",
@@ -418,22 +416,19 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "name": "states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeStates",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             },
             {
                 "name": "particle states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeParticleState",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             }
         ],
         "type": "struct",
@@ -475,15 +470,13 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             },
             {
                 "name": "particle types",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemType",
-                "maximum": 4,
-                "hek_maximum": 4
+                "maximum": 4
             }
         ],
         "type": "struct",

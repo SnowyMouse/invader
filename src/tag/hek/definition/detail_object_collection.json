@@ -137,7 +137,6 @@
                 "name": "types",
                 "type": "TagReflexive",
                 "struct": "DetailObjectCollectionObjectType",
-                "hek_maximum": 16,
                 "maximum": 16
             },
             {

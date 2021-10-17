@@ -162,7 +162,9 @@
             {
                 "name": "anchor",
                 "type": "HUDInterfaceChildAnchor",
-                "engines": [ "mcc" ]
+                "engines": [
+                    "mcc"
+                ]
             },
             {
                 "type": "pad",
@@ -251,7 +253,7 @@
                 "name": "multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "hek_maximum": 30
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -284,7 +286,9 @@
             {
                 "name": "anchor",
                 "type": "HUDInterfaceChildAnchor",
-                "engines": [ "mcc" ]
+                "engines": [
+                    "mcc"
+                ]
             },
             {
                 "type": "pad",
@@ -412,7 +416,9 @@
             {
                 "name": "anchor",
                 "type": "HUDInterfaceChildAnchor",
-                "engines": [ "mcc" ]
+                "engines": [
+                    "mcc"
+                ]
             },
             {
                 "type": "pad",
@@ -637,7 +643,7 @@
                 "name": "crosshair overlays",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceCrosshairOverlay",
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "type": "pad",
@@ -766,7 +772,9 @@
             {
                 "name": "anchor",
                 "type": "HUDInterfaceChildAnchor",
-                "engines": [ "mcc" ]
+                "engines": [
+                    "mcc"
+                ]
             },
             {
                 "type": "pad",
@@ -783,7 +791,7 @@
                 "name": "overlays",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceOverlay",
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "type": "pad",
@@ -952,31 +960,31 @@
                 "name": "static elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceStaticElement",
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "name": "meter elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceMeter",
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "name": "number elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceNumber",
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "name": "crosshairs",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceCrosshair",
-                "hek_maximum": 19
+                "maximum": 19
             },
             {
                 "name": "overlay elements",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceOverlayElement",
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "name": "crosshair types",
@@ -992,7 +1000,7 @@
                 "name": "screen effect",
                 "type": "TagReflexive",
                 "struct": "WeaponHUDInterfaceScreenEffect",
-                "hek_maximum": 1
+                "maximum": 1
             },
             {
                 "type": "pad",

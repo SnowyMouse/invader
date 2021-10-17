@@ -76,7 +76,9 @@
         "fields": [
             {
                 "type": "TagDependency",
-                "classes": [ "bitmap" ],
+                "classes": [
+                    "bitmap"
+                ],
                 "name": "target bitmap"
             },
             {
@@ -96,15 +98,16 @@
         "fields": [
             {
                 "type": "TagDependency",
-                "classes": [ "bitmap" ],
+                "classes": [
+                    "bitmap"
+                ],
                 "name": "source bitmap"
             },
             {
                 "type": "TagReflexive",
                 "name": "targets",
                 "struct": "HUDGlobalsAnniversaryRemapTarget",
-                "maximum": 26,
-                "hek_maximum": 26
+                "maximum": 26
             }
         ],
         "type": "struct",
@@ -265,8 +268,7 @@
                 "name": "button icons",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsButtonIcon",
-                "maximum": 18,
-                "hek_maximum": 18
+                "maximum": 18
             },
             {
                 "name": "hud help default color",
@@ -382,8 +384,7 @@
                 "name": "waypoint arrows",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsWaypointArrow",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "type": "pad",
@@ -576,10 +577,11 @@
             {
                 "name": "anniversary hud remaps",
                 "type": "TagReflexive",
-                "engines": [ "mcc" ],
+                "engines": [
+                    "mcc"
+                ],
                 "struct": "HUDGlobalsAnniversaryRemap",
-                "maximum": 32,
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "type": "pad",

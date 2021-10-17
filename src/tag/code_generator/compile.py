@@ -6,20 +6,20 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
     # compile()
     hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0, std::deque<const ParserStruct *> *stack = nullptr) override;\n")
     cpp_cache_format_data.write("    void {}::compile(BuildWorkload &workload, [[maybe_unused]] std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset, std::deque<const ParserStruct *> *stack) {{\n".format(struct_name))
-    
+
     # Make the stack if we need it
     cpp_cache_format_data.write("        std::optional<std::deque<const ParserStruct *>> new_stack;\n")
     cpp_cache_format_data.write("        if(!stack) {\n")
     cpp_cache_format_data.write("            new_stack = std::deque<const ParserStruct *>();\n")
     cpp_cache_format_data.write("            stack = &*new_stack;\n")
     cpp_cache_format_data.write("        }\n")
-    
+
     ## Add our struct to the stack
     cpp_cache_format_data.write("        stack->push_front(this);\n")
-    
+
     # Check if we're on the native engine. if not, check against stock limits (but don't strictly error)
     cpp_cache_format_data.write("        [[maybe_unused]] auto check_stock_limits = workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE;\n")
-    
+
     # Zero out the base struct
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].bsp = bsp;\n")
@@ -31,7 +31,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
         cpp_cache_format_data.write("        this->cache_formatted = true;\n")
     cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset);\n")
     cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r), std::byte());\n")
-    
+
     # Go through each field
     for struct in all_used_structs:
         if ("non_cached" in struct and struct["non_cached"]) or ("compile_ignore" in struct and struct["compile_ignore"]):
@@ -39,6 +39,10 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
         name = struct["member_name"]
         minimum = struct["minimum"] if "minimum" in struct else None
         maximum = struct["maximum"] if "maximum" in struct else None
+
+        if "maximum_enforced" in struct and not struct["maximum_enforced"]:
+            maximum = None
+
         if struct["type"] == "TagDependency":
             cpp_cache_format_data.write("        this->{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
             cpp_cache_format_data.write("        r.{}.tag_fourcc = this->{}.tag_fourcc;\n".format(name, name))
@@ -87,7 +91,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("        }\n")
         elif struct["type"] == "TagReflexive":
             cpp_cache_format_data.write("        std::size_t t_{}_count = this->{}.size();\n".format(name, name))
-            
+
             # Make sure we're within bounds in the reflexive
             if minimum != None:
                 cpp_cache_format_data.write("        if(t_{}_count < {}) {{\n".format(name, minimum))
@@ -99,13 +103,18 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must have no more than {} block{}\", tag_index);\n".format(struct_name, name, maximum, "" if maximum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
-                
-            # If there's a limited defined by the HEK, warn
-            if "hek_maximum" in struct:
-                cpp_cache_format_data.write("        if(check_stock_limits && t_{}_count > {}) {{\n".format(name, struct["hek_maximum"]))
-                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, \"{}::{} exceeds the stock limit of {} block{} and may not work as intended on the target engine\", tag_index);\n".format(struct_name, name, struct["hek_maximum"], "" if struct["hek_maximum"] == 1 else "s"))
+
+            # If there's a limit defined by the HEK that is exceeded, warn
+            if "legacy_maximum" in struct:
+                cpp_cache_format_data.write("        if(check_stock_limits && t_{}_count > {} && workload.get_build_parameters()->details.build_game_engine != HEK::GameEngine::GAME_ENGINE_MCC_COMBAT_EVOLVED_ANNIVERSARY && workload.get_build_parameters()->details.build_game_engine != HEK::GameEngine::GAME_ENGINE_NATIVE) {{\n".format(name, struct["legacy_maximum"]))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, \"{}::{} exceeds the legacy stock limit of {} block{} and may not work as intended on the target engine\", tag_index);\n".format(struct_name, name, struct["legacy_maximum"], "" if struct["legacy_maximum"] == 1 else "s"))
                 cpp_cache_format_data.write("        }\n")
-                
+
+            if "maximum" in struct:
+                cpp_cache_format_data.write("        if(check_stock_limits && t_{}_count > {}) {{\n".format(name, struct["maximum"]))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, \"{}::{} exceeds the stock limit of {} block{} and may not work as intended on the target engine\", tag_index);\n".format(struct_name, name, struct["maximum"], "" if struct["maximum"] == 1 else "s"))
+                cpp_cache_format_data.write("        }\n")
+
             # Now actually work
             cpp_cache_format_data.write("        if(t_{}_count > 0) {{\n".format(name))
             cpp_cache_format_data.write("            r.{}.count = static_cast<std::uint32_t>(t_{}_count);\n".format(name, name))
@@ -164,14 +173,14 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                                 member_to_check = p["member_name"]
                                 break
                         break
-                
+
                 if member_to_check is None:
                     print("Cannot resolve {} in {}".format(reflexive_to_check, struct_to_check), file=sys.stderr)
                     sys.exit(1)
-                
+
                 cpp_cache_format_data.write("        if(!workload.disable_error_checking && this->{} != NULL_INDEX) {{\n".format(name))
                 cpp_cache_format_data.write("            [[maybe_unused]] bool found = false;\n")
-                
+
                 def do_it_for_sam(struct_to_check):
                     cpp_cache_format_data.write("            for(auto *p : *stack) {\n")
                     cpp_cache_format_data.write("                auto *s = dynamic_cast<const {} *>(p);\n".format(struct_to_check))
@@ -185,13 +194,13 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                     cpp_cache_format_data.write("                    break;\n")
                     cpp_cache_format_data.write("                }\n")
                     cpp_cache_format_data.write("            }\n")
-                    
+
                 do_it_for_sam(struct_to_check)
-                
+
                 # Also check GBXModel too if necessary
                 if struct_to_check == "Model":
                     do_it_for_sam("GBXModel")
-                    
+
                 cpp_cache_format_data.write("            #ifndef NDEBUG\n")
                 cpp_cache_format_data.write("            if(!found) {\n")
                 cpp_cache_format_data.write("                eprintf_warn(\"DEBUG: {} was not found in the stack when checking {}::{}'s index.\");\n".format(struct_to_check, struct_name, name))
@@ -219,7 +228,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                     cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is not a normal 3D plane (%f, %f, %f) -> %f\", this->{}.vector.i.read(), this->{}.vector.j.read(), this->{}.vector.k.read(), this->{}.vector.calculate_scale());\n".format(struct_name, name, name, name, name, name))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
-            
+
             for e in all_enums:
                 if e["name"] == struct["type"]:
                     shifted_by_one = "+ 1" if ("shifted_by_one" in struct and struct["shifted_by_one"]) else ""
@@ -248,7 +257,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
     if post_compile:
         cpp_cache_format_data.write("        this->post_compile(workload, tag_index, struct_index, offset);\n".format(name, name))
-    
+
     ## Remove our struct from the top of the stack
     cpp_cache_format_data.write("        stack->erase(stack->begin());\n")
     cpp_cache_format_data.write("    }\n")

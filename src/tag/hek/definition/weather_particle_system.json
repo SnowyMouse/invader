@@ -311,7 +311,7 @@
                 "name": "particle types",
                 "type": "TagReflexive",
                 "struct": "WeatherParticleSystemParticleType",
-                "hek_maximum": 8
+                "maximum": 8
             }
         ],
         "type": "struct",

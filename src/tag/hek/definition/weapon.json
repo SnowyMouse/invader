@@ -234,7 +234,7 @@
                 "name": "magazine objects",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazineObject",
-                "hek_maximum": 8
+                "maximum": 8
             }
         ],
         "type": "struct",
@@ -368,7 +368,9 @@
                 "name": "prediction type",
                 "type": "WeaponPredictionType",
                 "comment": "behavior of the trigger in a network synced game.",
-                "engines": [ "mcc" ]
+                "engines": [
+                    "mcc"
+                ]
             },
             {
                 "name": "firing noise",
@@ -549,7 +551,7 @@
                 "name": "firing effects",
                 "type": "TagReflexive",
                 "struct": "WeaponTriggerFiringEffect",
-                "hek_maximum": 8
+                "maximum": 8
             }
         ],
         "type": "struct",
@@ -909,20 +911,20 @@
                 "name": "more predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
-                "hek_maximum": 1024,
-                "cache_only": true
+                "cache_only": true,
+                "maximum": 1024
             },
             {
                 "name": "magazines",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazine",
-                "hek_maximum": 2
+                "maximum": 2
             },
             {
                 "name": "triggers",
                 "type": "TagReflexive",
                 "struct": "WeaponTrigger",
-                "hek_maximum": 2
+                "maximum": 2
             }
         ],
         "type": "struct",

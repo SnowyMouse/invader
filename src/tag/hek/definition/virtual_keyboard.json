@@ -144,7 +144,7 @@
                 "name": "virtual keys",
                 "type": "TagReflexive",
                 "struct": "VirtualKeyboardVirtualKey",
-                "hek_maximum": 44
+                "maximum": 44
             }
         ],
         "type": "struct",

@@ -154,7 +154,6 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryPermutation",
                 "maximum": 32,
-                "hek_maximum": 32,
                 "read_only": true
             }
         ],
@@ -387,57 +386,49 @@
                 "name": "bsp3d nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP3DNode",
-                "maximum": 131072,
-                "hek_maximum": 131072
+                "maximum": 131072
             },
             {
                 "name": "planes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPPlane",
-                "maximum": 65536,
-                "hek_maximum": 65536
+                "maximum": 65536
             },
             {
                 "name": "leaves",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPLeaf",
-                "maximum": 65536,
-                "hek_maximum": 65536
+                "maximum": 65536
             },
             {
                 "name": "bsp2d references",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DReference",
-                "maximum": 131072,
-                "hek_maximum": 131072
+                "maximum": 131072
             },
             {
                 "name": "bsp2d nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DNode",
-                "maximum": 65535,
-                "hek_maximum": 65535
+                "maximum": 65535
             },
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPSurface",
-                "maximum": 131072,
-                "hek_maximum": 131072
+                "maximum": 131072
             },
             {
                 "name": "edges",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPEdge",
-                "maximum": 262144,
-                "hek_maximum": 262144
+                "maximum": 262144
             },
             {
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSPVertex",
-                "maximum": 131072,
-                "hek_maximum": 131072
+                "maximum": 131072
             }
         ],
         "type": "struct",
@@ -488,8 +479,7 @@
                 "name": "bsps",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
-                "maximum": 32,
-                "hek_maximum": 32
+                "maximum": 32
             }
         ],
         "type": "struct",
@@ -692,15 +682,13 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryMaterial",
                 "read_only": true,
-                "maximum": 32,
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryRegion",
                 "maximum": 8,
-                "hek_maximum": 8,
                 "read_only": true
             },
             {
@@ -708,8 +696,7 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryModifier",
                 "read_only": true,
-                "maximum": 0,
-                "hek_maximum": 0
+                "maximum": 0
             },
             {
                 "type": "pad",
@@ -735,7 +722,6 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometrySphere",
                 "maximum": 32,
-                "hek_maximum": 32,
                 "volatile": true
             },
             {
@@ -743,7 +729,6 @@
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryNode",
                 "maximum": 64,
-                "hek_maximum": 64,
                 "read_only": true
             }
         ],

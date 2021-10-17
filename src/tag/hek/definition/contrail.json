@@ -316,7 +316,6 @@
                 "name": "point states",
                 "type": "TagReflexive",
                 "struct": "ContrailPointState",
-                "hek_maximum": 16,
                 "maximum": 16
             }
         ],

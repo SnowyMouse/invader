@@ -201,22 +201,19 @@
                 "name": "shader functions",
                 "type": "TagReflexive",
                 "struct": "SkyFunction",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             },
             {
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "SkyAnimation",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             },
             {
                 "name": "lights",
                 "type": "TagReflexive",
                 "struct": "SkyLight",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             }
         ],
         "type": "struct",

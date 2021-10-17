@@ -29,7 +29,6 @@
                 "name": "control points",
                 "type": "TagReflexive",
                 "struct": "CameraTrackControlPoint",
-                "hek_maximum": 16,
                 "maximum": 16
             },
             {

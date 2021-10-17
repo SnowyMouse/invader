@@ -377,13 +377,13 @@
                 "name": "parts",
                 "type": "TagReflexive",
                 "struct": "EffectPart",
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "name": "particles",
                 "type": "TagReflexive",
                 "struct": "EffectParticle",
-                "hek_maximum": 32
+                "maximum": 32
             }
         ],
         "type": "struct",
@@ -422,13 +422,13 @@
                 "name": "locations",
                 "type": "TagReflexive",
                 "struct": "EffectLocation",
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "name": "events",
                 "type": "TagReflexive",
                 "struct": "EffectEvent",
-                "hek_maximum": 32
+                "maximum": 32
             }
         ],
         "type": "struct",

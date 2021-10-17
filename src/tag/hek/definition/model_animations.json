@@ -257,8 +257,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponTypeAnimation",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             }
         ],
         "type": "struct",
@@ -322,22 +321,19 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponClassAnimation",
-                "maximum": 55,
-                "hek_maximum": 55
+                "maximum": 55
             },
             {
                 "name": "ik point",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeatikPoint",
-                "maximum": 4,
-                "hek_maximum": 4
+                "maximum": 4
             },
             {
                 "name": "weapon types",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeaponType",
-                "maximum": 10,
-                "hek_maximum": 10
+                "maximum": 10
             }
         ],
         "type": "struct",
@@ -392,22 +388,19 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponClassAnimation",
-                "maximum": 33,
-                "hek_maximum": 33
+                "maximum": 33
             },
             {
                 "name": "ik points",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeatikPoint",
-                "maximum": 4,
-                "hek_maximum": 4
+                "maximum": 4
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeapon",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             }
         ],
         "type": "struct",
@@ -437,8 +430,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsWeaponAnimation",
-                "maximum": 11,
-                "hek_maximum": 11
+                "maximum": 11
             }
         ],
         "type": "struct",
@@ -529,15 +521,13 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsVehicleAnimation",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             },
             {
                 "name": "suspension animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationSuspensionAnimation",
-                "maximum": 8,
-                "hek_maximum": 8
+                "maximum": 8
             }
         ],
         "type": "struct",
@@ -567,8 +557,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsDeviceAnimation",
-                "maximum": 2,
-                "hek_maximum": 2
+                "maximum": 2
             }
         ],
         "type": "struct",
@@ -595,7 +584,6 @@
                 "type": "Index",
                 "reflexive": "animations",
                 "maximum": 176,
-                "hek_maximum": 176,
                 "struct": "ModelAnimations"
             }
         ],
@@ -613,8 +601,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsFirstPersonWeapon",
-                "maximum": 28,
-                "hek_maximum": 28
+                "maximum": 28
             }
         ],
         "type": "struct",
@@ -857,57 +844,49 @@
                 "name": "objects",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphObjectOverlay",
-                "maximum": 4,
-                "hek_maximum": 4
+                "maximum": 4
             },
             {
                 "name": "units",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeat",
-                "maximum": 33,
-                "hek_maximum": 33
+                "maximum": 33
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeaponAnimations",
-                "maximum": 16,
-                "hek_maximum": 16
+                "maximum": 16
             },
             {
                 "name": "vehicles",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphVehicleAnimations",
-                "maximum": 1,
-                "hek_maximum": 1
+                "maximum": 1
             },
             {
                 "name": "devices",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsDeviceAnimations",
-                "maximum": 2,
-                "hek_maximum": 2
+                "maximum": 2
             },
             {
                 "name": "unit damage",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsUnitDamageAnimations",
-                "maximum": 176,
-                "hek_maximum": 176
+                "maximum": 176
             },
             {
                 "name": "first person weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphFirstPersonWeaponAnimations",
-                "maximum": 28,
-                "hek_maximum": 28
+                "maximum": 28
             },
             {
                 "name": "sound references",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphSoundReference",
-                "maximum": 514,
-                "hek_maximum": 514
+                "maximum": 514
             },
             {
                 "name": "limp body node radius",
@@ -925,15 +904,13 @@
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphNode",
-                "maximum": 64,
-                "hek_maximum": 64
+                "maximum": 64
             },
             {
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimation",
-                "maximum": 2048,
-                "hek_maximum": 2048
+                "maximum": 2048
             }
         ],
         "type": "struct",

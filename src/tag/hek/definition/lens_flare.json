@@ -268,8 +268,7 @@
                 "name": "reflections",
                 "type": "TagReflexive",
                 "struct": "LensFlareReflection",
-                "maximum": 32,
-                "hek_maximum": 32
+                "maximum": 32
             },
             {
                 "type": "pad",

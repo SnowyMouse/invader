@@ -308,8 +308,9 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "SoundPermutation",
-                "hek_maximum": 256,
-                "read_only": true
+                "read_only": true,
+                "maximum": 256,
+                "maximum_enforced": false
             }
         ],
         "type": "struct",
@@ -470,8 +471,8 @@
                 "type": "TagReflexive",
                 "struct": "SoundPitchRange",
                 "read_only": true,
-                "hek_maximum": 8,
-                "zero_on_index": true
+                "zero_on_index": true,
+                "maximum": 8
             }
         ],
         "type": "struct",

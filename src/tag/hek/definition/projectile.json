@@ -341,8 +341,7 @@
                 "name": "projectile material response",
                 "type": "TagReflexive",
                 "struct": "ProjectileMaterialResponse",
-                "maximum": 33,
-                "hek_maximum": 33
+                "maximum": 33
             }
         ],
         "type": "struct",
