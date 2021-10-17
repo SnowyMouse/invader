@@ -105,7 +105,7 @@
             "deleted when attachment deactivates",
             "required for gameplay cannot optimize out",
             "must be deterministic",
-            "disabled in remastered by blood setting"
+            "disabled in anniversary by blood setting"
         ],
         "cache_only": [
             "must be deterministic"
