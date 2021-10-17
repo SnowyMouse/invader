@@ -935,12 +935,27 @@ ui\hud\bitmaps\combined\hud_waypoints.bitmap
 ui\hud\empty.weapon_hud_interface
 ui\hud\bitmaps\combined\hud_damage_arrows.bitmap
 ui\shell\bitmaps\postgame_carnage_report.bitmap
+ui\hud\bitmaps\combined\hud_ammo_alphas_r.bitmap
+ui\hud\bitmaps\combined\hud_ammo_meters_r.bitmap
+ui\hud\bitmaps\combined\hud_unit_backgrounds_r.bitmap
+ui\hud\bitmaps\combined\hud_unit_meters_r.bitmap
+ui\hud\bitmaps\combined\hud_ammo_type_icons_r.bitmap
+ui\hud\bitmaps\combined\hud_ammo_outlines_r.bitmap
+ui\hud\bitmaps\combined\hud_weapon_backgrounds_r.bitmap
+ui\hud\bitmaps\combined\hud_counter_numbers.bitmap
+ui\hud\bitmaps\combined\hud_counter_numbers_r.bitmap
+ui\hud\bitmaps\combined\hud_reticles_r.bitmap
+ui\hud\bitmaps\sniper\hud_reticles_scope_r.bitmap
+ui\hud\bitmaps\combined\hud_reticle_warnings_r.bitmap
+ui\hud\bitmaps\sniper\caption.bitmap
+ui\hud\bitmaps\sniper\caption_r.bitmap
+ui\hud\bitmaps\combined\hud_msg_icons_r.bitmap
+ui\hud\bitmaps\combined\hud_waypoints_r.bitmap
 ui\hud\bitmaps\hud_sweeper.bitmap
 ui\hud\bitmaps\hud_sweeper_mask.bitmap
 ui\hud\bitmaps\hud_multiplayer.bitmap
 old tags\internal string localization.string_list
 ui\hud\counter.hud_number
-ui\hud\bitmaps\combined\hud_counter_numbers.bitmap
 ui\hud\bitmaps\hud_sensor_blip.bitmap
 ui\hud\bitmaps\hud_sensor_blip_custom.bitmap
 ui\hud\bitmaps\hud_msg_icons_sm.bitmap
@@ -1221,7 +1236,6 @@ weapons\sniper rifle\bitmaps\angle_ticks.bitmap
 weapons\sniper rifle\bitmaps\angle_ticks2.bitmap
 ui\hud\bitmaps\sniper\sniper_scope_crosshairs2.bitmap
 ui\hud\bitmaps\sniper\sniper_scope_crosshairs_sm.bitmap
-ui\hud\bitmaps\sniper\caption.bitmap
 ui\hud\bitmaps\sniper\sniper_scope_mask2.bitmap
 ui\hud\bitmaps\sniper\sniper_scope_mask_sm.bitmap
 sound\sfx\weapons\weapon_pickup_ammo\sniper_ammo.sound
