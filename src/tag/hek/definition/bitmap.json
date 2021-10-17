@@ -208,7 +208,6 @@
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSprite",
                 "maximum": 64,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             }
         ],
@@ -438,7 +437,6 @@
                 "struct": "BitmapGroupSequence",
                 "read_only": true,
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {

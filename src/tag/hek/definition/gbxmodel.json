@@ -58,7 +58,6 @@
                 "type": "TagReflexive",
                 "struct": "GBXModelGeometryPart",
                 "maximum": 32,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             }
         ],
@@ -180,7 +179,6 @@
                 "type": "TagReflexive",
                 "struct": "ModelNode",
                 "maximum": 64,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -188,7 +186,6 @@
                 "type": "TagReflexive",
                 "struct": "ModelRegion",
                 "maximum": 32,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -196,7 +193,6 @@
                 "type": "TagReflexive",
                 "struct": "GBXModelGeometry",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -204,7 +200,6 @@
                 "type": "TagReflexive",
                 "struct": "ModelShaderReference",
                 "maximum": 32,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             }
         ],

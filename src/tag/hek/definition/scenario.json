@@ -3537,7 +3537,6 @@
                 "maximum": 640,
                 "read_only": true,
                 "legacy_maximum": 512,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3545,7 +3544,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioScenery",
                 "maximum": 2000,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3554,7 +3552,6 @@
                 "struct": "ScenarioSceneryPalette",
                 "maximum": 256,
                 "legacy_maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3562,7 +3559,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioBiped",
                 "maximum": 128,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3571,7 +3567,6 @@
                 "struct": "ScenarioBipedPalette",
                 "maximum": 256,
                 "legacy_maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3580,7 +3575,6 @@
                 "struct": "ScenarioVehicle",
                 "maximum": 256,
                 "legacy_maximum": 80,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3589,7 +3583,6 @@
                 "struct": "ScenarioVehiclePalette",
                 "maximum": 256,
                 "legacy_maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3597,7 +3590,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipment",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3605,7 +3597,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipmentPalette",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3613,7 +3604,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioWeapon",
                 "maximum": 128,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3622,7 +3612,6 @@
                 "struct": "ScenarioWeaponPalette",
                 "maximum": 256,
                 "legacy_maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3636,7 +3625,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioMachine",
                 "maximum": 400,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3645,7 +3633,6 @@
                 "struct": "ScenarioMachinePalette",
                 "maximum": 256,
                 "legacy_maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3653,7 +3640,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioControl",
                 "maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3662,7 +3648,6 @@
                 "struct": "ScenarioControlPalette",
                 "maximum": 256,
                 "legacy_maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3670,7 +3655,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioLightFixture",
                 "maximum": 500,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3679,7 +3663,6 @@
                 "struct": "ScenarioLightFixturePalette",
                 "maximum": 256,
                 "legacy_maximum": 100,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3687,7 +3670,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundScenery",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3695,7 +3677,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundSceneryPalette",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3707,7 +3688,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingProfile",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3715,7 +3695,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingLocation",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3723,7 +3702,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioTriggerVolume",
                 "maximum": 256,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3731,7 +3709,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioRecordedAnimation",
                 "maximum": 1024,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3739,7 +3716,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioNetgameFlags",
                 "maximum": 200,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3747,7 +3723,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioNetgameEquipment",
                 "maximum": 200,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3755,7 +3730,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioStartingEquipment",
                 "maximum": 200,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
@@ -3776,7 +3750,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioDecalPalette",
                 "maximum": 128,
-                "maximum_enforced": false,
                 "extended_maximum": 32767
             },
             {
