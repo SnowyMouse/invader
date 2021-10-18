@@ -396,8 +396,6 @@ namespace Invader {
                     oflush();
                 }
                 
-                File::save_file("raichu.bin", final_data);
-                
                 // Calculate the CRC32 and/or forge one if we must
                 if(workload.parameters->forge_crc.has_value()) {
                     std::uint32_t checksum_delta = 0;
