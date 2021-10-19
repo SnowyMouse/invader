@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <zlib.h>
 #include <tiffio.h>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser_struct.hpp>
+#include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/model/jms.hpp>
 #include <invader/tag/parser/compile/string_list.hpp>
@@ -67,46 +67,19 @@ namespace Invader::Recover {
             return;
         }
 
-        // Do we have color plate data?
-        if(width == 0 || height == 0 || input->size() <= sizeof(HEK::BigEndian<std::uint32_t>)) {
-            eprintf_warn("No color plate data to recover from - tag likely extracted");
-            std::exit(EXIT_FAILURE);
-        }
-
         // Does it already exist?
         if(std::filesystem::exists(file_path) && !overwrite) {
             eprintf("Skipped %s\n", file_path.string().c_str());
             std::exit(EXIT_SUCCESS);
         }
 
-        // Get the size of the data we're going to decompress
-        const auto *color_plate_data = input->data();
-        auto image_size = reinterpret_cast<const HEK::BigEndian<std::uint32_t> *>(color_plate_data)->read();
-        const auto *compressed_data = color_plate_data + sizeof(image_size);
-        auto compressed_size = input->size() - sizeof(image_size);
-
-        if(image_size != width * height * sizeof(std::uint32_t)) {
-            eprintf_error("Color plate size is wrong");
+        // Decompress it
+        auto decompressed_stuff = HEK::decompress_color_plate_data(*bitmap);
+        
+        // Do we have color plate data?
+        if(!decompressed_stuff.has_value()) {
+            eprintf_warn("No color plate data to recover from - tag likely extracted");
             std::exit(EXIT_FAILURE);
-        }
-        std::vector<HEK::LittleEndian<std::uint32_t>> pixels(image_size);
-
-        // Inflate if regular
-        if(bitmap) {
-            z_stream inflate_stream;
-            inflate_stream.zalloc = Z_NULL;
-            inflate_stream.zfree = Z_NULL;
-            inflate_stream.opaque = Z_NULL;
-            inflate_stream.avail_out = image_size;
-            inflate_stream.next_out = reinterpret_cast<Bytef *>(pixels.data());
-            inflate_stream.avail_in = compressed_size;
-            inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(compressed_data));
-            
-            // Do it
-            if(inflateInit(&inflate_stream) != Z_OK || inflate(&inflate_stream, Z_FINISH) != Z_STREAM_END || inflateEnd(&inflate_stream) != Z_OK) {
-                eprintf_error("Color plate data could not be decompressed");
-                std::exit(EXIT_FAILURE);
-            }
         }
 
         // Let's begin
@@ -135,13 +108,13 @@ namespace Invader::Recover {
         TIFFSetField(tiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
 
         // Swap blue and red channels
-        for(auto &i : pixels) {
+        for(auto &i : *decompressed_stuff) {
             i = (i & 0xFF00FF00) | ((i & 0x00FF0000) >> 16) | ((i & 0x000000FF) << 16);
         }
 
         // Write it
         for (std::size_t y = 0; y < height; y++) {
-            TIFFWriteScanline(tiff, pixels.data() + y * width, y, 0);
+            TIFFWriteScanline(tiff, decompressed_stuff->data() + y * width, y, 0);
         }
 
         TIFFClose(tiff);
