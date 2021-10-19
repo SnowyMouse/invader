@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
 #include <QMessageBox>
 #include "../tag_editor_window.hpp"
 #include "tag_editor_bitmap_subwindow.hpp"
@@ -15,6 +16,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/bitmap/swizzle.hpp>
 #include <invader/bitmap/bitmap_encode.hpp>
+#include <invader/tag/hek/class/bitmap.hpp>
 
 #define GET_PIXEL(x,y) (x + y * real_width)
 
@@ -77,6 +79,7 @@ namespace Invader::EditQt {
         }
         
         // Generate it!
+        colors->blockSignals(true);
         colors->clear();
         if(monochrome) {
             colors->addItem("Alpha-Luminance");
@@ -92,6 +95,7 @@ namespace Invader::EditQt {
             colors->addItem("Blue only");
         }
         colors->setCurrentIndex(0);
+        colors->blockSignals(false);
     }
 
     template<typename T> static void generate_main_widget(TagEditorBitmapSubwindow *subwindow, T *bitmap_data, void (*set_values)(TagEditorBitmapSubwindow *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QScrollArea *, std::vector<Parser::BitmapGroupSequence> *)) {
@@ -131,9 +135,12 @@ namespace Invader::EditQt {
         // Get the size
         auto bitmap_count = bitmap_data->bitmap_data.size();
         for(std::size_t i = 0; i < bitmap_count; i++) {
-            bitmaps->addItem(QString::number(i));
+            bitmaps->addItem(QString::number(i), false);
         }
-
+        if(!bitmap_data->compressed_color_plate_data.empty()) {
+            bitmaps->addItem("Color plate", true);
+        }
+            
         // Scaling stuff
         for(int z = 3; z > 0; z--) {
             char t[8];
@@ -182,7 +189,36 @@ namespace Invader::EditQt {
         this->mipmaps->clear();
 
         int index = this->bitmaps->currentIndex();
-        if(index >= 0) {
+        
+        // Are we viewing the color plate?
+        if(this->bitmaps->currentData().toBool()) {
+            // Add item
+            char name[256];
+            
+            Parser::Bitmap *bitmap;
+            auto *parent_window = this->get_parent_window();
+            switch(parent_window->get_file().tag_fourcc) {
+                case TagFourCC::TAG_FOURCC_BITMAP:
+                    bitmap = dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data());
+                    break;
+                default:
+                    std::terminate();
+            }
+            
+            std::size_t width = 0, height = 0;
+            if(bitmap->compressed_color_plate_data.size() != 0) {
+                width = bitmap->color_plate_width;
+                height = bitmap->color_plate_height;
+            }
+            
+            std::snprintf(name, sizeof(name), "Color plate data (%zu x %zu)", width, height);
+            this->mipmaps->addItem(name);
+            this->sequence->setEnabled(false);
+            this->sprite->setEnabled(false);
+        }
+        
+        // Otherwise, let's go
+        else if(index >= 0) {
             std::size_t index_unsigned = static_cast<std::size_t>(index);
             auto *parent_window = this->get_parent_window();
             Parser::BitmapData *bitmap_data;
@@ -237,6 +273,8 @@ namespace Invader::EditQt {
                 }
             }
             this->mipmaps->setCurrentIndex(0);
+            this->sequence->setEnabled(true);
+            this->sprite->setEnabled(true);
         }
 
         this->mipmaps->blockSignals(false);
@@ -245,6 +283,49 @@ namespace Invader::EditQt {
         this->reload_view();
     }
 
+    QGraphicsView *TagEditorBitmapSubwindow::draw_color_plate(Parser::Bitmap *bitmap_data, Colors colors, int scale) {
+        QGraphicsView *view = new QGraphicsView();
+        QGraphicsScene *scene = new QGraphicsScene(view);
+        QPixmap map;
+        
+        std::vector<std::uint32_t> color_plate_data;
+        int width = 0, height = 0;
+        
+        // Decompress
+        try {
+            auto c = HEK::decompress_color_plate_data(*bitmap_data);
+            if(c.has_value()) {
+                color_plate_data.reserve(c->size());
+                for(auto &p : *c) {
+                    color_plate_data.emplace_back(p.read());
+                }
+                width = bitmap_data->color_plate_width;
+                height = bitmap_data->color_plate_height;
+            }
+        }
+        catch (std::exception &e) {
+            std::printf("Got %s when trying to decompress color plate data\n", e.what());
+            color_plate_data.clear();
+        }
+        
+        std::size_t real_width = width, real_height = height, pixel_count = color_plate_data.size();
+        this->scale_bitmap(scale, real_width, real_height, pixel_count, color_plate_data);
+        this->show_channel(color_plate_data.data(), real_width, real_height, colors);
+        
+        map.convertFromImage(QImage(reinterpret_cast<const uchar *>(color_plate_data.data()), real_width, real_height, QImage::Format_ARGB32));
+        scene->addPixmap(map);
+        view->setScene(scene);
+
+        view->setFrameStyle(0);
+        view->setMinimumSize(real_width, real_height);
+        view->setMaximumSize(real_width, real_height);
+        view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+        view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+        view->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
+
+        return view;
+    }
+    
     QGraphicsView *TagEditorBitmapSubwindow::draw_bitmap_to_widget(Parser::BitmapData *bitmap_data, std::size_t mipmap, std::size_t index, Colors mode, int scale, const std::vector<std::byte> *pixel_data) {
         // Get the dimensions of the mipmap
         std::size_t width = static_cast<std::size_t>(bitmap_data->width);
@@ -432,6 +513,10 @@ namespace Invader::EditQt {
     }
 
     void TagEditorBitmapSubwindow::highlight_sprite(std::uint32_t *data, std::size_t real_width, std::size_t real_height) {
+        if(this->bitmaps->currentData().toBool()) {
+            return; // color plate data
+        }
+        
         int current_sequence_index = this->sequence->currentIndex();
         int current_sprite_index = this->sprite->currentIndex();
         if(current_sequence_index > 0 && current_sprite_index >= 0) {
@@ -632,36 +717,44 @@ namespace Invader::EditQt {
         // Get the index if valid
         int index = this->bitmaps->currentIndex();
         int mip_index = this->mipmaps->currentIndex();
-        if(index < 0 || mip_index < 0) {
+        bool color_plate = this->bitmaps->currentData().toBool();
+        
+        if(mip_index < 0) {
             return;
         }
         std::size_t index_unsigned = static_cast<std::size_t>(index);
         std::size_t mip_index_unsigned = static_cast<std::size_t>(mip_index);
 
         // Get the data
-        Parser::BitmapData *bitmap_data;
-        std::vector<std::byte> *pixel_data;
+        Parser::Bitmap *bitmap = dynamic_cast<Parser::Bitmap *>(this->get_parent_window()->get_parser_data());
+        Parser::BitmapData *bitmap_data = nullptr;
+        std::vector<std::byte> *pixel_data = nullptr;
         auto *parent_window = this->get_parent_window();
-        switch(parent_window->get_file().tag_fourcc) {
-            case TagFourCC::TAG_FOURCC_BITMAP:
-                bitmap_data = dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data.data() + index_unsigned;
-                pixel_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->processed_pixel_data;
-                break;
-            default:
-                std::terminate();
-        }
         
-        // Set the monochrome stuff depending on what we're doing
-        switch(bitmap_data->format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                this->generate_colors_array(true);
-                break;
-            default:
-                this->generate_colors_array(false);
-                break;
+        if(color_plate) {
+            this->generate_colors_array(false);
+        }
+        else {
+            switch(parent_window->get_file().tag_fourcc) {
+                case TagFourCC::TAG_FOURCC_BITMAP:
+                    bitmap_data = bitmap->bitmap_data.data() + index_unsigned;
+                    pixel_data = &bitmap->processed_pixel_data;
+                    break;
+                default:
+                    std::terminate();
+            }
+            // Set the monochrome stuff depending on what we're doing
+            switch(bitmap_data->format) {
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+                    this->generate_colors_array(true);
+                    break;
+                default:
+                    this->generate_colors_array(false);
+                    break;
+            }
         }
 
         auto *scroll_widget = new QWidget();
@@ -670,24 +763,38 @@ namespace Invader::EditQt {
         int scale = this->scale->currentIndex() - 3;
         auto *what = this;
 
-        auto make_widget = [&bitmap_data, &color, &scale, &pixel_data, &what](std::size_t mip, std::size_t index) {
-            return what->draw_bitmap_to_widget(bitmap_data, mip, index, color, scale, pixel_data);
+        auto make_widget = [&bitmap, &bitmap_data, &color, &scale, &pixel_data, &what, &color_plate](std::size_t mip, std::size_t index) {
+            if(color_plate) {
+                return what->draw_color_plate(bitmap, color, scale);
+            }
+            else {
+                return what->draw_bitmap_to_widget(bitmap_data, mip, index, color, scale, pixel_data);
+            }
         };
 
-        auto make_row = [&make_widget, &bitmap_data, &layout](std::size_t mip) {
+        auto make_row = [&make_widget, &bitmap_data, &layout, &color_plate](std::size_t mip) {
             std::size_t elements;
-            switch(bitmap_data->type) {
-                case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                    elements = bitmap_data->depth >> mip;
-                    if(elements == 0) {
+            
+            // Only one color plate
+            if(color_plate) {
+                elements = 1;
+            }
+            
+            // For each mipmap?
+            else {
+                switch(bitmap_data->type) {
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                        elements = bitmap_data->depth >> mip;
+                        if(elements == 0) {
+                            elements = 1;
+                        }
+                        break;
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                        elements = 6;
+                        break;
+                    default:
                         elements = 1;
-                    }
-                    break;
-                case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
-                    elements = 6;
-                    break;
-                default:
-                    elements = 1;
+                }
             }
 
             QWidget *row = new QWidget();
@@ -707,7 +814,7 @@ namespace Invader::EditQt {
         };
 
         // Draw the mips
-        if(mip_index_unsigned == 0) {
+        if(mip_index_unsigned == 0 && !color_plate) {
             for(std::size_t i = 0; i <= bitmap_data->mipmap_count; i++) {
                 make_row(i);
             }

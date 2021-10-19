@@ -12,6 +12,7 @@ class QGraphicsView;
 namespace Invader::Parser {
     struct BitmapGroupSequence;
     struct BitmapData;
+    struct Bitmap;
 }
 
 namespace Invader::EditQt {
@@ -63,6 +64,7 @@ namespace Invader::EditQt {
         
         void generate_colors_array(bool monochrome);
 
+        QGraphicsView *draw_color_plate(Parser::Bitmap *bitmap_data, Colors colors, int scale);
         QGraphicsView *draw_bitmap_to_widget(Parser::BitmapData *bitmap_data, std::size_t mipmap, std::size_t index, Colors mode, int scale, const std::vector<std::byte> *pixel_data);
         void highlight_sprite(std::uint32_t *data, std::size_t real_width, std::size_t real_height);
         void show_channel(std::uint32_t *data, std::size_t real_width, std::size_t real_height, Colors mode);

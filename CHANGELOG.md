@@ -22,6 +22,7 @@ This is used for recording Invader's changes. This changelog is based on
   in the header is correct or "mismatched" if not
 - invader-edit: Added `--checksum` which calculates the checksum of the tag and
   prints it
+- invader-edit-qt: Added viewing color plates in the bitmap previewer
 - invader-info: Added `tag_order_match` which checks if a map has the same tag
   order as stock and, if not, whether it may (probably) be network compatible
 
