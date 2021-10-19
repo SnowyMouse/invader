@@ -24,6 +24,7 @@ This is used for recording Invader's changes. This changelog is based on
   order as stock and, if not, whether it may (probably) be network compatible
 
 ### Changed
+- invader-archive: Tags that are excluded are now printed
 - invader-bitmap: Changed the default format to `auto`
 - invader-bitmap: If usage is set to alpha blend, bitmaps are now cropped if an
   edge has zero alpha and a warning will be displayed. If the resulting bitmap
@@ -56,6 +57,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader: Fixed invalid enums not being properly detected if they're valid for
   HEK but marked as invalid for the game
 - invader: Fixed iterating through directories with trailing slashes
+- invader-archive: Fixed creating empty archives if all tags were excluded
 - invader-bitmap: Fixed first bitmap index not being a valid bitmap
 - invader-bitmap: Fixed an infinite loop with `-P`
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"

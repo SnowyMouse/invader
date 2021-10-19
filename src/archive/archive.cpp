@@ -284,10 +284,12 @@ int main(int argc, const char **argv) {
             }
         }
     }
+    
     for(auto &i : archive_options.tags_excluded_same) {
         for(std::size_t t = 0; t < archive_list.size(); t++) {
             // First check if it exists
             auto path_to_test = i / File::halo_path_to_preferred_path(archive_list[t].second);
+            
             if(std::filesystem::exists(path_to_test)) {
                 // Okay it exists. Open both then
                 try {
@@ -306,12 +308,18 @@ int main(int argc, const char **argv) {
                     eprintf_error("Failed to do a functional comparison of %s and %s\n", archive_list[t].first.string().c_str(), path_to_test.string().c_str());
                     std::exit(EXIT_FAILURE);
                 }
-
-                // Exclude
+                
+                std::printf("Omitting %s\n", archive_list[t].second.c_str());
                 archive_list.erase(archive_list.begin() + t);
                 t--;
             }
         }
+    }
+    
+    // If we eliminate all tags, don't bother archiving anything
+    if(archive_list.size() == 0) {
+        oprintf_success_warn("There were no tags to archive");
+        return EXIT_SUCCESS;
     }
 
     // Archive
