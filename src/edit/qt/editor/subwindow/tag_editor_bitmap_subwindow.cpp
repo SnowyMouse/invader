@@ -213,8 +213,8 @@ namespace Invader::EditQt {
             
             std::snprintf(name, sizeof(name), "Color plate data (%zu x %zu)", width, height);
             this->mipmaps->addItem(name);
-            this->sequence->setEnabled(false);
-            this->sprite->setEnabled(false);
+            if(this->sequence) this->sequence->setEnabled(false);
+            if(this->sprite) this->sprite->setEnabled(false);
         }
         
         // Otherwise, let's go
@@ -273,8 +273,8 @@ namespace Invader::EditQt {
                 }
             }
             this->mipmaps->setCurrentIndex(0);
-            this->sequence->setEnabled(true);
-            this->sprite->setEnabled(true);
+            if(this->sequence) this->sequence->setEnabled(true);
+            if(this->sprite) this->sprite->setEnabled(true);
         }
 
         this->mipmaps->blockSignals(false);

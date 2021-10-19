@@ -36,14 +36,14 @@ namespace Invader::EditQt {
         ~TagEditorBitmapSubwindow() = default;
 
     private:
-        QComboBox *mipmaps;
-        QComboBox *colors;
-        QComboBox *bitmaps;
-        QComboBox *scale;
-        QScrollArea *images;
+        QComboBox *mipmaps = nullptr;
+        QComboBox *colors = nullptr;
+        QComboBox *bitmaps = nullptr;
+        QComboBox *scale = nullptr;
+        QScrollArea *images = nullptr;
 
-        QComboBox *sequence;
-        QComboBox *sprite;
+        QComboBox *sequence = nullptr;
+        QComboBox *sprite = nullptr;
         
         bool monochrome;
 
