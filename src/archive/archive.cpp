@@ -26,6 +26,7 @@ int main(int argc, const char **argv) {
         std::string output;
         bool use_filesystem_path = false;
         bool copy = false;
+        bool verbose = false;
         bool overwrite = false;
         std::optional<HEK::GameEngine> engine;
     } archive_options;
@@ -45,6 +46,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
+    options.emplace_back("verbose", 'v', 0, "Print whether or not tags are omitted,  Do verbose comparisons.");
     options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<id>");
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
@@ -63,6 +65,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'O':
                 archive_options.overwrite = true;
+                break;
+            case 'v':
+                archive_options.verbose = true;
                 break;
             case 'i':
                 show_version_info();
@@ -300,7 +305,7 @@ int main(int argc, const char **argv) {
                     auto tag_exclude = Parser::ParserStruct::parse_hek_tag_file(tag_exclude_data.data(), tag_exclude_data.size(), true);
 
                     // Do a functional comparison
-                    if(!tag_archive->compare(tag_exclude.get(), true, true)) {
+                    if(!tag_archive->compare(tag_exclude.get(), true, true, archive_options.verbose)) {
                         continue;
                     }
                 }
@@ -309,7 +314,10 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 
-                std::printf("Omitting %s\n", archive_list[t].second.c_str());
+                if(archive_options.verbose) {
+                    std::printf("Omitting %s\n", archive_list[t].second.c_str());
+                }
+                
                 archive_list.erase(archive_list.begin() + t);
                 t--;
             }

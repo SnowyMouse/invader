@@ -4,7 +4,9 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
-- invader: Added support for the upcoming MCC: CEA map format
+- invader: Added support for the MCC: CEA map format
+- invader-archive: Added `--verbose` which will print whether or not a tag was
+  omitted as well as doing verbose comparisons.
 - invader-bitmap: Added `auto` to `--format` which will default to the smallest,
   lossless output (i.e. monochrome if input is monochrome, 16-bit if it fits in
   a 16-bit color space, 32-bit otherwise)
@@ -24,6 +26,7 @@ This is used for recording Invader's changes. This changelog is based on
   order as stock and, if not, whether it may (probably) be network compatible
 
 ### Changed
+- invader: Definitions were updated to support MCC CEA season 8
 - invader-archive: Tags that are excluded are now printed
 - invader-bitmap: Changed the default format to `auto`
 - invader-bitmap: If usage is set to alpha blend, bitmaps are now cropped if an
