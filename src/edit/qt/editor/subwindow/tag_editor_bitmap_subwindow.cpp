@@ -138,7 +138,7 @@ namespace Invader::EditQt {
             bitmaps->addItem(QString::number(i), false);
         }
         if(!bitmap_data->compressed_color_plate_data.empty()) {
-            bitmaps->addItem("Color plate", true);
+            bitmaps->addItem("Source (color plate)", true);
         }
             
         // Scaling stuff
