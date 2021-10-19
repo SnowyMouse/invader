@@ -6,6 +6,7 @@
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/hek/header.hpp>
+#include "../crc/crc32.h"
 #include <string>
 
 #ifdef __linux__
@@ -18,6 +19,7 @@
 #endif
 
 enum ActionType {
+    ACTION_TYPE_CHECKSUM,
     ACTION_TYPE_GET,
     ACTION_TYPE_SET,
     ACTION_TYPE_COUNT,
@@ -736,6 +738,8 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file.");
     options.emplace_back("get", 'G', 1, "Get the value with the given key.", "<key>");
+    options.emplace_back("verify-checksum", 'V', 0, "Verify that the checksum in the header is correct and print the result.");
+    options.emplace_back("checksum", 'H', 0, "Output the calculated checksum of the tag.");
     options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
     options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
     options.emplace_back("new", 'N', 0, "Create a new tag");
@@ -760,6 +764,8 @@ int main(int argc, char * const *argv) {
         std::vector<Actions> actions;
         bool new_tag = false;
         bool check_read_only = true;
+        bool verify_checksum = false;
+        bool view_checksum = false;
         std::optional<std::variant<std::string, std::filesystem::path>> overwrite_path;
     } edit_options;
 
@@ -774,11 +780,17 @@ int main(int argc, char * const *argv) {
             case 'P':
                 edit_options.use_filesystem_path = true;
                 break;
+            case 'C':
+                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {}, 0, 0 });
+                break;
             case 'G':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_GET, arguments[0], {}, 0, 0 });
                 break;
-            case 'C':
-                edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {}, 0, 0 });
+            case 'V':
+                edit_options.verify_checksum = true;
+                break;
+            case 'H':
+                edit_options.view_checksum = true;
                 break;
             case 'L':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_LIST_ALL_VALUES, {}, {}, 0, 0 });
@@ -855,6 +867,18 @@ int main(int argc, char * const *argv) {
             eprintf_error("Failed to create a new tag %s. Make sure the extension is correct.", file_path.string().c_str());
             return EXIT_FAILURE;
         }
+        
+        // If we're verifying the checksum or viewing the checksum of a new tag, well... okay I guess
+        if(edit_options.verify_checksum || edit_options.view_checksum) {
+            if(edit_options.view_checksum) {
+                std::printf("0x%08X\n", reinterpret_cast<Invader::HEK::TagFileHeader *>(tag_struct->generate_hek_tag_data().data())->crc32.read());
+            }
+            
+            // Can't really verify a tag that never existed
+            if(edit_options.verify_checksum) {
+                std::printf("matched\n");
+            }
+        }
     }
     else {
         auto value = Invader::File::open_file(file_path);
@@ -869,6 +893,27 @@ int main(int argc, char * const *argv) {
         catch (std::exception &e) {
             eprintf_error("Failed to parse %s: %s", file_path.string().c_str(), e.what());
             return EXIT_FAILURE;
+        }
+        
+        // Verify checksum if desired
+        if(edit_options.verify_checksum || edit_options.view_checksum) {
+            auto *header = reinterpret_cast<Invader::HEK::TagFileHeader *>(value->data());
+            std::uint32_t checksum = crc32(0, value->data() + sizeof(*header), value->size() - sizeof(*header));
+            
+            // Print the checksum
+            if(edit_options.view_checksum) {
+                std::printf("0x%08X\n", checksum);
+            }
+            
+            // Verify it's correct
+            if(edit_options.verify_checksum) {
+                if(header->crc32 == ~crc32(0, value->data() + sizeof(*header), value->size() - sizeof(*header))) {
+                    std::printf("matched\n");
+                }
+                else {
+                    std::printf("mismatched\n");
+                }
+            }
         }
         
         tag_class = reinterpret_cast<const Invader::HEK::TagFileHeader *>(value->data())->tag_fourcc;

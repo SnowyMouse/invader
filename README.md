@@ -468,6 +468,7 @@ Options:
   -E --erase <key>             Delete the selected struct(s).
   -G --get <key>               Get the value with the given key.
   -h --help                    Show this list of options.
+  -H --checksum                Output the calculated checksum of the tag.
   -i --info                    Show license and credits.
   -I --insert <key> <#> <pos>  Add # structs to the given index or "end" if the
                                end of the array.
@@ -477,6 +478,8 @@ Options:
   -M --move <key> <pos>        Swap the selected structs with the structs at
                                the given index or "end" if the end of the
                                array. The regions must not intersect.
+  -n --no-safeguards           Allow all tag data to be edited (proceed at your
+                               own risk)
   -N --new                     Create a new tag
   -o --output <file>           Output the tag to a different path rather than
                                overwriting it.
@@ -487,6 +490,8 @@ Options:
   -S --set <key> <val>         Set the value at the given key to the given
                                value.
   -t --tags <dir>              Use the specified tags directory.
+  -V --verify-checksum         Verify that the checksum in the header is
+                               correct and print the result.
 ```
 
 ### invader-edit-qt

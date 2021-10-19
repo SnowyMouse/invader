@@ -16,6 +16,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Added `--anniversary-mode` which specifies if anniversary
   assets should be used
 - invader-edit: Added `--no-safeguards` which allows writing read-only data
+- invader-edit: Added `--verify-checksum` which prints "matched" if the checksum
+  in the header is correct or "mismatched" if not
+- invader-edit: Added `--checksum` which calculates the checksum of the tag and
+  prints it
 - invader-info: Added `tag_order_match` which checks if a map has the same tag
   order as stock and, if not, whether it may (probably) be network compatible
 
