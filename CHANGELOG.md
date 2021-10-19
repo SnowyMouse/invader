@@ -72,6 +72,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed a crashing issue for fast loading mode if a directory
   was present on one tags directory but not the other (if multiple tags
   directories are used)
+- invader-edit-qt: Fixed switching between monochrome and RGB bitmaps in the
+  bitmap previewer breaking the colors menu
 - invader-model: Fixed "unnamed" not being renamed to "__unnamed". This probably
   did not do anything useful, but tool.exe does this, so we have to as well.
 - invader-recover: Fixed alpha channel not being tagged correctly as an extra

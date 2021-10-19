@@ -70,13 +70,12 @@ namespace Invader::EditQt {
     
     void TagEditorBitmapSubwindow::generate_colors_array(bool monochrome) {
         // Is this populated at all?
-        if(this->colors->count() == 0) {
-            this->monochrome = monochrome;
-        }
-        // Do we even need to generate a new array?
-        else if(this->monochrome == monochrome) {
+        if(this->colors->count() != 0 && this->monochrome == monochrome) {
             return;
         }
+        
+        // Store this
+        this->monochrome = monochrome;
         
         // Generate it!
         colors->blockSignals(true);
