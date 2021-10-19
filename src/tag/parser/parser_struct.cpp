@@ -921,7 +921,7 @@ namespace Invader::Parser {
                         if(precision && vt.get_number_format() == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) { // if precision, is it different by too much?
                             auto value_count = vt_v.size();
                             for(std::size_t i = 0; i < value_count; i++) {
-                                if(std::fabs(std::get<double>(vt_v[i]) - std::get<double>(vt_v[i])) > 0.000001) {
+                                if(std::fabs(std::get<double>(vo_v[i]) - std::get<double>(vt_v[i])) > 0.000001) {
                                     complain();
                                     break;
                                 }

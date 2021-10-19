@@ -57,9 +57,11 @@ This is used for recording Invader's changes. This changelog is based on
 - invader: Fixed invalid enums not being properly detected if they're valid for
   HEK but marked as invalid for the game
 - invader: Fixed iterating through directories with trailing slashes
+- invader-archive: Fixed ignoring floating point numbers for mismatched values
 - invader-archive: Fixed creating empty archives if all tags were excluded
 - invader-bitmap: Fixed first bitmap index not being a valid bitmap
 - invader-bitmap: Fixed an infinite loop with `-P`
+- invader-compare: Fixed precision checking ignoring floating point numbers
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
   being defaulted to -1. It is no longer allowed to set these to -1, either, as
   they are known to cause unexpected crashes.
