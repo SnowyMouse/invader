@@ -1259,7 +1259,7 @@ namespace Invader {
             // Get the pointers
             for(auto &dependency : s.dependencies) {
                 auto tag_index = dependency.tag_index;
-                std::uint32_t full_id = static_cast<std::uint32_t>(tag_index + 0xE741) << 16 | static_cast<std::uint16_t>(tag_index);
+                std::uint32_t full_id = static_cast<std::uint32_t>(tag_index + 0xE174) << 16 | static_cast<std::uint16_t>(tag_index);
                 HEK::TagID new_tag_id = { full_id };
 
                 if(dependency.tag_id_only) {
