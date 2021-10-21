@@ -812,13 +812,27 @@ namespace Invader {
         // Remove duplicate slashes
         auto fixed_path = Invader::File::remove_duplicate_slashes(tag_path);
         tag_path = fixed_path.c_str();
+        std::optional<std::string> renamed_path;
+        
+        // If it's a scenario tag, rename it
+        if(tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO) {
+            std::string full_scenario_path = tag_path;
+            const char *first_char = full_scenario_path.c_str();
+            const char *last_slash = first_char;
+            for(const char *i = first_char; *i; i++) {
+                if(*i == '\\') {
+                    last_slash = i + 1;
+                }
+            }
+            renamed_path = std::string(first_char, last_slash - first_char) + this->scenario_name.string;
+        }
 
         // Search for the tag
         std::size_t return_value = this->tags.size();
         bool found = false;
         for(std::size_t i = 0; i < return_value; i++) {
             auto &tag = this->tags[i];
-            if((tag.tag_fourcc == tag_fourcc || tag.alias == tag_fourcc) && tag.path == tag_path) {
+            if((tag.tag_fourcc == tag_fourcc || tag.alias == tag_fourcc) && (tag.path == tag_path || renamed_path == tag.path)) {
                 if(tag.base_struct.has_value()) {
                     return i;
                 }
@@ -893,6 +907,11 @@ namespace Invader {
             tag.tag_fourcc = tag_fourcc;
             this->get_tag_paths().emplace_back(tag_path, tag_fourcc);
         }
+        
+        // Rename the path
+        if(renamed_path.has_value()) {
+            this->tags[return_value].path = *renamed_path;
+        }
 
         // And we're done! Maybe?
         if(this->disable_recursion && return_value > 0) {
@@ -956,15 +975,6 @@ namespace Invader {
                                    std::strcmp(this->scenario_name.string, "wizard") == 0;
 
         this->scenario_index = this->compile_tag_recursively(this->scenario, TagFourCC::TAG_FOURCC_SCENARIO);
-        std::string full_scenario_path = this->tags[this->scenario_index].path;
-        const char *first_char = full_scenario_path.c_str();
-        const char *last_slash = first_char;
-        for(const char *i = first_char; *i; i++) {
-            if(*i == '\\') {
-                last_slash = i + 1;
-            }
-        }
-        this->tags[this->scenario_index].path = std::string(first_char, last_slash - first_char) + this->scenario_name.string;
         
         const auto &required_tags = this->parameters->details.build_required_tags;
         auto &workload = *this;
