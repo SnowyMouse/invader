@@ -2,10 +2,10 @@
     {
         "name": "SoundFormat",
         "options": [
-            "16-bit PCM",
-            "Xbox ADPCM",
-            "IMA ADPCM",
-            "Ogg Vorbis"
+            "16-bit pcm",
+            "xbox adpcm",
+            "ima adpcm",
+            "ogg vorbis"
         ],
         "retcon_note": "The fields were originally called none, xbox adpcm, ima adpcm, and ogg, and the field was Compression, not Format.",
         "type": "enum"
