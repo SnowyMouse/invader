@@ -56,10 +56,8 @@ namespace Invader::Recover {
         auto *bitmap = dynamic_cast<const Parser::Bitmap *>(&tag);
         auto file_path = data / (path + ".tif");
 
-        const std::vector<std::byte> *input;
         std::size_t width, height;
         if(bitmap) {
-            input = &bitmap->compressed_color_plate_data;
             width = bitmap->color_plate_width;
             height = bitmap->color_plate_height;
         }
