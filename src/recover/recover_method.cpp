@@ -186,6 +186,7 @@ namespace Invader::Recover {
 
                     // Is it valid?
                     if(geometry_index >= model.geometries.size()) {
+                        eprintf_error("Geometry index for permutation #%zu of region #%zu is out of bounds (%zu >= %zu)", &p - r.permutations.data(), &r - model.regions.data(), geometry_index, model.geometries.size());
                         throw Invader::InvalidTagDataException();
                     }
 
