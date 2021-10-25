@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/sound/sound_reader.hpp>
 
 namespace Invader::Parser {
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
@@ -23,28 +24,31 @@ namespace Invader::Parser {
             }
         }
 
-        // Warn about this
-        bool buffer_size_required = (this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM || this->format == HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS);
-        if(buffer_size_required) {
-            bool stock_halo_wont_play_it = false;
-            if(this->buffer_size == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has 0 decompression buffer.", permutation_index);
-                stock_halo_wont_play_it = true;
+        // Check sound buffer size is what it should be
+        bool incorrect_buffer = false;
+
+        if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+            if(this->buffer_size != this->samples.size()) {
+                incorrect_buffer = true;
             }
-            // Make sure the value is set
-            else if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->buffer_size != this->samples.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", permutation_index);
-                stock_halo_wont_play_it = true;
-            }
-            if(stock_halo_wont_play_it) {
-                eprintf_warn("Stock Halo may not play it.");
+        }
+        else if(this->format ==  HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
+            auto decoded = Invader::SoundReader::sound_from_ogg(this->samples.data(), this->samples.size());
+            auto decoded_size_16_bit = decoded.pcm.size() / (decoded.bits_per_sample / 8) * 2;
+            if(this->buffer_size != decoded_size_16_bit) {
+                incorrect_buffer = true;
             }
         }
         else {
             this->buffer_size = 0;
         }
-        
-        // Warn based on format
+
+        if(incorrect_buffer) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an incorrect sound buffer size.", permutation_index);
+            throw InvalidTagDataException();
+        }
+
+        // Error based on format
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
         
         switch(this->format) {
@@ -58,7 +62,7 @@ namespace Invader::Parser {
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                 if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the original target engine", permutation_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the original target engine", permutation_index);
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
@@ -275,6 +279,7 @@ namespace Invader::Parser {
         }
     }
 
+    // Unflip the endianness of a 16-bit PCM stream
     void SoundPermutation::post_cache_deformat() {
         if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
