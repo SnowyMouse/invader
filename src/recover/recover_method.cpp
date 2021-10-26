@@ -209,6 +209,7 @@ namespace Invader::Recover {
                             marker.position = m.translation;
                             marker.rotation = m.rotation;
                             marker.region = new_region_index;
+                            marker.radius = 1.0F;
                         }
                     }
 
