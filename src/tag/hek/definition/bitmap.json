@@ -321,7 +321,7 @@
             {
                 "name": "sprite usage",
                 "first": "sprite usage",
-                "description": "Sprite usage affects how sprite sheets are generated if making a sprites bitmap by controlling the background of the sprite sheet.\n\n\"blend add subtract max\" uses a transparent black background and replaces pixels with the sprites\n\n\"multiply max\" uses a 50% gray and 50% alpha background and replaces pixels with the sprites\n\n\"double multiply\" uses a white background and alpha blends the sprites over white"
+                "description": "Sprite usage affects how sprite sheets are generated if making a sprites bitmap by controlling the background of the sprite sheet.\n\n\"blend add subtract max\" uses a transparent black background and replaces pixels with the sprites\n\n\"multiply min\" uses a white background and alpha blends the sprites over white\n\n\"double multiply\" uses a 50% gray and 50% alpha background and replaces pixels with the sprites"
             },
             {
                 "name": "sprite budget",
