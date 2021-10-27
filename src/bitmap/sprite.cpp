@@ -105,7 +105,7 @@ namespace Invader {
                     }
                     
                     if(sprite_fits_at_location(sprite, *x, *y, ordered_x, max_length)) {
-                        auto &new_sprite = sprites.emplace_back(sprite);
+                        auto &new_sprite = this->sprites.emplace_back(sprite);
                         new_sprite.x = *x;
                         new_sprite.y = *y;
                         return true;
@@ -189,7 +189,6 @@ namespace Invader {
             // Go through each sprite
             for(auto &sprite : this->sprites) {
                 auto &pixel_data = bitmap.bitmaps[bitmap.sequences[sprite.sequence].sprites[sprite.sprite].original_bitmap_index].pixels;
-                
                 for(std::size_t y = 0; y < sprite.height; y++) {
                     for(std::size_t x = 0; x < sprite.width; x++) {
                         auto &pixel_to_blend = baked_sheet[x + sprite.x + (sprite.y + y) * length];
@@ -210,10 +209,14 @@ namespace Invader {
         // Add by sequence
         if(sprites_in_sequences_must_coexist) {
             auto add_all_sprites_of_sequence_to_sheet = [&sprites_to_add, &ordered_x](std::size_t sequence, auto &sheet, std::size_t max_length) -> bool {
+                // Hold this in case it fails
+                auto sprite_count_before = sheet.sprites.size();
+                
                 for(auto &sprite : sprites_to_add) {
                     // If the sprite is in the sequence, let's do the thing
                     if(sprite.sequence == sequence) {
                         if(!sheet.place_sprite(sprite, ordered_x, max_length)) { // if we fail to add it, get destroyed
+                            sheet.sprites.resize(sprite_count_before, Invader::SpriteReference(0,0,0,0,0,0,0)); // roll back the sprite array back to what it was before
                             return false;
                         }
                     }
