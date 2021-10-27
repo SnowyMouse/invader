@@ -202,7 +202,7 @@ namespace Invader {
         }
     };
     
-    static std::optional<std::vector<SpriteSheet>> generate_sheets_with_direction(const std::vector<SpriteReference> &sprites_to_add, bool ordered_x, bool sprites_in_sequences_must_coexist, bool bypass_limits_for_sequences, ::size_t max_sheets, std::size_t max_length, std::size_t sequence_count) {
+    static std::optional<std::vector<SpriteSheet>> generate_sheets_with_direction(const std::vector<SpriteReference> &sprites_to_add, bool ordered_x, bool sprites_in_sequences_must_coexist, bool bypass_limits_for_sequences, std::size_t max_sheets, std::size_t max_length, std::size_t sequence_count) {
         std::vector<SpriteSheet> sheets;
         sheets.reserve(max_sheets); // o.o
         
@@ -244,7 +244,7 @@ namespace Invader {
                     
                     auto &sheet = sheets.emplace_back();
                     
-                    if(bypass_limits_for_sequences) {
+                    if(!bypass_limits_for_sequences) {
                         if(!add_all_sprites_of_sequence_to_sheet(seq, sheet, max_length)) {
                             return std::nullopt;
                         }
