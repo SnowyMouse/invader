@@ -408,8 +408,8 @@ namespace Invader {
             std::size_t length_generate = max_sheet_length;
             std::optional<std::vector<SpriteSheet>> sheets_vertical, sheets_horizontal;
             
-            // If we have no limits for sequences or we have just one sheet, we can brute force then
-            if((variable_sized_sheets == 1 && max_sheet_count == 1) || bypass_limits_for_sequences) {
+            // If we have virtually no limits for sequences, we can brute force then
+            if(max_sheet_count >= 32767 || bypass_limits_for_sequences) {
                 while(true) {
                     auto sheets_vertical_maybe = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
                     auto sheets_horizontal_maybe = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
