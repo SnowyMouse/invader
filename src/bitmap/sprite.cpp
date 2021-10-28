@@ -438,8 +438,34 @@ namespace Invader {
                 }
             }
             else {
-                sheets_vertical = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
-                sheets_horizontal = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
+                std::size_t pixel_count = variable_sized_sheets * length_generate * length_generate; // this is the remaining number of pixels we have available
+                bool had_to_increase_sheet_count = false;
+                
+                while(true) {
+                    sheets_vertical = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
+                    sheets_horizontal = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
+                    
+                    // If we failed, try increasing the number of sheets
+                    if(!sheets_vertical && !sheets_horizontal) {
+                        length_generate /= 2; // divide the length by 2 and recalculate the number of sheets we're allowed
+                        
+                        if(length_generate > 1) {
+                            variable_sized_sheets = pixel_count / (length_generate * length_generate); // recalculate the number of sheets we can use
+                            had_to_increase_sheet_count = true;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                }
+                
+                if(had_to_increase_sheet_count) {
+                    eprintf_warn("The number of sheets was increased from %u to %zu", max_sheet_count, max_sheet_count - sheets_single_sprite.size() + variable_sized_sheets);
+                    eprintf_warn("This is still within the budget pixel count but is more sheets than requested");
+                }
             }
             
             // Find the most efficient set of sprite sheets... if we have both. Otherwise just take whichever one was successful. Or return nothing if none were.
