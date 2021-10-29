@@ -15,6 +15,11 @@ namespace Invader {
         std::optional<float> sharpen,
         std::optional<float> blur) {
         
+        if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+            eprintf_error("Sprite generation is temporarily unavailable (sorry!)");
+            std::terminate();
+        }
+        
         BitmapProcessor processor;
         processor.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
         
