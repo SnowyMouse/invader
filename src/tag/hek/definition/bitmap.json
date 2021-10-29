@@ -197,7 +197,9 @@
             },
             {
                 "name": "bitmap count",
-                "type": "uint16"
+                "type": "uint16",
+                "maximum": 32767,
+                "retcon_note": "This value was originally signed"
             },
             {
                 "type": "pad",
@@ -370,11 +372,14 @@
             },
             {
                 "name": "sprite budget count",
-                "type": "uint16"
+                "type": "uint16",
+                "maximum": 32767,
+                "retcon_note": "This value was originally signed"
             },
             {
                 "name": "color plate width",
                 "type": "uint16",
+                "retcon_note": "This value was originally signed",
                 "unit": "pixels",
                 "non_cached": true,
                 "read_only": true,
@@ -383,6 +388,7 @@
             {
                 "name": "color plate height",
                 "type": "uint16",
+                "retcon_note": "This value was originally signed",
                 "unit": "pixels",
                 "non_cached": true,
                 "read_only": true,
@@ -416,7 +422,9 @@
             },
             {
                 "name": "mipmap count",
-                "type": "uint16"
+                "type": "uint16",
+                "maximum": 32767,
+                "retcon_note": "This value was originally signed"
             },
             {
                 "name": "sprite usage",
@@ -425,7 +433,8 @@
             {
                 "name": "sprite spacing",
                 "type": "uint16",
-                "read_only": true
+                "maximum": 32767,
+                "retcon_note": "This value was originally signed"
             },
             {
                 "type": "pad",
