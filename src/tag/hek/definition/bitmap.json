@@ -198,7 +198,6 @@
             {
                 "name": "bitmap count",
                 "type": "uint16",
-                "maximum": 32767,
                 "retcon_note": "This value was originally signed"
             },
             {
@@ -373,7 +372,6 @@
             {
                 "name": "sprite budget count",
                 "type": "uint16",
-                "maximum": 32767,
                 "retcon_note": "This value was originally signed"
             },
             {
@@ -423,7 +421,6 @@
             {
                 "name": "mipmap count",
                 "type": "uint16",
-                "maximum": 32767,
                 "retcon_note": "This value was originally signed"
             },
             {
@@ -433,7 +430,6 @@
             {
                 "name": "sprite spacing",
                 "type": "uint16",
-                "maximum": 32767,
                 "retcon_note": "This value was originally signed"
             },
             {
