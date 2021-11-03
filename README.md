@@ -195,11 +195,12 @@ Usage: invader-bitmap [options] <bitmap-tag>
 Create or modify a bitmap tag.
 
 Options:
-  -B --budget <length>         Set max length of sprite sheet. Can be 32, 64,
-                               128, 256, 512, or 1024. Default (new tag): 32
-  -C --budget-count <count>    Set maximum number of sprite sheets. Setting
-                               this to 0 disables budgeting. Default (new tag):
-                               0
+  -B --budget <length>         Set the maximum length of a sprite sheet. Can be
+                               32, 64, 128, 256, 512, or 1024. Default (new
+                               tag): 32
+  -C --budget-count <count>    Multiply the maximum length squared to set the
+                               maximum number of pixels. Setting this to 0
+                               disables budgeting. Default (new tag): 0
   -d --data <dir>              Use the specified data directory.
   -D --dithering <channels>    Apply dithering to 16-bit or p8 bitmaps. This
                                does not save in .bitmap tags. Can be: a, rgb,

@@ -449,8 +449,8 @@ int main(int argc, char *argv[]) {
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
     options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. This does not save in .bitmap tags. Can be: linear, nearest_alpha, nearest. Default (new tag): linear", "<type>");
     options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
-    options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, 512, or 1024. Default (new tag): 32", "<length>");
-    options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
+    options.emplace_back("budget", 'B', 1, "Set the maximum length of a sprite sheet. Can be 32, 64, 128, 256, 512, or 1024. Default (new tag): 32", "<length>");
+    options.emplace_back("budget-count", 'C', 1, "Multiply the maximum length squared to set the maximum number of pixels. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
     options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha_blend, default, height_map, detail_map, light_map, vector_map. Default: default", "<usage>");
