@@ -11,6 +11,7 @@ namespace Invader {
         std::uint32_t sprite_budget;
         std::uint32_t sprite_budget_count;
         std::uint32_t sprite_spacing;
+        bool force_square_sprite_sheets;
     };
     
     class BitmapProcessor {

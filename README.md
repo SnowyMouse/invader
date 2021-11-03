@@ -224,6 +224,8 @@ Options:
   -s --mipmap-scale <type>     Mipmap scale type. This does not save in .bitmap
                                tags. Can be: linear, nearest_alpha, nearest.
                                Default (new tag): linear
+  -S --square-sheets           Force square sprite sheets (works around
+                               particles being incorrectly stretched).
   -t --tags <dir>              Use the specified tags directory.
   -T --type <type>             Set the type of bitmap. Can be: 2d_textures,
                                3d_textures, cube_maps, interface_bitmaps, or

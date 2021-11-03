@@ -75,6 +75,7 @@ struct BitmapOptions {
     std::optional<std::uint32_t> sprite_budget;
     std::optional<std::uint32_t> sprite_budget_count;
     std::optional<std::uint16_t> sprite_spacing;
+    bool force_square_sprite_sheets = false;
 
     // Dithering?
     std::optional<bool> dither_alpha, dither_color, dithering;
@@ -278,6 +279,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         p.sprite_budget_count = bitmap_options.sprite_budget_count.value();
         p.sprite_usage = bitmap_options.sprite_usage.value();
         p.sprite_spacing = bitmap_options.sprite_spacing.value();
+        p.force_square_sprite_sheets = bitmap_options.force_square_sprite_sheets;
     }
 
     // Do it!
@@ -457,6 +459,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
     options.emplace_back("budget", 'B', 1, "Set the maximum length of a sprite sheet. Can be 32, 64, 128, 256, 512, or 1024. Default (new tag): 32", "<length>");
     options.emplace_back("budget-count", 'C', 1, "Multiply the maximum length squared to set the maximum number of pixels. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
+    options.emplace_back("square-sheets", 'S', 0, "Force square sprite sheets (works around particles being incorrectly stretched).");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
     options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha_blend, default, height_map, detail_map, light_map, vector_map. Default: default", "<usage>");
@@ -617,6 +620,10 @@ int main(int argc, char *argv[]) {
                         std::exit(EXIT_FAILURE);
                 }
 
+                break;
+                
+            case 'S':
+                bitmap_options.force_square_sprite_sheets = true;
                 break;
 
             case 'P':

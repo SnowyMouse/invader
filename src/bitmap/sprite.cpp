@@ -467,7 +467,7 @@ namespace Invader {
         
         // Optimize sheets. Then calculate total pixel usage
         for(auto &i : sheets) {
-            i.optimize(true);
+            i.optimize(!parameters.force_square_sprite_sheets);
             total_pixel_usage += i.max_length * i.max_height.value_or(i.max_length);
         }
         
@@ -494,7 +494,6 @@ namespace Invader {
             // Store this information
             for(auto &j : i.sprites) {
                 auto &sprite = generated_bitmap.sequences[j.sequence].sprites[j.sprite];
-                
                 sprite.bitmap_index = new_bitmap_index;
                 sprite.left = j.x;
                 sprite.right = j.x + j.effective_width();
