@@ -74,6 +74,7 @@ struct BitmapOptions {
     std::optional<BitmapSpriteUsage> sprite_usage;
     std::optional<std::uint32_t> sprite_budget;
     std::optional<std::uint32_t> sprite_budget_count;
+    std::optional<std::uint16_t> sprite_spacing;
 
     // Dithering?
     std::optional<bool> dither_alpha, dither_color, dithering;
@@ -151,6 +152,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(!bitmap_options.blur.has_value() && bitmap_tag_data.blur_filter_size > 0.0F) {
             bitmap_options.blur = bitmap_tag_data.blur_filter_size;
         }
+        if(!bitmap_options.sprite_spacing.has_value()) {
+            bitmap_options.sprite_spacing = bitmap_tag_data.sprite_spacing;
+        }
         
         // Clear existing data
         bitmap_tag_data.bitmap_data.clear();
@@ -183,6 +187,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     DEFAULT_VALUE(bitmap_options.dithering,false);
     DEFAULT_VALUE(bitmap_options.dither_alpha,false);
     DEFAULT_VALUE(bitmap_options.dither_color,false);
+    DEFAULT_VALUE(bitmap_options.sprite_spacing,0);
 
     #undef DEFAULT_VALUE
 
@@ -272,6 +277,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         p.sprite_budget = bitmap_options.sprite_budget.value();
         p.sprite_budget_count = bitmap_options.sprite_budget_count.value();
         p.sprite_usage = bitmap_options.sprite_usage.value();
+        p.sprite_spacing = bitmap_options.sprite_spacing.value();
     }
 
     // Do it!
@@ -395,7 +401,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     }
 
     // Set sprite stuff
-    bitmap_tag_data.sprite_spacing = sprite_parameters.value_or(BitmapProcessorSpriteParameters{}).sprite_spacing;
+    bitmap_tag_data.sprite_spacing = bitmap_options.sprite_spacing.value();
     bitmap_tag_data.sprite_budget_count = bitmap_options.sprite_budget_count.value();
     bitmap_tag_data.sprite_usage = bitmap_options.sprite_usage.value();
     auto &sprite_budget_value = bitmap_options.sprite_budget.value();

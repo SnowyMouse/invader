@@ -427,9 +427,10 @@ namespace Invader {
         for(auto &i : generated_bitmap.sequences) {
             for(std::size_t k = i.first_bitmap; k < i.first_bitmap + i.bitmap_count; k++) {
                 auto &sprite = i.sprites.emplace_back();
+                auto &bitmap = generated_bitmap.bitmaps[k];
+                
                 sprite.original_bitmap_index = k;
                 sprite.bitmap_index = k;
-                auto &bitmap = generated_bitmap.bitmaps[k];
                 sprite.registration_point_x = bitmap.registration_point_x;
                 sprite.registration_point_y = bitmap.registration_point_y;
             }
@@ -474,6 +475,8 @@ namespace Invader {
                 sprite.right = j.x + j.effective_width();
                 sprite.top = j.y;
                 sprite.bottom = j.y + j.effective_height();
+                sprite.registration_point_x += i.spacing;
+                sprite.registration_point_y += i.spacing;
             }
         }
         
