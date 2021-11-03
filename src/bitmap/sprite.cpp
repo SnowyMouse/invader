@@ -19,6 +19,9 @@ namespace Invader {
         // Bitmap data
         const GeneratedBitmapData *bitmap_data;
         
+        // The sprite sheet is locked (no more sprites can be added)
+        bool locked = false;
+        
         struct Sprite {
             const GeneratedBitmapDataBitmap *bitmap_data;
             const SpriteSheet *sheet;
@@ -178,9 +181,14 @@ namespace Invader {
         }
         
         bool add_sprite_to_sheet(std::size_t sprite, std::size_t sequence) {
-            auto s = best_place_to_add_sprite(sprite, sequence);
+            // If locked, don't add anymore sprites
+            if(this->locked) {
+                return false;
+            }
+            
+            auto s = this->best_place_to_add_sprite(sprite, sequence);
             if(s.has_value()) {
-                sprites.emplace_back(*s);
+                this->sprites.emplace_back(*s);
                 return true;
             }
             return false;
@@ -189,7 +197,21 @@ namespace Invader {
         bool add_sequence_to_sheet(const std::vector<std::size_t> &sprite_indices, std::size_t sequence) {
             auto sprite_data_backup = this->sprites;
             for(auto sprite : sprite_indices) {
-                if(!add_sprite_to_sheet(sprite, sequence)) {
+                if(!this->add_sprite_to_sheet(sprite, sequence)) {
+                    // Hold on. Are we adding only 1 sprite and we have no sprites currently AND that sprite would fit if we disabled the padding?
+                    if(sprite_indices.size() == 1 && this->sprites.size() == 0) {
+                        auto old_spacing = this->spacing;
+                        this->spacing = 0;
+                        
+                        // If so, add it but note that no more sprites are accepted now
+                        if(this->add_sprite_to_sheet(sprite, sequence)) {
+                            this->locked = true;
+                            return true;
+                        }
+                        
+                        this->spacing = old_spacing;
+                    }
+                    
                     this->sprites = sprite_data_backup;
                     return false;
                 }
@@ -219,7 +241,7 @@ namespace Invader {
             }
             
             // If we have more than 1 sprite, brute force a smaller sprite sheet
-            if(this->sprites.size() > 1) {
+            if(this->sprites.size() > 1 && !this->locked) {
                 while(this->max_length > 1) {
                     // Copy the old values
                     auto old_max_length = this->max_length;
@@ -270,6 +292,7 @@ namespace Invader {
             this->max_length = other.max_length;
             this->max_height = other.max_height;
             this->bitmap_data = other.bitmap_data;
+            this->locked = other.locked;
             for(auto &s : other.sprites) {
                 this->sprites.emplace_back(s).sheet = this;
             }
@@ -344,15 +367,17 @@ namespace Invader {
             // Add it one at a time?
             for(auto sprite : sorted) {
                 bool sprite_placed = false;
+                auto sprite_vec = std::vector<std::size_t> { sprite };
+                
                 for(auto &ss : sprite_sheets) {
-                    if(ss.add_sprite_to_sheet(sprite, si)) {
+                    if(ss.add_sequence_to_sheet(sprite_vec, si)) {
                         sprite_placed = true;
                         break;
                     }
                 }
                 
                 // Try adding it in a new sprite
-                if(!sprite_placed && sprite_sheets.emplace_back(spacing, bitmap, max_length).add_sprite_to_sheet(sprite, si)) {
+                if(!sprite_placed && sprite_sheets.emplace_back(spacing, bitmap, max_length).add_sequence_to_sheet(sprite_vec, si)) {
                     continue;
                 }
                 
