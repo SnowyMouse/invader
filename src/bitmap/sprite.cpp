@@ -1,160 +1,115 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <cassert>
+
 #include <invader/bitmap/bitmap_processor.hpp>
 #include <invader/hek/data_type.hpp>
 
 namespace Invader {
-    struct SpriteReference {
-        std::size_t x, y, width, height;
-        std::size_t sequence, sprite;
-        std::size_t half_spacing;
-        
-        SpriteReference(std::size_t x, std::size_t y, std::size_t width, std::size_t height, std::size_t half_spacing, std::size_t sequence, std::size_t sprite) : x(x), y(y), width(width), height(height), sequence(sequence), sprite(sprite), half_spacing(half_spacing) {}
-        
-        SpriteReference(SpriteReference &&) = default;
-        SpriteReference(const SpriteReference &) = default;
-        SpriteReference &operator =(const SpriteReference &) = default;
-        
-        bool inside_sprite(std::size_t x, std::size_t y) {
-            std::size_t left = this->x - this->half_spacing;
-            std::size_t top = this->y - this->half_spacing;
-            
-            std::size_t right = this->x + this->width + this->half_spacing;
-            std::size_t bottom = this->y + this->height + this->half_spacing;
-            
-            return x >= left && x <= right && y >= top && y <= bottom;
-        }
-    };
-
     struct SpriteSheet {
-        std::vector<SpriteReference> sprites;
+        // padding (only meaningful if >1 sprite in this sheet)
+        unsigned int spacing;
         
-        bool sprite_fits_at_location(const SpriteReference &sprite, std::size_t &x, std::size_t &y, bool ordered_x, std::size_t max_length) {
-            // Is the sprite too far to the top or left?
-            if(x < sprite.half_spacing) {
-                if(!ordered_x) {
-                    x = sprite.half_spacing;
-                }
-                return false;
+        // max length
+        unsigned int max_length;
+        
+        // max height? (note that non-square sprite sheets will break particles)
+        std::optional<decltype(max_length)> max_height;
+        
+        // Bitmap data
+        const GeneratedBitmapData *bitmap_data;
+        
+        struct Sprite {
+            const GeneratedBitmapDataBitmap *bitmap_data;
+            const SpriteSheet *sheet;
+            std::size_t sprite;
+            std::size_t sequence;
+            unsigned int x;
+            unsigned int y;
+            
+            Sprite(const GeneratedBitmapDataBitmap &bitmap_data, const SpriteSheet &sheet, std::size_t sprite, std::size_t sequence, unsigned int x = 0, unsigned int y = 0) noexcept :
+                bitmap_data(&bitmap_data),
+                sheet(&sheet),
+                sprite(sprite),
+                sequence(sequence),
+                x(x),
+                y(y) {}
+            Sprite(const Sprite &) = default;
+            Sprite &operator =(const Sprite &a) = default;
+            
+            bool overlaps(const Sprite &other) const noexcept {
+                auto overlap = [](const Sprite &a, const Sprite &b) -> bool {
+                    // Get edges
+                    auto a_end_x = a.x + a.effective_width();
+                    auto a_end_y = a.y + a.effective_height();
+                    auto b_end_x = b.x + b.effective_width();
+                    auto b_end_y = b.y + b.effective_height();
+                    
+                    // Left and top
+                    auto l_border_inside = a.x >= b.x && a.x < b_end_x;
+                    auto t_border_inside = a.y >= b.y && a.y < b_end_y;
+                    
+                    // Right and bottom
+                    auto r_border_inside = a_end_x >= b.x && a_end_x < b_end_x;
+                    auto b_border_inside = a_end_y >= b.y && a_end_y < b_end_y;
+                    
+                    // If both a horizontal and vertical border are inside, then it's overlapping
+                    return (l_border_inside || r_border_inside) && (t_border_inside || b_border_inside);
+                };
+                
+                return overlap(*this, other) || overlap(other, *this);
             }
             
-            if(y < sprite.half_spacing) {
-                if(ordered_x) {
-                    y = sprite.half_spacing;
-                }
-                return false;
+            unsigned int effective_width() const noexcept {
+                return bitmap_data->width + sheet->spacing * 2;
+            }
+            unsigned int effective_height() const noexcept {
+                return bitmap_data->height + sheet->spacing * 2;
             }
             
-            // Is the sprite too far to the bottom or right?
-            if(x + sprite.width + sprite.half_spacing > max_length) {
-                if(!ordered_x) {
-                    x = sprite.half_spacing;
-                    y++;
+            bool place_in_sheet() {
+                auto max_length = this->sheet->max_length;
+                
+                auto width = this->effective_width();
+                auto height = this->effective_height();
+                
+                // If the sprite is too big, fail
+                if(width > max_length || height > max_length) {
+                    return false;
                 }
-                return false;
-            }
-            
-            if(y + sprite.height + sprite.half_spacing > max_length) {
-                if(ordered_x) {
-                    y = sprite.half_spacing;
-                    x++;
-                }
-                return false;
-            }
-            
-            // Go through each pixel with each sprite
-            for(auto &sprite_to_check : sprites) {
-                for(std::size_t y_in_sprite_to_add = 0; y_in_sprite_to_add < sprite.height + sprite.half_spacing * 2; y_in_sprite_to_add++) {
-                    for(std::size_t x_in_sprite_to_add = 0; x_in_sprite_to_add < sprite.width + sprite.half_spacing * 2; x_in_sprite_to_add++) {
-                        if(sprite_to_check.inside_sprite(x_in_sprite_to_add + x, y_in_sprite_to_add + y)) {
-                            if(!ordered_x) {
-                                x = sprite_to_check.x + sprite_to_check.width + sprite_to_check.half_spacing;
+                
+                auto y_end = max_length - height;
+                auto x_end = max_length - width;
+                
+                // Otherwise, begin placing
+                auto old_x = this->x;
+                auto old_y = this->y;
+                for(this->y = 0; this->y <= y_end; this->y++) {
+                    for(this->x = 0; this->x <= x_end; this->x++) {
+                        bool overlap_fail = false;
+                        for(auto &s : this->sheet->sprites) {
+                            if(s.overlaps(*this)) {
+                                overlap_fail = true;
+                                break;
                             }
-                            else {
-                                y = sprite_to_check.y + sprite_to_check.height + sprite_to_check.half_spacing;
-                            }
-                            return false;
+                        }
+                            
+                        if(!overlap_fail) {
+                            return true;
                         }
                     }
                 }
-            }
-            
-            return true;
-        }
-        
-        bool place_sprite(const SpriteReference &sprite, bool ordered_x, std::size_t max_length) {
-            if(sprite.half_spacing > max_length) {
+                
+                this->x = old_x;
+                this->y = old_y;
+                
                 return false;
             }
-            
-            auto length_minus_spacing = max_length - sprite.half_spacing;
-            
-            // Go through each pixel
-            for(std::size_t a = sprite.half_spacing; a < length_minus_spacing; a++) {
-                for(std::size_t b = sprite.half_spacing; b < length_minus_spacing && a < length_minus_spacing; b++) {
-                    std::size_t *x;
-                    std::size_t *y;
-                    
-                    if(ordered_x) {
-                        x = &a;
-                        y = &b;
-                    }
-                    else {
-                        x = &b;
-                        y = &a;
-                    }
-                    
-                    if(sprite_fits_at_location(sprite, *x, *y, ordered_x, max_length)) {
-                        auto &new_sprite = this->sprites.emplace_back(sprite);
-                        new_sprite.x = *x;
-                        new_sprite.y = *y;
-                        return true;
-                    }
-                }
-            }
-            
-            return false;
-        }
+        };
         
-        std::size_t length() const {
-            std::size_t max_x = 0;
-            std::size_t max_y = 0;
-            
-            for(auto &i : this->sprites) {
-                max_x = std::max(max_x, i.x + i.half_spacing + i.width);
-                max_y = std::max(max_y, i.y + i.half_spacing + i.height);
-            }
-            
-            std::size_t max_length = std::max(max_x, max_y);
-            
-            // No length? Okay.
-            if(max_length == 0) {
-                return 0;
-            }
-            
-            // Let's calculate this
-            std::size_t max_length_copy = max_length;
-            std::size_t log2_rounded_down = 0;
-            
-            while(max_length_copy > 1) {
-                max_length_copy >>= 1;
-                log2_rounded_down++;
-            }
-            
-            // If our max length isn't power of two, then actual_max_length will be less than max_length. If so, we need to double actual_max_length and then return it.
-            std::size_t actual_max_length = 1 << log2_rounded_down;
-            if(max_length > actual_max_length) {
-                actual_max_length *= 2;
-            }
-            
-            return actual_max_length;
-        }
+        std::vector<Sprite> sprites;
         
-        std::vector<Invader::Pixel> bake_sprite_sheet(std::size_t &length, const GeneratedBitmapData &bitmap, BitmapSpriteUsage sprite_usage) {
-            // Store length
-            length = this->length();
-            
-            // Figure out the background color, too
+        std::vector<Pixel> bake_sprite_sheet(HEK::BitmapSpriteUsage sprite_usage) const {
             Pixel background_color;
             
             switch(sprite_usage) {
@@ -180,373 +135,267 @@ namespace Invader {
                     std::terminate();
             }
             
-            // Store this
-            std::vector<Invader::Pixel> baked_sheet(length * length, background_color);
+            std::vector<Pixel> image(this->max_length * this->max_height.value_or(this->max_length), background_color);
             
             // If we're doing multiply, do alpha blend. Otherwise do a simple replace.
             auto blend_function = sprite_usage == BitmapSpriteUsage::BITMAP_SPRITE_USAGE_MULTIPLY_MIN ? &Pixel::alpha_blend : &Pixel::replace;
             
             // Go through each sprite
             for(auto &sprite : this->sprites) {
-                auto &pixel_data = bitmap.bitmaps[bitmap.sequences[sprite.sequence].sprites[sprite.sprite].original_bitmap_index].pixels;
-                for(std::size_t y = 0; y < sprite.height; y++) {
-                    for(std::size_t x = 0; x < sprite.width; x++) {
-                        auto &pixel_to_blend = baked_sheet[x + sprite.x + (sprite.y + y) * length];
-                        pixel_to_blend = (pixel_to_blend.*blend_function)(pixel_data[x + y * sprite.width]);
+                auto &pixel_data = sprite.bitmap_data->pixels;
+                auto width = sprite.bitmap_data->width;
+                auto height = sprite.bitmap_data->height;
+                
+                for(std::size_t y = 0; y < height; y++) {
+                    for(std::size_t x = 0; x < width; x++) {
+                        auto pixel_x = x + sprite.x + this->spacing;
+                        auto pixel_y = y + sprite.y + this->spacing;
+                        
+                        assert(pixel_y < this->max_length && pixel_x < this->max_length);
+                        
+                        auto &pixel_to_blend = image[pixel_x + pixel_y * this->max_length];
+                        pixel_to_blend = (pixel_to_blend.*blend_function)(pixel_data[x + y * width]);
                     }
                 }
             }
             
-            // Done
-            return baked_sheet;
+            return image;
+        }
+        
+        // Calculate the best place to add a sprite to a sheet and return the location (if possible)
+        std::optional<Sprite> best_place_to_add_sprite(std::size_t sprite, std::size_t sequence) const noexcept {
+            // Instantiate this
+            auto bitmap_index = bitmap_data->sequences[sequence].sprites[sprite].bitmap_index;
+            Sprite sprite_candidate(bitmap_data->bitmaps[bitmap_index], *this, sprite, sequence);
+            
+            // Attempt to place it in the sheet
+            if(sprite_candidate.place_in_sheet()) {
+                return sprite_candidate;
+            }
+            else {
+                return std::nullopt;
+            }
+        }
+        
+        bool add_sprite_to_sheet(std::size_t sprite, std::size_t sequence) {
+            auto s = best_place_to_add_sprite(sprite, sequence);
+            if(s.has_value()) {
+                sprites.emplace_back(*s);
+                return true;
+            }
+            return false;
+        }
+        
+        bool add_sequence_to_sheet(const std::vector<std::size_t> &sprite_indices, std::size_t sequence) {
+            auto sprite_data_backup = this->sprites;
+            for(auto sprite : sprite_indices) {
+                if(!add_sprite_to_sheet(sprite, sequence)) {
+                    this->sprites = sprite_data_backup;
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // optimize sprite sheet size to as low as possible
+        void optimize(bool allow_non_square_sprite_sheets) {
+            // If we only have 1 sprite, remove spacing
+            // This is very VERY horrible, inconsistent, and arbitrary as fuck (and not trivial to account for when making your sprites) but it's required to match Bungie output
+            if(this->sprites.size() == 1) {
+                this->spacing = 0;
+            }
+            
+            // Get the max length needed for our current set of sprites
+            decltype(this->max_length) max_length_needed = 0;
+            for(auto &s : this->sprites) {
+                max_length_needed = std::max(s.x + s.effective_width(), max_length_needed);
+                max_length_needed = std::max(s.y + s.effective_height(), max_length_needed);
+            }
+            
+            // Find the closest power of two (rounded up)
+            this->max_length = 1;
+            while(this->max_length < max_length_needed) {
+                this->max_length <<= 1;
+            }
+            
+            // If we have more than 1 sprite, brute force a smaller sprite sheet
+            if(this->sprites.size() > 1) {
+                while(this->max_length > 1) {
+                    // Copy the old values
+                    auto old_max_length = this->max_length;
+                    auto old_sprites = this->sprites;
+                    
+                    // Halve max length, clear sprites
+                    this->max_length >>= 1;
+                    this->sprites.clear();
+                    
+                    // Go through each sprite and see if we can re-add all of them again
+                    for(auto s : old_sprites) {
+                        // Fail - copy back in old values
+                        if(!s.place_in_sheet()) {
+                            this->max_length = old_max_length;
+                            this->sprites = old_sprites;
+                            goto done_brute_forcing_sprites;
+                        }
+                        
+                        // Success - added!
+                        this->sprites.emplace_back(s);
+                    }
+                }
+            }
+            
+            // Bad
+            done_brute_forcing_sprites:
+            if(allow_non_square_sprite_sheets) {
+                decltype(this->max_length) new_max_height = 0;
+                for(auto s : sprites) {
+                    new_max_height = std::max(new_max_height, s.y + s.effective_height());
+                }
+                
+                this->max_height = 1;
+                while(*this->max_height < new_max_height) {
+                    *this->max_height <<= 1;
+                }
+            }
+        }
+        
+        SpriteSheet(unsigned int spacing, const GeneratedBitmapData &bitmap_data, unsigned max_length) : spacing(spacing), max_length(max_length), bitmap_data(&bitmap_data) {}
+        
+        SpriteSheet(const SpriteSheet &other) {
+            *this = other;
+        }
+        
+        SpriteSheet &operator =(const SpriteSheet &other) {
+            this->spacing = other.spacing;
+            this->max_length = other.max_length;
+            this->max_height = other.max_height;
+            this->bitmap_data = other.bitmap_data;
+            for(auto &s : other.sprites) {
+                this->sprites.emplace_back(s).sheet = this;
+            }
+            return *this;
         }
     };
     
-    static std::optional<std::vector<SpriteSheet>> generate_sheets_with_direction(const std::vector<SpriteReference> &sprites_to_add, bool ordered_x, bool sprites_in_sequences_must_coexist, bool bypass_limits_for_sequences, std::size_t max_sheets, std::size_t max_length, std::size_t sequence_count) {
-        std::vector<SpriteSheet> sheets;
-        sheets.reserve(max_sheets); // o.o
+    std::vector<SpriteSheet> generate_sheets(std::size_t max_length, std::size_t max_sheet_count, unsigned int spacing, GeneratedBitmapData &bitmap) {
+        // Reserve it
+        std::vector<SpriteSheet> sprite_sheets;
+        sprite_sheets.reserve(max_sheet_count); // reserve the max sheet count (performance)
         
-        // Add by sequence
-        if(sprites_in_sequences_must_coexist) {
-            auto add_all_sprites_of_sequence_to_sheet = [&sprites_to_add, &ordered_x](std::size_t sequence, auto &sheet, std::size_t max_length) -> bool {
-                // Hold this in case it fails
-                auto sprite_count_before = sheet.sprites.size();
-                
-                for(auto &sprite : sprites_to_add) {
-                    // If the sprite is in the sequence, let's do the thing
-                    if(sprite.sequence == sequence) {
-                        if(!sheet.place_sprite(sprite, ordered_x, max_length)) { // if we fail to add it, get destroyed
-                            sheet.sprites.resize(sprite_count_before, Invader::SpriteReference(0,0,0,0,0,0,0)); // roll back the sprite array back to what it was before
-                            return false;
-                        }
-                    }
-                }
-                
-                return true;
-            };
-            
-            for(std::size_t seq = 0; seq < sequence_count; seq++) {
-                bool added = false;
-                for(auto &sheet : sheets) {
-                    auto sheet_copy = sheet;
-                    if((added = add_all_sprites_of_sequence_to_sheet(seq, sheet_copy, max_length))) {
-                        sheet = sheet_copy;
-                        break;
-                    }
-                }
-                
-                // If we didn't add it, try a new sheet
-                if(!added) {
-                    // First check if we CAN. If not, fail
-                    if(sheets.size() == max_sheets) {
-                        return std::nullopt;
-                    }
-                    
-                    auto &sheet = sheets.emplace_back();
-                    
-                    if(!bypass_limits_for_sequences) {
-                        if(!add_all_sprites_of_sequence_to_sheet(seq, sheet, max_length)) {
-                            return std::nullopt;
-                        }
-                    }
-                    else {
-                        std::size_t temp_max_length = max_length;
-                        while(!add_all_sprites_of_sequence_to_sheet(seq, sheet, temp_max_length)) {
-                            temp_max_length *= 2;
-                        }
-                    }
-                }
-            };
-        }
-        
-        // Add by sprite
-        else {
-            for(auto &sprite : sprites_to_add) {
-                bool added = false;
-                for(auto &sheet : sheets) {
-                    if((added = sheet.place_sprite(sprite, ordered_x, max_length))) {
-                        break;
-                    }
-                }
-                
-                // If we didn't add it, try a new sheet
-                if(!added) {
-                    // First check if we CAN. If not, fail
-                    if(sheets.size() == max_sheets) {
-                        return std::nullopt;
-                    }
-                    
-                    // If adding a sprite to an empty sheet fails, give up. Not sure how this would ever fail, though, since we checked beforehand, but ok
-                    if(!sheets.emplace_back().place_sprite(sprite, ordered_x, max_length)) {
-                        return std::nullopt;
-                    }
-                }
-            }
-        }
-            
-        return sheets;
-    }
-    
-    static std::optional<std::vector<SpriteSheet>> generate_sheets(bool sprites_in_sequences_must_coexist, bool bypass_limits_for_sequences, unsigned int max_sheet_length, unsigned int max_sheet_count, int half_spacing, const GeneratedBitmapData &bitmap) {
-        std::vector<SpriteSheet> sheets_single_sprite;
+        // Sort sprites by height in descending order
         auto sequence_count = bitmap.sequences.size();
-        
-        // First, go through each sprite and find sprites that can't fit or can only fit if spacing is ignored
-        for(std::size_t se = 0; se < sequence_count; se++) {
-            auto &sequence = bitmap.sequences[se];
-            auto sprite_count = sequence.sprites.size();
+        std::vector<std::vector<std::size_t>> sorted_sprites(sequence_count);
+        for(std::size_t si = 0; si < sequence_count; si++) {
+            auto &seq = bitmap.sequences[si];
+            auto &sorted = sorted_sprites[si];
+            auto sprite_count = seq.sprites.size();
+            sorted.reserve(sprite_count);
             
-            for(std::size_t sp = 0; sp < sprite_count; sp++) {
-                auto &sprite = sequence.sprites[sp];
-                auto &sprite_bitmap = bitmap.bitmaps[sprite.original_bitmap_index];
+            for(std::size_t s = 0; s < sprite_count; s++) {
+                bool added = false;
+                auto &sprite = seq.sprites[s];
+                auto height = bitmap.bitmaps[sprite.original_bitmap_index].height;
                 
-                // If we can't fit this sprite, give up now
-                if(sprite_bitmap.height > max_sheet_length || sprite_bitmap.width > max_sheet_length) {
-                    return std::nullopt;
+                for(auto &s_other : sorted) {
+                    auto index_other = &s_other - sorted.data();
+                    
+                    auto height_other = bitmap.bitmaps[seq.sprites[index_other].original_bitmap_index].height;
+                    if(height_other < height) {
+                        added = true;
+                        sorted.insert(sorted.begin() + index_other, s);
+                        break;
+                    }
                 }
-                
-                // If we can only fit this sprite, check if sprites in sequences must coexist. If so, check if any other sprites are in the sequence and if so, give up. Otherwise, put the sprite in its own sheet.
-                if(sprite_bitmap.height + half_spacing * 2 > max_sheet_length || sprite_bitmap.width + half_spacing * 2 > max_sheet_length) {
-                    if(sprites_in_sequences_must_coexist && sequence.sprites.size() > 1) {
-                        return std::nullopt;
-                    }
-                    
-                    // If we can add even just a little bit of spacing, try that
-                    std::size_t x = 0;
-                    std::size_t y = 0;
-                    
-                    if(sprite_bitmap.width < max_sheet_length) {
-                        x = (max_sheet_length - sprite_bitmap.width) / 2;
-                    }
-                    
-                    if(sprite_bitmap.height < max_sheet_length) {
-                        y = (max_sheet_length - sprite_bitmap.height) / 2;
-                    }
-                    
-                    auto &sheet = sheets_single_sprite.emplace_back();
-                    sheet.sprites.emplace_back(x, y, sprite_bitmap.width, sprite_bitmap.height, 0, se, sp);
+                if(!added) {
+                    sorted.emplace_back(s);
                 }
             }
         }
         
-        // If we went over the limit doing that, give up
-        if(sheets_single_sprite.size() > max_sheet_count) {
-            return std::nullopt;
-        }
-        
-        // Remaining sheets goes here
-        std::size_t variable_sized_sheets = max_sheet_count - sheets_single_sprite.size();
-        
-        // Order each sprite from least to greatest
-        std::vector<SpriteReference> sprites_ordered_vertical;
-        std::vector<SpriteReference> sprites_ordered_horizontal;
-        
-        for(std::size_t se = 0; se < sequence_count; se++) {
-            auto &sequence = bitmap.sequences[se];
-            auto sprite_count = sequence.sprites.size();
+        // Place them now
+        std::size_t split_across = 0;
+        for(std::size_t si = 0; si < sequence_count; si++) {
+            // Make a new sprite sheet if we have to
+            SpriteSheet new_sprite_sheet(spacing, bitmap, max_length);
             
-            for(std::size_t sp = 0; sp < sprite_count; sp++) {
-                auto &sprite = sequence.sprites[sp];
-                
-                // Did we already add it?
-                bool already_added = false;
-                for(auto &i : sheets_single_sprite) {
-                    for(auto &s : i.sprites) {
-                        if(s.sequence == se && s.sprite == sp) {
-                            already_added = true;
-                            goto spaghetti_code_monster;
-                        }
+            // Make a backup if we can't
+            std::vector<SpriteSheet> backup;
+            
+            // Get our indices
+            auto &sorted = sorted_sprites[si];
+            
+            // Try placing in existing sprite sheets
+            for(auto &s : sprite_sheets) {
+                if(s.add_sequence_to_sheet(sorted, si)) {
+                    goto sequence_successfully_placed;
+                }
+            }
+            
+            // Try placing in the new sprite sheet
+            if(new_sprite_sheet.add_sequence_to_sheet(sorted, si)) {
+                sprite_sheets.emplace_back(new_sprite_sheet);
+                goto sequence_successfully_placed;
+            }
+            
+            // If we can't put it in a new sprite sheet, try splitting across the sprite sheets
+            backup = sprite_sheets;
+            split_across++;
+            
+            // Add it one at a time?
+            for(auto sprite : sorted) {
+                bool sprite_placed = false;
+                for(auto &ss : sprite_sheets) {
+                    if(ss.add_sprite_to_sheet(sprite, si)) {
+                        sprite_placed = true;
+                        break;
                     }
                 }
                 
-                // If we did it, pass
-                spaghetti_code_monster: if(already_added) {
+                // Try adding it in a new sprite
+                if(!sprite_placed && sprite_sheets.emplace_back(spacing, bitmap, max_length).add_sprite_to_sheet(sprite, si)) {
                     continue;
                 }
                 
-                // Let's begin
-                auto &sprite_bitmap = bitmap.bitmaps[sprite.original_bitmap_index];
-                SpriteReference sprite_reference(0, 0, sprite_bitmap.width, sprite_bitmap.height, half_spacing, se, sp);
-                
-                // Order vertically and horizontally
-                std::size_t added_sprite_count = sprites_ordered_horizontal.size();
-                
-                bool added_horizontal = false;
-                for(std::size_t q = 0; q < added_sprite_count; q++) {
-                    if(sprites_ordered_horizontal[q].width < sprite_bitmap.width) {
-                        added_horizontal = true;
-                        sprites_ordered_horizontal.insert(sprites_ordered_horizontal.begin() + q, sprite_reference);
-                        break;
-                    }
-                }
-                if(!added_horizontal) {
-                    sprites_ordered_horizontal.emplace_back(sprite_reference);
-                }
-                
-                bool added_vertical = false;
-                for(std::size_t q = 0; q < added_sprite_count; q++) {
-                    if(sprites_ordered_vertical[q].height < sprite_bitmap.height) {
-                        added_vertical = true;
-                        sprites_ordered_vertical.insert(sprites_ordered_vertical.begin() + q, sprite_reference);
-                        break;
-                    }
-                }
-                if(!added_vertical) {
-                    sprites_ordered_vertical.emplace_back(sprite_reference);
-                }
-            }
-        }
-        
-        // If we have anything remaining, generate sprite sheets
-        std::vector<SpriteSheet> sheets;
-        if(sprites_ordered_vertical.size() > 0) {
-            // If we're exactly out of sheets, bail.
-            if(variable_sized_sheets == 0) {
-                return std::nullopt;
-            }
-            
-            std::size_t length_generate = max_sheet_length;
-            std::optional<std::vector<SpriteSheet>> sheets_vertical, sheets_horizontal;
-            
-            // If we have virtually no limits for sequences, we can brute force then
-            if(max_sheet_count >= 32767 || bypass_limits_for_sequences) {
-                while(true) {
-                    auto sheets_vertical_maybe = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
-                    auto sheets_horizontal_maybe = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
-                    
-                    if(!sheets_vertical_maybe.has_value() && !sheets_horizontal_maybe.has_value()) {
-                        break;
-                    }
-                    
-                    sheets_vertical = sheets_vertical_maybe;
-                    sheets_horizontal = sheets_horizontal_maybe;
-                    
-                    if(sheets_horizontal.has_value()) {
-                        length_generate = std::min(length_generate, (*sheets_horizontal)[0].length());
-                    }
-                    
-                    if(sheets_vertical.has_value()) {
-                        length_generate = std::min(length_generate, (*sheets_vertical)[0].length());
-                    }
-                    
-                    length_generate /= 2;
-                    
-                    // If we cannot go any further, we're done
-                    if(length_generate == 0) {
-                        break;
-                    }
-                }
-            }
-            else {
-                while(true) {
-                    sheets_vertical = generate_sheets_with_direction(sprites_ordered_vertical, false, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
-                    sheets_horizontal = generate_sheets_with_direction(sprites_ordered_horizontal, true, sprites_in_sequences_must_coexist, bypass_limits_for_sequences, variable_sized_sheets, length_generate, sequence_count);
-                    
-                    // If we failed, try increasing the number of sheets
-                    if(!sheets_vertical && !sheets_horizontal && max_sheet_length > 2) {
-                        eprintf_warn("Unable to fit sprites into %i %ix%i sprite sheets. Limits adjusted.", max_sheet_count, max_sheet_length, max_sheet_length);
-                        return generate_sheets(false, false, max_sheet_length/2, max_sheet_count*4, half_spacing, bitmap);
-                    }
-                    else {
-                        break;
-                    }
+                // Guess not
+                if(!sprite_placed) {
+                    eprintf_error("Could not place all sprites in %zu %zux%zu sprite sheet%s", max_sheet_count, max_length, max_length, max_sheet_count == 1 ? "" : "s");
+                    throw InvalidTagDataException();
                 }
             }
             
-            // Find the most efficient set of sprite sheets... if we have both. Otherwise just take whichever one was successful. Or return nothing if none were.
-            if(sheets_horizontal.has_value() && sheets_vertical.has_value()) {
-                // Find the most efficient set of sprite sheets we just calculated
-                auto calculate_pixel_count_for_sheet_array = [](auto &what) -> std::size_t {
-                    std::size_t pixel_count = 0;
-                    for(auto &i : *what) {
-                        auto length = i.length();
-                        pixel_count += length * length;
-                    }
-                    return pixel_count;
-                };
-                
-                auto pixel_count_vertical = calculate_pixel_count_for_sheet_array(sheets_vertical);
-                auto pixel_count_horizontal = calculate_pixel_count_for_sheet_array(sheets_horizontal);
-                
-                if(pixel_count_vertical < pixel_count_horizontal) {
-                    sheets = std::move(*sheets_vertical);
-                }
-                else {
-                    sheets = std::move(*sheets_horizontal);
-                }
-            }
-            else if(!sheets_horizontal.has_value() && sheets_vertical.has_value()) {
-                sheets = *sheets_vertical;
-            }
-            else if(sheets_horizontal.has_value() && !sheets_vertical.has_value()) {
-                sheets = *sheets_horizontal;
-            }
-            else {
-                return std::nullopt; // nope
-            }
-            
-            // Remove spacing from sprite sheets that have one bitmap, but only if it would save space.
-            // This will fuck the sprite up on stock Halo's renderer, causing issues such as the sides of the sprites being clipped or repeated. Oh well. Bungie did it, too.
-            for(auto &i : sheets) {
-                if(i.sprites.size() == 1) {
-                    auto &sprite = i.sprites[0];
-                    auto length_before = i.length();
-                    auto half_spacing_before = sprite.half_spacing;
-                    sprite.x -= half_spacing_before;
-                    sprite.y -= half_spacing_before;
-                    sprite.half_spacing = 0;
-                    
-                    auto length_after = i.length();
-                    if(length_after >= length_before) {
-                        sprite.x += half_spacing_before;
-                        sprite.y += half_spacing_before;
-                        sprite.half_spacing = half_spacing_before;
-                    }
-                }
-            }
+            // Did we do it?
+            sequence_successfully_placed: continue;
         }
         
-        sheets.insert(sheets.end(), sheets_single_sprite.begin(), sheets_single_sprite.end());
-        
-        return sheets;
-    }
-    
-    static std::vector<SpriteSheet> generate_sheets(int max_sheet_length, int max_sheet_count, int half_spacing, const GeneratedBitmapData &bitmap, bool bypass_limits_for_sequences) {
-        std::vector<SpriteSheet> sheets;
-        
-        // Try forcing sprites in sequences to be in the same bitmap
-        auto attempt1 = generate_sheets(true, bypass_limits_for_sequences, max_sheet_length, max_sheet_count, half_spacing, bitmap);
-        if(attempt1.has_value()) {
-            return attempt1.value();
+        // If we split it across multiple sheets, complain but continue
+        if(split_across) {
+            eprintf_warn("%zu sequence%s had to be split across multiple sheets\nThis is valid but may cause issues", split_across, split_across == 1 ? "" : "s");
         }
         
-        // Allow sprites in sequences to be in different bitmaps
-        if(!bypass_limits_for_sequences) {
-            auto attempt2 = generate_sheets(false, bypass_limits_for_sequences, max_sheet_length, max_sheet_count, half_spacing, bitmap);
-            if(attempt2.has_value()) {
-                eprintf_warn("Sequences were split across multiple sprite sheets to meet the sprite budget.\nThis is valid but may cause issues. Consider using a higher budget or no budget.");
-                return attempt2.value();
-            }
-        }
-        
-        // Nope
-        eprintf_error("Failed to fit sprites into %i %ix%i sprite sheets", max_sheet_count, max_sheet_length, max_sheet_length);
-        throw std::exception();
+        // Done
+        return sprite_sheets;
     }
     
     void BitmapProcessor::process_sprites(GeneratedBitmapData &generated_bitmap, BitmapProcessorSpriteParameters &parameters, std::int16_t &mipmap_count) {
         // Get our parameters
-        unsigned int half_spacing = 1 << mipmap_count;
-        parameters.sprite_spacing = half_spacing;
+        unsigned int spacing;
         
+        // Get spacing
+        if(parameters.sprite_spacing == 0) {
+            spacing = mipmap_count == 1 ? 1 : 4;
+        }
+        else {
+            spacing = parameters.sprite_spacing;
+        }
+        
+        // Determine budgeting
         unsigned int max_sheet_length;
         unsigned int max_sheet_count;
-        bool bypass_limits_for_sequences;
         
+        // If we have our budget count set to 0, allow the maximum possible budget
         if(parameters.sprite_budget_count == 0) {
-            max_sheet_length = 512;
+            max_sheet_length = 1024;
             max_sheet_count = 32767;
-            bypass_limits_for_sequences = true;
             
             // If a sprite is bigger than a sheet, change the sheet size
             for(auto &i : generated_bitmap.bitmaps) {
@@ -568,10 +417,11 @@ namespace Invader {
                 max_sheet_length = 1 << n;
             }
         }
+        
+        // Otherwise, set it
         else {
             max_sheet_length = parameters.sprite_budget;
             max_sheet_count = parameters.sprite_budget_count;
-            bypass_limits_for_sequences = false;
         }
         
         for(auto &i : generated_bitmap.sequences) {
@@ -585,31 +435,45 @@ namespace Invader {
             }
         }
         
-        auto sheets = generate_sheets(max_sheet_length, max_sheet_count, half_spacing, generated_bitmap, bypass_limits_for_sequences);
+        auto sheets = generate_sheets(max_sheet_length, max_sheet_count, spacing, generated_bitmap);
+        unsigned long long total_pixel_usage = 0;
+        unsigned long long max_pixel_usage = max_sheet_length * max_sheet_length * max_sheet_count;
+        
+        // Optimize sheets. Then calculate total pixel usage
+        for(auto &i : sheets) {
+            i.optimize(true);
+            total_pixel_usage += i.max_length * i.max_height.value_or(i.max_length);
+        }
+        
+        // Failure?
+        if(total_pixel_usage > max_pixel_usage) {
+            eprintf_error("Maximum budget exceeded (%llu / %llu pixels)", total_pixel_usage, max_pixel_usage);
+            throw InvalidTagDataException();
+        }
+        
         std::vector<GeneratedBitmapDataBitmap> new_bitmaps;
         
         // Add new bitmaps
         for(auto &i : sheets) {
             std::size_t new_bitmap_index = new_bitmaps.size();
             auto &new_bitmap = new_bitmaps.emplace_back();
-            std::size_t length;
-            new_bitmap.pixels = i.bake_sprite_sheet(length, generated_bitmap, parameters.sprite_usage);
+            std::size_t length = i.max_length;
+            new_bitmap.pixels = i.bake_sprite_sheet(parameters.sprite_usage);
             new_bitmap.color_plate_x = 0;
             new_bitmap.color_plate_y = 0;
             new_bitmap.depth = 1;
-            new_bitmap.height = length;
             new_bitmap.width = length;
-            
-            std::size_t margins = i.sprites.size() > 1 ? 1 : 0; // add margins if we have multiple sprites in the sheets... for no reason because this is completely stupid
+            new_bitmap.height = i.max_height.value_or(length);
             
             // Store this information
             for(auto &j : i.sprites) {
                 auto &sprite = generated_bitmap.sequences[j.sequence].sprites[j.sprite];
+                
                 sprite.bitmap_index = new_bitmap_index;
-                sprite.left = j.x - margins;
-                sprite.right = j.x + j.width + margins;
-                sprite.top = j.y - margins;
-                sprite.bottom = j.y + j.height + margins;
+                sprite.left = j.x;
+                sprite.right = j.x + j.effective_width();
+                sprite.top = j.y;
+                sprite.bottom = j.y + j.effective_height();
             }
         }
         
