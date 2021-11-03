@@ -50,8 +50,8 @@ namespace Invader {
                     auto t_border_inside = a.y >= b.y && a.y < b_end_y;
                     
                     // Right and bottom
-                    auto r_border_inside = a_end_x >= b.x && a_end_x < b_end_x;
-                    auto b_border_inside = a_end_y >= b.y && a_end_y < b_end_y;
+                    auto r_border_inside = a_end_x > b.x && a_end_x < b_end_x; // the "end" is actually the pixel after the last pixel and not technically inside
+                    auto b_border_inside = a_end_y > b.y && a_end_y < b_end_y;
                     
                     // If both a horizontal and vertical border are inside, then it's overlapping
                     return (l_border_inside || r_border_inside) && (t_border_inside || b_border_inside);
