@@ -264,18 +264,9 @@ namespace Invader {
                 max_mipmap_count = mipmaps_unsigned;
             }
 
-            // Only generate up to log2(spacing) mipmaps for sprites
+            // Limit mipmap count to 2, defaulting 0 to 2
             if(generated_bitmap.type == BitmapType::BITMAP_TYPE_SPRITES) {
-                auto sprite_spacing = sprite_parameters.value().sprite_spacing;
-                if(sprite_spacing == 0) {
-                    max_mipmap_count = 0;
-                }
-                else {
-                    auto max_mipmaps_sprites = HEK::log2_int(sprite_parameters.value().sprite_spacing);
-                    if(max_mipmap_count > max_mipmaps_sprites) {
-                        max_mipmap_count = max_mipmaps_sprites;
-                    }
-                }
+                max_mipmap_count = std::min(max_mipmap_count, static_cast<decltype(max_mipmap_count)>(2));
             }
 
             // Delete mipmaps if needed
