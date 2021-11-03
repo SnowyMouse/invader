@@ -59,11 +59,10 @@ namespace Invader {
          * @param mipmaps            max number of mipmaps
          * @param mipmap_type        scaling filter to use for mipmaps
          * @param mipmap_fade_factor fade-to-gray factor for mipmaps
-         * @param sprite_parameters  sprite parameters (if using sprites)
          * @param sharpen            sharpen filter
          * @param usage              bitmap usage value
          */
-        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<BitmapProcessorSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage);
+        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage);
 
         /**
          * Consolidate the stacked bitmap data (cubemaps and 3d textures)

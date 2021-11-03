@@ -170,7 +170,7 @@ namespace Invader {
 
         // If we aren't making interface bitmaps, generate mipmaps when needed
         if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && usage != BitmapUsage::BITMAP_USAGE_LIGHT_MAP) {
-            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor, sprite_parameters, sharpen, blur, usage);
+            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor, sharpen, blur, usage);
         }
 
         // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data. 3D textures work similarly
@@ -250,7 +250,7 @@ namespace Invader {
         }
     }
 
-    void BitmapProcessor::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<BitmapProcessorSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
+    void BitmapProcessor::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
         
