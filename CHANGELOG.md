@@ -36,6 +36,9 @@ This is used for recording Invader's changes. This changelog is based on
   bitmap type is interface or sprites)
 - invader-bitmap: Changed A8 to alpha-on-white instead of alpha-on-black to
   match the rendering output of the game
+- invader-bitmap: Improved sprite generation to better match tool.exe (while
+  still allowing sprites that exceed the limit with padding enabled but meet it
+  with padding disabled)
 - invader-build: `--auto-forge-target` no longer takes a parameter (it forges
   based on the input of `--game-engine`)
 - invader-build: Scenarios with no scripts or globals now have their syntax and
