@@ -57,7 +57,30 @@ namespace Invader {
                     auto b_border_inside = a_end_y > b.y && a_end_y < b_end_y;
                     
                     // If both a horizontal and vertical border are inside, then it's overlapping
-                    return (l_border_inside || r_border_inside) && (t_border_inside || b_border_inside);
+                    if((l_border_inside || r_border_inside) && (t_border_inside || b_border_inside)) {
+                        return true;
+                    }
+                    
+                    // Get borders that are outside
+                    auto l_border_left = a.x <= b.x;
+                    auto r_border_right = a_end_x >= b_end_x;
+                    auto t_border_up = a.y <= b.y;
+                    auto b_border_bottom = a_end_y >= b_end_y;
+                    
+                    // If either a horizontal or vertical border is inside and we're within the two other borders, then it's overlapping
+                    if((l_border_inside || r_border_inside) && (t_border_up && b_border_bottom)) {
+                        return true;
+                    }
+                    if((t_border_inside || b_border_inside) && (l_border_left && r_border_right)) {
+                        return true;
+                    }
+                    
+                    // If we're within all borders, we're overlapping
+                    if(l_border_left && r_border_right && t_border_up && b_border_bottom) {
+                        return true;
+                    }
+                    
+                    return false;
                 };
                 
                 return overlap(*this, other) || overlap(other, *this);
