@@ -112,7 +112,7 @@ namespace Invader {
                 auto old_y = this->y;
                 
                 // 0 sprites always succeeds
-                if(this->sheet->sprites.size() == 0) {
+                if(this->sheet->sprites.empty()) {
                     this->x = 0;
                     this->y = 0;
                     return true;
@@ -154,25 +154,17 @@ namespace Invader {
                     }
                     
                     // Find the next y "level"
-                    bool found = false;
                     for(auto &l = sprites_level; l != sprites_end; l++) {
                         if(l->y == this->y) {
                             this->y += l->effective_height();
-                            found = true;
+                            sprites_level = l;
                             break;
                         }
                     }
                     
                     // If we could not find one or it won't fit, break
-                    if(!found || this->y > y_end) {
+                    if(this->y > y_end) {
                         break;
-                    }
-                }
-                
-                // If that fails, try all rows then
-                for(this->y = 0; this->y <= y_end; this->y++) {
-                    if(search_row()) {
-                        return true;
                     }
                 }
                 
@@ -268,28 +260,134 @@ namespace Invader {
         }
         
         bool add_sequence_to_sheet(const std::vector<std::size_t> &sprite_indices, std::size_t sequence) {
-            auto sprite_data_backup = this->sprites;
-            for(auto sprite : sprite_indices) {
-                if(!this->add_sprite_to_sheet(sprite, sequence)) {
-                    // Hold on. Are we adding only 1 sprite and we have no sprites currently AND that sprite would fit if we disabled the padding?
-                    if(sprite_indices.size() == 1 && this->sprites.size() == 0) {
-                        auto old_spacing = this->spacing;
-                        this->spacing = 0;
-                        
-                        // If so, add it but note that no more sprites are accepted now
-                        if(this->add_sprite_to_sheet(sprite, sequence)) {
-                            this->locked = true;
-                            return true;
-                        }
-                        
-                        this->spacing = old_spacing;
+            // Locked? No then.
+            if(this->locked) {
+                return false;
+            }
+            
+            auto new_sheet = this->sprites.empty();
+            
+            // Are we making a new, empty sheet?
+            if(new_sheet) {
+                // If we're only adding 1 sprite and we have no sprites, we can handle it a little different
+                if(sprite_indices.size() == 1) {
+                    // See if we can add it with spacing
+                    if(this->add_sprite_to_sheet(0, sequence)) {
+                        return true;
                     }
                     
-                    this->sprites = sprite_data_backup;
+                    // Otherwise, try it without spacing.
+                    auto old_spacing = this->spacing;
+                    this->spacing = 0;
+                    
+                    // It works! But we have to lock the sheet since you can't possibly add any more sprites without readding padding thus making this first sprite not fit anymore
+                    if(this->add_sprite_to_sheet(0, sequence)) {
+                        this->locked = true;
+                        return true;
+                    }
+                    
+                    // Readd the spacing
+                    this->spacing = old_spacing;
+                    
+                    // Mission failed. We'll get 'em next time.
                     return false;
                 }
+                
+                // Try adding everything.
+                else {
+                    auto sprite_data_backup = this->sprites;
+                    for(auto sprite : sprite_indices) {
+                        if(!this->add_sprite_to_sheet(sprite, sequence)) {
+                            this->sprites = sprite_data_backup;
+                            return false;
+                        }
+                    }
+                    
+                    // Yay!
+                    return true;
+                }
             }
-            return true;
+            
+            // Otherwise, we'll need to sort everything by height and attempt to add everything that way
+            else {
+                // Sprite, sequence
+                std::vector<std::pair<std::size_t, std::size_t>> sorted;
+                auto &bd = *this->bitmap_data;
+                
+                // Add all sprites already in the sheet as-is since they're already sorted
+                for(auto &i : this->sprites) {
+                    sorted.emplace_back(i.sprite, i.sequence);
+                }
+                
+                // Get the height of the sprite at sequence
+                auto sprite_height = [&bd](std::size_t sprite, std::size_t sequence) {
+                    return bd.bitmaps[bd.sequences[sequence].sprites[sprite].bitmap_index].height;
+                };
+                
+                // Get the height of the sprite at index n
+                auto sorted_sprite_height = [&sorted, &sprite_height](std::size_t n) {
+                    auto [sprite, sequence] = sorted[n];
+                    return sprite_height(sprite, sequence);
+                };
+                
+                // Sort the sprites of the new sequence into these sprites (binary sorting will make it faster - O(n log n))
+                for(auto sprite : sprite_indices) {
+                    auto height = sprite_height(sprite, sequence);
+                    
+                    // Set our search parameters (start is 0, end is the index of the last element)
+                    std::size_t start = 0;
+                    std::size_t end = sorted.size();
+                    
+                    while(true) {
+                        std::size_t i = (start + end) / 2;
+                        
+                        auto height_other = sorted_sprite_height(i);
+                        
+                        auto add_to_i = [&i, &sorted, &sprite, &sequence] {
+                            sorted.emplace(sorted.begin() + i, sprite, sequence);
+                        };
+                        
+                        // If it equals, add at this index then
+                        if(height == height_other) {
+                            add_to_i();
+                            break;
+                        }
+                        
+                        // If it's greater, search before
+                        else if(height > height_other) {
+                            end = i;
+                        }
+                        
+                        // If it's less, search after
+                        else if(height < height_other) {
+                            start = i + 1;
+                        }
+                        
+                        // If start and end are equal, place it here then
+                        if(start == end) {
+                            i = start;
+                            add_to_i();
+                            break;
+                        }
+                    }
+                }
+            
+                // Let's try adding everything
+                auto sprite_data_backup = this->sprites;
+                this->sprites.clear();
+                
+                for(auto &s : sorted) {
+                    auto [sprite, sequence] = s;
+                    if(!this->add_sprite_to_sheet(sprite, sequence)) {
+                        // Nope
+                        this->sprites = sprite_data_backup;
+                        return false;
+                    }
+                }
+                
+                // We did it
+                return true;
+            }
         }
         
         // optimize sprite sheet size to as low as possible
@@ -388,7 +486,6 @@ namespace Invader {
         
         // Otherwise let's continue
         std::vector<std::vector<std::size_t>> sorted_sprites(sequence_count);
-        bool sequences_only_have_one_sprite = true;
         
         // Sort sprites from largest to smallest
         for(std::size_t si = 0; si < sequence_count; si++) {
@@ -396,9 +493,6 @@ namespace Invader {
             auto &sorted = sorted_sprites[si];
             auto sprite_count = seq.sprites.size();
             sorted.reserve(sprite_count);
-            
-            // If we have one or no sprites, this MIGHT stay true. Otherwise it gets set to false... FOREVER. MWAHAHAHA
-            sequences_only_have_one_sprite = sequences_only_have_one_sprite && sprite_count <= 1;
             
             for(std::size_t s = 0; s < sprite_count; s++) {
                 bool added = false;
@@ -408,8 +502,8 @@ namespace Invader {
                 for(auto &s_other : sorted) {
                     auto index_other = &s_other - sorted.data();
                     
-                    auto height_other = bitmap.bitmaps[seq.sprites[index_other].original_bitmap_index].height;
-                    if(height_other < height) {
+                    auto height_other = bitmap.bitmaps[seq.sprites[s_other].original_bitmap_index].height;
+                    if(height > height_other) {
                         added = true;
                         sorted.insert(sorted.begin() + index_other, s);
                         break;
@@ -421,59 +515,13 @@ namespace Invader {
             }
         }
         
-        // Sort sequences (if sequences only have one sprite in them)
-        std::vector<std::size_t> sequences;
-        sequences.reserve(sequence_count);
-        
-        // If so, we can sort sequences largest to smallest too!
-        if(sequences_only_have_one_sprite) {
-            for(std::size_t s = 0; s < sequence_count; s++) {
-                auto &our_sequence = bitmap.sequences[s].sprites;
-                if(our_sequence.empty()) {
-                    continue;
-                }
-                
-                auto sorted_sequence_count = sequences.size();
-                if(sorted_sequence_count == 0) {
-                    sequences.emplace_back(s);
-                    continue;
-                }
-                
-                // Get our sprite's height
-                auto our_sprite_is_in_the_middle_of_our_sheet = bitmap.bitmaps[bitmap.sequences[s].sprites[0].bitmap_index].height;
-                bool added = false;
-                
-                // Compare against all other sequence's height
-                for(std::size_t so = 0; so < sorted_sequence_count; so++) {
-                    auto their_sprite_is_in_the_middle_of_their_sheet = bitmap.bitmaps[bitmap.sequences[sequences[so]].sprites[0].bitmap_index].height;
-                    
-                    if(our_sprite_is_in_the_middle_of_our_sheet > their_sprite_is_in_the_middle_of_their_sheet) {
-                        sequences.insert(sequences.begin() + so, s);
-                        added = true;
-                        break;
-                    }
-                }
-                
-                if(!added) {
-                    sequences.emplace_back(s);
-                }
-            }
-        }
-        // Otherwise, this is numeric
-        else {
-            for(std::size_t s = 0; s < sequence_count; s++) {
-                sequences.emplace_back(s);
-            }
-        }
+        // Number of split across sprite sequences (hopefully zero but entirely possible)
+        std::size_t split_across = 0;
         
         // Place them now
-        std::size_t split_across = 0;
-        for(auto si : sequences) {
+        for(std::size_t si = 0; si < sequence_count; si++) {
             // Make a new sprite sheet if we have to
             SpriteSheet new_sprite_sheet(spacing, bitmap, max_length);
-            
-            // Make a backup if we can't
-            std::vector<SpriteSheet> backup;
             
             // Get our indices
             auto &sorted = sorted_sprites[si];
@@ -481,7 +529,7 @@ namespace Invader {
             // Try placing in existing sprite sheets
             for(auto &s : sprite_sheets) {
                 if(s.add_sequence_to_sheet(sorted, si)) {
-                    goto sequence_successfully_placed;
+                    goto sequence_successfully_placed; // insert spaghetti code meme here
                 }
             }
             
@@ -492,30 +540,30 @@ namespace Invader {
             }
             
             // If we can't put it in a new sprite sheet, try splitting across the sprite sheets
-            backup = sprite_sheets;
-            split_across++;
-            
-            // Add it one at a time?
-            for(auto sprite : sorted) {
-                bool sprite_placed = false;
-                auto sprite_vec = std::vector<std::size_t> { sprite };
+            else {
+                split_across++;
                 
-                for(auto &ss : sprite_sheets) {
-                    if(ss.add_sequence_to_sheet(sprite_vec, si)) {
-                        sprite_placed = true;
-                        break;
+                auto sprite_count = sorted.size();
+                auto make_new_sheet = [&spacing, &bitmap, &max_length, &sprite_sheets]() {
+                    return &sprite_sheets.emplace_back(spacing, bitmap, max_length);
+                };
+                auto *next_sheet = make_new_sheet();
+                
+                // Go through each sprite
+                for(std::size_t i = 0; i < sprite_count; i++) {
+                    auto sprite = sorted[i];
+                    
+                    // Attempt to add it to this sheet
+                    if(!next_sheet->add_sprite_to_sheet(sprite, si)) {
+                        // If we fail, move onto the next sheet                        
+                        next_sheet = make_new_sheet();
+                        
+                        // If we can't even fit it in a sheet by itself, then get rekt
+                        if(!next_sheet->add_sprite_to_sheet(sprite, si)) {
+                            eprintf_error("Could not fit all sprites in sequence %zu in %zux%zu sprite sheets", si, max_length, max_length);
+                            throw InvalidTagDataException();
+                        }
                     }
-                }
-                
-                // Try adding it in a new sprite
-                if(!sprite_placed && sprite_sheets.emplace_back(spacing, bitmap, max_length).add_sequence_to_sheet(sprite_vec, si)) {
-                    continue;
-                }
-                
-                // Guess not
-                if(!sprite_placed) {
-                    eprintf_error("Could not place all sprites in %zu %zux%zu sprite sheet%s", max_sheet_count, max_length, max_length, max_sheet_count == 1 ? "" : "s");
-                    throw InvalidTagDataException();
                 }
             }
             
