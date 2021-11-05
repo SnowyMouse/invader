@@ -245,7 +245,12 @@ namespace Invader {
             }
         }
         
-        bool add_sprite_to_sheet(std::size_t sprite, std::size_t sequence) {
+        bool add_sprite_to_sheet(std::size_t sprite, std::size_t sequence, bool *adding_requires_disabling_spacing = nullptr) {
+            // Default to false
+            if(adding_requires_disabling_spacing != nullptr) {
+                *adding_requires_disabling_spacing = false;
+            }
+            
             // If locked, don't add anymore sprites
             if(this->locked) {
                 return false;
@@ -256,6 +261,50 @@ namespace Invader {
                 this->sprites.emplace_back(*s);
                 return true;
             }
+            
+            // Check if we can add it without spacing
+            if(adding_requires_disabling_spacing != nullptr && this->sprites.empty()) {
+                auto old_spacing = this->spacing;
+                this->spacing = 0;
+                *adding_requires_disabling_spacing = this->best_place_to_add_sprite(sprite, sequence).has_value();
+                this->spacing = old_spacing;
+            }
+            
+            return false;
+        }
+        
+        bool add_sprite_to_sheet_without_spacing_and_lock(std::size_t sprite, std::size_t sequence) {
+            // We can't do that if there is already a sprite
+            if(!this->sprites.empty()) {
+                return false;
+            }
+            
+            // Check if we can do that
+            auto old_spacing = this->spacing;
+            this->spacing = 0;
+            if(this->add_sprite_to_sheet(sprite, sequence)) {
+                this->locked = true;
+                return true;
+            }
+            else {
+                this->spacing = old_spacing;
+                return false;
+            }
+        }
+        
+        bool add_sprite_to_sheet_and_lock_if_needed(std::size_t sprite, std::size_t sequence) {
+            // Add it. Check if it failed because we need to remove spacing
+            bool requires_disabling_spacing = false;
+            if(this->add_sprite_to_sheet(sprite, sequence, &requires_disabling_spacing)) {
+                return true; // success
+            }
+            
+            // If we can disable spacing and add it, do it
+            if(requires_disabling_spacing) {
+                this->add_sprite_to_sheet_without_spacing_and_lock(sprite, sequence);
+                return true;
+            }
+            
             return false;
         }
         
@@ -271,26 +320,7 @@ namespace Invader {
             if(new_sheet) {
                 // If we're only adding 1 sprite and we have no sprites, we can handle it a little different
                 if(sprite_indices.size() == 1) {
-                    // See if we can add it with spacing
-                    if(this->add_sprite_to_sheet(0, sequence)) {
-                        return true;
-                    }
-                    
-                    // Otherwise, try it without spacing.
-                    auto old_spacing = this->spacing;
-                    this->spacing = 0;
-                    
-                    // It works! But we have to lock the sheet since you can't possibly add any more sprites without readding padding thus making this first sprite not fit anymore
-                    if(this->add_sprite_to_sheet(0, sequence)) {
-                        this->locked = true;
-                        return true;
-                    }
-                    
-                    // Readd the spacing
-                    this->spacing = old_spacing;
-                    
-                    // Mission failed. We'll get 'em next time.
-                    return false;
+                    return this->add_sprite_to_sheet_and_lock_if_needed(0, sequence);
                 }
                 
                 // Try adding everything.
@@ -554,12 +584,12 @@ namespace Invader {
                     auto sprite = sorted[i];
                     
                     // Attempt to add it to this sheet
-                    if(!next_sheet->add_sprite_to_sheet(sprite, si)) {
+                    if(!next_sheet->add_sprite_to_sheet_and_lock_if_needed(sprite, si)) {
                         // If we fail, move onto the next sheet                        
                         next_sheet = make_new_sheet();
                         
                         // If we can't even fit it in a sheet by itself, then get rekt
-                        if(!next_sheet->add_sprite_to_sheet(sprite, si)) {
+                        if(!next_sheet->add_sprite_to_sheet_and_lock_if_needed(sprite, si)) {
                             eprintf_error("Could not fit all sprites in sequence %zu in %zux%zu sprite sheets", si, max_length, max_length);
                             throw InvalidTagDataException();
                         }
