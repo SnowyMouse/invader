@@ -110,19 +110,69 @@ namespace Invader {
                 // Otherwise, begin placing
                 auto old_x = this->x;
                 auto old_y = this->y;
-                for(this->y = 0; this->y <= y_end; this->y++) {
-                    for(this->x = 0; this->x <= x_end; this->x++) {
+                
+                // 0 sprites always succeeds
+                if(this->sheet->sprites.size() == 0) {
+                    this->x = 0;
+                    this->y = 0;
+                    return true;
+                }
+                
+                this->y = 0;
+                
+                auto sprites_level = this->sheet->sprites.begin();
+                auto sprites_end = this->sheet->sprites.end();
+                
+                auto &sprite = *this;
+                
+                auto search_row = [&x_end, &sprite]() {
+                    // Scan left to right
+                    for(sprite.x = 0; sprite.x <= x_end; sprite.x++) {
                         bool overlap_fail = false;
-                        for(auto &s : this->sheet->sprites) {
-                            if(s.overlaps(*this)) {
+                        for(auto &s : sprite.sheet->sprites) {
+                            if(s.overlaps(sprite)) {
                                 overlap_fail = true;
                                 break;
                             }
                         }
-                            
+                        
+                        // Success
                         if(!overlap_fail) {
                             return true;
                         }
+                    }
+                    
+                    // Fail
+                    return false;
+                };
+                
+                // Try packing it nicely
+                while(true) {
+                    // Scan left to right
+                    if(search_row()) {
+                        return true;
+                    }
+                    
+                    // Find the next y "level"
+                    bool found = false;
+                    for(auto &l = sprites_level; l != sprites_end; l++) {
+                        if(l->y == this->y) {
+                            this->y += l->effective_height();
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    // If we could not find one or it won't fit, break
+                    if(!found || this->y > y_end) {
+                        break;
+                    }
+                }
+                
+                // If that fails, try all rows then
+                for(this->y = 0; this->y <= y_end; this->y++) {
+                    if(search_row()) {
+                        return true;
                     }
                 }
                 
@@ -330,12 +380,25 @@ namespace Invader {
         
         // Sort sprites by height in descending order
         auto sequence_count = bitmap.sequences.size();
+        
+        // If we don't have any sequences, we're done
+        if(sequence_count == 0) {
+            return sprite_sheets;
+        }
+        
+        // Otherwise let's continue
         std::vector<std::vector<std::size_t>> sorted_sprites(sequence_count);
+        bool sequences_only_have_one_sprite = true;
+        
+        // Sort sprites from largest to smallest
         for(std::size_t si = 0; si < sequence_count; si++) {
             auto &seq = bitmap.sequences[si];
             auto &sorted = sorted_sprites[si];
             auto sprite_count = seq.sprites.size();
             sorted.reserve(sprite_count);
+            
+            // If we have one or no sprites, this MIGHT stay true. Otherwise it gets set to false... FOREVER. MWAHAHAHA
+            sequences_only_have_one_sprite = sequences_only_have_one_sprite && sprite_count <= 1;
             
             for(std::size_t s = 0; s < sprite_count; s++) {
                 bool added = false;
@@ -358,9 +421,54 @@ namespace Invader {
             }
         }
         
+        // Sort sequences (if sequences only have one sprite in them)
+        std::vector<std::size_t> sequences;
+        sequences.reserve(sequence_count);
+        
+        // If so, we can sort sequences largest to smallest too!
+        if(sequences_only_have_one_sprite) {
+            for(std::size_t s = 0; s < sequence_count; s++) {
+                auto &our_sequence = bitmap.sequences[s].sprites;
+                if(our_sequence.empty()) {
+                    continue;
+                }
+                
+                auto sorted_sequence_count = sequences.size();
+                if(sorted_sequence_count == 0) {
+                    sequences.emplace_back(s);
+                    continue;
+                }
+                
+                // Get our sprite's height
+                auto our_sprite_is_in_the_middle_of_our_sheet = bitmap.bitmaps[bitmap.sequences[s].sprites[0].bitmap_index].height;
+                bool added = false;
+                
+                // Compare against all other sequence's height
+                for(std::size_t so = 0; so < sorted_sequence_count; so++) {
+                    auto their_sprite_is_in_the_middle_of_their_sheet = bitmap.bitmaps[bitmap.sequences[sequences[so]].sprites[0].bitmap_index].height;
+                    
+                    if(our_sprite_is_in_the_middle_of_our_sheet > their_sprite_is_in_the_middle_of_their_sheet) {
+                        sequences.insert(sequences.begin() + so, s);
+                        added = true;
+                        break;
+                    }
+                }
+                
+                if(!added) {
+                    sequences.emplace_back(s);
+                }
+            }
+        }
+        // Otherwise, this is numeric
+        else {
+            for(std::size_t s = 0; s < sequence_count; s++) {
+                sequences.emplace_back(s);
+            }
+        }
+        
         // Place them now
         std::size_t split_across = 0;
-        for(std::size_t si = 0; si < sequence_count; si++) {
+        for(auto si : sequences) {
             // Make a new sprite sheet if we have to
             SpriteSheet new_sprite_sheet(spacing, bitmap, max_length);
             
