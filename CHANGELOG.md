@@ -10,6 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Added `auto` to `--format` which will default to the smallest,
   lossless output (i.e. monochrome if input is monochrome, 16-bit if it fits in
   a 16-bit color space, 32-bit otherwise)
+- invader-bitmap: Added `--reg-point-hack` which sets the
+  `filthy sprite bug fix` flag
 - invader-build: Added `mcc-cea` as a build target
 - invader-build: Added `--resource-path` which can specify a different path to
   load resource maps from

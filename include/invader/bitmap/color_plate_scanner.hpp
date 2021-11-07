@@ -33,8 +33,8 @@ namespace Invader {
         std::uint32_t width;
         std::uint32_t color_plate_x;
         std::uint32_t color_plate_y;
-        std::int32_t registration_point_x;
-        std::int32_t registration_point_y;
+        double registration_point_x;
+        double registration_point_y;
         std::uint32_t depth = 1;
         std::vector<Pixel> pixels;
         std::vector<GeneratedBitmapDataBitmapMipmap> mipmaps;
@@ -46,8 +46,8 @@ namespace Invader {
         std::uint32_t right;
         std::uint32_t bottom;
         std::uint32_t bitmap_index;
-        std::int32_t registration_point_x;
-        std::int32_t registration_point_y;
+        double registration_point_x;
+        double registration_point_y;
         std::uint32_t original_bitmap_index;
     };
 
@@ -74,13 +74,15 @@ namespace Invader {
          * @param  height             height of color plate
          * @param  type               type of bitmap
          * @param  usage              usage value for bitmap
+         * @param  reg_point_hack     ignore sequence dividers when calculating registration point
          */
         static GeneratedBitmapData scan_color_plate(
             const Pixel *pixels,
             std::uint32_t width,
             std::uint32_t height,
             BitmapType type,
-            BitmapUsage usage
+            BitmapUsage usage,
+            bool reg_point_hack
         );
 
     private:
@@ -129,8 +131,9 @@ namespace Invader {
          * @param generated_bitmap bitmap data to write to (output)
          * @param pixels           pixel input
          * @param width            width of input
+         * @param reg_point_hack   ignore sequence edges
          */
-        void read_color_plate(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width) const;
+        void read_color_plate(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, bool reg_point_hack) const;
 
         /**
          * Read an unrolled cubemap

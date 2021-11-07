@@ -86,6 +86,9 @@ struct BitmapOptions {
 
     // Generate this many mipmaps
     std::optional<std::uint16_t> max_mipmap_count;
+    
+    // Filthy sprite bug fix?
+    std::optional<bool> filthy_sprite_bug_fix;
 
     // Ignore the tag data?
     bool ignore_tag_data = false;
@@ -156,6 +159,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(!bitmap_options.sprite_spacing.has_value()) {
             bitmap_options.sprite_spacing = bitmap_tag_data.sprite_spacing;
         }
+        if(!bitmap_options.filthy_sprite_bug_fix.has_value()) {
+            bitmap_options.filthy_sprite_bug_fix = (bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) != 0;
+        }
         
         // Clear existing data
         bitmap_tag_data.bitmap_data.clear();
@@ -188,6 +194,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     DEFAULT_VALUE(bitmap_options.dithering,false);
     DEFAULT_VALUE(bitmap_options.dither_alpha,false);
     DEFAULT_VALUE(bitmap_options.dither_color,false);
+    DEFAULT_VALUE(bitmap_options.filthy_sprite_bug_fix,false);
     DEFAULT_VALUE(bitmap_options.sprite_spacing,0);
 
     #undef DEFAULT_VALUE
@@ -285,7 +292,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Do it!
     auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
         try {
-            auto scanned_data = ColorPlateScanner::scan_color_plate(image_pixels.data(), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value());
+            auto scanned_data = ColorPlateScanner::scan_color_plate(image_pixels.data(), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), *bitmap_options.filthy_sprite_bug_fix);
             BitmapProcessor::process_bitmap_data(scanned_data, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
             return scanned_data;
         }
@@ -394,7 +401,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     bitmap_tag_data.encoding_format = bitmap_options.format.value();
     bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
     bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
-    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
+    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) | 
+                            (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | 
+                            (*bitmap_options.filthy_sprite_bug_fix ? HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX : 0);
     if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
         bitmap_tag_data.mipmap_count = 0;
     }
@@ -463,6 +472,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
     options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha_blend, default, height_map, detail_map, light_map, vector_map. Default: default", "<usage>");
+    options.emplace_back("reg-point-hack", 'r', 1, "Ignore sequence borders when calculating registration point (AKA 'filthy sprite bug fix'). Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data.");
 
@@ -539,6 +549,19 @@ int main(int argc, char *argv[]) {
                 }
                 catch(std::exception &) {
                     eprintf_error("Invalid bitmap type %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+            
+            case 'r':
+                if(std::strcmp(arguments[0], "on") == 0) {
+                    bitmap_options.filthy_sprite_bug_fix = true;
+                }
+                else if(std::strcmp(arguments[0], "off") == 0) {
+                    bitmap_options.filthy_sprite_bug_fix = false;
+                }
+                else {
+                    eprintf_error("Unknown registration point hack setting %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;

@@ -219,6 +219,9 @@ Options:
   -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
                                off or on. Default (new tag): off
   -P --fs-path                 Use a filesystem path for the data.
+  -r --reg-point-hack <val>    Ignore sequence borders when calculating
+                               registration point (AKA 'filthy sprite bug
+                               fix'). Can be: off or on. Default (new tag): off
   -R --regenerate              Use the bitmap tag's compressed color plate data
                                as data.
   -s --mipmap-scale <type>     Mipmap scale type. This does not save in .bitmap

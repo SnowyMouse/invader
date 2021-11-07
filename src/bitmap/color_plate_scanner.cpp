@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <cassert>
 #include <optional>
 #include <algorithm>
 
@@ -21,7 +22,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, bool reg_point_hack) {
         // We don't support this yet
         if(usage == BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
             eprintf_error("Vector maps are not supported at this time");
@@ -161,7 +162,7 @@ namespace Invader {
 
         // If we have valid color plate data, use the color plate data
         if(valid_color_plate_key) {
-            scanner.read_color_plate(generated_bitmap, pixels, width);
+            scanner.read_color_plate(generated_bitmap, pixels, width, reg_point_hack);
         }
 
         // Otherwise, read as one bitmap
@@ -187,7 +188,7 @@ namespace Invader {
         return generated_bitmap;
     }
 
-    void ColorPlateScanner::read_color_plate(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width) const {
+    void ColorPlateScanner::read_color_plate(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, bool reg_point_hack) const {
         for(auto &sequence : generated_bitmap.sequences) {
             sequence.first_bitmap = generated_bitmap.bitmaps.size();
             sequence.bitmap_count = 0;
@@ -198,7 +199,7 @@ namespace Invader {
             const std::uint32_t Y_END = sequence.y_end;
 
             // This is used for the registration point
-            const std::int32_t MID_Y = divide_by_two_round(static_cast<std::int32_t>(Y_START + Y_END));
+            const double MID_Y = (static_cast<double>(Y_START) + static_cast<double>(Y_END)) / 2.0;
 
             // Go through each pixel
             for(std::uint32_t x = 0; x < X_END; x++) {
@@ -312,15 +313,40 @@ namespace Invader {
                     bitmap.height = bitmap_height;
                     bitmap.color_plate_x = min_x.value();
                     bitmap.color_plate_y = min_y.value();
+                    
+                    assert(min_x.has_value());
+                    assert(min_y.has_value());
+                    assert(virtual_min_x.has_value());
+                    assert(virtual_min_y.has_value());
+                    
+                    assert(max_x.has_value());
+                    assert(max_y.has_value());
+                    assert(virtual_max_x.has_value());
+                    assert(virtual_max_y.has_value());
+                    
+                    auto min_x_f = static_cast<double>(*min_x);
+                    auto min_y_f = static_cast<double>(*min_y);
+                    auto virtual_min_x_f = static_cast<double>(*virtual_min_x);
+                    auto virtual_min_y_f = static_cast<double>(*virtual_min_y);
+                    
+                    //auto max_x_f = static_cast<double>(*max_x);
+                    //auto max_y_f = static_cast<double>(*max_y);
+                    auto virtual_max_x_f = static_cast<double>(*virtual_max_x);
+                    auto virtual_max_y_f = static_cast<double>(*virtual_max_y);
 
                     // Calculate registration point.
-                    const std::int32_t MID_X = divide_by_two_round(static_cast<std::int32_t>(1 + virtual_max_x.value() + virtual_min_x.value()));
+                    const double MID_X = (virtual_max_x_f + virtual_min_x_f) / 2.0;
 
                     // The x point is the midpoint of the width of the bitmap and cyan stuff relative to the left
-                    bitmap.registration_point_x = MID_X - static_cast<std::int32_t>(min_x.value());
+                    bitmap.registration_point_x = MID_X - min_x_f + 0.5;
 
-                    // The x point is the midpoint of the height of the entire sequence relative to the top
-                    bitmap.registration_point_y = MID_Y - static_cast<std::int32_t>(min_y.value());
+                    // The y point is the midpoint of the height of the entire sequence relative to the top (or if we have the reg point hack, relative to the top of the bitmap itself)
+                    if(!reg_point_hack) {
+                        bitmap.registration_point_y = MID_Y - min_y_f + 0.5;
+                    }
+                    else {
+                        bitmap.registration_point_y = virtual_min_y_f - min_y_f + (virtual_max_y_f - virtual_min_y_f) / 2.0 + 0.5;
+                    }
 
                     // Load the pixels
                     for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
