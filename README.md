@@ -195,6 +195,8 @@ Usage: invader-bitmap [options] <bitmap-tag>
 Create or modify a bitmap tag.
 
 Options:
+  -A --alpha-bias <bias>       Set the alpha bias from -1.0 to 1.0. Default
+                               (new tag): 0.0
   -B --budget <length>         Set the maximum length of a sprite sheet. Can be
                                32, 64, 128, 256, 512, or 1024. Default (new
                                tag): 32
@@ -211,7 +213,7 @@ Options:
                                will be replaced with the best lossless format.
                                Default (new tag): auto
   -h --help                    Show this list of options.
-  -H --bump-height <height>    Set the apparent bumpmap height from 0 to 1.
+  -H --bump-height <height>    Set the apparent bumpmap height from 0.0 to 1.0.
                                Default (new tag): 0.026
   -i --info                    Show license and credits.
   -I --ignore-tag              Ignore the tag data if the tag exists.

@@ -28,6 +28,7 @@ namespace Invader {
          * @param  mipmap_fade_factor fade-to-gray factor for mipmaps
          * @param  sharpen            sharpening filter
          * @param  blur               blur filter
+         * @param  alpha_bias         alpha bias filter
          * @return                    scanned color plate data
          */
         static void process_bitmap_data(
@@ -40,7 +41,8 @@ namespace Invader {
             BitmapMipmapScaleType mipmap_type,
             std::optional<float> mipmap_fade_factor,
             std::optional<float> sharpen,
-            std::optional<float> blur
+            std::optional<float> blur,
+            std::optional<float> alpha_bias
         );
         
     private:
@@ -60,9 +62,10 @@ namespace Invader {
          * @param mipmap_type        scaling filter to use for mipmaps
          * @param mipmap_fade_factor fade-to-gray factor for mipmaps
          * @param sharpen            sharpen filter
+         * @param alpha_bias         alpha bias
          * @param usage              bitmap usage value
          */
-        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage);
+        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur, std::optional<float> alpha_bias, BitmapUsage usage);
 
         /**
          * Consolidate the stacked bitmap data (cubemaps and 3d textures)

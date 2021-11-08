@@ -12,6 +12,7 @@ This is used for recording Invader's changes. This changelog is based on
   a 16-bit color space, 32-bit otherwise)
 - invader-bitmap: Added `--reg-point-hack` which sets the
   `filthy sprite bug fix` flag
+- invader-bitmap: Added `--alpha-bias` which sets alpha bias
 - invader-build: Added `mcc-cea` as a build target
 - invader-build: Added `--resource-path` which can specify a different path to
   load resource maps from

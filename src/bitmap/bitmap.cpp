@@ -83,6 +83,7 @@ struct BitmapOptions {
     // Sharpen and blur; legacy support for older tags and should not be used in newer ones
     std::optional<float> sharpen;
     std::optional<float> blur;
+    std::optional<float> alpha_bias;
 
     // Generate this many mipmaps
     std::optional<std::uint16_t> max_mipmap_count;
@@ -162,6 +163,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(!bitmap_options.filthy_sprite_bug_fix.has_value()) {
             bitmap_options.filthy_sprite_bug_fix = (bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) != 0;
         }
+        if(!bitmap_options.alpha_bias.has_value()) {
+            bitmap_options.alpha_bias = bitmap_tag_data.alpha_bias;
+        }
         
         // Clear existing data
         bitmap_tag_data.bitmap_data.clear();
@@ -191,6 +195,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     DEFAULT_VALUE(bitmap_options.palettize,false);
     DEFAULT_VALUE(bitmap_options.bump_height,0.026F);
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
+    DEFAULT_VALUE(bitmap_options.alpha_bias,0.0F);
     DEFAULT_VALUE(bitmap_options.dithering,false);
     DEFAULT_VALUE(bitmap_options.dither_alpha,false);
     DEFAULT_VALUE(bitmap_options.dither_color,false);
@@ -293,7 +298,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
         try {
             auto scanned_data = ColorPlateScanner::scan_color_plate(image_pixels.data(), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), *bitmap_options.filthy_sprite_bug_fix);
-            BitmapProcessor::process_bitmap_data(scanned_data, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
+            BitmapProcessor::process_bitmap_data(scanned_data, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur, bitmap_options.alpha_bias);
             return scanned_data;
         }
         catch (std::exception &e) {
@@ -401,6 +406,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     bitmap_tag_data.encoding_format = bitmap_options.format.value();
     bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
     bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
+    bitmap_tag_data.alpha_bias = bitmap_options.alpha_bias.value_or(0.0F);
     bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) | 
                             (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | 
                             (*bitmap_options.filthy_sprite_bug_fix ? HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX : 0);
@@ -470,7 +476,8 @@ int main(int argc, char *argv[]) {
     options.emplace_back("budget-count", 'C', 1, "Multiply the maximum length squared to set the maximum number of pixels. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
     options.emplace_back("square-sheets", 'S', 0, "Force square sprite sheets (works around particles being incorrectly stretched).");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
-    options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
+    options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0.0 to 1.0. Default (new tag): 0.026", "<height>");
+    options.emplace_back("alpha-bias", 'A', 1, "Set the alpha bias from -1.0 to 1.0. Default (new tag): 0.0", "<bias>");
     options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha_blend, default, height_map, detail_map, light_map, vector_map. Default: default", "<usage>");
     options.emplace_back("reg-point-hack", 'r', 1, "Ignore sequence borders when calculating registration point (AKA 'filthy sprite bug fix'). Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
@@ -484,6 +491,14 @@ int main(int argc, char *argv[]) {
         switch(opt) {
             case 'd':
                 bitmap_options.data = arguments[0];
+                break;
+                
+            case 'A':
+                bitmap_options.alpha_bias = std::strtof(arguments[0], nullptr);
+                if(bitmap_options.alpha_bias < -1.0F || bitmap_options.alpha_bias > 1.0F) {
+                    eprintf_error("Alpha bias must be between -1.0 and 1.0");
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
 
             case 't':
@@ -505,7 +520,7 @@ int main(int argc, char *argv[]) {
             case 'f':
                 bitmap_options.mipmap_fade = std::strtof(arguments[0], nullptr);
                 if(bitmap_options.mipmap_fade < 0.0F || bitmap_options.mipmap_fade > 1.0F) {
-                    eprintf_error("Mipmap fade must be between 0-1");
+                    eprintf_error("Mipmap fade must be between 0.0 and 1.0");
                     std::exit(EXIT_FAILURE);
                 }
                 break;

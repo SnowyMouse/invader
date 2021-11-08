@@ -13,7 +13,8 @@ namespace Invader {
         BitmapMipmapScaleType mipmap_type,
         std::optional<float> mipmap_fade_factor,
         std::optional<float> sharpen,
-        std::optional<float> blur) {
+        std::optional<float> blur,
+        std::optional<float> alpha_bias) {
         
         BitmapProcessor processor;
         processor.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
@@ -170,7 +171,7 @@ namespace Invader {
 
         // If we aren't making interface bitmaps, generate mipmaps when needed
         if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && usage != BitmapUsage::BITMAP_USAGE_LIGHT_MAP) {
-            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor, sharpen, blur, usage);
+            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor, sharpen, blur, alpha_bias, usage);
         }
 
         // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data. 3D textures work similarly
@@ -250,7 +251,7 @@ namespace Invader {
         }
     }
 
-    void BitmapProcessor::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
+    void BitmapProcessor::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, BitmapMipmapScaleType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur, std::optional<float> alpha_bias, BitmapUsage usage) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
         
@@ -542,6 +543,22 @@ namespace Invader {
                         Pixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
                         *first = first->alpha_blend(FADE_TO_GRAY);
 
+                        first++;
+                    }
+                }
+            }
+            
+            // Alpha bias
+            if(alpha_bias.has_value()) {
+                std::size_t mipmap_count = bitmap.mipmaps.size();
+                for(std::size_t m = 0; m < mipmap_count; m++) {
+                    auto &mipmap = bitmap.mipmaps[m];
+                    Pixel *first = bitmap.pixels.data() + mipmap.first_pixel;
+                    auto *last = first + mipmap.pixel_count;
+                    float delta = *alpha_bias * UINT8_MAX * (m + 1) / mipmap_count;
+                    
+                    while(first < last) {
+                        first->alpha = std::max(0, std::min(UINT8_MAX, static_cast<int>(delta + first->alpha + 0.5)));
                         first++;
                     }
                 }
