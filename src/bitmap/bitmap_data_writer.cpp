@@ -97,7 +97,7 @@ namespace Invader {
             // Get the data
             std::vector<std::byte> current_bitmap_pixels(reinterpret_cast<const std::byte *>(bitmap_color_plate.pixels.data()), reinterpret_cast<const std::byte *>(bitmap_color_plate.pixels.data() + bitmap_color_plate.pixels.size()));
             auto *first_pixel = reinterpret_cast<Pixel *>(current_bitmap_pixels.data());
-            bitmap.format = BitmapEncode::most_efficient_format(current_bitmap_pixels.data(), bitmap.width, bitmap.height, bitmap.depth, *format, bitmap.type);
+            bitmap.format = BitmapEncode::most_efficient_format(current_bitmap_pixels.data(), bitmap.width, bitmap.height, bitmap.depth, *format, bitmap.type, mipmap_count);
 
             // Set the format
             bool compressed = (format == BitmapFormat::BITMAP_FORMAT_DXT1 || format == BitmapFormat::BITMAP_FORMAT_DXT3 || format == BitmapFormat::BITMAP_FORMAT_DXT5);
