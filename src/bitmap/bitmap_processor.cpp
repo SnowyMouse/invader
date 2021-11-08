@@ -541,8 +541,10 @@ namespace Invader {
                         }
 
                         Pixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
+                        auto old_alpha = first->alpha;
+                        first->alpha = 0xFF;
                         *first = first->alpha_blend(FADE_TO_GRAY);
-
+                        first->alpha = old_alpha;
                         first++;
                     }
                 }

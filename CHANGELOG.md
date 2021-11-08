@@ -71,6 +71,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-archive: Fixed creating empty archives if all tags were excluded
 - invader-bitmap: Fixed first bitmap index not being a valid bitmap
 - invader-bitmap: Fixed an infinite loop with `-P`
+- invader-bitmap: Fixed fade-to-gray unevenly being applied on semitransparent
+  pixels
 - invader-compare: Fixed precision checking ignoring floating point numbers
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
   being defaulted to -1. It is no longer allowed to set these to -1, either, as
