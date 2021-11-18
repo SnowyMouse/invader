@@ -14,7 +14,7 @@ from check_invalid_indices import make_check_invalid_indices
 from check_normalize import make_normalize
 from scan_padding import make_scan_padding
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_read_hek_file, cpp_scan_padding):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, hpp, cpp_save_hek_data, cpp_read_hek_data, cpp_read_cache_file_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_read_hek_file, cpp_scan_padding):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
