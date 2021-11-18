@@ -145,17 +145,8 @@ with open(sys.argv[1], "w") as f:
         with open(sys.argv[bitfield_cpp+1], "w") as ecpp:
             make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arranged)
 
-with open(sys.argv[2], "w") as hpp:
-    with open(sys.argv[3], "w") as cpp_save_hek_data:
-        with open(sys.argv[4], "w") as cpp_read_hek_data:
-            with open(sys.argv[5], "w") as cpp_read_cache_file_data:
-                with open(sys.argv[6], "w") as cpp_cache_format_data:
-                    with open(sys.argv[7], "w") as cpp_cache_deformat_data:
-                        with open(sys.argv[8], "w") as cpp_refactor_reference:
-                            with open(sys.argv[9], "w") as cpp_struct_value:
-                                with open(sys.argv[10], "w") as cpp_check_invalid_ranges:
-                                    with open(sys.argv[11], "w") as cpp_check_invalid_indices:
-                                        with open(sys.argv[12], "w") as cpp_normalize:
-                                            with open(sys.argv[13], "w") as cpp_hek_file:
-                                                with open(sys.argv[14], "w") as cpp_scan_padding:
-                                                    make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, hpp, cpp_save_hek_data, cpp_read_hek_data, cpp_read_cache_file_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_normalize, cpp_hek_file, cpp_scan_padding)
+parser_files = map(lambda fname: open(fname, "w"), sys.argv[2:15])
+make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs,
+            *parser_files)
+for f in parser_files:
+    f.close()
