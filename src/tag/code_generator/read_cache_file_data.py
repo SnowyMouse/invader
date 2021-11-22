@@ -50,12 +50,13 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                     
             elif struct["type"] == "TagReflexive":
                 cpp_read_cache_file_data.write("        std::size_t l_{}_count = l.{}.count.read();\n".format(name, name))
-                cpp_read_cache_file_data.write("        r.{}.reserve(l_{}_count);\n".format(name, name))
-                cpp_read_cache_file_data.write("        if(l_{}_count > 0) {{\n".format(name))
+                cpp_read_cache_file_data.write("        auto l_{}_pointer = l.{}.pointer.read();\n".format(name, name))
+                cpp_read_cache_file_data.write("        if(l_{}_count > 0 && l_{}_pointer != 0) {{\n".format(name, name))
                 if "zero_on_index" in struct and struct["zero_on_index"]:
-                    cpp_read_cache_file_data.write("            auto l_{}_ptr = tag.is_indexed() ? 0 : l.{}.pointer.read();\n".format(name, name))
+                    cpp_read_cache_file_data.write("            auto l_{}_ptr = tag.is_indexed() ? 0 : l_{}_pointer;\n".format(name, name))
                 else:
-                    cpp_read_cache_file_data.write("            auto l_{}_ptr = l.{}.pointer;\n".format(name, name))
+                    cpp_read_cache_file_data.write("            auto l_{}_ptr = l_{}_pointer;\n".format(name, name))
+                cpp_read_cache_file_data.write("            r.{}.reserve(l_{}_count);\n".format(name, name))
                 cpp_read_cache_file_data.write("            for(std::size_t i = 0; i < l_{}_count; i++) {{\n".format(name))
                 cpp_read_cache_file_data.write("                try {\n")
                 cpp_read_cache_file_data.write("                    r.{}.emplace_back({}::parse_cache_file_data(tag, l_{}_ptr + i * sizeof({}::struct_little)));\n".format(name, struct["struct"], name, struct["struct"]))
