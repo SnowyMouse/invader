@@ -19,6 +19,7 @@
 #include "../../tree/tag_tree_dialog.hpp"
 #include <invader/bitmap/pixel.hpp>
 #include "tag_editor_array_widget.hpp"
+#include <cassert>
 
 #define INTERNAL_VALUE "internal-value"
 
@@ -94,6 +95,7 @@ namespace Invader::EditQt {
         this->setLayout(layout);
         std::size_t value_index = 0;
         auto &widgets_array = this->widgets;
+        
         auto values = value->get_values();
         auto &textbox_widgets = this->textbox_widgets;
         auto &read_only = this->read_only;
@@ -102,10 +104,17 @@ namespace Invader::EditQt {
         auxiliary_widget = nullptr;
 
         auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox, &this_widget]() {
-            auto add_single_textbox = [&value, &value_index, &widgets_array, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, QLayout *layout, const char *prefix = nullptr) -> QLineEdit * {
+            auto add_simple_textbox = [&widgets_array, &standard_width, &textbox_widgets](int size, QLayout *layout) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
-
+                int width = standard_width * size;
+                textbox_widgets.emplace_back(textbox);
+                textbox->setMinimumWidth(width);
+                layout->addWidget(textbox);
+                return textbox;
+            };
+            
+            auto add_single_textbox = [&value, &value_index, &widgets_array, &values, &label_width, &prefix_label_width, &read_only, &add_simple_textbox](int size, QLayout *layout, const char *prefix = nullptr) -> QLineEdit * {
                 // If we've got a prefix, set it
                 if(prefix) {
                     auto *label = reinterpret_cast<QLabel *>(widgets_array.emplace_back(new QLabel()));
@@ -120,16 +129,16 @@ namespace Invader::EditQt {
                         label_width -= prefix_label_width + layout->spacing();
                     }
                 }
-
-                // Parameters for textbox
-                int width = standard_width * size;
-                textbox_widgets.emplace_back(textbox);
-                textbox->setMinimumWidth(width);
-                layout->addWidget(textbox);
+                
+                // Make our textbox
+                auto *textbox = add_simple_textbox(size, layout);
                 
                 // Get the minimum and maximum
                 auto min = value->get_minimum();
                 auto max = value->get_maximum();
+                
+                assert(value_index < values.size());
+                
                 auto &current_value = values[value_index];
                 set_error_level_textbox(textbox, ((min.has_value() && compare_number(current_value, min.value()) < 0) || (max.has_value() && compare_number(current_value, max.value()) > 0)) ? 2 : 0);
 
@@ -211,7 +220,7 @@ namespace Invader::EditQt {
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-                    add_single_textbox(8, layout);
+                    add_simple_textbox(8, layout);
                     break;
 
                 // Some more complex stuff with multiple boxes
@@ -349,7 +358,7 @@ namespace Invader::EditQt {
                     layout->addWidget(combobox);
 
                     // Next, the textbox
-                    auto *textbox = add_single_textbox(8, layout);
+                    auto *textbox = add_simple_textbox(8, layout);
 
                     // Next, get our thing
                     auto &dependency = value->get_dependency();
