@@ -167,9 +167,6 @@ namespace Invader::EditQt {
 
         /** We're done */
         void tag_count_changed(std::pair<std::mutex, std::size_t> *count);
-
-        /** Show the sauce! */
-        void show_source_code();
         
         /** Set count label */
         void set_count_label(std::size_t count);
@@ -177,6 +174,9 @@ namespace Invader::EditQt {
         #ifdef SHOW_NIGHTLY_LINK
         /** Nightly build? */
         void show_nightly_build();
+
+        /** Show the sauce! */
+        void show_source_code();
         #endif
 
         enum : std::size_t {

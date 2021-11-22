@@ -87,11 +87,12 @@ namespace Invader::EditQt {
 
         help_menu->addSeparator();
 
+        // Source and binary buttons are only relevant if we're on a nightly build, as building from source may make these inconsistent with what code was used
+        #ifdef SHOW_NIGHTLY_LINK
         auto *source = help_menu->addAction("View source code...");
         source->setIcon(QIcon::fromTheme(QStringLiteral("help-about")));
         connect(source, &QAction::triggered, this, &TagTreeWindow::show_source_code);
-
-        #ifdef SHOW_NIGHTLY_LINK
+        
         auto *nightly = help_menu->addAction("Nightly builds...");
         connect(nightly, &QAction::triggered, this, &TagTreeWindow::show_nightly_build);
         #endif
@@ -686,11 +687,11 @@ namespace Invader::EditQt {
         }
     }
 
+    #ifdef SHOW_NIGHTLY_LINK
     void TagTreeWindow::show_source_code() {
         QDesktopServices::openUrl(QUrl::fromUserInput("https://github.com/SnowyMouse/invader"));
     }
 
-    #ifdef SHOW_NIGHTLY_LINK
     void TagTreeWindow::show_nightly_build() {
         QDesktopServices::openUrl(QUrl::fromUserInput("https://invader.opencarnage.net/builds/nightly/download-latest.html"));
     }
