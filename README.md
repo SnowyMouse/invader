@@ -513,6 +513,8 @@ Edit tag files.
 Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
+  -L --listing-mode            Set the listing behavior. Can be: fast,
+                               recursive (default: fast)
   -n --no-safeguards           Allow all tag data to be edited (proceed at your
                                own risk)
   -P --fs-path                 Use a filesystem path for the tag path if

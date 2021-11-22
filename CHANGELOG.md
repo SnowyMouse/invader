@@ -49,6 +49,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Changed `--build-version` to `--build-string`
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
   directories to the tag's current directory
+- invader-edit-qt: Changed listing mode to always be "fast" by default. This
+  drastically improves performance on WSL
 - invader-model: "Legacy" mode is now the only option as, while it's not very
   sane, the workflow of making a map currently fully depends on it. -L was also
   removed.
