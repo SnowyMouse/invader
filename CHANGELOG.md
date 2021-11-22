@@ -84,6 +84,8 @@ This is used for recording Invader's changes. This changelog is based on
   directories are used)
 - invader-edit-qt: Fixed switching between monochrome and RGB bitmaps in the
   bitmap previewer breaking the colors menu
+- invader-edit-qt: Fixed an out-of-bounds crash that occurs on newer Arch Linux
+  installations (this issue always existed but was never caught until recently!)
 - invader-model: Fixed "unnamed" not being renamed to "__unnamed". This probably
   did not do anything useful, but tool.exe does this, so we have to as well.
 - invader-recover: Fixed alpha channel not being tagged correctly as an extra
