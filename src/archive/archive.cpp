@@ -15,6 +15,32 @@
 
 #include "../build/build.hpp"
 
+struct Format {
+    const char *name;
+    const char *extension;
+    int (*filter)(archive *a);
+    int (*format)(archive *a);
+};
+
+static const constexpr Format formats[] = {
+    {"7z", ".7z", nullptr, archive_write_set_format_7zip},
+    {"tar-gz", ".tar.xz", archive_write_add_filter_gzip, archive_write_set_format_pax_restricted},
+    {"tar-xz", ".tar.xz", archive_write_add_filter_xz, archive_write_set_format_pax_restricted},
+    {"tar-zst", ".tar.zst", archive_write_add_filter_zstd, archive_write_set_format_pax_restricted},
+    {"zip", ".zip", nullptr, archive_write_set_format_zip}
+};
+
+static std::string list_formats() {
+    std::string f;
+    for(auto &format : formats) {
+        if(!f.empty()) {
+            f = f + ", ";
+        }
+        f = f + format.name;
+    }
+    return f;
+}
+
 int main(int argc, const char **argv) {
     using namespace Invader;
     
@@ -29,14 +55,17 @@ int main(int argc, const char **argv) {
         bool verbose = false;
         bool overwrite = false;
         std::optional<HEK::GameEngine> engine;
+        const Format *format = &formats[0];
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
     static constexpr char USAGE[] = "[options] <scenario | -s tag.class>";
     
     std::string game_engine_arguments = std::string("Specify the game engine. This option is required. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
-
+    std::string formats_argument = std::string("Specify format. Valid formats are: ") + list_formats() + ". Default format is 7z";
+    
     std::vector<CommandLineOption> options;
+    options.emplace_back("format", 'F', 1, formats_argument.c_str(), "<format>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
@@ -51,6 +80,21 @@ int main(int argc, const char **argv) {
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
+            case 'F': {
+                bool found = false;
+                for(auto &f : formats) {
+                    if(std::strcmp(arguments[0], f.name) == 0) {
+                        archive_options.format = &f;
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    eprintf_error("Unknown archive format %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+            }
             case 't':
                 archive_options.tags.push_back(arguments[0]);
                 break;
@@ -140,15 +184,16 @@ int main(int argc, const char **argv) {
     std::vector<std::pair<std::filesystem::path, std::string>> archive_list;
 
     // If no output filename was given, make one
-    static const char extension[] = ".tar.xz";
+    const char *extension = archive_options.format->extension;
     if(archive_options.output.size() == 0) {
         // Set output
         archive_options.output = File::base_name(base_tag.data()) + ((archive_options.copy) ? "" : extension);
     }
     else {
         bool fail = true;
-        if(archive_options.output.size() > sizeof(extension)) {
-            fail = std::strcmp(archive_options.output.c_str() + archive_options.output.size() - sizeof(extension) + 1, extension) != 0;
+        auto extension_len = std::strlen(extension);
+        if(archive_options.output.size() > extension_len) {
+            fail = std::strcmp(archive_options.output.c_str() + archive_options.output.size() - extension_len + 1, extension) != 0;
         }
 
         if(!archive_options.copy) {
@@ -334,8 +379,12 @@ int main(int argc, const char **argv) {
     if(!archive_options.copy) {
         // Begin making the archive
         auto *archive = archive_write_new();
-        archive_write_add_filter_xz(archive);
-        archive_write_set_format_pax_restricted(archive);
+        if(archive_options.format->filter) {
+            archive_options.format->filter(archive);
+        }
+        if(archive_options.format->format) {
+            archive_options.format->format(archive);
+        }
         archive_write_open_filename(archive, archive_options.output.c_str());
 
         // Go through each tag path we got

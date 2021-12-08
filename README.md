@@ -163,6 +163,8 @@ Options:
                                in the specified directory and are functionally
                                the same. Use multiple times to exclude multiple
                                directories.
+  -F --format <format>         Specify format. Valid formats are: 7z, tar-gz,
+                               tar-xz, tar-zst, zip. Default format is 7z
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: gbx-custom,
                                gbx-demo, gbx-retail, mcc-cea, native,
@@ -180,6 +182,8 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+  -v --verbose                 Print whether or not tags are omitted, Do
+                               verbose comparisons.
 ```
 
 ### invader-bitmap
