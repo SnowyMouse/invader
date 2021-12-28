@@ -88,6 +88,7 @@ This is used for recording Invader's changes. This changelog is based on
   installations (this issue always existed but was never caught until recently!)
 - invader-model: Fixed "unnamed" not being renamed to "__unnamed". This probably
   did not do anything useful, but tool.exe does this, so we have to as well.
+- invader-model: Fixed an incorrect region index being set for some models
 - invader-recover: Fixed alpha channel not being tagged correctly as an extra
   sample when making TIFFs
 

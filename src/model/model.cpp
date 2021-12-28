@@ -175,16 +175,12 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             }
         }
         
-        auto triangle_count = jms_data_copy.triangles.size();
-        auto marker_count = jms_data_copy.markers.size();
-        
         // Add any regions it may have
         for(std::size_t i = 0; i < region_count; i++) {
             auto &r = jms_data_copy.regions[i];
-            std::size_t new_region_index = 0;
             auto iterator = regions.begin();
             bool has_it = false;
-            for(; iterator != regions.end(); iterator++, new_region_index++) {
+            for(; iterator != regions.end(); iterator++) {
                 // The regions already exists
                 if(r.name == *iterator) {
                     has_it = true;
@@ -200,18 +196,6 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             // Add the new region if it doesn't exist
             if(!has_it) {
                 regions.insert(iterator, r.name);
-            }
-            
-            // Fix all the triangles and markers to point to the new region
-            for(std::size_t t = 0; t < triangle_count; t++) {
-                if(jms.second.triangles[t].region == i) {
-                    jms_data_copy.triangles[t].region = new_region_index;
-                }
-            }
-            for(std::size_t m = 0; m < marker_count; m++) {
-                if(jms.second.markers[m].region == i) {
-                    jms_data_copy.markers[m].region = new_region_index;
-                }
             }
         }
         
@@ -298,6 +282,30 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         
         permutation_map.emplace(lod, jms_data_copy); // Now add it
     }
+    
+    // Next, fix region indices to point to the new region
+    auto region_count = regions.size();
+    for(auto &p : permutations) {
+        for(auto &jms_pair : p.second) {
+            auto &jms = jms_pair.second;
+            std::map<std::size_t, std::size_t> region_translations;
+            
+            auto jms_region_count = jms.regions.size();
+            for(std::size_t jreg = 0; jreg < jms_region_count; jreg++) {
+                for(std::size_t reg = 0; reg < region_count; reg++) {
+                    if(jms.regions[jreg].name == regions[reg]) {
+                        region_translations[jreg] = reg;
+                        break;
+                    }
+                }
+            }
+            
+            for(auto &t : jms.triangles) {
+                t.region = region_translations[t.region];
+            }
+        }
+    }
+    
     
     // List permutations
     auto permutation_count = permutations.size();
