@@ -500,8 +500,8 @@ namespace Invader {
                 warn_on_zero_alpha = warn_on_zero_alpha || has_zero_alpha_and_alpha_blend_usage;
             }
 
-            // Do fade-to-gray for each mipmap
-            if(mipmap_fade_factor.has_value()) {
+            // Do fade-to-gray for each mipmap (TODO: CHECK HOW THIS WORKS WITH ALL BITMAP USAGES)
+            if(usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP && mipmap_fade_factor.has_value()) {
                 std::size_t mipmap_count = bitmap.mipmaps.size();
                 float mipmap_count_plus_one = mipmap_count + 1.0F; // although Guerilla only mentions mipmaps in the fade-to-gray stuff, it includes the first bitmap in the calculation
                 float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(fade) * (mipmap_count_plus_one - 1.0F + (1.0F - fade)); // excuse me what the fuck
