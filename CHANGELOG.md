@@ -75,6 +75,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Fixed an infinite loop with `-P`
 - invader-bitmap: Fixed fade-to-gray unevenly being applied on semitransparent
   pixels
+- invader-bitmap: Fixed fade-to-gray being applied on non-detail maps
 - invader-compare: Fixed precision checking ignoring floating point numbers
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
   being defaulted to -1. It is no longer allowed to set these to -1, either, as
