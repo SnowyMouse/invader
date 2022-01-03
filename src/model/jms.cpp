@@ -227,6 +227,10 @@ namespace Invader {
         m.name = string_from_string(cursor, true);
         m.region = read_next_uint32(cursor);
         m.node = read_next_uint32(cursor);
+        if(m.node == NULL_INDEX) {
+            m.node = 0;
+        }
+        
         m.rotation = quaternion_from_string(cursor);
         m.position = point3d_from_string(cursor) / 100.0F;
         m.radius = read_next_float(cursor);
