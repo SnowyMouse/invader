@@ -107,6 +107,8 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         // Look for markers that don't have a defined region
         for(auto &m : jms_data_copy.markers) {
             if(m.region == NULL_INDEX) {
+                std::map<HEK::Index, std::size_t> matches_per_region;
+                
                 // Find a vertex that has the same node as the marker
                 for(std::size_t vi = 0; vi < vertex_count; vi++) {
                     auto &v = jms_data_copy.vertices[vi];
@@ -117,15 +119,24 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                             for(auto &v2 : t.vertices) {
                                 if(v2 == vi) {
                                     // Then get the region from that. This is really bad but whatever.
-                                    m.region = t.region;
-                                    goto done_finding_region_for_marker;
+                                    matches_per_region[t.region]++;
                                 }
                             }
                         }
                     }
                 }
                 
-                done_finding_region_for_marker:
+                // Find the best match
+                HEK::Index best_match = NULL_INDEX;
+                std::size_t best_match_count = 0;
+                for(auto &r : matches_per_region) {
+                    if(r.second > best_match_count) {
+                        best_match = r.first;
+                        best_match_count = r.second;
+                    }
+                }
+                
+                m.region = best_match;
                 if(m.region == NULL_INDEX) {
                     eprintf_error("Can't resolve marker %s's region", m.name.c_str());
                     std::exit(EXIT_FAILURE);
