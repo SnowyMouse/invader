@@ -99,6 +99,40 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     
     for(auto &jms : map) {
         auto jms_data_copy = jms.second;
+        
+        // Resolve null marker regions
+        auto region_count = jms_data_copy.regions.size();
+        auto vertex_count = jms_data_copy.vertices.size();
+        
+        // Look for markers that don't have a defined region
+        for(auto &m : jms_data_copy.markers) {
+            if(m.region == NULL_INDEX) {
+                // Find a vertex that has the same node as the marker
+                for(std::size_t vi = 0; vi < vertex_count; vi++) {
+                    auto &v = jms_data_copy.vertices[vi];
+                    
+                    // If so, look for triangles that use that vertex
+                    if(v.node0 == m.node || v.node1 == m.node) {
+                        for(auto &t : jms_data_copy.triangles) {
+                            for(auto &v2 : t.vertices) {
+                                if(v2 == vi) {
+                                    // Then get the region from that. This is really bad but whatever.
+                                    m.region = t.region;
+                                    goto done_finding_region_for_marker;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                done_finding_region_for_marker:
+                if(m.region == NULL_INDEX) {
+                    eprintf_error("Can't resolve marker %s's region", m.name.c_str());
+                    std::exit(EXIT_FAILURE);
+                }
+            }
+        }
+        
         jms_data_copy.optimize();
         
         auto lod = LoD::LOD_SUPERHIGH;
@@ -163,7 +197,6 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         
         // Bounds check!
         auto material_count = jms_data_copy.materials.size();
-        auto region_count = jms_data_copy.regions.size();
         for(auto &i : jms_data_copy.triangles) {
             if(i.shader >= material_count) {
                 eprintf_error("Permutation %s's %s LoD has an out-of-bounds shader index", permutation.c_str(), lod_str);
@@ -302,6 +335,10 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             
             for(auto &t : jms.triangles) {
                 t.region = region_translations[t.region];
+            }
+            
+            for(auto &m : jms.markers) {
+                m.region = region_translations[m.region];
             }
         }
     }
