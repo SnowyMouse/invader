@@ -104,6 +104,15 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         auto region_count = jms_data_copy.regions.size();
         auto vertex_count = jms_data_copy.vertices.size();
         
+        // Rename first region to __unnamed if needed
+        if(region_count == 0) {
+            eprintf_error("No regions found in JMS");
+            std::exit(EXIT_FAILURE);
+        }
+        if(jms_data_copy.regions[0].name == "unnamed") {
+            jms_data_copy.regions[0].name = "__unnamed";
+        }
+        
         // Look for markers that don't have a defined region
         for(auto &m : jms_data_copy.markers) {
             if(m.region == NULL_INDEX) {
@@ -197,13 +206,6 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         if(nodes != jms_data_copy.nodes) {
             eprintf_error("Permutation %s's %s LoD does not match permutation %s's %s LoD's node", permutation.c_str(), lod_str, top_permutation.c_str(), top_lod);
             std::exit(EXIT_FAILURE);
-        }
-        
-        // Regions
-        for(auto &r : jms_data_copy.regions) {
-            if(r.name == "unnamed") {
-                r.name = "__unnamed";
-            }
         }
         
         // Bounds check!
