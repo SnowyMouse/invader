@@ -95,7 +95,7 @@ namespace Invader {
         struct Triangle {
             HEK::Index region;
             HEK::Index shader;
-            HEK::Index vertices[3];
+            std::uint32_t vertices[3];
             
             std::string string() const;
             static Triangle from_string(const char *string, const char **end);

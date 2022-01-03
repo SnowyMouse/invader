@@ -615,7 +615,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                     // On average, it saves a decent amount of space... as far as 16-bit integers go at least.
                     
                     // Add the first triangle
-                    std::vector<HEK::Index> triangle_man = { all_triangles_here[0].vertices[0], all_triangles_here[0].vertices[1], all_triangles_here[0].vertices[2] };
+                    std::vector<std::uint32_t> triangle_man = { all_triangles_here[0].vertices[0], all_triangles_here[0].vertices[1], all_triangles_here[0].vertices[2] };
                     
                     // Our remaining triangles
                     std::list<JMS::Triangle> remaining_triangles = std::list<JMS::Triangle>(all_triangles_here.begin() + 1, all_triangles_here.end());
