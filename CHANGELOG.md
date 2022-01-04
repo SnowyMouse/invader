@@ -90,6 +90,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-model: Fixed "unnamed" not being renamed to "__unnamed". This probably
   did not do anything useful, but tool.exe does this, so we have to as well.
 - invader-model: Fixed an incorrect region index being set for some models
+- invader-model: Fixed triangles being corrupt for models with more than 65535
+  vertices total
 - invader-recover: Fixed alpha channel not being tagged correctly as an extra
   sample when making TIFFs
 
