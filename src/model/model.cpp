@@ -100,9 +100,47 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
     for(auto &jms : map) {
         auto jms_data_copy = jms.second;
         
-        // Resolve null marker regions
+        // Optimize
+        jms_data_copy.optimize();
+        
+        // Do bounds checking for nodes and regions
         auto region_count = jms_data_copy.regions.size();
+        auto node_count = jms_data_copy.nodes.size();
+        auto triangle_count = jms_data_copy.triangles.size();
         auto vertex_count = jms_data_copy.vertices.size();
+        auto shader_count = jms_data_copy.materials.size();
+        for(auto &m : jms_data_copy.markers) {
+            if(m.node >= node_count) {
+                eprintf_error("Marker %s's node index is invalid", m.name.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+            if(m.region >= region_count && m.region != NULL_INDEX) {
+                eprintf_error("Marker %s's region index is non-null and invalid", m.name.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        for(std::size_t ti = 0; ti < triangle_count; ti++) {
+            auto &t = jms_data_copy.triangles[ti];
+            if(t.region >= region_count) {
+                eprintf_error("Triangle #%zu's region index is invalid", ti);
+                std::exit(EXIT_FAILURE);
+            }
+            if(t.shader >= shader_count) {
+                eprintf_error("Triangle #%zu's material index is invalid", ti);
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        for(std::size_t vi = 0; vi < vertex_count; vi++) {
+            auto &v = jms_data_copy.vertices[vi];
+            if(v.node0 >= node_count) {
+                eprintf_error("Vertex #%zu's node0 index is invalid", vi);
+                std::exit(EXIT_FAILURE);
+            }
+            if(v.node1 >= node_count && v.node1 != NULL_INDEX) {
+                eprintf_error("Vertex #%zu's node1 index is non-null and invalid", vi);
+                std::exit(EXIT_FAILURE);
+            }
+        }
         
         // Rename first region to __unnamed if needed
         if(region_count == 0) {
@@ -152,8 +190,6 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
                 }
             }
         }
-        
-        jms_data_copy.optimize();
         
         auto lod = LoD::LOD_SUPERHIGH;
         std::string permutation = jms.first;
@@ -208,19 +244,6 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
             std::exit(EXIT_FAILURE);
         }
         
-        // Bounds check!
-        auto material_count = jms_data_copy.materials.size();
-        for(auto &i : jms_data_copy.triangles) {
-            if(i.shader >= material_count) {
-                eprintf_error("Permutation %s's %s LoD has an out-of-bounds shader index", permutation.c_str(), lod_str);
-                std::exit(EXIT_FAILURE);
-            }
-            if(i.region >= region_count) {
-                eprintf_error("Permutation %s's %s LoD has an out-of-bounds region index", permutation.c_str(), lod_str);
-                std::exit(EXIT_FAILURE);
-            }
-        }
-        
         // Add any regions it may have
         for(std::size_t i = 0; i < region_count; i++) {
             auto &r = jms_data_copy.regions[i];
@@ -246,7 +269,7 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
         }
         
         // Add any shaders it may have, too
-        for(std::size_t mat = 0; mat < material_count; mat++) {
+        for(std::size_t mat = 0; mat < shader_count; mat++) {
             auto shader_name = jms_data_copy.materials[mat].name;
             if(shader_name.empty()) {
                 eprintf_error("Permutation %s's %s LoD has an empty shader name", permutation.c_str(), lod_str);
