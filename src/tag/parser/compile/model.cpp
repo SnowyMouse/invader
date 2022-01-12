@@ -383,6 +383,18 @@ namespace Invader::Parser {
     }
 
     template<typename M> static void pre_compile_model(M &what, BuildWorkload &workload, std::size_t tag_index) {
+        if(what.super_low_detail_cutoff == 0.0F && what.low_detail_cutoff == 0.0F && what.medium_detail_cutoff == 0.0F && what.super_high_detail_cutoff == 0.0F && what.high_detail_cutoff == 0.0F) {
+            for(auto &r : what.regions) {
+                for(auto &p : r.permutations) {
+                    if(p.super_low != p.low || p.low != p.medium || p.medium != p.high || p.high != p.super_high) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Model with LoDs does not have any LoD cutoffs set");
+                        goto post_lod_cutoff_check;
+                    }
+                }
+            }
+        }
+        
+        post_lod_cutoff_check:
         std::size_t region_count = what.regions.size();
         std::size_t geometries_count = what.geometries.size();
         std::size_t node_count = what.nodes.size();
