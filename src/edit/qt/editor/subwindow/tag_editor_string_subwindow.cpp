@@ -80,10 +80,10 @@ namespace Invader::EditQt {
         }
         
         if(this->utf16) {
-            return QString::fromUtf16(reinterpret_cast<const char16_t *>(data->data()), data->size() / sizeof(char16_t));
+            return QString::fromUtf16(reinterpret_cast<const char16_t *>(data->data()), data->size() / sizeof(char16_t) - 1);
         }
         else {
-            return QString::fromLatin1(reinterpret_cast<const char *>(data->data()), data->size() / sizeof(char));
+            return QString::fromLatin1(reinterpret_cast<const char *>(data->data()), data->size() / sizeof(char) - 1);
         }
     }
     
