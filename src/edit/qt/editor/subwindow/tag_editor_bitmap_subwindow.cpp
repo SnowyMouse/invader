@@ -9,6 +9,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QMessageBox>
+#include <QScreen>
+#include <QGuiApplication>
 #include "../tag_editor_window.hpp"
 #include "tag_editor_bitmap_subwindow.hpp"
 #include "tag_editor_subwindow.hpp"
@@ -177,6 +179,25 @@ namespace Invader::EditQt {
 
     TagEditorBitmapSubwindow::TagEditorBitmapSubwindow(TagEditorWindow *parent_window) : TagEditorSubwindow(parent_window) {
         this->update();
+        
+        // Query the display dimensions
+        auto screen_geometry = QGuiApplication::primaryScreen()->geometry();
+        
+        int max_width = screen_geometry.width() / 5 * 4;
+        int max_height = screen_geometry.height() / 5 * 4;
+        
+        // Make into a square
+        if(max_width > max_height) {
+            max_width = max_height;
+        }
+        else {
+            max_height = max_width;
+        }
+        
+        // Resize the window to this
+        this->resize(max_width, max_height);
+        
+        // Now center it
         this->center_window();
     }
 
