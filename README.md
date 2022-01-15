@@ -249,7 +249,7 @@ Refer to [Creating a bitmap] for information on how to create bitmap tags.
 [Creating a bitmap]: https://github.com/SnowyMouse/invader/wiki/Creating-a-bitmap
 
 ### invader-bludgeon
-This program convinces tags to work with Invader.
+This program convinces broken tags to work with Invader.
 
 ```
 Usage: invader-bludgeon [options] <-a | tag.class>
@@ -614,10 +614,9 @@ directly from .JMS files.
 
 JMS files should be placed in the data folder in a `models` folder in a folder
 relative to where the model tag will be generated in the tags directory. So, if
-you want to compile a model tags `weapons/pistol/pistol.model`, you would put
-your JMS files in `data/weapons/pistol/pistol/models` or, if using legacy mode,
-in `data/weapons/pistol/models`. A tutorial will be made sometime in the future
-regarding this.
+you want to compile a model `tags/weapons/pistol/pistol.model`, you would put
+your JMS files in `data/weapons/pistol/models`. A tutorial will be made sometime
+in the future regarding this.
 
 You can make JMS files for free using [Halo-Asset-Blender-Development-Toolset]
 in [Blender].
@@ -646,7 +645,7 @@ Options:
 
 ### invader-recover
 This program recovers source data from bitmaps (if color plate data is present),
-models, string lists, tag collections, and scenario scripts
+models, string lists, tag collections, and scenario scripts.
 
 ```
 Usage: invader-recover [options] <tag.class>
@@ -718,8 +717,9 @@ Options:
 ```
 
 ### invader-resource
-This program builds resource maps. Only maps with stock tags can be built.
-These files are not guaranteed to work with existing cache files.
+This program builds resource maps. Custom Edition resource maps require all
+stock tags to be present in order to be built. Files created by this tool are
+not guaranteed to work with existing cache files.
 
 ```
 Usage: invader-resource [options] -T <type>
@@ -1094,8 +1094,8 @@ this does not mean that you can't make a fork of Invader that supports it, and
 there are people who have said they were willing to do this.
 
 ### Can invader-build create Xbox maps?
-Yes. Pass `-g xbox-2276` into invader-build. You may need to fix some tags if
-using tags for other versions of the game.
+Yes. Pass `-g xbox-ntsc` (for NTSC Halo) into invader-build. You may need to
+fix some tags if using tags for other versions of the game.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this
