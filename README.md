@@ -731,14 +731,16 @@ Options:
                                This cannot be used with -T loc
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Demo and retail maps also require
-                               either -w or -M to be specified at least once.
-                               Valid engines are: gbx-custom, gbx-demo,
-                               gbx-retail, mcc-cea.
+                               either --with-index or --with-map to be
+                               specified at least once. Valid engines are:
+                               gbx-custom, gbx-demo, gbx-retail, mcc-cea.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Set the maps directory.
   -M --with-map <file>         Use a map file for the tags. This can be
                                specified multiple times.
+  -S --show-matched            Print the paths of any matched tags found when
+                               using --concatenate.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
