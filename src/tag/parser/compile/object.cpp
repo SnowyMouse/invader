@@ -492,6 +492,10 @@ namespace Invader::Parser {
         set_pathfinding_spheres(workload, struct_index);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         // Make sure zoom levels aren't too high for the HUD interface
         if(this->zoom_levels && !this->hud_interface.tag_id.is_null()) {
             auto &weapon_hud_interface_tag = workload.tags[this->hud_interface.tag_id.index];

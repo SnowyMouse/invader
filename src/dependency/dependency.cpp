@@ -68,6 +68,7 @@ int main(int argc, char * const *argv) {
             tag_path = remaining_arguments[0];
         }
     }
+    
     if(!tag_path.has_value()) {
         eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
         return EXIT_FAILURE;

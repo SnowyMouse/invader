@@ -95,6 +95,10 @@ namespace Invader::Parser {
     }
 
     void WeaponHUDInterfaceCrosshair::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         // Figure out what we're getting into
         std::size_t sequence_count;
         const BitmapGroupSequence::struct_little *sequences;

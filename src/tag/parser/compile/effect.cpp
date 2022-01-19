@@ -9,6 +9,10 @@ namespace Invader::Parser {
     }
 
     void Effect::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         bool must_be_deterministic = false;
         auto &effect_struct = workload.structs[struct_index];
         auto &effect = *reinterpret_cast<struct_little *>(effect_struct.data.data() + struct_offset);

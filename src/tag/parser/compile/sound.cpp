@@ -305,6 +305,10 @@ namespace Invader::Parser {
     }
 
     void SoundLooping::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         auto &maximum_distance = reinterpret_cast<SoundLooping::struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->maximum_distance;
         
         auto get_max_distance_of_sound_tag = [&workload](const Dependency &tag) {

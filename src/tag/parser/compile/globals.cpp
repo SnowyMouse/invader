@@ -89,6 +89,10 @@ namespace Invader::Parser {
         }
     }
     void GlobalsMultiplayerInformation::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
         const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
         
