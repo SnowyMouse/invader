@@ -359,6 +359,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "post_compile": true,
         "title": "name",
         "size": 376
     },
