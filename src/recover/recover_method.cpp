@@ -44,7 +44,7 @@ namespace Invader::Recover {
         auto file_path = data / (path + ".txt");
 
         if(std::filesystem::exists(file_path) && !overwrite) {
-            eprintf("Skipped %s\n", file_path.string().c_str());
+            oprintf_success_warn("Skipped %s\n", file_path.string().c_str());
             std::exit(EXIT_SUCCESS);
         }
 
@@ -67,7 +67,7 @@ namespace Invader::Recover {
 
         // Does it already exist?
         if(std::filesystem::exists(file_path) && !overwrite) {
-            eprintf("Skipped %s\n", file_path.string().c_str());
+            oprintf_success_warn("Skipped %s\n", file_path.string().c_str());
             std::exit(EXIT_SUCCESS);
         }
 
@@ -130,7 +130,7 @@ namespace Invader::Recover {
         "superlow"
     };
 
-    template<typename T> static void make_jms(const T &model, const std::string &permutation, std::size_t lod, const std::filesystem::path &models_path, bool local_nodes) {
+    template<typename T> static void make_jms(const T &model, const std::string &permutation, std::size_t lod, const std::filesystem::path &models_path, bool local_nodes, bool overwrite) {
         JMS jms;
 
         // Set the checksum value
@@ -355,6 +355,25 @@ namespace Invader::Recover {
         auto filename = models_path / (permutation + " " + ALL_LODS[lod] + ".jms");
         auto string_data = jms.string();
         auto *jms_data = string_data.data();
+        
+        if(std::filesystem::exists(filename)) {
+            auto f = Invader::File::open_file(filename);
+                
+            // Prevent SSD destruction by checking if it's the same or not before overwriting
+            if(f.has_value()) {
+                f->emplace_back(std::byte());
+                if(string_data == reinterpret_cast<const char *>(f->data())) {
+                    oprintf_success_lesser_warn("Skipped %s (matched)", filename.string().c_str());
+                    return;
+                }
+            }
+            
+            if(!overwrite) {
+                oprintf_success_warn("Skipped %s", filename.string().c_str());
+                return;
+            }
+        }
+        
         if(File::save_file(filename, std::vector<std::byte>(reinterpret_cast<std::byte *>(jms_data), reinterpret_cast<std::byte *>(jms_data + string_data.size())))) {
             oprintf_success("Recovered %s", filename.string().c_str());
         }
@@ -381,21 +400,6 @@ namespace Invader::Recover {
 
         // Models
         auto model_directory = data / parent_path_path / "models";
-
-        if(std::filesystem::exists(model_directory)) {
-            if(!overwrite) {
-                eprintf("Skipped %s\n", model_directory.string().c_str());
-                std::exit(EXIT_SUCCESS);
-            }
-            else {
-                std::error_code ec;
-                std::filesystem::remove_all(model_directory);
-                if(ec) {
-                    eprintf_error("Cannot remove %s", model_directory.string().c_str());
-                    std::exit(EXIT_FAILURE);
-                }
-            }
-        }
 
         // Create directories if needed
         std::error_code ec;
@@ -428,7 +432,7 @@ namespace Invader::Recover {
         // Make all permutations
         for(auto &p : permutations) {
             for(std::size_t i = 0; i < sizeof(ALL_LODS) / sizeof(*ALL_LODS); i++) {
-                make_jms(*model, p, i, model_directory, local_nodes);
+                make_jms(*model, p, i, model_directory, local_nodes, overwrite);
             }
         }
 
@@ -442,7 +446,7 @@ namespace Invader::Recover {
         auto data_path = data / (path + ".txt");
 
         if(std::filesystem::exists(data_path) && !overwrite) {
-            eprintf("Skipped %s\n", data_path.string().c_str());
+            oprintf_success_warn("Skipped %s\n", data_path.string().c_str());
             std::exit(EXIT_SUCCESS);
         }
 
@@ -503,85 +507,6 @@ namespace Invader::Recover {
 
         // Scripts
         auto scripts_directory = data / std::filesystem::path(path).parent_path() / "scripts";
-        bool found_external_globals_script = false;
-        bool skipped_external_globals_script = false;
-        
-        // "tell_lies" pretends that we recovered it (if it matched what was on disk)
-        auto recover_script = [](const std::filesystem::path &scripts_directory, const auto &script, bool tell_lies) {
-            auto hsc_path = scripts_directory / (std::string(script.name.string) + ".hsc");
-            if(tell_lies || File::save_file(hsc_path, script.source)) {
-                oprintf_success("Recovered %s", hsc_path.string().c_str());
-            }
-            else {
-                eprintf_error("Failed to write to %s", hsc_path.string().c_str());
-                std::exit(EXIT_FAILURE);
-            }
-        };
-        
-        // Extract global_scripts.hsc to data root (special case)
-        const char *global_scripts_name = "global_scripts";
-        for(auto &i : scenario->source_files) {
-            if(std::strcmp(i.name.string, global_scripts_name) == 0) {
-                bool matches;
-                auto script_path = data / (std::string(global_scripts_name) + ".hsc");
-                found_external_globals_script = true;
-                
-                // Check if it exists
-                if(std::filesystem::exists(script_path)) {
-                    if(!overwrite) {
-                        skipped_external_globals_script = true;
-                        break;
-                    }
-                    
-                    // Check if it matches
-                    try {
-                        matches = File::open_file(script_path).value() == i.source;
-                    }
-                    catch(std::exception &e) {
-                        eprintf_error("Failed to open %s: %s", script_path.string().c_str(), e.what());
-                        std::exit(EXIT_FAILURE);
-                    }
-                }
-                else {
-                    matches = false;
-                }
-                    
-                // Re-extract it
-                recover_script(data, i, matches);
-            }
-        }
-         
-        // No globals_script was found in the scenario
-        if(!found_external_globals_script) {
-            skipped_external_globals_script = true;
-        }
-        
-        // Check if scripts_directory exists
-        if(std::filesystem::exists(scripts_directory)) {
-            if(!overwrite) {
-                if(skipped_external_globals_script) {
-                    eprintf("Skipped %s\n", scripts_directory.string().c_str());
-                }
-                else {
-                    eprintf_warn("global_scripts was extracted, but %s was skipped.\nScripts may mismatch now!\n", scripts_directory.string().c_str());
-                }
-                std::exit(EXIT_SUCCESS);
-            }
-            else {
-                std::error_code ec;
-                std::filesystem::remove_all(scripts_directory);
-                if(ec) {
-                    eprintf_error("Cannot remove %s", scripts_directory.string().c_str());
-                    std::exit(EXIT_FAILURE);
-                }
-            }
-        }
-        
-        // If globals_script was extracted and we only have one script, we're done
-        if(!skipped_external_globals_script && scenario->source_files.size() == 1) {
-            oprintf("Scenario only had global scripts");
-            std::exit(EXIT_SUCCESS);
-        }
 
         // Create directories if needed
         std::error_code ec;
@@ -589,15 +514,39 @@ namespace Invader::Recover {
 
         // Write it all
         for(auto &hsc : scenario->source_files) {
-            if(std::strcmp(hsc.name.string, global_scripts_name) == 0) {
-                continue;
+            std::filesystem::path hsc_path;
+            std::string script_name = hsc.name.string;
+            
+            if(script_name == "global_scripts") {
+                hsc_path = data / (script_name + ".hsc");
             }
-            recover_script(scripts_directory, hsc, false);
-        }
-        
-        // If we skipped an external_globals script we found, warn
-        if(skipped_external_globals_script && found_external_globals_script) {
-            eprintf_warn("global_scripts was skipped, but %s was extracted.\nScripts may mismatch now!\n", scripts_directory.string().c_str());
+            else {
+                hsc_path = scripts_directory / (script_name + ".hsc");
+            }
+            
+            bool exists = std::filesystem::exists(hsc_path);
+            
+            if(exists) {
+                auto f = Invader::File::open_file(hsc_path);
+                    
+                // Prevent SSD destruction by checking if it's the same or not before overwriting
+                if(f.has_value() && *f == hsc.source) {
+                    oprintf_success_lesser_warn("Skipped %s (matched)", hsc_path.string().c_str());
+                    continue;
+                }
+                else if(!overwrite) {
+                    oprintf_success_warn("Skipped %s", hsc_path.string().c_str());
+                    continue;
+                }
+            }
+            
+            if(File::save_file(hsc_path, hsc.source)) {
+                oprintf_success("Recovered %s", hsc_path.string().c_str());
+            }
+            else {
+                eprintf_error("Failed to write to %s", hsc_path.string().c_str());
+                std::exit(EXIT_FAILURE);
+            }
         }
 
         std::exit(EXIT_SUCCESS);
