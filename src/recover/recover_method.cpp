@@ -356,22 +356,9 @@ namespace Invader::Recover {
         auto string_data = jms.string();
         auto *jms_data = string_data.data();
         
-        if(std::filesystem::exists(filename)) {
-            auto f = Invader::File::open_file(filename);
-                
-            // Prevent SSD destruction by checking if it's the same or not before overwriting
-            if(f.has_value()) {
-                f->emplace_back(std::byte());
-                if(string_data == reinterpret_cast<const char *>(f->data())) {
-                    oprintf_success_lesser_warn("Skipped %s (matched)", filename.string().c_str());
-                    return;
-                }
-            }
-            
-            if(!overwrite) {
-                oprintf_success_warn("Skipped %s", filename.string().c_str());
-                return;
-            }
+        if(std::filesystem::exists(filename) && !overwrite) {
+            oprintf_success_warn("Skipped %s", filename.string().c_str());
+            return;
         }
         
         if(File::save_file(filename, std::vector<std::byte>(reinterpret_cast<std::byte *>(jms_data), reinterpret_cast<std::byte *>(jms_data + string_data.size())))) {
@@ -526,18 +513,9 @@ namespace Invader::Recover {
             
             bool exists = std::filesystem::exists(hsc_path);
             
-            if(exists) {
-                auto f = Invader::File::open_file(hsc_path);
-                    
-                // Prevent SSD destruction by checking if it's the same or not before overwriting
-                if(f.has_value() && *f == hsc.source) {
-                    oprintf_success_lesser_warn("Skipped %s (matched)", hsc_path.string().c_str());
-                    continue;
-                }
-                else if(!overwrite) {
-                    oprintf_success_warn("Skipped %s", hsc_path.string().c_str());
-                    continue;
-                }
+            if(exists && !overwrite) {
+                oprintf_success_warn("Skipped %s", hsc_path.string().c_str());
+                continue;
             }
             
             if(File::save_file(hsc_path, hsc.source)) {
