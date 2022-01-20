@@ -8,7 +8,7 @@
 namespace Invader::Parser {
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto permutation_index = offset / sizeof(struct_little);
-        
+
         // Flip the endianness of the 16-bit PCM stream
         if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             std::size_t size = this->samples.size() / 2;
@@ -50,26 +50,26 @@ namespace Invader::Parser {
 
         // Error based on format
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
-        
+
         switch(this->format) {
             case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                 if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine.", permutation_index);
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_IMA_ADPCM:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine", permutation_index);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine.", permutation_index);
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                 if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the original target engine", permutation_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu uses 16-bit PCM. The target engine will not play this without a mod.", permutation_index);
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
                 // Xbox ADPCM works on everything
                 break;
             default:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid sound format set", permutation_index);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid sound format set.", permutation_index);
                 throw InvalidTagDataException();
         }
 
@@ -101,17 +101,17 @@ namespace Invader::Parser {
         this->unknown_ffffffff_1 = 0xFFFFFFFF;
         auto actual_natural_pitch = this->natural_pitch <= 0.0F ? 1.0F : this->natural_pitch;
         this->playback_rate = 1.0f / actual_natural_pitch;
-        
+
         // Make sure our bend bounds are valid for the natural pitch
         auto old_bend_bounds = this->bend_bounds;
-        
+
         // Set the new bend bounds, ensuring natural pitch falls within it
         this->bend_bounds.from = std::min(actual_natural_pitch, old_bend_bounds.from);
         this->bend_bounds.to = std::max(actual_natural_pitch, old_bend_bounds.to);
-        
+
         // If our bend bounds was changed, but they weren't zero, then that means bullshit happened
         if((old_bend_bounds.from != 0.0F || old_bend_bounds.to != 0.0F) && ((this->bend_bounds.from != old_bend_bounds.from) || (this->bend_bounds.to != old_bend_bounds.to))) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Natural pitch (%f) in pitch range #%zu falls outside of bend bounds (%f - %f) so the bounds were changed to %f - %f", actual_natural_pitch, struct_offset / sizeof(struct_little), old_bend_bounds.from, old_bend_bounds.to, this->bend_bounds.from, this->bend_bounds.to);
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Natural pitch (%f) in pitch range #%zu falls outside of bend bounds (%f - %f) so the bounds were changed to %f - %f.", actual_natural_pitch, struct_offset / sizeof(struct_little), old_bend_bounds.from, old_bend_bounds.to, this->bend_bounds.from, this->bend_bounds.to);
         }
 
         // Make sure all of the permutations are valid
@@ -143,7 +143,7 @@ namespace Invader::Parser {
         // List unused permutations
         for(std::size_t i = 0; i < permutation_count; i++) {
             if(!referenced[i]) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Permutation #%zu in pitch range #%zu is unused", i, struct_offset / sizeof(struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Permutation #%zu in pitch range #%zu is unused.", i, struct_offset / sizeof(struct_little));
             }
         }
 
@@ -158,7 +158,7 @@ namespace Invader::Parser {
             // Keep going until we hit a null index or we loop forever
             while(permutation_index != NULL_INDEX) {
                 if(referenced[permutation_index]) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Actual permutation #%zu (%s) in pitch range #%zu will never end", a, this->permutations[a].name.string, struct_offset / sizeof(struct_little));
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Actual permutation #%zu (%s) in pitch range #%zu will never end.", a, this->permutations[a].name.string, struct_offset / sizeof(struct_little));
                     throw InvalidTagDataException();
                 }
                 referenced[permutation_index] = true;
@@ -198,7 +198,7 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         if(sound->one_skip_fraction_modifier == 0.0f && sound->zero_skip_fraction_modifier == 0.0f) {
             sound->one_skip_fraction_modifier = 1.0f;
             sound->zero_skip_fraction_modifier = 1.0f;
@@ -206,7 +206,7 @@ namespace Invader::Parser {
 
         if(sound->one_gain_modifier == 0.0f && sound->zero_gain_modifier == 0.0f) {
             sound->one_gain_modifier = 1.0f;
-        
+
             // Set default zero gain modifier based on class
             switch(sound->sound_class) {
                 case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
@@ -237,12 +237,12 @@ namespace Invader::Parser {
 
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         sound_pre_compile(this, workload, tag_index);
-        
+
         // Warn if we're using bullshit distances
         if(this->minimum_distance > this->maximum_distance) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Minimum distance is greater than maximum distance (%f > %f)", this->maximum_distance, this->minimum_distance);
         }
-        
+
         // Find the song length
         if(this->zero_pitch_modifier == 1.0F && this->one_pitch_modifier == 1.0F) {
             double seconds = 0.0F;
@@ -257,9 +257,9 @@ namespace Invader::Parser {
                             sample_count = p.buffer_size / 2;
                             break;
                     }
-                    
+
                     double potential_seconds = sample_count / (this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1.0 : 2.0) / (this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ ? 44100.0 : 22050.0) * pr.natural_pitch;
-                    
+
                     if(potential_seconds > seconds) {
                         seconds = potential_seconds;
                     }
@@ -308,14 +308,14 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return;
         }
-        
+
         auto &maximum_distance = reinterpret_cast<SoundLooping::struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->maximum_distance;
-        
+
         auto get_max_distance_of_sound_tag = [&workload](const Dependency &tag) {
             if(tag.tag_id.is_null()) {
                 return 0.0F;
             }
-            
+
             auto &sound_tag_data = *reinterpret_cast<const Sound::struct_little *>(workload.structs[*workload.tags[tag.tag_id.index].base_struct].data.data());
             float max = sound_tag_data.maximum_distance.read();
             if(max == 0.0F) {
@@ -366,15 +366,15 @@ namespace Invader::Parser {
 
                     case HEK::SoundClass::SOUND_CLASS_PROJECTILE_DETONATION:
                         return 120.0F;
-                        
+
                     default:
                         break;
                 }
             }
-            
+
             return max;
         };
-        
+
         // Get the maximum distances of all referenced sound tags
         for(auto &i : this->tracks) {
             maximum_distance = std::max(std::max(std::initializer_list<float> {
