@@ -318,8 +318,19 @@ namespace Invader::Parser {
         script_data_struct.data = std::move(scenario.script_syntax_data);
         const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
         std::size_t string_data_length = scenario.script_string_data.size();
+        
+        // For verifying if strings end with 00 bytes down below
+        while(string_data_length > 0) {
+            if(string_data[string_data_length - 1] != 0) {
+                string_data_length--;
+            }
+            else {
+                break;
+            }
+        }
 
         const char *string_data_end = string_data + string_data_length;
+        
         auto *syntax_data = script_data_struct.data.data();
         auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
         std::uint16_t element_count = table_header.size.read();
@@ -328,7 +339,7 @@ namespace Invader::Parser {
         for(std::uint16_t i = 0; i < element_count; i++) {
             // Check if we know the class
             std::optional<TagFourCC> tag_class;
-            auto node = nodes[i];
+            auto &node = nodes[i];
 
             // Check the class type
             switch(node.type.read()) {
