@@ -14,7 +14,7 @@ namespace Invader::Parser {
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
-    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
+    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
         // Determine what target to use
         RIAT_CompileTarget target;
         switch(info.cache_version) {
@@ -40,7 +40,15 @@ namespace Invader::Parser {
         
         // Instantiate it
         RIAT::Instance instance(target);
+        instance.set_user_data(&warnings);
     
+        // Any warnings get eaten up here
+        instance.set_warn_callback([](RIAT_Instance *instance, const char *message, const char *file, std::size_t line, std::size_t column) {
+            char fmt_message[512];
+            std::snprintf(fmt_message, sizeof(fmt_message), "%s:%zu:%zu: warning: %s", file, line, column, message);
+            reinterpret_cast<std::vector<std::string> *>(riat_instance_get_user_data(instance))->emplace_back(fmt_message);
+        });
+        
         // Load the input from script_source
         decltype(scenario.source_files) source_files;
         if(script_source.has_value()) {
@@ -279,110 +287,7 @@ namespace Invader::Parser {
         }
     }
     
-    static constexpr const std::size_t MAX_SCRIPT_NODE_COUNT = 19001;
-    static constexpr const std::size_t MAX_SCRIPT_NODE_COUNT_CEA = static_cast<std::size_t>(INT16_MAX);
-    
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
-        // TODO: Properly compile scripts here. If there are no scripts, then we'd get DEFAULT_SCRIPT_NODE_COUNT nodes anyway!
-        
-        // If we have no scripts, initialize it (hack to fix MCC and OS edited cache files for now until we have script compilation done)
-        if(scenario.scripts.size() == 0 && scenario.globals.size() == 0) {
-            scenario.script_syntax_data.clear();
-            scenario.script_string_data.clear();
-        }
-        
-        // If we don't have any string data, allocate 1024 bytes
-        if(scenario.script_string_data.size() == 0) {
-            scenario.script_string_data.resize(1024);
-        }
-        
-        auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
-        
-        // If we don't have any syntax data, let's make some stuff
-        static constexpr char SCRIPT_NODE_LITERAL[] = "script node";
-        static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
-        if(scenario.script_syntax_data.size() == 0) {
-            ScenarioScriptNodeTable::struct_little t = {};
-            std::size_t DEFAULT_SCRIPT_NODE_COUNT = (engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA || engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) ? 32767 : 19001;
-            t.count = 0;
-            t.data = 0x64407440;
-            t.element_size = SCRIPT_ELEMENT_SIZE;
-            t.maximum_count = DEFAULT_SCRIPT_NODE_COUNT;
-            t.next_id = 0xE741;
-            t.one = 1;
-            t.size = 0;
-            std::copy(SCRIPT_NODE_LITERAL, SCRIPT_NODE_LITERAL + sizeof(SCRIPT_NODE_LITERAL), t.name.string);
-
-            scenario.script_syntax_data.resize(sizeof(t) + SCRIPT_ELEMENT_SIZE * DEFAULT_SCRIPT_NODE_COUNT);
-            auto *first_node = reinterpret_cast<ScenarioScriptNode::struct_little *>(scenario.script_syntax_data.data() + sizeof(t));
-            for(std::size_t i = 0; i < DEFAULT_SCRIPT_NODE_COUNT; i++) {
-                auto &node = first_node[i];
-                std::memset(reinterpret_cast<std::uint8_t *>(&node), 0xCA, sizeof(node));
-                node.salt = 0;
-            }
-
-            std::copy(reinterpret_cast<const std::byte *>(&t), reinterpret_cast<const std::byte *>(&t + 1), scenario.script_syntax_data.data());
-        }
-        else {
-            ScenarioScriptNodeTable::struct_little t;
-            if(scenario.script_syntax_data.size() < sizeof(t)) {
-                if(!workload.disable_error_checking) {
-                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script syntax data is invalid", tag_index);
-                    throw InvalidTagDataException();
-                }
-            }
-            else {
-                t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
-                *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
-                t.first_element_ptr = 0;
-                
-                // Check the maximum node count here
-                std::size_t max_node_count;
-                switch(engine) {
-                    case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                    case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
-                        max_node_count = MAX_SCRIPT_NODE_COUNT_CEA;
-                        break;
-                    default:
-                        max_node_count = MAX_SCRIPT_NODE_COUNT;
-                        break;
-                }
-            
-                // Maximum node count exceeded?
-                if(static_cast<std::size_t>(t.maximum_count) > max_node_count) {
-                    if(!workload.disable_error_checking) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), max_node_count);
-                        throw InvalidTagDataException();
-                    }
-                }
-                else {
-                    auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
-                    auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
-                    if(t.element_size != SCRIPT_ELEMENT_SIZE) {
-                        if(!workload.disable_error_checking) {
-                            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script node table header is invalid", tag_index);
-                            throw InvalidTagDataException();
-                        }
-                    }
-                    else {
-                        std::size_t element_count = t.maximum_count;
-                        std::size_t expected_table_size = element_count * SCRIPT_ELEMENT_SIZE + sizeof(t);
-                        if(scenario.script_syntax_data.size() != expected_table_size) {
-                            if(!workload.disable_error_checking) {
-                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is the wrong size (%zu expected, %zu gotten)", expected_table_size, scenario.script_syntax_data.size());
-                                throw InvalidTagDataException();
-                            }
-                        }
-                        else {
-                            for(std::size_t i = 0; i < element_count; i++) {
-                                start_little[i] = start_big[i];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
         // If we have scripts, do stuff
         if(scenario.scripts.size() > 0 || scenario.globals.size() > 0) {
             if(scenario.source_files.size() == 0) {
@@ -393,8 +298,18 @@ namespace Invader::Parser {
                 }
             }
             else {
-                // TODO: Recompile scripts
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Tags with scripts are not fully supported at this time", tag_index);
+                // Recompile scripts
+                try {
+                    std::vector<std::string> warnings;
+                    compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), warnings);
+                    for(auto &w : warnings) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
+                    }
+                }
+                catch(std::exception &e) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to compile scripts: %s", e.what());
+                    throw;
+                }
             }
         }
 
@@ -928,29 +843,5 @@ namespace Invader::Parser {
     void ScenarioFiringPosition::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->cluster_index = NULL_INDEX;
         this->surface_index = NULL_INDEX;
-    }
-    
-    bool fix_excessive_script_nodes(Scenario &scenario, bool fix) {
-        if(scenario.script_syntax_data.size() == 0) {
-            return false;
-        }
-        else {
-            ScenarioScriptNodeTable::struct_big *t;
-            if(scenario.script_syntax_data.size() < sizeof(*t)) {
-                return false; // invalid
-            }
-            t = reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
-            
-            // Maximum node count exceeded? And can we safely resize it?
-            if(t->maximum_count > MAX_SCRIPT_NODE_COUNT && static_cast<std::size_t>(t->size) + 128 < MAX_SCRIPT_NODE_COUNT) {
-                if(fix) {
-                    t->maximum_count = MAX_SCRIPT_NODE_COUNT;
-                    scenario.script_syntax_data.resize(sizeof(*t) + sizeof(ScenarioScriptNode::struct_big) * t->maximum_count);
-                }
-                return true;
-            }
-            
-            return false;
-        }
     }
 }

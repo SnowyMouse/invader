@@ -140,11 +140,16 @@ int main(int argc, const char **argv) {
         }
         
         // Compile
-        Invader::Parser::compile_scripts(s, *script_options.engine, source_files);
+        std::vector<std::string> warnings;
+        Invader::Parser::compile_scripts(s, *script_options.engine, warnings, source_files);
+        
+        for(auto &w : warnings) {
+            eprintf_warn("%s", w.c_str());
+        }
     }
     catch(std::exception &e) {
-        eprintf_error("Failed to compile scripts: %s", e.what());
-        throw std::exception();
+        eprintf_error("%s", e.what());
+        return EXIT_FAILURE;
     }
     
     std::size_t script_count = s.scripts.size();
