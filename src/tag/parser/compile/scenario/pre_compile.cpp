@@ -189,7 +189,7 @@ namespace Invader::Parser {
         table_output.next_id = format_index_to_id(node_count) >> 16;
         table_output.element_size = sizeof(node_tag_fmt);
         table_output.data = 0x64407440;
-        std::strcpy(table_output.name.string, "script node");
+        std::strncpy(table_output.name.string, "script node", sizeof(table_output.name.string));
         table_output.one = 1;
         for(std::size_t node_index = 0; node_index < node_count; node_index++) {
             auto output = into_nodes[node_index].generate_hek_tag_data();
@@ -319,16 +319,6 @@ namespace Invader::Parser {
         const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
         std::size_t string_data_length = scenario.script_string_data.size();
 
-        // Ensure we're null terminated
-        while(string_data_length > 0) {
-            if(string_data[string_data_length - 1] != 0) {
-                string_data_length--;
-            }
-            else {
-                break;
-            }
-        }
-
         const char *string_data_end = string_data + string_data_length;
         auto *syntax_data = script_data_struct.data.data();
         auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
@@ -338,7 +328,7 @@ namespace Invader::Parser {
         for(std::uint16_t i = 0; i < element_count; i++) {
             // Check if we know the class
             std::optional<TagFourCC> tag_class;
-            auto &node = nodes[i];
+            auto node = nodes[i];
 
             // Check the class type
             switch(node.type.read()) {

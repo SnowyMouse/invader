@@ -19,7 +19,7 @@ namespace Invader::Bludgeoner {
     bool broken_indices_fix(Parser::ParserStruct *s, bool fix);
     bool broken_normals(Parser::ParserStruct *s, bool fix);
     bool broken_strings(Parser::ParserStruct *s, bool fix);
-    bool excessive_script_nodes(Parser::ParserStruct *s, bool fix);
+    bool null_terminated_scripts(Parser::ParserStruct *s, bool fix);
 }
 
 #endif
