@@ -289,31 +289,57 @@ namespace Invader::Parser {
     
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
         // If we have scripts, do stuff
-        if(scenario.scripts.size() > 0 || scenario.globals.size() > 0) {
-            if(scenario.source_files.size() == 0) {
-                if(!workload.disable_error_checking) {
-                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Scenario tag has script data but no source file data", tag_index);
-                    eprintf_warn("To fix this, recompile the scripts");
-                    throw InvalidTagDataException();
-                }
-            }
-            else {
-                // Recompile scripts
-                try {
-                    std::vector<std::string> warnings;
-                    compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), warnings);
-                    for(auto &w : warnings) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
-                    }
-                }
-                catch(std::exception &e) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to compile scripts: %s", e.what());
-                    throw;
-                }
+        if((scenario.scripts.size() > 0 || scenario.globals.size() > 0) && scenario.source_files.size() == 0) {
+            if(!workload.disable_error_checking) {
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Scenario tag has script data but no source file data", tag_index);
+                eprintf_warn("To fix this, recompile the scripts");
+                throw InvalidTagDataException();
             }
         }
+        
+        // Recompile scripts
+        try {
+            std::vector<std::string> warnings;
+            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), warnings);
+            for(auto &w : warnings) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
+            }
+        }
+        catch(std::exception &e) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to compile scripts: %s", e.what());
+            throw;
+        }
+        
+        // Is the syntax data correct?
+        auto syntax_data_size = scenario.script_syntax_data.size();
+        std::size_t expected_max_element_count = workload.get_build_parameters()->details.build_scenario_maximum_script_nodes;
+        std::size_t correct_syntax_data_size = sizeof(ScenarioScriptNodeTable::struct_big) + expected_max_element_count * sizeof(ScenarioScriptNode::struct_big);
+        if(scenario.script_syntax_data.size() != correct_syntax_data_size) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is incorrect for the target engine (%zu != %zu)", syntax_data_size, correct_syntax_data_size);
+            throw InvalidTagDataException();
+        }
+        
+        // Flip the endianness
+        auto t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
+        *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
+        t.first_element_ptr = 0;
+        
+        auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
+        auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
+        
+        // Make sure the element count is correct
+        std::size_t max_element_count = t.maximum_count;
+        if(max_element_count != expected_max_element_count) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax node count is wrong for the target engine (%zu != %zu)", max_element_count, expected_max_element_count);
+            throw InvalidTagDataException();
+        }
+        
+        // And now flip the endianness of the nodes
+        for(std::size_t i = 0; i < max_element_count; i++) {
+            start_little[i] = start_big[i];
+        }
 
-        // Let's start on the script data
+        // Get these things
         BuildWorkload::BuildWorkloadStruct script_data_struct = {};
         script_data_struct.data = std::move(scenario.script_syntax_data);
         const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
