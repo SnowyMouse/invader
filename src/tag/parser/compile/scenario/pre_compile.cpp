@@ -310,6 +310,13 @@ namespace Invader::Parser {
             throw;
         }
         
+        // Check for stubs and warn
+        for(auto &script : scenario.scripts) {
+            if(script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Script '%s' is a stub script and has not been replaced by a static script. It will function as a static script, instead.", script.name.string);
+            }
+        }
+        
         // Is the syntax data correct?
         auto syntax_data_size = scenario.script_syntax_data.size();
         std::size_t expected_max_element_count = workload.get_build_parameters()->details.build_scenario_maximum_script_nodes;
