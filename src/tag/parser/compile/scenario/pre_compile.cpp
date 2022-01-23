@@ -1,15 +1,235 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <map>
+#include <cassert>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
+#include <riat/riat.hpp>
 
 namespace Invader::Parser {
     static void merge_child_scenarios(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     static void check_palettes(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
+    
+    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
+        // Determine what target to use
+        RIAT_CompileTarget target;
+        switch(info.cache_version) {
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_DEMO;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_RETAIL;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_CUSTOM_EDITION;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
+                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_MCC_CEA;
+                break;
+            default:
+                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_ANY;
+                break;
+        }
+        
+        // Instantiate it
+        RIAT::Instance instance(target);
+    
+        // Load the input from script_source
+        decltype(scenario.source_files) source_files;
+        if(script_source.has_value()) {
+            for(auto &source : *script_source) {
+                auto &file = source_files.emplace_back();
+                
+                // Check if it's too long. If not, copy. Otherwise, error
+                if(source.first.size() > sizeof(file.name.string) - 1) {
+                    eprintf_error("Script file name '%s' is too long", source.first.c_str());
+                    throw std::exception();
+                }
+                std::strncpy(file.name.string, source.first.c_str(), sizeof(file.name.string) - 1);
+                file.source = source.second;
+            };
+        }
+        
+        // Use the scenario tag's source data
+        else {
+            source_files = scenario.source_files;
+        }
+        
+        // Load the scripts
+        try {
+            for(auto &source : source_files) {
+                instance.load_script_source(reinterpret_cast<const char *>(source.source.data()), source.source.size(), source.name.string);
+            }
+            instance.compile_scripts();
+        }
+        catch(std::exception &e) {
+            eprintf_error("Script compilation error: %s", e.what());
+            throw InvalidTagDataException();
+        }
+        
+        std::size_t node_limit = info.maximum_scenario_script_nodes;
+        
+        auto scripts = instance.get_scripts();
+        auto globals = instance.get_globals();
+        auto nodes = instance.get_nodes();
+        
+        std::size_t node_count = nodes.size();
+        
+        if(nodes.size() > node_limit) {
+            eprintf_error("Node limit exceeded for the target engine (%zu > %zu)", node_count, node_limit);
+            throw InvalidTagDataException();
+        }
+        
+        std::vector<Invader::Parser::ScenarioScriptNode> into_nodes;
+        
+        auto format_index_to_id = [](std::size_t index) -> std::uint32_t {
+            auto index_16_bit = static_cast<std::uint16_t>(index);
+            return static_cast<std::uint32_t>(((index_16_bit + 0x6373) | 0x8000) << 16) | index_16_bit;
+        };
+        
+        std::map<std::string, std::size_t> string_index;
+        std::vector<std::byte> string_data;
+        
+        for(std::size_t node_index = 0; node_index < node_count; node_index++) {
+            auto &n = nodes[node_index];
+            auto &new_node = into_nodes.emplace_back();
+            new_node = {};
+            
+            // Set the salt
+            new_node.salt = format_index_to_id(node_index) >> 16;
+            
+            // If we have string data, add it
+            if(n.string_data != NULL) {
+                std::string str = n.string_data;
+                if(!string_index.contains(str)) {
+                    string_index[str] = string_data.size();
+                    const auto *cstr = str.c_str();
+                    string_data.insert(string_data.end(), reinterpret_cast<const std::byte *>(cstr), reinterpret_cast<const std::byte *>(cstr) + str.size());
+                    string_data.emplace_back(std::byte());
+                }
+                new_node.string_offset = string_index[str];
+            }
+            
+            // All nodes are marked with this...?
+            new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GARBAGE_COLLECTABLE;
+            
+            // Here's the type
+            new_node.type = static_cast<Invader::HEK::ScenarioScriptValueType>(n.type);
+            new_node.index_union = new_node.type;
+            
+            // Set this stuff
+            if(n.is_primitive) {
+                new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE;
+                if(n.is_global) {
+                    new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL;
+                }
+                else {
+                    switch(n.type) {
+                        case RIAT_ValueType::RIAT_VALUE_TYPE_BOOLEAN:
+                            new_node.data.bool_int = n.bool_int;
+                            break;
+                        case RIAT_ValueType::RIAT_VALUE_TYPE_SCRIPT:
+                        case RIAT_ValueType::RIAT_VALUE_TYPE_SHORT:
+                            new_node.data.short_int = n.short_int;
+                            break;
+                        case RIAT_ValueType::RIAT_VALUE_TYPE_LONG:
+                            new_node.data.long_int = n.long_int;
+                            break;
+                        case RIAT_ValueType::RIAT_VALUE_TYPE_REAL:
+                            new_node.data.real = n.real;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            else {
+                new_node.data.tag_id.id = format_index_to_id(n.child_node);
+                
+                if(n.is_script_call) {
+                    new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL;
+                    new_node.index_union = n.call_index;
+                }
+            }
+            
+            // Set the next node?
+            if(n.next_node == SIZE_MAX) {
+                new_node.next_node = UINT32_MAX;
+            }
+            else {
+                new_node.next_node = format_index_to_id(n.next_node);
+            }
+        }
+        
+        using node_table_header_tag_fmt = Invader::Parser::ScenarioScriptNodeTable::struct_big;
+        using node_tag_fmt = std::remove_reference<decltype(*into_nodes.data())>::type::struct_big;
+        
+        // Initialize the syntax data and write to it
+        std::vector<std::byte> syntax_data(sizeof(node_table_header_tag_fmt) + node_limit * sizeof(node_tag_fmt));
+        auto &table_output = *reinterpret_cast<node_table_header_tag_fmt *>(syntax_data.data());
+        auto *node_output = reinterpret_cast<node_tag_fmt *>(&table_output + 1);
+        table_output.count = node_count;
+        table_output.size = node_count;
+        table_output.maximum_count = node_limit;
+        table_output.next_id = format_index_to_id(node_count) >> 16;
+        table_output.element_size = sizeof(node_tag_fmt);
+        table_output.data = 0x64407440;
+        std::strcpy(table_output.name.string, "script node");
+        table_output.one = 1;
+        for(std::size_t node_index = 0; node_index < node_count; node_index++) {
+            auto output = into_nodes[node_index].generate_hek_tag_data();
+            assert(sizeof(node_output[node_index]) == output.size());
+            std::memcpy(&node_output[node_index], output.data(), output.size());
+        }
+        
+        std::size_t script_count = scripts.size();
+        std::size_t global_count = globals.size();
+        
+        // Set up scripts
+        decltype(scenario.scripts) new_scripts;
+        new_scripts.resize(script_count);
+        for(std::size_t s = 0; s < script_count; s++) {
+            auto &new_script = new_scripts[s];
+            const auto &cmp_script = scripts[s];
+            
+            static_assert(sizeof(new_script.name.string) == sizeof(cmp_script.name));
+            memcpy(new_script.name.string, cmp_script.name, sizeof(cmp_script.name));
+            
+            new_script.return_type = static_cast<decltype(new_script.return_type)>(cmp_script.return_type);
+            new_script.script_type = static_cast<decltype(new_script.script_type)>(cmp_script.script_type);
+            new_script.root_expression_index = format_index_to_id(cmp_script.first_node);
+        }
+        
+        // Set up globals
+        decltype(scenario.globals) new_globals;
+        new_globals.resize(global_count);
+        for(std::size_t g = 0; g < global_count; g++) {
+            auto &new_global = new_globals[g];
+            const auto &cmp_global = globals[g];
+            
+            static_assert(sizeof(new_global.name.string) == sizeof(cmp_global.name));
+            memcpy(new_global.name.string, cmp_global.name, sizeof(cmp_global.name));
+            
+            new_global.type = static_cast<decltype(new_global.type)>(cmp_global.value_type);
+            new_global.initialization_expression_index = format_index_to_id(cmp_global.first_node);
+        }
+        
+        string_data.resize(string_data.size() + 1024);
+        
+        // Clear out the script data
+        scenario.scripts = std::move(new_scripts);
+        scenario.globals = std::move(new_globals);
+        scenario.source_files = std::move(source_files);
+        scenario.script_string_data = std::move(string_data);
+        scenario.script_syntax_data = std::move(syntax_data);
+    }
     
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         merge_child_scenarios(workload, tag_index, *this);
