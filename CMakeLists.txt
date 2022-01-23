@@ -13,8 +13,8 @@ project(Invader
 # Use C++20
 set(CMAKE_CXX_STANDARD 20)
 
-# Use C99
-set(CMAKE_C_STANDARD 99)
+# Use C11
+set(CMAKE_C_STANDARD 11)
 
 # Add our dependencies
 include(dependencies.cmake)
@@ -80,7 +80,7 @@ include(src/archive/archive.cmake)
 include(src/dependency/dependency.cmake)
 include(src/font/font.cmake)
 include(src/string/string.cmake)
-# include(src/script/script.cmake)
+include(src/script/script.cmake)
 include(src/info/info.cmake)
 include(src/extract/extract.cmake)
 include(src/sound/sound.cmake)

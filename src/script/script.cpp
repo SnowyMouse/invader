@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <map>
 #include <cstdlib>
+#include <cassert>
 #include <filesystem>
+#include <invader/printf.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/version.hpp>
-#include <invader/script/script_tree.hpp>
-#include <invader/script/tokenizer.hpp>
-#include <invader/script/compiler.hpp>
 #include <invader/file/file.hpp>
+#include <invader/tag/parser/parser.hpp>
+
+#include <riat/riat.hpp>
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -15,8 +18,8 @@ int main(int argc, const char **argv) {
 
     struct ScriptOption {
         const char *path;
-        const char *data = "data/";
-        const char *tags = "tags/";
+        std::filesystem::path data = "data";
+        std::filesystem::path tags = "tags";
     } script_options;
     script_options.path = *argv;
 
@@ -47,7 +50,7 @@ int main(int argc, const char **argv) {
     });
 
     // Get the scenario tag
-    const char *scenario;
+    std::string scenario;
     if(remaining_options.size() == 0) {
         eprintf("Expected a scenario tag. Use -h for more information.\n");
         return EXIT_FAILURE;
@@ -57,95 +60,17 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
     else {
-        scenario = remaining_options[0];
+        scenario = File::halo_path_to_preferred_path(remaining_options[0]);
     }
 
-    // A simple function to clean tokens
-    /*
-        auto clean_token = [](const char *token) -> std::string {
-        std::string s;
-        for(const char *c = token; *c; c++) {
-            if(*c == '\r') {
-                s += "\\r";
-            }
-            else if(*c == '\n') {
-                s += "\\n";
-            }
-            else if(*c == '\t') {
-                s += "\\t";
-            }
-            else {
-                s += *c;
-            }
-        }
-        return s;
-    };
-    */
-
-    std::filesystem::path tags(script_options.tags);
-    std::filesystem::path data(script_options.data);
-
-    std::filesystem::path tag_path = (tags / scenario);
-    tag_path += std::string(".scenario");
-    std::filesystem::path script_directory_path = (data / scenario).parent_path() / "scripts";
-
-    // Make sure we have a scripts directory
-    /*if(!std::filesystem::exists(script_directory_path)) {
-        eprintf("Missing a scripts directory at %s\n", script_directory_path.string().c_str());
-        return EXIT_FAILURE;
-    }
-
-    // Put our nodes, scripts, and globals here
-    std::vector<ScriptTree::Object> all_scripts;
-
-    // Go through each script in the scripts directory
-    for(auto &file : std::filesystem::directory_iterator(script_directory_path)) {
-        auto &path = file.path();
-        if(file.is_regular_file() && path.extension() == ".hsc") {
-            auto path_str = path.string();
-            auto file_data_maybe = Invader::File::open_file(path_str.c_str());
-            if(!file_data_maybe.has_value()) {
-                eprintf("Failed to open %s\n", path_str.c_str());
-                return EXIT_FAILURE;
-            }
-            auto &file_data = file_data_maybe.value();
-
-            // Add a 0 to the end for null termination
-            file_data.push_back(static_cast<std::byte>(0));
-
-            // Tokenize
-            bool error;
-            std::string error_message;
-            std::size_t error_line = 0, error_column = 0;
-            std::string error_token;
-            auto tokens = Tokenizer::tokenize(reinterpret_cast<char *>(file_data.data()), error, error_line, error_column, error_token, error_message);
-
-            // On failure, explain what happened
-            if(error) {
-                eprintf_error("Error parsing script %s", path_str.c_str());
-                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.c_str()).c_str());
-                eprintf("The error was: %s\n", error_message.c_str());
-                return EXIT_FAILURE;
-            }
-
-            // Make a syntax tree
-            auto tree = ScriptTree::compile_tokens(tokens, error, error_line, error_column, error_token, error_message);
-            if(error) {
-                eprintf_error("Error compiling script %s", path_str.c_str());
-                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.c_str()).c_str());
-                eprintf("The error was: %s\n", error_message.c_str());
-                return EXIT_FAILURE;
-            }
-
-            all_scripts.insert(all_scripts.begin(), tree.begin(), tree.end());
-        }
-    }*/
-
+    auto tag_path = script_options.tags / (scenario + ".scenario");
+    auto script_directory_path = (script_options.data / scenario).parent_path() / "scripts";
+    auto global_script_path = script_options.data / "global_scripts.hsc";
+    
     // Open the scenario tag
-    auto tag_path_str = tag_path.string();
-    auto scenario_file_data = Invader::File::open_file(tag_path_str.c_str());
+    auto scenario_file_data = Invader::File::open_file(tag_path);
     if(!scenario_file_data.has_value()) {
-        eprintf("Failed to open %s\n", tag_path_str.c_str());
+        eprintf("Failed to open %s\n", tag_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -155,11 +80,238 @@ int main(int argc, const char **argv) {
         s = Parser::Scenario::parse_hek_tag_file((*scenario_file_data).data(), (*scenario_file_data).size());
     }
     catch(std::exception &e) {
-        eprintf("Failed to parse %s\n", tag_path_str.c_str());
-        eprintf("The error was: %s\n", e.what());
+        eprintf_error("Failed to parse %s: %s", tag_path.string().c_str(), e.what());
         return EXIT_FAILURE;
     }
-
-    auto new_s = Compiler::decompile_scenario(s);
-    oprintf("%s\n\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(new_s)).c_str());
+    
+    RIAT::Instance instance;
+    
+    decltype(s.source_files) source_files;
+    auto load_script = [&source_files, &instance](const std::filesystem::path &path) {
+        auto filename = path.filename();
+        auto filename_without_extension = std::filesystem::path(filename).replace_extension().string();
+        
+        auto &source = source_files.emplace_back();
+        
+        oprintf("Loading %s...\n", filename.c_str());
+        
+        // Initialize
+        source = {};
+        
+        // Check if it's too long. If not, copy. Otherwise, error
+        if(filename_without_extension.size() > sizeof(source.name.string) - 1) {
+            eprintf_error("Script file name '%s' is too long", filename_without_extension.c_str());
+            throw std::exception();
+        }
+        std::strncpy(source.name.string, filename_without_extension.c_str(), sizeof(source.name.string) - 1);
+        
+        // Open it!
+        auto f = File::open_file(path).value();
+        instance.load_script_source(reinterpret_cast<const char *>(f.data()), f.size(), filename.string().c_str());
+        
+        // Move it into here
+        source.source = std::move(f);
+    };
+    
+    try {
+        // First load the global scripts
+        if(std::filesystem::exists(global_script_path)) {
+            load_script(global_script_path);
+        }
+        
+        // Next, load scripts in script directory
+        std::list<std::filesystem::path> script_paths;
+        
+        if(std::filesystem::exists(script_directory_path)) {
+            for(auto &p : std::filesystem::directory_iterator(script_directory_path)) {
+                auto path = p.path();
+                if(!p.is_regular_file() || path.extension() != ".hsc") {
+                    continue;
+                }
+                script_paths.emplace_back(path);
+            }
+        }
+        script_paths.sort();
+        
+        // Load in that order
+        for(auto &path : script_paths) {
+            load_script(path);
+        }
+        
+        // Compile
+        oprintf("Compiling all scripts...\n");
+        instance.compile_scripts();
+    }
+    catch(std::exception &e) {
+        eprintf_error("Failed to compile scripts: %s", e.what());
+        throw std::exception();
+    }
+    
+    std::size_t node_limit = 19001;
+    
+    auto scripts = instance.get_scripts();
+    auto globals = instance.get_globals();
+    auto nodes = instance.get_nodes();
+    
+    std::size_t node_count = nodes.size();
+    
+    if(nodes.size() > node_limit) {
+        eprintf_error("Node limit exceeded for the target engine (%zu > %zu)", node_count, node_limit);
+        throw std::exception();
+    }
+    
+    std::vector<Invader::Parser::ScenarioScriptNode> into_nodes;
+    
+    auto format_index_to_id = [](std::size_t index) -> std::uint32_t {
+        auto index_16_bit = static_cast<std::uint16_t>(index);
+        return static_cast<std::uint32_t>(((index_16_bit + 0x6373) | 0x8000) << 16) | index_16_bit;
+    };
+    
+    std::map<std::string, std::size_t> string_index;
+    std::vector<std::byte> string_data;
+    
+    for(std::size_t node_index = 0; node_index < node_count; node_index++) {
+        auto &n = nodes[node_index];
+        auto &new_node = into_nodes.emplace_back();
+        new_node = {};
+        
+        // Set the salt
+        new_node.salt = format_index_to_id(node_index) >> 16;
+        
+        // If we have string data, add it
+        if(n.string_data != NULL) {
+            std::string str = n.string_data;
+            if(!string_index.contains(str)) {
+                string_index[str] = string_data.size();
+                const auto *cstr = str.c_str();
+                string_data.insert(string_data.end(), reinterpret_cast<const std::byte *>(cstr), reinterpret_cast<const std::byte *>(cstr) + str.size());
+                string_data.emplace_back(std::byte());
+            }
+            new_node.string_offset = string_index[str];
+        }
+        
+        // All nodes are marked with this...?
+        new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GARBAGE_COLLECTABLE;
+        
+        // Here's the type
+        new_node.type = static_cast<Invader::HEK::ScenarioScriptValueType>(n.type);
+        new_node.index_union = new_node.type;
+        
+        // Set this stuff
+        if(n.is_primitive) {
+            new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE;
+            if(n.is_global) {
+                new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL;
+            }
+            else {
+                switch(n.type) {
+                    case RIAT_ValueType::RIAT_VALUE_TYPE_BOOLEAN:
+                        new_node.data.bool_int = n.bool_int;
+                        break;
+                    case RIAT_ValueType::RIAT_VALUE_TYPE_SCRIPT:
+                    case RIAT_ValueType::RIAT_VALUE_TYPE_SHORT:
+                        new_node.data.short_int = n.short_int;
+                        break;
+                    case RIAT_ValueType::RIAT_VALUE_TYPE_LONG:
+                        new_node.data.long_int = n.long_int;
+                        break;
+                    case RIAT_ValueType::RIAT_VALUE_TYPE_REAL:
+                        new_node.data.real = n.real;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else {
+            new_node.data.tag_id.id = format_index_to_id(n.child_node);
+            
+            if(n.is_script_call) {
+                new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL;
+                new_node.index_union = n.call_index;
+            }
+        }
+        
+        // Set the next node?
+        if(n.next_node == SIZE_MAX) {
+            new_node.next_node = UINT32_MAX;
+        }
+        else {
+            new_node.next_node = format_index_to_id(n.next_node);
+        }
+    }
+    
+    using node_table_header_tag_fmt = Invader::Parser::ScenarioScriptNodeTable::struct_big;
+    using node_tag_fmt = std::remove_reference<decltype(*into_nodes.data())>::type::struct_big;
+    
+    // Initialize the syntax data and write to it
+    std::vector<std::byte> syntax_data(sizeof(node_table_header_tag_fmt) + node_limit * sizeof(node_tag_fmt));
+    auto &table_output = *reinterpret_cast<node_table_header_tag_fmt *>(syntax_data.data());
+    auto *node_output = reinterpret_cast<node_tag_fmt *>(&table_output + 1);
+    table_output.count = node_count;
+    table_output.size = node_count;
+    table_output.maximum_count = node_limit;
+    table_output.next_id = format_index_to_id(node_count) >> 16;
+    table_output.element_size = sizeof(node_tag_fmt);
+    table_output.data = 0x64407440;
+    std::strcpy(table_output.name.string, "script node");
+    table_output.one = 1;
+    for(std::size_t node_index = 0; node_index < node_count; node_index++) {
+        assert(sizeof(node_output[node_index]) == output.size());
+        
+        auto output = into_nodes[node_index].generate_hek_tag_data();
+        memcpy(&node_output[node_index], output.data(), output.size());
+    }
+    
+    std::size_t script_count = scripts.size();
+    std::size_t global_count = globals.size();
+    
+    // Set up scripts
+    decltype(s.scripts) new_scripts;
+    new_scripts.resize(script_count);
+    for(std::size_t s = 0; s < script_count; s++) {
+        auto &new_script = new_scripts[s];
+        const auto &cmp_script = scripts[s];
+        
+        static_assert(sizeof(new_script.name.string) == sizeof(cmp_script.name));
+        memcpy(new_script.name.string, cmp_script.name, sizeof(cmp_script.name));
+        
+        new_script.return_type = static_cast<decltype(new_script.return_type)>(cmp_script.return_type);
+        new_script.script_type = static_cast<decltype(new_script.script_type)>(cmp_script.script_type);
+        new_script.root_expression_index = format_index_to_id(cmp_script.first_node);
+    }
+    
+    // Set up globals
+    decltype(s.globals) new_globals;
+    new_globals.resize(global_count);
+    for(std::size_t g = 0; g < global_count; g++) {
+        auto &new_global = new_globals[g];
+        const auto &cmp_global = globals[g];
+        
+        static_assert(sizeof(new_global.name.string) == sizeof(cmp_global.name));
+        memcpy(new_global.name.string, cmp_global.name, sizeof(cmp_global.name));
+        
+        new_global.type = static_cast<decltype(new_global.type)>(cmp_global.value_type);
+        new_global.initialization_expression_index = format_index_to_id(cmp_global.first_node);
+    }
+    
+    string_data.resize(string_data.size() + 1024);
+    
+    // Clear out the script data
+    s.scripts = std::move(new_scripts);
+    s.globals = std::move(new_globals);
+    s.source_files = std::move(source_files);
+    s.script_string_data = std::move(string_data);
+    s.script_syntax_data = std::move(syntax_data);
+    
+    // Write
+    auto output = s.generate_hek_tag_data(Invader::HEK::TagFourCC::TAG_FOURCC_SCENARIO);
+    if(File::save_file(tag_path, output)) {
+        oprintf_success("Successfully compiled scripts");
+        return EXIT_SUCCESS;
+    }
+    else {
+        eprintf_error("Failed to write to %s", tag_path.string().c_str());
+        return EXIT_FAILURE;
+    }
 }

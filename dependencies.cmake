@@ -9,6 +9,9 @@ find_package(TIFF)
 find_package(Freetype)
 find_package(Git)
 
+# Load RIAT
+add_subdirectory(ext/riat)
+
 if(WIN32)
     option(INVADER_WIN32_EXE_STATIC_LINK "set whether or not to make a completely static build of all of the Invader programs" ON)
 endif()
@@ -41,3 +44,4 @@ else()
     add_definitions(-DDISABLE_AUDIO)
     set(DEP_AUDIO_LIBRARIES "")
 endif()
+
