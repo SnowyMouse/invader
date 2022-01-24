@@ -6,6 +6,60 @@
 #include <invader/sound/sound_reader.hpp>
 
 namespace Invader::Parser {
+    static std::pair<float, float> default_min_max_distance_sounds(HEK::SoundClass sclass) {
+        switch(sclass) {
+            case HEK::SoundClass::SOUND_CLASS_DEVICE_MACHINERY:
+            case HEK::SoundClass::SOUND_CLASS_DEVICE_FORCE_FIELD:
+            case HEK::SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
+            case HEK::SoundClass::SOUND_CLASS_AMBIENT_NATURE:
+            case HEK::SoundClass::SOUND_CLASS_DEVICE_DOOR:
+            case HEK::SoundClass::SOUND_CLASS_MUSIC:
+            case HEK::SoundClass::SOUND_CLASS_DEVICE_NATURE:
+                return {0.9F, 5.0F};
+                
+            case HEK::SoundClass::SOUND_CLASS_WEAPON_EMPTY:
+            case HEK::SoundClass::SOUND_CLASS_WEAPON_IDLE:
+            case HEK::SoundClass::SOUND_CLASS_WEAPON_READY:
+            case HEK::SoundClass::SOUND_CLASS_WEAPON_RELOAD:
+            case HEK::SoundClass::SOUND_CLASS_WEAPON_CHARGE:
+            case HEK::SoundClass::SOUND_CLASS_WEAPON_OVERHEAT:
+                return {1.0F, 9.0F};
+                
+            case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
+            case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
+            case HEK::SoundClass::SOUND_CLASS_GAME_EVENT:
+            case HEK::SoundClass::SOUND_CLASS_UNIT_DIALOG:
+            case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
+                return {3.0F, 20.0F};
+                
+            case HEK::SoundClass::SOUND_CLASS_FIRST_PERSON_DAMAGE:
+            case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
+            case HEK::SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
+            case HEK::SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
+            case HEK::SoundClass::SOUND_CLASS_DEVICE_COMPUTERS:
+            case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
+                return {0.5F, 3.0F};
+                
+            case HEK::SoundClass::SOUND_CLASS_VEHICLE_ENGINE:
+            case HEK::SoundClass::SOUND_CLASS_PROJECTILE_IMPACT:
+            case HEK::SoundClass::SOUND_CLASS_VEHICLE_COLLISION:
+                return {1.4F, 8.0F};
+                
+            case HEK::SoundClass::SOUND_CLASS_WEAPON_FIRE:
+                return {4.0F, 70.0F};
+            case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
+                return {2.0F, 5.0F};
+            case HEK::SoundClass::SOUND_CLASS_PROJECTILE_DETONATION:
+                return {8.0F, 120.0F};
+            case HEK::SoundClass::SOUND_CLASS_UNIT_FOOTSTEPS:
+                return {0.9F, 10.0F};
+                
+            default:
+                return {};
+        }
+    }
+    
+    
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto permutation_index = offset / sizeof(struct_little);
 
@@ -167,15 +221,15 @@ namespace Invader::Parser {
         }
     }
 
-    template <typename T> static void sound_pre_compile(T *sound, BuildWorkload &workload, std::size_t tag_index) {
-        sound->maximum_bend_per_second = std::pow(sound->maximum_bend_per_second, 1.0f / TICK_RATE);
-        sound->unknown_ffffffff_0 = 0xFFFFFFFF;
-        sound->unknown_ffffffff_1 = 0xFFFFFFFF;
+    void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, 1.0f / TICK_RATE);
+        this->unknown_ffffffff_0 = 0xFFFFFFFF;
+        this->unknown_ffffffff_1 = 0xFFFFFFFF;
 
         std::size_t errors = 0;
-        for(auto &pr : sound->pitch_ranges) {
+        for(auto &pr : this->pitch_ranges) {
             for(auto &pe : pr.permutations) {
-                if(pe.format != sound->format) {
+                if(pe.format != this->format) {
                     errors++;
                 }
             }
@@ -185,13 +239,13 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
 
-        if(sound->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && sound->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound is 44.1 kHz AND mono. The target engine will not play this.");
         }
 
-        // If we didn't split long sounds into permutations, go through each permutation and Jason Jones it
-        if(!(sound->flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS)) {
-            for(auto &pr : sound->pitch_ranges) {
+        // If we didn't split long thiss into permutations, go through each permutation and Jason Jones it
+        if(!(this->flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS)) {
+            for(auto &pr : this->pitch_ranges) {
                 pr.actual_permutation_count = static_cast<std::uint16_t>(pr.permutations.size());
                 for(auto &p : pr.permutations) {
                     p.next_permutation_index = NULL_INDEX;
@@ -199,16 +253,16 @@ namespace Invader::Parser {
             }
         }
 
-        if(sound->one_skip_fraction_modifier == 0.0f && sound->zero_skip_fraction_modifier == 0.0f) {
-            sound->one_skip_fraction_modifier = 1.0f;
-            sound->zero_skip_fraction_modifier = 1.0f;
+        if(this->one_skip_fraction_modifier == 0.0f && this->zero_skip_fraction_modifier == 0.0f) {
+            this->one_skip_fraction_modifier = 1.0f;
+            this->zero_skip_fraction_modifier = 1.0f;
         }
 
-        if(sound->one_gain_modifier == 0.0f && sound->zero_gain_modifier == 0.0f) {
-            sound->one_gain_modifier = 1.0f;
+        if(this->one_gain_modifier == 0.0f && this->zero_gain_modifier == 0.0f) {
+            this->one_gain_modifier = 1.0f;
 
             // Set default zero gain modifier based on class
-            switch(sound->sound_class) {
+            switch(this->sound_class) {
                 case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
                 case HEK::SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
                 case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
@@ -221,22 +275,27 @@ namespace Invader::Parser {
                 case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
                 case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
                 case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
-                    sound->zero_gain_modifier = 0.0F;
+                    this->zero_gain_modifier = 0.0F;
                     break;
                 default:
-                    sound->zero_gain_modifier = 1.0F;
+                    this->zero_gain_modifier = 1.0F;
                     break;
             }
         }
 
-        if(sound->zero_pitch_modifier == 0.0f && sound->one_pitch_modifier == 0.0f) {
-            sound->one_pitch_modifier = 1.0f;
-            sound->zero_pitch_modifier = 1.0f;
+        if(this->zero_pitch_modifier == 0.0f && this->one_pitch_modifier == 0.0f) {
+            this->one_pitch_modifier = 1.0f;
+            this->zero_pitch_modifier = 1.0f;
         }
-    }
-
-    void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        sound_pre_compile(this, workload, tag_index);
+        
+        // Set distances
+        auto default_distance = default_min_max_distance_sounds(this->sound_class);
+        if(this->minimum_distance == 0.0F) {
+            this->minimum_distance = default_distance.first;
+        }
+        if(this->maximum_distance == 0.0F) {
+            this->maximum_distance = default_distance.second;
+        }
 
         // Warn if we're using bullshit distances
         if(this->minimum_distance > this->maximum_distance) {
@@ -311,68 +370,13 @@ namespace Invader::Parser {
 
         auto &maximum_distance = reinterpret_cast<SoundLooping::struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->maximum_distance;
 
-        auto get_max_distance_of_sound_tag = [&workload](const Dependency &tag) {
+        auto get_max_distance_of_sound_tag = [&workload](const Dependency &tag) -> float {
             if(tag.tag_id.is_null()) {
                 return 0.0F;
             }
 
             auto &sound_tag_data = *reinterpret_cast<const Sound::struct_little *>(workload.structs[*workload.tags[tag.tag_id.index].base_struct].data.data());
-            float max = sound_tag_data.maximum_distance.read();
-            if(max == 0.0F) {
-                switch(sound_tag_data.sound_class) {
-                    case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
-                    case HEK::SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
-                    case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_COMPUTERS:
-                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
-                    case HEK::SoundClass::SOUND_CLASS_FIRST_PERSON_DAMAGE:
-                        return 3.0F;
-
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_DOOR:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_FORCE_FIELD:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_MACHINERY:
-                    case HEK::SoundClass::SOUND_CLASS_DEVICE_NATURE:
-                    case HEK::SoundClass::SOUND_CLASS_MUSIC:
-                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_NATURE:
-                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
-                        return 5.0F;
-
-                    case HEK::SoundClass::SOUND_CLASS_PROJECTILE_IMPACT:
-                    case HEK::SoundClass::SOUND_CLASS_VEHICLE_COLLISION:
-                    case HEK::SoundClass::SOUND_CLASS_VEHICLE_ENGINE:
-                        return 8.0F;
-
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_READY:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_RELOAD:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_EMPTY:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_CHARGE:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_OVERHEAT:
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_IDLE:
-                        return 9.0F;
-
-                    case HEK::SoundClass::SOUND_CLASS_UNIT_FOOTSTEPS:
-                        return 10.0F;
-
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
-                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
-                    case HEK::SoundClass::SOUND_CLASS_GAME_EVENT:
-                    case HEK::SoundClass::SOUND_CLASS_UNIT_DIALOG:
-                        return 20.0F;
-
-                    case HEK::SoundClass::SOUND_CLASS_WEAPON_FIRE:
-                        return 70.0F;
-
-                    case HEK::SoundClass::SOUND_CLASS_PROJECTILE_DETONATION:
-                        return 120.0F;
-
-                    default:
-                        break;
-                }
-            }
-
-            return max;
+            return sound_tag_data.maximum_distance.read();
         };
 
         // Get the maximum distances of all referenced sound tags
