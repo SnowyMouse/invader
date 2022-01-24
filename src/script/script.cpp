@@ -16,37 +16,39 @@
 
 int main(int argc, const char **argv) {
     using namespace Invader;
-    //using namespace Invader::HEK;
+    using namespace Invader::HEK;
 
     struct ScriptOption {
         const char *path;
         std::filesystem::path data = "data";
         std::filesystem::path tags = "tags";
-        const Invader::HEK::GameEngineInfo *engine = &HEK::GameEngineInfo::get_game_engine_info(HEK::GameEngine::GAME_ENGINE_NATIVE);
+        bool filesystem_path = false;
+        const GameEngineInfo *engine = &GameEngineInfo::get_game_engine_info(GameEngine::GAME_ENGINE_NATIVE);
     } script_options;
     script_options.path = *argv;
     
-    std::string game_engine_arguments = std::string("Specify the game engine. Valid engines are: ") + Invader::Build::get_comma_separated_game_engine_shorthands();
+    std::string game_engine_arguments = std::string("Specify the game engine. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
 
     // Add our options
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0);
     options.emplace_back("data", 'd', 1);
     options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
     options.emplace_back("tags", 't', 1);
 
     static constexpr char DESCRIPTION[] = "Compile scripts.";
     static constexpr char USAGE[] = "[options] <scenario>";
 
     // Parse arguments
-    auto remaining_options = CommandLineOption::parse_arguments<ScriptOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, script_options, [](char opt, const auto &arguments, ScriptOption &script_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ScriptOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, script_options, [](char opt, const auto &arguments, ScriptOption &script_options) {
         switch(opt) {
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
                 
             case 'g': {
-                if(const auto *engine_maybe = HEK::GameEngineInfo::get_game_engine_info(arguments[0])) {
+                if(const auto *engine_maybe = GameEngineInfo::get_game_engine_info(arguments[0])) {
                     script_options.engine = engine_maybe;
                 }
                 else {
@@ -61,6 +63,10 @@ int main(int argc, const char **argv) {
                 script_options.data = arguments[0];
                 break;
 
+            case 'P':
+                script_options.filesystem_path = true;
+                break;
+
             case 't':
                 script_options.tags = arguments[0];
                 break;
@@ -69,16 +75,29 @@ int main(int argc, const char **argv) {
 
     // Get the scenario tag
     std::string scenario;
-    if(remaining_options.size() == 0) {
+    if(remaining_arguments.size() == 0) {
         eprintf("Expected a scenario tag. Use -h for more information.\n");
         return EXIT_FAILURE;
     }
-    else if(remaining_options.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_options[1]);
+    else if(remaining_arguments.size() > 1) {
+        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
     else {
-        scenario = File::halo_path_to_preferred_path(remaining_options[0]);
+        if(script_options.filesystem_path) {
+            auto tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
+            auto split = File::split_tag_class_extension(tag_maybe.value_or(""));
+            if(split.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+                scenario = split->path;
+            }
+            else {
+                eprintf_error("Failed to find a valid tag %s in %s.", remaining_arguments[0], script_options.tags.string().c_str());
+                return EXIT_FAILURE;
+            }
+        }
+        else {
+            scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
+        }
     }
 
     auto tag_path = script_options.tags / (scenario + ".scenario");
@@ -86,7 +105,7 @@ int main(int argc, const char **argv) {
     auto global_script_path = script_options.data / "global_scripts.hsc";
     
     // Open the scenario tag
-    auto scenario_file_data = Invader::File::open_file(tag_path);
+    auto scenario_file_data = File::open_file(tag_path);
     if(!scenario_file_data.has_value()) {
         eprintf("Failed to open %s\n", tag_path.string().c_str());
         return EXIT_FAILURE;
@@ -141,7 +160,7 @@ int main(int argc, const char **argv) {
         
         // Compile
         std::vector<std::string> warnings;
-        Invader::Parser::compile_scripts(s, *script_options.engine, warnings, source_files);
+        Parser::compile_scripts(s, *script_options.engine, warnings, source_files);
         
         for(auto &w : warnings) {
             eprintf_warn("%s", w.c_str());
@@ -163,7 +182,7 @@ int main(int argc, const char **argv) {
     oprintf("Compiled %zu script%s and %zu global%s\n", script_count, script_count == 1 ? "" : "s", global_count, global_count == 1 ? "" : "s");
     
     // Write
-    auto output = s.generate_hek_tag_data(Invader::HEK::TagFourCC::TAG_FOURCC_SCENARIO);
+    auto output = s.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SCENARIO);
     if(File::save_file(tag_path, output)) {
         oprintf_success("Successfully compiled scripts");
         return EXIT_SUCCESS;
