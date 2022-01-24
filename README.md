@@ -756,6 +756,8 @@ Options:
 This program compiles .hsc scripts. Scripts are stored in the `scripts` folder
 relative to the scenario tag's path in the data directory.
 
+It uses the [Rat In a Tube](https://github.com/SnowyMouse/riat) script compiler.
+
 ```
 Usage: invader-script [options] <scenario>
 
