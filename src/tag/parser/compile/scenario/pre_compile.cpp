@@ -6,6 +6,7 @@
 #include <invader/build/build_workload.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
+
 #include <riat/riat.hpp>
 
 namespace Invader::Parser {
@@ -14,7 +15,7 @@ namespace Invader::Parser {
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
-    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
+    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, RIAT_OptimizationLevel optimization_level, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
         // Determine what target to use
         RIAT_CompileTarget target;
         switch(info.cache_version) {
@@ -39,7 +40,9 @@ namespace Invader::Parser {
         }
         
         // Instantiate it
-        RIAT::Instance instance(target);
+        RIAT::Instance instance;
+        instance.set_compile_target(target);
+        instance.set_optimization_level(optimization_level);
         instance.set_user_data(&warnings);
     
         // Any warnings get eaten up here
@@ -300,7 +303,7 @@ namespace Invader::Parser {
         // Recompile scripts
         try {
             std::vector<std::string> warnings;
-            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), warnings);
+            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), workload.get_build_parameters()->script_optimization_level, warnings);
             for(auto &w : warnings) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
             }

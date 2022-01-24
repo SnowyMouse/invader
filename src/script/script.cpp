@@ -160,7 +160,7 @@ int main(int argc, const char **argv) {
         
         // Compile
         std::vector<std::string> warnings;
-        Parser::compile_scripts(s, *script_options.engine, warnings, source_files);
+        Parser::compile_scripts(s, *script_options.engine, RIAT_OptimizationLevel::RIAT_OPTIMIZATION_PREVENT_GENERATIONAL_LOSS, warnings, source_files);
         
         for(auto &w : warnings) {
             eprintf_warn("%s", w.c_str());

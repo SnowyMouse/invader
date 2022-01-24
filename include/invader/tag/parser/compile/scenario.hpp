@@ -5,6 +5,8 @@
 
 #include "../parser.hpp"
 
+#include <riat/riat.h>
+
 namespace Invader::Parser {
     /**
      * Fix scenario script source data being missing by decompiling scripts
@@ -16,12 +18,13 @@ namespace Invader::Parser {
     
     /**
      * Compile scripts for the scenario
-     * @param scenario scenario to compile scripts for
-     * @param info     target engine info
-     * @param warnings array to hold warnings
-     * @param scripts  optional array of scripts (filename-data pairs). If not set, use source data from the scenario tag
+     * @param scenario           scenario to compile scripts for
+     * @param info               target engine info
+     * @param optimization_level optimization level
+     * @param warnings           array to hold warnings
+     * @param scripts            optional array of scripts (filename-data pairs). If not set, use source data from the scenario tag
      */
-    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &scripts = std::nullopt);
+    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, RIAT_OptimizationLevel optimization_level, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &scripts = std::nullopt);
 }
 
 #endif
