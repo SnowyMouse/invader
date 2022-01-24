@@ -20,25 +20,6 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 )
 
-# Sound stuff
-if(${INVADER_USE_AUDIO})
-    SET(INVADER_AUDIO_FILES
-        src/sound/sound_encoder_flac.cpp
-        src/sound/sound_encoder_ogg_vorbis.cpp
-        src/sound/sound_encoder_wav.cpp
-        src/sound/sound_encoder_xbox_adpcm.cpp
-        src/sound/sound_encoder.cpp
-        src/sound/sound_reader_16_bit_pcm_big_endian.cpp
-        src/sound/sound_reader_flac.cpp
-        src/sound/sound_reader_ogg.cpp
-        src/sound/sound_reader_wav.cpp
-        src/sound/sound_reader_xbox_adpcm.cpp
-        src/sound/adpcm_xq/adpcm-lib.c
-    )
-else()
-    SET(INVADER_AUDIO_FILES "")
-endif()
-
 # Invader library
 set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
@@ -64,7 +45,17 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 
-    ${INVADER_AUDIO_FILES}
+    src/sound/sound_encoder_flac.cpp
+    src/sound/sound_encoder_ogg_vorbis.cpp
+    src/sound/sound_encoder_wav.cpp
+    src/sound/sound_encoder_xbox_adpcm.cpp
+    src/sound/sound_encoder.cpp
+    src/sound/sound_reader_16_bit_pcm_big_endian.cpp
+    src/sound/sound_reader_flac.cpp
+    src/sound/sound_reader_ogg.cpp
+    src/sound/sound_reader_wav.cpp
+    src/sound/sound_reader_xbox_adpcm.cpp
+    src/sound/adpcm_xq/adpcm-lib.c
 
     src/error.cpp
     src/hek/fourcc.cpp
@@ -136,24 +127,14 @@ set(INVADER_SOURCE_FILES
     src/version.cpp
 )
 
-# If static build, build as static
-if(${INVADER_STATIC_BUILD})
-    add_library(invader STATIC
-        ${INVADER_SOURCE_FILES}
-    )
-# Otherwise, do this
-else()
-    add_library(invader SHARED
-        ${INVADER_SOURCE_FILES}
-    )
+add_library(invader
+    ${INVADER_SOURCE_FILES}
+)
+
+# If dynamic, have the .dll have the windowsrc thing too
+if(${BUILD_SHARED_LIBS})
     do_windows_rc(invader libinvader.dll "Invader library")
 endif()
-
-# Set our alternative Invader library (the one we aren't linking)
-set_target_properties(${ALTERNATE_INVADER_BUILD}
-    PROPERTIES OUTPUT_NAME invader
-)
-set(TARGETS_LIST ${TARGETS_LIST} ${ALTERNATE_INVADER_BUILD})
 
 # Do this
 add_custom_target(invader-header-version

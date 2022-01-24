@@ -5,10 +5,6 @@ if(NOT DEFINED ${INVADER_SOUND})
 endif()
 
 if(${INVADER_SOUND})
-    if(NOT ${INVADER_USE_AUDIO})
-        message(FATAL_ERROR "invader-sound requires audio")
-    endif()
-
     add_executable(invader-sound
         src/sound/sound.cpp
     )

@@ -16,6 +16,9 @@ set(CMAKE_CXX_STANDARD 20)
 # Use C11
 set(CMAKE_C_STANDARD 11)
 
+# Build shared libs?
+option(BUILD_SHARED_LIBS "Build with shared libs" ON)
+
 # Add our dependencies
 include(dependencies.cmake)
 
