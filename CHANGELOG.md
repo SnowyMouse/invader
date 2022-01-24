@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
+- New tool: invader-script - Compiles scripts
 - invader: Added support for the MCC: CEA map format
 - invader-archive: Added `--verbose` which will print whether or not a tag was
   omitted as well as doing verbose comparisons.

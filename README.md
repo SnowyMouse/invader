@@ -94,7 +94,7 @@ First, you will need to download the Invader repository onto your computer. You
 can do this using the command:
 
 ```
-git clone https://github.com/SnowyMouse/invader
+git clone https://github.com/SnowyMouse/invader --recursive
 ```
 
 Everything in this section, from this point on, assumes the Invader repository
@@ -141,6 +141,7 @@ this project is split into different programs.
 - [invader-recover]
 - [invader-refactor]
 - [invader-resource]
+- [invader-script]
 - [invader-sound]
 - [invader-string]
 - [invader-strip]
@@ -751,6 +752,27 @@ Options:
                                duplicates).
 ```
 
+### invader-script
+This program compiles .hsc scripts. Scripts are stored in the `scripts` folder
+relative to the scenario tag's path in the data directory.
+
+```
+Usage: invader-script [options] <scenario>
+
+Compile scripts.
+
+Options:
+  -d --data                   
+  -g --game-engine <engine>    Specify the game engine. Valid engines are:
+                               gbx-custom, gbx-demo, gbx-retail, mcc-cea,
+                               native, xbox-demo, xbox-ntsc, xbox-ntsc-jp,
+                               xbox-ntsc-tw, xbox-pal
+  -h --help                    Show this list of options.
+  -i --info                   
+  -P --fs-path                 Use a filesystem path for the tag path
+                               directory.
+```
+
 
 ### invader-sound
 This program generates sound tags. Sound tag data is stored in the data
@@ -1178,6 +1200,7 @@ to a point where it can be a better and free replacement for tool.exe.
 [invader-recover]: #invader-recover
 [invader-refactor]: #invader-refactor
 [invader-resource]: #invader-resource
+[invader-script]: #invader-script
 [invader-sound]: #invader-sound
 [invader-string]: #invader-string
 [invader-strip]: #invader-strip
