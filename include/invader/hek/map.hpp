@@ -69,6 +69,9 @@ namespace Invader::HEK {
         /** Maximum file size, or a function to get the maximum file size - use get_maximum_file_size() to retrieve it */
         maximum_file_size_t maximum_file_size;
         
+        /** Maximum script nodes allowed for the target engine */
+        std::uint16_t maximum_scenario_script_nodes = UINT16_MAX;
+        
         /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
         bool base_memory_address_is_inferred = false;
         

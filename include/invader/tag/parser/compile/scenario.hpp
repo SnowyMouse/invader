@@ -15,12 +15,13 @@ namespace Invader::Parser {
     bool fix_missing_script_source_data(Scenario &scenario, bool fix);
     
     /**
-     * Fix excessive script nodes being present
-     * @param  scenario scenario to fix
-     * @param  fix      actually apply changes
-     * @return          true if there were too many nodes and it was fixable, false if not
+     * Compile scripts for the scenario
+     * @param scenario scenario to compile scripts for
+     * @param info     target engine info
+     * @param warnings array to hold warnings
+     * @param scripts  optional array of scripts (filename-data pairs). If not set, use source data from the scenario tag
      */
-    bool fix_excessive_script_nodes(Scenario &scenario, bool fix);
+    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &scripts = std::nullopt);
 }
 
 #endif

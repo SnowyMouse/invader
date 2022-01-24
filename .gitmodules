@@ -1,0 +1,3 @@
+[submodule "ext/riat"]
+	path = ext/riat
+	url = https://github.com/SnowyMouse/riat

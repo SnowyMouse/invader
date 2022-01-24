@@ -126,6 +126,11 @@ namespace Invader {
                 std::uint64_t build_maximum_tag_space;
                 
                 /**
+                 * Maximum script nodes to allow
+                 */
+                std::uint16_t build_scenario_maximum_script_nodes;
+                
+                /**
                  * Maximum cache file size to use. If null, it will determine it based on the map type on Xbox or the maximum allowed file size on other versions (without modding).
                  */
                 HEK::GameEngineInfo::maximum_file_size_t build_maximum_cache_file_size;

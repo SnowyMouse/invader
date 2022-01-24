@@ -201,14 +201,26 @@ namespace Invader::Bludgeoner {
         
         return rval;
     }
-    
-    bool excessive_script_nodes(Parser::ParserStruct *s, bool fix) {
-        auto attempt_fix = [&fix](auto *s) -> bool {
-            if(s) {
-                return fix_excessive_script_nodes(*s, fix);
+
+    bool null_terminated_scripts(Parser::ParserStruct *s, bool fix) {
+        bool rval = false;
+        auto *scenario = dynamic_cast<Parser::Scenario *>(s);
+        if(scenario) {
+            for(auto &source : scenario->source_files) {
+                for(std::size_t s = 0; s < source.source.size(); s++) {
+                    if(static_cast<char>(source.source[s]) == 0) {
+                        if(fix) {
+                            source.source.erase(source.source.begin() + s);
+                            s--;
+                            continue;
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+                }
             }
-            return false;
-        };
-        return attempt_fix(dynamic_cast<Invader::Parser::Scenario *>(s));
+        }
+        return rval;
     }
 }

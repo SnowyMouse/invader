@@ -24,6 +24,7 @@ namespace Invader {
         this->build_compress = engine_info.uses_compression;
         this->build_version = engine_info.build_string_is_enforced ? engine_info.get_build_string() : full_version();
         this->build_bsps_occupy_tag_space = engine_info.bsps_occupy_tag_space;
+        this->build_scenario_maximum_script_nodes = engine_info.maximum_scenario_script_nodes;
         
         if(engine_info.supports_external_resource_maps()) {
             this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
