@@ -808,6 +808,30 @@ namespace Invader::Parser {
         return this->compare(what, precision, ignore_volatile, verbose, 0);
     }
     
+    static constexpr bool too_different(double a, double b) noexcept {
+        double delta = 0.0001;
+        
+        auto max_discrepency = a * delta;
+        if(max_discrepency < 0.0) {
+            max_discrepency *= -1.0;
+        }
+        
+        auto difference = (a - b);
+        if(difference < 0.0) {
+            difference *= -1.0;
+        }
+        
+        // (a-b) > delta && b is not in [a - dA, a + dA]
+        return difference > delta && ((b > a + max_discrepency) || (b < a - max_discrepency));
+    }
+    
+    static_assert(too_different(1, 1) == false);
+    static_assert(too_different(1.000025, 1) == false);
+    static_assert(too_different(1.01, 1) == true);
+    static_assert(too_different(-1, 1) == true);
+    static_assert(too_different(-0.000025, 0.000025) == false);
+    static_assert(too_different(0.000025, -0.000025) == false);
+    
     bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const {
         // Different struct name
         if(typeid(this) != typeid(what)) {
@@ -921,7 +945,9 @@ namespace Invader::Parser {
                         if(precision && vt.get_number_format() == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) { // if precision, is it different by too much?
                             auto value_count = vt_v.size();
                             for(std::size_t i = 0; i < value_count; i++) {
-                                if(std::fabs(std::get<double>(vo_v[i]) - std::get<double>(vt_v[i])) > 0.000001) {
+                                auto t = std::fabs(std::get<double>(vt_v[i]));
+                                auto o = std::fabs(std::get<double>(vo_v[i]));
+                                if(too_different(t,o)) {
                                     complain();
                                     break;
                                 }
