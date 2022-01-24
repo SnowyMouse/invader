@@ -21,9 +21,9 @@ namespace Invader::Parser {
         float density_scale = this->density / mass_points_count;
         float density_scale_co = 0.0f;
 
-        float xx = 1e-30f;
-        float yy = 1e-30f;
-        float zz = 1e-30f;
+        float xx = 0.0f;
+        float yy = 0.0f;
+        float zz = 0.0f;
 
         float neg_zx = 0.0f;
         float neg_xy = 0.0f;
