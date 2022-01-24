@@ -313,7 +313,7 @@ namespace Invader::Parser {
         // Check for stubs and warn
         for(auto &script : scenario.scripts) {
             if(script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Script '%s' is a stub script and has not been replaced by a static script. It will function as a static script, instead.", script.name.string);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script '%s' is a stub script but has not been replaced by a static script. It will function as a static script, instead.", script.name.string);
             }
         }
         
