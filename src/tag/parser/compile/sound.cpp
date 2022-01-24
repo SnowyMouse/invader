@@ -6,6 +6,7 @@
 #include <invader/sound/sound_reader.hpp>
 
 namespace Invader::Parser {
+    // Originally, defaulting the maximum applied to just sound_looping tags, but then it was changed to defaulting the sound tags in Halo: CEA
     static std::pair<float, float> default_min_max_distance_sounds(HEK::SoundClass sclass) {
         switch(sclass) {
             case HEK::SoundClass::SOUND_CLASS_DEVICE_MACHINERY:

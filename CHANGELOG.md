@@ -48,6 +48,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Scenarios with no scripts or globals now have their syntax and
   string data initialized
 - invader-build: Changed `--build-version` to `--build-string`
+- invader-compare: Fixed `-p` still mismatching small discrepencies
 - invader-edit-qt: Clicking "Find" and "Save As" for a tag now expands all
   directories to the tag's current directory
 - invader-edit-qt: Changed listing mode to always be "fast" by default. This
