@@ -273,6 +273,9 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], BROKEN_RANGE_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_RANGE;
                 }
+                else if(std::strcmp(arguments[0], NULL_TERMINATED_SCRIPTS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::NULL_TERMINATED_SCRIPTS;
+                }
                 else if(std::strcmp(arguments[0], INVALID_INDICES_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_INDICES;
                 }

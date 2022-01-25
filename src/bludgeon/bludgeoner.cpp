@@ -201,6 +201,7 @@ namespace Invader::Bludgeoner {
                     if(static_cast<char>(source.source[s]) == 0) {
                         if(fix) {
                             source.source.erase(source.source.begin() + s);
+                            rval = true;
                             s--;
                             continue;
                         }
