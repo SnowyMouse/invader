@@ -2,6 +2,7 @@
 
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/tag/parser/compile/bitmap.hpp>
 
 namespace Invader::Parser {
     static std::uint16_t convert_shader_type(const BuildWorkload &workload, HEK::ShaderType pc_input) noexcept {
@@ -38,6 +39,13 @@ namespace Invader::Parser {
             this->material_color.blue = 1.0F;
         }
     }
+    
+    void ShaderEnvironment::post_compile(BuildWorkload &workload, std::size_t , std::size_t , std::size_t ) {
+        if(!this->base_map.tag_id.is_null()) {
+            set_bitmap_data_environment_flag(workload, this->base_map.tag_id.index);
+        }
+    }
+    
     void ShaderModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_MODEL);
         this->unknown = 1.0F;

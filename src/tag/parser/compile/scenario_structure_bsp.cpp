@@ -4,6 +4,7 @@
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/tag/parser/compile/bitmap.hpp>
 
 namespace Invader::Parser {
     void ScenarioStructureBSP::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -110,6 +111,10 @@ namespace Invader::Parser {
     void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto lightmap_count = this->lightmaps.size();
         auto lightmap_bitmap = this->lightmaps_bitmap.tag_id;
+        
+        if(!lightmap_bitmap.is_null()) {
+            set_bitmap_data_environment_flag(workload, lightmap_bitmap.index);
+        }
         
         // If we need to, handle lightmap bitmap stuff
         if(!workload.disable_recursion && !workload.disable_error_checking) {

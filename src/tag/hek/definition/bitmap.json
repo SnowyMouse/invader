@@ -118,13 +118,16 @@
             "v16u16",
             "unused",
             "make it actually work",
-            "external"
+            "external",
+            "environment"
         ],
         "cache_only": [
             "unused",
             "make it actually work",
-            "external"
+            "external",
+            "environment"
         ],
+        "comment": "The 'environment' flag is only on CEA and it is set for lightmaps and environment shader base maps, and if it isn't set, it causes lightmaps to have issues.\nThe 'external' flag is for Gearbox versions and CEA and is set if the data is in an external bitmaps.map file.",
         "width": 16
     },
     {

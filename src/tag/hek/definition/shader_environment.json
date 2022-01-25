@@ -452,6 +452,7 @@
         "type": "struct",
         "inherits": "Shader",
         "pre_compile": true,
+        "post_compile": true,
         "size": 836
     }
 ]

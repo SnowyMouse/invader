@@ -6,6 +6,26 @@
 #include <invader/bitmap/swizzle.hpp>
 
 namespace Invader::Parser {
+    void set_bitmap_data_environment_flag(BuildWorkload &workload, std::size_t tag_index) {
+        if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            return;
+        }
+        
+        auto &base_struct = workload.structs[*workload.tags[tag_index].base_struct];
+        auto &bitmap_base = *reinterpret_cast<Parser::Bitmap::struct_little *>(base_struct.data.data());
+        
+        auto bitmap_data_count = static_cast<std::size_t>(bitmap_base.bitmap_data.count);
+        if(bitmap_data_count == 0) {
+            return;
+        }
+        auto *bitmap_data = reinterpret_cast<Parser::BitmapData::struct_little *>(workload.structs[*base_struct.resolve_pointer(&bitmap_base.bitmap_data.pointer)].data.data());
+        
+        for(std::size_t b = 0; b < bitmap_data_count; b++) {
+            auto &flags = bitmap_data[b].flags;
+            flags = flags.read() | HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_ENVIRONMENT;
+        }
+    }
+    
     void BitmapData::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &s = workload.structs[struct_index];
         auto *data = s.data.data();

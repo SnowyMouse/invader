@@ -83,6 +83,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Fixed fade-to-gray being applied on non-detail maps
 - invader-build: Fixed sound min/max distances not being defaulted properly
 - invader-build: Fix model size reading as 0 MiB when building Xbox maps
+- invader-build: Fixed lighting issues for environment shaders on CEA maps
 - invader-compare: Fixed precision checking ignoring floating point numbers
 - invader-edit-qt: Fixed "forced shader permutation" and "hud text message"
   being defaulted to -1. It is no longer allowed to set these to -1, either, as

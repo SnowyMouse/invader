@@ -36,22 +36,11 @@ def make_scan_padding(all_used_structs, struct_name, all_bitfields, hpp, cpp_sca
                     # Base mask (all existing fields)
                     mask = 2**len(b["fields"]) - 1
                     
-                    # Hide unused cache-only stuff
-                    if "cache_only" in b:
-                        mask_cache_only = 0
-                        for a in b["cache_only"]:
-                            for n in range(0, len(b["fields"])):
-                                if b["fields"][n] == a:
-                                    mask_cache_only = mask_cache_only | (1 << n)
-                                    break
-                            
-                        mask = (~mask_cache_only) & mask
-                    
                     # Hide unused bitmasks
                     if "__excluded" in struct and struct["__excluded"] is not None:
                         mask = (~struct["__excluded"]) & mask
                         
-                    cpp_scan_padding.write("        l_copy.{} = static_cast<HEK::{}>(l_copy.{} & {});\n".format(name, struct["type"], name, ~mask))
+                    cpp_scan_padding.write("        l_copy.{} = static_cast<HEK::{}>(l_copy.{} & ~0x{:08X});\n".format(name, struct["type"], name, mask))
                     break
             if memset_all_zero:
                 cpp_scan_padding.write("        std::memset(reinterpret_cast<void *>(&l_copy.{}), 0, sizeof(l_copy.{}));\n".format(name, name))
