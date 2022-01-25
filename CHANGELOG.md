@@ -73,6 +73,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader: Fixed invalid enums not being properly detected if they're valid for
   HEK but marked as invalid for the game
 - invader: Fixed iterating through directories with trailing slashes
+- invader-archive: Fixed child scenarios not being included
 - invader-archive: Fixed ignoring floating point numbers for mismatched values
 - invader-archive: Fixed creating empty archives if all tags were excluded
 - invader-bitmap: Fixed first bitmap index not being a valid bitmap

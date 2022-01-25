@@ -232,7 +232,7 @@ int main(int argc, const char **argv) {
             map = BuildWorkload::compile_map(parameters);
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile scenario %s into a map", base_tag.data());
+            eprintf_error("Failed to compile scenario %s into a map", base_tag.c_str());
             return EXIT_FAILURE;
         }
 
@@ -242,19 +242,18 @@ int main(int argc, const char **argv) {
             parsed_map = std::make_unique<Map>(Map::map_with_move(std::move(map)));
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to parse the map file generated with scenario %s: %s", base_tag.data(), e.what());
+            eprintf_error("Failed to parse the map file generated with scenario %s: %s", base_tag.c_str(), e.what());
             return EXIT_FAILURE;
         }
         auto tag_count = parsed_map->get_tag_count();
 
         // Go through each tag and see if we can find everything.
-        archive_list.reserve(tag_count);
-        for(std::size_t i = 0; i < tag_count; i++) {
-            // Get the tag path information
-            auto &tag = parsed_map->get_tag(i);
-            std::string full_tag_path = File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_fourcc_to_extension(tag.get_tag_fourcc()));
+        archive_list.reserve(tag_count + 64);
+        
+        auto archive_it = [&archive_options, &archive_list](const std::string &path, TagFourCC fourcc) {
+            std::string full_tag_path = File::halo_path_to_preferred_path(path) + "." + tag_fourcc_to_extension(fourcc);
 
-            // Check each tags directory if it exists. If so, archive it
+            // Check each tags directory if it exists. If so, archive it (todo: refactor to tag_path_to_file_path())
             bool exists = false;
             for(auto &dir : archive_options.tags) {
                 std::filesystem::path tag_path = std::filesystem::path(dir) / full_tag_path;
@@ -267,8 +266,31 @@ int main(int argc, const char **argv) {
 
             if(!exists) {
                 eprintf_error("Failed to find %s. Archive could not be made.", full_tag_path.c_str());
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             }
+        };
+        
+        for(std::size_t i = 0; i < tag_count; i++) {
+            // Get the tag path information
+            auto &tag = parsed_map->get_tag(i);
+            archive_it(tag.get_path(), tag.get_tag_fourcc());
+        }
+        
+        // Archive child scenarios
+        try {
+            auto path = Invader::File::tag_path_to_file_path(base_tag + ".scenario", archive_options.tags);
+            auto scenario_data = Invader::File::open_file(path.value()).value();
+            auto scenario_ptr = Invader::Parser::ParserStruct::parse_hek_tag_file(scenario_data.data(), scenario_data.size());
+            auto &scenario = dynamic_cast<Invader::Parser::Scenario &>(*scenario_ptr);
+            for(auto &child : scenario.child_scenarios) {
+                if(!child.child_scenario.path.empty()) {
+                    archive_it(child.child_scenario.path, child.child_scenario.tag_fourcc);
+                }
+            }
+        }
+        catch(std::exception &e) {
+            eprintf_error("Failed to get dependencies of %s.scenario: %s", base_tag.c_str(), e.what());
+            return EXIT_FAILURE;
         }
     }
     else {
