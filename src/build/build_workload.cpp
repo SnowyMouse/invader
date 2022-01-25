@@ -302,8 +302,8 @@ namespace Invader {
             
             // If we ARE on Xbox, then we go straight to the tag data
             else {
-                model_data_size = 0;
-                vertex_size = 0;
+                vertex_size = workload.compressed_model_vertices.size() * sizeof(*workload.compressed_model_vertices.data());
+                model_data_size = vertex_size + workload.model_indices.size() * sizeof(*workload.model_indices.data());
                 model_offset = 0;
                 tag_data_offset = final_data.size() + REQUIRED_PADDING_N_BYTES(final_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
             }
