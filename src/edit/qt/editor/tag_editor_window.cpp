@@ -21,9 +21,7 @@
 #include "../tree/tag_tree_dialog.hpp"
 #include "subwindow/tag_editor_subwindow.hpp"
 #include "subwindow/tag_editor_bitmap_subwindow.hpp"
-#ifndef DISABLE_AUDIO
 #include "subwindow/tag_editor_sound_subwindow.hpp"
-#endif
 #include "subwindow/tag_editor_string_subwindow.hpp"
 #include "subwindow/tag_editor_font_subwindow.hpp"
 
@@ -118,11 +116,9 @@ namespace Invader::EditQt {
             case TagFourCC::TAG_FOURCC_BITMAP:
                 extra_widget = new QPushButton("Preview bitmap");
                 break;
-            #ifndef DISABLE_AUDIO
             case TagFourCC::TAG_FOURCC_SOUND:
                 extra_widget = new QPushButton("Preview sound");
                 break;
-            #endif
             case TagFourCC::TAG_FOURCC_FONT:
                 extra_widget = new QPushButton("Preview font");
                 break;
@@ -373,11 +369,9 @@ namespace Invader::EditQt {
                 case TagFourCC::TAG_FOURCC_BITMAP:
                     this->subwindow = new TagEditorBitmapSubwindow(this);
                     break;
-                #ifndef DISABLE_AUDIO
                 case TagFourCC::TAG_FOURCC_SOUND:
                     this->subwindow = new TagEditorSoundSubwindow(this);
                     break;
-                #endif
                 case TagFourCC::TAG_FOURCC_FONT:
                     this->subwindow = new TagEditorFontSubwindow(this);
                     break;

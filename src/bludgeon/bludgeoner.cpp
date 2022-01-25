@@ -58,8 +58,6 @@ namespace Invader::Bludgeoner {
         return attempt_fix(dynamic_cast<Invader::Parser::GBXModel *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::Model *>(s));
     }
     
-    #ifndef DISABLE_AUDIO
-    
     static bool broken_sound_buffer(Parser::SoundPermutation &pe, bool fix) {
         using SoundFormat = Invader::HEK::SoundFormat;
         auto &samples = pe.samples;
@@ -111,14 +109,6 @@ namespace Invader::Bludgeoner {
         
         return fucked;
     }
-    
-    #else
-    
-    static bool broken_sound_buffer(Parser::SoundPermutation &, bool) {
-        return false;
-    }
-    
-    #endif
 
     bool sound_buffer(Invader::Parser::ParserStruct *s, bool fix) {
         auto attempt_fix = [&fix](auto *s) -> bool {
