@@ -25,6 +25,12 @@ int main(int argc, const char **argv) {
         bool regenerate = false;
         bool clear = false;
         bool filesystem_path = false;
+        bool use_global_scripts = true;
+        
+        std::list<std::string> explicit_scripts;
+        bool reload_scripts = false;
+        bool use_explicit = false;
+        
         const GameEngineInfo *engine = &GameEngineInfo::get_game_engine_info(GameEngine::GAME_ENGINE_NATIVE);
     } script_options;
     script_options.path = *argv;
@@ -39,7 +45,10 @@ int main(int argc, const char **argv) {
     options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
     options.emplace_back("regenerate", 'R', 0, "Use the scenario tag's script source data as data.");
-    options.emplace_back("tags", 't', 1);
+    options.emplace_back("exclude-global-scripts", 'E', 0, "Do not use global scripts.");
+    options.emplace_back("reload-scripts", 'r', 0, "Explicitly recompile scripts referenced by the tag. Automatically use global scripts.");
+    options.emplace_back("explicit", 'e', 1, "Explicitly only compile the given script. Automatically use global scripts.", "<script>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
 
     static constexpr char DESCRIPTION[] = "Compile scripts.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -70,6 +79,20 @@ int main(int argc, const char **argv) {
             case 'c':
                 script_options.clear = true;
                 break;
+
+            case 'e':
+                script_options.explicit_scripts.emplace_back(arguments[0]);
+                script_options.use_explicit = true;
+                break;
+
+            case 'r':
+                script_options.reload_scripts = true;
+                script_options.use_explicit = true;
+                break;
+
+            case 'E':
+                script_options.use_global_scripts = false;
+                break;
                 
             case 'R':
                 script_options.regenerate = true;
@@ -87,33 +110,23 @@ int main(int argc, const char **argv) {
 
     // Get the scenario tag
     std::string scenario;
-    if(remaining_arguments.size() == 0) {
-        eprintf("Expected a scenario tag. Use -h for more information.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
-    }
-    else {
-        if(script_options.filesystem_path) {
-            auto tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
-            auto split = File::split_tag_class_extension(tag_maybe.value_or(""));
-            
-            
-            auto tag_path = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
-            
-            if(split.has_value() && std::filesystem::exists(remaining_arguments[0])) {
-                scenario = split->path;
-            }
-            else {
-                eprintf_error("Failed to find a valid tag %s in %s.", remaining_arguments[0], script_options.tags.string().c_str());
-                return EXIT_FAILURE;
-            }
+    if(script_options.filesystem_path) {
+        auto tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
+        auto split = File::split_tag_class_extension(tag_maybe.value_or(""));
+        
+        
+        auto tag_path = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
+        
+        if(split.has_value() && std::filesystem::exists(remaining_arguments[0])) {
+            scenario = split->path;
         }
         else {
-            scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
+            eprintf_error("Failed to find a valid tag %s in %s.", remaining_arguments[0], script_options.tags.string().c_str());
+            return EXIT_FAILURE;
         }
+    }
+    else {
+        scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
     }
 
     auto tag_path = script_options.tags / (scenario + ".scenario");
@@ -169,12 +182,25 @@ int main(int argc, const char **argv) {
             source_files.emplace();
             
             // First load the global scripts
-            if(std::filesystem::exists(global_script_path)) {
+            if(script_options.use_global_scripts && std::filesystem::exists(global_script_path)) {
                 load_script(global_script_path);
             }
             
             // Next, load scripts in script directory
             std::list<std::filesystem::path> script_paths;
+            
+            // Add reload scripts
+            if(script_options.reload_scripts) {
+                for(auto &source : s.source_files) {
+                    if(std::strcmp(source.name.string, "global_scripts") == 0) {
+                        continue;
+                    }
+                    script_options.explicit_scripts.emplace_back(source.name.string);
+                }
+            }
+            
+            // Make these unique
+            script_options.explicit_scripts.unique();
             
             if(std::filesystem::exists(script_directory_path)) {
                 for(auto &p : std::filesystem::directory_iterator(script_directory_path)) {
@@ -182,9 +208,45 @@ int main(int argc, const char **argv) {
                     if(!p.is_regular_file() || path.extension() != ".hsc") {
                         continue;
                     }
+                    
+                    // If we use explicit scripts, check if it's in our list
+                    if(script_options.use_explicit) {
+                        auto filename = std::filesystem::path(path).filename().replace_extension().string();
+                        bool contained = false;
+                        
+                        for(auto &source : script_options.explicit_scripts) {
+                            if(filename == source) {
+                                contained = true;
+                                break;
+                            }
+                        }
+                        
+                        if(!contained) {
+                            continue;
+                        }
+                    }
+                    
                     script_paths.emplace_back(path);
                 }
             }
+            
+            // Are we missing any scripts?
+            for(auto &source : script_options.explicit_scripts) {
+                bool present = false;
+                for(auto &path : script_paths) {
+                    auto filename = std::filesystem::path(path).filename().replace_extension().string();
+                    if(filename == source) {
+                        present = true;
+                        break;
+                    }
+                }
+                    
+                if(!present) {
+                    eprintf_error("%s was not found in %s", source.c_str(), script_directory_path.string().c_str());
+                    return EXIT_FAILURE;
+                }
+            }
+            
             script_paths.sort();
             
             // Load in that order

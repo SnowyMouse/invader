@@ -764,7 +764,11 @@ Usage: invader-script [options] <scenario>
 Compile scripts.
 
 Options:
+  -c --clear                   Clear all script data from the scenario tag
   -d --data <dir>              Use the specified data directory.
+  -e --explicit <script>       Explicitly only compile the given script.
+                               Automatically use global scripts.
+  -E --exclude-global-scripts  Do not use global scripts.
   -g --game-engine <engine>    Specify the game engine. Valid engines are:
                                gbx-custom, gbx-demo, gbx-retail, mcc-cea,
                                native, xbox-demo, xbox-ntsc, xbox-ntsc-jp,
@@ -773,9 +777,11 @@ Options:
   -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the tag path
                                directory.
+  -r --reload-scripts          Explicitly recompile scripts referenced by the
+                               tag. Automatically use global scripts.
   -R --regenerate              Use the scenario tag's script source data as
                                data.
-  -t --tags                   
+  -t --tags <dir>              Use the specified tags directory.
 ```
 
 
