@@ -177,6 +177,83 @@ namespace Invader::Parser {
             else {
                 new_node.next_node = format_index_to_id(n.next_node);
             }
+            
+            // Get the index of the thing
+            auto find_thing = [&n, &warnings, &source_files, &new_node](auto &array) -> void {
+                auto len = array.size();
+                bool exists = false;
+                bool multiple_instances = false;
+                size_t first_instance = 0;
+                
+                // See if it exists and then find the first multiple instance if it does
+                for(std::size_t i = 0; i < len && !multiple_instances; i++) {
+                    const char *c = n.string_data;
+                    const char *d = array[i].name.string;
+                    
+                    while(*c != 0 && *d != 0 && std::tolower(*c) == std::tolower(*d)) {
+                        c++;
+                        d++;
+                    }
+                    
+                    if(std::tolower(*c) == std::tolower(*d)) {
+                        if(exists) {
+                            multiple_instances = true;
+                            break;
+                        }
+                        
+                        first_instance = i;
+                        exists = true;
+                    }
+                }
+                
+                if(!exists) {
+                    throw std::exception();
+                }
+                
+                if(multiple_instances) {
+                    char warning[512];
+                    std::snprintf(warning, sizeof(warning), "%s:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data, first_instance);
+                    warnings.emplace_back(warning);
+                }
+            };
+            
+            // Make sure the thing it refers to exists
+            try {
+                if(n.is_primitive && !n.is_global) {
+                    switch(new_node.type) {
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_CAMERA_POINT:
+                            find_thing(scenario.cutscene_camera_points);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_FLAG:
+                            find_thing(scenario.cutscene_flags);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_RECORDING:
+                            find_thing(scenario.recorded_animations);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_TITLE:
+                            find_thing(scenario.cutscene_titles);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_GROUP:
+                            find_thing(scenario.device_groups);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_NAME:
+                            find_thing(scenario.object_names);
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch(std::exception &) {
+                eprintf_error("%s:%zu:%zu: error: can't find %s '%s'", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data);
+                throw InvalidTagDataException();
+            }
         }
         
         using node_table_header_tag_fmt = Invader::Parser::ScenarioScriptNodeTable::struct_big;
