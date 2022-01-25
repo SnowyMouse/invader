@@ -104,17 +104,23 @@ namespace Invader::EditQt {
         auxiliary_widget = nullptr;
 
         auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox, &this_widget]() {
-            auto add_simple_textbox = [&widgets_array, &standard_width, &textbox_widgets](int size, QLayout *layout) -> QLineEdit * {
+            auto add_simple_textbox = [&widgets_array, &standard_width, &textbox_widgets, &read_only](int size, QLayout *layout) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
                 int width = standard_width * size;
                 textbox_widgets.emplace_back(textbox);
                 textbox->setMinimumWidth(width);
                 layout->addWidget(textbox);
+                
+                // If it's readonly, limit it to a size
+                if(read_only) {
+                    textbox->setEnabled(false);
+                }
+                
                 return textbox;
             };
             
-            auto add_single_textbox = [&value, &value_index, &widgets_array, &values, &label_width, &prefix_label_width, &read_only, &add_simple_textbox](int size, QLayout *layout, const char *prefix = nullptr) -> QLineEdit * {
+            auto add_single_textbox = [&value, &value_index, &widgets_array, &values, &label_width, &prefix_label_width, &add_simple_textbox](int size, QLayout *layout, const char *prefix = nullptr) -> QLineEdit * {
                 // If we've got a prefix, set it
                 if(prefix) {
                     auto *label = reinterpret_cast<QLabel *>(widgets_array.emplace_back(new QLabel()));
@@ -138,12 +144,19 @@ namespace Invader::EditQt {
                 auto max = value->get_maximum();
                 
                 assert(value_index < values.size());
+                auto value_type = value->get_type();
                 
                 auto &current_value = values[value_index];
                 set_error_level_textbox(textbox, ((min.has_value() && compare_number(current_value, min.value()) < 0) || (max.has_value() && compare_number(current_value, max.value()) > 0)) ? 2 : 0);
 
-                auto value_type = value->get_type();
-                if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
+                // Indices can be blank (null)
+                if(value_type == Parser::ParserStructValue::VALUE_TYPE_INDEX) {
+                    if(std::get<std::int64_t>(current_value) != NULL_INDEX) {
+                        textbox->setText(QString::number(std::get<std::int64_t>(current_value)));
+                    }
+                    textbox->setPlaceholderText("NULL");
+                }
+                else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
                     // Radians get converted to degrees
                     switch(value_type) {
                         case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
@@ -156,23 +169,8 @@ namespace Invader::EditQt {
                             break;
                     }
                 }
-                // Indices can be blank (null)
-                else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_INDEX) {
-                    if(std::get<std::int64_t>(current_value) != NULL_INDEX) {
-                        textbox->setText(QString::number(std::get<std::int64_t>(current_value)));
-                    }
-                    textbox->setPlaceholderText("NULL");
-                }
                 else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
                     textbox->setText(QString::number(std::get<std::int64_t>(current_value)));
-                }
-                else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_TAGSTRING) {
-                    textbox->setText(value->get_string());
-                    textbox->setMaxLength(sizeof(HEK::TagString::string) - 1);
-                }
-
-                if(read_only) {
-                    textbox->setEnabled(false);
                 }
 
                 value_index++;
@@ -219,9 +217,12 @@ namespace Invader::EditQt {
                     add_single_textbox(3, layout);
                     break;
 
-                case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-                    add_simple_textbox(8, layout);
+                case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING: {
+                    auto *tb = add_simple_textbox(8, layout);
+                    tb->setText(value->get_string());
+                    tb->setMaxLength(sizeof(HEK::TagString::string) - 1);
                     break;
+                }
 
                 // Some more complex stuff with multiple boxes
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
