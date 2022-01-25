@@ -1133,18 +1133,15 @@ Yes. Pass `-g xbox-ntsc` (for NTSC Halo) into invader-build. You may need to
 fix some tags if using tags for other versions of the game.
 
 ### The HEK says my bitmap tag is "too large" when opening.
-The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this
-limitation, and you can use invader-edit-qt to view bitmap tags that exceed 16
-MiB. Halo PC also does not have any problems loading bitmaps that exceed 16 MiB.
-That said, some DirectX 9 GPUs and/or implementations won't support textures
-larger than 2048x2048 (2D textures) or 256x256x256 (3D textures).
+The original HEK has a 16 MiB limitation for bitmap data. You can install the
+[newer H1AEK] and use this for your workflow as it contains a number of fixes
+and improvements such as more accurate BSP generation, higher limits, and fixed
+shaders.
 
-It is worth noting that invader-build and various other tools let you specify
-multiple tag directories. If you need to use Sapien, you can put a lower
-quality, compressed version of your bitmap in your main tags folder, and you
-can put the higher quality version in a tags directory that takes priority.
-Sapien will use the lower quality bitmap and load happily, and invader-build
-will use the higher quality bitmap when building.
+It can be downloaded free of charge on Steam even if you do not own Halo: Combat
+Evolved Anniversary on Steam.
+
+[newer H1AEK]: https://store.steampowered.com/app/1532190/Halo_CE_Mod_Tools__MCC/
 
 ### How close to completion is Invader?
 There is still a lot to do in Invader. Check the [Issues] page for more
@@ -1152,20 +1149,12 @@ information.
 
 [Issues]: https://github.com/SnowyMouse/invader/issues
 
-### Should I use invader-bitmap or tool.exe?
-In this case, invader-bitmap is either mostly or completely feature-complete,
-and it has a number of features tool.exe does not have, such as support for the
-.tga format (goes well with Refinery's data extraction) as well as dithering.
-Therefore, invader-bitmap is the superior choice.
-
 ### Should I use invader-build for my map right now?
 It depends.
 
-Most multiplayer maps will work without issue, particularly those without
-scripts, but singleplayer maps may have issues. Because tool.exe has a number of
-bugs and invader-build does quite a few things tool.exe doesn't do (such as
-better error checking), there are a few reasons to use invader-build over
-tool.exe for multiplayer maps.
+Because tool.exe has a number of bugs and invader-build does quite a few things
+tool.exe doesn't do (such as better error checking), there are a few reasons to
+use invader-build over tool.exe for multiplayer maps.
 
 However, invader-build isn't finished and has a number of issues that need
 ironed out before this FAQ can confidently recommend it for *every* use case,
