@@ -137,6 +137,12 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
     
+    // If the user tries to regenerate scripts without source data... bad
+    if(s.source_files.empty() && script_options.regenerate && !script_options.clear && (s.scripts.size() > 0 || s.globals.size() > 0)) {
+        eprintf_error("%s contains scripts and/or globals but no source data.\nUsing --regenerate is not possible. Use invader-bludgeon to regenerate scripts.\nOr to completely clear script data, use --clear instead.", tag_path.string().c_str());
+        return EXIT_FAILURE;
+    }
+    
     std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> source_files;
     auto load_script = [&source_files](const std::filesystem::path &path) {
         auto filename = path.filename();
@@ -214,7 +220,7 @@ int main(int argc, const char **argv) {
     // Write
     auto output = s.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SCENARIO);
     if(File::save_file(tag_path, output)) {
-        oprintf_success("Successfully %s scripts", script_options.clear ? "cleared" : "compiled");
+        oprintf_success("Successfully %s scripts", script_options.clear ? "cleared all" : "compiled");
         return EXIT_SUCCESS;
     }
     else {
