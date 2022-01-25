@@ -583,7 +583,6 @@
                 "name": "animation",
                 "type": "Index",
                 "reflexive": "animations",
-                "maximum": 176,
                 "struct": "ModelAnimations"
             }
         ],
