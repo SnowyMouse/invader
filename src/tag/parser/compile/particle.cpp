@@ -69,6 +69,11 @@ namespace Invader::Parser {
     void Particle::postprocess_hek_data() {
         this->contact_deterioration = 0.0F;
     }
+    
+    static void complain_about_non_square_sheets(BuildWorkload &workload, std::size_t tag_index, const BuildWorkload::BuildWorkloadTag &tag) {
+        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap %s.%s uses non-square sprite sheets. The particle will be distorted.", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.tag_fourcc));
+    }
+    
     void Particle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         bool warn;
         auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
@@ -77,8 +82,7 @@ namespace Invader::Parser {
         particle.make_it_actually_work = 1;
         
         if(warn) {
-            auto bitmap = workload.tags[this->bitmap.tag_id.index];
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap %s.%s uses non-square sprite sheets. The particle will be distorted.", bitmap.path.c_str(), HEK::tag_fourcc_to_extension(bitmap.tag_fourcc));
+            complain_about_non_square_sheets(workload, tag_index, workload.tags[this->bitmap.tag_id.index]);
         }
     }
     void WeatherParticleSystemParticleType::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
@@ -89,18 +93,15 @@ namespace Invader::Parser {
         particle.not_broken = 1;
         
         if(warn) {
-            auto bitmap = workload.tags[this->bitmap.tag_id.index];
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap %s.%s uses non-square sprite sheets. The weather particle system type #%zu will be distorted.", bitmap.path.c_str(), HEK::tag_fourcc_to_extension(bitmap.tag_fourcc), offset / sizeof(struct_little));
+            complain_about_non_square_sheets(workload, tag_index, workload.tags[this->bitmap.tag_id.index]);
         }
     }
-    void ParticleSystemTypeParticleState::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+    void ParticleSystemTypeParticleState::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         bool warn;
-        auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
         get_bitmap_tag_pixel_size(workload, this->bitmaps.tag_id.index, warn);
         
         if(warn) {
-            auto bitmap = workload.tags[this->bitmaps.tag_id.index];
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap %s.%s uses non-square sprite sheets. Particle system state #%zu will be distorted.", bitmap.path.c_str(), HEK::tag_fourcc_to_extension(bitmap.tag_fourcc), offset / sizeof(struct_little));
+            complain_about_non_square_sheets(workload, tag_index, workload.tags[this->bitmaps.tag_id.index]);
         }
     }
     void ParticleSystemTypeParticleState::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
