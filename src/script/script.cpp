@@ -22,6 +22,7 @@ int main(int argc, const char **argv) {
         const char *path;
         std::filesystem::path data = "data";
         std::filesystem::path tags = "tags";
+        bool regenerate = false;
         bool filesystem_path = false;
         const GameEngineInfo *engine = &GameEngineInfo::get_game_engine_info(GameEngine::GAME_ENGINE_NATIVE);
     } script_options;
@@ -31,10 +32,11 @@ int main(int argc, const char **argv) {
 
     // Add our options
     std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("data", 'd', 1);
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
+    options.emplace_back("regenerate", 'R', 0, "Use the scenario tag's script source data as data.");
     options.emplace_back("tags", 't', 1);
 
     static constexpr char DESCRIPTION[] = "Compile scripts.";
@@ -61,6 +63,10 @@ int main(int argc, const char **argv) {
 
             case 'd':
                 script_options.data = arguments[0];
+                break;
+                
+            case 'R':
+                script_options.regenerate = true;
                 break;
 
             case 'P':
@@ -121,7 +127,7 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
     
-    std::vector<std::pair<std::string, std::vector<std::byte>>> source_files;
+    std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> source_files;
     auto load_script = [&source_files](const std::filesystem::path &path) {
         auto filename = path.filename();
         auto filename_without_extension = std::filesystem::path(filename).replace_extension().string();
@@ -130,36 +136,43 @@ int main(int argc, const char **argv) {
         auto f = File::open_file(path).value();
         
         // Move it into here
-        source_files.emplace_back(filename_without_extension, std::move(f));
+        source_files->emplace_back(filename_without_extension, std::move(f));
     };
     
     try {
-        // First load the global scripts
-        if(std::filesystem::exists(global_script_path)) {
-            load_script(global_script_path);
-        }
+        std::vector<std::string> warnings;
         
-        // Next, load scripts in script directory
-        std::list<std::filesystem::path> script_paths;
-        
-        if(std::filesystem::exists(script_directory_path)) {
-            for(auto &p : std::filesystem::directory_iterator(script_directory_path)) {
-                auto path = p.path();
-                if(!p.is_regular_file() || path.extension() != ".hsc") {
-                    continue;
-                }
-                script_paths.emplace_back(path);
+        // If we aren't regenerating, load the scripts in here
+        if(!script_options.regenerate) {
+            // Instantiate our array
+            source_files.emplace();
+            
+            // First load the global scripts
+            if(std::filesystem::exists(global_script_path)) {
+                load_script(global_script_path);
             }
-        }
-        script_paths.sort();
-        
-        // Load in that order
-        for(auto &path : script_paths) {
-            load_script(path);
+            
+            // Next, load scripts in script directory
+            std::list<std::filesystem::path> script_paths;
+            
+            if(std::filesystem::exists(script_directory_path)) {
+                for(auto &p : std::filesystem::directory_iterator(script_directory_path)) {
+                    auto path = p.path();
+                    if(!p.is_regular_file() || path.extension() != ".hsc") {
+                        continue;
+                    }
+                    script_paths.emplace_back(path);
+                }
+            }
+            script_paths.sort();
+            
+            // Load in that order
+            for(auto &path : script_paths) {
+                load_script(path);
+            }
         }
         
         // Compile
-        std::vector<std::string> warnings;
         Parser::compile_scripts(s, *script_options.engine, RIAT_OptimizationLevel::RIAT_OPTIMIZATION_PREVENT_GENERATIONAL_LOSS, warnings, source_files);
         
         for(auto &w : warnings) {
@@ -175,7 +188,7 @@ int main(int argc, const char **argv) {
     std::size_t global_count = s.globals.size();
     
     // Warn if the user may have messed up something
-    if(source_files.size() == 0) {
+    if(source_files.has_value() && source_files->size() == 0) {
         oprintf_success_warn("WARNING: No source files were compiled");
     }
     

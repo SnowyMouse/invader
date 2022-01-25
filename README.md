@@ -764,15 +764,18 @@ Usage: invader-script [options] <scenario>
 Compile scripts.
 
 Options:
-  -d --data                   
+  -d --data <dir>              Use the specified data directory.
   -g --game-engine <engine>    Specify the game engine. Valid engines are:
                                gbx-custom, gbx-demo, gbx-retail, mcc-cea,
                                native, xbox-demo, xbox-ntsc, xbox-ntsc-jp,
                                xbox-ntsc-tw, xbox-pal
   -h --help                    Show this list of options.
-  -i --info                   
+  -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the tag path
                                directory.
+  -R --regenerate              Use the scenario tag's script source data as
+                               data.
+  -t --tags                   
 ```
 
 
