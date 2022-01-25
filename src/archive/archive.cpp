@@ -221,14 +221,10 @@ int main(int argc, const char **argv) {
             BuildWorkload::BuildParameters parameters(*archive_options.engine);
             parameters.scenario = base_tag;
             parameters.tags_directories = archive_options.tags;
-            if(archive_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                parameters.details.build_compress = true;
+            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 parameters.details.build_compression_level = 0;
             }
-            else {
-                parameters.details.build_compress = false;
-            }
-            if(archive_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(parameters.details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
             parameters.verbosity = BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
