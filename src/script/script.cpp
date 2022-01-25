@@ -23,6 +23,7 @@ int main(int argc, const char **argv) {
         std::filesystem::path data = "data";
         std::filesystem::path tags = "tags";
         bool regenerate = false;
+        bool clear = false;
         bool filesystem_path = false;
         const GameEngineInfo *engine = &GameEngineInfo::get_game_engine_info(GameEngine::GAME_ENGINE_NATIVE);
     } script_options;
@@ -34,6 +35,7 @@ int main(int argc, const char **argv) {
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("clear", 'c', 0, "Clear all script data from the scenario tag");
     options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
     options.emplace_back("regenerate", 'R', 0, "Use the scenario tag's script source data as data.");
@@ -64,6 +66,10 @@ int main(int argc, const char **argv) {
             case 'd':
                 script_options.data = arguments[0];
                 break;
+
+            case 'c':
+                script_options.clear = true;
+                break;
                 
             case 'R':
                 script_options.regenerate = true;
@@ -93,6 +99,10 @@ int main(int argc, const char **argv) {
         if(script_options.filesystem_path) {
             auto tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
             auto split = File::split_tag_class_extension(tag_maybe.value_or(""));
+            
+            
+            auto tag_path = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
+            
             if(split.has_value() && std::filesystem::exists(remaining_arguments[0])) {
                 scenario = split->path;
             }
@@ -142,8 +152,13 @@ int main(int argc, const char **argv) {
     try {
         std::vector<std::string> warnings;
         
+        // If we're clearing, supply an empty array
+        if(script_options.clear) {
+            source_files.emplace();
+        }
+        
         // If we aren't regenerating, load the scripts in here
-        if(!script_options.regenerate) {
+        else if(!script_options.regenerate) {
             // Instantiate our array
             source_files.emplace();
             
@@ -188,16 +203,18 @@ int main(int argc, const char **argv) {
     std::size_t global_count = s.globals.size();
     
     // Warn if the user may have messed up something
-    if(source_files.has_value() && source_files->size() == 0) {
+    if(!script_options.clear && source_files.has_value() && source_files->size() == 0) {
         oprintf_success_warn("WARNING: No source files were compiled");
     }
     
-    oprintf("Compiled %zu script%s and %zu global%s\n", script_count, script_count == 1 ? "" : "s", global_count, global_count == 1 ? "" : "s");
-    
+    if(!script_options.clear) {
+        oprintf("Compiled %zu script%s and %zu global%s\n", script_count, script_count == 1 ? "" : "s", global_count, global_count == 1 ? "" : "s");
+    }
+        
     // Write
     auto output = s.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SCENARIO);
     if(File::save_file(tag_path, output)) {
-        oprintf_success("Successfully compiled scripts");
+        oprintf_success("Successfully %s scripts", script_options.clear ? "cleared" : "compiled");
         return EXIT_SUCCESS;
     }
     else {
