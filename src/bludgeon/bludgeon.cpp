@@ -351,7 +351,7 @@ int main(int argc, char * const *argv) {
             i.join();
         }
 
-        oprintf("Bludgeoned %zu out of %zu tag%s\n", success, tag_index, tag_index == 1 ? "" : "s");
+        oprintf("%s %zu out of %zu tag%s\n", fixes ? "Bludgeoned" : "Identified issues with", success, tag_index, tag_index == 1 ? "" : "s");
 
         return EXIT_SUCCESS;
     }

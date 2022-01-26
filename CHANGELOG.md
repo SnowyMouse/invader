@@ -7,6 +7,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-script: Changed default node count (if -g is unspecified) to match
   CEA's node count
 
+### Fixed
+- invader-bludgeon: Fixed invader-bludgeon reporting it "Bludgeoned" tags even
+  when no fixes were requested (and thus it did not change anything)
+
 ## [0.45.0] - 2022-01-25
 ### Added
 - New tool: invader-script - Compiles scripts
