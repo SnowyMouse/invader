@@ -149,7 +149,7 @@ add_custom_target(invader-header-gen
 add_dependencies(invader invader-header-gen invader-header-version)
 
 # P8 palette library (separate for slightly faster building)
-add_library(invader-bitmap-p8-palette STATIC
+add_library(invader-bitmap-p8-palette OBJECT
     "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
 )
 
