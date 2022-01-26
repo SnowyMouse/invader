@@ -1134,14 +1134,14 @@ fix some tags if using tags for other versions of the game.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The original HEK has a 16 MiB limitation for bitmap data. You can install the
-[newer H1AEK] and use this for your workflow as it contains a number of fixes
-and improvements such as more accurate BSP generation, higher limits, and fixed
-shaders.
+[newer MCC Halo CE: Mod Tools] and use this for your workflow as it contains a
+number of fixes and improvements such as more accurate BSP generation, higher
+limits, and fixed shaders.
 
 It can be downloaded free of charge on Steam even if you do not own Halo: Combat
 Evolved Anniversary on Steam.
 
-[newer H1AEK]: https://store.steampowered.com/app/1532190/Halo_CE_Mod_Tools__MCC/
+[newer MCC Halo CE: Mod Tools]: https://store.steampowered.com/app/1532190/Halo_CE_Mod_Tools__MCC/
 
 ### How close to completion is Invader?
 There is still a lot to do in Invader. Check the [Issues] page for more
