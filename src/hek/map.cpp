@@ -112,6 +112,7 @@ namespace Invader::HEK {
             .base_memory_address = 0,
             .tag_space_length = UINT64_MAX,
             .maximum_file_size = UINT64_MAX,
+            .maximum_scenario_script_nodes = MCC_CEA_MAXIMUM_SCENARIO_SCRIPT_NODES,
             .bsps_occupy_tag_space = false,
             .required_tags = {
                 .all = USE_TAG_ARRAY(INVADER_REQUIRED_TAGS)
@@ -125,10 +126,11 @@ namespace Invader::HEK {
             .build_string = "01.03.43.0000",
             .build_string_is_enforced = false,
             .base_memory_address = 0x50000000,
+            .base_memory_address_is_inferred = true,
             .tag_space_length = 64 * 1024 * 1024,
             .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
             .maximum_scenario_script_nodes = MCC_CEA_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .base_memory_address_is_inferred = true,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_MCC_CEA,
             .scenario_name_and_file_name_must_be_equal = false,
             .supports_external_bitmaps_map = true,
             PC_BOILERPLATE
@@ -144,6 +146,7 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_DEMO,
             .supports_external_bitmaps_map = true,
             .supports_external_sounds_map = true,
             PC_BOILERPLATE
@@ -159,6 +162,7 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_CUSTOM_EDITION,
             .supports_external_bitmaps_map = true,
             .supports_external_sounds_map = true,
             .supports_external_loc_map = true,
@@ -176,6 +180,7 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_RETAIL,
             .supports_external_bitmaps_map = true,
             .supports_external_sounds_map = true,
             PC_BOILERPLATE
@@ -190,8 +195,11 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_max_file_size,
+            
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
             .uses_compression = true,
+            
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_2276)
         },
         {
@@ -204,8 +212,11 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = static_cast<Pointer64>(XBOX_TAG_SPACE_LENGTH + 288 * 1024),
             .maximum_file_size = xbox_max_file_size,
+            
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
             .uses_compression = true,
+            
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
@@ -218,8 +229,11 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = static_cast<Pointer64>(XBOX_TAG_SPACE_LENGTH + 500 * 1024),
             .maximum_file_size = xbox_max_file_size,
+            
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
             .uses_compression = true,
+            
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
@@ -232,8 +246,11 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_max_file_size,
+            
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
             .uses_compression = true,
+            
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         },
         {
@@ -243,10 +260,12 @@ namespace Invader::HEK {
             .build_string = "",
             .build_string_is_enforced = false,
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
+            .base_memory_address_is_inferred = true,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
+            
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .base_memory_address_is_inferred = true,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
             .uses_compression = true
         },
         {
@@ -259,8 +278,11 @@ namespace Invader::HEK {
             .base_memory_address = XBOX_BASE_MEMORY_ADDRESS,
             .tag_space_length = XBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = xbox_demo_max_file_size,
+            
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
+            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
             .uses_compression = true,
+            
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
         }
     };

@@ -16,32 +16,9 @@ namespace Invader::Parser {
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
     void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, RIAT_OptimizationLevel optimization_level, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
-        // Determine what target to use
-        RIAT_CompileTarget target;
-        switch(info.cache_version) {
-            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_DEMO;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_RETAIL;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_CUSTOM_EDITION;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
-                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_MCC_CEA;
-                break;
-            default:
-                target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_ANY;
-                break;
-        }
-        
         // Instantiate it
         RIAT::Instance instance;
-        instance.set_compile_target(target);
+        instance.set_compile_target(info.scenario_script_compile_target);
         instance.set_optimization_level(optimization_level);
         instance.set_user_data(&warnings);
     

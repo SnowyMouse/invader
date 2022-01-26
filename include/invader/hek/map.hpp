@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <variant>
 #include <list>
+#include <riat/riat.h>
 #include "data_type.hpp"
 #include "../tag/hek/definition.hpp"
 
@@ -63,6 +64,9 @@ namespace Invader::HEK {
         /** Base memory address for tag space */
         Pointer64 base_memory_address;
         
+        /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
+        bool base_memory_address_is_inferred = false;
+        
         /** Tag space length */
         Pointer64 tag_space_length;
         
@@ -72,8 +76,8 @@ namespace Invader::HEK {
         /** Maximum script nodes allowed for the target engine */
         std::uint16_t maximum_scenario_script_nodes = UINT16_MAX;
         
-        /** When reading a cache file, infer the base memory address by the tag array address rather than a hardcoded address */
-        bool base_memory_address_is_inferred = false;
+        /** Compile target for scenario scripts */
+        RIAT_CompileTarget scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_ANY;
         
         bool scenario_name_and_file_name_must_be_equal = true;
         bool bsps_occupy_tag_space = true;

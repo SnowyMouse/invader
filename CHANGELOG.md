@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Changed
+- invader-script: Changed default node count (if -g is unspecified) to match
+  CEA's node count
 
 ## [0.45.0] - 2022-01-25
 ### Added
