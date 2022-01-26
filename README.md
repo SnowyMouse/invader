@@ -900,7 +900,6 @@ Invader's development.
 - [What operating systems are supported?]
 - [Who owns my map when I build it?]
 - [Why GPL and not MIT or BSD?]
-- [How can I get Invader under a different license?]
 - [Why is Invader multiple programs?]
 - [Are there any GUI tools?]
 - [Are 32-bit Windows builds available?]
@@ -978,24 +977,17 @@ to use any extracted assets (or to even extract those assets). Consult a legal
 expert if you need assurance on your rights.
 
 ### Why GPL and not MIT or BSD?
-Invader uses version 3 of the GNU GPL because we feel that Invader and all
-derivatives and modifications of Invader should stay free and open.
-
-The Halo CE modding community has a habit of obfuscating knowledge that could
-be used to help other people. This is often done through these means:
+This is primarily due to Halo's modding history. The Halo: CE modding community
+has traditionally obfuscated knowledge that could be used to help other people.
+This is often done through these means:
 - [Map protection](http://forum.halomaps.org/index.cfm?page=topic&topicID=16885)
 - [Writing closed source software](http://halo.isimaginary.com/)
 - [Obfuscating software](http://forum.halomaps.org/index.cfm?page=topic&topicID=51196&start=112)
 - [Keeping helpful information locked behind secret forums and groups](http://www.macgamingmods.com/forum/viewtopic.php?f=40&t=7948)
 
-Many great accomplishments have been lost to time, as most of the people who
-made them are no longer there to support what they have made.
-
-Often times, people will say they will release the source code in the future,
-or they will at least consider releasing the source code. In nearly all cases
-of this, the source code was never released. The GNU GPL solves this problem
-by requiring everyone who has access to binary code have access to the source
-code.
+Many tools have been released without accompanying source code, and in nearly
+all cases, they have gone unmaintained. Even if the idea of a source code
+release is expressed, this rarely happens.
 
 As time goes on, unmaintained, closed-source software becomes more seemingly
 broken, incomplete, or even incompatible. For example, the Halo Editing Kit has
@@ -1004,16 +996,22 @@ yet [it is still the only way to fully create maps].
 
 [it is still the only way to fully create maps]: https://opencarnage.net/index.php?/topic/7765-replacing-the-halo-editing-kit-with-open-source-software/
 
-The worst part about this is that, in many cases, people do not make any sort of
-effort to replace this software with working software as they either do not know
-how to or they do not feel it is worth the time or effort. Therefore, the
-broken, unmaintained software continues being used. This is where Invader comes in.
+Many great accomplishments have been lost to time, as most of the people who
+made them are no longer there to support what they have made. Unfortunately,
+most users do not make any sort of effort to replace this software with working
+software as they either do not know how to or they do not feel it is worth the
+time or effort. Therefore, the broken, unmaintained software continues being
+used. This is where Invader comes in.
 
-In our opinion, we feel that modding tools run by a user should be open for all
-to use, share, change, and learn from. At the same time, we also feel that a
-requirement for people give back to the community the source code to any
-derivatives of our tools they have chosen to share is not too much to ask for,
-as this ensures that modding stays free and open instead of left to stagnation
+An editing kit made in the open ensures that learned information shall be
+available for those who want to learn and expand upon or make their own tools.
+
+Modding tools run by a user should be open for all to use, share, change, and
+learn from. At the same time, we also feel that a requirement for people give
+back to the community the source code to any derivatives of our tools they have
+chosen to share is not too much to ask for.
+
+This ensures that modding stays free and open instead of left to stagnation
 behind closed groups and obfuscation as modding this game has been in the past.
 
 Also, a weak license like MIT has proven to not be helpful. A common argument is
@@ -1024,10 +1022,8 @@ closed source projects, or they have been converted to closed source with the
 
 [original open source versions receiving zero contributions]: https://github.com/Chaosvex/HAC2
 
-That is why Invader uses version 3 of the GNU GPL.
-
-### How can I get Invader under a different license?
-See LICENSE.md for information.
+That is why Invader uses version 3 of the GNU GPL. It keeps it free for everyone
+to use.
 
 ### Why is Invader multiple programs?
 Invader takes the approach of making each program do one thing well. There are a
@@ -1173,7 +1169,6 @@ to a point where it can be a better and free replacement for tool.exe.
 [What operating systems are supported?]: #what-operating-systems-are-supported
 [Who owns my map when I build it?]: #who-owns-my-map-when-i-build-it
 [Why GPL and not MIT or BSD?]: #why-gpl-and-not-mit-or-bsd
-[How can I get Invader under a different license?]: #how-can-i-get-invader-under-a-different-license
 [Why is Invader multiple programs?]: #why-is-invader-multiple-programs
 [Are there any GUI tools?]: #are-there-any-gui-tools
 [Are 32-bit Windows builds available?]: #are-32-bit-windows-builds-available
