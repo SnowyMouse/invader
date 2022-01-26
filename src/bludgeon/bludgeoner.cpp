@@ -47,6 +47,22 @@ namespace Invader::Bludgeoner {
     bool broken_vertices(Parser::ParserStruct *s, bool fix) {
         return broken_bsp_vertices(dynamic_cast<Parser::ScenarioStructureBSP *>(s), fix) || broken_model_vertices(dynamic_cast<Parser::GBXModel *>(s), fix) || broken_model_vertices(dynamic_cast<Parser::Model *>(s), fix);
     }
+    
+    bool broken_lens_flare_function_scale(Parser::ParserStruct *s, bool fix) {
+        auto attempt_fix = [&fix](auto *lens_flare) -> bool {
+            if(!lens_flare) {
+                return false;
+            }
+            if(lens_flare->rotation_function_scale == 360.0F) {
+                if(fix) {
+                    lens_flare->rotation_function_scale = 0.0F;
+                }
+                return true;
+            }
+            return false;
+        };
+        return attempt_fix(dynamic_cast<Invader::Parser::LensFlare *>(s));
+    }
 
     bool invalid_model_markers(Parser::ParserStruct *s, bool fix) {
         auto attempt_fix = [&fix](auto *model) -> bool {

@@ -272,9 +272,10 @@ Options:
                                invalid-reference-classes,
                                invalid-model-markers, missing-script-source,
                                incorrect-sound-buffer, missing-vertices,
-                               nonnormal-vectors, invalid-uppercase-references,
-                               excessive-script-nodes, none, everything
-                               (default: none)
+                               null-terminated-scripts, nonnormal-vectors,
+                               invalid-uppercase-references,
+                               broken-lens-flare-function-scale, none,
+                               everything (default: none)
 ```
 
 ### invader-build

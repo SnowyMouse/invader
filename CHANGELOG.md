@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-bludgeon: Added -T broken-lens-flare-function-scale
+
 ### Changed
 - invader-build: Now warns on 360 radian rotation function scales in lens flares
 - invader-script: Changed default node count (if -g is unspecified) to match
