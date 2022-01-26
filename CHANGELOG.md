@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Changed
+- invader-build: Now warns on 360 radian rotation function scales in lens flares
 - invader-script: Changed default node count (if -g is unspecified) to match
   CEA's node count
 
