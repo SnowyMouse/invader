@@ -8,6 +8,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-build: Now warns on 360 radian rotation function scales in lens flares
+- invader-build: Now errors on mismatched checksums and warns if the tag was set
+  to 0 to bypass this check
 - invader-script: Changed default node count (if -g is unspecified) to match
   CEA's node count
 

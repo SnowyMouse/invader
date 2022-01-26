@@ -712,7 +712,7 @@
             },
             {
                 "name": "node list checksum",
-                "type": "uint32",
+                "type": "int32",
                 "read_only": true
             },
             {
@@ -903,12 +903,14 @@
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphNode",
+                "read_only": true,
                 "maximum": 64
             },
             {
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimation",
+                "read_only": true,
                 "maximum": 2048
             }
         ],

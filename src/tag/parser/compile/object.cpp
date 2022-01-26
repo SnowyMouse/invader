@@ -368,6 +368,54 @@ namespace Invader::Parser {
         }
     }
     
+    static void validate_model_animation_checksum(BuildWorkload &workload, std::size_t tag_index, HEK::TagID model, HEK::TagID animations) {
+        if(model.is_null() || animations.is_null()) {
+            return;
+        }
+        
+        // Read the checksum
+        auto &model_tag = workload.tags[model.index];
+        auto model_checksum = reinterpret_cast<Model::struct_little *>(workload.structs[*model_tag.base_struct].data.data())->node_list_checksum.read();
+        
+        // And, yes, reading it as a model is OK since they're in the same offset, so we don't need to do any extra logic here
+        static_assert(offsetof(Model::struct_little, node_list_checksum) == offsetof(GBXModel::struct_little, node_list_checksum));
+        
+        // If it's 0, don't bother checking. This is a complete hack, but the official tools do this. And if you're lucky and make a tag that just so happens to have a checksum of 0, you win a free warning!
+        if(model_checksum == 0) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s.%s has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(model_tag.path).c_str(), HEK::tag_fourcc_to_extension(model_tag.tag_fourcc));
+            return;
+        }
+        
+        // Now iterate through animations
+        auto &animation_tag = workload.tags[animations.index];
+        auto &animation_struct = workload.structs[*animation_tag.base_struct];
+        auto &animation_struct_data = *reinterpret_cast<Parser::ModelAnimations::struct_little *>(animation_struct.data.data());
+        auto animation_count = animation_struct_data.animations.count.read();
+        if(animation_count > 0) {
+            auto *animations = reinterpret_cast<Parser::ModelAnimationsAnimation::struct_little *>(workload.structs[*animation_struct.resolve_pointer(&animation_struct_data.animations.pointer)].data.data());
+            for(std::size_t a = 0; a < animation_count; a++) {
+                auto animation_checksum = animations[a].node_list_checksum.read();
+                
+                // Same hack as before. And again, if your lucky lotto number is 0, congratulations!
+                if(animation_checksum == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s.%s animation #%zu has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(animation_tag.path).c_str(), HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc), a);
+                    continue;
+                }
+                
+                // Check it
+                if(model_checksum != animation_checksum) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
+                                                                                                                       HEK::tag_fourcc_to_extension(model_tag.tag_fourcc),
+                                                                                                                       File::halo_path_to_preferred_path(animation_tag.path).c_str(),
+                                                                                                                       HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc));
+                    throw InvalidTagDataException();
+                }
+            }
+        }
+        
+        //auto &object = 
+    }
+    
     static void set_pathfinding_spheres(BuildWorkload &workload, std::size_t struct_index, std::optional<float> collision_radius = std::nullopt) {
         // If recursion is disabled, do not do this
         if(workload.disable_recursion) {
@@ -480,6 +528,7 @@ namespace Invader::Parser {
 
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index, struct_val.collision_radius);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
     void Vehicle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
@@ -490,6 +539,7 @@ namespace Invader::Parser {
 
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         if(workload.disable_recursion) {
@@ -551,25 +601,34 @@ namespace Invader::Parser {
         }
         
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        
+        // we do not check animations for first person because they do not match
     }
-    void Equipment::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Equipment::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
-    void Garbage::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Garbage::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
-    void Projectile::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Projectile::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
-    void Scenery::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Scenery::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
-    void Placeholder::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Placeholder::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
-    void SoundScenery::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void SoundScenery::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
     
     void device_post_compile(BuildWorkload &workload, ::size_t struct_index, std::size_t struct_offset) {
@@ -591,17 +650,20 @@ namespace Invader::Parser {
         device.delay_time_ticks = TICK_RATE * device.delay_time;
     }
     
-    void DeviceMachine::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+    void DeviceMachine::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
-    void DeviceControl::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+    void DeviceControl::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
-    void DeviceLightFixture::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+    void DeviceLightFixture::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
+        validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
     }
 }
