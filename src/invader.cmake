@@ -119,6 +119,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/shader.cpp
     src/tag/parser/compile/sound.cpp
     src/tag/parser/compile/string_list.cpp
+    src/tag/parser/compile/ui_widget_definition.cpp
 
     src/crc/crc32.c
     src/crc/crc_spoof.c

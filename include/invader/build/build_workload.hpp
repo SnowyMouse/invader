@@ -417,6 +417,9 @@ namespace Invader {
         /** Are we building a stock map? */
         bool building_stock_map = false;
         
+        /** Scenario index? */
+        std::size_t scenario_index;
+        
         /** 
          * Get the build parameters
          * @return build parameters
@@ -449,7 +452,6 @@ namespace Invader {
 
         std::chrono::steady_clock::time_point start;
         const char *scenario;
-        std::size_t scenario_index;
         std::vector<std::byte> build_cache_file();
         void add_tags();
         void generate_tag_array();
