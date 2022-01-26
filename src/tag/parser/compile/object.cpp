@@ -404,16 +404,40 @@ namespace Invader::Parser {
                 
                 // Check it
                 if(model_checksum != animation_checksum) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
-                                                                                                                       HEK::tag_fourcc_to_extension(model_tag.tag_fourcc),
-                                                                                                                       File::halo_path_to_preferred_path(animation_tag.path).c_str(),
-                                                                                                                       HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc));
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s animation #%zu node list checksums are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
+                                                                                                                                                          HEK::tag_fourcc_to_extension(model_tag.tag_fourcc),
+                                                                                                                                                          File::halo_path_to_preferred_path(animation_tag.path).c_str(),
+                                                                                                                                                          HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc),
+                                                                                                                                                          a);
                     throw InvalidTagDataException();
                 }
             }
         }
+    }
+    
+    static void validate_collision_model_regions(BuildWorkload &workload, std::size_t tag_index, HEK::TagID model, HEK::TagID collision_model) {
+        if(model.is_null() || collision_model.is_null()) {
+            return;
+        }
         
-        //auto &object = 
+        // Read the thing
+        auto &model_tag = workload.tags[model.index];
+        auto &collision_tag = workload.tags[collision_model.index];
+    
+        auto &model_struct = *reinterpret_cast<Parser::Model::struct_little *>(workload.structs[*model_tag.base_struct].data.data());
+        auto &collision_struct = *reinterpret_cast<Parser::ModelCollisionGeometry::struct_little *>(workload.structs[*collision_tag.base_struct].data.data());
+        
+        // And, as always, reading it as a model is OK since they're in the same offset, so we don't need to do any extra logic here
+        static_assert(offsetof(Model::struct_little, regions) == offsetof(GBXModel::struct_little, regions));
+        
+        // Error if they are different
+        if(model_struct.regions.count.read() != collision_struct.regions.count.read()) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s's region counts are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
+                                                                                                                               HEK::tag_fourcc_to_extension(model_tag.tag_fourcc),
+                                                                                                                               File::halo_path_to_preferred_path(collision_tag.path).c_str(),
+                                                                                                                               HEK::tag_fourcc_to_extension(collision_tag.tag_fourcc));
+            throw InvalidTagDataException();
+        }
     }
     
     static void set_pathfinding_spheres(BuildWorkload &workload, std::size_t struct_index, std::optional<float> collision_radius = std::nullopt) {
@@ -529,6 +553,7 @@ namespace Invader::Parser {
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index, struct_val.collision_radius);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void Vehicle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
@@ -540,6 +565,7 @@ namespace Invader::Parser {
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         if(workload.disable_recursion) {
@@ -602,33 +628,40 @@ namespace Invader::Parser {
         
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
         
-        // we do not check animations for first person because they do not match
+        // we do not check animations for first person because they do not correspond to one another
     }
     void Equipment::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void Garbage::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void Projectile::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void Scenery::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void Placeholder::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void SoundScenery::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     
     void device_post_compile(BuildWorkload &workload, ::size_t struct_index, std::size_t struct_offset) {
@@ -655,15 +688,18 @@ namespace Invader::Parser {
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void DeviceControl::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
     void DeviceLightFixture::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
+        validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
 }
