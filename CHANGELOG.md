@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Added
 - invader-bludgeon: Added -T broken-lens-flare-function-scale
+- invader-build: Readded --tag-space
 
 ### Changed
 - invader-build: Now warns on 360 radian rotation function scales in lens flares

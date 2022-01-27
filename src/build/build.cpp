@@ -98,6 +98,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
     options.emplace_back("anniversary-mode", 'a', 0, "Enable anniversary graphics and audio (CEA only)");
     options.emplace_back("resource-maps", 'R', 1, "Specify the directory for loading resource maps. (by default this is the maps directory)", "<dir>");
+    options.emplace_back("tag-space", 'T', 1, "Override the tag space. This may result in a map that does not work with the stock games. You can specify the number of bytes, optionally suffixing with K (for KiB) or M (for MiB), or specify in hexadecimal the number of bytes (e.g. 0x1000).", "<size>");
     options.emplace_back("resource-usage", 'r', 1, "Specify the behavior for using resource maps. Must be: none (don't use resource maps), check (check resource maps), always (always index tags in resource maps - Custom Edition only). Default: none", "<usage>");
 
     static constexpr char DESCRIPTION[] = "Build a cache file.";
@@ -196,6 +197,53 @@ int main(int argc, const char **argv) {
                 break;
             case 'H':
                 build_options.hide_pedantic_warnings = true;
+                break;
+            case 'T':
+                try {
+                    std::string arg = arguments[0];
+                    std::size_t after = 0;
+                    if(arg.size() >= 2 && arg.substr(0, 2) == "0x") {
+                        build_options.max_tag_space = std::stoull(arguments[0] + 2, &after, 16);
+                        if(arg.size() != 2 + after) {
+                            throw std::exception(); // nope!
+                        }
+                    }
+                    else {
+                        unsigned long long tag_space_int = std::stoull(arg, &after);
+                        unsigned long long multiplier = 1;
+
+                        if(arg.size() != after) {
+                            if(arg.size() != after + 1) {
+                                throw std::exception(); // nope!
+                            }
+                            char s = arg[after];
+                            switch(s) {
+                                case 'K':
+                                    multiplier = 1024;
+                                    break;
+                                case 'M':
+                                    multiplier = 1024 * 1024;
+                                    break;
+                                default:
+                                    throw std::exception();
+                            }
+                        }
+
+                        // Check if we overflowed
+                        unsigned long long final_tag_space = tag_space_int * multiplier;
+                        if(final_tag_space / multiplier != tag_space_int) {
+                            eprintf_error("overflowed");
+                            throw std::exception();
+                        }
+
+                        // Done
+                        build_options.max_tag_space = final_tag_space;
+                    }
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid tag space size %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
         }
     });
