@@ -339,7 +339,6 @@
             }
         ],
         "type": "struct",
-        "size": 480,
-        "class": "hud_interface_multitexture_overlay"
+        "size": 480
     }
 ]
