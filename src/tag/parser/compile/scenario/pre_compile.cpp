@@ -817,7 +817,6 @@ namespace Invader::Parser {
                 command.animation = translate_animation_palette(command.animation);
                 command.recording = translate_recording(command.recording);
                 command.object_name = translate_object_name(command.object_name);
-                command.animation = translate_animation_palette(command.animation);
                 command.script = translate_script_reference(command.script);
             }
         }
@@ -909,10 +908,10 @@ namespace Invader::Parser {
                         merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc)).c_str());
                     }
                     catch(std::exception &) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to merge %s%s into %s.%s",
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to merge %s.%s into %s.%s",
                                             File::halo_path_to_preferred_path(first_scenario.path).c_str(),
                                             HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc),
-                                            workload.tags[tag_index].path.c_str(),
+                                            File::halo_path_to_preferred_path(workload.tags[tag_index].path).c_str(),
                                             HEK::tag_fourcc_to_extension(workload.tags[tag_index].tag_fourcc)
                                            );
                         throw;
