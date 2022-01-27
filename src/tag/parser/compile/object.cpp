@@ -369,7 +369,7 @@ namespace Invader::Parser {
     }
     
     static void validate_model_animation_checksum(BuildWorkload &workload, std::size_t tag_index, HEK::TagID model, HEK::TagID animations) {
-        if(model.is_null() || animations.is_null()) {
+        if(model.is_null() || animations.is_null() || workload.disable_recursion) {
             return;
         }
         
@@ -416,7 +416,7 @@ namespace Invader::Parser {
     }
     
     static void validate_collision_model_regions(BuildWorkload &workload, std::size_t tag_index, HEK::TagID model, HEK::TagID collision_model) {
-        if(model.is_null() || collision_model.is_null()) {
+        if(model.is_null() || collision_model.is_null() || workload.disable_recursion) {
             return;
         }
         
