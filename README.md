@@ -200,49 +200,55 @@ Usage: invader-bitmap [options] <bitmap-tag>
 Create or modify a bitmap tag.
 
 Options:
-  -A --alpha-bias <bias>       Set the alpha bias from -1.0 to 1.0. Default
-                               (new tag): 0.0
-  -B --budget <length>         Set the maximum length of a sprite sheet. Can be
-                               32, 64, 128, 256, 512, or 1024. Default (new
-                               tag): 32
-  -C --budget-count <count>    Multiply the maximum length squared to set the
-                               maximum number of pixels. Setting this to 0
-                               disables budgeting. Default (new tag): 0
-  -d --data <dir>              Use the specified data directory.
-  -D --dithering <channels>    Apply dithering to 16-bit or p8 bitmaps. This
-                               does not save in .bitmap tags. Can be: a, rgb,
-                               or argb. Default: none
-  -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
-  -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
-                               monochrome, dxt5, dxt3, dxt1, or auto. 'auto'
-                               will be replaced with the best lossless format.
-                               Default (new tag): auto
+  -a --anniversary-mode        Enable anniversary graphics and audio (CEA only)
+  -A --auto-forge              Ensure the map will be network compatible with
+                               the target engine's stock maps.
+  -b --stock-resource-bounds   Only index tags if the tag's index is within
+                               stock Custom Edition's resource map bounds.
+                               (Custom Edition only)
+  -B --build-string <ver>      Set the build string in the header.
+  -C --forge-crc <crc>         Forge the CRC32 value of the map after building
+                               it.
+  -E --extend-file-limits      Extend file size limits beyond what is allowed
+                               by the target engine to its theoretical maximum
+                               size. This may create a map that will not work
+                               without a mod.
+  -g --game-engine <engine>    Specify the game engine. This option is
+                               required. Valid engines are: gbx-custom,
+                               gbx-demo, gbx-retail, mcc-cea, native,
+                               xbox-demo, xbox-ntsc, xbox-ntsc-jp,
+                               xbox-ntsc-tw, xbox-pal
   -h --help                    Show this list of options.
-  -H --bump-height <height>    Set the apparent bumpmap height from 0.0 to 1.0.
-                               Default (new tag): 0.026
-  -i --info                    Show license and credits.
-  -I --ignore-tag              Ignore the tag data if the tag exists.
-  -M --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
-  -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
-                               off or on. Default (new tag): off
-  -P --fs-path                 Use a filesystem path for the data.
-  -r --reg-point-hack <val>    Ignore sequence borders when calculating
-                               registration point (AKA 'filthy sprite bug
-                               fix'). Can be: off or on. Default (new tag): off
-  -R --regenerate              Use the bitmap tag's compressed color plate data
-                               as data.
-  -s --mipmap-scale <type>     Mipmap scale type. This does not save in .bitmap
-                               tags. Can be: linear, nearest_alpha, nearest.
-                               Default (new tag): linear
-  -S --square-sheets           Force square sprite sheets (works around
-                               particles being incorrectly stretched).
-  -t --tags <dir>              Use the specified tags directory.
-  -T --type <type>             Set the type of bitmap. Can be: 2d_textures,
-                               3d_textures, cube_maps, interface_bitmaps, or
-                               sprites. Default (new tag): 2d
-  -u --usage <usage>           Set the bitmap usage. Can be: alpha_blend,
-                               default, height_map, detail_map, light_map,
-                               vector_map. Default: default
+  -H --hide-pedantic-warnings  Don't show minor warnings.
+  -i --info                    Show credits, source info, and other info.
+  -l --level <level>           Set the compression level (Xbox maps only). Must
+                               be between 0 and 9. Default: 9
+  -m --maps <dir>              Use the specified maps directory.
+  -N --rename-scenario <name>  Rename the scenario.
+  -o --output <file>           Output to a specific file.
+  -O --optimize                Optimize tag space. This will drastically
+                               increase the amount of time required to build
+                               the cache file.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -q --quiet                   Only output error messages.
+  -r --resource-usage <usage>  Specify the behavior for using resource maps.
+                               Must be: none (don't use resource maps), check
+                               (check resource maps), always (always index tags
+                               in resource maps - Custom Edition only).
+                               Default: none
+  -R --resource-maps <dir>     Specify the directory for loading resource maps.
+                               (by default this is the maps directory)
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
+  -T --tag-space <size>        Override the tag space. This may result in a map
+                               that does not work with the stock games. You can
+                               specify the number of bytes, optionally
+                               suffixing with K (for KiB) or M (for MiB), or
+                               specify in hexadecimal the number of bytes (e.g.
+                               0x1000).
+  -w --with-index <file>       Use an index file for the tags, ensuring the
+                               map's tags are ordered in the same way.
 ```
 
 Refer to [Creating a bitmap] for information on how to create bitmap tags.
