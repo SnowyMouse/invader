@@ -18,6 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-bludgeon: Fixed invader-bludgeon reporting it "Bludgeoned" tags even
   when no fixes were requested (and thus it did not change anything)
+- invader-build: Fixed incorrect animation index being stored when merging
+  child scenarios in command lists
 
 ## [0.45.0] - 2022-01-25
 ### Added
