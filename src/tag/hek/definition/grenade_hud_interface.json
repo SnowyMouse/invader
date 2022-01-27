@@ -482,6 +482,7 @@
             }
         ],
         "type": "struct",
-        "size": 504
+        "size": 504,
+        "class": "grenade_hud_interface"
     }
 ]

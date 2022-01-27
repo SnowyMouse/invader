@@ -788,6 +788,7 @@
         ],
         "type": "struct",
         "post_compile": true,
-        "size": 1272
+        "size": 1272,
+        "class": "actor"
     }
 ]

@@ -126,6 +126,7 @@
             }
         ],
         "type": "struct",
-        "size": 96
+        "size": 96,
+        "class": "flag"
     }
 ]

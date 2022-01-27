@@ -288,6 +288,7 @@
         "pre_compile": true,
         "post_compile": true,
         "postprocess_hek_data": true,
-        "size": 1008
+        "size": 1008,
+        "class": "vehicle"
     }
 ]

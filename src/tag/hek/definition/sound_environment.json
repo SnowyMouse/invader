@@ -73,6 +73,7 @@
             }
         ],
         "type": "struct",
-        "size": 72
+        "size": 72,
+        "class": "sound_environment"
     }
 ]

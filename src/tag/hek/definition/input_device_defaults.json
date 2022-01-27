@@ -38,6 +38,7 @@
             }
         ],
         "type": "struct",
-        "size": 44
+        "size": 44,
+        "class": "input_device_defaults"
     }
 ]

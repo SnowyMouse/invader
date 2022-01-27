@@ -453,6 +453,7 @@
         "inherits": "Shader",
         "pre_compile": true,
         "post_compile": true,
-        "size": 836
+        "size": 836,
+        "class": "shader_environment"
     }
 ]

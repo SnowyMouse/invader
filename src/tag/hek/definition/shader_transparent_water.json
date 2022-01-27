@@ -186,6 +186,7 @@
         "type": "struct",
         "inherits": "Shader",
         "pre_compile": true,
-        "size": 320
+        "size": 320,
+        "class": "shader_transparent_water"
     }
 ]

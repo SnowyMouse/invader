@@ -321,6 +321,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "size": 324
+        "size": 324,
+        "class": "contrail"
     }
 ]

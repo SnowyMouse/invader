@@ -1043,6 +1043,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "size": 380
+        "size": 380,
+        "class": "weapon_hud_interface"
     }
 ]

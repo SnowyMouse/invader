@@ -490,6 +490,7 @@
         "type": "struct",
         "inherits": "Shader",
         "pre_compile": true,
-        "size": 108
+        "size": 108,
+        "class": "shader_transparent_generic"
     }
 ]

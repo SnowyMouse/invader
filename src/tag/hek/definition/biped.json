@@ -352,6 +352,7 @@
         "pre_compile": true,
         "post_compile": true,
         "postprocess_hek_data": true,
-        "size": 1268
+        "size": 1268,
+        "class": "biped"
     }
 ]

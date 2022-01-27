@@ -1326,6 +1326,7 @@
         ],
         "type": "struct",
         "size": 1388,
-        "post_compile": true
+        "post_compile": true,
+        "class": "unit_hud_interface"
     }
 ]

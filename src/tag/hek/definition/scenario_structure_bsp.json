@@ -1606,6 +1606,7 @@
             }
         ],
         "type": "struct",
+        "class": "scenario_structure_bsp",
         "pre_compile": true,
         "post_compile": true,
         "read_only": true,

@@ -581,6 +581,7 @@
         "type": "struct",
         "pre_compile": true,
         "post_cache_deformat": true,
-        "size": 672
+        "size": 672,
+        "class": "damage_effect"
     }
 ]

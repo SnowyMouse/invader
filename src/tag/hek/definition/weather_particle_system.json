@@ -315,6 +315,7 @@
             }
         ],
         "type": "struct",
-        "size": 48
+        "size": 48,
+        "class": "weather_particle_system"
     }
 ]

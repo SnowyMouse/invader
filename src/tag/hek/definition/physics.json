@@ -278,6 +278,7 @@
         "type": "struct",
         "postprocess_hek_data": true,
         "post_cache_deformat": true,
-        "size": 128
+        "size": 128,
+        "class": "physics"
     }
 ]

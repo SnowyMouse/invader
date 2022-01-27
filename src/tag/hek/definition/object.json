@@ -519,6 +519,7 @@
             }
         ],
         "type": "struct",
+        "class": "object",
         "size": 380
     },
     {

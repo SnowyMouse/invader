@@ -200,6 +200,7 @@
         ],
         "type": "struct",
         "inherits": "Object",
-        "size": 656
+        "size": 656,
+        "class": "device"
     }
 ]

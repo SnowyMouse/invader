@@ -51,6 +51,7 @@
             }
         ],
         "type": "struct",
-        "size": 896
+        "size": 896,
+        "class": "preferences_network_game"
     }
 ]

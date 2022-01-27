@@ -673,6 +673,7 @@
         ],
         "type": "struct",
         "inherits": "Object",
-        "size": 752
+        "size": 752,
+        "class": "unit"
     }
 ]

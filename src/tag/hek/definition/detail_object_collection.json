@@ -146,6 +146,7 @@
         ],
         "type": "struct",
         "post_compile": true,
-        "size": 128
+        "size": 128,
+        "class": "detail_object_collection"
     }
 ]

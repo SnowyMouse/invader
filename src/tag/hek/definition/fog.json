@@ -199,6 +199,7 @@
             }
         ],
         "type": "struct",
-        "size": 396
+        "size": 396,
+        "class": "fog"
     }
 ]

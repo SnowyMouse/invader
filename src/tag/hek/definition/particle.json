@@ -326,6 +326,7 @@
         "type": "struct",
         "post_compile": true,
         "postprocess_hek_data": true,
-        "size": 356
+        "size": 356,
+        "class": "particle"
     }
 ]

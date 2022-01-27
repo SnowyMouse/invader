@@ -479,6 +479,7 @@
         "post_cache_parse": true,
         "unsafe_to_dedupe": true,
         "pre_compile": true,
-        "size": 164
+        "size": 164,
+        "class": "sound"
     }
 ]

@@ -149,6 +149,7 @@
             }
         ],
         "type": "struct",
-        "size": 40
+        "size": 40,
+        "class": "shader"
     }
 ]

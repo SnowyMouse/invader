@@ -350,6 +350,7 @@
         "pre_compile": true,
         "post_compile": true,
         "postprocess_hek_data": true,
-        "size": 588
+        "size": 588,
+        "class": "projectile"
     }
 ]
