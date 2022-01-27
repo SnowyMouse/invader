@@ -119,8 +119,6 @@ namespace Invader::Parser {
             std::size_t start = data.pixel_data_offset;
             std::size_t width = data.width;
             std::size_t height = data.height;
-            
-            auto *build_parameters = workload.get_build_parameters();
 
             // Warn for stuff
             bool exceeded = false;
@@ -130,30 +128,30 @@ namespace Invader::Parser {
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX // TODODILE: tentative
+                engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX
             ) {
                 if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
-                    exceeded = true;
                 }
-            
+
+                // Check if stock limits are exceeded
                 switch(type) {
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
                         if(width > 2048 || height > 2048) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 2048x2048 (%zux%zu)", data_index, width, height);
+                            eprintf_warn("Bitmap data #%zu exceeds 2048x2048 (%zux%zu)", data_index, width, height);
                             exceeded = true;
                         }
                         break;
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
                         if(width > 256 || height > 256 || depth > 256) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 256x256x256 (%zux%zu)", data_index, width, height);
+                            eprintf_warn("Bitmap data #%zu exceeds 256x256x256 (%zux%zu)", data_index, width, height);
                             exceeded = true;
                         }
                         break;
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
                         if(width > 512 || height > 512) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 512x512 (%zux%zu)", data_index, width, height);
+                            eprintf_warn("Bitmap data #%zu exceeds 512x512 (%zux%zu)", data_index, width, height);
                             exceeded = true;
                         }
                         break;
@@ -161,13 +159,14 @@ namespace Invader::Parser {
                         break;
                 }
                 
+                // On Xbox, it's an error. Otherwise, it's a warning.
                 if(exceeded) {
                     if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                        eprintf_error("Target engine runs on a system that does not support these bitmaps");
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Target engine runs on a system that does not support these bitmaps");
                         throw InvalidTagDataException();
                     }
-                    else if(build_parameters->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
-                        eprintf_warn("Target engine uses D3D9; some D3D9 compliant hardware may not render this bitmap");
+                    else {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Target engine uses D3D9; some D3D9 compliant hardware may not render this bitmap");
                     }
                 }
             }
