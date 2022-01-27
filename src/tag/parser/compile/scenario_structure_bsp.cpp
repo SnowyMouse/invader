@@ -14,6 +14,11 @@ namespace Invader::Parser {
         auto cea = engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA;
         auto compressed = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
         
+        if(this->collision_bsp.size() != 1) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Collision BSP count is wrong (%zu != %zu)", this->collision_bsp.size(), static_cast<std::size_t>(1));
+            throw InvalidTagDataException();
+        }
+        
         // Check these
         auto &data = workload.bsp_data.emplace_back();
         auto lm_count = this->lightmaps.size();
@@ -58,6 +63,47 @@ namespace Invader::Parser {
                         mat.compressed_vertices.clear();
                     }
                 }
+            }
+        }
+        
+        // If there are no detail objects, put in a blank one
+        if(this->detail_objects.empty()) {
+            this->detail_objects.emplace_back();
+        }
+        
+        // If there are no pathfinding surfaces, generate them
+        // TODODILE: Match tool.exe output? This is pretty close but not exact.
+        if(this->pathfinding_surfaces.empty()) {
+            auto &surfaces = this->collision_bsp[0].surfaces;
+            auto &planes = this->collision_bsp[0].planes;
+            this->pathfinding_surfaces.reserve(surfaces.size());
+            
+            for(auto &s : surfaces) {
+                auto &surface = this->pathfinding_surfaces.emplace_back();
+                surface.data = 0;
+                
+                if(s.plane.is_null()) {
+                    continue;
+                }
+                
+                std::size_t plane_index = s.plane.int_value();
+                if(plane_index >= planes.size()) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Plane index (%zu) out of bounds\n", plane_index);
+                    continue;
+                }
+                
+                auto &p = planes[plane_index].plane.vector;
+                
+                // angle = acos((a1a2 + b1b2 + c1c2) / (sqrt(a1^2 + b1^2 + c1^2) * sqrt(a2^2 + b2^2 + c2^2)))
+                float i1 = p.i.read(), j1 = p.j.read(), k1 = p.k.read();
+                /*float i2 = 0.0, j2 = 0.0, k2 = 1.0;*/
+                
+                //auto angle = std::acos((i1*i2) + (j1*j2) + (k1*k2) / (std::sqrt(i1*i1+j1*j1+k1*k1) * std::sqrt(i2*i2+j2*j2+k2*k2)));
+                
+                // We can use a more optimized function since i2 and j2 are 0
+                auto angle_cos = k1 / (std::sqrt(i1*i1+j1*j1+k1*k1)) * (s.plane.flag_value() ? -1 : 1);
+                auto angle = std::acos(angle_cos);
+                surface.data = (angle <= (HALO_PI * 45.0 / 180.0)) ? 64 : 0;
             }
         }
     }
