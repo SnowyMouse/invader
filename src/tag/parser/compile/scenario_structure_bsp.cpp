@@ -103,7 +103,7 @@ namespace Invader::Parser {
                 // We can use a more optimized function since i2 and j2 are 0
                 auto angle_cos = k1 / (std::sqrt(i1*i1+j1*j1+k1*k1)) * (s.plane.flag_value() ? -1 : 1);
                 auto angle = std::acos(angle_cos);
-                surface.data = (angle <= (HALO_PI * 45.0 / 180.0)) ? 64 : 0;
+                surface.data = (angle <= (HALO_PI * 45.0 / 180.0)) ? 64 : 0; // if slope is <= 45 degrees, it's good?
             }
         }
     }

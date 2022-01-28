@@ -768,13 +768,14 @@ It uses the [Rat In a Tube](https://github.com/SnowyMouse/riat) script compiler.
 ```
 Usage: invader-script [options] <scenario>
 
-Compile scripts.
+Compile scripts. Unless otherwise specified, global scripts are always compiled.
 
 Options:
   -c --clear                   Clear all script data from the scenario tag
   -d --data <dir>              Use the specified data directory.
-  -e --explicit <source>       Explicitly only compile the given source.
-                               Automatically use global scripts.
+  -e --explicit <source>       Explicitly compile the given source in the
+                               script directory. This argument can be used
+                               multiple times.
   -E --exclude-global-scripts  Do not use global_scripts source.
   -g --game-engine <engine>    Specify the game engine. Valid engines are:
                                gbx-custom, gbx-demo, gbx-retail, mcc-cea,
@@ -784,8 +785,7 @@ Options:
   -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the tag path
                                directory.
-  -r --reload-scripts          Explicitly recompile sources referenced by the
-                               tag. Automatically use global scripts.
+  -r --reload-scripts          Only recompile sources referenced by the tag.
   -R --regenerate              Use the scenario tag's script source data as
                                data.
   -t --tags <dir>              Use the specified tags directory.

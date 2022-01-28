@@ -46,11 +46,11 @@ int main(int argc, const char **argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
     options.emplace_back("regenerate", 'R', 0, "Use the scenario tag's script source data as data.");
     options.emplace_back("exclude-global-scripts", 'E', 0, "Do not use global_scripts source.");
-    options.emplace_back("reload-scripts", 'r', 0, "Explicitly recompile sources referenced by the tag. Automatically use global scripts.");
-    options.emplace_back("explicit", 'e', 1, "Explicitly only compile the given source. Automatically use global scripts.", "<source>");
+    options.emplace_back("reload-scripts", 'r', 0, "Only recompile sources referenced by the tag.");
+    options.emplace_back("explicit", 'e', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
 
-    static constexpr char DESCRIPTION[] = "Compile scripts.";
+    static constexpr char DESCRIPTION[] = "Compile scripts. Unless otherwise specified, global scripts are always compiled.";
     static constexpr char USAGE[] = "[options] <scenario>";
 
     // Parse arguments
