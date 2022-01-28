@@ -20,6 +20,8 @@ This is used for recording Invader's changes. This changelog is based on
   when no fixes were requested (and thus it did not change anything)
 - invader-build: Fixed incorrect animation index being stored when merging
   child scenarios in command lists
+- invader-build: Fixed player starting locations being merged when merging
+  scenarios (this is actually not supposed to happen and broke c40!)
 - invader-build: Fixed pathfinding surfaces not being generated for BSP tags
   that are missing them due to no baked lightmaps (which caused a crash in the
   original game)

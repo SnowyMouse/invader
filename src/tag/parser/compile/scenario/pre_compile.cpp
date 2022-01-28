@@ -667,7 +667,6 @@ namespace Invader::Parser {
         MERGE_ARRAY(object_names, merge.name != base.name);
         MERGE_ARRAY(device_groups, merge.name != base.name);
         MERGE_ARRAY(player_starting_profile, true);
-        MERGE_ARRAY(player_starting_locations, true);
         MERGE_ARRAY(trigger_volumes, merge.name != base.name);
         MERGE_ARRAY(recorded_animations, merge.name != base.name);
         MERGE_ARRAY(netgame_flags, true);
