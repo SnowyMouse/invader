@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.45.1] - 2022-01-28
 ### Added
 - invader-bludgeon: Added -T broken-lens-flare-function-scale
 - invader-build: Readded --tag-space
