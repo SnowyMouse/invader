@@ -16,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
   CEA's node count
 
 ### Fixed
+- invader-archive: Fixed Windows path separators being used instead of portable
+  UNIX path separators when making .7z files
 - invader-bludgeon: Fixed invader-bludgeon reporting it "Bludgeoned" tags even
   when no fixes were requested (and thus it did not change anything)
 - invader-build: Fixed incorrect animation index being stored when merging

@@ -408,6 +408,11 @@ int main(int argc, const char **argv) {
         // Go through each tag path we got
         for(std::size_t i = 0; i < archive_list.size(); i++) {
             auto str_path = archive_list[i].first.string();
+            for(char &c : str_path) {
+                if(c == std::filesystem::path::preferred_separator) {
+                    c = '/';
+                }
+            }
             const char *path = str_path.c_str();
 
             // Begin
