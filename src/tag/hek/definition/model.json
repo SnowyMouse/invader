@@ -219,7 +219,6 @@
             {
                 "name": "permutation number",
                 "type": "uint16",
-                "endian": "Index",
                 "cache_only": true
             },
             {
