@@ -92,7 +92,7 @@
             "interpolate color along hsv space",
             "more colors for hsv interpolation",
             "invert interpolation",
-            "use xbox meter channel order"
+            "use xbox shading"
         ],
         "width": 8
     },
