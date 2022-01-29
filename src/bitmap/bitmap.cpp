@@ -311,34 +311,41 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     // Compress the original input blob
     if(!bitmap_options.regenerate) {
-        // Get ready
-        bitmap_tag_data.compressed_color_plate_data.clear();
-        std::vector<std::byte> compressed_data(image_size * 4);
-        BigEndian<std::uint32_t> decompressed_size;
-        decompressed_size = static_cast<std::uint32_t>(image_size);
-        bitmap_tag_data.color_plate_width = image_width;
-        bitmap_tag_data.color_plate_height = image_height;
+        if(image_width > static_cast<std::uint16_t>(INT16_MAX) || image_height > static_cast<std::uint16_t>(INT16_MAX)) {
+            eprintf_warn("Color plate dimensions exceed %zux%zu\nThe bitmap can still be made, but it cannot be regenerated.", static_cast<std::size_t>(INT16_MAX),  static_cast<std::size_t>(INT16_MAX));
+            bitmap_tag_data.color_plate_width = 0;
+            bitmap_tag_data.color_plate_height = 0;
+        }
+        else {
+            // Get ready
+            bitmap_tag_data.compressed_color_plate_data.clear();
+            std::vector<std::byte> compressed_data(image_size * 4);
+            BigEndian<std::uint32_t> decompressed_size;
+            decompressed_size = static_cast<std::uint32_t>(image_size);
+            bitmap_tag_data.color_plate_width = image_width;
+            bitmap_tag_data.color_plate_height = image_height;
 
-        // Set compressed size
-        bitmap_tag_data.compressed_color_plate_data.resize(sizeof(decompressed_size));
-        *reinterpret_cast<BigEndian<std::uint32_t> *>(bitmap_tag_data.compressed_color_plate_data.data()) = decompressed_size;
+            // Set compressed size
+            bitmap_tag_data.compressed_color_plate_data.resize(sizeof(decompressed_size));
+            *reinterpret_cast<BigEndian<std::uint32_t> *>(bitmap_tag_data.compressed_color_plate_data.data()) = decompressed_size;
 
-        // Deflate color plate data
-        compressed_data.resize(image_size * 4);
-        z_stream deflate_stream;
-        deflate_stream.zalloc = Z_NULL;
-        deflate_stream.zfree = Z_NULL;
-        deflate_stream.opaque = Z_NULL;
-        deflate_stream.avail_in = image_size;
-        deflate_stream.next_in = const_cast<Bytef *>(reinterpret_cast<const Bytef *>(image_pixels.data()));
-        deflate_stream.avail_out = compressed_data.size();
-        deflate_stream.next_out = reinterpret_cast<Bytef *>(compressed_data.data());
+            // Deflate color plate data
+            compressed_data.resize(image_size * 4);
+            z_stream deflate_stream;
+            deflate_stream.zalloc = Z_NULL;
+            deflate_stream.zfree = Z_NULL;
+            deflate_stream.opaque = Z_NULL;
+            deflate_stream.avail_in = image_size;
+            deflate_stream.next_in = const_cast<Bytef *>(reinterpret_cast<const Bytef *>(image_pixels.data()));
+            deflate_stream.avail_out = compressed_data.size();
+            deflate_stream.next_out = reinterpret_cast<Bytef *>(compressed_data.data());
 
-        // Do it
-        deflateInit(&deflate_stream, Z_BEST_COMPRESSION);
-        deflate(&deflate_stream, Z_FINISH);
-        deflateEnd(&deflate_stream);
-        bitmap_tag_data.compressed_color_plate_data.insert(bitmap_tag_data.compressed_color_plate_data.end(), compressed_data.data(), compressed_data.data() + deflate_stream.total_out);
+            // Do it
+            deflateInit(&deflate_stream, Z_BEST_COMPRESSION);
+            deflate(&deflate_stream, Z_FINISH);
+            deflateEnd(&deflate_stream);
+            bitmap_tag_data.compressed_color_plate_data.insert(bitmap_tag_data.compressed_color_plate_data.end(), compressed_data.data(), compressed_data.data() + deflate_stream.total_out);
+        }
     }
 
     // Now let's add the actual bitmap data

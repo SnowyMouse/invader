@@ -18,6 +18,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-archive: Fixed Windows path separators being used instead of portable
   UNIX path separators when making .7z files
+- invader-bitmap: Color plates with a dimension larger than 32767 (INT16_MAX)
+  will no longer be stored in a bitmap tag, as this produces a bitmap that is
+  technically impossible to regenerate due to how the dimensions are stored
 - invader-bludgeon: Fixed invader-bludgeon reporting it "Bludgeoned" tags even
   when no fixes were requested (and thus it did not change anything)
 - invader-build: Fixed incorrect animation index being stored when merging
