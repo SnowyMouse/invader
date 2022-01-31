@@ -242,12 +242,39 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound is 44.1 kHz AND mono. The target engine will not play this.");
         }
 
-        // If we didn't split long thiss into permutations, go through each permutation and Jason Jones it
+        // If we didn't split long this into permutations, go through each permutation and Jason Jones it. Also fix the gains
         if(!(this->flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS)) {
             for(auto &pr : this->pitch_ranges) {
                 pr.actual_permutation_count = static_cast<std::uint16_t>(pr.permutations.size());
                 for(auto &p : pr.permutations) {
                     p.next_permutation_index = NULL_INDEX;
+                    
+                    if(p.gain == 0.0F) {
+                        p.gain = 1.0F;
+                    }
+                }
+            }
+        }
+        
+        // Otherwise, fix gains
+        else {
+            for(auto &pr : this->pitch_ranges) {
+                auto p_count = pr.permutations.size();
+                for(std::size_t pi = 0; pi < p_count && pi < pr.actual_permutation_count; pi++) {
+                    auto &p = pr.permutations[pi];
+                    if(p.gain == 0.0F) {
+                        p.gain = 1.0F;
+                    }
+                    
+                    std::size_t loop_count = 0;
+                    std::size_t n = p.next_permutation_index;
+                    
+                    // This will not report errors, instead breaking. Wait until SoundPitchRange to report errors.
+                    while(loop_count < p_count && n < p_count) {
+                        pr.permutations[n].gain = p.gain;
+                        n = pr.permutations[n].next_permutation_index;
+                        loop_count++;
+                    }
                 }
             }
         }
@@ -255,6 +282,14 @@ namespace Invader::Parser {
         if(this->one_skip_fraction_modifier == 0.0f && this->zero_skip_fraction_modifier == 0.0f) {
             this->one_skip_fraction_modifier = 1.0f;
             this->zero_skip_fraction_modifier = 1.0f;
+        }
+        
+        if(this->random_pitch_bounds.from == 0.0F) {
+            this->random_pitch_bounds.from = 1.0F;
+        }
+
+        if(this->random_pitch_bounds.to == 0.0F) {
+            this->random_pitch_bounds.to = 1.0F;
         }
 
         if(this->one_gain_modifier == 0.0f && this->zero_gain_modifier == 0.0f) {
@@ -325,6 +360,8 @@ namespace Invader::Parser {
             }
             this->longest_permutation_length = seconds * 1100;
         }
+        
+        
     }
 
     void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {

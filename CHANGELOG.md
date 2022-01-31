@@ -19,6 +19,7 @@ This is used for recording Invader's changes. This changelog is based on
   by tick rate
 - invader-build: Fixed radius multiplier in particle system states not being
   defaulted to 1
+- invader-build: Fixed subpermutations not using the main permutation's gain
 - invader-extract: Fixed minimum velocity and potential and not being multiplied
   by tick rate
 
