@@ -135,7 +135,8 @@
             },
             {
                 "name": "count",
-                "type": "int16"
+                "type": "int16",
+                "default": 1
             },
             {
                 "type": "pad",
