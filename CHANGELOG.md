@@ -23,6 +23,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed wind period in fog tags not defaulting to 1-1
 - invader-build: Fixed light tags' falloff/cutoff angle not clamping correctly
 - invader-build: Fixed particle radius animation not defaulting correctly
+- invader-build: Fixed particle_system radius multiplier not defaulting
 - invader-extract: Fixed minimum velocity and potential and not being multiplied
   by tick rate
 
