@@ -34,4 +34,13 @@ namespace Invader::Parser {
             this->color_upper_bound.blue = 1.0F;
         }
     }
+    
+    void LightVolumeFrame::postprocess_hek_data() {
+        if(this->offset_exponent <= 0.0F) {
+            this->offset_exponent = 1.0F;
+        }
+        if(this->radius_exponent <= 0.0F) {
+            this->radius_exponent = 1.0F;
+        }
+    }
 }

@@ -79,6 +79,7 @@
             }
         ],
         "type": "struct",
+        "postprocess_hek_data": true,
         "size": 176
     },
     {
