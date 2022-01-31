@@ -7,6 +7,7 @@
 #include <invader/sound/sound_reader.hpp>
 #include <FLAC/stream_decoder.h>
 #include <vorbis/vorbisenc.h>
+#include <vorbis/vorbisfile.h>
 #include <memory>
 
 #include <algorithm>
@@ -234,5 +235,99 @@ namespace Invader::SoundReader {
         result.bits_per_sample = 24;
 
         return result;
+    }
+    
+    struct OggVorbisContainer {
+        const std::byte *data;
+        std::size_t length;
+        std::size_t position;
+        
+        static std::size_t ov_read(void *ptr, std::size_t size, std::size_t nmemb, void *datasource) {
+            auto *byte_ptr = reinterpret_cast<std::byte *>(ptr);
+            auto &container = *reinterpret_cast<OggVorbisContainer *>(datasource);
+            std::size_t rv = 0;
+            
+            for(std::size_t i = 0; i < nmemb; i++) {
+                if(container.length - container.position < size) {
+                    break;
+                }
+                std::memcpy(byte_ptr, container.data + container.position, size);
+                byte_ptr += size;
+                container.position += size;
+                rv++;
+            }
+            
+            return rv;
+        }
+        
+        static int ov_seek(void *datasource, ogg_int64_t offset, int whence) {
+            auto &container = *reinterpret_cast<OggVorbisContainer *>(datasource);
+            auto offset_uns = static_cast<decltype(OggVorbisContainer::position)>(offset);
+            
+            if(offset_uns > container.length) {
+                return -1;
+            }
+            
+            if(whence == SEEK_SET) {
+                container.position = offset_uns;
+                return 0;
+            }
+            else if(whence == SEEK_END) {
+                container.position = container.length - offset_uns;
+                return 0;
+            }
+            else if(whence == SEEK_CUR) {
+                if(offset > 0) {
+                    if(container.length - container.position < offset_uns) {
+                        return -1;
+                    }
+                    container.position += offset_uns;
+                    return 0;
+                }
+                else if(offset < 0) {
+                    offset_uns = static_cast<decltype(offset_uns)>(-offset);
+                    if(container.position < offset_uns) {
+                        return -1;
+                    }
+                    container.position -= offset_uns;
+                    return 0;
+                }
+                else {
+                    return 0;
+                }
+            }
+            else {
+                eprintf_error("Unknown whence %i\n", whence);
+                std::terminate();
+            }
+        }
+        
+        static long ov_tell(void *datasource) {
+            auto &container = *reinterpret_cast<OggVorbisContainer *>(datasource);
+            return static_cast<long>(container.position);
+        }
+    };
+    
+    std::size_t ogg_vorbis_sample_count(const std::byte *data, std::size_t data_size) {
+        OggVorbis_File vf;
+        ov_callbacks cb;
+        OggVorbisContainer container = { .data = data, .length = data_size, .position = 0 };
+        
+        cb.close_func = nullptr;
+        cb.seek_func = OggVorbisContainer::ov_seek;
+        cb.read_func = OggVorbisContainer::ov_read;
+        cb.tell_func = OggVorbisContainer::ov_tell;
+        
+        if(ov_open_callbacks(&container, &vf, nullptr, 0, cb) < 0) {
+            eprintf_error("Invalid ogg vorbis input");
+            throw std::exception();
+        }
+        
+        auto *info = ov_info(&vf,-1);
+        auto channel_count = info->channels;
+        auto sample_count = ov_pcm_total(&vf, -1);
+        
+        ov_clear(&vf);
+        return static_cast<std::size_t>(sample_count) * static_cast<std::size_t>(channel_count);
     }
 }

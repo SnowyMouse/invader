@@ -100,12 +100,11 @@ namespace Invader::Bludgeoner {
             // We need to decode this first
             case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
                 try {
-                    auto decoded = Invader::SoundReader::sound_from_ogg(samples.data(), samples.size());
-                    auto decoded_size_16_bit = decoded.pcm.size() / (decoded.bits_per_sample / 8) * 2;
-                    if(decoded_size_16_bit != buffer_size) {
+                    auto expected_buffer_size = Invader::SoundReader::ogg_vorbis_sample_count(samples.data(), samples.size()) * sizeof(std::uint16_t);
+                    if(expected_buffer_size != buffer_size) {
                         fucked = true;
                         if(fix) {
-                            buffer_size = decoded_size_16_bit;
+                            buffer_size = expected_buffer_size;
                         }
                         else {
                             return fucked;

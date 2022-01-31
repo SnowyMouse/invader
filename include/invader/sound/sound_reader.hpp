@@ -103,6 +103,14 @@ namespace Invader::SoundReader {
      * @return               sound
      */
     Sound sound_from_16_bit_pcm_big_endian(const std::byte *data, std::size_t data_length, std::size_t channel_count, std::size_t sample_rate);
+    
+    /**
+     * Get the number of PCM samples in an Ogg Vorbis stream
+     * @param  data        pointer to data
+     * @param  data_length data size
+     * @return             number of samples
+     */
+    std::size_t ogg_vorbis_sample_count(const std::byte *data, std::size_t data_length);
 }
 
 #endif

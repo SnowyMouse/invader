@@ -4,6 +4,10 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unchanged]
 ### Changed
+- Now uses the vorbisfile API to query sample count from Ogg Vorbis. This will
+  drastically reduce invader-build's build time (+221% speed improvement on d40
+  on an AMD Ryzen 5 2600 system running Arch Linux) and the time required for
+  `invader-bludgeon -T invalid-sound-buffer`
 - invader-compare: Differences with --verbose are now shown in more detail
 - invader-compare: Added whitespace indenting to --verbose
 

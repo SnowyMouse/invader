@@ -60,7 +60,6 @@ namespace Invader::Parser {
         }
     }
     
-    
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto permutation_index = offset / sizeof(struct_little);
 
@@ -88,9 +87,8 @@ namespace Invader::Parser {
             }
         }
         else if(this->format ==  HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
-            auto decoded = Invader::SoundReader::sound_from_ogg(this->samples.data(), this->samples.size());
-            auto decoded_size_16_bit = decoded.pcm.size() / (decoded.bits_per_sample / 8) * 2;
-            if(this->buffer_size != decoded_size_16_bit) {
+            auto expected_buffer_size = SoundReader::ogg_vorbis_sample_count(this->samples.data(), this->samples.size()) * sizeof(std::uint16_t);
+            if(this->buffer_size != expected_buffer_size) {
                 incorrect_buffer = true;
             }
         }
