@@ -944,7 +944,7 @@ namespace Invader::Parser {
                     auto vt_count = vt.get_array_size();
                     auto vo_count = vo.get_array_size();
                     if(vt_count != vo_count) {
-                        std::snprintf(difference_text, sizeof(difference_text), " different sizes [%zu != %zu]", vt_count, vo_count);
+                        std::snprintf(difference_text, sizeof(difference_text), "different sizes [%zu != %zu]", vt_count, vo_count);
                         complain();
                     }
                     else {
