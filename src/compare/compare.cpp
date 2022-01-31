@@ -82,7 +82,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input.");
-    options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with -f");
+    options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with --functional");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for comparison. This cannot be used with --verbose. Default: 1");
 
