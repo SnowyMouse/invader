@@ -200,6 +200,7 @@ namespace Invader::Parser {
     void Projectile::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_PROJECTILE;
         compile_object(*this, workload, tag_index);
+        this->minimum_velocity /= TICK_RATE;
         this->initial_velocity /= TICK_RATE;
         this->final_velocity /= TICK_RATE;
     }

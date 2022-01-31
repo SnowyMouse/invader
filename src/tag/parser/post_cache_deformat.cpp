@@ -29,6 +29,7 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::Projectile::post_cache_deformat() {
+        this->minimum_velocity *= TICK_RATE;
         this->initial_velocity *= TICK_RATE;
         this->final_velocity *= TICK_RATE;
     }
