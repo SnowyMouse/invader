@@ -34,6 +34,11 @@ namespace Invader::Parser {
         this->final_velocity *= TICK_RATE;
     }
 
+    void Invader::Parser::ProjectileMaterialResponse::post_cache_deformat() {
+        this->potential_and.from *= TICK_RATE;
+        this->potential_and.to *= TICK_RATE;
+    }
+
     void Invader::Parser::ScenarioCutsceneTitle::post_cache_deformat() {
         this->fade_in_time /= TICK_RATE;
         this->fade_out_time /= TICK_RATE;

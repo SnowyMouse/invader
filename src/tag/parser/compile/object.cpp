@@ -204,6 +204,10 @@ namespace Invader::Parser {
         this->initial_velocity /= TICK_RATE;
         this->final_velocity /= TICK_RATE;
     }
+    void ProjectileMaterialResponse::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+        this->potential_and.from /= TICK_RATE;
+        this->potential_and.to /= TICK_RATE;
+    }
     void Scenery::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_SCENERY;
         compile_object(*this, workload, tag_index);

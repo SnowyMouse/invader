@@ -12,9 +12,12 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now errors on mismatched checksums and warns if the tag was set
   to 0 to bypass this check
 - invader-build: Now errors on mismatched collision models
-- invader-build: Fixed minimum velocity not being defaulted
+- invader-build: Fixed minimum velocity and potential and not being divided
+  by tick rate
 - invader-compare: Differences with --verbose are now shown in more detail
 - invader-compare: Added whitespace indenting to --verbose
+- invader-build: Fixed minimum velocity and potential and not being multiplied
+  by tick rate
 - invader-script: Changed default node count (if -g is unspecified) to match
   CEA's node count
 
