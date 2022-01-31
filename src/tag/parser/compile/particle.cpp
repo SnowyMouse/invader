@@ -68,6 +68,13 @@ namespace Invader::Parser {
 
     void Particle::postprocess_hek_data() {
         this->contact_deterioration = 0.0F;
+        
+        if(this->radius_animation.from == 0.0F) {
+            this->radius_animation.from = 1.0F;
+        }
+        if(this->radius_animation.to == 0.0F) {
+            this->radius_animation.to = 1.0F;
+        }
     }
     
     static void complain_about_non_square_sheets(BuildWorkload &workload, std::size_t tag_index, const BuildWorkload::BuildWorkloadTag &tag) {
