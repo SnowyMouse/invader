@@ -112,7 +112,12 @@ namespace Invader::Parser {
                 const float TING_VOLUME = target_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
                 const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
                 if(!sound_id.is_null()) {
-                    reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = TING_VOLUME;
+                    auto &random_gain_modifier = reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier;
+                    
+                    if(random_gain_modifier.read() != TING_VOLUME) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Random gain modifier was set to %.01f for the target engine", TING_VOLUME);
+                        random_gain_modifier = TING_VOLUME;
+                    }
                 }
             }
         }
