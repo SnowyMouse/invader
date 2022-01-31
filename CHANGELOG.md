@@ -17,13 +17,12 @@ This is used for recording Invader's changes. This changelog is based on
   technically impossible to regenerate due to how the dimensions are stored
 - invader-build: Fixed minimum velocity and potential and not being divided
   by tick rate
-- invader-build: Fixed radius multiplier in particle system states not being
-  defaulted to 1
 - invader-build: Fixed subpermutations not using the main permutation's gain
 - invader-build: Fixed wind period in fog tags not defaulting to 1-1
 - invader-build: Fixed light tags' falloff/cutoff angle not clamping correctly
 - invader-build: Fixed particle radius animation not defaulting correctly
-- invader-build: Fixed particle_system radius multiplier not defaulting
+- invader-build: Fixed particle_system radius multiplier not defaulting in
+  particle system states and particle system particle states
 - invader-extract: Fixed minimum velocity and potential and not being multiplied
   by tick rate
 
