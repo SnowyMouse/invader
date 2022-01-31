@@ -20,6 +20,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed radius multiplier in particle system states not being
   defaulted to 1
 - invader-build: Fixed subpermutations not using the main permutation's gain
+- invader-build: Fixed wind period in fog tags not defaulting to 1-1
 - invader-extract: Fixed minimum velocity and potential and not being multiplied
   by tick rate
 

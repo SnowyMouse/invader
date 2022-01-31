@@ -161,6 +161,10 @@
                 "name": "wind period",
                 "unit": "seconds",
                 "bounds": true,
+                "default": [
+                    1.0,
+                    1.0
+                ],
                 "type": "float"
             },
             {
