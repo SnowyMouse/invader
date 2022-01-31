@@ -25,6 +25,8 @@ This is used for recording Invader's changes. This changelog is based on
   particle system states and particle system particle states
 - invader-build: Fixed lightning count not being defaulted to 1
 - invader-build: Fixed light volume frame exponents not being defaulted to 1
+- invader-build: Fixed leaf maps and leaf map portals not being purged from
+  scenario_structure_bsp tags
 - invader-extract: Fixed minimum velocity and potential and not being multiplied
   by tick rate
 

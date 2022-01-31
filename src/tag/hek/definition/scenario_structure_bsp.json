@@ -1596,12 +1596,14 @@
                 "name": "leaf map leaves",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalMapLeaf",
+                "non_cached": true,
                 "maximum": 65536
             },
             {
                 "name": "leaf map portals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalLeafPortal",
+                "non_cached": true,
                 "maximum": 524288
             }
         ],
