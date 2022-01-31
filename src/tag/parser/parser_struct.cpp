@@ -1021,7 +1021,8 @@ namespace Invader::Parser {
                             // Append if different
                             if(vt_v[i] != vo_v[i]) {
                                 if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
-                                    pos += std::snprintf(pos, len, "%s%f != %f", comma, std::get<double>(vt_v[i]), std::get<double>(vo_v[i]));
+                                    double multiplier = (vt_type == ParserStructValue::ValueType::VALUE_TYPE_ANGLE || vt_type == ParserStructValue::ValueType::VALUE_TYPE_EULER2D || vt_type == ParserStructValue::ValueType::VALUE_TYPE_EULER3D) ? (180.0 / HALO_PI) : 1.0;
+                                    pos += std::snprintf(pos, len, "%s%f != %f", comma, std::get<double>(vt_v[i]) * multiplier, std::get<double>(vo_v[i]) * multiplier);
                                 }
                                 else if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
                                     pos += std::snprintf(pos, len, "%s%lli != %lli", comma, static_cast<long long>(std::get<std::int64_t>(vt_v[i])), static_cast<long long>(std::get<std::int64_t>(vo_v[i])));
