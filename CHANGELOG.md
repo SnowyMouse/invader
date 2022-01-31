@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unchanged]
+## [0.46.0] - 2022-01-31
 ### Changed
 - Now uses the vorbisfile API to query sample count from Ogg Vorbis. This will
   drastically reduce invader-build's build time (+221% speed improvement on d40
