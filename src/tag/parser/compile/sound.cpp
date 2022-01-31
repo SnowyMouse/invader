@@ -148,7 +148,7 @@ namespace Invader::Parser {
         workload.tags[tag_index].asset_data.emplace_back(&r - workload.raw_data.data());
         this->samples_pointer = 0xFFFFFFFF;
     }
-
+        
     void SoundPitchRange::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         this->unknown_ffffffff_0 = 0xFFFFFFFF;
         this->unknown_ffffffff_1 = 0xFFFFFFFF;
@@ -196,7 +196,7 @@ namespace Invader::Parser {
         // List unused permutations
         for(std::size_t i = 0; i < permutation_count; i++) {
             if(!referenced[i]) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Permutation #%zu in pitch range #%zu is unused.", i, struct_offset / sizeof(struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Permutation #%zu in pitch range #%zu is unused.", i, struct_offset / sizeof(struct_little));
             }
         }
 
