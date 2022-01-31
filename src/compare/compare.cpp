@@ -56,6 +56,7 @@ int main(int argc, const char **argv) {
 
     struct CompareOptions {
         std::vector<HEK::TagFourCC> class_to_check;
+        std::vector<HEK::TagFourCC> class_to_not_check;
         Input *top_input = nullptr;
         std::vector<Input> inputs;
         bool exhaustive = false;
@@ -75,6 +76,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Add a maps directory to the input to specify where to find resource files for a map.");
     options.emplace_back("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used.");
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
+    options.emplace_back("exclude-class", 'e', 1, "Exclude a tag class to check. This cannot be used with --class.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
     options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
@@ -211,6 +213,22 @@ int main(int argc, const char **argv) {
                 break;
             }
                 
+            case 'e': {
+                auto class_to_not_check = tag_extension_to_fourcc(args[0]);
+                for(auto c : compare_options.class_to_not_check) {
+                    if(c == class_to_not_check) {
+                        eprintf_error("Class %s was already specified", args[0]);
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                if(class_to_not_check == TagFourCC::TAG_FOURCC_NULL || class_to_not_check == TagFourCC::TAG_FOURCC_NONE) {
+                    eprintf_error("Class %s is not a valid class", args[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                compare_options.class_to_not_check.push_back(class_to_not_check);
+                break;
+            }
+                
             case 'p':
                 compare_options.precision = true;
                 break;
@@ -251,6 +269,11 @@ int main(int argc, const char **argv) {
     // Default 0 to 1
     if(!compare_options.job_count.has_value()) {
         compare_options.job_count = 1;
+    }
+    
+    if(!compare_options.class_to_check.empty() && !compare_options.class_to_not_check.empty()) {
+        eprintf_error("--class and --excluse-class cannot be used together. Use -h for more information.");
+        return EXIT_FAILURE;
     }
     
     // Can we close it?
@@ -311,11 +334,23 @@ int main(int argc, const char **argv) {
                 if(!tag.data_is_available() || std::strcmp(tag_fourcc_to_extension(tag_fourcc), "unknown") == 0) {
                     continue;
                 }
-                if(compare_options.class_to_check.size()) {
+                if(!compare_options.class_to_check.empty()) {
                     bool should_add = false;
                     for(auto c : compare_options.class_to_check) {
                         if(c == tag_fourcc) {
                             should_add = true;
+                            break;
+                        }
+                    }
+                    if(!should_add) {
+                        continue;
+                    }
+                }
+                if(!compare_options.class_to_not_check.empty()) {
+                    bool should_add = true;
+                    for(auto c : compare_options.class_to_not_check) {
+                        if(c == tag_fourcc) {
+                            should_add = false;
                             break;
                         }
                     }
@@ -336,11 +371,23 @@ int main(int argc, const char **argv) {
             }
             i.tag_paths.reserve(i.virtual_directory.size());
             for(auto &t : i.virtual_directory) {
-                if(compare_options.class_to_check.size()) {
+                if(!compare_options.class_to_check.empty()) {
                     bool should_add = false;
                     for(auto c : compare_options.class_to_check) {
                         if(c == t.tag_fourcc) {
                             should_add = true;
+                            break;
+                        }
+                    }
+                    if(!should_add) {
+                        continue;
+                    }
+                }
+                if(!compare_options.class_to_not_check.empty()) {
+                    bool should_add = true;
+                    for(auto c : compare_options.class_to_not_check) {
+                        if(c == t.tag_fourcc) {
+                            should_add = false;
                             break;
                         }
                     }
