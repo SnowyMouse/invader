@@ -930,8 +930,29 @@ namespace Invader::Parser {
                         b = vo.get_string();
                     }
                     else if(vt_type == ParserStructValue::ValueType::VALUE_TYPE_ENUM) {
-                        a = vt.read_enum();
-                        b = vo.read_enum();
+                        bool invalid_enums = false;
+                        
+                        try {
+                            a = vt.read_enum();
+                        }
+                        catch(std::exception &) {
+                            a = "invalid-value";
+                            invalid_enums = true;
+                        }
+                        
+                        try {
+                            b = vo.read_enum();
+                        }
+                        catch(std::exception &) {
+                            b = "invalid-value";
+                            invalid_enums = true;
+                        }
+                        
+                        if(invalid_enums) {
+                            std::snprintf(difference_text, sizeof(difference_text), "invalid enum(s) ['%s' ?= '%s']", a, b);
+                            complain();
+                            return false;
+                        }
                     }
                     
                     if(std::strcmp(a, b) != 0) {
