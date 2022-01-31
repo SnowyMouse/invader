@@ -172,7 +172,7 @@ namespace Invader::Parser {
     void Weapon::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
         compile_object(*this, workload, tag_index);
-        
+
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
 
         // Jason jones autoaim for the rocket warthog
@@ -204,7 +204,7 @@ namespace Invader::Parser {
         this->initial_velocity /= TICK_RATE;
         this->final_velocity /= TICK_RATE;
     }
-    void ProjectileMaterialResponse::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+    void ProjectileMaterialResponse::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->potential_and.from /= TICK_RATE;
         this->potential_and.to /= TICK_RATE;
     }
@@ -269,17 +269,17 @@ namespace Invader::Parser {
                 this->error_angle.to = DEGREES_TO_RADIANS(2.5F);
             }
         }
-        
+
         // Warn if we're trying to fire a negative number of projectiles per shot
         if(this->projectiles_per_shot < 0) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles per shot, thus no projectiles will spawn. Set it to 0 to silence this warning.", offset / sizeof(struct_little));
         }
-        
+
         // Warn if we have rounds per shot set but no magazine
         if(this->rounds_per_shot != 0 && this->magazine == NULL_INDEX) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has rounds per shot set with no magazine, thus it will not actually use any rounds per shot. Set it to 0 or set a magazine to silence this warning.", offset / sizeof(struct_little));
         }
-        
+
         // Warn if the weapon doesn't fire automatically but we have projectiles per contrail set or we have a meme value.
         if(this->projectiles_between_contrails < 0) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles between contrails, thus all projectiles will have contrails. Set it to 0 to silence this warning.", offset / sizeof(struct_little));
@@ -372,25 +372,25 @@ namespace Invader::Parser {
             prs.data.insert(prs.data.begin(), reinterpret_cast<const std::byte *>(predicted_resources.data()), reinterpret_cast<const std::byte *>(predicted_resources.data() + resources_count));
         }
     }
-    
+
     static void validate_model_animation_checksum(BuildWorkload &workload, std::size_t tag_index, HEK::TagID model, HEK::TagID animations) {
         if(model.is_null() || animations.is_null() || workload.disable_recursion) {
             return;
         }
-        
+
         // Read the checksum
         auto &model_tag = workload.tags[model.index];
         auto model_checksum = reinterpret_cast<Model::struct_little *>(workload.structs[*model_tag.base_struct].data.data())->node_list_checksum.read();
-        
+
         // And, yes, reading it as a model is OK since they're in the same offset, so we don't need to do any extra logic here
         static_assert(offsetof(Model::struct_little, node_list_checksum) == offsetof(GBXModel::struct_little, node_list_checksum));
-        
+
         // If it's 0, don't bother checking. This is a complete hack, but the official tools do this. And if you're lucky and make a tag that just so happens to have a checksum of 0, you win a free warning!
         if(model_checksum == 0) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s.%s has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(model_tag.path).c_str(), HEK::tag_fourcc_to_extension(model_tag.tag_fourcc));
             return;
         }
-        
+
         // Now iterate through animations
         auto &animation_tag = workload.tags[animations.index];
         auto &animation_struct = workload.structs[*animation_tag.base_struct];
@@ -400,13 +400,13 @@ namespace Invader::Parser {
             auto *animations = reinterpret_cast<Parser::ModelAnimationsAnimation::struct_little *>(workload.structs[*animation_struct.resolve_pointer(&animation_struct_data.animations.pointer)].data.data());
             for(std::size_t a = 0; a < animation_count; a++) {
                 auto animation_checksum = animations[a].node_list_checksum.read();
-                
+
                 // Same hack as before. And again, if your lucky lotto number is 0, congratulations!
                 if(animation_checksum == 0) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s.%s animation #%zu has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(animation_tag.path).c_str(), HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc), a);
                     continue;
                 }
-                
+
                 // Check it
                 if(model_checksum != animation_checksum) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s animation #%zu node list checksums are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
@@ -419,22 +419,22 @@ namespace Invader::Parser {
             }
         }
     }
-    
+
     static void validate_collision_model_regions(BuildWorkload &workload, std::size_t tag_index, HEK::TagID model, HEK::TagID collision_model) {
         if(model.is_null() || collision_model.is_null() || workload.disable_recursion) {
             return;
         }
-        
+
         // Read the thing
         auto &model_tag = workload.tags[model.index];
         auto &collision_tag = workload.tags[collision_model.index];
-    
+
         auto &model_struct = *reinterpret_cast<Parser::Model::struct_little *>(workload.structs[*model_tag.base_struct].data.data());
         auto &collision_struct = *reinterpret_cast<Parser::ModelCollisionGeometry::struct_little *>(workload.structs[*collision_tag.base_struct].data.data());
-        
+
         // And, as always, reading it as a model is OK since they're in the same offset, so we don't need to do any extra logic here
         static_assert(offsetof(Model::struct_little, regions) == offsetof(GBXModel::struct_little, regions));
-        
+
         // Error if they are different
         if(model_struct.regions.count.read() != collision_struct.regions.count.read()) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s's region counts are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
@@ -444,37 +444,37 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
     }
-    
+
     static void set_pathfinding_spheres(BuildWorkload &workload, std::size_t struct_index, std::optional<float> collision_radius = std::nullopt) {
         // If recursion is disabled, do not do this
         if(workload.disable_recursion) {
             return;
         }
-        
+
         // Get our object
         auto &object_struct = workload.structs[struct_index];
         auto &object_data = *reinterpret_cast<Object::struct_little *>(object_struct.data.data());
-        
+
         // Do we have a collision model?
         auto collision_id = object_data.collision_model.tag_id.read();
         if(collision_id.is_null()) {
             return; // nope
         }
-        
+
         // Get what we need
         auto &collision_struct = workload.structs[*workload.tags[collision_id.index].base_struct];
         auto *collision_data_ptr = collision_struct.data.data();
         auto &collision_data = *reinterpret_cast<ModelCollisionGeometry::struct_little *>(collision_data_ptr);
-        
+
         // Do we already have pathfinding spheres?
         if(collision_data.pathfinding_spheres.count.read() != 0) {
             return; // yep
         }
-        
+
         // Start finding the thing, then
         float x = 0.0F, y = 0.0F, z = 0.0F;
         HEK::Index node_index;
-        
+
         // If we don't have a value set, set one.
         float sphere_radius;
         if(!collision_radius.has_value()) {
@@ -490,7 +490,7 @@ namespace Invader::Parser {
             }
             sphere_radius = static_cast<float>(v * 3.0 / 4.0);
             node_index = 0;
-            
+
             // Set the offset to the bounding offset of the object
             x = object_data.bounding_offset.x.read();
             y = object_data.bounding_offset.y.read();
@@ -505,13 +505,13 @@ namespace Invader::Parser {
                 return; // no pathfinding sphere
             }
         }
-        
+
         // Let's make that pathfinding sphere
         auto &pathfinding_ptr = collision_struct.pointers.emplace_back();
         pathfinding_ptr.struct_index = workload.structs.size();
         pathfinding_ptr.offset = reinterpret_cast<std::byte *>(&collision_data.pathfinding_spheres.pointer) - collision_data_ptr;
         collision_data.pathfinding_spheres.count = 1;
-        
+
         auto &pathfinding_struct = workload.structs.emplace_back();
         pathfinding_struct.data.resize(sizeof(ModelCollisionGeometrySphere::struct_little));
         auto &sphere = *reinterpret_cast<ModelCollisionGeometrySphere::struct_little *>(pathfinding_struct.data.data());
@@ -576,7 +576,7 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return;
         }
-        
+
         // Make sure zoom levels aren't too high for the HUD interface
         if(this->zoom_levels && !this->hud_interface.tag_id.is_null()) {
             auto &weapon_hud_interface_tag = workload.tags[this->hud_interface.tag_id.index];
@@ -630,11 +630,11 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
         validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
-        
+
         // we do not check animations for first person because they do not correspond to one another
     }
     void Equipment::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
@@ -668,26 +668,26 @@ namespace Invader::Parser {
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
         validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
-    
+
     void device_post_compile(BuildWorkload &workload, ::size_t struct_index, std::size_t struct_offset) {
         auto &device = *reinterpret_cast<Device::struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
-        
+
         auto set_inverse = [](auto &from, auto &to) {
             if(from.read() != 0) {
                 to = 1.0F / (TICK_RATE * from);
             }
         };
-        
+
         set_inverse(device.power_transition_time, device.inverse_power_transition_time);
         set_inverse(device.power_acceleration_time, device.inverse_power_acceleration_time);
         set_inverse(device.position_transition_time, device.inverse_position_transition_time);
         set_inverse(device.position_acceleration_time, device.inverse_position_acceleration_time);
         set_inverse(device.depowered_position_transition_time, device.inverse_depowered_position_transition_time);
         set_inverse(device.depowered_position_acceleration_time, device.inverse_depowered_position_acceleration_time);
-        
+
         device.delay_time_ticks = TICK_RATE * device.delay_time;
     }
-    
+
     void DeviceMachine::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
