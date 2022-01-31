@@ -2,6 +2,22 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unchanged]
+### Changed
+- invader-compare: Differences with --verbose are now shown in more detail
+- invader-compare: Added whitespace indenting to --verbose
+
+### Fixed
+- invader-bitmap: Color plates with a dimension larger than 32767 (INT16_MAX)
+  will no longer be stored in a bitmap tag, as this produces a bitmap that is
+  technically impossible to regenerate due to how the dimensions are stored
+- invader-build: Fixed minimum velocity and potential and not being divided
+  by tick rate
+- invader-build: Fixed radius multiplier in particle system states not being
+  defaulted to 1
+- invader-extract: Fixed minimum velocity and potential and not being multiplied
+  by tick rate
+
 ## [0.45.1] - 2022-01-28
 ### Added
 - invader-bludgeon: Added -T broken-lens-flare-function-scale
@@ -12,17 +28,12 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now errors on mismatched checksums and warns if the tag was set
   to 0 to bypass this check
 - invader-build: Now errors on mismatched collision models
-- invader-compare: Differences with --verbose are now shown in more detail
-- invader-compare: Added whitespace indenting to --verbose
 - invader-script: Changed default node count (if -g is unspecified) to match
   CEA's node count
 
 ### Fixed
 - invader-archive: Fixed Windows path separators being used instead of portable
   UNIX path separators when making .7z files
-- invader-bitmap: Color plates with a dimension larger than 32767 (INT16_MAX)
-  will no longer be stored in a bitmap tag, as this produces a bitmap that is
-  technically impossible to regenerate due to how the dimensions are stored
 - invader-bludgeon: Fixed invader-bludgeon reporting it "Bludgeoned" tags even
   when no fixes were requested (and thus it did not change anything)
 - invader-build: Fixed incorrect animation index being stored when merging
@@ -32,12 +43,6 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed pathfinding surfaces not being generated for BSP tags
   that are missing them due to no baked lightmaps (which caused a crash in the
   original game)
-- invader-build: Fixed minimum velocity and potential and not being divided
-  by tick rate
-- invader-build: Fixed radius multiplier in particle system states not being
-  defaulted to 1
-- invader-extract: Fixed minimum velocity and potential and not being multiplied
-  by tick rate
 
 ## [0.45.0] - 2022-01-25
 ### Added
