@@ -805,7 +805,7 @@ namespace Invader::Parser {
     }
     
     bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose) const {
-        return this->compare(what, precision, ignore_volatile, verbose, 0);
+        return this->compare(what, precision, ignore_volatile, verbose, 1);
     }
     
     static constexpr bool too_different(double a, double b) noexcept {
