@@ -864,15 +864,21 @@ namespace Invader::Parser {
             
             auto vt_type = vt.get_type();
             auto vo_type = vo.get_type();
+                
+            char difference_text[512] = {};
         
-            auto complain = [&is_different, &should_continue, &verbose, &vt, &this_value](std::optional<std::size_t> index = std::nullopt) {
+            auto complain = [&is_different, &should_continue, &verbose, &vt, &this_value, &difference_text](std::optional<std::size_t> index = std::nullopt) {
                 is_different = true;
+                
                 if(verbose) {
+                    const char *lp = difference_text[0] == 0 ? "" : " (";
+                    const char *rp = difference_text[0] == 0 ? "" : ")";
+                    
                     if(index.has_value()) {
-                        oprintf_success_warn("%s::%s#%zu is different", this_value.struct_name(), vt.get_member_name(), *index);
+                        oprintf_success_warn("%s::%s#%zu is different%s%s%s", this_value.struct_name(), vt.get_member_name(), *index, lp, difference_text, rp);
                     }
                     else {
-                        oprintf_success_warn("%s::%s is different", this_value.struct_name(), vt.get_member_name());
+                        oprintf_success_warn("%s::%s is different%s%s%s", this_value.struct_name(), vt.get_member_name(), lp, difference_text, rp);
                     }
                 }
                 else {
@@ -899,16 +905,36 @@ namespace Invader::Parser {
                         complain();
                     }
                     break;
-                case ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
-                    if(vt.get_dependency() != vo.get_dependency()) {
+                case ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+                    auto &a = vt.get_dependency();
+                    auto &b = vo.get_dependency();
+                    if(a != b) {
+                        std::snprintf(difference_text, sizeof(difference_text), "'%s.%s' != '%s.%s'", File::halo_path_to_preferred_path(a.path).c_str(),
+                                                                                                      HEK::tag_fourcc_to_extension(a.tag_fourcc),
+                                                                                                      File::halo_path_to_preferred_path(b.path).c_str(),
+                                                                                                      HEK::tag_fourcc_to_extension(b.tag_fourcc));
                         complain();
                     }
                     break;
+                }
                 case ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
-                    if(std::strcmp(vt.get_string(), vo.get_string()) != 0) {
+                case ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
+                    const char *a, *b;
+                    if(vt_type == ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING) {
+                        a = vt.get_string();
+                        b = vo.get_string();
+                    }
+                    else if(vt_type == ParserStructValue::ValueType::VALUE_TYPE_ENUM) {
+                        a = vt.read_enum();
+                        b = vo.read_enum();
+                    }
+                    
+                    if(std::strcmp(a, b) != 0) {
+                        std::snprintf(difference_text, sizeof(difference_text), "'%s' != '%s'", a, b);
                         complain();
                     }
                     break;
+                }
                 case ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
                     auto vt_count = vt.get_array_size();
                     auto vo_count = vo.get_array_size();
@@ -936,14 +962,64 @@ namespace Invader::Parser {
                     }
                     break;
                 }
+                case ParserStructValue::ValueType::VALUE_TYPE_BITMASK: {
+                    auto enums = vt.list_enum();
+                    bool same = true;
+                    char *pos = difference_text;
+                    for(auto &i : enums) {
+                        if(pos >= difference_text + (sizeof(difference_text) - 1)) {
+                            break;
+                        }
+                        auto len = sizeof(difference_text) - (pos - difference_text);
+                        
+                        const char *comma = pos != difference_text ? ", " : "";
+                        
+                        bool a = vt.read_bitfield(i), b = vo.read_bitfield(i);
+                        
+                        // Append if different
+                        if(a != b) {
+                            pos += std::snprintf(pos, len, "%s'%s' [%i != %i]", comma, i, a, b);
+                            same = false;
+                        }
+                    }
+                    if(!same) {
+                        complain();
+                    }
+                    
+                    break;
+                }
                 default: {
                     auto vt_v = vt.get_values();
                     auto vo_v = vo.get_values();
                     
                     // Is it different?
                     if(vt_v != vo_v) {
-                        if(precision && vt.get_number_format() == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) { // if precision, is it different by too much?
-                            auto value_count = vt_v.size();
+                        auto value_count = vt_v.size();
+                        auto fmt = vt.get_number_format();
+                        
+                        char *pos = difference_text;
+                        
+                        for(std::size_t i = 0; i < value_count; i++) {
+                            if(pos >= difference_text + (sizeof(difference_text) - 1)) {
+                                break;
+                            }
+                            
+                            auto len = sizeof(difference_text) - (pos - difference_text);
+                            
+                            const char *comma = pos != difference_text ? ", " : "";
+                            
+                            // Append if different
+                            if(vt_v[i] != vo_v[i]) {
+                                if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
+                                    pos += std::snprintf(pos, len, "%s%f != %f", comma, std::get<double>(vt_v[i]), std::get<double>(vo_v[i]));
+                                }
+                                else if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
+                                    pos += std::snprintf(pos, len, "%s%lli != %lli", comma, static_cast<long long>(std::get<std::int64_t>(vt_v[i])), static_cast<long long>(std::get<std::int64_t>(vo_v[i])));
+                                }
+                            }
+                        }
+                        
+                        if(precision && fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) { // if precision, is it different by too much?
                             for(std::size_t i = 0; i < value_count; i++) {
                                 auto t = std::fabs(std::get<double>(vt_v[i]));
                                 auto o = std::fabs(std::get<double>(vo_v[i]));

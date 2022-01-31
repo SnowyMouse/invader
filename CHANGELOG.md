@@ -12,6 +12,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now errors on mismatched checksums and warns if the tag was set
   to 0 to bypass this check
 - invader-build: Now errors on mismatched collision models
+- invader-compare: Differences with --verbose are now shown in more detail
 - invader-script: Changed default node count (if -g is unspecified) to match
   CEA's node count
 
