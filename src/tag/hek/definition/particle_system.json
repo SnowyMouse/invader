@@ -109,7 +109,8 @@
             },
             {
                 "name": "radius multiplier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "minimum particle count",
