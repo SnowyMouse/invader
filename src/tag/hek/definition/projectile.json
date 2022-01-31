@@ -107,7 +107,7 @@
             {
                 "name": "potential between",
                 "bounds": true,
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "potential and",
