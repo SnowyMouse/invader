@@ -13,6 +13,7 @@ This is used for recording Invader's changes. This changelog is based on
   to 0 to bypass this check
 - invader-build: Now errors on mismatched collision models
 - invader-compare: Differences with --verbose are now shown in more detail
+- invader-compare: Added whitespace indenting to --verbose
 - invader-script: Changed default node count (if -g is unspecified) to match
   CEA's node count
 

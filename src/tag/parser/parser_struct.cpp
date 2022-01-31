@@ -867,18 +867,23 @@ namespace Invader::Parser {
                 
             char difference_text[512] = {};
         
-            auto complain = [&is_different, &should_continue, &verbose, &vt, &this_value, &difference_text](std::optional<std::size_t> index = std::nullopt) {
+            auto complain = [&is_different, &should_continue, &verbose, &vt, &this_value, &difference_text, &depth](std::optional<std::size_t> index = std::nullopt) {
                 is_different = true;
                 
                 if(verbose) {
                     const char *lp = difference_text[0] == 0 ? "" : " (";
                     const char *rp = difference_text[0] == 0 ? "" : ")";
                     
+                    char depth_spacing[512] = {};
+                    for(std::size_t d = 0; d < sizeof(depth_spacing) - 1 && d < depth * 2; d++) {
+                        depth_spacing[d] = ' ';
+                    }
+                    
                     if(index.has_value()) {
-                        oprintf_success_warn("%s::%s#%zu is different%s%s%s", this_value.struct_name(), vt.get_member_name(), *index, lp, difference_text, rp);
+                        oprintf_success_warn("%s%s::%s#%zu is different%s%s%s", depth_spacing, this_value.struct_name(), vt.get_member_name(), *index, lp, difference_text, rp);
                     }
                     else {
-                        oprintf_success_warn("%s::%s is different%s%s%s", this_value.struct_name(), vt.get_member_name(), lp, difference_text, rp);
+                        oprintf_success_warn("%s%s::%s is different%s%s%s", depth_spacing, this_value.struct_name(), vt.get_member_name(), lp, difference_text, rp);
                     }
                 }
                 else {
@@ -944,6 +949,8 @@ namespace Invader::Parser {
                     else {
                         bool complained = false;
                         
+                        depth++;
+                        
                         for(std::size_t i = 0; i < vt_count && should_continue; i++) {
                             const auto &vt_struct = vt.get_object_in_array(i);
                             const auto &vo_struct = vo.get_object_in_array(i);
@@ -954,6 +961,8 @@ namespace Invader::Parser {
                                 complained = true;
                             }
                         }
+                        
+                        depth--;
                         
                         // Complain some more.
                         if(complained) {
