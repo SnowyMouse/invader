@@ -528,6 +528,10 @@ int main(int argc, char * const *argv) {
     }
 
     oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
+    
+    if(refactor_options.dry_run) {
+        oprintf("Dry run complete\n");
+    }
 
     // Move things if needed
     perform_move();
