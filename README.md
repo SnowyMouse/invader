@@ -389,7 +389,7 @@ Usage: invader-compare [options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]
 Compare tags against other tags.
 
 Options:
-  -a --all                     Only match if tags are in all inputs
+  -a --all                     Only match if tags are in all inputs.
   -B --by-path <path-type>     Set what tags get compared against other tags.
                                By default, only tags with the same relative
                                path are checked. Using "any" ignores paths
@@ -400,28 +400,37 @@ Options:
                                same). Can be: any, different, or same (default)
   -c --class                   Add a tag class to check. If no tag classes are
                                specified, all tag classes will be checked.
+  -e --exclude-class           Exclude a tag class to check. This cannot be
+                               used with --class.
   -f --functional              Precompile the tags before comparison to check
                                for only functional differences.
   -G --ignore-resources        Ignore resource maps for the current map input.
+                               This option must be used after --input.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -I --input                   Add an input directory
+  -I --input                   Add an input. This option is required before
+                               using --tags, --maps, --map, and
+                               --ignore-resources.
+  -j --threads                 Set the number of threads to use for comparison.
+                               This cannot be used with --verbose. Default: 1
   -m --maps                    Add a maps directory to the input to specify
-                               where to find resource files for a map.
+                               where to find resource files for a map. This
+                               option must be used after --input.
   -M --map                     Add a map to the input. Only one map can be
                                specified per input. If a maps directory isn't
                                specified, then the map's directory will be
-                               used.
+                               used. This option must be used after --input.
   -p --precision               Allow for slight differences in floats to
                                account for precision loss.
   -s --show                    Can be: all, matched, or mismatched. Default:
                                all
   -t --tags                    Add a tags directory to the input. Specify
                                multiple tag directories in order of precedence
-                               for the input.
+                               for the input. This option must be used after
+                               --input.
   -v --verbose                 Output more information on the differences
                                between tags to standard output. This will not
-                               work with -f
+                               work with --functional.
 ```
 
 ### invader-convert
