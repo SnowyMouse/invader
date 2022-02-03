@@ -437,14 +437,16 @@
             {
                 "name": "prev filthy part index",
                 "type": "uint8",
-                "default": 255,
+                "comment": "Defaults to 255, but it's a hack how this is done",
+                "description": "Specify rendering order",
                 "read_only": false,
                 "endian": null
             },
             {
                 "name": "next filthy part index",
                 "type": "uint8",
-                "default": 255,
+                "comment": "Defaults to 255, but it's a hack how this is done",
+                "description": "Specify rendering order",
                 "read_only": false,
                 "endian": null
             },

@@ -705,8 +705,39 @@ namespace Invader::Parser {
         bool exodux_handler = false;
         bool exodux_parser = false;
 
-        for(auto &g : what.geometries) {
-            for(auto &p : g.parts) {
+        for(std::size_t gi = 0; gi < geometries_count; gi++) {
+            auto &g = what.geometries[gi];
+            
+            auto part_count = g.parts.size();
+            
+            std::size_t part_index_limit = part_count > INT_MAX ? INT_MAX : part_count;
+            
+            for(std::size_t pi = 0; pi < part_count; pi++) {
+                auto &p = g.parts[pi];
+                
+                // Validate each part index
+                if(p.next_filthy_part_index != 255 && p.next_filthy_part_index >= part_index_limit) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of geometry #%zu has an invalid next filthy part index (%zu >= %zu)", pi, gi, static_cast<std::size_t>(p.next_filthy_part_index), part_index_limit);
+                    throw InvalidTagDataException();
+                }
+                if(p.prev_filthy_part_index != 255 && p.prev_filthy_part_index >= part_index_limit) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of geometry #%zu has an invalid previous filthy part index (%zu >= %zu)", pi, gi, static_cast<std::size_t>(p.prev_filthy_part_index), part_index_limit);
+                    throw InvalidTagDataException();
+                }
+                
+                if(p.next_filthy_part_index != p.prev_filthy_part_index && (p.next_filthy_part_index == 0 || p.prev_filthy_part_index == 0)) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Part #%zu of geometry #%zu has exactly one filthy part index set to 0. While this is a valid index, this will be defaulted to none due to tool.exe behavior. If you intended to use none, set it to 255. Otherwise, you need to rearrange the geometry parts (or ask 343 Industries to fix this behavior).", pi, gi);
+                }
+                
+                // Default
+                if(p.next_filthy_part_index == 0) {
+                    p.next_filthy_part_index = UINT8_MAX;
+                }
+                
+                if(p.prev_filthy_part_index == 0) {
+                    p.prev_filthy_part_index = UINT8_MAX;
+                }
+                
                 // exodux compatibility bit; AND zoner flag with the value from the tag data and XOR with the auxiliary rainbow bitmask
                 std::uint32_t zoner = p.flags & HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
                 std::uint32_t exodux_value = (p.bullshit & zoner) ^ 0x7F7F7F7F;
