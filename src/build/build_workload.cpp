@@ -639,9 +639,10 @@ namespace Invader {
         // Check header and CRC32
         HEK::TagFileHeader::validate_header(header, tag_data_size, tag_fourcc);
         HEK::BigEndian<std::uint32_t> expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
+        std::uint32_t header_crc = header->crc32;
         
-        // Make sure the header's CRC32 matches the calculated CRC32
-        if(expected_crc != header->crc32) {
+        // Make sure the header's CRC32 matches the calculated CRC32 (but only if the header CRC is not 0xFFFFFFFF since some stock tags have this)
+        if(header_crc != 0xFFFFFFFF && expected_crc != header_crc) {
             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_fourcc_to_extension(tag_fourcc.value()));
         }
         

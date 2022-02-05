@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-build: Now errors on invalid filthy part indices and warn if you try
   to use a filthy part index of 0 (since this gets defaulted)
+- invader-build: Tags with CRC32 of 0xFFFFFFFF reported by the header no longer
+  trip the checksum check.
 
 ## [0.46.0] - 2022-01-31
 ### Changed
