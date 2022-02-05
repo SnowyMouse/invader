@@ -643,7 +643,7 @@ namespace Invader {
         
         // Make sure the header's CRC32 matches the calculated CRC32 (but only if the header CRC is not 0xFFFFFFFF since some stock tags have this)
         if(header_crc != 0xFFFFFFFF && expected_crc != header_crc) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_fourcc_to_extension(tag_fourcc.value()));
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, tag_index, "%s.%s's CRC32 is incorrect. Tag may be corrupt.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_fourcc_to_extension(tag_fourcc.value()));
         }
         
         // Calculate checksums. This is to prevent collisions when bitmap/sound data is modified but nothing else, since this data isn't directly factored into the map checksum.
