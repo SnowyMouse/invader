@@ -25,7 +25,7 @@ namespace Invader::Parser {
         // Any warnings get eaten up here
         instance.set_warn_callback([](RIAT_Instance *instance, const char *message, const char *file, std::size_t line, std::size_t column) {
             char fmt_message[512];
-            std::snprintf(fmt_message, sizeof(fmt_message), "%s.hsc:%zu:%zu: warning: %s", file, line, column, message);
+            std::snprintf(fmt_message, sizeof(fmt_message), "%s:%zu:%zu: warning: %s", file, line, column, message);
             reinterpret_cast<std::vector<std::string> *>(riat_instance_get_user_data(instance))->emplace_back(fmt_message);
         });
         
@@ -53,7 +53,7 @@ namespace Invader::Parser {
         // Load the scripts
         try {
             for(auto &source : source_files) {
-                instance.load_script_source(reinterpret_cast<const char *>(source.source.data()), source.source.size(), source.name.string);
+                instance.load_script_source(reinterpret_cast<const char *>(source.source.data()), source.source.size(), (std::string(source.name.string) + ".hsc").c_str());
             }
             instance.compile_scripts();
         }
