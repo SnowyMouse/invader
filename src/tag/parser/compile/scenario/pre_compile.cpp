@@ -657,7 +657,7 @@ namespace Invader::Parser {
                 } \
             } \
             if(can_merge) { \
-                base_scenario.what.push_back(merge); \
+                base_scenario.what.emplace_back(merge); \
             } \
         }
         
@@ -854,7 +854,7 @@ namespace Invader::Parser {
 
     static void merge_child_scenarios(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
         // Merge child scenarios
-        if(scenario.child_scenarios.size() != 0 && !workload.disable_recursion) {
+        if(!scenario.child_scenarios.empty() && !workload.disable_recursion) {
             // Let's begin by adding this scenario to the list (in case we reference ourself)
             std::vector<std::string> merged_scenarios;
             merged_scenarios.emplace_back(workload.tags[tag_index].path);
@@ -862,7 +862,8 @@ namespace Invader::Parser {
             // Take the scenario off the top
             while(scenario.child_scenarios.size()) {
                 // Get the scenario
-                auto &first_scenario = scenario.child_scenarios[0].child_scenario;
+                auto first_scenario = scenario.child_scenarios[0].child_scenario;
+                
                 if(!first_scenario.path.empty()) {
                     // If this isn't even a scenario tag... what
                     if(first_scenario.tag_fourcc != TagFourCC::TAG_FOURCC_SCENARIO) {
