@@ -10,6 +10,9 @@ This is used for recording Invader's changes. This changelog is based on
   trip the checksum check. This warning is no longer a pedantic warning.
 
 ### Fixed
+- invader-build: Fixed various scripting commands not working when using
+  uppercase strings (uppercase strings are now currently only allowed for print
+  commands)
 - invader-compare: Fixed -t not being stackable
 
 ## [0.46.0] - 2022-01-31
