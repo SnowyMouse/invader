@@ -190,7 +190,7 @@ int main(int argc, const char **argv) {
                     eprintf_error("An input is required before setting a tags directory.");
                     std::exit(EXIT_FAILURE);
                 }
-                if(!top_option_is_map_input) {
+                if(!top_option_is_tag_input) {
                     eprintf_error("%s", CAN_ONLY_BE_USED_WITH_TAG_INPUT);
                     std::exit(EXIT_FAILURE);
                 }

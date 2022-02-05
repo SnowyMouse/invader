@@ -9,6 +9,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Tags with CRC32 of 0xFFFFFFFF reported by the header no longer
   trip the checksum check. This warning is no longer a pedantic warning.
 
+### Fixed
+- invader-compare: Fixed -t not being stackable
+
 ## [0.46.0] - 2022-01-31
 ### Changed
 - Now uses the vorbisfile API to query sample count from Ogg Vorbis. This will
