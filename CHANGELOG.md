@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.46.1] - 2022-02-06
 ### Added
 - invader-compare: Added --search and --search-exclude which allows you to
   include and exclude tags that match a given expression. You can use these
