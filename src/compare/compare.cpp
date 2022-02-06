@@ -55,8 +55,6 @@ int main(int argc, const char **argv) {
     using namespace Invader::HEK;
 
     struct CompareOptions {
-        std::vector<HEK::TagFourCC> class_to_check;
-        std::vector<HEK::TagFourCC> class_to_not_check;
         Input *top_input = nullptr;
         std::vector<Input> inputs;
         bool exhaustive = false;
@@ -67,6 +65,8 @@ int main(int argc, const char **argv) {
         ByPath by_path = ByPath::BY_PATH_SAME;
         Show show = Show::SHOW_ALL;
         std::optional<std::size_t> job_count;
+        std::vector<std::string> search;
+        std::vector<std::string> search_exclude;
     } compare_options;
 
     std::vector<Invader::CommandLineOption> options;
@@ -75,12 +75,14 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Add a tags directory to the input. Specify multiple tag directories in order of precedence for the input. This option must be used after --input.");
     options.emplace_back("maps", 'm', 1, "Add a maps directory to the input to specify where to find resource files for a map. This option must be used after --input.");
     options.emplace_back("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used. This option must be used after --input.");
-    options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
-    options.emplace_back("exclude-class", 'e', 1, "Exclude a tag class to check. This cannot be used with --class.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
+    
+    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and compare these; use multiple times for multiple queries. If unspecified, all tags will be compared.", "<expr>");
+    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these; use multiple times for multiple queries", "<expr>");
+    
     options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
-    options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
+    options.emplace_back("show", 'S', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input. This option must be used after --input.");
     options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with --functional.");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs.");
@@ -169,6 +171,14 @@ int main(int argc, const char **argv) {
                 compare_options.functional = true;
                 break;
                 
+            case 's':
+                compare_options.search.emplace_back(File::preferred_path_to_halo_path(args[0]));
+                break;
+                
+            case 'e':
+                compare_options.search_exclude.emplace_back(File::preferred_path_to_halo_path(args[0]));
+                break;
+                
             case 'M':
                 if(!compare_options.top_input) {
                     eprintf_error("An input is required before setting a maps directory.");
@@ -197,38 +207,6 @@ int main(int argc, const char **argv) {
                 compare_options.top_input->tags.emplace_back(args[0]);
                 break;
                 
-            case 'c': {
-                auto class_to_check = tag_extension_to_fourcc(args[0]);
-                for(auto c : compare_options.class_to_check) {
-                    if(c == class_to_check) {
-                        eprintf_error("Class %s was already specified", args[0]);
-                        std::exit(EXIT_FAILURE);
-                    }
-                }
-                if(class_to_check == TagFourCC::TAG_FOURCC_NULL || class_to_check == TagFourCC::TAG_FOURCC_NONE) {
-                    eprintf_error("Class %s is not a valid class", args[0]);
-                    std::exit(EXIT_FAILURE);
-                }
-                compare_options.class_to_check.push_back(class_to_check);
-                break;
-            }
-                
-            case 'e': {
-                auto class_to_not_check = tag_extension_to_fourcc(args[0]);
-                for(auto c : compare_options.class_to_not_check) {
-                    if(c == class_to_not_check) {
-                        eprintf_error("Class %s was already specified", args[0]);
-                        std::exit(EXIT_FAILURE);
-                    }
-                }
-                if(class_to_not_check == TagFourCC::TAG_FOURCC_NULL || class_to_not_check == TagFourCC::TAG_FOURCC_NONE) {
-                    eprintf_error("Class %s is not a valid class", args[0]);
-                    std::exit(EXIT_FAILURE);
-                }
-                compare_options.class_to_not_check.push_back(class_to_not_check);
-                break;
-            }
-                
             case 'p':
                 compare_options.precision = true;
                 break;
@@ -237,7 +215,7 @@ int main(int argc, const char **argv) {
                 compare_options.match_all = true;
                 break;
                 
-            case 's':
+            case 'S':
                 if(std::strcmp(args[0], "all") == 0) {
                     compare_options.show = Show::SHOW_ALL;
                 }
@@ -271,11 +249,6 @@ int main(int argc, const char **argv) {
         compare_options.job_count = 1;
     }
     
-    if(!compare_options.class_to_check.empty() && !compare_options.class_to_not_check.empty()) {
-        eprintf_error("--class and --excluse-class cannot be used together. Use -h for more information.");
-        return EXIT_FAILURE;
-    }
-    
     // Can we close it?
     close_input(compare_options);
     
@@ -284,6 +257,31 @@ int main(int argc, const char **argv) {
         if(i.map.has_value() && !i.maps.has_value()) {
             i.maps = std::filesystem::absolute(*i.map).parent_path();
         }
+        
+        // Check if it matches our filters
+        auto add_if_matched = [&i, &compare_options](Invader::File::TagFilePath &&path) {
+            auto path_joined = Invader::File::preferred_path_to_halo_path(path.join());
+            if(!compare_options.search_exclude.empty()) {
+                for(auto &i : compare_options.search_exclude) {
+                    if(File::path_matches(path_joined.c_str(), i.c_str())) {
+                        return;
+                    }
+                }
+            }
+            if(!compare_options.search.empty()) {
+                bool matched = false;
+                for(auto &i : compare_options.search) {
+                    if(File::path_matches(path_joined.c_str(), i.c_str())) {
+                        matched = true;
+                        break;
+                    }
+                }
+                if(!matched) {
+                    return;
+                }
+            }
+            i.tag_paths.emplace_back(std::move(path));
+        };
             
         if(i.map.has_value()) {
             // Load resource maps
@@ -334,31 +332,7 @@ int main(int argc, const char **argv) {
                 if(!tag.data_is_available() || std::strcmp(tag_fourcc_to_extension(tag_fourcc), "unknown") == 0) {
                     continue;
                 }
-                if(!compare_options.class_to_check.empty()) {
-                    bool should_add = false;
-                    for(auto c : compare_options.class_to_check) {
-                        if(c == tag_fourcc) {
-                            should_add = true;
-                            break;
-                        }
-                    }
-                    if(!should_add) {
-                        continue;
-                    }
-                }
-                if(!compare_options.class_to_not_check.empty()) {
-                    bool should_add = true;
-                    for(auto c : compare_options.class_to_not_check) {
-                        if(c == tag_fourcc) {
-                            should_add = false;
-                            break;
-                        }
-                    }
-                    if(!should_add) {
-                        continue;
-                    }
-                }
-                i.tag_paths.emplace_back(tag.get_path(), tag_fourcc);
+                add_if_matched(Invader::File::TagFilePath(tag.get_path(), tag_fourcc));
             }
         }
         else {
@@ -371,31 +345,7 @@ int main(int argc, const char **argv) {
             }
             i.tag_paths.reserve(i.virtual_directory.size());
             for(auto &t : i.virtual_directory) {
-                if(!compare_options.class_to_check.empty()) {
-                    bool should_add = false;
-                    for(auto c : compare_options.class_to_check) {
-                        if(c == t.tag_fourcc) {
-                            should_add = true;
-                            break;
-                        }
-                    }
-                    if(!should_add) {
-                        continue;
-                    }
-                }
-                if(!compare_options.class_to_not_check.empty()) {
-                    bool should_add = true;
-                    for(auto c : compare_options.class_to_not_check) {
-                        if(c == t.tag_fourcc) {
-                            should_add = false;
-                            break;
-                        }
-                    }
-                    if(!should_add) {
-                        continue;
-                    }
-                }
-                i.tag_paths.emplace_back(File::split_tag_class_extension(File::preferred_path_to_halo_path(t.tag_path)).value());
+                add_if_matched(File::split_tag_class_extension(File::preferred_path_to_halo_path(t.tag_path)).value());
             }
         }
         i.tag_paths.shrink_to_fit();

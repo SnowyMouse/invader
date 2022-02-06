@@ -398,10 +398,9 @@ Options:
                                only checks tags with different paths (useful
                                for finding duplicates when both inputs are the
                                same). Can be: any, different, or same (default)
-  -c --class                   Add a tag class to check. If no tag classes are
-                               specified, all tag classes will be checked.
-  -e --exclude-class           Exclude a tag class to check. This cannot be
-                               used with --class.
+  -e --search-exclude <expr>   Search for tags (* and ? are wildcards) and
+                               ignore these; use multiple times for multiple
+                               queries
   -f --functional              Precompile the tags before comparison to check
                                for only functional differences.
   -G --ignore-resources        Ignore resource maps for the current map input.
@@ -422,7 +421,11 @@ Options:
                                used. This option must be used after --input.
   -p --precision               Allow for slight differences in floats to
                                account for precision loss.
-  -s --show                    Can be: all, matched, or mismatched. Default:
+  -s --search <expr>           Search for tags (* and ? are wildcards) and
+                               compare these; use multiple times for multiple
+                               queries. If unspecified, all tags will be
+                               compared.
+  -S --show                    Can be: all, matched, or mismatched. Default:
                                all
   -t --tags                    Add a tags directory to the input. Specify
                                multiple tag directories in order of precedence

@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-compare: Added --search and --search-exclude which allows you to
+  include and exclude tags that match a given expression.
+
 ### Changed
 - invader-build: Now errors on invalid filthy part indices and warn if you try
   to use a filthy part index of 0 (since this gets defaulted)
@@ -14,6 +18,11 @@ This is used for recording Invader's changes. This changelog is based on
   uppercase strings (uppercase strings are now currently only allowed for print
   commands)
 - invader-compare: Fixed -t not being stackable
+
+### Removed
+- invader-compare: Removed --class (you can use --search instead e.g.
+  `--search "*.biped"`) and  --exclude-class (use --search-exclude instead
+  e.g. `--search-exclude "*.scenario_structure_bsp"`)
 
 ## [0.46.0] - 2022-01-31
 ### Changed
