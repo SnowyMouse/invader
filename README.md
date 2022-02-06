@@ -399,8 +399,8 @@ Options:
                                for finding duplicates when both inputs are the
                                same). Can be: any, different, or same (default)
   -e --search-exclude <expr>   Search for tags (* and ? are wildcards) and
-                               ignore these; use multiple times for multiple
-                               queries
+                               ignore these. Use multiple times for multiple
+                               queries. This takes precedence over --search.
   -f --functional              Precompile the tags before comparison to check
                                for only functional differences.
   -G --ignore-resources        Ignore resource maps for the current map input.
@@ -422,7 +422,7 @@ Options:
   -p --precision               Allow for slight differences in floats to
                                account for precision loss.
   -s --search <expr>           Search for tags (* and ? are wildcards) and
-                               compare these; use multiple times for multiple
+                               compare these. Use multiple times for multiple
                                queries. If unspecified, all tags will be
                                compared.
   -S --show                    Can be: all, matched, or mismatched. Default:
@@ -557,16 +557,22 @@ Usage: invader-extract [options] <map>
 Extract data from cache files.
 
 Options:
+  -e --search-exclude <expr>   Search for tags (* and ? are wildcards) and
+                               ignore these. Use multiple times for multiple
+                               queries. This takes precedence over --search.
   -G --ignore-resources        Ignore resource maps.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info
-  -m --maps <dir>              Use the specified maps directory.
+  -m --maps <dir>              Use the specified maps directory to find
+                               bitmaps.map, sounds.map, and/or loc.map.
   -n --non-mp-globals          Enable extraction of non-multiplayer .globals
   -O --overwrite               Overwrite tags if they already exist
   -r --recursive               Extract tag dependencies
-  -s --search <expr>           Search for tags (* and ? are wildcards); use
-                               multiple times for multiple queries
-  -t --tags <dir>              Use the specified tags directory.
+  -s --search <expr>           Search for tags (* and ? are wildcards) and
+                               extract these. Use multiple times for multiple
+                               queries. If unspecified, all tags will be
+                               extracted.
+  -t --tags <dir>              Use the specified tags directory to save tags.
 ```
 
 ### invader-font

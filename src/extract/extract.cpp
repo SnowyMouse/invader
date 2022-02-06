@@ -20,8 +20,10 @@ int main(int argc, const char **argv) {
         std::optional<std::string> tags_directory;
         std::optional<std::string> maps_directory;
         std::vector<std::string> tags_to_extract;
+        
         std::vector<std::string> search_queries;
-        bool search_all_tags = true;
+        std::vector<std::string> search_queries_exclude;
+        
         bool recursive = false;
         bool overwrite = false;
         bool non_mp_globals = false;
@@ -36,7 +38,10 @@ int main(int argc, const char **argv) {
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
-    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
+    
+    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and extract these. Use multiple times for multiple queries. If unspecified, all tags will be extracted.", "<expr>");
+    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>");
+    
     options.emplace_back("non-mp-globals", 'n', 0, "Enable extraction of non-multiplayer .globals");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
@@ -68,8 +73,10 @@ int main(int argc, const char **argv) {
                 extract_options.non_mp_globals = true;
                 break;
             case 's':
-                extract_options.search_queries.emplace_back(args[0]);
-                extract_options.search_all_tags = false;
+                extract_options.search_queries.emplace_back(File::preferred_path_to_halo_path(args[0]));
+                break;
+            case 'e':
+                extract_options.search_queries_exclude.emplace_back(File::preferred_path_to_halo_path(args[0]));
                 break;
             case 'i':
                 Invader::show_version_info();
@@ -172,5 +179,5 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
-    ExtractionWorkload::extract_map(*map, *extract_options.tags_directory, extract_options.search_queries, extract_options.recursive, extract_options.overwrite, extract_options.non_mp_globals);
+    ExtractionWorkload::extract_map(*map, *extract_options.tags_directory, extract_options.search_queries, extract_options.search_queries_exclude, extract_options.recursive, extract_options.overwrite, extract_options.non_mp_globals);
 }

@@ -5,7 +5,11 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - invader-compare: Added --search and --search-exclude which allows you to
-  include and exclude tags that match a given expression.
+  include and exclude tags that match a given expression. You can use these
+  individually or together, and excluding always takes precedence.
+- invader-extract: Added --search-exclude which allows you to exclude tags that
+  match a given expression. You can use this with or without --search, and
+  excluding always takes precedence.
 
 ### Changed
 - invader-build: Now errors on invalid filthy part indices and warn if you try

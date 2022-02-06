@@ -7,7 +7,7 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader {
-    void ExtractionWorkload::extract_map(const Map &map, const std::string &tags, const std::vector<std::string> &queries, bool recursive, bool overwrite, bool non_mp_globals, ReportingLevel reporting_level) {
+    void ExtractionWorkload::extract_map(const Map &map, const std::string &tags, const std::vector<std::string> &queries, const std::vector<std::string> &queries_exclude, bool recursive, bool overwrite, bool non_mp_globals, ReportingLevel reporting_level) {
         // There's no need to extract recursively if we're extracting all tags
         if(queries.size() == 0) {
             recursive = false;
@@ -15,7 +15,7 @@ namespace Invader {
         
         ExtractionWorkload workload(map, reporting_level);
         auto start = std::chrono::steady_clock::now();
-        auto success = workload.perform_extraction(queries, tags, recursive, overwrite, non_mp_globals);
+        auto success = workload.perform_extraction(queries, queries_exclude, tags, recursive, overwrite, non_mp_globals);
         auto matched = workload.matched_tags.size();
         auto warnings = workload.get_warnings();
         auto errors = workload.get_errors();
@@ -47,7 +47,7 @@ namespace Invader {
         }
     }
     
-    std::size_t ExtractionWorkload::perform_extraction(const std::vector<std::string> &queries, const std::filesystem::path &tags, bool recursive, bool overwrite, bool non_mp_globals) {
+    std::size_t ExtractionWorkload::perform_extraction(const std::vector<std::string> &queries, const std::vector<std::string> &queries_exclude, const std::filesystem::path &tags, bool recursive, bool overwrite, bool non_mp_globals) {
         // Set these variables up
         auto *map = &this->map;
         auto type = map->get_type();
@@ -210,14 +210,13 @@ namespace Invader {
         };
 
         // Extract each tag?
-        if(queries.size() == 0) {
+        if(queries.empty() && queries_exclude.empty()) {
             for(std::size_t t = 0; t < tag_count; t++) {
                 all_tags_to_extract.push_back(t);
             }
         }
 
         else {
-            std::size_t tag_count = map->get_tag_count();
             for(std::size_t t = 0; t < tag_count; t++) {
                 // See if we already added
                 bool already_added = false;
@@ -232,14 +231,34 @@ namespace Invader {
                 }
 
                 const auto &tag = map->get_tag(t);
-                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_fourcc_to_extension(tag.get_tag_fourcc());
-
-                for(auto &query : queries) {
+                auto full_tag_path = tag.get_path() + "." + HEK::tag_fourcc_to_extension(tag.get_tag_fourcc());
+                
+                bool should_ignore = false;
+                
+                // Check if we ignore it
+                for(auto &query : queries_exclude) {
                     if(File::path_matches(full_tag_path.c_str(), query.c_str())) {
-                        all_tags_to_extract.emplace_back(t);
+                        should_ignore = true;
                         break;
                     }
                 }
+                
+                // Now check if we should extract it
+                if(!should_ignore && !queries.empty()) {
+                    should_ignore = true;
+                    
+                    for(auto &query : queries) {
+                        if(File::path_matches(full_tag_path.c_str(), query.c_str())) {
+                            should_ignore = false;
+                            break;
+                        }
+                    }
+                }
+                
+                // If we should, then let's do this
+                if(!should_ignore) {
+                    all_tags_to_extract.emplace_back(t);
+                }    
             }
 
             if(all_tags_to_extract.size() == 0) {

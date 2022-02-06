@@ -78,8 +78,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
     
-    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and compare these; use multiple times for multiple queries. If unspecified, all tags will be compared.", "<expr>");
-    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these; use multiple times for multiple queries", "<expr>");
+    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and compare these. Use multiple times for multiple queries. If unspecified, all tags will be compared.", "<expr>");
+    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>");
     
     options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
     options.emplace_back("show", 'S', 1, "Can be: all, matched, or mismatched. Default: all");

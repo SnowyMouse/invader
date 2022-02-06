@@ -26,12 +26,13 @@ namespace Invader {
          * @param map             map to read
          * @param tags            tags directory to extract to
          * @param queries         search queries to look for
+         * @param queries_exclude search queries to exclude
          * @param recursive       also extract tags depended by a tag
          * @param overwrite       overwrite tag files that exist
          * @param non_mp_globals  allow extraction of non-multiplayer globals
          * @param reporting_level reporting level to use
          */
-        static void extract_map(const Map &map, const std::string &tags, const std::vector<std::string> &queries, bool recursive = false, bool overwrite = false, bool non_mp_globals = false, ReportingLevel reporting_level = ReportingLevel::REPORTING_LEVEL_ALL);
+        static void extract_map(const Map &map, const std::string &tags, const std::vector<std::string> &queries, const std::vector<std::string> &queries_exclude, bool recursive = false, bool overwrite = false, bool non_mp_globals = false, ReportingLevel reporting_level = ReportingLevel::REPORTING_LEVEL_ALL);
         
     private:
         /**
@@ -42,14 +43,15 @@ namespace Invader {
         
         /**
          * Perform the extraction
-         * @param queries        queries to do
-         * @param tags           tag files to output to
-         * @param recursive      also extract tags depended by a tag
-         * @param overwrite      overwrite tag files that exist
-         * @param non_mp_globals allow extraction of non-multiplayer globals
-         * @return               number of tags successfully extracted
+         * @param queries         queries to do
+         * @param queries_exclude queries to not do
+         * @param tags            tag files to output to
+         * @param recursive       also extract tags depended by a tag
+         * @param overwrite       overwrite tag files that exist
+         * @param non_mp_globals  allow extraction of non-multiplayer globals
+         * @return                number of tags successfully extracted
          */
-        std::size_t perform_extraction(const std::vector<std::string> &queries, const std::filesystem::path &tags, bool recursive, bool overwrite, bool non_mp_globals);
+        std::size_t perform_extraction(const std::vector<std::string> &queries, const std::vector<std::string> &queries_exclude, const std::filesystem::path &tags, bool recursive, bool overwrite, bool non_mp_globals);
         
         /** Map reference */
         const Map &map;
