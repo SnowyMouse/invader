@@ -212,9 +212,21 @@ namespace Invader::EditQt {
         #define REPLACE_HL(what) label->setText(label->text().replace(label->text().indexOf(what), QString(what).size(), "<a href=\"" what "\">" what "</a>"));
         REPLACE_HL("https://invader.opencarnage.net/builds/nightly/")
         REPLACE_HL("https://invader.opencarnage.net")
-        REPLACE_HL("https://github.com/nothings/stb");
-        REPLACE_HL("https://www.freetype.org/");
         REPLACE_HL("https://github.com/SnowyMouse/invader");
+        
+        REPLACE_HL("https://www.freetype.org/")
+        REPLACE_HL("https://www.libarchive.org/")
+        REPLACE_HL("https://github.com/xiph/flac")
+        REPLACE_HL("http://www.libtiff.org/")
+        REPLACE_HL("https://sourceforge.net/projects/libsquish/")
+        REPLACE_HL("https://xiph.org/vorbis/")
+        REPLACE_HL("https://www.qt.io/")
+        REPLACE_HL("https://github.com/SnowyMouse/riat")
+        REPLACE_HL("http://www.mega-nerd.com/SRC/")
+        REPLACE_HL("https://github.com/nothings/stb")
+        REPLACE_HL("https://zlib.net/")
+        
+        
         #undef REPLACE_HL
         
         vbox_layout->addWidget(icon_label_widget);
