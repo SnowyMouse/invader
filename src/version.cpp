@@ -17,7 +17,8 @@ namespace Invader {
 
     const char *full_version_and_credits() {
         return INVADER_FULL_VERSION_STRING "." INVADER_VERSION_COMMIT_HASH "\n\n"
-               "This program is licensed under the GNU General Public License v3.0.\n"
+               "This software is licensed under the GNU General Public License v3.0 as published\n"
+               "by the Free Software Foundation. See https://www.gnu.org/licenses/gpl-3.0.txt\n"
                "\n"
                "Credits:\n"
                "  Snowy Mouse                     - Lead developer, project owner\n"
