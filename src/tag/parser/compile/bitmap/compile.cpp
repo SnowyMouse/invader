@@ -124,16 +124,26 @@ namespace Invader::Parser {
             bool exceeded = false;
             bool non_power_of_two = (!HEK::is_power_of_two(height) || !HEK::is_power_of_two(width) || !HEK::is_power_of_two(depth));
             
+            if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
+                char message[256];
+                std::snprintf(message, sizeof(message), "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
+                
+                // Yes the Xbox can do non-power-of-two textures, but swizzling is required if it's marked as 2D Textures and, yeah...
+                if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s. This is invalid for the target engine.", message);
+                    throw InvalidTagDataException();
+                }
+                else {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s", message);
+                }
+            }
+            
             if(
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO ||
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX
             ) {
-                if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
-                }
-
                 // Check if stock limits are exceeded
                 switch(type) {
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:

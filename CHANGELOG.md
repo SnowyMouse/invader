@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-bitmap: Now warns if using a non-power-of-two non-interface bitmap tag
+  on MCC AND once again errors if on Xbox
+
 ## [0.46.1] - 2022-02-06
 ### Added
 - invader-compare: Added --search and --search-exclude which allows you to
@@ -2121,5 +2126,7 @@ image as one bitmap
 [0.43.0]: https://github.com/SnowyMouse/invader/compare/0.42.2...0.43.0
 [0.44.0]: https://github.com/SnowyMouse/invader/compare/0.43.0...0.44.0
 [0.45.0]: https://github.com/SnowyMouse/invader/compare/0.44.0...0.45.0
+[0.46.0]: https://github.com/SnowyMouse/invader/compare/0.45.0...0.46.0
+[0.46.1]: https://github.com/SnowyMouse/invader/compare/0.46.0...0.46.1
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.45.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.46.1...master
