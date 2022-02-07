@@ -45,6 +45,9 @@ struct BitmapOptions {
     
     // Tags directory
     std::filesystem::path tags = "tags";
+    
+    // Allow non-power-of-two bitmaps
+    bool allow_non_power_of_two = false;
 
     // Scale type?
     std::optional<BitmapMipmapScaleType> mipmap_scale_type;
@@ -297,7 +300,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Do it!
     auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
         try {
-            auto scanned_data = ColorPlateScanner::scan_color_plate(image_pixels.data(), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), *bitmap_options.filthy_sprite_bug_fix);
+            auto scanned_data = ColorPlateScanner::scan_color_plate(image_pixels.data(), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), *bitmap_options.filthy_sprite_bug_fix, bitmap_options.allow_non_power_of_two);
             BitmapProcessor::process_bitmap_data(scanned_data, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur, bitmap_options.alpha_bias);
             return scanned_data;
         }
@@ -489,6 +492,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("reg-point-hack", 'r', 1, "Ignore sequence borders when calculating registration point (AKA 'filthy sprite bug fix'). Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data.");
+    options.emplace_back("allow-non-power-of-two", 'n', 0, "Allow non-power-of-two bitmaps.");
 
     static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
     static constexpr char USAGE[] = "[options] <bitmap-tag>";
@@ -510,6 +514,10 @@ int main(int argc, char *argv[]) {
 
             case 't':
                 bitmap_options.tags = arguments[0];
+                break;
+
+            case 'n':
+                bitmap_options.allow_non_power_of_two = true;
                 break;
 
             case 'R':

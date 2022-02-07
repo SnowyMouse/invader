@@ -69,12 +69,13 @@ namespace Invader {
     public:
         /**
          * Scan the color plate for bitmaps
-         * @param  pixels             pointer to first pixel
-         * @param  width              width of color plate
-         * @param  height             height of color plate
-         * @param  type               type of bitmap
-         * @param  usage              usage value for bitmap
-         * @param  reg_point_hack     ignore sequence dividers when calculating registration point
+         * @param pixels                 pointer to first pixel
+         * @param width                  width of color plate
+         * @param height                 height of color plate
+         * @param type                   type of bitmap
+         * @param usage                  usage value for bitmap
+         * @param reg_point_hack         ignore sequence dividers when calculating registration point
+         * @param allow_non_power_of_two allow non-power-of-two textures (besides when the type is sprites or interface bitmaps)
          */
         static GeneratedBitmapData scan_color_plate(
             const Pixel *pixels,
@@ -82,7 +83,8 @@ namespace Invader {
             std::uint32_t height,
             BitmapType type,
             BitmapUsage usage,
-            bool reg_point_hack
+            bool reg_point_hack,
+            bool allow_non_power_of_two
         );
 
     private:

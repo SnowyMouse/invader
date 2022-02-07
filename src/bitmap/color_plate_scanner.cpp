@@ -22,7 +22,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, bool reg_point_hack) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const Pixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, bool reg_point_hack, bool allow_non_power_of_two) {
         // We don't support this yet
         if(usage == BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
             eprintf_error("Vector maps are not supported at this time");
@@ -33,7 +33,7 @@ namespace Invader {
         GeneratedBitmapData generated_bitmap;
 
         generated_bitmap.type = type;
-        scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
+        scanner.power_of_two = !allow_non_power_of_two && ((type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS));
 
         if(width == 0 || height == 0) {
             return generated_bitmap;

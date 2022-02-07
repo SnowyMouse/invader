@@ -3,8 +3,11 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-bitmap: Added --allow-non-power-of-two
+
 ### Fixed
-- invader-bitmap: Now warns if using a non-power-of-two non-interface bitmap tag
+- invader-build: Now warns if using a non-power-of-two non-interface bitmap tag
   on MCC AND once again errors if on Xbox
 
 ## [0.46.1] - 2022-02-06
