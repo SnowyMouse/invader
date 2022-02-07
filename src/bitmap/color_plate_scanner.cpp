@@ -434,7 +434,7 @@ namespace Invader {
     }
 
     void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const {
-        if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
+        if(this->power_of_two) {
             if(!HEK::is_power_of_two(width)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
                 throw InvalidInputBitmapException();
