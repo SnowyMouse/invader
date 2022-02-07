@@ -478,7 +478,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, dxt1, or auto. 'auto' will be replaced with the best lossless format. Default (new tag): auto", "<type>");
-    options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d_textures, 3d_textures, cube_maps, interface_bitmaps, or sprites. Default (new tag): 2d", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d_textures, 3d_textures, cube_maps, interface_bitmaps, or sprites. Default (new tag): 2d_textures", "<type>");
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
     options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. This does not save in .bitmap tags. Can be: linear, nearest_alpha, nearest. Default (new tag): linear", "<type>");
     options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
@@ -492,7 +492,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("reg-point-hack", 'r', 1, "Ignore sequence borders when calculating registration point (AKA 'filthy sprite bug fix'). Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data.");
-    options.emplace_back("allow-non-power-of-two", 'n', 0, "Allow non-power-of-two bitmaps.");
+    options.emplace_back("allow-non-power-of-two", 'n', 0, "Allow color plates with non-power-of-two, non-interface bitmaps.");
 
     static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
     static constexpr char USAGE[] = "[options] <bitmap-tag>";

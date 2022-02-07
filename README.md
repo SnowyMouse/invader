@@ -223,6 +223,8 @@ Options:
   -i --info                    Show license and credits.
   -I --ignore-tag              Ignore the tag data if the tag exists.
   -M --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
+  -n --allow-non-power-of-two  Allow color plates with non-power-of-two,
+                               non-interface bitmaps.
   -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
                                off or on. Default (new tag): off
   -P --fs-path                 Use a filesystem path for the data.
@@ -239,7 +241,7 @@ Options:
   -t --tags <dir>              Use the specified tags directory.
   -T --type <type>             Set the type of bitmap. Can be: 2d_textures,
                                3d_textures, cube_maps, interface_bitmaps, or
-                               sprites. Default (new tag): 2d
+                               sprites. Default (new tag): 2d_textures
   -u --usage <usage>           Set the bitmap usage. Can be: alpha_blend,
                                default, height_map, detail_map, light_map,
                                vector_map. Default: default
