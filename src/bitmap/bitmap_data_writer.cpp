@@ -128,13 +128,14 @@ namespace Invader {
             if(compressed) {
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
             }
+            
             if(bitmap_type == BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
             }
-            
-            if(is_power_of_two(bitmap.width) && is_power_of_two(bitmap.height)) {
+            else /* if(is_power_of_two(bitmap.width) && is_power_of_two(bitmap.height)) */ { // this flag does not actually mean "power-of-two" but rather "not an interface bitmap"
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
             }
+            
             if(palettized) {
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_PALETTIZED;
             }
