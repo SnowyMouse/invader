@@ -351,89 +351,22 @@ namespace Invader::EditQt {
         std::size_t width = static_cast<std::size_t>(bitmap_data->width);
         std::size_t height = static_cast<std::size_t>(bitmap_data->height);
         std::size_t depth = static_cast<std::size_t>(bitmap_data->depth);
-        std::size_t real_width = width;
-        std::size_t real_height = height;
         std::size_t offset = bitmap_data->pixel_data_offset;
-        std::size_t bits_per_pixel;
-        bool compressed = false;
-
-        switch(bitmap_data->format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                bits_per_pixel = 16;
-                break;
-
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
-                bits_per_pixel = 32;
-                break;
-
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                compressed = true;
-                // fallthrough
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-                bits_per_pixel = 8;
-                break;
-
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                bits_per_pixel = 4;
-                compressed = true;
-                break;
-
-            default:
-                return nullptr;
-        }
-
-        std::size_t stride = bitmap_data->type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
 
         // Find the offset
-        std::size_t pixels_required = ((depth * width * height) * (bits_per_pixel) / 8);
-        for(std::size_t m = 0; m < mipmap; m++) {
-            offset += pixels_required * stride;
-            real_width /= 2;
-            real_height /= 2;
-            width = real_width;
-            height = real_height;
-            depth /= 2;
-            if(width < 1) {
-                width = 1;
-            }
-            if(depth < 1) {
-                depth = 1;
-            }
-            if(height < 1) {
-                height = 1;
-            }
-            if(compressed) {
-                if(width % 4) {
-                    width += 4 - (width % 4);
-                }
-                if(height % 4) {
-                    height += 4 - (height % 4);
-                }
-            }
-            pixels_required = ((depth * width * height) * (bits_per_pixel) / 8);
+        if(mipmap > 0) {
+            offset += BitmapEncode::bitmap_data_size(width, height, depth, mipmap - 1, bitmap_data->format, bitmap_data->type);
         }
 
         // Recalculate pixels required with 1 depth since we're doing 1 bitmap at a time
-        pixels_required = ((width * height) * (bits_per_pixel) / 8);
+        static constexpr const std::size_t one = 1;
+        width = std::max(width >> mipmap, one);
+        height = std::max(height >> mipmap, one);
+        
+        auto pixels_required = BitmapEncode::bitmap_data_size(width, height, 1, 0, bitmap_data->format, HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE);
         offset += index * pixels_required;
 
-        // Zero width/height
-        if(real_width == 0) {
-            real_width = 1;
-        }
-        if(real_height == 0) {
-            real_height = 1;
-        }
-
-        std::size_t pixel_count = real_width * real_height;
+        std::size_t pixel_count = width * height;
         std::size_t data_remaining = pixel_data->size();
         if(offset >= data_remaining || data_remaining - offset < pixels_required) {
             eprintf_warn("Not enough data left for bitmap preview (%zu < %zu)", data_remaining, pixels_required);
@@ -443,34 +376,34 @@ namespace Invader::EditQt {
 
         // Decode bitmap
         const auto *bytes = pixel_data->data() + offset;
-        std::vector<std::uint32_t> data(real_width * real_height);
+        std::vector<std::uint32_t> data(width * height);
         std::fill(data.begin(), data.end(), 0xFFFF00FF);
-        BitmapEncode::encode_bitmap(bytes, bitmap_data->format, reinterpret_cast<std::byte *>(data.data()), HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, real_width, real_height);
+        BitmapEncode::encode_bitmap(bytes, bitmap_data->format, reinterpret_cast<std::byte *>(data.data()), HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, width, height);
 
         // Scale if needed
         if(scale != 0) {
-            this->scale_bitmap(scale, real_width, real_height, pixel_count, data);
+            this->scale_bitmap(scale, width, height, pixel_count, data);
         }
 
         // Filter for mode
-        this->show_channel(data.data(), real_width, real_height, mode);
+        this->show_channel(data.data(), width, height, mode);
 
         // Show sprite if selected
         if(this->sequence) {
-            this->highlight_sprite(data.data(), real_width, real_height);
+            this->highlight_sprite(data.data(), width, height);
         }
 
         // Finish up
         QGraphicsView *view = new QGraphicsView();
         QGraphicsScene *scene = new QGraphicsScene(view);
         QPixmap map;
-        map.convertFromImage(QImage(reinterpret_cast<const uchar *>(data.data()), static_cast<int>(real_width), static_cast<int>(real_height), QImage::Format_ARGB32));
+        map.convertFromImage(QImage(reinterpret_cast<const uchar *>(data.data()), static_cast<int>(width), static_cast<int>(height), QImage::Format_ARGB32));
         scene->addPixmap(map);
         view->setScene(scene);
 
         view->setFrameStyle(0);
-        view->setMinimumSize(real_width,real_height);
-        view->setMaximumSize(real_width,real_height);
+        view->setMinimumSize(width, height);
+        view->setMaximumSize(width, height);
         view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
         view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
         view->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);

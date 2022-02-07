@@ -7,8 +7,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Added --allow-non-power-of-two
 
 ### Fixed
+- invader-bitmap: Fixed issues with generating non-power-of-two DXT bitmaps
 - invader-build: Now warns if using a non-power-of-two non-interface bitmap tag
   on MCC AND once again errors if on Xbox
+- invader-edit-qt: Fixed issues with previewing non-power-of-two DXT bitmaps
 
 ## [0.46.1] - 2022-02-06
 ### Added

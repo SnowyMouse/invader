@@ -3,6 +3,7 @@
 #include <invader/bitmap/bitmap_encode.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/bitmap/pixel.hpp>
+#include <cassert>
 #include <squish.h>
 
 namespace Invader::BitmapEncode {
@@ -475,10 +476,7 @@ namespace Invader::BitmapEncode {
         std::size_t size = 0;
         std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(format);
 
-        // Is this a meme?
-        if(bits_per_pixel == 0) {
-            return 0;
-        }
+        assert(bits_per_pixel > 0);
 
         bool should_be_compressed = format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
         std::size_t multiplier = type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
@@ -489,12 +487,18 @@ namespace Invader::BitmapEncode {
 
         // Do it
         for(std::size_t i = 0; i <= mipmap_count; i++) {
-            size += width * height * depth * multiplier * bits_per_pixel / 8;
+            std::size_t width_to_multiply = (width + REQUIRED_PADDING_N_BYTES(width, block_length));
+            std::size_t height_to_multiply = (height + REQUIRED_PADDING_N_BYTES(height, block_length));
             
-            // Divide by 2, resetting back to 1 when needed, but make sure we don't go below the block length (4x4 if DXT, else 1x1)
-            width = std::max(width / 2, block_length);
-            height = std::max(height / 2, block_length);
-            depth = std::max(depth / 2, static_cast<std::size_t>(1));
+            auto add_amount = width_to_multiply * height_to_multiply * depth * multiplier * bits_per_pixel;
+            assert(static_cast<std::size_t>(add_amount / 8) * 8 == add_amount);
+            size += add_amount / 8;
+            
+            // Divide by 2, resetting back to 1 when needed
+            static constexpr const std::size_t one = 1;
+            width = std::max(width / 2, one);
+            height = std::max(height / 2, one);
+            depth = std::max(depth / 2, one);
         }
 
         return size;
