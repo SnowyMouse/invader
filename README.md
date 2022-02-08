@@ -75,7 +75,7 @@ you use a package manager to get them, then it should take care of that for you.
 
 ##### Required dependencies
 - C++17 compiler with support for `filesystem`
-- C99 compiler
+- C11 compiler
 - CMake 3.12 or newer
 - Python 3.7 or newer
 - LibTIFF 3.6 or newer
