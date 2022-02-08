@@ -8,6 +8,8 @@ This is used for recording Invader's changes. This changelog is based on
   ranges are present
 - invader-edit-qt: Fixed stop button in audio player being available if no audio
   is being played
+- invader-extract: Fixed audio pitch ranges being cleared on extraction if from
+  a Custom Edition map
 
 ## [0.46.2] - 2022-02-07
 ### Added
