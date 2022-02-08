@@ -338,18 +338,29 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                     std::exit(EXIT_FAILURE);
                 }
                 return value.set_string(new_value.c_str());
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
-                try {
-                    auto &dep = value.get_dependency();
+            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+                auto &dep = value.get_dependency();
+                
+                // If the value is empty, just clear the path
+                if(new_value == "") {
+                    dep.path.clear();
+                }
+                
+                // Otherwise, attempt to parse what was given.
+                else try {
                     auto new_path = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(new_value)).value();
                     dep.path = new_path.path;
                     dep.tag_fourcc = new_path.fourcc;
-                    return;
                 }
+                
+                // Hopefully no one comments on the fact I wrote "else try" a few lines up as if it was something equivalent to "else if".
                 catch (std::exception &) {
                     eprintf_error("Invalid tag path %s", new_value.c_str());
                     std::exit(EXIT_FAILURE);
                 }
+                
+                return;
+            }
             case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
                 try {
                     return value.write_enum(new_value.c_str());

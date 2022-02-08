@@ -6,6 +6,11 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-bitmap: Added --allow-non-power-of-two
 
+### Changed
+- invader-edit: --set on a tag reference with an empty string will now clear the
+  reference (it is equivalent to `--set ".group"` where "group" is the extension
+  of the current tag reference if --get was used)
+
 ### Fixed
 - invader-bitmap: Fixed issues with generating non-power-of-two DXT bitmaps
 - invader-build: Now warns if using a non-power-of-two non-interface bitmap tag
