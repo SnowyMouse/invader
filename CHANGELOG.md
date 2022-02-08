@@ -10,6 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Fixed issues with generating non-power-of-two DXT bitmaps
 - invader-build: Now warns if using a non-power-of-two non-interface bitmap tag
   on MCC AND once again errors if on Xbox
+- invader-build: Fixed Xbox maps not having the correct effect flag set, as the
+  flags were changed between the Xbox Halo and Gearbox Halo PC releases
 - invader-edit-qt: Fixed issues with previewing non-power-of-two DXT bitmaps
 
 ## [0.46.1] - 2022-02-06
