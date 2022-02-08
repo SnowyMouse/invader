@@ -100,7 +100,7 @@ namespace Invader::Parser {
         particle.not_broken = 1;
         
         if(warn) {
-            complain_about_non_square_sheets(workload, tag_index, workload.tags[this->bitmap.tag_id.index]);
+            complain_about_non_square_sheets(workload, tag_index, workload.tags[this->sprite_bitmap.tag_id.index]);
         }
     }
     void ParticleSystemTypeParticleState::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
