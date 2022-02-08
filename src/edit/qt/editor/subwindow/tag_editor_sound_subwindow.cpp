@@ -91,6 +91,7 @@ namespace Invader::EditQt {
         connect(this->play_button, &QPushButton::clicked, this, &TagEditorSoundSubwindow::play_sound);
         this->stop_button = new QPushButton("Stop");
         connect(this->stop_button, &QPushButton::clicked, this, &TagEditorSoundSubwindow::stop_sound);
+        this->stop_button->setEnabled(false);
         playback_layout->addWidget(this->play_button);
         playback_layout->addWidget(this->stop_button);
 
@@ -116,6 +117,7 @@ namespace Invader::EditQt {
         if(!pitch_ranges) {
             this->actual_permutation->setEnabled(false);
             this->permutation->setEnabled(false);
+            this->play_button->setEnabled(false);
             return;
         }
 
@@ -141,6 +143,7 @@ namespace Invader::EditQt {
         connect(this->permutation, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_sound);
         this->actual_permutation->blockSignals(false);
         this->update_permutation_list();
+        this->play_button->setEnabled(actual_permutations > 0);
     }
 
     TagEditorSoundSubwindow::TagEditorSoundSubwindow(TagEditorWindow *parent_window) : TagEditorSubwindow(parent_window) {

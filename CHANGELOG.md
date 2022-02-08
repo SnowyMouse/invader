@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-edit-qt: Fixed play button in audio player being available if no pitch
+  ranges are present
+- invader-edit-qt: Fixed stop button in audio player being available if no audio
+  is being played
+
 ## [0.46.2] - 2022-02-07
 ### Added
 - invader-bitmap: Added --allow-non-power-of-two
