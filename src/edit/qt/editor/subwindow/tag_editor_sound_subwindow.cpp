@@ -52,18 +52,8 @@ namespace Invader::EditQt {
         this->pitch_range = pitch_range;
         auto *parser_data = this->get_parent_window()->get_parser_data();
         
-        auto populate_pitch_range_box = [&pitch_range](auto *sound) {
-            for(auto &i : sound->pitch_ranges) {
-                pitch_range->addItem(i.name.string);
-            }
-        };
-        
-        switch(this->get_parent_window()->get_file().tag_fourcc) {
-            case TagFourCC::TAG_FOURCC_SOUND:
-                populate_pitch_range_box(dynamic_cast<Parser::Sound *>(parser_data));
-                break;
-            default:
-                std::terminate();
+        for(auto &i : dynamic_cast<Parser::Sound &>(*parser_data).pitch_ranges) {
+            this->pitch_range->addItem(i.name.string);
         }
         
         connect(this->pitch_range, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_pitch_range_permutations);
@@ -75,7 +65,7 @@ namespace Invader::EditQt {
         this->loop = new QCheckBox("Loop");
         this->permutation = new QComboBox();
         add_option("Permutation:", this->permutation, 1.0)->addWidget(this->loop);
-
+        
         // Add playback stuff
         this->slider = new QSlider(Qt::Orientation::Horizontal);
         connect(this->slider, &QSlider::valueChanged, this, &TagEditorSoundSubwindow::change_sample);
@@ -107,6 +97,9 @@ namespace Invader::EditQt {
 
         // Whoop!
         this->update_pitch_range_permutations();
+
+        // Gray out everything if no pitch ranges exist
+        widget->setEnabled(this->pitch_range->count() > 0);
     }
     
     void TagEditorSoundSubwindow::update_pitch_range_permutations() {
@@ -114,36 +107,38 @@ namespace Invader::EditQt {
         this->actual_permutation->clear();
         
         Parser::SoundPitchRange *pitch_ranges = this->get_pitch_range();
-        if(!pitch_ranges) {
-            this->actual_permutation->setEnabled(false);
-            this->permutation->setEnabled(false);
-            this->play_button->setEnabled(false);
-            return;
-        }
-
-        // All right
-        std::size_t actual_permutations = pitch_ranges->actual_permutation_count;
-        if(actual_permutations == 0) {
-            actual_permutations = pitch_ranges->permutations.size();
-        }
-        if(actual_permutations <= pitch_ranges->permutations.size()) {
-            for(std::size_t p = 0; p < actual_permutations; p++) {
-                char permutation_name[256];
-                std::snprintf(permutation_name, sizeof(permutation_name), "%zu (%s)", p, pitch_ranges->permutations[p].name.string);
-                this->actual_permutation->addItem(permutation_name);
+        std::size_t actual_permutations = 0;
+        
+        if(pitch_ranges != nullptr) {
+            // All right
+            actual_permutations = pitch_ranges->actual_permutation_count;
+            if(actual_permutations == 0) {
+                actual_permutations = pitch_ranges->permutations.size();
             }
-        }
-        else {
-            this->actual_permutation->setEnabled(false);
-            this->permutation->setEnabled(false);
-            return;
+            if(actual_permutations <= pitch_ranges->permutations.size()) {
+                for(std::size_t p = 0; p < actual_permutations; p++) {
+                    char permutation_name[256];
+                    std::snprintf(permutation_name, sizeof(permutation_name), "%zu (%s)", p, pitch_ranges->permutations[p].name.string);
+                    this->actual_permutation->addItem(permutation_name);
+                }
+            }
+            else {
+                this->actual_permutation->setEnabled(false);
+                this->permutation->setEnabled(false);
+                return;
+            }
+
+            connect(this->actual_permutation, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_permutation_list);
+            connect(this->permutation, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_sound);
+            this->actual_permutation->blockSignals(false);
+            this->update_permutation_list();
         }
 
-        connect(this->actual_permutation, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_permutation_list);
-        connect(this->permutation, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_sound);
-        this->actual_permutation->blockSignals(false);
-        this->update_permutation_list();
         this->play_button->setEnabled(actual_permutations > 0);
+        this->actual_permutation->setEnabled(actual_permutations > 0);
+        this->permutation->setEnabled(actual_permutations > 0);
+        this->loop->setEnabled(actual_permutations > 0);
+        this->slider->setEnabled(actual_permutations > 0);
     }
 
     TagEditorSoundSubwindow::TagEditorSoundSubwindow(TagEditorWindow *parent_window) : TagEditorSubwindow(parent_window) {
