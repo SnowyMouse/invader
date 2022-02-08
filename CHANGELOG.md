@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.46.3] - 2022-02-08
 ### Fixed
 - invader-edit-qt: Fixed play button in audio player being available if no pitch
   ranges are present
@@ -2152,5 +2152,6 @@ image as one bitmap
 [0.46.0]: https://github.com/SnowyMouse/invader/compare/0.45.0...0.46.0
 [0.46.1]: https://github.com/SnowyMouse/invader/compare/0.46.0...0.46.1
 [0.46.2]: https://github.com/SnowyMouse/invader/compare/0.46.1...0.46.2
+[0.46.3]: https://github.com/SnowyMouse/invader/compare/0.46.2...0.46.3
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.46.2...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.46.3...master
