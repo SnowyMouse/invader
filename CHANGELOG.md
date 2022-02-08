@@ -2,14 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.46.2] - 2022-02-07
 ### Added
 - invader-bitmap: Added --allow-non-power-of-two
 
 ### Changed
 - invader-edit: --set on a tag reference with an empty string will now clear the
-  reference (it is equivalent to `--set ".group"` where "group" is the extension
-  of the current tag reference if --get was used)
+  reference (it is equivalent to `--set ".group"` where "group" is the file
+  extension of the current tag reference if --get was used)
 
 ### Fixed
 - invader-bitmap: Fixed issues with generating non-power-of-two DXT bitmaps
@@ -2142,5 +2142,6 @@ image as one bitmap
 [0.45.0]: https://github.com/SnowyMouse/invader/compare/0.44.0...0.45.0
 [0.46.0]: https://github.com/SnowyMouse/invader/compare/0.45.0...0.46.0
 [0.46.1]: https://github.com/SnowyMouse/invader/compare/0.46.0...0.46.1
+[0.46.2]: https://github.com/SnowyMouse/invader/compare/0.46.1...0.46.2
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.46.1...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.46.2...master
