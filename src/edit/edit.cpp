@@ -349,8 +349,24 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                 // Otherwise, attempt to parse what was given.
                 else try {
                     auto new_path = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(new_value)).value();
-                    dep.path = new_path.path;
-                    dep.tag_fourcc = new_path.fourcc;
+                    
+                    auto allowed_classes = value.get_allowed_classes();
+                    bool found = allowed_classes.empty();
+                    
+                    for(auto &i : allowed_classes) {
+                        if(i == new_path.fourcc) {
+                            found = true;
+                        }
+                    }
+                    
+                    if(found) {
+                        dep.path = new_path.path;
+                        dep.tag_fourcc = new_path.fourcc;
+                    }
+                    else {
+                        eprintf_error("%s tags cannot be referenced here", tag_fourcc_to_extension(new_path.fourcc));
+                        std::exit(EXIT_FAILURE);
+                    }
                 }
                 
                 // Hopefully no one comments on the fact I wrote "else try" a few lines up as if it was something equivalent to "else if".

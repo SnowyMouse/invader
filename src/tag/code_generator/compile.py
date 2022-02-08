@@ -74,7 +74,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                         error_line = error_line + " {}".format(classes[c])
 
                 cpp_cache_format_data.write("            if({}) {{\n".format(test_line))
-                cpp_cache_format_data.write("                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} must be{}, found %s, instead\", tag_fourcc_to_extension(this->{}.tag_fourcc));\n".format(struct_name, name, error_line, name))
+                cpp_cache_format_data.write("                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} must be{}, found '%s' instead\", tag_fourcc_to_extension(this->{}.tag_fourcc));\n".format(struct_name, name, error_line, name))
                 cpp_cache_format_data.write("                throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("            }\n")
 

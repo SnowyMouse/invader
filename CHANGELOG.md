@@ -17,6 +17,8 @@ This is used for recording Invader's changes. This changelog is based on
   on MCC AND once again errors if on Xbox
 - invader-build: Fixed Xbox maps not having the correct effect flag set, as the
   flags were changed between the Xbox Halo and Gearbox Halo PC releases
+- invader-edit: Fixed allowing tag references that have a disallowed group (for
+  example, referencing a light tag where a shader is expected)
 - invader-edit-qt: Fixed issues with previewing non-power-of-two DXT bitmaps
 
 ## [0.46.1] - 2022-02-06
