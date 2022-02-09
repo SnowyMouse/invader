@@ -322,7 +322,7 @@ int main(int argc, char * const *argv) {
                 }
 
                 if(!added) {
-                    eprintf_error("Error: %s was not found.", joined.c_str());
+                    eprintf_error("Error: %s was not found.", Invader::File::halo_path_to_preferred_path(joined).c_str());
                     return EXIT_FAILURE;
                 }
             }
