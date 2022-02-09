@@ -36,6 +36,7 @@ namespace Invader::Parser {
                             auto r = part.type.tag_fourcc.read();
                             if(IS_OBJECT_TAG(r)) {
                                 part.type_class = TagFourCC::TAG_FOURCC_OBJECT;
+                                must_be_deterministic = true;
                             }
                             else {
                                 part.type_class = r;
