@@ -104,12 +104,12 @@
         "fields": [
             "deleted when attachment deactivates",
             "must be deterministic xbox",
-            "must be deterministic",
+            "must be deterministic pc",
             "disabled in anniversary by blood setting"
         ],
         "cache_only": [
             "must be deterministic xbox",
-            "must be deterministic"
+            "must be deterministic pc"
         ],
         "comment": "\"must be deterministic xbox\" was originally \"must be deterministic\", but apparently Gearbox renamed it to \"required for gameplay cannot optimize out\" and bumped the real \"must be deterministic\" flag up, thus special handling is needed for Xbox maps",
         "width": 32

@@ -61,12 +61,12 @@ namespace Invader::Parser {
         auto flags = effect.flags.read();
         
         // Unset these if they're set
-        flags &= ~(HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC | HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC_XBOX);
+        flags &= ~(HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC_PC | HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC_XBOX);
         
         // Set the correct flag based on if it's Xbox or not
         if(must_be_deterministic) {
             flags |= workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX ? HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC_XBOX :
-                                                                                                                                 HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC;
+                                                                                                                                 HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_MUST_BE_DETERMINISTIC_PC;
         }
         
         effect.flags = flags;
