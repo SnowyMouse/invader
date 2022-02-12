@@ -32,24 +32,25 @@ namespace Invader::Parser {
                     for(std::size_t p = 0; p < part_count; p++) {
                         auto &part = parts[p];
                         auto part_id = part.type.tag_id.read();
-                        if(!part_id.is_null()) {
-                            auto r = part.type.tag_fourcc.read();
-                            if(IS_OBJECT_TAG(r)) {
-                                part.type_class = TagFourCC::TAG_FOURCC_OBJECT;
+                        
+                        auto r = part.type.tag_fourcc.read();
+                        if(IS_OBJECT_TAG(r)) {
+                            part.type_class = TagFourCC::TAG_FOURCC_OBJECT;
+                            must_be_deterministic = true;
+                        }
+                        else {
+                            part.type_class = r;
+                            if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT || r == TagFourCC::TAG_FOURCC_LIGHT) {
                                 must_be_deterministic = true;
                             }
-                            else {
-                                part.type_class = r;
-                                if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT || r == TagFourCC::TAG_FOURCC_LIGHT) {
-                                    must_be_deterministic = true;
-                                }
-                                
-                                // Find the maximum radius
-                                if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
-                                    float max_radius = reinterpret_cast<DamageEffect::struct_little *>(workload.structs[*workload.tags[part_id.index].base_struct].data.data())->radius.to;
-                                    if(max_radius > effect.maximum_damage_radius.read()) {
-                                        effect.maximum_damage_radius = max_radius;
-                                    }
+                        }
+                            
+                        // Find the maximum radius
+                        if(!part_id.is_null()) {
+                            if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
+                                float max_radius = reinterpret_cast<DamageEffect::struct_little *>(workload.structs[*workload.tags[part_id.index].base_struct].data.data())->radius.to;
+                                if(max_radius > effect.maximum_damage_radius.read()) {
+                                    effect.maximum_damage_radius = max_radius;
                                 }
                             }
                         }
