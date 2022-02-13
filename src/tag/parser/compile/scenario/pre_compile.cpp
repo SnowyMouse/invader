@@ -44,9 +44,6 @@ namespace Invader::Parser {
 
                 // Set it
                 file.source = source.second;
-                
-                // Add a null terminator
-                file.source.emplace_back();
             };
         }
         

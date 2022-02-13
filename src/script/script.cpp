@@ -164,6 +164,9 @@ int main(int argc, const char **argv) {
         // Open it!
         auto f = File::open_file(path).value();
         
+        // Null terminate it
+        f.emplace_back();
+        
         // Move it into here
         source_files->emplace_back(filename_without_extension, std::move(f));
     };
