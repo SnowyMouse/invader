@@ -27,10 +27,8 @@
             "all except ctf",
             "all except race ctf"
         ],
+        "comment": "terminator is unused but valid - add a 'deprecated' type later",
         "exclude": [
-            {
-                "option": "terminator"
-            },
             {
                 "option": "stub"
             },
