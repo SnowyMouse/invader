@@ -158,11 +158,15 @@ namespace Invader::Parser {
             }
             
             // Get the index of the thing
-            auto find_thing = [&n, &warnings, &source_files, &new_node](auto &array) -> void {
+            auto find_thing = [&n, &warnings, &source_files, &new_node](auto &array) -> std::size_t {
+                if(std::strcmp(n.string_data, "none") == 0) {
+                    return SIZE_MAX;
+                }
+                
                 auto len = array.size();
                 bool exists = false;
                 bool multiple_instances = false;
-                size_t first_instance = 0;
+                std::size_t first_instance = 0;
                 
                 // See if it exists and then find the first multiple instance if it does
                 for(std::size_t i = 0; i < len && !multiple_instances; i++) {
@@ -194,34 +198,54 @@ namespace Invader::Parser {
                     std::snprintf(warning, sizeof(warning), "%s:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data, first_instance);
                     warnings.emplace_back(warning);
                 }
+                
+                return first_instance;
             };
             
-            // Make sure the thing it refers to exists
+            // Make sure the thing it refers to exists. If so, save the index.
             try {
                 if(n.is_primitive && !n.is_global) {
                     switch(new_node.type) {
-                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_CAMERA_POINT:
-                            find_thing(scenario.cutscene_camera_points);
-                            break;
-                            
-                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_FLAG:
-                            find_thing(scenario.cutscene_flags);
-                            break;
-                            
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_RECORDING:
-                            find_thing(scenario.recorded_animations);
+                            new_node.data.long_int = find_thing(scenario.recorded_animations);
                             break;
                             
-                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_TITLE:
-                            find_thing(scenario.cutscene_titles);
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_AI_COMMAND_LIST:
+                            new_node.data.long_int = find_thing(scenario.command_lists);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CONVERSATION:
+                            new_node.data.long_int = find_thing(scenario.ai_conversations);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_GROUP:
-                            find_thing(scenario.device_groups);
+                            new_node.data.long_int = find_thing(scenario.device_groups);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_TITLE:
+                            new_node.data.long_int = find_thing(scenario.cutscene_titles);
+                            break;
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_FLAG:
+                            new_node.data.long_int = find_thing(scenario.cutscene_flags);
+                            break;
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_CAMERA_POINT:
+                            new_node.data.long_int = find_thing(scenario.cutscene_camera_points);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_NAME:
-                            find_thing(scenario.object_names);
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_LIST:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_UNIT:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VEHICLE:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_WEAPON:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SCENERY:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_UNIT_NAME:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VEHICLE_NAME:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_WEAPON_NAME:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_NAME:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SCENERY_NAME:
+                            new_node.data.short_int = find_thing(scenario.object_names);
                             break;
                         
                         default:
