@@ -518,6 +518,12 @@ namespace Invader::Recover {
                 continue;
             }
             
+            // Remove the last null terminator
+            auto source = hsc.source;
+            while(!source.empty() && source[source.size() - 1] == static_cast<std::byte>(0)) {
+                source.resize(source.size() - 1);
+            }
+            
             if(File::save_file(hsc_path, hsc.source)) {
                 oprintf_success("Recovered %s", hsc_path.string().c_str());
             }

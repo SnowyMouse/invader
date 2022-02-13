@@ -20,7 +20,6 @@ namespace Invader::Bludgeoner {
     bool broken_normals(Parser::ParserStruct *s, bool fix);
     bool broken_strings(Parser::ParserStruct *s, bool fix);
     bool broken_lens_flare_function_scale(Parser::ParserStruct *s, bool fix);
-    bool null_terminated_scripts(Parser::ParserStruct *s, bool fix);
 }
 
 #endif

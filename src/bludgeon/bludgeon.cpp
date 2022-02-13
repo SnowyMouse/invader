@@ -64,11 +64,8 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     /** Fix uppercase references */
     INVALID_UPPERCASE_REFERENCES        = 1ull << 13,
     
-    /** Fix null terminated scripts */
-    NULL_TERMINATED_SCRIPTS             = 1ull << 14,
-    
     /** Fix broken rotation function scales (caused by extracting maps made with older tools that broke this value, even the original HEK) */
-    BROKEN_LENS_FLARE_ROTATION_SCALE    = 1ull << 15,
+    BROKEN_LENS_FLARE_ROTATION_SCALE    = 1ull << 14,
     
     /** Attempt to unfuck anything that can be unfucked (CAUTION: you can unscrew a lightbulb; you can't unscrew a Halo tag) */
     EVERYTHING                          = ~0ull
@@ -88,7 +85,6 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define INVALID_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define INVALID_INDICES_FIX "invalid-indices"
 #define INVALID_NORMALS_FIX "nonnormal-vectors"
-#define NULL_TERMINATED_SCRIPTS_FIX "null-terminated-scripts"
 #define BROKEN_STRINGS_FIX "invalid-strings"
 #define BROKEN_LENS_FLARE_ROTATION_SCALE_FIX "broken-lens-flare-function-scale"
 #define EVERYTHING_FIX "everything"
@@ -139,7 +135,6 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
             check_fix(broken_normals, "problematic nonnormal vectors detected; fix with " INVALID_NORMALS_FIX);
             check_fix(broken_strings, "problematic strings detected; fix with " BROKEN_STRINGS_FIX);
             check_fix(uppercase_references, "uppercase references detected; fix with " INVALID_UPPERCASE_REFERENCES_FIX);
-            check_fix(null_terminated_scripts, "null terminated scripts detected detected; fix with " NULL_TERMINATED_SCRIPTS_FIX);
             check_fix(broken_lens_flare_function_scale, "broken lens flare function scale; fix with " BROKEN_LENS_FLARE_ROTATION_SCALE_FIX);
             
             #undef check_fix
@@ -161,7 +156,6 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
             apply_fix(broken_normals, INVALID_NORMALS, INVALID_NORMALS_FIX);
             apply_fix(broken_strings, BROKEN_STRINGS, BROKEN_STRINGS_FIX);
             apply_fix(uppercase_references, INVALID_UPPERCASE_REFERENCES, INVALID_UPPERCASE_REFERENCES_FIX);
-            apply_fix(null_terminated_scripts, NULL_TERMINATED_SCRIPTS, NULL_TERMINATED_SCRIPTS_FIX);
             apply_fix(broken_lens_flare_function_scale, BROKEN_LENS_FLARE_ROTATION_SCALE, BROKEN_LENS_FLARE_ROTATION_SCALE_FIX);
             
             #undef apply_fix
@@ -201,7 +195,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " NULL_TERMINATED_SCRIPTS_FIX ", " INVALID_NORMALS_FIX ", " INVALID_UPPERCASE_REFERENCES_FIX ", " BROKEN_LENS_FLARE_ROTATION_SCALE_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " INVALID_NORMALS_FIX ", " INVALID_UPPERCASE_REFERENCES_FIX ", " BROKEN_LENS_FLARE_ROTATION_SCALE_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -278,9 +272,6 @@ int main(int argc, char * const *argv) {
                 }
                 else if(std::strcmp(arguments[0], BROKEN_RANGE_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_RANGE;
-                }
-                else if(std::strcmp(arguments[0], NULL_TERMINATED_SCRIPTS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::NULL_TERMINATED_SCRIPTS;
                 }
                 else if(std::strcmp(arguments[0], INVALID_INDICES_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_INDICES;

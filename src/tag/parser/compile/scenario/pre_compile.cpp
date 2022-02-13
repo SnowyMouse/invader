@@ -41,7 +41,12 @@ namespace Invader::Parser {
                     throw std::exception();
                 }
                 std::strncpy(file.name.string, source.first.c_str(), sizeof(file.name.string) - 1);
+
+                // Set it
                 file.source = source.second;
+                
+                // Add a null terminator
+                file.source.emplace_back();
             };
         }
         

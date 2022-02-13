@@ -2,6 +2,20 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Changed
+- "terminator" is no longer marked as invalid, thus icefields.scenario no longer
+  needs bludgeoned
+- Null terminated scripts are now allowed as official tools do this, thus
+  various scenario tags no longer need bludgeoned
+
+### Fixed
+- invader-recover: Fixed null terminators being included in recovered script
+  source data
+
+### Removed
+- invader-bludgeon: Removed -T null-terminated-scripts
+
 ## [0.46.3] - 2022-02-08
 ### Fixed
 - invader-edit-qt: Fixed play button in audio player being available if no pitch
