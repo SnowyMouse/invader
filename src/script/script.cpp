@@ -21,7 +21,8 @@ int main(int argc, const char **argv) {
     struct ScriptOption {
         const char *path;
         std::filesystem::path data = "data";
-        std::filesystem::path tags = "tags";
+        std::vector<std::filesystem::path> tags;
+        
         bool regenerate = false;
         bool clear = false;
         bool filesystem_path = false;
@@ -48,7 +49,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("exclude-global-scripts", 'E', 0, "Do not use global_scripts source.");
     options.emplace_back("reload-scripts", 'r', 0, "Only recompile sources referenced by the tag.");
     options.emplace_back("explicit", 'e', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
 
     static constexpr char DESCRIPTION[] = "Compile scripts. Unless otherwise specified, global scripts are always compiled.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -103,10 +104,14 @@ int main(int argc, const char **argv) {
                 break;
 
             case 't':
-                script_options.tags = arguments[0];
+                script_options.tags.emplace_back(arguments[0]);
                 break;
         }
     });
+    
+    if(script_options.tags.empty()) {
+        script_options.tags = { "tags" };
+    }
 
     // Get the scenario tag
     std::string scenario;
@@ -114,14 +119,11 @@ int main(int argc, const char **argv) {
         auto tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
         auto split = File::split_tag_class_extension(tag_maybe.value_or(""));
         
-        
-        auto tag_path = File::file_path_to_tag_path(remaining_arguments[0], script_options.tags);
-        
         if(split.has_value() && std::filesystem::exists(remaining_arguments[0])) {
             scenario = split->path;
         }
         else {
-            eprintf_error("Failed to find a valid tag %s in %s.", remaining_arguments[0], script_options.tags.string().c_str());
+            eprintf_error("Failed to find a valid scenario tag %s", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }
@@ -129,14 +131,20 @@ int main(int argc, const char **argv) {
         scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
     }
 
-    auto tag_path = script_options.tags / (scenario + ".scenario");
+    // Now get the file path
+    auto tag_path = File::tag_path_to_file_path(scenario + ".scenario", script_options.tags);
+    if(!tag_path.has_value()) {
+        eprintf_error("Failed to find a valid scenario tags %s.scenario", File::halo_path_to_preferred_path(scenario).c_str());
+        return EXIT_FAILURE;
+    }
+    
     auto script_directory_path = (script_options.data / scenario).parent_path() / "scripts";
     auto global_script_path = script_options.data / "global_scripts.hsc";
     
     // Open the scenario tag
-    auto scenario_file_data = File::open_file(tag_path);
+    auto scenario_file_data = File::open_file(*tag_path);
     if(!scenario_file_data.has_value()) {
-        eprintf("Failed to open %s\n", tag_path.string().c_str());
+        eprintf("Failed to open %s\n", tag_path->string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -146,13 +154,13 @@ int main(int argc, const char **argv) {
         s = Parser::Scenario::parse_hek_tag_file((*scenario_file_data).data(), (*scenario_file_data).size());
     }
     catch(std::exception &e) {
-        eprintf_error("Failed to parse %s: %s", tag_path.string().c_str(), e.what());
+        eprintf_error("Failed to parse %s: %s", tag_path->string().c_str(), e.what());
         return EXIT_FAILURE;
     }
     
     // If the user tries to regenerate scripts without source data... bad
     if(s.source_files.empty() && script_options.regenerate && !script_options.clear && (s.scripts.size() > 0 || s.globals.size() > 0)) {
-        eprintf_error("%s contains scripts and/or globals but no source data.\nUsing --regenerate is not possible. Use invader-bludgeon to regenerate scripts.\nOr to completely clear script data, use --clear instead.", tag_path.string().c_str());
+        eprintf_error("%s contains scripts and/or globals but no source data.\nUsing --regenerate is not possible. Use invader-bludgeon to regenerate scripts.\nOr to completely clear script data, use --clear instead.", tag_path->string().c_str());
         return EXIT_FAILURE;
     }
     
@@ -259,7 +267,7 @@ int main(int argc, const char **argv) {
         }
         
         // Compile
-        Parser::compile_scripts(s, *script_options.engine, RIAT_OptimizationLevel::RIAT_OPTIMIZATION_PREVENT_GENERATIONAL_LOSS, warnings, source_files);
+        Parser::compile_scripts(s, *script_options.engine, RIAT_OptimizationLevel::RIAT_OPTIMIZATION_PREVENT_GENERATIONAL_LOSS, warnings, script_options.tags, source_files);
         
         for(auto &w : warnings) {
             eprintf_warn("%s", w.c_str());
@@ -284,12 +292,12 @@ int main(int argc, const char **argv) {
         
     // Write
     auto output = s.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SCENARIO);
-    if(File::save_file(tag_path, output)) {
+    if(File::save_file(*tag_path, output)) {
         oprintf_success("Successfully %s scripts", script_options.clear ? "cleared all" : "compiled");
         return EXIT_SUCCESS;
     }
     else {
-        eprintf_error("Failed to write to %s", tag_path.string().c_str());
+        eprintf_error("Failed to write to %s", tag_path->string().c_str());
         return EXIT_FAILURE;
     }
 }

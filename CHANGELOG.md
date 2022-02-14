@@ -10,6 +10,9 @@ This is used for recording Invader's changes. This changelog is based on
   various scenario tags no longer need bludgeoned
 
 ### Fixed
+- invader-build: Fixed a number of scripting issues on MCC. This notably fixes
+  some desyncing issues on online co-op, and it fixes an issue with the banshees
+  not attacking the player on the level Halo
 - invader-recover: Fixed null terminators being included in recovered script
   source data
 

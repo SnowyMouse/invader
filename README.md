@@ -807,7 +807,9 @@ Options:
   -r --reload-scripts          Only recompile sources referenced by the tag.
   -R --regenerate              Use the scenario tag's script source data as
                                data.
-  -t --tags <dir>              Use the specified tags directory.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
 ```
 
 

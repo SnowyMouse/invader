@@ -15,12 +15,53 @@ namespace Invader::Parser {
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
-    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, RIAT_OptimizationLevel optimization_level, std::vector<std::string> &warnings, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
+    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, RIAT_OptimizationLevel optimization_level, std::vector<std::string> &warnings, const std::vector<std::filesystem::path> &tags_directories, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
         // Instantiate it
         RIAT::Instance instance;
         instance.set_compile_target(info.scenario_script_compile_target);
         instance.set_optimization_level(optimization_level);
         instance.set_user_data(&warnings);
+        
+        // Open the hud message text
+        Parser::HUDMessageText hmt;
+        if(!scenario.hud_messages.path.empty()) {
+            auto file_path = File::tag_path_to_file_path(File::halo_path_to_preferred_path(scenario.hud_messages.path) + ".hud_message_text", tags_directories);
+            if(file_path.has_value()) {
+                auto hud_message_text_data = File::open_file(*file_path);
+                if(!hud_message_text_data.has_value()) {
+                    eprintf_error("Failed to open %s\n", file_path->string().c_str());
+                    throw std::exception();
+                }
+                hmt = Parser::HUDMessageText::parse_hek_tag_file(hud_message_text_data->data(), hud_message_text_data->size());
+            }
+        }
+        
+        // Eventually get the HUD globals tag
+        Parser::HUDGlobals hud_globals;
+        auto globals_file_path = File::tag_path_to_file_path(File::halo_path_to_preferred_path("globals\\globals.globals"), tags_directories);
+        if(globals_file_path.has_value()) {
+            auto globals_data = File::open_file(*globals_file_path);
+            if(!globals_data.has_value()) {
+                eprintf_error("Failed to open %s\n", globals_file_path->string().c_str());
+                throw std::exception();
+            }
+            
+            auto globals = Globals::parse_hek_tag_file(globals_data->data(), globals_data->size());
+            if(!globals.interface_bitmaps.empty()) {
+                auto &interface_bitmaps = globals.interface_bitmaps[0];
+                if(!interface_bitmaps.hud_globals.path.empty()) {
+                    auto file_path = File::tag_path_to_file_path(File::halo_path_to_preferred_path(interface_bitmaps.hud_globals.path) + ".hud_globals", tags_directories);
+                    if(file_path.has_value()) {
+                        auto hud_globals_data = File::open_file(*file_path);
+                        if(!hud_globals_data.has_value()) {
+                            eprintf_error("Failed to open %s\n", file_path->string().c_str());
+                            throw std::exception();
+                        }
+                        hud_globals = Parser::HUDGlobals::parse_hek_tag_file(hud_globals_data->data(), hud_globals_data->size());
+                    }
+                }
+            }
+        }
     
         // Any warnings get eaten up here
         instance.set_warn_callback([](RIAT_Instance *instance, const char *message, const char *file, std::size_t line, std::size_t column) {
@@ -131,6 +172,7 @@ namespace Invader::Parser {
                         case RIAT_ValueType::RIAT_VALUE_TYPE_SCRIPT:
                         case RIAT_ValueType::RIAT_VALUE_TYPE_SHORT:
                         case RIAT_ValueType::RIAT_VALUE_TYPE_TEAM:
+                        case RIAT_ValueType::RIAT_VALUE_TYPE_GAME_DIFFICULTY:
                             new_node.data.short_int = n.short_int;
                             break;
                         case RIAT_ValueType::RIAT_VALUE_TYPE_LONG:
@@ -162,8 +204,8 @@ namespace Invader::Parser {
             }
             
             // Get the index of the thing
-            auto find_thing = [&n, &warnings, &source_files, &new_node](auto &array) -> std::size_t {
-                if(std::strcmp(n.string_data, "none") == 0) {
+            auto find_thing = [&n, &warnings, &source_files, &new_node](auto &array, const char *name) -> std::size_t {
+                if(std::strcmp(name, "none") == 0) {
                     return SIZE_MAX;
                 }
                 
@@ -174,7 +216,7 @@ namespace Invader::Parser {
                 
                 // See if it exists and then find the first multiple instance if it does
                 for(std::size_t i = 0; i < len && !multiple_instances; i++) {
-                    const char *c = n.string_data;
+                    const char *c = name;
                     const char *d = array[i].name.string;
                     
                     while(*c != 0 && *d != 0 && std::tolower(*c) == std::tolower(*d)) {
@@ -199,7 +241,7 @@ namespace Invader::Parser {
                 
                 if(multiple_instances) {
                     char warning[512];
-                    std::snprintf(warning, sizeof(warning), "%s:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data, first_instance);
+                    std::snprintf(warning, sizeof(warning), "%s:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), name, first_instance);
                     warnings.emplace_back(warning);
                 }
                 
@@ -211,29 +253,89 @@ namespace Invader::Parser {
                 if(n.is_primitive && !n.is_global) {
                     switch(new_node.type) {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_RECORDING:
-                            new_node.data.long_int = find_thing(scenario.recorded_animations);
+                            new_node.data.long_int = find_thing(scenario.recorded_animations, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_AI_COMMAND_LIST:
-                            new_node.data.long_int = find_thing(scenario.command_lists);
+                            new_node.data.long_int = find_thing(scenario.command_lists, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CONVERSATION:
-                            new_node.data.long_int = find_thing(scenario.ai_conversations);
+                            new_node.data.long_int = find_thing(scenario.ai_conversations, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_GROUP:
-                            new_node.data.long_int = find_thing(scenario.device_groups);
+                            new_node.data.long_int = find_thing(scenario.device_groups, n.string_data);
                             break;
                             
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_TRIGGER_VOLUME:
+                            new_node.data.long_int = find_thing(scenario.trigger_volumes, n.string_data);
+                            break;
+                            
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_AI: {
+                            const char *sub_encounter = nullptr;
+                            
+                            // AI can be a encounter/squad or encounter/platoon or just encounter
+                            for(const char *c = n.string_data; *c != 0; c++) {
+                                if(*c == '/') {
+                                    sub_encounter = c + 1;
+                                    break;
+                                }
+                            }
+                            
+                            /*
+                             * XX XX XXXX
+                             * ^  ^  ^
+                             * |  |  encounter
+                             * |  squad (or 00 if no squad)
+                             * 80 if encounter/squad, 40 if encounter/platoon. else 00 if just encounter
+                             */
+                            if(sub_encounter != nullptr) {
+                                std::string encounter_name(n.string_data, sub_encounter - 1 - n.string_data);
+                                
+                                std::size_t encounter_index = find_thing(scenario.encounters, encounter_name.c_str());
+                                auto &encounter = scenario.encounters[encounter_index];
+                                
+                                std::size_t sub_index;
+                                std::uint32_t bitfield_base;
+                                
+                                try {
+                                    sub_index = find_thing(encounter.squads, sub_encounter);
+                                    bitfield_base = 0x80000000;
+                                }
+                                catch(std::exception &) {
+                                    try {
+                                        sub_index = find_thing(encounter.platoons, sub_encounter);
+                                        bitfield_base = 0x40000000;
+                                    }
+                                    catch(std::exception &) {
+                                        throw;
+                                    }
+                                }
+                                
+                                new_node.data.long_int = static_cast<std::int32_t>(bitfield_base | ((sub_index & 0xFF) << 16) | (encounter_index & 0xFFFF));
+                            }
+                            else {
+                                new_node.data.long_int = find_thing(scenario.encounters, n.string_data);
+                            }
+                            
+                            break;
+                        }
+                            
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_TITLE:
-                            new_node.data.long_int = find_thing(scenario.cutscene_titles);
+                            new_node.data.long_int = find_thing(scenario.cutscene_titles, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_FLAG:
-                            new_node.data.long_int = find_thing(scenario.cutscene_flags);
+                            new_node.data.long_int = find_thing(scenario.cutscene_flags, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_CAMERA_POINT:
-                            new_node.data.long_int = find_thing(scenario.cutscene_camera_points);
+                            new_node.data.long_int = find_thing(scenario.cutscene_camera_points, n.string_data);
+                            break;
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_HUD_MESSAGE:
+                            new_node.data.long_int = find_thing(hmt.messages, n.string_data);
+                            break;
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_NAVPOINT:
+                            new_node.data.long_int = find_thing(hud_globals.waypoint_arrows, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_NAME:
@@ -249,7 +351,7 @@ namespace Invader::Parser {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_WEAPON_NAME:
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_NAME:
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SCENERY_NAME:
-                            new_node.data.short_int = find_thing(scenario.object_names);
+                            new_node.data.short_int = find_thing(scenario.object_names, n.string_data);
                             break;
                         
                         default:
@@ -387,7 +489,7 @@ namespace Invader::Parser {
         // Recompile scripts
         try {
             std::vector<std::string> warnings;
-            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), workload.get_build_parameters()->script_optimization_level, warnings);
+            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), workload.get_build_parameters()->script_optimization_level, warnings, workload.get_build_parameters()->tags_directories);
             for(auto &w : warnings) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
             }
