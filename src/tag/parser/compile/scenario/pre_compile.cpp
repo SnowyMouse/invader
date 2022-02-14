@@ -95,6 +95,9 @@ namespace Invader::Parser {
             // Set the salt
             new_node.salt = format_index_to_id(node_index) >> 16;
             
+            // Set to 0xFFFFFFFF
+            new_node.data.long_int = -1;
+            
             // If we have string data, add it
             if(n.string_data != NULL) {
                 std::string str = n.string_data;
@@ -127,6 +130,7 @@ namespace Invader::Parser {
                             break;
                         case RIAT_ValueType::RIAT_VALUE_TYPE_SCRIPT:
                         case RIAT_ValueType::RIAT_VALUE_TYPE_SHORT:
+                        case RIAT_ValueType::RIAT_VALUE_TYPE_TEAM:
                             new_node.data.short_int = n.short_int;
                             break;
                         case RIAT_ValueType::RIAT_VALUE_TYPE_LONG:
