@@ -1060,6 +1060,7 @@ namespace Invader::Parser {
         this->fade_in_time *= TICK_RATE;
         this->fade_out_time *= TICK_RATE;
         this->up_time *= TICK_RATE;
+        this->up_time += this->fade_in_time;
     }
     
     void ScenarioFiringPosition::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
