@@ -1048,7 +1048,7 @@ namespace Invader::Parser {
                         auto b = vo.read_bitfield(i);
                         
                         if(a != b) {
-                            std::snprintf(difference_text, sizeof(difference_text), "%s: [%i != %i]", i, a, b);
+                            std::snprintf(difference_text, sizeof(difference_text), "%s: %i != %i", i, a, b);
                             same = false;
                             if(differences_array != nullptr) {
                                 differences.emplace_back(difference_text);
