@@ -360,6 +360,8 @@ int main(int argc, const char **argv) {
             
             if(std::filesystem::exists(path_to_test)) {
                 // Okay it exists. Open both then
+                std::list<std::string> differences;
+                    
                 try {
                     auto tag_archive_data = File::open_file(archive_list[t].first).value();
                     auto tag_archive = Parser::ParserStruct::parse_hek_tag_file(tag_archive_data.data(), tag_archive_data.size(), true);
@@ -368,7 +370,7 @@ int main(int argc, const char **argv) {
                     auto tag_exclude = Parser::ParserStruct::parse_hek_tag_file(tag_exclude_data.data(), tag_exclude_data.size(), true);
 
                     // Do a functional comparison
-                    if(!tag_archive->compare(tag_exclude.get(), true, true, archive_options.verbose)) {
+                    if(!tag_archive->compare(tag_exclude.get(), true, true, archive_options.verbose ? &differences : nullptr)) {
                         continue;
                     }
                 }
@@ -379,6 +381,10 @@ int main(int argc, const char **argv) {
                 
                 if(archive_options.verbose) {
                     std::printf("Omitting %s\n", archive_list[t].second.c_str());
+                    
+                    for(auto &i : differences) {
+                        eprintf("%s\n", i.c_str());
+                    }
                 }
                 
                 archive_list.erase(archive_list.begin() + t);

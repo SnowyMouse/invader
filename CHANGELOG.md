@@ -8,6 +8,11 @@ This is used for recording Invader's changes. This changelog is based on
   needs bludgeoned
 - Null terminated scripts are now allowed as official tools do this, thus
   various scenario tags no longer need bludgeoned
+- invader-archive: Verbose comparisons are now shown in an inverted tree, making
+  it easier for collapsing in text editors
+- invader-compare: Verbose comparisons are now shown in an inverted tree, making
+  it easier for collapsing in text editors
+- invader-compare: Verbose comparisons can now be threaded
 
 ### Fixed
 - invader-build: Fixed a number of scripting issues on MCC. This notably fixes

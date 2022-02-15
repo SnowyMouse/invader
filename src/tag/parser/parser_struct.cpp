@@ -804,8 +804,8 @@ namespace Invader::Parser {
         return result;
     }
     
-    bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose) const {
-        return this->compare(what, precision, ignore_volatile, verbose, 1);
+    bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, std::list<std::string> *differences) const {
+        return this->compare(what, precision, ignore_volatile, differences, 1);
     }
     
     static constexpr bool too_different(double a, double b) noexcept {
@@ -832,11 +832,11 @@ namespace Invader::Parser {
     static_assert(too_different(-0.000025, 0.000025) == false);
     static_assert(too_different(0.000025, -0.000025) == false);
     
-    bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const {
+    bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, std::list<std::string> *differences_array, std::size_t depth) const {
         // Different struct name
         if(typeid(this) != typeid(what)) {
-            if(verbose) {
-                oprintf_success_warn("%s is not a %s", this->struct_name(), what->struct_name());
+            if(differences_array) {
+                differences_array->emplace_back(std::string(this->struct_name()) + " is not a " + std::string(what->struct_name()));
             }
             return false;
         }
@@ -867,24 +867,26 @@ namespace Invader::Parser {
                 
             char difference_text[512] = {};
         
-            auto complain = [&is_different, &should_continue, &verbose, &vt, &this_value, &difference_text, &depth](std::optional<std::size_t> index = std::nullopt) {
+            auto complain = [&is_different, &should_continue, &differences_array, &vt, &this_value, &difference_text, &depth](std::optional<std::size_t> index = std::nullopt) {
                 is_different = true;
                 
-                if(verbose) {
+                if(differences_array != nullptr) {
                     const char *lp = difference_text[0] == 0 ? "" : " (";
                     const char *rp = difference_text[0] == 0 ? "" : ")";
                     
                     char depth_spacing[512] = {};
-                    for(std::size_t d = 0; d < sizeof(depth_spacing) - 1 && d < depth * 2; d++) {
+                    for(std::size_t d = 0; d < sizeof(depth_spacing) - 1 && d < depth * 4; d++) {
                         depth_spacing[d] = ' ';
                     }
                     
+                    char message[512];
                     if(index.has_value()) {
-                        oprintf_success_warn("%s%s::%s#%zu is different%s%s%s", depth_spacing, this_value.struct_name(), vt.get_member_name(), *index, lp, difference_text, rp);
+                        std::snprintf(message, sizeof(message), "%s%s::%s#%zu is different%s%s%s", depth_spacing, this_value.struct_name(), vt.get_member_name(), *index, lp, difference_text, rp);
                     }
                     else {
-                        oprintf_success_warn("%s%s::%s is different%s%s%s", depth_spacing, this_value.struct_name(), vt.get_member_name(), lp, difference_text, rp);
+                        std::snprintf(message, sizeof(message), "%s%s::%s is different%s%s%s", depth_spacing, this_value.struct_name(), vt.get_member_name(), lp, difference_text, rp);
                     }
+                    differences_array->emplace_back(message);
                 }
                 else {
                     should_continue = false;
@@ -971,16 +973,28 @@ namespace Invader::Parser {
                     else {
                         bool complained = false;
                         
+                        // Hold onto this for now so we can move stuff around
+                        std::size_t current_difference_index = differences_array == nullptr ? 0 : differences_array->size();
+                        
                         depth++;
                         
                         for(std::size_t i = 0; i < vt_count && should_continue; i++) {
                             const auto &vt_struct = vt.get_object_in_array(i);
                             const auto &vo_struct = vo.get_object_in_array(i);
                             
-                            bool same = vt_struct.compare(&vo_struct, precision, ignore_volatile, verbose, depth + 1);
+                            // This will be filled if we're doing a verbose check
+                            std::list<std::string> differences_this;
+                            
+                            bool same = vt_struct.compare(&vo_struct, precision, ignore_volatile, differences_array == nullptr ? nullptr : &differences_this, depth + 1);
                             if(!same) {
                                 complain(i);
                                 complained = true;
+                            
+                                if(differences_array != nullptr) {
+                                    for(auto &i : differences_this) {
+                                        differences_array->emplace_back(std::move(i));
+                                    }
+                                }
                             }
                         }
                         
@@ -989,6 +1003,23 @@ namespace Invader::Parser {
                         // Complain some more.
                         if(complained) {
                             complain();
+                            
+                            // If we have differences and we're doing verbose output, move the last element to where the bottom was before comparison
+                            if(differences_array && current_difference_index < differences_array->size()) {
+                                auto to_here = differences_array->begin();
+                                for(std::size_t i = 0; i < current_difference_index; i++) {
+                                    to_here++;
+                                }
+                                
+                                auto length = differences_array->size();
+                                auto end = to_here;
+                                for(std::size_t i = current_difference_index; i + 1 < length; i++) {
+                                    end++;
+                                }
+                                auto last_str = std::move(*end);
+                                differences_array->erase(end);
+                                differences_array->insert(to_here, last_str);
+                            }
                         }
                     }
                     break;

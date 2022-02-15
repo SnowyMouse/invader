@@ -412,7 +412,7 @@ Options:
                                using --tags, --maps, --map, and
                                --ignore-resources.
   -j --threads                 Set the number of threads to use for comparison.
-                               This cannot be used with --verbose. Default: 1
+                               Default: 1
   -m --maps                    Add a maps directory to the input to specify
                                where to find resource files for a map. This
                                option must be used after --input.

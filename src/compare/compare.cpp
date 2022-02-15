@@ -86,7 +86,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input. This option must be used after --input.");
     options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with --functional.");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs.");
-    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for comparison. This cannot be used with --verbose. Default: 1");
+    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for comparison. Default: 1");
 
     static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
     static constexpr char USAGE[] = "[options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]";
@@ -236,11 +236,6 @@ int main(int argc, const char **argv) {
     // Make sure everything's valid
     if(compare_options.inputs.size() < 2) {
         eprintf_error("At least two inputs are required. Use -h for more information.");
-        return EXIT_FAILURE;
-    }
-    
-    if(compare_options.verbose && compare_options.job_count.has_value()) {
-        eprintf_error("--verbose and --threads cannot be used together. Use -h for more information.");
         return EXIT_FAILURE;
     }
     
@@ -527,7 +522,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 auto &first_struct = structs[0];
                 
                 // Just for setting counter/debugging
-                auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs, &log_mutex](bool did_match, std::size_t i) {
+                auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs, &log_mutex](bool did_match, std::size_t i, const std::list<std::string> &other_messages = {}) {
                     auto *extension = HEK::tag_fourcc_to_extension(tag.fourcc);
                     auto other_path = File::halo_path_to_preferred_path(struct_paths[i]);
                     bool show_different_input = inputs->size() > 2; // only need to show differing inputs if we have more than two inputs
@@ -556,6 +551,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                             else {
                                 oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
                             }
+                            for(auto &i : other_messages) {
+                                oprintf_success("%s", i.c_str());
+                            }
                             log_mutex->unlock();
                         }
                         (*matched_count)++;
@@ -571,6 +569,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                             }
                             else {
                                 oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
+                            }
+                            for(auto &i : other_messages) {
+                                oprintf_success_warn("%s", i.c_str());
                             }
                             log_mutex->unlock();
                         }
@@ -647,7 +648,12 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 }
                 else {
                     for(std::size_t i = 1; i < found_count; i++) {
-                        match_log(first_struct->compare(structs[i].get(), precision, true, verbose), i);
+                        std::list<std::string> differences;
+                        auto matched = first_struct->compare(structs[i].get(), precision, true, verbose ? &differences : nullptr);
+                        if(!show_all && verbose) {
+                            differences.emplace_back();
+                        }
+                        match_log(matched, i, differences);
                     }
                 }
             }

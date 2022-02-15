@@ -6,6 +6,7 @@
 #include <vector>
 #include <deque>
 #include <cstddef>
+#include <list>
 #include <optional>
 #include <variant>
 #include <memory>
@@ -1097,9 +1098,9 @@ namespace Invader::Parser {
          * @param what            struct to compare against
          * @param precision       allow small differences for floats (can account for minor precision differences but may slightly increase false positives/negatives)
          * @param ignore_volatile ignore data that can be added or removed when a map is compiled
-         * @param verbose         print differences and other information to stdout
+         * @param differences     an optional pointer to a list of strings to be filled with the differences (verbose mode)
          */
-        bool compare(const ParserStruct *what, bool precision = false, bool ignore_volatile = false, bool verbose = false) const;
+        bool compare(const ParserStruct *what, bool precision = false, bool ignore_volatile = false, std::list<std::string> *differences = nullptr) const;
         
         bool operator==(const ParserStruct &other) const {
             return this->compare(&other);
@@ -1121,7 +1122,7 @@ namespace Invader::Parser {
         virtual std::vector<ParserStructValue> get_values_internal() = 0;
         
     private:
-        bool compare(const ParserStruct *what, bool precision, bool ignore_volatile, bool verbose, std::size_t depth) const;
+        bool compare(const ParserStruct *what, bool precision, bool ignore_volatile, std::list<std::string> *differences, std::size_t depth) const;
         
         std::optional<std::vector<ParserStructValue>> values;
     };
