@@ -927,42 +927,44 @@ namespace Invader::Parser {
                     }
                     break;
                 }
-                case ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
-                case ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
-                    const char *a, *b;
-                    if(vt_type == ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING) {
-                        a = vt.get_string();
-                        b = vo.get_string();
+                case ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING: {
+                    const char *a = vt.get_string();
+                    const char *b = vo.get_string();
+                    if(std::strcmp(a, b) != 0) {
+                        std::snprintf(difference_text, sizeof(difference_text), "'%s' != '%s'", a, b);
+                        complain();
                     }
-                    else if(vt_type == ParserStructValue::ValueType::VALUE_TYPE_ENUM) {
-                        bool invalid_enums = false;
-                        
+                    break;
+                }
+                case ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
+                    auto vt_values = vt.get_values();
+                    auto vo_values = vo.get_values();
+                    
+                    assert(vt_values.size() == vo_values.size() && vt_values.size() == 1);
+                    
+                    const char *a, *b;
+                    auto a_value = static_cast<int>(std::get<std::int64_t>(vt_values[0]));
+                    auto b_value = static_cast<int>(std::get<std::int64_t>(vo_values[0]));
+                    
+                    if(a_value != b_value) {
                         try {
                             a = vt.read_enum();
                         }
                         catch(std::exception &) {
-                            a = "invalid-value";
-                            invalid_enums = true;
+                            a = "invalid-enum-value";
                         }
                         
                         try {
                             b = vo.read_enum();
                         }
                         catch(std::exception &) {
-                            b = "invalid-value";
-                            invalid_enums = true;
+                            b = "invalid-enum-value";
                         }
                         
-                        if(invalid_enums) {
-                            std::snprintf(difference_text, sizeof(difference_text), "invalid enum(s) ['%s' ?= '%s']", a, b);
+                        if(std::strcmp(a, b) != 0) {
+                            std::snprintf(difference_text, sizeof(difference_text), "'%s' (%i) != '%s' (%i)", a, a_value, b, b_value);
                             complain();
-                            return false;
                         }
-                    }
-                    
-                    if(std::strcmp(a, b) != 0) {
-                        std::snprintf(difference_text, sizeof(difference_text), "'%s' != '%s'", a, b);
-                        complain();
                     }
                     break;
                 }
