@@ -861,6 +861,14 @@ namespace Invader::Parser {
         
         static constexpr const std::size_t depth_spacing_amount = 4;
         
+        auto generate_depth_spacing = [](std::size_t depth) {
+            char depth_spacing[512] = {};
+            for(std::size_t d = 0; d < sizeof(depth_spacing) && d < depth * depth_spacing_amount; d++) {
+                depth_spacing[d] = ' ';
+            }
+            return std::string(depth_spacing);
+        };
+        
         for(std::size_t v = 0; v < vt_size && should_continue; v++) {
             auto &vt = v_this[v];
             auto &vo = v_other[v];
@@ -951,18 +959,18 @@ namespace Invader::Parser {
                             a = vt.read_enum();
                         }
                         catch(std::exception &) {
-                            a = "invalid-enum-value";
+                            a = "unknown_enum_value?";
                         }
                         
                         try {
                             b = vo.read_enum();
                         }
                         catch(std::exception &) {
-                            b = "invalid-enum-value";
+                            b = "unknown_enum_value?";
                         }
                         
                         if(std::strcmp(a, b) != 0) {
-                            std::snprintf(difference_text, sizeof(difference_text), "'%s' (%i) != '%s' (%i)", a, a_value, b, b_value);
+                            std::snprintf(difference_text, sizeof(difference_text), "'%s' [%i] != '%s' [%i]", a, a_value, b, b_value);
                             complain();
                         }
                     }
@@ -1032,25 +1040,32 @@ namespace Invader::Parser {
                 case ParserStructValue::ValueType::VALUE_TYPE_BITMASK: {
                     auto enums = vt.list_enum();
                     bool same = true;
-                    char *pos = difference_text;
+                    std::list<std::string> differences;
+                    
                     for(auto &i : enums) {
-                        if(pos >= difference_text + (sizeof(difference_text) - 1)) {
-                            break;
-                        }
-                        auto len = sizeof(difference_text) - (pos - difference_text);
-                        
-                        const char *comma = pos != difference_text ? ", " : "";
-                        
-                        bool a = vt.read_bitfield(i), b = vo.read_bitfield(i);
-                        
                         // Append if different
+                        auto a = vt.read_bitfield(i);
+                        auto b = vo.read_bitfield(i);
+                        
                         if(a != b) {
-                            pos += std::snprintf(pos, len, "%s'%s' [%i != %i]", comma, i, a, b);
+                            std::snprintf(difference_text, sizeof(difference_text), "%s: [%i != %i]", i, a, b);
                             same = false;
+                            if(differences_array != nullptr) {
+                                differences.emplace_back(difference_text);
+                            }
                         }
                     }
+                    
                     if(!same) {
+                        difference_text[0] = 0;
                         complain();
+                        
+                        if(differences_array != nullptr) {
+                            auto spacing = generate_depth_spacing(depth + 1);
+                            for(auto &i : differences) {
+                                differences_array->emplace_back(spacing + i);
+                            }
+                        }
                     }
                     
                     break;
@@ -1294,13 +1309,8 @@ namespace Invader::Parser {
                         complain();
                         
                         // Append everything
-                        if(value_count > 1) {
-                            char depth_spacing[512] = {};
-                            for(std::size_t d = 0; d < sizeof(depth_spacing) && d < (depth + 1) * depth_spacing_amount; d++) {
-                                depth_spacing[d] = ' ';
-                            }
-                            std::string depth_spacing_str = depth_spacing;
-                            
+                        if(value_count > 1 && differences_array != nullptr) {
+                            std::string depth_spacing_str = generate_depth_spacing(depth + 1);
                             for(auto &d : differences_this_value) {
                                 differences_array->emplace_back(depth_spacing_str + d);
                             }
