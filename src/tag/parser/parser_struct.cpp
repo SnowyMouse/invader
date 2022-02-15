@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <cassert>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/tag/hek/header.hpp>
@@ -858,6 +859,8 @@ namespace Invader::Parser {
         bool should_continue = true;
         bool is_different = false;
         
+        static constexpr const std::size_t depth_spacing_amount = 4;
+        
         for(std::size_t v = 0; v < vt_size && should_continue; v++) {
             auto &vt = v_this[v];
             auto &vo = v_other[v];
@@ -875,7 +878,7 @@ namespace Invader::Parser {
                     const char *rp = difference_text[0] == 0 ? "" : ")";
                     
                     char depth_spacing[512] = {};
-                    for(std::size_t d = 0; d < sizeof(depth_spacing) - 1 && d < depth * 4; d++) {
+                    for(std::size_t d = 0; d < sizeof(depth_spacing) - 1 && d < depth * depth_spacing_amount; d++) {
                         depth_spacing[d] = ' ';
                     }
                     
@@ -1059,41 +1062,246 @@ namespace Invader::Parser {
                         auto value_count = vt_v.size();
                         auto fmt = vt.get_number_format();
                         
-                        char *pos = difference_text;
+                        std::list<std::string> differences_this_value;
                         
                         for(std::size_t i = 0; i < value_count; i++) {
-                            if(pos >= difference_text + (sizeof(difference_text) - 1)) {
-                                break;
+                            const char *prefix = "";
+                            
+                            // TODO: Refactor this???
+                            if(value_count > 1) {
+                                if(vt.is_bounds()) {
+                                    prefix = i == 0 ? "f: " : "t: ";
+                                }
+                                else switch(vt_type) {
+                                    case ParserStructValue::VALUE_TYPE_COLORARGB:
+                                    case ParserStructValue::VALUE_TYPE_COLORARGBINT:
+                                        switch(i % 4) {
+                                            case 0:
+                                                prefix = "a: ";
+                                                break;
+                                            case 1:
+                                                prefix = "r: ";
+                                                break;
+                                            case 2:
+                                                prefix = "g: ";
+                                                break;
+                                            case 3:
+                                                prefix = "b: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_COLORRGB:
+                                        switch(i % 3) {
+                                            case 0:
+                                                prefix = "r: ";
+                                                break;
+                                            case 1:
+                                                prefix = "g: ";
+                                                break;
+                                            case 2:
+                                                prefix = "b: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_EULER2D:
+                                        switch(i % 2) {
+                                            case 0:
+                                                prefix = "y: ";
+                                                break;
+                                            case 1:
+                                                prefix = "p: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_EULER3D:
+                                        switch(i % 2) {
+                                            case 0:
+                                                prefix = "y: ";
+                                                break;
+                                            case 1:
+                                                prefix = "p: ";
+                                                break;
+                                            case 2:
+                                                prefix = "r: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_PLANE2D:
+                                        switch(i % 3) {
+                                            case 0:
+                                                prefix = "i: ";
+                                                break;
+                                            case 1:
+                                                prefix = "j: ";
+                                                break;
+                                            case 2:
+                                                prefix = "w: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_PLANE3D:
+                                    case ParserStructValue::VALUE_TYPE_QUATERNION:
+                                        switch(i % 4) {
+                                            case 0:
+                                                prefix = "i: ";
+                                                break;
+                                            case 1:
+                                                prefix = "j: ";
+                                                break;
+                                            case 2:
+                                                prefix = "k: ";
+                                                break;
+                                            case 3:
+                                                prefix = "w: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_POINT2D:
+                                    case ParserStructValue::VALUE_TYPE_POINT2DINT:
+                                        switch(i % 2) {
+                                            case 0:
+                                                prefix = "x: ";
+                                                break;
+                                            case 1:
+                                                prefix = "y: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_POINT3D:
+                                        switch(i % 3) {
+                                            case 0:
+                                                prefix = "x: ";
+                                                break;
+                                            case 1:
+                                                prefix = "y: ";
+                                                break;
+                                            case 2:
+                                                prefix = "z: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_VECTOR2D:
+                                        switch(i % 2) {
+                                            case 0:
+                                                prefix = "i: ";
+                                                break;
+                                            case 1:
+                                                prefix = "j: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_VECTOR3D:
+                                        switch(i % 3) {
+                                            case 0:
+                                                prefix = "i: ";
+                                                break;
+                                            case 1:
+                                                prefix = "j: ";
+                                                break;
+                                            case 2:
+                                                prefix = "k: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_RECTANGLE2D:
+                                        switch(i % 4) {
+                                            case 0:
+                                                prefix = "x0: ";
+                                                break;
+                                            case 1:
+                                                prefix = "y0: ";
+                                                break;
+                                            case 2:
+                                                prefix = "x1: ";
+                                                break;
+                                            case 3:
+                                                prefix = "y1: ";
+                                                break;
+                                        }
+                                        break;
+                                    case ParserStructValue::VALUE_TYPE_MATRIX:
+                                        switch(i % 9) {
+                                            case 0:
+                                                prefix = "x0: ";
+                                                break;
+                                            case 1:
+                                                prefix = "y0: ";
+                                                break;
+                                            case 2:
+                                                prefix = "z0: ";
+                                                break;
+                                            case 3:
+                                                prefix = "x1: ";
+                                                break;
+                                            case 4:
+                                                prefix = "y1: ";
+                                                break;
+                                            case 5:
+                                                prefix = "z1: ";
+                                                break;
+                                            case 6:
+                                                prefix = "x2: ";
+                                                break;
+                                            case 7:
+                                                prefix = "y2: ";
+                                                break;
+                                            case 8:
+                                                prefix = "z2: ";
+                                                break;
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
-                            
-                            auto len = sizeof(difference_text) - (pos - difference_text);
-                            
-                            const char *comma = pos != difference_text ? ", " : "";
                             
                             // Append if different
                             if(vt_v[i] != vo_v[i]) {
                                 if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
                                     double multiplier = (vt_type == ParserStructValue::ValueType::VALUE_TYPE_ANGLE || vt_type == ParserStructValue::ValueType::VALUE_TYPE_EULER2D || vt_type == ParserStructValue::ValueType::VALUE_TYPE_EULER3D) ? (180.0 / HALO_PI) : 1.0;
-                                    pos += std::snprintf(pos, len, "%s%f != %f", comma, std::get<double>(vt_v[i]) * multiplier, std::get<double>(vo_v[i]) * multiplier);
+                                    
+                                    union float_type_punner_9000 {
+                                        float f;
+                                        std::uint32_t u;
+                                    };
+                                    
+                                    float_type_punner_9000 t_float = { static_cast<float>(std::get<double>(vt_v[i])) };
+                                    float_type_punner_9000 v_float = { static_cast<float>(std::get<double>(vo_v[i])) };
+                                    
+                                    if(precision && !too_different(t_float.f, v_float.f)) {
+                                        continue;
+                                    }
+                                    
+                                    std::snprintf(difference_text, sizeof(difference_text), "%s%f [0x%08X] != %f [0x%08X]", prefix, t_float.f * multiplier, t_float.u, v_float.f * multiplier, v_float.u);
                                 }
                                 else if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
-                                    pos += std::snprintf(pos, len, "%s%lli != %lli", comma, static_cast<long long>(std::get<std::int64_t>(vt_v[i])), static_cast<long long>(std::get<std::int64_t>(vo_v[i])));
+                                    std::snprintf(difference_text, sizeof(difference_text), "%s%lli != %lli", prefix, static_cast<long long>(std::get<std::int64_t>(vt_v[i])), static_cast<long long>(std::get<std::int64_t>(vo_v[i])));
+                                }
+                                
+                                if(value_count > 1) {
+                                    differences_this_value.emplace_back(difference_text);
                                 }
                             }
                         }
                         
-                        if(precision && fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) { // if precision, is it different by too much?
-                            for(std::size_t i = 0; i < value_count; i++) {
-                                auto t = std::fabs(std::get<double>(vt_v[i]));
-                                auto o = std::fabs(std::get<double>(vo_v[i]));
-                                if(too_different(t,o)) {
-                                    complain();
-                                    break;
-                                }
-                            }
+                        // Set the first byte to 0, making it an empty string
+                        if(value_count > 1) {
+                            difference_text[0] = 0;
                         }
-                        else {
-                            complain();
+                        
+                        complain();
+                        
+                        // Append everything
+                        if(value_count > 1) {
+                            char depth_spacing[512] = {};
+                            for(std::size_t d = 0; d < sizeof(depth_spacing) && d < (depth + 1) * depth_spacing_amount; d++) {
+                                depth_spacing[d] = ' ';
+                            }
+                            std::string depth_spacing_str = depth_spacing;
+                            
+                            for(auto &d : differences_this_value) {
+                                differences_array->emplace_back(depth_spacing_str + d);
+                            }
                         }
                     }
                     break;
