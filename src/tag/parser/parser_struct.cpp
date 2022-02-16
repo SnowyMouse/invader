@@ -5,6 +5,7 @@
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/tag/hek/header.hpp>
 #include <invader/file/file.hpp>
+#include "../../crc/crc32.h"
 
 namespace Invader::Parser {
     ParserStructValue::ParserStructValue(
@@ -918,11 +919,27 @@ namespace Invader::Parser {
             switch(vt_type) {
                 case ParserStructValue::ValueType::VALUE_TYPE_GROUP_START:
                     break;
-                case ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET:
-                    if(vt.get_data() != vo.get_data()) {
+                case ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET: {
+                    auto &vt_data = vt.get_data();
+                    auto &vo_data = vo.get_data();
+                    
+                    // Check if the data is different
+                    if(vt_data != vo_data) {
                         complain();
+                        
+                        auto indent = generate_depth_spacing(depth + 1);
+                        bool size_different = vt_data.size() != vo_data.size();
+                        std::snprintf(difference_text, sizeof(difference_text), "%ssize: %zu %s %zu", indent.c_str(), vt_data.size(), size_different ? "!=" : "==", vo_data.size());
+                        differences_array->emplace_back(difference_text);
+                        
+                        auto vt_crc32 = ~crc32(0, vt_data.data(), vt_data.size());
+                        auto vo_crc32 = ~crc32(0, vo_data.data(), vo_data.size());
+                        bool crc32_different = vt_crc32 != vo_crc32;
+                        std::snprintf(difference_text, sizeof(difference_text), "%scrc32: 0x%08X %s 0x%08X%s", indent.c_str(), vt_crc32, crc32_different ? "!=" : "==", vo_crc32, (crc32_different && size_different) ? "" : " (possibly spoofed)");
+                        differences_array->emplace_back(difference_text);
                     }
                     break;
+                }
                 case ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
                     auto &a = vt.get_dependency();
                     auto &b = vo.get_dependency();
