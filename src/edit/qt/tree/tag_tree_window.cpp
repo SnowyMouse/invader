@@ -137,6 +137,14 @@ namespace Invader::EditQt {
         status_bar->addWidget(this->tag_opening_label, 1);
         status_bar->addWidget(this->tag_count_label, 2);
         this->setStatusBar(status_bar);
+        
+        // Figure out how big we want to make this window. Guarantee 4:3
+        auto screen_geometry = QGuiApplication::primaryScreen()->geometry();
+        auto scaled_height = std::max(screen_geometry.height() / 7 * 5, this->minimumHeight());
+        auto scaled_width = std::max(scaled_height * 4 / 3, this->minimumWidth());
+        scaled_height = std::max(scaled_width * 3 / 4, this->minimumHeight());
+
+        this->resize(scaled_width, scaled_height);
 
         // Set more stuff
         this->setWindowFlag(Qt::WindowStaysOnTopHint, 0);
@@ -147,7 +155,7 @@ namespace Invader::EditQt {
                 Qt::LeftToRight,
                 Qt::AlignCenter,
                 this->size(),
-                QGuiApplication::primaryScreen()->geometry()
+                screen_geometry
             )
         );
     }
