@@ -1857,44 +1857,25 @@
                 "endian": null
             },
             {
-                "name": "float 1",
-                "type": "float"
+                "name": "parameters",
+                "type": "float",
+                "comment": "appears to be zero",
+                "count": 3,
+                "hidden": true
             },
             {
-                "name": "float 2",
-                "type": "float"
+                "name": "rotation vector a",
+                "type": "Vector3D",
+                "compound": true
             },
             {
-                "name": "float 3",
-                "type": "float"
-            },
-            {
-                "name": "float 4",
-                "type": "float"
-            },
-            {
-                "name": "float 5",
-                "type": "float"
-            },
-            {
-                "name": "float 6",
-                "type": "float"
-            },
-            {
-                "name": "float 7",
-                "type": "float"
-            },
-            {
-                "name": "float 8",
-                "type": "float"
-            },
-            {
-                "name": "float 9",
-                "type": "float"
+                "name": "rotation vector b",
+                "type": "Vector3D",
+                "compound": true
             },
             {
                 "name": "starting corner",
-                "type": "Point3D"
+                "type": "Point3D",
             },
             {
                 "name": "ending corner offset",
@@ -1902,6 +1883,7 @@
             }
         ],
         "title": "name",
+        "comment": "original definitions have every float as an individual member called \"parameters\"",
         "size": 96
     },
     {
