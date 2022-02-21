@@ -282,7 +282,7 @@ namespace Invader {
                 extracted++;
             }
             else {
-                eprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
+                oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
             }
         }
         
