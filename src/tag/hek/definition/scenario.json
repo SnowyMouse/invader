@@ -1875,7 +1875,7 @@
             },
             {
                 "name": "starting corner",
-                "type": "Point3D",
+                "type": "Point3D"
             },
             {
                 "name": "ending corner offset",
@@ -1893,7 +1893,8 @@
             {
                 "name": "name",
                 "type": "TagString",
-                "endian": null
+                "endian": null,
+                "read_only": false
             },
             {
                 "name": "version",
@@ -1916,7 +1917,8 @@
             },
             {
                 "name": "length of animation",
-                "type": "int16"
+                "type": "int16",
+                "unit": "ticks"
             },
             {
                 "type": "pad",
@@ -1932,6 +1934,7 @@
             }
         ],
         "title": "name",
+        "read_only": true,
         "size": 64
     },
     {
