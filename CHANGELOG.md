@@ -10,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
   various scenario tags no longer need bludgeoned
 - invader-archive: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
+- invader-build: Bitmap type is now checked for shaders
 - invader-compare: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
 - invader-compare: Verbose comparisons can now be threaded

@@ -14,6 +14,27 @@ namespace Invader::Parser {
         }
     }
     
+    static void verify_bitmap_is_type(BuildWorkload &workload, HEK::BitmapType expected_type, std::size_t shader_tag_index, HEK::TagDependency<HEK::LittleEndian> &dependency, const char *what) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
+        auto tag_id = dependency.tag_id.read();
+        if(tag_id.is_null()) {
+            return;
+        }
+        
+        auto &bitmap = workload.tags[tag_id.index];
+        if(!bitmap.base_struct.has_value()) {
+            return;
+        }
+        auto bitmap_type = reinterpret_cast<Bitmap::struct_little *>(workload.structs[*bitmap.base_struct].data.data())->type;
+        if(bitmap_type != expected_type) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, shader_tag_index, "%s references %s bitmap %s.bitmap where a %s was expected", what, HEK::BitmapType_to_string(bitmap_type), File::halo_path_to_preferred_path(bitmap.path).c_str(), HEK::BitmapType_to_string(expected_type));
+            throw InvalidTagDataException();
+        }
+    }
+    
     template<typename T> static void default_maps(T &maps) {
         for(auto &i : maps) {
             if(i.map_u_scale == 0.0F && i.map_v_scale == 0.0F) {
@@ -40,10 +61,22 @@ namespace Invader::Parser {
         }
     }
     
-    void ShaderEnvironment::post_compile(BuildWorkload &workload, std::size_t , std::size_t , std::size_t ) {
+    #define GET_SHADER_STRUCT auto &s = workload.structs[struct_index]; auto &s_data = *reinterpret_cast<struct_little *>(s.data.data());
+    #define VERIFY_BITMAP_IS_TYPE(what, type) verify_bitmap_is_type(workload, HEK::BitmapType::type, tag_index, s_data.what, # what);
+    
+    void ShaderEnvironment::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         if(!this->base_map.tag_id.is_null()) {
             set_bitmap_data_environment_flag(workload, this->base_map.tag_id.index);
         }
+        
+        GET_SHADER_STRUCT
+        VERIFY_BITMAP_IS_TYPE(map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(base_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(primary_detail_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(secondary_detail_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(bump_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(micro_detail_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(reflection_cube_map, BITMAP_TYPE_CUBE_MAPS);
     }
     
     void ShaderModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -57,10 +90,42 @@ namespace Invader::Parser {
         }
     }
     
+    void ShaderModel::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        GET_SHADER_STRUCT
+        VERIFY_BITMAP_IS_TYPE(base_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(multipurpose_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(detail_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(reflection_cube_map, BITMAP_TYPE_CUBE_MAPS);
+    }
+    
     void ShaderTransparentChicago::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO);
         default_maps(this->maps);
     }
+    
+    template <typename Array> static void check_generic_transparent_shader(BuildWorkload &workload, std::size_t tag_index, Invader::BuildWorkload::BuildWorkloadStruct &base_struct, const Array &array, const HEK::ShaderFirstMapType first_map_type) {
+        std::size_t count = array.count;
+        if(count > 0) {
+            auto &s = workload.structs[*base_struct.resolve_pointer(&array.pointer)];
+            auto *data = reinterpret_cast<typename Array::struct_type_little *>(s.data.data());
+            for(std::size_t c = 0; c < count; c++) {
+                auto &s_data = data[c];
+                verify_bitmap_is_type(workload,
+                                      (c == 0 && first_map_type != HEK::ShaderFirstMapType::SHADER_FIRST_MAP_TYPE_2D_MAP) ? HEK::BitmapType::BITMAP_TYPE_CUBE_MAPS 
+                                                                                                                          : HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES,
+                                      tag_index,
+                                      s_data.map,
+                                      "map");
+            }
+        }
+    };
+    
+    void ShaderTransparentChicago::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        auto &s = workload.structs[struct_index];
+        auto &s_data = *reinterpret_cast<struct_little *>(s.data.data());
+        check_generic_transparent_shader(workload, tag_index, s, s_data.maps, s_data.first_map_type);
+    }
+    
     void ShaderTransparentChicagoExtended::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Error if the target engine can't use it
         if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
@@ -74,31 +139,76 @@ namespace Invader::Parser {
         default_maps(this->maps_2_stage);
     }
     
-    void ShaderTransparentWater::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_WATER);
+    void ShaderTransparentChicagoExtended::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        GET_SHADER_STRUCT
+        check_generic_transparent_shader(workload, tag_index, s, s_data.maps_2_stage, s_data.first_map_type);
+        check_generic_transparent_shader(workload, tag_index, s, s_data.maps_4_stage, s_data.first_map_type);
     }
-    void ShaderTransparentGlass::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GLASS);
-    }
-    void ShaderTransparentMeter::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_METER);
-    }
-    void ShaderTransparentPlasma::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
-        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_PLASMA);
-    }
+    
     void ShaderTransparentGeneric::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Warn if the target engine can't render it
         switch(workload.get_build_parameters()->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "shader_transparent_generic tags will not render on the original release of Halo: Combat Evolved", tag_index);
+                break;
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "shader_transparent_generic tags will not render on the target engine", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "shader_transparent_generic tags will not render on the original release of Halo Custom Edition (but may work in MCC)", tag_index);
                 break;
             default: break;
         }
         default_maps(this->maps);
         
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC);
+    }
+    
+    void ShaderTransparentGeneric::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        GET_SHADER_STRUCT
+        check_generic_transparent_shader(workload, tag_index, s, s_data.maps, s_data.first_map_type);
+    }
+    
+    void ShaderTransparentWater::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_WATER);
+    }
+    
+    void ShaderTransparentWater::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        GET_SHADER_STRUCT
+        VERIFY_BITMAP_IS_TYPE(base_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(reflection_map, BITMAP_TYPE_CUBE_MAPS);
+        VERIFY_BITMAP_IS_TYPE(ripple_maps, BITMAP_TYPE_2D_TEXTURES);
+    }
+    
+    void ShaderTransparentGlass::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GLASS);
+    }
+    
+    void ShaderTransparentGlass::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        GET_SHADER_STRUCT
+        VERIFY_BITMAP_IS_TYPE(bump_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(diffuse_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(diffuse_detail_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(specular_detail_map, BITMAP_TYPE_2D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(specular_map, BITMAP_TYPE_CUBE_MAPS);
+        VERIFY_BITMAP_IS_TYPE(reflection_map, BITMAP_TYPE_CUBE_MAPS);
+    }
+    
+    void ShaderTransparentMeter::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_METER);
+    }
+    
+    void ShaderTransparentMeter::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        GET_SHADER_STRUCT
+        VERIFY_BITMAP_IS_TYPE(map, BITMAP_TYPE_2D_TEXTURES);
+    }
+    
+    void ShaderTransparentPlasma::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+        this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_PLASMA);
+    }
+    
+    void ShaderTransparentPlasma::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        GET_SHADER_STRUCT
+        VERIFY_BITMAP_IS_TYPE(primary_noise_map, BITMAP_TYPE_3D_TEXTURES);
+        VERIFY_BITMAP_IS_TYPE(secondary_noise_map, BITMAP_TYPE_3D_TEXTURES);
     }
     
     ShaderTransparentChicago convert_shader_transparent_chicago_extended_to_shader_transparent_chicago(const ShaderTransparentChicagoExtended &shader) {
