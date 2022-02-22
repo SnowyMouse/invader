@@ -8,7 +8,7 @@ namespace Invader::Parser {
         reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->relative_direction_vector = HEK::euler2d_to_vector(this->relative_direction);
     }
 
-    void Effect::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+    void Effect::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         if(workload.disable_recursion) {
             return;
         }
@@ -53,6 +53,11 @@ namespace Invader::Parser {
                                     effect.maximum_damage_radius = max_radius;
                                 }
                             }
+                        }
+                        
+                        else if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of event #%zu contains a null %s tag reference", p, e, HEK::tag_fourcc_to_extension(r));
+                            throw InvalidTagDataException();
                         }
                     }
                 }
