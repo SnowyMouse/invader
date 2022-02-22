@@ -247,18 +247,25 @@ namespace Invader::EditQt {
             auto &permutation = permutations[p];
             auto *sound_data = permutation.samples.data();
             auto sound_size = permutation.samples.size();
-            switch(permutation.format) {
-                case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
-                    add_to_pcm(SoundReader::sound_from_16_bit_pcm_big_endian(sound_data, sound_size, this->channel_count, this->sample_rate));
-                    break;
-                case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
-                    add_to_pcm(SoundReader::sound_from_ogg(sound_data, sound_size));
-                    break;
-                case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
-                    add_to_pcm(SoundReader::sound_from_xbox_adpcm(sound_data, sound_size, this->channel_count, this->sample_rate));
-                    break;
-                default:
-                    return;
+            try {
+                switch(permutation.format) {
+                    case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+                        add_to_pcm(SoundReader::sound_from_16_bit_pcm_big_endian(sound_data, sound_size, this->channel_count, this->sample_rate));
+                        break;
+                    case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
+                        add_to_pcm(SoundReader::sound_from_ogg(sound_data, sound_size));
+                        break;
+                    case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                        add_to_pcm(SoundReader::sound_from_xbox_adpcm(sound_data, sound_size, this->channel_count, this->sample_rate));
+                        break;
+                    default:
+                        return;
+                }
+            }
+            catch(Invader::InvalidInputSoundException &) {
+                pcm.clear();
+                bits_per_sample = bits_per_sample.value_or(16);
+                QMessageBox(QMessageBox::Icon::Critical, "Error", "Failed to load all data.\n\nThe tag may be corrupt.", QMessageBox::Ok).exec();
             }
         }
 
