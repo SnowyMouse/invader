@@ -8,9 +8,14 @@ This is used for recording Invader's changes. This changelog is based on
   needs bludgeoned
 - Null terminated scripts are now allowed as official tools do this, thus
   various scenario tags no longer need bludgeoned
+- Trigger volumes are better defined now.
 - invader-archive: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
 - invader-build: Bitmap type is now checked for shaders
+- invader-build: Added warnings for out-of-bounds pickup messages (which is no
+  longer an error but may cause unintended behavior)
+- invader-build: Added warnings for null references in effect tags (except for
+  damage_effect which is an error)
 - invader-compare: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
 - invader-compare: Verbose comparisons can now be threaded
