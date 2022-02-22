@@ -2322,9 +2322,8 @@ namespace Invader {
         }
         
         // Check indices
-        for(this->get_reporting_level() >= ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_ALL_WARNINGS) {
+        if(this->get_reporting_level() >= ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_ALL_WARNINGS) {
             std::size_t tag_count = this->tags.size();
-            std::size_t warning_count = 0;
             
             for(std::size_t i = 0; i < tag_count; i++) {
                 auto &tag = this->tags[i];
@@ -2337,11 +2336,17 @@ namespace Invader {
                 switch(tag.tag_fourcc) {
                     case HEK::TagFourCC::TAG_FOURCC_WEAPON:
                     case HEK::TagFourCC::TAG_FOURCC_EQUIPMENT: {
-                        auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(this->structs[*tag.base_struct].data.data())->pickup_text_index);
+                        auto *s = this->structs[*tag.base_struct].data.data();
+                        
+                        auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(s)->pickup_text_index);
                         if(index >= item_strings && index != NULL_INDEX) {
                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Pickup text index is not valid (%zu >= %zu) so no text will appear when picked up", index, item_strings);
-                            warning_count++;
                         }
+                        
+                        else if(tag.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_WEAPON && static_cast<std::size_t>(reinterpret_cast<Parser::Weapon::struct_little *>(s)->magazines.count) > 0 && item_strings - 1 <= index) {
+                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Pickup text index is not valid for picking up ammo (%zu + 1 >= %zu) so no text will appear when ammo is picked up", index, item_strings);
+                        }
+                        
                         break;
                     }
                     case HEK::TagFourCC::TAG_FOURCC_BIPED:
@@ -2353,14 +2358,12 @@ namespace Invader {
                         if(seat_count > 0) {
                             if(index >= icon_strings && index != NULL_INDEX) {
                                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Message text index is not valid (%zu >= %zu) so placeholder text will appear", index, icon_strings);
-                                warning_count++;
                             }
                             auto *seat_data = reinterpret_cast<Parser::UnitSeat::struct_little *>(this->structs[unit_struct.resolve_pointer(&unit_data.seats.pointer).value()].data.data());
                             for(std::size_t s = 0; s < seat_count; s++) {
                                 auto seat_index = static_cast<std::size_t>(seat_data[s].hud_text_message_index);
                                 if(seat_index >= icon_strings && seat_index != NULL_INDEX) {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Seat #%zu's message text index is not valid (%zu >= %zu) so placeholder text will appear", s, seat_index, icon_strings);
-                                    warning_count++;
                                 }
                             }
                         }
@@ -2369,10 +2372,6 @@ namespace Invader {
                     default:
                         break;
                 }
-            }
-            
-            if(warning_count > 0) {
-                eprintf_warn("To silence %s warning%s, set %s to null", warning_count == 1 ? "this" : "these", warning_count == 1 ? "" : "s", warning_count == 1 ? "it" : "them");
             }
         }
     }
