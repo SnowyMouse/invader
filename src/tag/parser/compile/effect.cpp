@@ -56,8 +56,12 @@ namespace Invader::Parser {
                         }
                         
                         else if(r == TagFourCC::TAG_FOURCC_DAMAGE_EFFECT) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of event #%zu contains a null %s tag reference", p, e, HEK::tag_fourcc_to_extension(r));
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of event #%zu contains a null %s tag reference. This is invalid.", p, e, HEK::tag_fourcc_to_extension(r));
                             throw InvalidTagDataException();
+                        }
+                        
+                        else {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Part #%zu of event #%zu contains a null %s tag reference. The part will not do anything.", p, e, HEK::tag_fourcc_to_extension(r));
                         }
                     }
                 }
