@@ -2321,57 +2321,59 @@ namespace Invader {
             icon_strings = 0;
         }
         
-        std::size_t tag_count = this->tags.size();
-        std::size_t error_count = 0;
-        
-        for(std::size_t i = 0; i < tag_count; i++) {
-            auto &tag = this->tags[i];
+        // Check indices
+        for(this->get_reporting_level() >= ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_ALL_WARNINGS) {
+            std::size_t tag_count = this->tags.size();
+            std::size_t warning_count = 0;
             
-            // Skip tags we don't have
-            if(!tag.base_struct.has_value()) {
-                continue;
-            }
-            
-            switch(tag.tag_fourcc) {
-                case HEK::TagFourCC::TAG_FOURCC_WEAPON:
-                case HEK::TagFourCC::TAG_FOURCC_EQUIPMENT: {
-                    auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(this->structs[*tag.base_struct].data.data())->pickup_text_index);
-                    if(index >= item_strings && index != NULL_INDEX) {
-                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, i, "Pickup text index is not valid (%zu >= %zu)", index, item_strings);
-                        error_count++;
-                    }
-                    break;
+            for(std::size_t i = 0; i < tag_count; i++) {
+                auto &tag = this->tags[i];
+                
+                // Skip tags we don't have
+                if(!tag.base_struct.has_value()) {
+                    continue;
                 }
-                case HEK::TagFourCC::TAG_FOURCC_BIPED:
-                case HEK::TagFourCC::TAG_FOURCC_VEHICLE: {
-                    auto &unit_struct = this->structs[*tag.base_struct];
-                    auto &unit_data = *reinterpret_cast<Parser::Unit::struct_little *>(unit_struct.data.data());
-                    auto index = static_cast<std::size_t>(unit_data.hud_text_message_index);
-                    if(index >= icon_strings && index != NULL_INDEX) {
-                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, i, "Message text index is not valid (%zu >= %zu)", index, icon_strings);
-                        error_count++;
+                
+                switch(tag.tag_fourcc) {
+                    case HEK::TagFourCC::TAG_FOURCC_WEAPON:
+                    case HEK::TagFourCC::TAG_FOURCC_EQUIPMENT: {
+                        auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(this->structs[*tag.base_struct].data.data())->pickup_text_index);
+                        if(index >= item_strings && index != NULL_INDEX) {
+                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Pickup text index is not valid (%zu >= %zu) so no text will appear when picked up", index, item_strings);
+                            warning_count++;
+                        }
+                        break;
                     }
-                    std::size_t seat_count = unit_data.seats.count;
-                    if(seat_count > 0) {
-                        auto *seat_data = reinterpret_cast<Parser::UnitSeat::struct_little *>(this->structs[unit_struct.resolve_pointer(&unit_data.seats.pointer).value()].data.data());
-                        for(std::size_t s = 0; s < seat_count; s++) {
-                            auto seat_index = static_cast<std::size_t>(seat_data[s].hud_text_message_index);
-                            if(seat_index >= icon_strings && seat_index != NULL_INDEX) {
-                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, i, "Seat #%zu's message text index is not valid (%zu >= %zu)", s, seat_index, icon_strings);
-                                error_count++;
+                    case HEK::TagFourCC::TAG_FOURCC_BIPED:
+                    case HEK::TagFourCC::TAG_FOURCC_VEHICLE: {
+                        auto &unit_struct = this->structs[*tag.base_struct];
+                        auto &unit_data = *reinterpret_cast<Parser::Unit::struct_little *>(unit_struct.data.data());
+                        auto index = static_cast<std::size_t>(unit_data.hud_text_message_index);
+                        std::size_t seat_count = unit_data.seats.count;
+                        if(seat_count > 0) {
+                            if(index >= icon_strings && index != NULL_INDEX) {
+                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Message text index is not valid (%zu >= %zu) so placeholder text will appear", index, icon_strings);
+                                warning_count++;
+                            }
+                            auto *seat_data = reinterpret_cast<Parser::UnitSeat::struct_little *>(this->structs[unit_struct.resolve_pointer(&unit_data.seats.pointer).value()].data.data());
+                            for(std::size_t s = 0; s < seat_count; s++) {
+                                auto seat_index = static_cast<std::size_t>(seat_data[s].hud_text_message_index);
+                                if(seat_index >= icon_strings && seat_index != NULL_INDEX) {
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Seat #%zu's message text index is not valid (%zu >= %zu) so placeholder text will appear", s, seat_index, icon_strings);
+                                    warning_count++;
+                                }
                             }
                         }
+                        break;
                     }
-                    break;
+                    default:
+                        break;
                 }
-                default:
-                    break;
             }
-        }
-        
-        if(error_count) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%zu error%s found when checking message indices. %s should be set to NULL if %s to be unset.", error_count, error_count == 1 ? " was" : "s were", error_count == 1 ? "This index" : "These indices", error_count == 1 ? "it needs" : "they need");
-            throw InvalidTagDataException();
+            
+            if(warning_count > 0) {
+                eprintf_warn("To silence %s warning%s, set %s to null", warning_count == 1 ? "this" : "these", warning_count == 1 ? "" : "s", warning_count == 1 ? "it" : "them");
+            }
         }
     }
     
