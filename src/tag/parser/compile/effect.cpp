@@ -19,14 +19,16 @@ namespace Invader::Parser {
         std::size_t event_count = effect.events.count;
         
         // Go through each part (requires going through each event)
-        if(event_count) {
+        if(event_count > 0) {
             auto &events_struct = workload.structs[*effect_struct.resolve_pointer(&effect.events.pointer)];
             auto *events = reinterpret_cast<EffectEvent::struct_little *>(events_struct.data.data());
             
             for(std::size_t e = 0; e < event_count; e++) {
                 auto &event = events[e];
                 std::size_t part_count = event.parts.count;
-                if(part_count) {
+                std::size_t particle_count = event.particles.count;
+                
+                if(part_count > 0) {
                     auto *parts = reinterpret_cast<EffectPart::struct_little *>(workload.structs[*events_struct.resolve_pointer(&event.parts.pointer)].data.data());
                     
                     for(std::size_t p = 0; p < part_count; p++) {
@@ -62,6 +64,16 @@ namespace Invader::Parser {
                         
                         else {
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Part #%zu of event #%zu contains a null %s tag reference. The part will not do anything.", p, e, HEK::tag_fourcc_to_extension(r));
+                        }
+                    }
+                }
+                
+                if(particle_count > 0) {
+                    auto *particles = reinterpret_cast<EffectParticle::struct_little *>(workload.structs[*events_struct.resolve_pointer(&event.particles.pointer)].data.data());
+                    
+                    for(std::size_t p = 0; p < particle_count; p++) {
+                        if(particles[p].particle_type.tag_id.read().is_null()) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Particle #%zu of event #%zu is null.", p, e);
                         }
                     }
                 }
