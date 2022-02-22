@@ -62,18 +62,33 @@ namespace Invader::Parser {
     
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto permutation_index = offset / sizeof(struct_little);
+        
+        // Make sure the modulus is correct
+        auto sample_size = this->samples.size();
+        bool sample_size_invalid = false;
+        switch(this->format) {
+            case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+                sample_size_invalid = (sample_size % sizeof(HEK::LittleEndian<std::uint16_t>)) != 0;
+                break;
+            
+            case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                sample_size_invalid = (sample_size % 36) != 0;
+                break;
+                
+            default:
+                break;
+        }
+        
+        if(sample_size_invalid) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size.", permutation_index);
+            throw InvalidTagDataException();
+        }
 
         // Flip the endianness of the 16-bit PCM stream
         if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-            std::size_t size = this->samples.size() / 2;
-            if(size * 2 != this->samples.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size.", permutation_index);
-                throw InvalidTagDataException();
-            }
-
             auto *samples = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
             auto *samples_big = reinterpret_cast<HEK::BigEndian<std::uint16_t> *>(this->samples.data());
-            for(std::size_t i = 0; i < size; i++) {
+            for(std::size_t i = 0; i < sample_size / 2; i++) {
                 samples_big[i] = samples[i];
             }
         }
@@ -85,6 +100,7 @@ namespace Invader::Parser {
             if(this->buffer_size != this->samples.size()) {
                 incorrect_buffer = true;
             }
+            
         }
         else if(this->format ==  HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
             auto expected_buffer_size = SoundReader::ogg_vorbis_sample_count(this->samples.data(), this->samples.size()) * sizeof(std::uint16_t);
@@ -107,12 +123,13 @@ namespace Invader::Parser {
         switch(this->format) {
             case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                 if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine.", permutation_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine.", permutation_index);
+                    throw InvalidTagDataException();
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_IMA_ADPCM:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine.", permutation_index);
-                break;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine.", permutation_index);
+                throw InvalidTagDataException();
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                 if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu uses 16-bit PCM. The target engine will not play this without a mod.", permutation_index);
