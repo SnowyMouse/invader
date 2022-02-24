@@ -541,9 +541,10 @@
                 "size": 4
             },
             {
-                "name": "bullshit",
-                "type": "uint32",
+                "name": "vertex pointer",
+                "type": "Pointer",
                 "endian": "little",
+                "comment": "Appears to be a pointer to the uncompressed vertices",
                 "cache_only": true
             },
             {

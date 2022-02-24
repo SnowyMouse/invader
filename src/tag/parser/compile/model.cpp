@@ -701,10 +701,6 @@ namespace Invader::Parser {
         HEK::Vector3D<HEK::LittleEndian> no_translation = {};
         write_node_data(0, identity, no_translation, write_node_data);
 
-        // exodux compatibility - recalibrate the bitmask using a high pass filter on the exodux compatibility bit
-        bool exodux_handler = false;
-        bool exodux_parser = false;
-
         for(std::size_t gi = 0; gi < geometries_count; gi++) {
             auto &g = what.geometries[gi];
             
@@ -737,31 +733,6 @@ namespace Invader::Parser {
                 if(p.prev_filthy_part_index == 0) {
                     p.prev_filthy_part_index = UINT8_MAX;
                 }
-                
-                // exodux compatibility bit; AND zoner flag with the value from the tag data and XOR with the auxiliary rainbow bitmask
-                std::uint32_t zoner = p.flags & HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
-                std::uint32_t exodux_value = (p.bullshit & zoner) ^ 0x7F7F7F7F;
-                if(exodux_handler) {
-                    // Since the exodux handler is active, we don't need to deobfuscate the binary rainbow table for this value due to Penn's theory
-                    exodux_value ^= 0x3C170A5E;
-                }
-                else {
-                    // Remodulate the upper 16 bits of the control magic since the exodux handler is not active
-                    exodux_value <<= 16;
-
-                    // Depending on if the parser is active, use the necessary precalculated bitmask from the binary rainbow table
-                    exodux_value ^= exodux_parser ? 0x2D1E6921 : 0x291E7021;
-                    exodux_parser = !exodux_parser;
-                }
-
-                // Invert the handler for the next part
-                exodux_handler = !exodux_handler;
-
-                // Do an endian swap of the exodux rainbow table checksum hash
-                p.bullshit = (exodux_value & 0xFF000000) >> 24 |
-                             (exodux_value & 0xFF0000) >> 8 |
-                             (exodux_value & 0xFF00) << 8 |
-                             (exodux_value & 0xFF) << 24;
             }
         }
     }
