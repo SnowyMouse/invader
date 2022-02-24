@@ -16,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
   longer an error but may cause unintended behavior)
 - invader-build: Added warnings for null references in effect tags (except for
   damage_effect which is an error)
+- invader-build: Predicted resources for scenario_structure_bsp clusters are now
+  calculated
 - invader-compare: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
 - invader-compare: Verbose comparisons can now be threaded

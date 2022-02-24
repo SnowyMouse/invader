@@ -2,6 +2,7 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/tag/parser/compile/shader.hpp>
 
 #include "hud_interface.hpp"
 
@@ -289,7 +290,7 @@ namespace Invader::Parser {
         }
     }
 
-    static void recursively_get_all_predicted_resources_from_struct(const BuildWorkload &workload, std::size_t struct_index, std::vector<std::size_t> &resources, bool ignore_shader_resources) {
+    void recursively_get_all_predicted_resources_from_struct(const BuildWorkload &workload, std::size_t struct_index, std::vector<std::size_t> &resources, bool ignore_shader_resources) {
         if(workload.disable_recursion) {
             return;
         }

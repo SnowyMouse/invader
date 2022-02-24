@@ -5,6 +5,10 @@
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/compile/bitmap.hpp>
+#include <invader/tag/parser/compile/shader.hpp>
+#include <cassert>
+#include <map>
+#include <utility>
 
 namespace Invader::Parser {
     void ScenarioStructureBSP::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -278,6 +282,113 @@ namespace Invader::Parser {
                     auto &fog = *reinterpret_cast<Fog::struct_little *>(workload.structs[*workload.tags[fog_id.index].base_struct].data.data());
                     if(fog.flags & HEK::FogFlagsFlag::FOG_FLAGS_FLAG_IS_WATER) {
                         plane.material_type = HEK::MaterialType::MATERIAL_TYPE_WATER;
+                    }
+                }
+            }
+        }
+        
+        // Populate cluster predicted resources
+        const auto cluster_count = tag_data.clusters.count.read();
+        assert(cluster_count == this->clusters.size());
+        
+        if(cluster_count > 0 && !workload.disable_recursion) {
+            // First let's make a lookup table
+            // first surface index, index count -> [tag index, sequence index]
+            std::map<std::pair<std::size_t, std::size_t>, std::vector<std::pair<std::size_t, std::size_t>>> predicted_resources_per_surface_index_array;
+            
+            // Get all bitmaps loaded in a set of surfaces
+            for(auto &l : this->lightmaps) {
+                for(auto &m : l.materials) {
+                    auto &pd = predicted_resources_per_surface_index_array[{static_cast<std::size_t>(m.surfaces), static_cast<std::size_t>(m.surfaces) + static_cast<std::size_t>(m.surface_count)}];
+                    
+                    // Add the lightmap thing first
+                    if(!this->lightmaps_bitmap.tag_id.is_null() && l.bitmap != NULL_INDEX) {
+                        pd.emplace_back(this->lightmaps_bitmap.tag_id.index, l.bitmap);
+                    }
+                    
+                    // Add shader stuff too
+                    if(!m.shader.tag_id.is_null()) {
+                        std::vector<std::size_t> resources;
+                        recursively_get_all_predicted_resources_from_struct(workload, *workload.tags[m.shader.tag_id.index].base_struct, resources, false);
+                        for(auto r : resources) {
+                            pd.emplace_back(r, 0);
+                        }
+                    }
+                }
+            }
+            
+            auto cluster_struct_index = *tag_struct.resolve_pointer(&tag_data.clusters.pointer);
+            auto get_clusters_struct = [&workload, &cluster_struct_index]() -> Invader::BuildWorkload::BuildWorkloadStruct & {
+                return workload.structs[cluster_struct_index];
+            };
+            
+            auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster::struct_little *>(get_clusters_struct().data.data());
+            for(std::size_t c = 0; c < cluster_count; c++) {
+                auto &cluster_struct = clusters[c];
+                auto &cluster_struct_parsed = this->clusters[c];
+                
+                std::list<std::pair<std::size_t, std::size_t>> things_to_import;
+                
+                // Add all the things
+                for(auto &sc : cluster_struct_parsed.subclusters) {
+                    for(auto &si : sc.surface_indices) {
+                        auto index = static_cast<std::size_t>(si.index);
+                        for(auto &p : predicted_resources_per_surface_index_array) {
+                            auto &range = p.first;
+                            if(index >= range.first && index < range.second) {
+                                bool in_things_to_import = false;
+                                for(auto &t : things_to_import) {
+                                    if(t == range) {
+                                        in_things_to_import = true;
+                                        break;
+                                    }
+                                }
+                                if(!in_things_to_import) {
+                                    things_to_import.emplace_back(range);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // We have predicted resources to add maybe?
+                if(!things_to_import.empty()) {
+                    // Make a list of things
+                    std::list<std::pair<std::size_t, std::size_t>> all_predicted_resources;
+                    for(auto &i : things_to_import) {
+                        auto &a = predicted_resources_per_surface_index_array[i];
+                        all_predicted_resources.insert(all_predicted_resources.end(), a.begin(), a.end());
+                    }
+                    all_predicted_resources.unique();
+                    
+                    auto all_predicted_resource_count = all_predicted_resources.size();
+                    
+                    // We do!
+                    if(all_predicted_resource_count > 0) {
+                        // Add a new pointer
+                        auto &new_pointer = get_clusters_struct().pointers.emplace_back();
+                        new_pointer.struct_index = workload.structs.size();
+                        new_pointer.offset = reinterpret_cast<std::byte *>(&cluster_struct.predicted_resources.pointer) - reinterpret_cast<std::byte *>(clusters);
+                        
+                        cluster_struct.predicted_resources.count = all_predicted_resource_count;
+                        
+                        auto &new_predicted_resources_struct = workload.structs.emplace_back();
+                        PredictedResource::struct_little *new_predicted_resources;
+                        new_predicted_resources_struct.data.resize(sizeof(*new_predicted_resources) * all_predicted_resource_count);
+                        new_predicted_resources = reinterpret_cast<decltype(new_predicted_resources)>(new_predicted_resources_struct.data.data());
+                        
+                        auto resource = all_predicted_resources.begin();
+                        for(std::size_t tp = 0; tp < all_predicted_resource_count; tp++, resource++) {
+                            auto &t = new_predicted_resources[tp];
+                            t.resource_index = resource->second;
+                            t.tag = HEK::TagID { static_cast<std::uint32_t>(resource->first) };
+                            t.type = HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP;
+                            
+                            auto &reference = new_predicted_resources_struct.dependencies.emplace_back();
+                            reference.offset = reinterpret_cast<std::byte *>(&t.tag) - reinterpret_cast<std::byte *>(new_predicted_resources);
+                            reference.tag_index = resource->first;
+                            reference.tag_id_only = true;
+                        }
                     }
                 }
             }
