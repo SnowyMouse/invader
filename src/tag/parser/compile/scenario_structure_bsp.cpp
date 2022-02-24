@@ -359,6 +359,7 @@ namespace Invader::Parser {
                         auto &a = predicted_resources_per_surface_index_array[i];
                         all_predicted_resources.insert(all_predicted_resources.end(), a.begin(), a.end());
                     }
+                    all_predicted_resources.sort(); // unique() requires sorting first
                     all_predicted_resources.unique();
                     
                     auto all_predicted_resource_count = all_predicted_resources.size();
