@@ -16,8 +16,6 @@ This is used for recording Invader's changes. This changelog is based on
   longer an error but may cause unintended behavior)
 - invader-build: Added warnings for null references in effect tags (except for
   damage_effect which is an error)
-- invader-build: Fixed recharge rate being set to infinite if a collision model
-  has no recharge time set (it should be set to 1)
 - invader-compare: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
 - invader-compare: Verbose comparisons can now be threaded
@@ -28,6 +26,9 @@ This is used for recording Invader's changes. This changelog is based on
   some desyncing issues on online co-op, and it fixes an issue with the banshees
   not attacking the player on the level Halo
 - invader-build: Fixed cutscene title up time not being correct
+- invader-build: Fixed recharge rate being set to infinite if a collision model
+  has no recharge time set (it should be set to 1)
+- invader-build: Fixed pelvis/head indices being inverted
 - invader-extract: Fixed cutscene title up time not being correct
 - invader-recover: Fixed null terminators being included in recovered script
   source data

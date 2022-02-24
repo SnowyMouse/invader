@@ -329,13 +329,13 @@
                 "cache_only": true
             },
             {
-                "name": "head model node index",
+                "name": "pelvis model node index",
                 "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },
             {
-                "name": "pelvis model node index",
+                "name": "head model node index",
                 "type": "Index",
                 "endian": "little",
                 "cache_only": true
