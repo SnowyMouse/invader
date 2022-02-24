@@ -430,7 +430,10 @@ namespace Invader::Parser {
             this->do_not_screw_up_the_model = 1;
             this->set_this_or_die = 3;
         }
-        else if(engine != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+        else if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
+            this->set_this_or_die = 2;
+        }
+        else {
             this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
             this->compressed_vertices.clear();
         }
