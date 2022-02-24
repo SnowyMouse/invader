@@ -5,7 +5,12 @@
 
 namespace Invader::Parser {
     void ModelCollisionGeometry::pre_compile(BuildWorkload &, std::size_t , std::size_t, std::size_t) {
-        this->shield_recharge_rate = 1.0F / this->recharge_time / TICK_RATE;
+        if(this->recharge_time == 0.0) {
+            this->shield_recharge_rate = 1.0F;
+        }
+        else {
+            this->shield_recharge_rate = 1.0F / this->recharge_time / TICK_RATE;
+        }
     }
     void ModelCollisionGeometry::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &s = workload.structs[struct_index];
