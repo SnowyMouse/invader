@@ -749,8 +749,8 @@ namespace Invader::Parser {
             auto &name = scenario.object_names[i];
             const char *name_str = name.name.string;
             if(used == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Object name #%zu (%s) is unused", i, name_str);
-                scenario.object_names[i].object_index = 0;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Object name #%zu (%s) is unused", i, name_str); // crashes the game if it's used (though oddly not on the tag test)
+                throw InvalidTagDataException();
             }
             else if(used > 1 && !workload.disable_error_checking) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
