@@ -350,14 +350,62 @@ namespace Invader::Parser {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VEHICLE_NAME:
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_WEAPON_NAME:
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_NAME:
-                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SCENERY_NAME:
-                            new_node.data.short_int = find_thing(scenario.object_names, n.string_data);
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SCENERY_NAME: {
+                            auto index = find_thing(scenario.object_names, n.string_data);
+                            new_node.data.short_int = index;
+                            
+                            if(index != SIZE_MAX) {
+                                bool something_corresponds_to_this = false;
+                                
+                                auto check_thing = [&something_corresponds_to_this, &index](auto &what) {
+                                    if(something_corresponds_to_this) {
+                                        return;
+                                    }
+                                    for(auto &i : what) {
+                                        if(i.name == index) {
+                                            something_corresponds_to_this = true;
+                                        }
+                                    }
+                                };
+                                
+                                check_thing(scenario.bipeds);
+                                check_thing(scenario.vehicles);
+                                check_thing(scenario.scenery);
+                                check_thing(scenario.weapons);
+                                check_thing(scenario.equipment);
+                                check_thing(scenario.machines);
+                                check_thing(scenario.controls);
+                                check_thing(scenario.light_fixtures);
+                                check_thing(scenario.sound_scenery);
+                                
+                                if(!something_corresponds_to_this) {
+                                    for(auto &c : scenario.ai_conversations) {
+                                        for(auto &p : c.participants) {
+                                            if(p.set_new_name == index) {
+                                                something_corresponds_to_this = true;
+                                                goto do_object_index_check_now;
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                do_object_index_check_now:
+                                if(!something_corresponds_to_this) {
+                                    eprintf_error("%s:%zu:%zu: error: '%s' is an object name that does not correspond to any object or AI conversation and is thus invalid for use in scripts", source_files[n.file].name.string, n.line, n.column, n.string_data);
+                                    throw InvalidTagDataException();
+                                }
+                            }
+                            
                             break;
+                        }
                         
                         default:
                             break;
                     }
                 }
+            }
+            catch (InvalidTagDataException &) {
+                throw;
             }
             catch(std::exception &) {
                 eprintf_error("%s:%zu:%zu: error: can't find %s '%s'", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data);
@@ -749,8 +797,7 @@ namespace Invader::Parser {
             auto &name = scenario.object_names[i];
             const char *name_str = name.name.string;
             if(used == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Object name #%zu (%s) is unused", i, name_str); // crashes the game if it's used (though oddly not on the tag test)
-                throw InvalidTagDataException();
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Object name #%zu (%s) has no corresponding object or AI conversation", i, name_str); // crashes the game if it's used in a script (though oddly not on the tag test)
             }
             else if(used > 1 && !workload.disable_error_checking) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
