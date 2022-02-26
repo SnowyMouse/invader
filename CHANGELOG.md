@@ -24,9 +24,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Changed default sizing of the main window to be larger
 
 ### Fixed
-- invader-build: Fixed a number of scripting issues on MCC. This notably fixes
-  some desyncing issues on online co-op, and it fixes an issue with the banshees
-  not attacking the player on the level Halo
+- invader-build: Fixed a number of scripting issues on MCC. This fixes an issue
+  with the banshees not attacking the player on the level Halo.
 - invader-build: Fixed cutscene title up time not being correct
 - invader-build: Fixed recharge rate being set to infinite if a collision model
   has no recharge time set (it should be set to 1)
