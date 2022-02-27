@@ -148,7 +148,7 @@
     {
         "name": "VertexType",
         "options": [
-            "structure bsp uncompressed_rendered_vertices",
+            "structure bsp uncompressed rendered vertices",
             "structure bsp compressed rendered vertices",
             "structure bsp uncompressed lightmap vertices",
             "structure bsp compressed lightmap vertices",
