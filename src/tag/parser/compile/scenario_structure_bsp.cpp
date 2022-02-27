@@ -539,15 +539,30 @@ namespace Invader::Parser {
         if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             this->uncompressed_vertices.clear();
             this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
-            this->do_not_screw_up_the_model = 1;
-            this->set_this_or_die = 3;
+            if(this->rendered_vertices_count > 0) {
+                this->rendered_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_COMPRESSED_RENDERED_VERTICES;
+            }
+            if(this->lightmap_vertices_count > 0) {
+                this->lightmap_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_COMPRESSED_LIGHTMAP_VERTICES;
+            }
         }
         else if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-            this->set_this_or_die = 2;
+            if(this->rendered_vertices_count > 0) {
+                this->rendered_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_RENDERED_VERTICES;
+            }
+            if(this->lightmap_vertices_count > 0) {
+                this->lightmap_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_LIGHTMAP_VERTICES;
+            }
         }
         else {
-            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
             this->compressed_vertices.clear();
+            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+            if(this->rendered_vertices_count > 0) {
+                this->rendered_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_RENDERED_VERTICES;
+            }
+            if(this->lightmap_vertices_count > 0) {
+                this->lightmap_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_LIGHTMAP_VERTICES;
+            }
         }
     }
     

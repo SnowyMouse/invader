@@ -144,5 +144,17 @@
             "covenant plasma"
         ],
         "type": "enum"
+    },
+    {
+        "name": "VertexType",
+        "options": [
+            "structure bsp uncompressed_rendered_vertices",
+            "structure bsp compressed rendered vertices",
+            "structure bsp uncompressed lightmap vertices",
+            "structure bsp compressed lightmap vertices",
+            "model uncompressed",
+            "model compressed"
+        ],
+        "type": "enum"
     }
 ]

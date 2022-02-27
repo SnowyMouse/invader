@@ -312,11 +312,14 @@
                 "size": 2
             },
             {
-                "name": "do not screw up the model",
-                "type": "uint32",
-                "comment": "(Xbox only) if this isn't set to 1, then the world ends",
-                "endian": "little",
-                "cache_only": true
+                "name": "rendered vertices type",
+                "type": "VertexType",
+                "cache_only": true,
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 2
             },
             {
                 "name": "rendered vertices count",
@@ -340,11 +343,14 @@
                 "endian": "little"
             },
             {
-                "name": "set this or die",
-                "type": "uint32",
-                "endian": "little",
-                "comment": "(Xbox only) if this isn't set to 3, then the visible lightmap UVs do not work",
-                "cache_only": true
+                "name": "lightmap vertices type",
+                "type": "VertexType",
+                "cache_only": true,
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 2
             },
             {
                 "name": "lightmap vertices count",
