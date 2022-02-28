@@ -33,8 +33,9 @@ namespace Invader::Parser {
                         std::size_t olength = std::strlen(node_to_check->name.string);
                         
                         if(olength >= ilength) {
+                            // Check if substring
                             for(std::size_t i = 0; i <= (olength - ilength); i++) {
-                                if(std::strcmp(str, node_to_check->name.string + i) == 0) {
+                                if(std::strncmp(str, node_to_check->name.string + i, ilength) == 0) {
                                     thing = set_value;
                                     break;
                                 }
