@@ -158,7 +158,14 @@ namespace Invader::Parser {
         compile_object(*this, workload, tag_index);
         compile_unit(*this);
         this->cosine_stationary_turning_threshold = std::cos(this->stationary_turning_threshold);
-        this->crouch_camera_velocity = 1.0f / this->crouch_transition_time / TICK_RATE;
+        
+        if(this->crouch_transition_time == 0.0F) {
+            this->crouch_camera_velocity = 1.0F;
+        }
+        else {
+            this->crouch_camera_velocity = 1.0f / this->crouch_transition_time / TICK_RATE;
+        }
+        
         this->cosine_maximum_slope_angle = static_cast<float>(std::cos(this->maximum_slope_angle));
         this->negative_sine_downhill_falloff_angle = static_cast<float>(-std::sin(this->downhill_falloff_angle));
         this->negative_sine_downhill_cutoff_angle = static_cast<float>(-std::sin(this->downhill_cutoff_angle));
