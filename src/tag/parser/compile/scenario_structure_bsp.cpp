@@ -547,12 +547,9 @@ namespace Invader::Parser {
             }
         }
         else if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-            if(this->rendered_vertices_count > 0) {
-                this->rendered_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_RENDERED_VERTICES;
-            }
-            if(this->lightmap_vertices_count > 0) {
-                this->lightmap_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_LIGHTMAP_VERTICES;
-            }
+            // MCC quirk - these are always set regardless of vertex count
+            this->rendered_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_RENDERED_VERTICES;
+            this->lightmap_vertices_type = HEK::VertexType::VERTEX_TYPE_STRUCTURE_BSP_UNCOMPRESSED_LIGHTMAP_VERTICES;
         }
         else {
             this->compressed_vertices.clear();
