@@ -33,6 +33,7 @@ This is used for recording Invader's changes. This changelog is based on
   no camera crouch transition time set (it should be set to 1)
 - invader-build: Fixed pelvis/head indices being inverted
 - invader-build: Fixed centroid primary/secondary nodes not resolving local node
+- invader-build: Fixed particle size not factoring in sequence index
 - invader-extract: Fixed cutscene title up time not being correct
 - invader-recover: Fixed null terminators being included in recovered script
   source data
