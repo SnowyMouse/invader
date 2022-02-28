@@ -30,6 +30,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed recharge rate being set to infinite if a collision model
   has no recharge time set (it should be set to 1)
 - invader-build: Fixed pelvis/head indices being inverted
+- invader-build: Fixed centroid primary/secondary nodes not resolving local node
 - invader-extract: Fixed cutscene title up time not being correct
 - invader-recover: Fixed null terminators being included in recovered script
   source data

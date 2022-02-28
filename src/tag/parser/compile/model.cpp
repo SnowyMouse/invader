@@ -597,17 +597,35 @@ namespace Invader::Parser {
                     // Check the top two
                     std::size_t first_highest = highest_nodes[0];
                     std::size_t second_highest = highest_nodes[1];
+                    std::size_t first_highest_local = first_highest;
+                    std::size_t second_highest_local = second_highest;
                     float first_highest_weight = node_weight[first_highest];
                     float second_highest_weight = node_weight[second_highest];
+                    
+                    // Use the local node indices if needed
+                    if(uses_local_part_nodes) {
+                        auto &p_gbx = *reinterpret_cast<GBXModelGeometryPart *>(&p);
+                        auto index_count = p_gbx.local_node_count;
+                        
+                        for(std::size_t i = 0; i < index_count; i++) {
+                            auto li = p_gbx.local_node_indices[i];
+                            if(li == first_highest) {
+                                first_highest_local = i;
+                            }
+                            if(li == second_highest) {
+                                second_highest_local = i;
+                            }
+                        }
+                    }
 
                     // If we have a centroid primary node, let's hear it
                     if(first_highest_weight > 0.0F) {
                         // Set the centroid primary node
-                        p.centroid_primary_node = static_cast<HEK::Index>(first_highest);
+                        p.centroid_primary_node = static_cast<HEK::Index>(first_highest_local);
 
                         // Next, do we have a secondary node? If so, divide the weight between the two and set the secondary node
                         if(second_highest_weight > 0.0F) {
-                            p.centroid_secondary_node = static_cast<HEK::Index>(second_highest);
+                            p.centroid_secondary_node = static_cast<HEK::Index>(second_highest_local);
                             float total_weight = first_highest_weight + second_highest_weight;
                             p.centroid_primary_weight = first_highest_weight / total_weight;
                             p.centroid_secondary_weight = second_highest_weight / total_weight;
