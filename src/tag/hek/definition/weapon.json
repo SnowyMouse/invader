@@ -463,10 +463,10 @@
                 "size": 4
             },
             {
-                "name": "projectile object",
+                "name": "projectile",
                 "type": "TagDependency",
                 "classes": [
-                    "object"
+                    "projectile"
                 ],
                 "comment": "This is the object that spawns when firing the weapon.\nThe object will spawn facing the same direction as the first person camera (along with any error angle applied, if necessary) with the velocity of the shooter."
             },
