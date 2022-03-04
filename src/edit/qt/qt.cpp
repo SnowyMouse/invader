@@ -18,6 +18,8 @@ Q_IMPORT_PLUGIN(QWindowsAudioPlugin)
 #endif
 
 int main(int argc, char **argv) {
+    set_up_color_term();
+    
     using namespace Invader;
 
     std::vector<CommandLineOption> options;

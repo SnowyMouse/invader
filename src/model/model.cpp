@@ -1007,6 +1007,8 @@ template <typename T, Invader::HEK::TagFourCC fourcc> std::vector<std::byte> mak
 }
 
 int main(int argc, const char **argv) {
+    set_up_color_term();
+    
     using namespace Invader;
     using namespace Invader::HEK;
     

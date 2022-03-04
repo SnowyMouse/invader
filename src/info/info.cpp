@@ -290,6 +290,8 @@ static DisplayValue all_values[] = {
 };
 
 int main(int argc, const char **argv) {
+    set_up_color_term();
+    
     using namespace Invader;
 
     // Options struct

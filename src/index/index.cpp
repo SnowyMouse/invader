@@ -13,6 +13,8 @@
 #include <invader/command_line_option.hpp>
 
 int main(int argc, const char **argv) {
+    set_up_color_term();
+    
     using namespace Invader;
     using namespace Invader::HEK;
 

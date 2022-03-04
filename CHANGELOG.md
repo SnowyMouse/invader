@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Changed
+- VT100 colors are now used on win32 builds. This may fix a few error messages
+  being formatted/colored improperly as well as improve performance.
 - "terminator" is no longer marked as invalid, thus icefields.scenario no longer
   needs bludgeoned
 - Null terminated scripts are now allowed as official tools do this, thus

@@ -469,6 +469,8 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 }
 
 int main(int argc, char *argv[]) {
+    set_up_color_term();
+    
     BitmapOptions bitmap_options;
 
     std::vector<CommandLineOption> options;

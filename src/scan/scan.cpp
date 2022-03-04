@@ -13,6 +13,8 @@
 #include <invader/map/map.hpp>
 
 int main(int argc, char * const *argv) {
+    set_up_color_term();
+    
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
 

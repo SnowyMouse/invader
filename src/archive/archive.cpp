@@ -42,6 +42,8 @@ static std::string list_formats() {
 }
 
 int main(int argc, const char **argv) {
+    set_up_color_term();
+    
     using namespace Invader;
     
     struct ArchiveOptions {

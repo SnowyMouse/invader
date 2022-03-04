@@ -13,6 +13,8 @@
 #define INDEX_EXTENSION ".txt"
 
 int main(int argc, char * const *argv) {
+    set_up_color_term();
+    
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
