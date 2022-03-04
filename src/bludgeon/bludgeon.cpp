@@ -38,8 +38,8 @@ struct BludgeonAction {
     };
     
     const char *name;
-    std::optional<bool (*)(Invader::Parser::ParserStruct *s, bool fix)> fix_fn;
-    FixBit fix_bit;
+    std::optional<bool (*)(Invader::Parser::ParserStruct *s, bool fix)> fix_fn = std::nullopt;
+    FixBit fix_bit = FixBit();
 };
 
 static BludgeonAction all_fixes[] = {
