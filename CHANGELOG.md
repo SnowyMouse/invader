@@ -37,6 +37,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-extract: Fixed cutscene title up time not being correct
 - invader-recover: Fixed null terminators being included in recovered script
   source data
+- invader-script: Fixed vehicles not being allowed to be converted into units
 
 ### Removed
 - invader-bludgeon: Removed -T null-terminated-scripts
