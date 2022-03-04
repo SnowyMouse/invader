@@ -919,11 +919,15 @@ Usage: invader-strip [options] <-a | tag.class>
 Strips extra hidden data from tags.
 
 Options:
-  -a --all                     Strip all tags in the tags directory.
+  -e --search-exclude <expr>   Search for tags (* and ? are wildcards) and
+                               ignore these. Use multiple times for multiple
+                               queries. This takes precedence over --search.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
-  -P --fs-path                 Use a filesystem path for the tag path if
-                               specifying a tag.
+  -s --search <expr>           Search for tags (* and ? are wildcards) and
+                               strip these. Use multiple times for multiple
+                               queries. If unspecified, all tags will be
+                               stripped.
   -t --tags <dir>              Use the specified tags directory.
 ```
 
@@ -975,7 +979,7 @@ case they have not. However, some HEK tags do not have this set for some reason.
 You can fix this by running this command:
 
 ```
-invader-strip --all
+invader-strip
 ```
 
 Note that the above commands take `-t <path-to-tags-directory>` just like
