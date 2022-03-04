@@ -43,6 +43,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Removed
 - invader-bludgeon: Removed -T null-terminated-scripts
+- invader-bludgeon: Nulled indices are no longer listed
 
 ## [0.46.3] - 2022-02-08
 ### Fixed
