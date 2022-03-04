@@ -29,6 +29,7 @@ This is used for recording Invader's changes. This changelog is based on
   it easier for collapsing in text editors
 - invader-compare: Verbose comparisons can now be threaded
 - invader-edit-qt: Changed default sizing of the main window to be larger
+- invader-strip: Clean tags are no longer stripped and are skipped instead
 
 ### Fixed
 - invader-build: Fixed a number of scripting issues on MCC. This fixes an issue

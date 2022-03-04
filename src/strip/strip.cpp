@@ -11,12 +11,12 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
 
-int strip_tag(const std::filesystem::path &file_path, const std::string &tag_path) {
+bool strip_tag(const std::filesystem::path &file_path, const std::string &tag_path) {
     // Open the tag
     auto tag = Invader::File::open_file(file_path);
     if(!tag.has_value()) {
         eprintf_error("Failed to open %s", file_path.string().c_str());
-        return EXIT_FAILURE;
+        return false;
     }
 
     // Get the header
@@ -28,17 +28,23 @@ int strip_tag(const std::filesystem::path &file_path, const std::string &tag_pat
     }
     catch(std::exception &e) {
         eprintf_error("Error: Failed to strip %s: %s", tag_path.c_str(), e.what());
-        return EXIT_FAILURE;
+        return false;
     }
 
+    // Don't write if it matches
+    if(file_data == *tag) {
+        oprintf("Skipped %s\n", tag_path.c_str());
+        return false;
+    }
+    
     if(!Invader::File::save_file(file_path, file_data)) {
         eprintf_error("Error: Failed to write to %s.", file_path.string().c_str());
-        return EXIT_FAILURE;
+        return false;
     }
 
     oprintf_success("Stripped %s", tag_path.c_str());
 
-    return EXIT_SUCCESS;
+    return true;
 }
 
 int main(int argc, char * const *argv) {
@@ -83,7 +89,7 @@ int main(int argc, char * const *argv) {
     for(auto &i : Invader::File::load_virtual_tag_folder( { strip_options.tags } )) {
         if(Invader::File::path_matches(i.tag_path.c_str(), strip_options.search, strip_options.search_exclude)) {
             total++;
-            success += strip_tag(i.full_path.c_str(), i.tag_path) == EXIT_SUCCESS;
+            success += strip_tag(i.full_path.c_str(), i.tag_path) ? 1 : 0;
         }
     }
 
