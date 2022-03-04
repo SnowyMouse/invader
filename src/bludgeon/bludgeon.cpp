@@ -15,85 +15,78 @@
 
 #include "bludgeoner.hpp"
 
-#define MAKE_BLUDGEON_BIT(bit) static_cast<std::uint64_t>(1) << bit
+using namespace Invader::Bludgeoner;
 
-enum WaysToFuckUpTheTag : std::uint64_t {
-    /** Apply no fixes; just see what we can do */
-    NO_FIXES                            = 0,
-
-    /** Fix color change in tag being incorrect */
-    INVALID_COLOR_CHANGE                = MAKE_BLUDGEON_BIT(0),
-
-    /** Fix invalid enums being used (this is present in stock HEK tags, and in some cases with HEK+ extracted tags,
-        this has led to the game crashing) */
-    BROKEN_ENUMS                        = MAKE_BLUDGEON_BIT(1),
-
-    /** Fix bullshit tag references being used (e.g. light tags being referenced in models) */
-    BROKEN_REFERENCE_CLASSES            = MAKE_BLUDGEON_BIT(2),
-
-    /** Fix the incorrect sound format being reported in the header (incorrect format was done to work around Halo not
-        allowing 16-bit PCM, but this was fixed in mods, and this is undefined behavior) */
-    BROKEN_SOUND_FORMAT                 = MAKE_BLUDGEON_BIT(3),
-
-    /** Fix strings not being null terminated or being the wrong length */
-    BROKEN_STRINGS                      = MAKE_BLUDGEON_BIT(4),
-
-    /** Extract scripts (not having this results in undefined behavior when built by tool.exe) */
-    MISSING_SCRIPTS                     = MAKE_BLUDGEON_BIT(5),
-
-    /** Fix an incorrect sound buffer size */
-    INVALID_SOUND_BUFFER                = MAKE_BLUDGEON_BIT(6),
+struct BludgeonAction {
+    // Simple counter that increments every time it's initialized
+    struct FixBit {
+        std::uint64_t value;
+        
+        operator std::uint64_t() const noexcept {
+            return this->value;
+        }
+        
+        FixBit() {
+            static std::uint64_t fix_bit_current = 1;
+            this->value = fix_bit_current;
+            fix_bit_current <<= 1;
+        }
+        
+        FixBit(std::uint64_t value) {
+            this->value = value;
+        }
+    };
     
-    /** Fix invalid values that are out of bounds for their ranges */
-    BROKEN_RANGE                        = MAKE_BLUDGEON_BIT(7),
+    const char *name;
+    std::optional<bool (*)(Invader::Parser::ParserStruct *s, bool fix)> fix_fn;
+    FixBit fix_bit;
+};
+
+static BludgeonAction all_fixes[] = {
+    /** Fix broken rotation function scales (caused by extracting maps made with older tools that broke this value, even the original HEK) */
+    { .name = "broken-lens-flare-function-scale", .fix_fn = broken_lens_flare_function_scale },
+    
+    /** Fix an incorrect sound buffer size */
+    { .name = "incorrect-sound-buffer", .fix_fn = sound_buffer },
+
+    /** Fix invalid enums being used (this is present in stock tags, and in some cases with HEK+ extracted tags,
+        this has led to the game crashing) */
+    { .name = "invalid-enums", .fix_fn = broken_enums },
     
     /** Fix indices that are out of bounds */
-    INVALID_INDICES                     = MAKE_BLUDGEON_BIT(8),
+    { .name = "invalid-indices", .fix_fn = broken_indices_fix },
 
-    /** Fix normals (broken normals crashes tool.exe and sapien when generating lightmaps) */
-    INVALID_NORMALS                     = MAKE_BLUDGEON_BIT(9),
+    /** Fix strings not being null terminated or being the wrong length */
+    { .name = "invalid-strings", .fix_fn = broken_strings },
     
     /** Fix model markers not being put in the right place (not having this results in undefined behavior when built by
         tool.exe) */
-    INVALID_MODEL_MARKERS               = MAKE_BLUDGEON_BIT(10),
-
-    /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation) */
-    INVALID_VERTICES                    = MAKE_BLUDGEON_BIT(11),
-
-    /** Fix sound permutations not being valid (caused by old versions of Refinery when safe mode is enabled; this cannot be fixed, but it can at least be turned into something technically valid) */
-    INVALID_SOUND_PERMUTATIONS          = MAKE_BLUDGEON_BIT(12),
+    { .name = "invalid-model-markers", .fix_fn = invalid_model_markers },
+    
+    /** Fix bullshit tag references being used (e.g. light tags being referenced in models) */
+    { .name = "invalid-reference-classes", .fix_fn = broken_references },
     
     /** Fix uppercase references */
-    INVALID_UPPERCASE_REFERENCES        = MAKE_BLUDGEON_BIT(13),
-    
-    /** Fix broken rotation function scales (caused by extracting maps made with older tools that broke this value, even the original HEK) */
-    BROKEN_LENS_FLARE_ROTATION_SCALE    = MAKE_BLUDGEON_BIT(14),
+    { .name = "invalid-uppercase-references", .fix_fn = uppercase_references },
     
     /** Fix mismatched sound enums */
-    MISMATCHED_SOUND_ENUMS              = MAKE_BLUDGEON_BIT(15),
-    
-    /** Attempt to unfuck anything that can be unfucked (CAUTION: you can unscrew a lightbulb; you can't unscrew a Halo tag) */
-    EVERYTHING                          = ~0ull
-};
+    { .name = "mismatched-sound-enums", .fix_fn = mismatched_sound_enums },
 
-#define NO_FIXES_FIX "none"
-#define INVALID_COLOR_CHANGE_FIX "broken-color-change"
-#define BROKEN_ENUMS_FIX "invalid-enums"
-#define BROKEN_REFERENCE_CLASSES_FIX "invalid-reference-classes"
-#define INVALID_UPPERCASE_REFERENCES_FIX "invalid-uppercase-references"
-#define BROKEN_SOUND_FORMAT_FIX "invalid-sound-format"
-#define INVALID_MODEL_MARKERS_FIX "invalid-model-markers"
-#define INVALID_VERTICES_FIX "missing-vertices"
-#define MISSING_SCRIPTS_FIX "missing-script-source"
-#define BROKEN_RANGE_FIX "out-of-range"
-#define INVALID_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
-#define INVALID_SOUND_BUFFER_FIX "incorrect-sound-buffer"
-#define INVALID_INDICES_FIX "invalid-indices"
-#define INVALID_NORMALS_FIX "nonnormal-vectors"
-#define BROKEN_STRINGS_FIX "invalid-strings"
-#define BROKEN_LENS_FLARE_ROTATION_SCALE_FIX "broken-lens-flare-function-scale"
-#define MISMATCHED_SOUND_ENUMS_FIX "mismatched-sound-enums"
-#define EVERYTHING_FIX "everything"
+    /** Extract scripts (not having this results in undefined behavior when built by tool.exe) */
+    { .name = "missing-script-source", .fix_fn = missing_scripts },
+
+    /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation) */
+    { .name = "missing-vertices", .fix_fn = broken_vertices },
+
+    /** Fix normals (broken normals crashes tool.exe and sapien when generating lightmaps) */
+    { .name = "nonnormal-vectors", .fix_fn = broken_normals },
+    
+    /** Fix invalid values that are out of bounds for their ranges */
+    { .name = "out-of-range", .fix_fn = broken_range_fix },
+    
+    /** Fix everything */
+    { .name = "everything", .fix_bit = static_cast<std::uint64_t>(~0) }
+};
 
 // Singleton the printf!
 static std::mutex bad_code_design_mutex;
@@ -124,49 +117,25 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
 
         // No fixes; try to detect things
         bool issues_present = false;
-        if(fixes == WaysToFuckUpTheTag::NO_FIXES) {
-            #define check_fix(fix, fix_message) if(fix(parsed_data.get(), false)) { \
-                badly_designed_printf(oprintf_success_warn, "%s: " fix_message, file_path.string().c_str()); \
-                issues_present = true; \
+        if(fixes == 0) {
+            for(auto &i : all_fixes) {
+                if(i.fix_fn.has_value()) {
+                    if((*i.fix_fn)(parsed_data.get(), false)) {
+                        badly_designed_printf(oprintf_success_warn, "%s: Detected %s", file_path.string().c_str(), i.name);
+                        issues_present = true;
+                    }
+                }
             }
-            
-            check_fix(broken_enums, "invalid enums detected; fix with " BROKEN_ENUMS_FIX);
-            check_fix(broken_references, "invalid reference class detected; fix with " BROKEN_REFERENCE_CLASSES_FIX);
-            check_fix(invalid_model_markers, "invalid model markers detected; fix with " INVALID_MODEL_MARKERS_FIX);
-            check_fix(sound_buffer, "incorrect sound buffer size on one or more permutations; fix with " INVALID_SOUND_BUFFER_FIX);
-            check_fix(broken_vertices, "missing compressed or uncompressed vertices; fix with " INVALID_VERTICES_FIX);
-            check_fix(broken_range_fix, "value(s) are out of range; fix with " BROKEN_RANGE_FIX);
-            check_fix(missing_scripts, "script source data is missing; fix with " MISSING_SCRIPTS_FIX);
-            check_fix(broken_indices_fix, "indices are out of bounds; fix with " INVALID_INDICES_FIX);
-            check_fix(broken_normals, "problematic nonnormal vectors detected; fix with " INVALID_NORMALS_FIX);
-            check_fix(broken_strings, "problematic strings detected; fix with " BROKEN_STRINGS_FIX);
-            check_fix(uppercase_references, "uppercase references detected; fix with " INVALID_UPPERCASE_REFERENCES_FIX);
-            check_fix(broken_lens_flare_function_scale, "broken lens flare function scale; fix with " BROKEN_LENS_FLARE_ROTATION_SCALE_FIX);
-            check_fix(mismatched_sound_enums, "mismatched sound class enums detected; fix with " MISMATCHED_SOUND_ENUMS_FIX);
-            
-            #undef check_fix
         }
         else {
-            #define apply_fix(fix, fix_enum, fix_name) if((fixes & fix_enum) && fix(parsed_data.get(), true)) { \
-                badly_designed_printf(oprintf_success, "%s: Fixed " fix_name, file_path.string().c_str()); \
-                issues_present = true; \
+            for(auto &i : all_fixes) {
+                if(i.fix_fn.has_value() && (i.fix_bit & fixes) != 0) {
+                    if((*i.fix_fn)(parsed_data.get(), true)) {
+                        badly_designed_printf(oprintf_success, "%s: Fixed %s", file_path.string().c_str(), i.name);
+                        issues_present = true;
+                    }
+                }
             }
-            
-            apply_fix(broken_enums, BROKEN_ENUMS, BROKEN_ENUMS_FIX);
-            apply_fix(broken_references, BROKEN_REFERENCE_CLASSES, BROKEN_REFERENCE_CLASSES_FIX);
-            apply_fix(invalid_model_markers, INVALID_MODEL_MARKERS, INVALID_MODEL_MARKERS_FIX);
-            apply_fix(broken_range_fix, BROKEN_RANGE, BROKEN_RANGE_FIX);
-            apply_fix(sound_buffer, INVALID_SOUND_BUFFER, INVALID_SOUND_BUFFER_FIX);
-            apply_fix(broken_vertices, INVALID_VERTICES, INVALID_VERTICES_FIX);
-            apply_fix(missing_scripts, MISSING_SCRIPTS, MISSING_SCRIPTS_FIX);
-            apply_fix(broken_indices_fix, INVALID_INDICES, INVALID_INDICES_FIX);
-            apply_fix(broken_normals, INVALID_NORMALS, INVALID_NORMALS_FIX);
-            apply_fix(broken_strings, BROKEN_STRINGS, BROKEN_STRINGS_FIX);
-            apply_fix(uppercase_references, INVALID_UPPERCASE_REFERENCES, INVALID_UPPERCASE_REFERENCES_FIX);
-            apply_fix(broken_lens_flare_function_scale, BROKEN_LENS_FLARE_ROTATION_SCALE, BROKEN_LENS_FLARE_ROTATION_SCALE_FIX);
-            apply_fix(mismatched_sound_enums, MISMATCHED_SOUND_ENUMS, MISMATCHED_SOUND_ENUMS_FIX);
-            
-            #undef apply_fix
         }
 
         // No issues? OK
@@ -177,7 +146,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
         bludgeoned = true;
 
         // Exit out of here
-        if(fixes == WaysToFuckUpTheTag::NO_FIXES) {
+        if(fixes == 0) {
             return EXIT_SUCCESS;
         }
 
@@ -205,7 +174,17 @@ int main(int argc, char * const *argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " INVALID_NORMALS_FIX ", " INVALID_UPPERCASE_REFERENCES_FIX ", " BROKEN_LENS_FLARE_ROTATION_SCALE_FIX ", " MISMATCHED_SOUND_ENUMS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    
+    std::string issues_list;
+    for(auto &i : all_fixes) {
+        if(!issues_list.empty()) {
+            issues_list += ", ";
+        }
+        issues_list += i.name;
+    }
+    issues_list = std::string("Type of bludgeoning. Can be: ") + issues_list;
+    
+    options.emplace_back("type", 'T', 1, issues_list.c_str());
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -214,7 +193,7 @@ int main(int argc, char * const *argv) {
         std::optional<std::filesystem::path> tags;
         bool use_filesystem_path = false;
         bool all = false;
-        std::uint64_t fixes = WaysToFuckUpTheTag::NO_FIXES;
+        std::uint64_t fixes = 0;
         std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
     } bludgeon_options;
 
@@ -248,66 +227,15 @@ int main(int argc, char * const *argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-                break;
             case 'T':
-                if(std::strcmp(arguments[0], NO_FIXES_FIX) == 0) {
-                    bludgeon_options.fixes = WaysToFuckUpTheTag::NO_FIXES;
+                for(auto &i : all_fixes) {
+                    if(std::strcmp(arguments[0], i.name) == 0) {
+                        bludgeon_options.fixes |= i.fix_bit;
+                        return;
+                    }
                 }
-                else if(std::strcmp(arguments[0], INVALID_COLOR_CHANGE_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_COLOR_CHANGE;
-                }
-                else if(std::strcmp(arguments[0], BROKEN_ENUMS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_ENUMS;
-                }
-                else if(std::strcmp(arguments[0], BROKEN_REFERENCE_CLASSES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_REFERENCE_CLASSES;
-                }
-                else if(std::strcmp(arguments[0], MISSING_SCRIPTS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::MISSING_SCRIPTS;
-                }
-                else if(std::strcmp(arguments[0], BROKEN_SOUND_FORMAT_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_SOUND_FORMAT;
-                }
-                else if(std::strcmp(arguments[0], INVALID_MODEL_MARKERS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_MODEL_MARKERS;
-                }
-                else if(std::strcmp(arguments[0], INVALID_VERTICES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_VERTICES;
-                }
-                else if(std::strcmp(arguments[0], INVALID_SOUND_PERMUTATIONS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_SOUND_PERMUTATIONS;
-                }
-                else if(std::strcmp(arguments[0], INVALID_SOUND_BUFFER_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_SOUND_BUFFER;
-                }
-                else if(std::strcmp(arguments[0], BROKEN_RANGE_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_RANGE;
-                }
-                else if(std::strcmp(arguments[0], INVALID_INDICES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_INDICES;
-                }
-                else if(std::strcmp(arguments[0], INVALID_NORMALS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_NORMALS;
-                }
-                else if(std::strcmp(arguments[0], BROKEN_STRINGS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_STRINGS;
-                }
-                else if(std::strcmp(arguments[0], INVALID_UPPERCASE_REFERENCES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_UPPERCASE_REFERENCES;
-                }
-                else if(std::strcmp(arguments[0], BROKEN_LENS_FLARE_ROTATION_SCALE_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_LENS_FLARE_ROTATION_SCALE;
-                }
-                else if(std::strcmp(arguments[0], MISMATCHED_SOUND_ENUMS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::MISMATCHED_SOUND_ENUMS;
-                }
-                else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
-                    bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;
-                }
-                else {
-                    eprintf_error("Unknown fix type %s", arguments[0]);
-                    std::exit(EXIT_FAILURE);
-                }
+                eprintf_error("Unknown fix type %s", arguments[0]);
+                std::exit(EXIT_FAILURE);
                 break;
         }
     });

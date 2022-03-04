@@ -269,15 +269,16 @@ Options:
   -P --fs-path                 Use a filesystem path for the tag path if
                                specifying a tag.
   -t --tags <dir>              Use the specified tags directory.
-  -T --type                    Type of bludgeoning. Can be: invalid-enums,
-                               out-of-range, invalid-strings,
-                               invalid-reference-classes,
-                               invalid-model-markers, missing-script-source,
-                               incorrect-sound-buffer, missing-vertices,
-                               nonnormal-vectors, invalid-uppercase-references,
+  -T --type                    Type of bludgeoning. Can be:
                                broken-lens-flare-function-scale,
-                               mismatched-sound-enums, none, everything
-                               (default: none)
+                               incorrect-sound-buffer, invalid-enums,
+                               invalid-indices, invalid-strings,
+                               invalid-model-markers,
+                               invalid-reference-classes,
+                               invalid-uppercase-references,
+                               mismatched-sound-enums, missing-script-source,
+                               missing-vertices, nonnormal-vectors,
+                               out-of-range, everything
 ```
 
 ### invader-build
