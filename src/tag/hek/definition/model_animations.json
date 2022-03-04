@@ -257,7 +257,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponTypeAnimation",
-                "maximum": 16
+                "maximum": 10
             }
         ],
         "type": "struct",
@@ -333,7 +333,7 @@
                 "name": "weapon types",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeaponType",
-                "maximum": 10
+                "maximum": 16
             }
         ],
         "type": "struct",
@@ -388,7 +388,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponClassAnimation",
-                "maximum": 33
+                "maximum": 30
             },
             {
                 "name": "ik points",
@@ -849,13 +849,13 @@
                 "name": "units",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeat",
-                "maximum": 33
+                "maximum": 32
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeaponAnimations",
-                "maximum": 16
+                "maximum": 1
             },
             {
                 "name": "vehicles",
@@ -867,7 +867,7 @@
                 "name": "devices",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsDeviceAnimations",
-                "maximum": 2
+                "maximum": 1
             },
             {
                 "name": "unit damage",
@@ -879,13 +879,13 @@
                 "name": "first person weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphFirstPersonWeaponAnimations",
-                "maximum": 28
+                "maximum": 1
             },
             {
                 "name": "sound references",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphSoundReference",
-                "maximum": 514
+                "maximum": 513
             },
             {
                 "name": "limp body node radius",
