@@ -220,7 +220,16 @@ namespace Invader::File {
      * @param pattern pattern to check
      * @return        true if a match was found
      */
-    bool path_matches(const char *path, const char *pattern);
+    bool path_matches(const char *path, const char *pattern) noexcept;
+    
+    /**
+     * Check if the path matches (? matches any character, * matches any number of characters, / and \ match any path separator
+     * @param path    path to check
+     * @param include include patterns to check (empty matches all)
+     * @param exclude exclude patterns to check
+     * @return        true if a match was found
+     */
+    bool path_matches(const char *path, const std::vector<std::string> &include, const std::vector<std::string> &exclude) noexcept;
 }
 
 #endif

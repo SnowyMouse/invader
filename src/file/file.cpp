@@ -463,7 +463,7 @@ namespace Invader::File {
         }
     }
     
-    bool path_matches(const char *path, const char *pattern) {
+    bool path_matches(const char *path, const char *pattern) noexcept {
         for(const char *p = pattern;; p++) {
             // End of string
             if(*p == *path && *p == 0) {
@@ -495,6 +495,24 @@ namespace Invader::File {
                 return false;
             }
         }
+        return true;
+    }
+    
+    bool path_matches(const char *path, const std::vector<std::string> &include, const std::vector<std::string> &exclude) noexcept {
+        // Check if excluded
+        for(auto &e : exclude) {
+            if(path_matches(path, e.c_str())) {
+                return false;
+            }
+        }
+        
+        // Check if included
+        for(auto &i : include) {
+            if(!path_matches(path, i.c_str())) {
+                return false;
+            }
+        }
+        
         return true;
     }
 }

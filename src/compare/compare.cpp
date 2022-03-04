@@ -257,27 +257,9 @@ int main(int argc, const char **argv) {
         
         // Check if it matches our filters
         auto add_if_matched = [&i, &compare_options](Invader::File::TagFilePath &&path) {
-            auto path_joined = Invader::File::preferred_path_to_halo_path(path.join());
-            if(!compare_options.search_exclude.empty()) {
-                for(auto &i : compare_options.search_exclude) {
-                    if(File::path_matches(path_joined.c_str(), i.c_str())) {
-                        return;
-                    }
-                }
+            if(File::path_matches(Invader::File::preferred_path_to_halo_path(path.join()).c_str(), compare_options.search, compare_options.search_exclude)) {
+                i.tag_paths.emplace_back(std::move(path));
             }
-            if(!compare_options.search.empty()) {
-                bool matched = false;
-                for(auto &i : compare_options.search) {
-                    if(File::path_matches(path_joined.c_str(), i.c_str())) {
-                        matched = true;
-                        break;
-                    }
-                }
-                if(!matched) {
-                    return;
-                }
-            }
-            i.tag_paths.emplace_back(std::move(path));
         };
             
         if(i.map.has_value()) {
