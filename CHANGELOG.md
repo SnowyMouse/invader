@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Added
 - invader-bludgeon: Added -T mismatched-sound-enums
+- invader-bludgeon: Added --search and --search-exclude
 
 ### Changed
 - VT100 colors are now used on win32 builds. This may fix a few error messages
@@ -47,6 +48,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Removed
 - invader-bludgeon: Removed -T null-terminated-scripts
 - invader-bludgeon: Nulled indices are no longer listed
+- invader-bludgeon: Removed -P and singular tag path bludgeoning (use -s)
 
 ## [0.46.3] - 2022-02-08
 ### Fixed

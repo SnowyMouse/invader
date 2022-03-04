@@ -94,7 +94,7 @@ static std::mutex bad_code_design_mutex;
                                              function(__VA_ARGS__); \
                                              bad_code_design_mutex.unlock();
 
-static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fixes, bool &bludgeoned) {
+static int bludgeon_tag(const std::filesystem::path &file_path, const std::string &tag_path, std::uint64_t fixes, bool &bludgeoned) {
     using namespace Invader::Bludgeoner;
     using namespace Invader::HEK;
     using namespace Invader::File;
@@ -121,7 +121,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
             for(auto &i : all_fixes) {
                 if(i.fix_fn.has_value()) {
                     if((*i.fix_fn)(parsed_data.get(), false)) {
-                        badly_designed_printf(oprintf_success_warn, "%s: Detected %s", file_path.string().c_str(), i.name);
+                        badly_designed_printf(oprintf_success_warn, "%s: Detected %s", tag_path.c_str(), i.name);
                         issues_present = true;
                     }
                 }
@@ -131,7 +131,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
             for(auto &i : all_fixes) {
                 if(i.fix_fn.has_value() && (i.fix_bit & fixes) != 0) {
                     if((*i.fix_fn)(parsed_data.get(), true)) {
-                        badly_designed_printf(oprintf_success, "%s: Fixed %s", file_path.string().c_str(), i.name);
+                        badly_designed_printf(oprintf_success, "%s: Fixed %s", tag_path.c_str(), i.name);
                         issues_present = true;
                     }
                 }
@@ -160,7 +160,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
         return EXIT_SUCCESS;
     }
     catch(std::exception &e) {
-        badly_designed_printf(eprintf_error, "Error: Failed to bludgeon %s: %s", file_path.string().c_str(), e.what());
+        badly_designed_printf(eprintf_error, "Error: Failed to bludgeon %s: %s", tag_path.c_str(), e.what());
         return EXIT_FAILURE;
     }
 }
@@ -171,9 +171,10 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
-    options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count");
+    
+    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and bludgeon these. Use multiple times for multiple queries. If unspecified, all tags will be bludgeoned.", "<expr>");
+    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>");
     
     std::string issues_list;
     for(auto &i : all_fixes) {
@@ -187,17 +188,18 @@ int main(int argc, char * const *argv) {
     options.emplace_back("type", 'T', 1, issues_list.c_str());
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
-    static constexpr char USAGE[] = "[options] <-a | tag.class>";
+    static constexpr char USAGE[] = "[options]";
 
     struct BludgeonOptions {
         std::optional<std::filesystem::path> tags;
-        bool use_filesystem_path = false;
-        bool all = false;
         std::uint64_t fixes = 0;
+        std::vector<std::string> search;
+        std::vector<std::string> search_exclude;
         std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
     } bludgeon_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
+        using namespace Invader;
         switch(opt) {
             case 't':
                 if(bludgeon_options.tags.has_value()) {
@@ -209,12 +211,15 @@ int main(int argc, char * const *argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
-            case 'P':
-                bludgeon_options.use_filesystem_path = true;
+                
+            case 's':
+                bludgeon_options.search.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
                 break;
-            case 'a':
-                bludgeon_options.all = true;
+                
+            case 'e':
+                bludgeon_options.search_exclude.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
                 break;
+                
             case 'j':
                 try {
                     bludgeon_options.max_threads = std::stoi(arguments[0]);
@@ -246,74 +251,62 @@ int main(int argc, char * const *argv) {
 
     auto &fixes = bludgeon_options.fixes;
 
-    if(remaining_arguments.size() == 0) {
-        if(!bludgeon_options.all) {
-            eprintf_error("Expected --all to be used OR a tag path. Use -h for more information.");
-            return EXIT_FAILURE;
-        }
-
-        std::size_t success = 0;
-        
-        auto all_tags = Invader::File::load_virtual_tag_folder(std::vector<std::filesystem::path>(&*bludgeon_options.tags, &*bludgeon_options.tags + 1));
-        std::mutex thread_mutex;
-        std::vector<std::thread> threads;
-        std::size_t tag_index = 0;
-        threads.reserve(bludgeon_options.max_threads);
-        
-        auto bludgeon_worker = [](auto *all_tags, std::size_t *tag_index, std::mutex *thread_mutex, std::size_t *success, auto *fixes) {
-            while(true) {
-                thread_mutex->lock();
-                std::size_t this_index = *tag_index;
-                if(this_index == all_tags->size()) {
-                    thread_mutex->unlock();
-                    return;
-                }
-                (*tag_index)++;
-                thread_mutex->unlock();
-                
-                // Bludgeon
-                bool bludgeoned;
-                bludgeon_tag(all_tags->data()[this_index].full_path, *fixes, bludgeoned);
-                
-                // Increment
-                thread_mutex->lock();
-                (*success) += bludgeoned;
-                thread_mutex->unlock();
-            }
-        };
-        
-        // Go through each tag
-        for(std::size_t i = 0; i < bludgeon_options.max_threads; i++) {
-            threads.emplace_back(bludgeon_worker, &all_tags, &tag_index, &thread_mutex, &success, &fixes);
-        }
-        
-        // Wait for all threads to end
-        for(auto &i : threads) {
-            i.join();
-        }
-
-        oprintf("%s %zu out of %zu tag%s\n", fixes ? "Bludgeoned" : "Identified issues with", success, tag_index, tag_index == 1 ? "" : "s");
-
-        return EXIT_SUCCESS;
-    }
-    else if(bludgeon_options.all) {
-        eprintf_error("--all and a tag path cannot be used at the same time. Use -h for more information.");
-        return EXIT_FAILURE;
+    std::size_t success = 0;
+    
+    auto all_virtual_tags = Invader::File::load_virtual_tag_folder(std::vector<std::filesystem::path>(&*bludgeon_options.tags, &*bludgeon_options.tags + 1));
+    decltype(all_virtual_tags) all_tags;
+    all_tags.reserve(all_virtual_tags.size());
+    
+    if(bludgeon_options.search.empty() && bludgeon_options.search_exclude.empty()) {
+        all_tags = std::move(all_virtual_tags);
     }
     else {
-        std::filesystem::path file_path;
-        if(bludgeon_options.use_filesystem_path) {
-            file_path = std::string(remaining_arguments[0]);
+        for(auto &i : all_virtual_tags) {
+            if(Invader::File::path_matches(i.tag_path.c_str(), bludgeon_options.search, bludgeon_options.search_exclude)) {
+                all_tags.emplace_back(std::move(i));
+            }
         }
-        else {
-            file_path = std::filesystem::path(*bludgeon_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
-        }
-        std::string file_path_str = file_path.string();
-        bool bludgeoned;
-        int result = bludgeon_tag(file_path_str.c_str(), fixes, bludgeoned);
-        if(result == EXIT_SUCCESS && !bludgeoned) {
-            oprintf("%s: No issues detected\n", file_path_str.c_str());
-        }
-        return result;
     }
+    
+    std::mutex thread_mutex;
+    std::vector<std::thread> threads;
+    std::size_t tag_index = 0;
+    threads.reserve(bludgeon_options.max_threads);
+    
+    auto bludgeon_worker = [](auto *all_tags, std::size_t *tag_index, std::mutex *thread_mutex, std::size_t *success, auto *fixes) {
+        while(true) {
+            thread_mutex->lock();
+            std::size_t this_index = *tag_index;
+            if(this_index == all_tags->size()) {
+                thread_mutex->unlock();
+                return;
+            }
+            (*tag_index)++;
+            thread_mutex->unlock();
+            
+            // Bludgeon
+            bool bludgeoned;
+            auto &tag = all_tags->data()[this_index];
+            bludgeon_tag(tag.full_path, tag.tag_path, *fixes, bludgeoned);
+            
+            // Increment
+            thread_mutex->lock();
+            (*success) += bludgeoned;
+            thread_mutex->unlock();
+        }
+    };
+    
+    // Go through each tag
+    for(std::size_t i = 0; i < bludgeon_options.max_threads; i++) {
+        threads.emplace_back(bludgeon_worker, &all_tags, &tag_index, &thread_mutex, &success, &fixes);
+    }
+    
+    // Wait for all threads to end
+    for(auto &i : threads) {
+        i.join();
+    }
+
+    oprintf("%s %zu out of %zu tag%s\n", fixes ? "Bludgeoned" : "Identified issues with", success, tag_index, tag_index == 1 ? "" : "s");
+
+    return EXIT_SUCCESS;
 }

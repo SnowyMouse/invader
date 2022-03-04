@@ -255,19 +255,23 @@ Refer to [Creating a bitmap] for information on how to create bitmap tags.
 This program convinces broken tags to work with Invader.
 
 ```
-Usage: invader-bludgeon [options] <-a | tag.class>
+Usage: invader-bludgeon [options]
 
 Convinces tags to work with Invader.
 
 Options:
-  -a --all                     Bludgeon all tags in the tags directory.
+  -e --search-exclude <expr>   Search for tags (* and ? are wildcards) and
+                               ignore these. Use multiple times for multiple
+                               queries. This takes precedence over --search.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
   -j --threads                 Set the number of threads to use for parallel
                                bludgeoning when using --all. Default: CPU
                                thread count
-  -P --fs-path                 Use a filesystem path for the tag path if
-                               specifying a tag.
+  -s --search <expr>           Search for tags (* and ? are wildcards) and
+                               bludgeon these. Use multiple times for multiple
+                               queries. If unspecified, all tags will be
+                               bludgeoned.
   -t --tags <dir>              Use the specified tags directory.
   -T --type                    Type of bludgeoning. Can be:
                                broken-lens-flare-function-scale,
@@ -949,7 +953,7 @@ nevertheless.
 The most common issues can be fixed by running the following command:
 
 ```
-invader-bludgeon --all -T invalid-indices -T invalid-enums -T out-of-range
+invader-bludgeon -T invalid-indices -T invalid-enums -T out-of-range
 ```
 
 The stock Halo Editing Kit also comes with a number of tags that reference model
