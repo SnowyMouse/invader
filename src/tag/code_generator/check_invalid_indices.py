@@ -55,6 +55,8 @@ def make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_inv
                 cpp_check_invalid_indices.write("                    if(this->{} >= count) {{\n".format(name))
                 cpp_check_invalid_indices.write("                        if(null_indices) {\n")
                 cpp_check_invalid_indices.write("                            return_value = true;\n")
+                
+                # Commented out. This shows the indices that were nulled, but it isn't thread-safe, nor is it consistent with other bludgeon outputs.
                 #cpp_check_invalid_indices.write("                            oprintf_success_lesser_warn(\"    Nulled {}::{} ({}::{} #%zu >= %zu)\", static_cast<std::size_t>(this->{}), count);\n".format(struct_name, name, struct_to_check, member_to_check, name))
                 #cpp_check_invalid_indices.write("                            oprintf_success_lesser_warn(\"    Stack:\");\n")
                 #cpp_check_invalid_indices.write("                            auto stack_size = stack.size();\n")
@@ -64,6 +66,7 @@ def make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_inv
                 #cpp_check_invalid_indices.write("                                auto index = std::get<1>(stack[i]);\n")
                 #cpp_check_invalid_indices.write("                                oprintf_success_lesser_warn(\"        %s::%s #%zu\", parent_struct_name, member_name, index);\n")
                 #cpp_check_invalid_indices.write("                            }\n")
+                
                 cpp_check_invalid_indices.write("                            this->{} = NULL_INDEX;\n".format(name))
                 cpp_check_invalid_indices.write("                        }\n")
                 cpp_check_invalid_indices.write("                        else {\n")

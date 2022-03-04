@@ -275,8 +275,9 @@ Options:
                                invalid-model-markers, missing-script-source,
                                incorrect-sound-buffer, missing-vertices,
                                nonnormal-vectors, invalid-uppercase-references,
-                               broken-lens-flare-function-scale, none,
-                               everything (default: none)
+                               broken-lens-flare-function-scale,
+                               mismatched-sound-enums, none, everything
+                               (default: none)
 ```
 
 ### invader-build

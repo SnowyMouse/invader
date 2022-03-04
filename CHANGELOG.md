@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-bludgeon: Added -T mismatched-sound-enums
+
 ### Changed
 - VT100 colors are now used on win32 builds. This may fix a few error messages
   being formatted/colored improperly as well as improve performance.

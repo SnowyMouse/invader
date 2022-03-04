@@ -206,4 +206,36 @@ namespace Invader::Bludgeoner {
         
         return rval;
     }
+    
+    bool mismatched_sound_enums(Parser::ParserStruct *s, bool fix) {
+        return [&fix](auto *s) -> bool {
+            if(s == nullptr) {
+                return false;
+            }
+            
+            std::list<decltype(s->format)> formats;
+            for(Invader::Parser::SoundPitchRange &pr : s->pitch_ranges) {
+                for(auto &pe : pr.permutations) {
+                    formats.emplace_back(pe.format);
+                }
+            }
+            formats.sort();
+            formats.unique();
+            
+            // We can't fix this
+            if(formats.size() != 1) {
+                return false;
+            }
+            else {
+                auto actual_format = *formats.begin();
+                if(actual_format != s->format) {
+                    if(fix) {
+                        s->format = actual_format;
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }(dynamic_cast<Invader::Parser::Sound *>(s));
+    }
 }
