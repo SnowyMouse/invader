@@ -210,9 +210,16 @@ namespace Invader {
                 default:
                     throw UnsupportedMapEngineException();
             }
+            
+            // Decompressed file size?
+            if(header.decompressed_file_size > data_length) {
+                eprintf_error("Decompressed file size is too large! (expected %zu, got %zu)", static_cast<std::size_t>(header.decompressed_file_size), data_length);
+                throw InvalidMapException();
+            }
 
             // Check if any overflowing occurs
-            if(header.decompressed_file_size > data_length || header.build.overflows() || header.name.overflows()) {
+            if(header.build.overflows() || header.name.overflows()) {
+                eprintf_error("Header data overflow detected!");
                 throw InvalidMapException();
             }
             
@@ -237,6 +244,7 @@ namespace Invader {
             // Maybe it's a demo map?
             auto *demo_header_maybe = reinterpret_cast<const CacheFileDemoHeader *>(header_maybe);
             if(!demo_header_maybe->valid()) {
+                eprintf_error("Header is incorrect");
                 throw InvalidMapException();
             }
             continue_loading_map(*this, *demo_header_maybe);
