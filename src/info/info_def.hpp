@@ -21,12 +21,13 @@ namespace Invader::Info {
     /**
      * List all indices of external tags with the given parameters
      * @param map         map to check
-     * @param data_type   resource map type
+     * @param data_type   resource map type (if std::nullopt, then any type)
      * @param by_index    check indexed tags
      * @param by_resource check tags with external pointers to resource maps
+     * @param inverted    invert the check and look for internal tags
      * @return            vector of all external tags with the parameters given
      */
-    std::vector<std::size_t> find_external_tags_indices(const Invader::Map &map, Map::DataMapType data_type, bool by_index, bool by_resource);
+    std::vector<std::size_t> find_external_tags_indices(const Invader::Map &map, std::optional<Map::DataMapType> data_type, bool by_index, bool by_resource, bool inverted = false);
     
     /**
      * Calculate the number of stubbed tags in the map
@@ -72,34 +73,45 @@ namespace Invader::Info {
     
     void overview(const Invader::Map &);
     void build(const Invader::Map &);
-    void compressed(const Invader::Map &);
     void crc32(const Invader::Map &);
     void crc32_mismatched(const Invader::Map &);
-    void dirty(const Invader::Map &);
     void engine(const Invader::Map &);
     void external_bitmap_indices(const Invader::Map &);
+    void external_bitmap_indices_count(const Invader::Map &);
+    void external_bitmap_pointers(const Invader::Map &);
+    void external_bitmap_pointers_count(const Invader::Map &);
     void external_bitmaps(const Invader::Map &);
+    void external_bitmaps_count(const Invader::Map &);
     void external_indices(const Invader::Map &);
+    void external_indices_count(const Invader::Map &);
     void external_loc_indices(const Invader::Map &);
-    void external_pointers(const Invader::Map &);
+    void external_loc_indices_count(const Invader::Map &);
     void external_sound_indices(const Invader::Map &);
+    void external_sound_indices_count(const Invader::Map &);
+    void external_sound_pointers(const Invader::Map &);
+    void external_sound_pointers_count(const Invader::Map &);
     void external_sounds(const Invader::Map &);
+    void external_sounds_count(const Invader::Map &);
     void external_tags(const Invader::Map &);
+    void external_tags_count(const Invader::Map &);
+    void internal_bitmaps(const Invader::Map &);
+    void internal_bitmaps_count(const Invader::Map &);
+    void internal_sounds(const Invader::Map &);
+    void internal_sounds_count(const Invader::Map &);
+    void is_compressed(const Invader::Map &);
+    void is_dirty(const Invader::Map &);
+    void is_protected(const Invader::Map &);
     void languages(const Invader::Map &);
     void map_type(const Invader::Map &);
-    void protection(const Invader::Map &);
+    void protection_issues(const Invader::Map &);
     void scenario(const Invader::Map &);
     void scenario_path(const Invader::Map &);
-    void tag_count(const Invader::Map &);
     void stub_count(const Invader::Map &);
     void tags(const Invader::Map &);
-    void tags_external_bitmap_indices(const Invader::Map &);
-    void tags_external_loc_indices(const Invader::Map &);
-    void tags_external_pointers(const Invader::Map &);
-    void tags_external_sound_indices(const Invader::Map &);
-    void tags_external_indices(const Invader::Map &);
+    void tags_count(const Invader::Map &);
     void tag_order_match(const Invader::Map &);
     void uncompressed_size(const Invader::Map &);
+    void uses_external_pointers(const Invader::Map &);
 }
 
 #endif

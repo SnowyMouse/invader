@@ -10,7 +10,14 @@
 #include "info_def.hpp"
 
 namespace Invader::Info {
-    std::vector<std::pair<std::size_t, std::size_t>> resource_offsets_for_tag(const Invader::Tag &tag) {
+    static void print_all_indices(const Invader::Map &map, const std::vector<std::size_t> &indices) {
+        for(auto i : indices) {
+            auto &tag = map.get_tag(i);
+            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));
+        }
+    }
+    
+    static std::vector<std::pair<std::size_t, std::size_t>> resource_offsets_for_tag(const Invader::Tag &tag) {
         std::vector<std::pair<std::size_t, std::size_t>> offsets;
         
         // Ignore stubbed/indexed tags
@@ -59,11 +66,24 @@ namespace Invader::Info {
         return offsets;
     }
     
-    std::vector<std::size_t> find_external_tags_indices(const Invader::Map &map, Map::DataMapType data_type, bool by_index, bool by_resource) {
+    std::vector<std::size_t> find_external_tags_indices(const Invader::Map &map, std::optional<Map::DataMapType> data_type, bool by_index, bool by_resource, bool inverted) {
         std::vector<std::size_t> indices;
+        
+        // if data_type is null, do all
+        if(!data_type.has_value()) {
+            auto bitmaps = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, by_index, by_resource, inverted);
+            auto sounds = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, by_index, by_resource, inverted);
+            auto loc = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, by_index, by_resource, inverted);
+            
+            indices.insert(indices.end(), bitmaps.begin(), bitmaps.end());
+            indices.insert(indices.end(), sounds.begin(), sounds.end());
+            indices.insert(indices.end(), loc.begin(), loc.end());
+            return indices;
+        }
+        
         std::size_t tag_count = map.get_tag_count();
         std::vector<HEK::TagFourCC> allowed_classes;
-        switch(data_type) {
+        switch(*data_type) {
             case Map::DataMapType::DATA_MAP_BITMAP:
                 allowed_classes.push_back(HEK::TagFourCC::TAG_FOURCC_BITMAP);
                 break;
@@ -99,7 +119,7 @@ namespace Invader::Info {
             }
             
             // Add that thing
-            if((by_index && tag.is_indexed()) || (by_resource && resource_offsets_for_tag(tag).size() > 0)) {
+            if(((by_index && tag.is_indexed()) || (by_resource && resource_offsets_for_tag(tag).size() > 0)) != inverted) {
                 indices.push_back(i);
             }
         }
@@ -302,10 +322,6 @@ namespace Invader::Info {
         oprintf("%s\n", map.get_build());
     }
     
-    void compressed(const Invader::Map &map) {
-        oprintf("%i\n", map.get_compression_algorithm());
-    }
-    
     void crc32(const Invader::Map &map) {
         oprintf("0x%08X\n", map.get_crc32());
     }
@@ -313,40 +329,88 @@ namespace Invader::Info {
         oprintf("%i\n", map.get_crc32() != map.get_header_crc32());
     }
     
-    void dirty(const Invader::Map &map) {
-        oprintf("%i\n", !map.is_clean());
-    }
-    
     void engine(const Invader::Map &map) {
         oprintf("%s\n", HEK::GameEngineInfo::get_game_engine_info(map.get_game_engine()).name);
     }
     
-    void external_bitmap_indices(const Invader::Map &map) {
+    void external_bitmap_indices_count(const Invader::Map &map) {
         oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, false).size());
     }
-    void external_bitmaps(const Invader::Map &map) {
+    void external_bitmaps_count(const Invader::Map &map) {
         oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, true).size());
     }
     
-    void external_loc_indices(const Invader::Map &map) {
-        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false).size());
-    }
-    
-    void external_sound_indices(const Invader::Map &map) {
-        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, false).size());
+    void external_bitmaps(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, true));
     }
     void external_sounds(const Invader::Map &map) {
-        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, true).size());
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, true));
+    }
+    
+    void internal_bitmaps(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, true, true));
+    }
+    void internal_sounds(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, true, true));
+    }
+    void internal_bitmaps_count(const Invader::Map &map) {
+        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, true, true).size());
+    }
+    void internal_sounds_count(const Invader::Map &map) {
+        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, true, true).size());
     }
     
     void external_tags(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map,std::nullopt, true, true));
+    }
+    
+    void external_loc_indices_count(const Invader::Map &map) {
+        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false).size());
+    }
+    
+    void external_sound_indices_count(const Invader::Map &map) {
+        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, false).size());
+    }
+    
+    void external_sounds_count(const Invader::Map &map) {
+        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, true).size());
+    }
+    
+    void external_tags_count(const Invader::Map &map) {
         oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, true).size() + find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, true).size() + find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, true).size());
     }
-    void external_indices(const Invader::Map &map) {
+    void external_indices_count(const Invader::Map &map) {
         oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, true).size() + find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false).size() + find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, false).size());
     }
+    
+    void external_loc_indices(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false));
+    }
     void external_pointers(const Invader::Map &map) {
-        oprintf("%i\n", (find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, false, true).size() + find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, false, true).size() + find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, false, true).size()) > 0);
+        print_all_indices(map, find_external_tags_indices(map, std::nullopt, false, true));
+    }
+    void external_bitmap_indices(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, false));
+    }
+    void external_sound_indices(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, false));
+    }
+    void external_indices(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, std::nullopt, true, false));
+    }
+    
+    void external_bitmap_pointers(const Invader::Map &map) {
+        std::printf("A\n");
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, false, true));
+    }
+    void external_bitmap_pointers_count(const Invader::Map &map) {
+        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, false, true).size());
+    }
+    void external_sound_pointers(const Invader::Map &map) {
+        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, false, true));
+    }
+    void external_sound_pointers_count(const Invader::Map &map) {
+        oprintf("%zu\n", find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, false, true).size());
     }
     
     void languages(const Invader::Map &map) {
@@ -367,8 +431,22 @@ namespace Invader::Info {
         oprintf("%s\n", type_name(map.get_type()));
     }
     
-    void protection(const Invader::Map &map) {
+    void is_compressed(const Invader::Map &map) {
+        oprintf("%i\n", map.get_compression_algorithm());
+    }
+    void is_dirty(const Invader::Map &map) {
+        oprintf("%i\n", !map.is_clean());
+    }
+    void is_protected(const Invader::Map &map) {
         oprintf("%i\n", map.is_protected());
+    }
+    
+    void protection_issues(const Invader::Map &map) {
+        std::vector<std::string> list;
+        map.is_protected(list);
+        for(auto &i : list) {
+            oprintf("%s\n", i.c_str());
+        }
     }
     
     void scenario(const Invader::Map &map) {
@@ -379,7 +457,7 @@ namespace Invader::Info {
         oprintf("%s\n", File::halo_path_to_preferred_path(map.get_tag(map.get_scenario_tag_id()).get_path()).c_str());
     }
     
-    void tag_count(const Invader::Map &map) {
+    void tags_count(const Invader::Map &map) {
         oprintf("%zu\n", map.get_tag_count());
     }
     
@@ -393,33 +471,6 @@ namespace Invader::Info {
             auto &tag = map.get_tag(i);
             oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));
         }
-    }
-    
-    static void print_all_indices(const Invader::Map &map, const std::vector<std::size_t> &indices) {
-        for(auto i : indices) {
-            auto &tag = map.get_tag(i);
-            oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag.get_tag_fourcc()));
-        }
-    }
-    
-    void tags_external_bitmap_indices(const Invader::Map &map) {
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, false));
-    }
-    void tags_external_loc_indices(const Invader::Map &map) {
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false));
-    }
-    void tags_external_pointers(const Invader::Map &map) {
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, false, true));
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, false, true));
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, false, true));
-    }
-    void tags_external_sound_indices(const Invader::Map &map) {
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, false, true));
-    }
-    void tags_external_indices(const Invader::Map &map) {
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, false));
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_LOC, true, false));
-        print_all_indices(map, find_external_tags_indices(map, Map::DataMapType::DATA_MAP_SOUND, true, false));
     }
     
     void uncompressed_size(const Invader::Map &map) {
@@ -447,5 +498,9 @@ namespace Invader::Info {
                 oprintf("matched\n");
                 break;
         }
+    }
+    
+    void uses_external_pointers(const Invader::Map &map) {
+        oprintf("%i\n", !find_external_tags_indices(map, std::nullopt, false, true).empty());
     }
 }

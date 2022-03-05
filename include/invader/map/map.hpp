@@ -295,7 +295,15 @@ namespace Invader {
 
         /**
          * Get whether the map is obviously protected
-         * @return true if the map is obviously protected
+         * @param  reasons human-readable diagnostics of what makes the map protected
+         * @return         true if the map is obviously protected
+         */
+        bool is_protected(std::vector<std::string> &reasons) const noexcept;
+        
+        /**
+         * Get whether the map is obviously protected
+         * @param  reasons human-readable diagnostics of what makes the map protected
+         * @return         true if the map is obviously protected
          */
         bool is_protected() const noexcept;
         

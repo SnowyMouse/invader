@@ -116,11 +116,12 @@ namespace Invader::Info {
         }
         
         // Protected?
-        if(!map.is_protected()) {
+        std::vector<std::string> protection_reasons;
+        if(!map.is_protected(protection_reasons)) {
             PRINT_LINE(oprintf_success, "Protected:", "%s", "No (probably)");
         }
         else {
-            PRINT_LINE(oprintf_success_warn, "Protected:", "%s", "Yes");
+            PRINT_LINE(oprintf_success_warn, "Protected:", "%s (probably - %zu issue%s)", "Yes", protection_reasons.size(), protection_reasons.size() == 1 ? "" : "s");
         }
         
         std::size_t external_bitmaps = find_external_tags_indices(map, Map::DataMapType::DATA_MAP_BITMAP, true, true).size();
@@ -258,35 +259,59 @@ namespace Invader::Info {
 static DisplayValue all_values[] = {
     MAKE_DISPLAY_VALUE(overview),
     MAKE_DISPLAY_VALUE(build),
-    MAKE_DISPLAY_VALUE(compressed),
     MAKE_DISPLAY_VALUE(compression_ratio),
     MAKE_DISPLAY_VALUE(crc32),
     MAKE_DISPLAY_VALUE(crc32_mismatched),
-    MAKE_DISPLAY_VALUE(dirty),
     MAKE_DISPLAY_VALUE(engine),
-    MAKE_DISPLAY_VALUE(external_bitmap_indices),
+    
     MAKE_DISPLAY_VALUE(external_bitmaps),
+    MAKE_DISPLAY_VALUE(external_bitmaps_count),
+    
+    MAKE_DISPLAY_VALUE(external_bitmap_indices),
+    MAKE_DISPLAY_VALUE(external_bitmap_indices_count),
+    
+    MAKE_DISPLAY_VALUE(external_bitmap_pointers),
+    MAKE_DISPLAY_VALUE(external_bitmap_pointers_count),
+    
     MAKE_DISPLAY_VALUE(external_indices),
+    MAKE_DISPLAY_VALUE(external_indices_count),
+    
     MAKE_DISPLAY_VALUE(external_loc_indices),
-    MAKE_DISPLAY_VALUE(external_pointers),
-    MAKE_DISPLAY_VALUE(external_sound_indices),
+    MAKE_DISPLAY_VALUE(external_loc_indices_count),
+    
     MAKE_DISPLAY_VALUE(external_sounds),
+    MAKE_DISPLAY_VALUE(external_sounds_count),
+    
+    MAKE_DISPLAY_VALUE(external_sound_indices),
+    MAKE_DISPLAY_VALUE(external_sound_indices_count),
+    
+    MAKE_DISPLAY_VALUE(external_sound_pointers),
+    MAKE_DISPLAY_VALUE(external_sound_pointers_count),
+    
     MAKE_DISPLAY_VALUE(external_tags),
+    MAKE_DISPLAY_VALUE(external_tags_count),
+    
+    MAKE_DISPLAY_VALUE(internal_bitmaps),
+    MAKE_DISPLAY_VALUE(internal_bitmaps_count),
+    
+    MAKE_DISPLAY_VALUE(internal_sounds),
+    MAKE_DISPLAY_VALUE(internal_sounds_count),
+    
+    
+    MAKE_DISPLAY_VALUE(is_compressed),
+    MAKE_DISPLAY_VALUE(is_dirty),
+    MAKE_DISPLAY_VALUE(is_protected),
     MAKE_DISPLAY_VALUE(languages),
     MAKE_DISPLAY_VALUE(map_type),
-    MAKE_DISPLAY_VALUE(protection),
+    MAKE_DISPLAY_VALUE(protection_issues),
     MAKE_DISPLAY_VALUE(scenario),
     MAKE_DISPLAY_VALUE(scenario_path),
-    MAKE_DISPLAY_VALUE(tag_count),
     MAKE_DISPLAY_VALUE(stub_count),
-    MAKE_DISPLAY_VALUE(tags),
-    MAKE_DISPLAY_VALUE(tags_external_bitmap_indices),
-    MAKE_DISPLAY_VALUE(tags_external_loc_indices),
-    MAKE_DISPLAY_VALUE(tags_external_pointers),
-    MAKE_DISPLAY_VALUE(tags_external_sound_indices),
-    MAKE_DISPLAY_VALUE(tags_external_indices),
     MAKE_DISPLAY_VALUE(tag_order_match),
-    MAKE_DISPLAY_VALUE(uncompressed_size)
+    MAKE_DISPLAY_VALUE(tags),
+    MAKE_DISPLAY_VALUE(tags_count),
+    MAKE_DISPLAY_VALUE(uncompressed_size),
+    MAKE_DISPLAY_VALUE(uses_external_pointers)
 };
 
 int main(int argc, const char **argv) {

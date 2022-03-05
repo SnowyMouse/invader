@@ -6,6 +6,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-bludgeon: Added -T mismatched-sound-enums
 - invader-bludgeon: Added --search and --search-exclude
+- invader-info: Added -T protection_issues which lists the reasons why the map
+- invader-info: Added -T internal_bitmaps, -T internal_sounds,
+  -T internal_bitmaps, and -T internal_sounds_count which list all tags that are
+  partially internal
 - invader-strip: Added --search and --search-exclude
 
 ### Changed
@@ -18,6 +22,7 @@ This is used for recording Invader's changes. This changelog is based on
 - Trigger volumes are better defined now.
 - invader-archive: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
+- invader-build: Reduced --extend-file-limits from 4 GiB to 2 GiB
 - invader-build: Bitmap type is now checked for shaders
 - invader-build: Added warnings for out-of-bounds pickup messages (which is no
   longer an error but may cause unintended behavior)
@@ -29,6 +34,7 @@ This is used for recording Invader's changes. This changelog is based on
   it easier for collapsing in text editors
 - invader-compare: Verbose comparisons can now be threaded
 - invader-edit-qt: Changed default sizing of the main window to be larger
+- invader-info: Renamed a number of options to be consistent
 - invader-strip: Clean tags are no longer stripped and are skipped instead
 
 ### Fixed
@@ -43,6 +49,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed centroid primary/secondary nodes not resolving local node
 - invader-build: Fixed particle size not factoring in sequence index
 - invader-extract: Fixed cutscene title up time not being correct
+- invader-info: Fixed retail Halo PC maps not showing external tags
 - invader-recover: Fixed null terminators being included in recovered script
   source data
 - invader-script: Fixed vehicles not being allowed to be converted into units

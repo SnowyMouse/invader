@@ -625,20 +625,26 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -T --type <type>             Set the type of data to show. Can be overview
-                               (default), build, compressed, compression_ratio,
-                               crc32, crc32_mismatched, dirty, engine,
-                               external_bitmap_indices, external_bitmaps,
-                               external_indices, external_loc_indices,
-                               external_pointers, external_sound_indices,
-                               external_sounds, external_tags, languages,
-                               map_type, protection, scenario, scenario_path,
-                               tag_count, stub_count, tags,
-                               tags_external_bitmap_indices,
-                               tags_external_loc_indices,
-                               tags_external_pointers,
-                               tags_external_sound_indices,
-                               tags_external_indices, tag_order_match,
-                               uncompressed_size
+                               (default), build, compression_ratio, crc32,
+                               crc32_mismatched, engine, external_bitmaps,
+                               external_bitmaps_count, external_bitmap_indices,
+                               external_bitmap_indices_count,
+                               external_bitmap_pointers,
+                               external_bitmap_pointers_count,
+                               external_indices, external_indices_count,
+                               external_loc_indices,
+                               external_loc_indices_count, external_sounds,
+                               external_sounds_count, external_sound_indices,
+                               external_sound_indices_count,
+                               external_sound_pointers,
+                               external_sound_pointers_count, external_tags,
+                               external_tags_count, internal_bitmaps,
+                               internal_bitmaps_count, internal_sounds,
+                               internal_sounds_count, is_compressed, is_dirty,
+                               is_protected, languages, map_type,
+                               protection_issues, scenario, scenario_path,
+                               stub_count, tag_order_match, tags, tags_count,
+                               uncompressed_size, uses_external_pointers
 ```
 
 ### invader-model

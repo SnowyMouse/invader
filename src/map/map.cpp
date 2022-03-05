@@ -530,18 +530,30 @@ namespace Invader {
     Map::CompressionType Map::get_compression_algorithm() const noexcept {
         return this->compressed;
     }
-
+    
     bool Map::is_protected() const noexcept {
+        std::vector<std::string> r;
+        return this->is_protected(r);
+    }
+
+    bool Map::is_protected(std::vector<std::string> &reasons) const noexcept {
         using namespace HEK;
+        
+        reasons.clear();
         
         // Invalid paths?
         if(this->invalid_paths_detected) {
-            return true;
+            reasons.emplace_back("invalid paths detected");
         }
+        
+        char buff[2048];
+        
+        #define ADD_PROT_REASON(...) std::snprintf(buff, sizeof(buff), __VA_ARGS__); reasons.emplace_back(buff);
 
         // We can get this right off the bat
-        if(this->get_tag(this->get_scenario_tag_id()).get_tag_fourcc() != TagFourCC::TAG_FOURCC_SCENARIO) {
-            return true;
+        auto &scenario_tag = this->get_tag(this->get_scenario_tag_id());
+        if(scenario_tag.get_tag_fourcc() != TagFourCC::TAG_FOURCC_SCENARIO) {
+            ADD_PROT_REASON("scenario \"%s\" (tag #%zu) FourCC is incorrect", File::halo_path_to_preferred_path(scenario_tag.get_path()).c_str(), scenario_tag.get_tag_index());
         }
 
         // Go through each tag
@@ -556,28 +568,31 @@ namespace Invader {
                 continue;
             }
 
-            // If the extension is invalid, return true
+            // If the fourCC is invalid, return true
+            auto tag_merged = File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_fourcc_to_extension(tag_class);
+            
             if(tag_class == TagFourCC::TAG_FOURCC_NULL || tag_class == TagFourCC::TAG_FOURCC_NONE || tag_extension_to_fourcc(tag_fourcc_to_extension(tag_class)) != tag_class) {
-                return true;
+                ADD_PROT_REASON("tag \"%s\" (tag #%zu) FourCC is incorrect", tag_merged.c_str(), t);
             }
 
             // Empty path? Probably protected
             if(tag_path == "") {
-                return true;
+                ADD_PROT_REASON("tag #%zu has an empty path", t);
             }
 
             // Go through each tag and see if we have any duplicates
-            for(std::size_t t2 = t + 1; t2 < tag_count; t2++) {
+            for(std::size_t t2 = 0; t2 < t; t2++) {
                 auto &tag2 = this->get_tag(t2);
                 if(tag_class != tag2.get_tag_fourcc()) {
                     continue;
                 }
                 if(tag2.get_path() == tag_path) {
-                    return true;
+                    ADD_PROT_REASON("tag \"%s\" (tag #%zu) shares a path and fourCC with tag #%zu", tag_merged.c_str(), t, t2);
+                    break;
                 }
             }
         }
-        return false;
+        return !reasons.empty();
     }
 
     std::optional<std::size_t> Map::find_tag(const char *tag_path, TagFourCC tag_fourcc) const noexcept {

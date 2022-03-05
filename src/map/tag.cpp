@@ -9,14 +9,14 @@ namespace Invader {
         using namespace HEK;
 
         // If it's indexed, check if the corresponding data is available
-        if(this->is_indexed() || this->external_pointers) {
+        if(this->is_indexed()) {
             switch(this->tag_fourcc) {
                 case TagFourCC::TAG_FOURCC_BITMAP:
-                    return this->map.bitmap_data.size() > 0;
+                    return !this->map.bitmap_data.empty();
                 case TagFourCC::TAG_FOURCC_SOUND:
-                    return this->map.sound_data.size() > 0;
+                    return !this->map.sound_data.empty();
                 default:
-                    return this->map.loc_data.size() > 0;
+                    return !this->map.loc_data.empty();
             }
         }
 
