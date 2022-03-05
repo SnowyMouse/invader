@@ -95,7 +95,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("level", 'l', 1, "Set the compression level (Xbox maps only). Must be between 0 and 9. Default: 9", "<level>");
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
-    options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
+    options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits to 2 GiB regardless of if the target engine will support the cache file.");
     options.emplace_back("build-string", 'B', 1, "Set the build string in the header.", "<ver>");
     options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
     options.emplace_back("anniversary-mode", 'a', 0, "Enable anniversary graphics and audio (CEA only)");
@@ -351,7 +351,7 @@ int main(int argc, const char **argv) {
         
         if(build_options.increased_file_size_limits) {
             if(engine_info.engine != HEK::GameEngine::GAME_ENGINE_NATIVE) {
-                parameters.details.build_maximum_cache_file_size = UINT32_MAX;
+                parameters.details.build_maximum_cache_file_size = static_cast<std::uint32_t>(INT32_MAX); // 2 GiB minus 1 byte
             }
         }
         if(build_options.compression_level.has_value()) {
