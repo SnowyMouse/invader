@@ -204,13 +204,7 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_RETAIL:
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 case CacheFileEngine::CACHE_FILE_NATIVE:
-                    break;
                 case CacheFileEngine::CACHE_FILE_MCC_CEA:
-                    if(reinterpret_cast<const HEK::CacheFileHeader &>(header).compressed_padding != 0) { // if this is non-zero then we can't open it
-                        throw InvalidMapException();
-                    }
-                    
-                    break;
                 case CacheFileEngine::CACHE_FILE_XBOX:
                     break;
                 default:
