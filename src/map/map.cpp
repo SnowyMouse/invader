@@ -210,12 +210,6 @@ namespace Invader {
                 default:
                     throw UnsupportedMapEngineException();
             }
-            
-            // Decompressed file size?
-            if(header.decompressed_file_size > data_length) {
-                eprintf_error("Decompressed file size is too large! (expected %zu, got %zu)", static_cast<std::size_t>(header.decompressed_file_size), data_length);
-                throw InvalidMapException();
-            }
 
             // Check if any overflowing occurs
             if(header.build.overflows() || header.name.overflows()) {
