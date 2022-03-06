@@ -850,56 +850,12 @@ namespace Invader {
         // Find it
         char formatted_path[512];
         std::optional<std::filesystem::path> new_path;
-        if(tag_fourcc != TagFourCC::TAG_FOURCC_OBJECT) {
-            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
-            Invader::File::halo_path_to_preferred_path_chars(formatted_path);
-            
-            // Only set the new path if it exists
-            if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) {
-                new_path = std::nullopt;
-            }
-        }
-        else {
-            #define TRY_THIS(new_int) if(!new_path.has_value()) { \
-                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(new_int)); \
-                Invader::File::halo_path_to_preferred_path_chars(formatted_path); \
-                new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories); \
-                if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) { /* only set the new path if it exists */ \
-                    new_path = std::nullopt; \
-                } \
-                tag_fourcc = new_int; \
-            }
-            TRY_THIS(TagFourCC::TAG_FOURCC_BIPED);
-            TRY_THIS(TagFourCC::TAG_FOURCC_VEHICLE);
-            TRY_THIS(TagFourCC::TAG_FOURCC_WEAPON);
-            TRY_THIS(TagFourCC::TAG_FOURCC_EQUIPMENT);
-            TRY_THIS(TagFourCC::TAG_FOURCC_GARBAGE);
-            TRY_THIS(TagFourCC::TAG_FOURCC_SCENERY);
-            TRY_THIS(TagFourCC::TAG_FOURCC_PLACEHOLDER);
-            TRY_THIS(TagFourCC::TAG_FOURCC_SOUND_SCENERY);
-            TRY_THIS(TagFourCC::TAG_FOURCC_DEVICE_CONTROL);
-            TRY_THIS(TagFourCC::TAG_FOURCC_DEVICE_MACHINE);
-            TRY_THIS(TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE);
-            #undef TRY_THIS
-            if(!new_path.has_value()) {
-                tag_fourcc = TagFourCC::TAG_FOURCC_OBJECT;
-                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
-            }
-            else {
-                // Look for it again
-                for(std::size_t i = 0; i < return_value; i++) {
-                    auto &tag = this->tags[i];
-                    if(tag.tag_fourcc == tag_fourcc && tag.path == tag_path) {
-                        if(tag.base_struct.has_value()) {
-                            return i;
-                        }
-                        return_value = i;
-                        found = true;
-                        tag.stubbed = false;
-                        break;
-                    }
-                }
-            }
+        std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
+        Invader::File::halo_path_to_preferred_path_chars(formatted_path);
+        
+        // Only set the new path if it exists
+        if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) {
+            new_path = std::nullopt;
         }
 
         // If it wasn't found in the current array list, add it to the list and let's begin
