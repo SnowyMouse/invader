@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.47.0] - 2022-03-06
 ### Added
 - invader-bludgeon: Added -T mismatched-sound-enums
 - invader-bludgeon: Added --search and --search-exclude
@@ -2216,5 +2216,6 @@ image as one bitmap
 [0.46.1]: https://github.com/SnowyMouse/invader/compare/0.46.0...0.46.1
 [0.46.2]: https://github.com/SnowyMouse/invader/compare/0.46.1...0.46.2
 [0.46.3]: https://github.com/SnowyMouse/invader/compare/0.46.2...0.46.3
+[0.46.3]: https://github.com/SnowyMouse/invader/compare/0.46.3...0.47.0
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.46.3...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.47.0...master
