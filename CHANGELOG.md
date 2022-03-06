@@ -38,8 +38,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-strip: Clean tags are no longer stripped and are skipped instead
 
 ### Fixed
-- Absolute paths or paths with '..' path components are now explicitly banned.
-  This fixes a vulnerability.
+- Absolute paths or paths with '..' path components are now explicitly banned in
+  tag paths (note: file paths may still use this). This fixes a vulnerability.
 - invader-build: Fixed a number of scripting issues on MCC. This fixes an issue
   with the banshees not attacking the player on the level Halo.
 - invader-build: Fixed cutscene title up time not being correct
