@@ -20,6 +20,8 @@ This is used for recording Invader's changes. This changelog is based on
 - Null terminated scripts are now allowed as official tools do this, thus
   various scenario tags no longer need bludgeoned
 - Trigger volumes are better defined now.
+- Absolute paths or paths with '..' path components are now explicitly banned.
+  This fixes a vulnerability.
 - invader-archive: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
 - invader-build: Reduced --extend-file-limits from 4 GiB to 2 GiB

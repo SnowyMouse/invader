@@ -234,7 +234,7 @@ int main(int argc, const char **argv) {
             map = BuildWorkload::compile_map(parameters);
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile scenario %s into a map", base_tag.c_str());
+            eprintf_error("Failed to compile scenario %s into a map: %s", base_tag.c_str(), e.what());
             return EXIT_FAILURE;
         }
 

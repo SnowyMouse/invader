@@ -79,7 +79,7 @@ namespace Invader {
             }
 
             // Figure out the path we're writing to
-            auto tag_path_to_write_to = tags / (path + "." + tag_extension);
+            auto tag_path_to_write_to = Invader::File::tag_path_to_file_path(path, tags);
             if(!overwrite && std::filesystem::exists(tag_path_to_write_to)) {
                 return false;
             }
@@ -244,12 +244,22 @@ namespace Invader {
                 continue;
             }
             const auto &tag_map = map->get_tag(tag);
-            if(extract_tag(tag)) {
-                oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
+            auto path_dot = Invader::File::halo_path_to_preferred_path(tag_map.get_path()) + "." + HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc());
+            
+            // Do it!
+            bool result;
+            try {
+                result = extract_tag(tag);
+            }
+            catch(std::exception &e) {
+                eprintf_error("Error while extracting %s: %s", path_dot.c_str(), e.what());
+            }
+            if(result) {
+                oprintf_success("Extracted %s", path_dot.c_str());
                 extracted++;
             }
             else {
-                oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc()));
+                oprintf("Skipped %s\n", path_dot.c_str());
             }
         }
         
