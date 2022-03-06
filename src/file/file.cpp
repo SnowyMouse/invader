@@ -94,6 +94,14 @@ namespace Invader::File {
         return std::nullopt;
     }
 
+    std::filesystem::path tag_path_to_file_path(const TagFilePath &tag_path, const std::filesystem::path &tags) {
+        return tag_path_to_file_path(tag_path.join(), tags);
+    }
+    
+    std::optional<std::filesystem::path> tag_path_to_file_path(const TagFilePath &tag_path, const std::vector<std::filesystem::path> &tags) {
+        return tag_path_to_file_path(tag_path.join(), tags);
+    }
+
     std::filesystem::path tag_path_to_file_path(const std::string &tag_path, const std::filesystem::path &tags) {
         return tags / halo_path_to_preferred_path(tag_path);
     }

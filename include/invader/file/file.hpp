@@ -17,6 +17,48 @@ namespace Invader::File {
     #else
     #define INVADER_PREFERRED_PATH_SEPARATOR std::filesystem::path::preferred_separator
     #endif
+
+    /**
+     * File path holder
+     */
+    struct TagFilePath {
+        /** Path without extension */
+        std::string path;
+
+        /** Class of the tag */
+        TagFourCC fourcc;
+        
+        /** Join the path and class into one path */
+        std::string join() const {
+            return path + "." + HEK::tag_fourcc_to_extension(fourcc);
+        }
+        
+        TagFilePath() = default;
+        TagFilePath(const TagFilePath &copy) = default;
+        TagFilePath(const std::string &path, TagFourCC fourcc) : path(path), fourcc(fourcc) {}
+        
+        std::strong_ordering operator<=>(const TagFilePath &other) const noexcept {
+            auto space_ship = this->path <=> other.path;
+            if(space_ship == 0) {
+                return this->fourcc <=> other.fourcc;
+            }
+            else {
+                return space_ship;
+            }
+        }
+        bool operator==(const TagFilePath &other) const noexcept {
+            return (*this <=> other) == std::strong_ordering::equivalent;
+        }
+        bool operator!=(const TagFilePath &other) const noexcept {
+            return (*this <=> other) != std::strong_ordering::equivalent;
+        }
+        bool operator>(const TagFilePath &other) const noexcept {
+            return (*this <=> other) == std::strong_ordering::greater;
+        }
+        bool operator<(const TagFilePath &other) const noexcept {
+            return (*this <=> other) == std::strong_ordering::less;
+        }
+    };
     
     /**
      * Attempt to open the file and read it all into a buffer
@@ -34,12 +76,28 @@ namespace Invader::File {
     bool save_file(const std::filesystem::path &path, const std::vector<std::byte> &data);
 
     /**
-     * Convert a tag path to a file path for one tags directory. The file MUST exist.
+     * Convert a tag path to a file path for one tags directory. The file must exist, or std::nullopt will be returned.
+     * @param  tag_path   tag path to use
+     * @param  tags       tags directories to use
+     * @return            file path or std::nullopt on failure
+     */
+    std::optional<std::filesystem::path> tag_path_to_file_path(const TagFilePath &tag_path, const std::vector<std::filesystem::path> &tags);
+
+    /**
+     * Convert a tag path to a file path for one tags directory. The file must exist, or std::nullopt will be returned.
      * @param  tag_path   tag path to use
      * @param  tags       tags directories to use
      * @return            file path or std::nullopt on failure
      */
     std::optional<std::filesystem::path> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::filesystem::path> &tags);
+
+    /**
+     * Convert a tag path to a file path for one tags directory. The file does not have to exist.
+     * @param  tag_path   tag path to use
+     * @param  tags       tags directory to use
+     * @return            file path or std::nullopt on failure
+     */
+    std::filesystem::path tag_path_to_file_path(const TagFilePath &tag_path, const std::filesystem::path &tags);
 
     /**
      * Convert a tag path to a file path for one tags directory. The file does not have to exist.
@@ -64,32 +122,6 @@ namespace Invader::File {
      * @return            tag path or std::nullopt on failure
      */
     std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::filesystem::path &tags);
-
-    /**
-     * File path holder
-     */
-    struct TagFilePath {
-        /** Path without extension */
-        std::string path;
-
-        /** Class of the tag */
-        TagFourCC fourcc;
-        
-        /** Join the path and class into one path */
-        std::string join() const {
-            return path + "." + HEK::tag_fourcc_to_extension(fourcc);
-        }
-        
-        TagFilePath() = default;
-        TagFilePath(const TagFilePath &copy) = default;
-        TagFilePath(const std::string &path, TagFourCC fourcc) : path(path), fourcc(fourcc) {}
-        bool operator==(const TagFilePath &other) const noexcept {
-            return other.fourcc == this->fourcc && other.path == this->path;
-        }
-        bool operator!=(const TagFilePath &other) const noexcept {
-            return other.fourcc != this->fourcc || other.path != this->path;
-        }
-    };
 
     /**
      * Attempt to split the tag class extension from a path
