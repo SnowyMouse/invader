@@ -474,6 +474,7 @@ namespace Invader::Parser {
         scenario.source_files = std::move(source_files);
         scenario.script_string_data = std::move(string_data);
         scenario.script_syntax_data = std::move(syntax_data);
+        scenario.references.clear();
     }
     
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
