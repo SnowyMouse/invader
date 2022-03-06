@@ -93,13 +93,16 @@ int main(int argc, char * const *argv) {
     std::size_t line_number = 0;
     while(std::getline(input_file, line)) {
         line_number++;
-        if(line.size()) {
+        if(!line.empty()) {
             auto &entry = tag.tags.emplace_back();
+            
+            // First make sure it's a valid path
             auto whole_tag = Invader::File::split_tag_class_extension(line);
             if(!whole_tag.has_value()) {
-                eprintf_error("Invalid tag path in line #%zu: %s", line_number, line.c_str());
+                eprintf_error("Invalid tag path in line #%zu: %s (invalid or missing extension)", line_number, line.c_str());
                 return EXIT_FAILURE;
             }
+            
             entry.reference.path = Invader::File::preferred_path_to_halo_path(whole_tag->path);
             entry.reference.tag_fourcc = whole_tag->fourcc;
         }
