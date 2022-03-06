@@ -116,6 +116,7 @@ namespace Invader::File {
                 auto str = c.string();
                 if(str == "." || str == "..") {
                     malicious_maybe = true;
+                    break;
                 }
             }
         }
