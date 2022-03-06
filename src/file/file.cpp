@@ -104,8 +104,7 @@ namespace Invader::File {
     }
 
     std::filesystem::path tag_path_to_file_path(const std::string &tag_path, const std::filesystem::path &tags) {
-        std::filesystem::path p = tag_path;
-        auto path = tags / halo_path_to_preferred_path(tag_path);
+        std::filesystem::path p = halo_path_to_preferred_path(tag_path);
         
         // Check if an absolute path or if it uses . or .. path components (which can potentially cause some bad traversal)
         bool malicious_maybe = false;
@@ -113,7 +112,7 @@ namespace Invader::File {
             malicious_maybe = true;
         }
         else {
-            for(auto &c : path) {
+            for(auto &c : p) {
                 auto str = c.string();
                 if(str == "." || str == "..") {
                     malicious_maybe = true;
@@ -126,7 +125,8 @@ namespace Invader::File {
             throw InvalidTagPathException();
         }
         
-        return path;
+        // Combine
+        return tags / p;
     }
 
     std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::filesystem::path &tags) {
