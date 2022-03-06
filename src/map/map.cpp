@@ -98,10 +98,6 @@ namespace Invader {
     }
 
     std::byte *Map::get_data(DataMapType map_type) {
-        if(map_type != DATA_MAP_CACHE && this->get_data_length(map_type) == 0) {
-            throw ResourceMapRequiredException();
-        }
-        
         // Redirect reads outside of the cache file to inside of the cache file itself if Xbox.
         //
         // No correctly made Xbox map will ever try to do this, but a number of maps built with tools like Arsenic copy runtime-only
@@ -111,6 +107,10 @@ namespace Invader {
         if(this->cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX && map_type != DataMapType::DATA_MAP_CACHE) {
             eprintf_warn("WARNING: Tried to access data outside of an Xbox cache file!");
             map_type = DataMapType::DATA_MAP_CACHE;
+        }
+        
+        if(map_type != DATA_MAP_CACHE && this->get_data_length(map_type) == 0) {
+            throw ResourceMapRequiredException();
         }
         
         switch(map_type) {
