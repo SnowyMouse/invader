@@ -20,8 +20,6 @@ This is used for recording Invader's changes. This changelog is based on
 - Null terminated scripts are now allowed as official tools do this, thus
   various scenario tags no longer need bludgeoned
 - Trigger volumes are better defined now.
-- Absolute paths or paths with '..' path components are now explicitly banned.
-  This fixes a vulnerability.
 - invader-archive: Verbose comparisons are now shown in an inverted tree, making
   it easier for collapsing in text editors
 - invader-build: Reduced --extend-file-limits from 4 GiB to 2 GiB
@@ -40,6 +38,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-strip: Clean tags are no longer stripped and are skipped instead
 
 ### Fixed
+- Absolute paths or paths with '..' path components are now explicitly banned.
+  This fixes a vulnerability.
 - invader-build: Fixed a number of scripting issues on MCC. This fixes an issue
   with the banshees not attacking the player on the level Halo.
 - invader-build: Fixed cutscene title up time not being correct
@@ -55,6 +55,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-recover: Fixed null terminators being included in recovered script
   source data
 - invader-script: Fixed vehicles not being allowed to be converted into units
+- invader-script: Tag paths in scripts are now validated
+- invader-script: Scripts with forward slashes in path separators are no longer
+  allowed as expected
 
 ### Removed
 - invader-bludgeon: Removed -T null-terminated-scripts

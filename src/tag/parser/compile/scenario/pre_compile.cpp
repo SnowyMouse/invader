@@ -15,6 +15,37 @@ namespace Invader::Parser {
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
+    template<typename T> static std::optional<HEK::TagFourCC> script_value_type_to_fourcc(T type) {
+        switch(static_cast<RIAT_ValueType>(type)) {
+            case RIAT_ValueType::RIAT_VALUE_TYPE_SOUND:
+                return HEK::TAG_FOURCC_SOUND;
+
+            case RIAT_ValueType::RIAT_VALUE_TYPE_EFFECT:
+                return HEK::TAG_FOURCC_EFFECT;
+
+            case RIAT_ValueType::RIAT_VALUE_TYPE_DAMAGE:
+                return HEK::TAG_FOURCC_DAMAGE_EFFECT;
+
+            case RIAT_ValueType::RIAT_VALUE_TYPE_LOOPING_SOUND:
+                return HEK::TAG_FOURCC_SOUND_LOOPING;
+
+            case RIAT_ValueType::RIAT_VALUE_TYPE_ANIMATION_GRAPH:
+                return HEK::TAG_FOURCC_MODEL_ANIMATIONS;
+
+            case RIAT_ValueType::RIAT_VALUE_TYPE_ACTOR_VARIANT:
+                return HEK::TAG_FOURCC_ACTOR_VARIANT;
+
+            case RIAT_ValueType::RIAT_VALUE_TYPE_DAMAGE_EFFECT:
+                return HEK::TAG_FOURCC_DAMAGE_EFFECT;
+
+            case RIAT_ValueType::RIAT_VALUE_TYPE_OBJECT_DEFINITION:
+                return HEK::TAG_FOURCC_OBJECT;
+
+            default:
+                return std::nullopt;
+        }
+    }
+    
     void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, RIAT_OptimizationLevel optimization_level, std::vector<std::string> &warnings, const std::vector<std::filesystem::path> &tags_directories, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
         // Instantiate it
         RIAT::Instance instance;
@@ -452,6 +483,88 @@ namespace Invader::Parser {
             new_script.root_expression_index = format_index_to_id(cmp_script.first_node);
         }
         
+        
+        // Set up references
+        std::list<std::pair<File::TagFilePath, std::size_t>> new_references_array;
+        for(std::size_t n = 0; n < node_count; n++) {
+            auto &node = nodes[n];
+            
+            // Skip non-primitives/globals
+            if(!node.is_primitive || node.is_global) {
+                continue;
+            }
+            
+            // Check if we know the group
+            auto group = script_value_type_to_fourcc(node.type);
+            if(!group.has_value()) {
+                continue;
+            }
+            
+            // Add it if we don't have it
+            auto new_path = File::TagFilePath(File::halo_path_to_preferred_path(node.string_data), *group);
+            bool is_found = false;
+            for(auto &i : new_references_array) {
+                if(i.first == new_path) {
+                    is_found = true;
+                    break;
+                }
+            }
+            if(!is_found) {
+                new_references_array.emplace_back(new_path, n);
+            }
+        }
+        
+        // Resolve object references
+        decltype(scenario.references) new_references;
+        new_references.reserve(new_references_array.size());
+        for(auto &r : new_references_array) {
+            auto &[path, node_index] = r;
+            auto &n = nodes[node_index];
+            
+            bool resolved = false;
+            
+            try {
+                auto resolve_maybe = [&tags_directories, &r]() -> bool {
+                    return File::tag_path_to_file_path(r.first, tags_directories).has_value();
+                };
+                auto resolve_with_fourcc_maybe = [&resolve_maybe, &r](HEK::TagFourCC fourcc) -> bool {
+                    r.first.fourcc = fourcc;
+                    return resolve_maybe();
+                };
+                
+                if(path.fourcc == HEK::TAG_FOURCC_OBJECT) {
+                    resolved = resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_BIPED)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_VEHICLE)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_WEAPON)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_EQUIPMENT)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_GARBAGE)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_SCENERY)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_PLACEHOLDER)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_SOUND_SCENERY)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_DEVICE_CONTROL)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_DEVICE_MACHINE)
+                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE);
+                    if(!resolved) {
+                        path.fourcc = HEK::TAG_FOURCC_OBJECT;
+                    }
+                }
+                else {
+                    resolved = resolve_maybe();
+                }
+            }
+            catch(std::exception &) {}
+            
+            if(!resolved) {
+                eprintf_error("%s:%zu:%zu: error: can't find %s tag \"%s\"", source_files[n.file].name.string, n.line, n.column, HEK::tag_fourcc_to_extension(path.fourcc), path.path.c_str());
+                throw InvalidTagDataException();
+            }
+            
+            // Add it
+            auto &ref = new_references.emplace_back();
+            ref.reference.path = File::preferred_path_to_halo_path(path.path);
+            ref.reference.tag_fourcc = path.fourcc;
+        }
+        
         // Set up globals
         decltype(scenario.globals) new_globals;
         new_globals.resize(global_count);
@@ -474,7 +587,7 @@ namespace Invader::Parser {
         scenario.source_files = std::move(source_files);
         scenario.script_string_data = std::move(string_data);
         scenario.script_syntax_data = std::move(syntax_data);
-        scenario.references.clear();
+        scenario.references = std::move(new_references);
     }
     
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
@@ -555,15 +668,6 @@ namespace Invader::Parser {
             }
         }
         
-        // Is the syntax data correct?
-        auto syntax_data_size = scenario.script_syntax_data.size();
-        std::size_t expected_max_element_count = workload.get_build_parameters()->details.build_scenario_maximum_script_nodes;
-        std::size_t correct_syntax_data_size = sizeof(ScenarioScriptNodeTable::struct_big) + expected_max_element_count * sizeof(ScenarioScriptNode::struct_big);
-        if(scenario.script_syntax_data.size() != correct_syntax_data_size) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is incorrect for the target engine (%zu != %zu)", syntax_data_size, correct_syntax_data_size);
-            throw InvalidTagDataException();
-        }
-        
         // Flip the endianness
         auto t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
         *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
@@ -572,14 +676,8 @@ namespace Invader::Parser {
         auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
         auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
         
-        // Make sure the element count is correct
-        std::size_t max_element_count = t.maximum_count;
-        if(max_element_count != expected_max_element_count) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax node count is wrong for the target engine (%zu != %zu)", max_element_count, expected_max_element_count);
-            throw InvalidTagDataException();
-        }
-        
         // And now flip the endianness of the nodes
+        std::size_t max_element_count = t.maximum_count;
         for(std::size_t i = 0; i < max_element_count; i++) {
             start_little[i] = start_big[i];
         }
@@ -587,113 +685,76 @@ namespace Invader::Parser {
         // Get these things
         BuildWorkload::BuildWorkloadStruct script_data_struct = {};
         script_data_struct.data = std::move(scenario.script_syntax_data);
+        scenario.script_syntax_data.clear();
         const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
-        std::size_t string_data_length = scenario.script_string_data.size();
-        
-        // For verifying if strings end with 00 bytes down below
-        while(string_data_length > 0) {
-            if(string_data[string_data_length - 1] != 0) {
-                string_data_length--;
-            }
-            else {
-                break;
-            }
-        }
-
-        const char *string_data_end = string_data + string_data_length;
         
         auto *syntax_data = script_data_struct.data.data();
         auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
         std::uint16_t element_count = table_header.size.read();
         auto *nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(&table_header + 1);
+        
+        // Get all references
+        for(auto &r : scenario.references) {
+            try {
+                r.reference.tag_id = { static_cast<std::uint32_t>(workload.compile_tag_recursively(r.reference.path.c_str(), r.reference.tag_fourcc)) };
+            }
+            catch(std::exception &) {
+                eprintf_error("I'm pretty sure this was found when compiling scripts, though! This is a bug. Please report it!");
+                std::terminate();
+            }
+        }
 
         for(std::uint16_t i = 0; i < element_count; i++) {
             // Check if we know the class
-            std::optional<TagFourCC> tag_class;
             auto &node = nodes[i];
-
-            // Check the class type
-            switch(node.type.read()) {
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
-                    tag_class = HEK::TAG_FOURCC_SOUND;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
-                    tag_class = HEK::TAG_FOURCC_EFFECT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
-                    tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
-                    tag_class = HEK::TAG_FOURCC_SOUND_LOOPING;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
-                    tag_class = HEK::TAG_FOURCC_MODEL_ANIMATIONS;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
-                    tag_class = HEK::TAG_FOURCC_ACTOR_VARIANT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
-                    tag_class = HEK::TAG_FOURCC_DAMAGE_EFFECT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
-                    tag_class = HEK::TAG_FOURCC_OBJECT;
-                    break;
-
-                default:
-                    continue;
+            auto node_flags = node.flags.read();
+            if(!(node_flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE) || !(node_flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL)) {
+                continue;
             }
-
-            if(tag_class.has_value()) {
-                // Check if we should leave it alone
-                auto flags = node.flags.read();
-                if(
-                    (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL) ||
-                    (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL)
-                ) {
-                    continue;
-                }
-
-                // Get the string
-                const char *string = string_data + node.string_offset.read();
-                if(string >= string_data_end) {
-                    if(!workload.disable_error_checking) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node #%zu has an invalid string offset. The scripts need recompiled.", static_cast<std::size_t>(i));
+            auto group = script_value_type_to_fourcc(node.type.read());
+            if(!group.has_value()) {
+                continue;
+            }
+            
+            auto *path = string_data + node.string_offset.read();
+            bool found = false;
+            std::size_t index = 0;
+            
+            for(auto &r : scenario.references) {
+                if(r.reference.path == path) {
+                    if(*group == HEK::TagFourCC::TAG_FOURCC_OBJECT) {
+                        if(r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_BIPED)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_VEHICLE)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_WEAPON)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_EQUIPMENT)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_GARBAGE)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_SCENERY)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_PLACEHOLDER)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_SOUND_SCENERY)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_DEVICE_CONTROL)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_DEVICE_MACHINE)
+                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE)) {
+                            continue;
+                        }
                     }
+                    else if(r.reference.tag_fourcc != *group) {
+                        continue;
+                    }
+                    index = r.reference.tag_id.index;
+                    node.data = r.reference.tag_id;
+                    found = true;
                     break;
-                }
-
-                // Add it to the list
-                std::size_t dependency_offset = reinterpret_cast<const std::byte *>(&node.data) - syntax_data;
-                std::size_t new_id = workload.compile_tag_recursively(string, *tag_class);
-                node.data = HEK::TagID { static_cast<std::uint32_t>(new_id) };
-                auto &dependency = script_data_struct.dependencies.emplace_back();
-                dependency.offset = dependency_offset;
-                dependency.tag_id_only = true;
-                dependency.tag_index = new_id;
-
-                // Let's also add up a reference too. This is 110% pointless and only wastes tag data space, but it's what tool.exe does, and a Vap really wanted it.
-                bool exists = false;
-                auto &new_tag = workload.tags[new_id];
-                for(auto &r : scenario.references) {
-                    if(r.reference.tag_fourcc == new_tag.tag_fourcc && r.reference.path == new_tag.path) {
-                        exists = true;
-                        break;
-                    }
-                }
-                if(!exists) {
-                    auto &reference = scenario.references.emplace_back().reference;
-                    reference.tag_fourcc = new_tag.tag_fourcc;
-                    reference.path = new_tag.path;
-                    reference.tag_id = HEK::TagID { static_cast<std::uint32_t>(new_id) };
                 }
             }
+            if(!found) {
+                eprintf_error("Couldn't find \"%s.%s\" in the references array. This is a bug. Please report it!\n", path, HEK::tag_fourcc_to_extension(*group));
+                std::terminate();
+            }
+            
+            auto &new_dep = script_data_struct.dependencies.emplace_back();
+            new_dep.offset = reinterpret_cast<std::byte *>(&node.data) - reinterpret_cast<std::byte *>(nodes);
+            new_dep.tag_id_only = true;
+            new_dep.tag_index = index;
         }
 
         // Add the new structs
