@@ -49,18 +49,18 @@ namespace Invader::Info {
         // Basic metadata
         PRINT_LINE(oprintf, "Scenario name:", "%s\n", map.get_scenario_name());
         
-        auto build_string = map.get_build();
-        
-        if(std::strlen(build_string) != 0) {
-            PRINT_LINE(oprintf, "Build:", "%s\n", build_string);
-        }
-        
         auto cache_version = map.get_cache_version();
         auto &game_engine_info = HEK::GameEngineInfo::get_game_engine_info(map.get_game_engine());
         PRINT_LINE(oprintf, "Engine:", "%s\n", game_engine_info.name);
         
         if(cache_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             PRINT_LINE(oprintf, "Timestamp:", "%s\n", reinterpret_cast<Invader::HEK::NativeCacheFileHeader *>(header_cache)->timestamp.string);
+        }
+        
+        auto build_string = map.get_build();
+        
+        if(std::strlen(build_string) != 0) {
+            PRINT_LINE(oprintf, "Build string:", "%s\n", build_string);
         }
         
         auto map_type = map.get_type();
