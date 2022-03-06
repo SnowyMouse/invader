@@ -86,6 +86,17 @@ namespace Invader {
     }
 
     std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) {
+        // Redirect reads outside of the cache file to inside of the cache file itself if Xbox.
+        //
+        // No correctly made Xbox map will ever try to do this, but a number of maps built with tools like Arsenic copy runtime-only
+        // values such as whether or not an asset is external.
+        //
+        // TODO: This is a *complete* hack, and it should be removed or changed to an error once we have a map decorruptor available.
+        if(this->cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX && map_type != DataMapType::DATA_MAP_CACHE) {
+            eprintf_warn("WARNING: Tried to access data at 0x%08zX-0x%08zX outside of an Xbox cache file!", offset, offset + minimum_size);
+            map_type = DataMapType::DATA_MAP_CACHE;
+        }
+        
         std::size_t max_length = this->get_data_length(map_type);
         std::byte *data_ptr = this->get_data(map_type);
 
@@ -132,6 +143,17 @@ namespace Invader {
     }
 
     std::size_t Map::get_data_length(DataMapType map_type) const noexcept {
+        // Redirect reads outside of the cache file to inside of the cache file itself if Xbox.
+        //
+        // No correctly made Xbox map will ever try to do this, but a number of maps built with tools like Arsenic copy runtime-only
+        // values such as whether or not an asset is external.
+        //
+        // TODO: This is a *complete* hack, and it should be removed or changed to an error once we have a map decorruptor available.
+        if(this->cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX && map_type != DataMapType::DATA_MAP_CACHE) {
+            eprintf_warn("WARNING: Tried to query data outside of an Xbox cache file!");
+            map_type = DataMapType::DATA_MAP_CACHE;
+        }
+        
         switch(map_type) {
             case DATA_MAP_CACHE:
                 return this->data.size();
@@ -196,9 +218,8 @@ namespace Invader {
         
         // Get header
         auto *header_maybe = reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
-        auto data_length = this->data.size();
 
-        auto continue_loading_map = [&data_length](Map &map, auto &header) {
+        auto continue_loading_map = [](Map &map, auto &header) {
             // Set the cache_version and type
             map.cache_version = header.engine;
             map.header_type = header.map_type;
