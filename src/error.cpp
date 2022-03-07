@@ -21,7 +21,6 @@ void set_up_color_term() noexcept {
     
     // If we're not on Windows 10, don't enable colors since that isn't supported.
     if(!IsWindows10OrGreater()) {
-        eprintf_warn("WARNING: Your Windows version is unsupported. Don't report bugs.");
         return;
     }
     
