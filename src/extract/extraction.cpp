@@ -253,6 +253,7 @@ namespace Invader {
             }
             catch(std::exception &e) {
                 eprintf_error("Error while extracting %s: %s", path_dot.c_str(), e.what());
+                result = false;
             }
             if(result) {
                 oprintf_success("Extracted %s", path_dot.c_str());
