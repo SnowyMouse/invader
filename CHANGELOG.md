@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-script: Fixed object_name not being convertible to object_list or
   object
+- invader-script: Fixed globals for object definitions not being recognized
 
 ## [0.47.0] - 2022-03-06
 ### Added

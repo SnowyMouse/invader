@@ -705,10 +705,10 @@ namespace Invader::Parser {
         }
 
         for(std::uint16_t i = 0; i < element_count; i++) {
-            // Check if we know the class
+            // Check if we know the tag group
             auto &node = nodes[i];
             auto node_flags = node.flags.read();
-            if(!(node_flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE) || !(node_flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL)) {
+            if(!(node_flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE) || (node_flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL)) {
                 continue;
             }
             auto group = script_value_type_to_fourcc(node.type.read());
