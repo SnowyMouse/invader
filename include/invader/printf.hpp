@@ -18,7 +18,7 @@ bool is_on_color_term() noexcept;
 #define oflush(...) std::fflush(stdout)
 
 #define eprintf_error(...) if(ON_COLOR_TERM(stderr)) {\
-    eprintf("\x1B[1;38;5;1m"); \
+    eprintf("\x1B[1;31m"); \
     eprintf(__VA_ARGS__); \
     eprintf("\x1B[m\n"); \
 } \
@@ -28,7 +28,7 @@ else {\
 }
 
 #define eprintf_warn(...) if(ON_COLOR_TERM(stderr)) {\
-    eprintf("\x1B[1;38;5;3m"); \
+    eprintf("\x1B[1;33m"); \
     eprintf(__VA_ARGS__); \
     eprintf("\x1B[m\n"); \
 } \
@@ -38,7 +38,7 @@ else {\
 }
 
 #define eprintf_warn_lesser(...) if(ON_COLOR_TERM(stderr)) {\
-    eprintf("\x1B[1;38;5;5m"); \
+    eprintf("\x1B[1;35m"); \
     eprintf(__VA_ARGS__); \
     eprintf("\x1B[m\n"); \
 } \
@@ -48,7 +48,7 @@ else {\
 }
 
 #define oprintf_success(...) if(ON_COLOR_TERM(stdout)) {\
-    oprintf("\x1B[38;5;2m"); \
+    oprintf("\x1B[32m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
 } \
@@ -58,7 +58,7 @@ else {\
 }
 
 #define oprintf_success_warn(...) if(ON_COLOR_TERM(stdout)) {\
-    oprintf("\x1B[1;38;5;3m"); \
+    oprintf("\x1B[1;33m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
 } \
@@ -67,7 +67,7 @@ else {\
     oprintf("\n"); \
 }
 #define oprintf_success_lesser_warn(...) if(ON_COLOR_TERM(stdout)) {\
-    oprintf("\x1B[1;38;5;5m"); \
+    oprintf("\x1B[1;35m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
 } \
@@ -76,7 +76,7 @@ else {\
     oprintf("\n"); \
 }
 #define oprintf_fail(...) if(ON_COLOR_TERM(stdout)) {\
-    oprintf("\x1B[1;38;5;1m"); \
+    oprintf("\x1B[1;31m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
 } \
