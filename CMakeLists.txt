@@ -48,9 +48,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -march=native")
 endif()
 
-# If it's MinGW, this may be required to prevent linking errors
 if(MINGW)
+    # If it's MinGW, this may be required to prevent linking errors
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fstack-protector")
+    
+    # Windows 10 stuff too
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--major-os-version 10")
 endif()
 
 # Turn on console messages
