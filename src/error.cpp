@@ -5,6 +5,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <versionhelpers.h>
 #endif
 
 namespace Invader {
