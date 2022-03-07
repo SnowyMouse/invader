@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-script: Fixed object_name not being convertible to object_list or
+  object
+
 ## [0.47.0] - 2022-03-06
 ### Added
 - invader-bludgeon: Added -T mismatched-sound-enums
