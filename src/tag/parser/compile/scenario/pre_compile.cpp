@@ -718,7 +718,6 @@ namespace Invader::Parser {
             
             auto *path = string_data + node.string_offset.read();
             bool found = false;
-            std::size_t index = 0;
             
             for(auto &r : scenario.references) {
                 if(r.reference.path == path) {
@@ -740,9 +739,15 @@ namespace Invader::Parser {
                     else if(r.reference.tag_fourcc != *group) {
                         continue;
                     }
-                    index = r.reference.tag_id.index;
+                    auto index = r.reference.tag_id.index;
                     node.data = r.reference.tag_id;
                     found = true;
+            
+                    auto &new_dep = script_data_struct.dependencies.emplace_back();
+                    new_dep.offset = reinterpret_cast<std::byte *>(&node.data) - syntax_data;
+                    new_dep.tag_id_only = true;
+                    new_dep.tag_index = index;
+                    
                     break;
                 }
             }
@@ -750,11 +755,6 @@ namespace Invader::Parser {
                 eprintf_error("Couldn't find \"%s.%s\" in the references array. This is a bug. Please report it!\n", path, HEK::tag_fourcc_to_extension(*group));
                 std::terminate();
             }
-            
-            auto &new_dep = script_data_struct.dependencies.emplace_back();
-            new_dep.offset = reinterpret_cast<std::byte *>(&node.data) - reinterpret_cast<std::byte *>(nodes);
-            new_dep.tag_id_only = true;
-            new_dep.tag_index = index;
         }
 
         // Add the new structs

@@ -8,6 +8,8 @@ This is used for recording Invader's changes. This changelog is based on
   does not require a build target anymore
 
 ### Fixed
+- invader-build: Fixed tag ID not being put in tag definition fields in scripts,
+  causing some tag definition usages to not work properly
 - invader-extract: Fixed extension being missing from extracted tags
 - invader-script: Fixed object_name not being convertible to object_list or
   object
