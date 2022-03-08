@@ -271,6 +271,12 @@ int main(int argc, const char **argv) {
         // Compile
         Parser::compile_scripts(s, *script_options.engine, RIAT_OptimizationLevel::RIAT_OPTIMIZATION_PREVENT_GENERATIONAL_LOSS, warnings, script_options.tags, source_files);
         
+        // Clear?
+        if(script_options.clear) {
+            s.script_string_data.clear();
+            s.script_syntax_data.clear();
+        }
+        
         for(auto &w : warnings) {
             eprintf_warn("%s", w.c_str());
         }

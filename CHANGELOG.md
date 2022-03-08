@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Changed
+- invader-script: Clearing script data now deletes string and syntax data and
+  does not require a build target anymore
+
 ### Fixed
 - invader-extract: Fixed extension being missing from extracted tags
 - invader-script: Fixed object_name not being convertible to object_list or
