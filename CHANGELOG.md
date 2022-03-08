@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.47.1] - 2022-03-07
 ### Changed
 - invader-script: Clearing script data now deletes string and syntax data and
   does not require a build target anymore
@@ -2230,5 +2230,6 @@ image as one bitmap
 [0.46.2]: https://github.com/SnowyMouse/invader/compare/0.46.1...0.46.2
 [0.46.3]: https://github.com/SnowyMouse/invader/compare/0.46.2...0.46.3
 [0.46.3]: https://github.com/SnowyMouse/invader/compare/0.46.3...0.47.0
+[0.46.3]: https://github.com/SnowyMouse/invader/compare/0.47.0...0.47.1
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.47.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.47.1...master
