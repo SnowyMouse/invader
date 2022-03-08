@@ -63,29 +63,31 @@ namespace Invader {
 
             // Get the tag path
             const auto &tag = map->get_tag(tag_index);
-
-            // See if we can extract this
-            auto tag_fourcc = tag.get_tag_fourcc();
-            const char *tag_extension = Invader::HEK::tag_fourcc_to_extension(tag_fourcc);
             if(!tag.data_is_available()) {
                 return false;
             }
 
+            // See if we can extract this
+            auto tag_path = tag.get_path();
+
             // Get the path
-            auto path = Invader::File::halo_path_to_preferred_path(tag.get_path());
-            if(path.size() == 0) {
+            if(tag_path.empty()) {
                 workload.report_error(ErrorType::ERROR_TYPE_ERROR, "Tag path is invalid", tag_index);
                 return false;
             }
+            
+            // Let's do this
+            auto tfp = File::TagFilePath(Invader::File::halo_path_to_preferred_path(tag_path), tag.get_tag_fourcc());
 
             // Figure out the path we're writing to
-            auto tag_path_to_write_to = Invader::File::tag_path_to_file_path(path, tags);
+            auto tag_path_to_write_to = Invader::File::tag_path_to_file_path(tfp, tags);
+
             if(!overwrite && std::filesystem::exists(tag_path_to_write_to)) {
                 return false;
             }
 
             // Skip globals
-            if(tag_fourcc == Invader::TagFourCC::TAG_FOURCC_GLOBALS && !non_mp_globals && type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
+            if(tfp.fourcc == Invader::TagFourCC::TAG_FOURCC_GLOBALS && !non_mp_globals && type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
                 workload.report_error(ErrorType::ERROR_TYPE_WARNING_PEDANTIC, "Skipping the non-multiplayer map's globals tag", tag_index);
                 return false;
             }
@@ -114,18 +116,16 @@ namespace Invader {
                 }
             }
             catch (std::exception &e) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Failed to extract %s.%s: %s", Invader::File::halo_path_to_preferred_path(tag.get_path()).c_str(), tag_extension, e.what());
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Failed to extract %s.%s: %s", tfp.path.c_str(), HEK::tag_fourcc_to_extension(tfp.fourcc), e.what());
                 return false;
             }
 
             // Jason Jones the tag
             if(type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
-                auto tag_path = tag.get_path();
                 bool changed = false;
-                switch(tag_fourcc) {
+                switch(tfp.fourcc) {
                     case Invader::TagFourCC::TAG_FOURCC_WEAPON: {
                         #define ALTER_TAG_DATA(from, to) if(from != to) { from = to; changed = true; } 
-                        
                         if(tag_path == "weapons\\pistol\\pistol") {
                             auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
                             if(parsed.triggers.size() >= 1) {
@@ -166,7 +166,7 @@ namespace Invader {
             }
 
             // Warn if we had to generate mipmaps
-            if(engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX && tag_fourcc == Invader::HEK::TagFourCC::TAG_FOURCC_BITMAP) {
+            if(engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX && tfp.fourcc == Invader::HEK::TagFourCC::TAG_FOURCC_BITMAP) {
                 auto bitmap_tag = Invader::Parser::Bitmap::parse_hek_tag_file(new_tag.data(), new_tag.size());
                 for(auto &data : bitmap_tag.bitmap_data) {
                     // Skip uncompressed bitmaps
@@ -244,7 +244,7 @@ namespace Invader {
                 continue;
             }
             const auto &tag_map = map->get_tag(tag);
-            auto path_dot = Invader::File::halo_path_to_preferred_path(tag_map.get_path()) + "." + HEK::tag_fourcc_to_extension(tag_map.get_tag_fourcc());
+            auto path_dot = File::TagFilePath(File::halo_path_to_preferred_path(tag_map.get_path()), tag_map.get_tag_fourcc());
             
             // Do it!
             bool result;
@@ -252,15 +252,15 @@ namespace Invader {
                 result = extract_tag(tag);
             }
             catch(std::exception &e) {
-                eprintf_error("Error while extracting %s: %s", path_dot.c_str(), e.what());
+                eprintf_error("Error while extracting %s: %s", path_dot.join().c_str(), e.what());
                 result = false;
             }
             if(result) {
-                oprintf_success("Extracted %s", path_dot.c_str());
+                oprintf_success("Extracted %s", path_dot.join().c_str());
                 extracted++;
             }
             else {
-                oprintf("Skipped %s\n", path_dot.c_str());
+                oprintf("Skipped %s\n", path_dot.join().c_str());
             }
         }
         
