@@ -596,7 +596,7 @@ namespace Invader::Parser {
                 auto *crosshairs = reinterpret_cast<const WeaponHUDInterfaceCrosshair::struct_little *>(crosshairs_struct.data.data());
                 for(std::size_t c = 0; c < crosshair_count; c++) {
                     auto &crosshair = crosshairs[c];
-                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM_LEVEL) {
+                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM_OVERLAY) {
                         continue;
                     }
 

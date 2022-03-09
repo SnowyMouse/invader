@@ -569,7 +569,7 @@
             {
                 "name": "zoom levels",
                 "first": "zoom levels",
-                "description": "These attributes are used for determining magnification levels of the weapon. The minimum zoom level is used for the first zoom level, and the maximum zoom level is used for the final zoom level. Zoom levels in between the minimum and maximum are interpolated. For example, if you have four zoom levels and the minimum was 2 with the maximum being 8, then the second and third zoom levels will be 4x and 6x, respectively.\n\nWhen zoomed in, if the weapon's HUD has a zoom reticle, it will appear. If there are multiple zoom levels, then it will changed to the next bitmap or sprite in its sequence every time the player zooms in. Note that if there are not enough bitmaps in the sequence, the game may crash (invader-build will check this)."
+                "description": "These attributes are used for determining magnification levels of the weapon. The minimum zoom level is used for the first zoom level, and the maximum zoom level is used for the final zoom level. Zoom levels in between the minimum and maximum are interpolated. For example, if you have four zoom levels and the minimum was 2 with the maximum being 8, then the second and third zoom levels will be 4x and 6x, respectively.\n\nWhen zoomed in, if the weapon's HUD has a zoom overlay crosshair, it will appear. If there are multiple zoom levels, then it will changed to the next bitmap or sprite in its sequence every time the player zooms in. Note that if there are not enough bitmaps in the sequence, the game may crash (invader-build will check this)."
             }
         ],
         "fields": [
