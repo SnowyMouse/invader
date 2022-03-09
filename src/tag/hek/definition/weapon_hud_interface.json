@@ -17,8 +17,8 @@
         "name": "WeaponHUDInterfaceViewType",
         "options": [
             "any",
-            "solo",
-            "split screen"
+            "fullscreen",
+            "splitscreen"
         ],
         "type": "enum"
     },
