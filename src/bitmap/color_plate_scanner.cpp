@@ -374,10 +374,10 @@ namespace Invader {
     void ColorPlateScanner::read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const Pixel *pixels, std::uint32_t width, std::uint32_t height) const {
         // Make sure the height and width of each face is the same
         std::uint32_t face_width = width / 4;
-        std::uint32_t face_height = height / 3;
+        std::uint32_t face_height = face_width;
 
-        if(face_height != face_width || !HEK::is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
-            eprintf_error("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
+        if(!HEK::is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 > height) {
+            eprintf_error("Error: Invalid cubemap input dimensions %ux%u", face_width, face_height);
             throw InvalidInputBitmapException();
         }
 

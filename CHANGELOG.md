@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-bitmap: Fixed extra tall unrolled cubemaps not being accepted
+
 ## [0.47.1] - 2022-03-07
 ### Changed
 - invader-script: Clearing script data now deletes string and syntax data and
