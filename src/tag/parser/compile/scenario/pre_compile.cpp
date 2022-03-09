@@ -602,6 +602,28 @@ namespace Invader::Parser {
         check_palettes(workload, tag_index, *this);
         fix_script_data(workload, tag_index, struct_index, *this);
         fix_bsp_transitions(workload, tag_index, *this);
+        
+        // Ensure we have the necessary things for singleplayer/multiplayer
+        switch(this->type) {
+            case HEK::ScenarioType::SCENARIO_TYPE_SINGLEPLAYER: {
+                bool spawn_present = false;
+                for(auto &s : this->player_starting_locations) {
+                    if(s.type_0 == HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_NONE && s.type_1 == HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_NONE && s.type_2 == HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_NONE && s.type_3 == HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_NONE) {
+                        spawn_present = true;
+                        break;
+                    }
+                }
+                if(!spawn_present) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "No viable player starting locations are present (type 0, etc. must be set to none). No players will spawn.");
+                }
+                break;
+            }
+            case HEK::ScenarioType::SCENARIO_TYPE_MULTIPLAYER: {
+                // TODO: Check for 16 spawns for each CTF team, 16 spawns for all other gametypes
+                break;
+            }
+            default: break;
+        }
     }
     
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
