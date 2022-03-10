@@ -587,7 +587,7 @@ namespace Invader::Parser {
                     if(fourcc_matches) {
                         if((resolved = File::tag_path_to_file_path(tfp, tags_directories).has_value())) {
                             char w[1024];
-                            std::snprintf(w, sizeof(w), "%s.hsc:%zu:%zu: warning: using tag paths with explicit groups is a Halo 2 extension and may not work with stock tools or future release of Invader", source_files[n.file].name.string, n.line, n.column);
+                            std::snprintf(w, sizeof(w), "%s.hsc:%zu:%zu: warning: using tag paths with explicit groups is a Halo 2 extension and may not work with stock tools or any future release of Invader", source_files[n.file].name.string, n.line, n.column);
                             warnings.emplace_back(w);
                             path = tfp;
                         }
