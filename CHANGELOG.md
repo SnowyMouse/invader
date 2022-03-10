@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-script: Using explicit extensions is now supported. Note that this is
   not presently supported in any stock tools
+- invader-script: Using "none" is now supported for tag paths. Note that this is
+  not presently supported in any stock tools
 
 ### Fixed
 - invader-bitmap: Fixed extra tall unrolled cubemaps not being accepted

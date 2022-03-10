@@ -595,15 +595,29 @@ namespace Invader::Parser {
                 }
             }
             
+            // Is it "none"?
+            bool skip_adding = false;
+            
+            if(!resolved && r.first.path == "none") {
+                resolved = true;
+                char w[1024];
+                std::snprintf(w, sizeof(w), "%s.hsc:%zu:%zu: warning: using null tag paths is a Halo 3 extension and may not work with stock tools or any future release of Invader", source_files[n.file].name.string, n.line, n.column);
+                warnings.emplace_back(w);
+                path = r.first;
+                skip_adding = true;
+            }
+            
             if(!resolved) {
                 eprintf_error("%s.hsc:%zu:%zu: error: can't find %s tag \"%s\"", source_files[n.file].name.string, n.line, n.column, HEK::tag_fourcc_to_extension(path.fourcc), path.path.c_str());
                 throw InvalidTagDataException();
             }
             
             // Add it
-            auto &ref = new_references.emplace_back();
-            ref.reference.path = File::preferred_path_to_halo_path(path.path);
-            ref.reference.tag_fourcc = path.fourcc;
+            if(!skip_adding) {
+                auto &ref = new_references.emplace_back();
+                ref.reference.path = File::preferred_path_to_halo_path(path.path);
+                ref.reference.tag_fourcc = path.fourcc;
+            }
         }
         
         // Set up globals
@@ -820,18 +834,26 @@ namespace Invader::Parser {
                 }
             }
             
+            // Did we do it?
+            if(node_object_index.has_value()) {
+                // If we found it, set it
+                node.data = HEK::TagID { static_cast<std::uint32_t>(*node_object_index) };
+                auto &new_dep = script_data_struct.dependencies.emplace_back();
+                new_dep.offset = reinterpret_cast<std::byte *>(&node.data) - syntax_data;
+                new_dep.tag_id_only = true;
+                new_dep.tag_index = *node_object_index;
+            }
+            
+            // None?
+            else if(std::strcmp(path, "none") == 0) {
+                node.data = HEK::TagID::null_tag_id();
+            }
+            
             // Error!
-            if(!node_object_index.has_value()) {
+            else {
                 eprintf_error("Couldn't find \"%s.%s\" in the references array. This is a bug. Please report it!\n", path, HEK::tag_fourcc_to_extension(*group));
                 std::terminate();
             }
-            
-            // If we found it, set it
-            node.data = HEK::TagID { static_cast<std::uint32_t>(*node_object_index) };
-            auto &new_dep = script_data_struct.dependencies.emplace_back();
-            new_dep.offset = reinterpret_cast<std::byte *>(&node.data) - syntax_data;
-            new_dep.tag_id_only = true;
-            new_dep.tag_index = *node_object_index;
         }
 
         // Add the new structs
