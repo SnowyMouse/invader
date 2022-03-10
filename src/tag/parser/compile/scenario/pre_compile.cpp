@@ -97,7 +97,7 @@ namespace Invader::Parser {
         // Any warnings get eaten up here
         instance.set_warn_callback([](RIAT_Instance *instance, const char *message, const char *file, std::size_t line, std::size_t column) {
             char fmt_message[512];
-            std::snprintf(fmt_message, sizeof(fmt_message), "%s:%zu:%zu: warning: %s", file, line, column, message);
+            std::snprintf(fmt_message, sizeof(fmt_message), "%s.hsc:%zu:%zu: warning: %s", file, line, column, message);
             reinterpret_cast<std::vector<std::string> *>(riat_instance_get_user_data(instance))->emplace_back(fmt_message);
         });
         
@@ -127,7 +127,7 @@ namespace Invader::Parser {
         // Load the scripts
         try {
             for(auto &source : source_files) {
-                instance.load_script_source(reinterpret_cast<const char *>(source.source.data()), source.source.size(), (std::string(source.name.string) + ".hsc").c_str());
+                instance.load_script_source(reinterpret_cast<const char *>(source.source.data()), source.source.size(), std::string(source.name.string).c_str());
             }
             instance.compile_scripts();
         }
@@ -272,7 +272,7 @@ namespace Invader::Parser {
                 
                 if(multiple_instances) {
                     char warning[512];
-                    std::snprintf(warning, sizeof(warning), "%s:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), name, first_instance);
+                    std::snprintf(warning, sizeof(warning), "%s.hsc:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), name, first_instance);
                     warnings.emplace_back(warning);
                 }
                 
@@ -422,7 +422,7 @@ namespace Invader::Parser {
                                 
                                 do_object_index_check_now:
                                 if(!something_corresponds_to_this) {
-                                    eprintf_error("%s:%zu:%zu: error: '%s' is an object name that does not correspond to any object or AI conversation and is thus invalid for use in scripts", source_files[n.file].name.string, n.line, n.column, n.string_data);
+                                    eprintf_error("%s.hsc:%zu:%zu: error: '%s' is an object name that does not correspond to any object or AI conversation and is thus invalid for use in scripts", source_files[n.file].name.string, n.line, n.column, n.string_data);
                                     throw InvalidTagDataException();
                                 }
                             }
@@ -439,7 +439,7 @@ namespace Invader::Parser {
                 throw;
             }
             catch(std::exception &) {
-                eprintf_error("%s:%zu:%zu: error: can't find %s '%s'", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data);
+                eprintf_error("%s.hsc:%zu:%zu: error: can't find %s '%s'", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data);
                 throw InvalidTagDataException();
             }
         }
