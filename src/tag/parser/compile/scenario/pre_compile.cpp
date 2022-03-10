@@ -15,6 +15,18 @@ namespace Invader::Parser {
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
+    static constexpr const HEK::TagFourCC OBJECT_FOURCCS[] = { TagFourCC::TAG_FOURCC_BIPED, 
+                                                               TagFourCC::TAG_FOURCC_VEHICLE,
+                                                               TagFourCC::TAG_FOURCC_WEAPON,
+                                                               TagFourCC::TAG_FOURCC_EQUIPMENT,
+                                                               TagFourCC::TAG_FOURCC_GARBAGE,
+                                                               TagFourCC::TAG_FOURCC_SCENERY,
+                                                               TagFourCC::TAG_FOURCC_PLACEHOLDER,
+                                                               TagFourCC::TAG_FOURCC_SOUND_SCENERY,
+                                                               TagFourCC::TAG_FOURCC_DEVICE_CONTROL,
+                                                               TagFourCC::TAG_FOURCC_DEVICE_MACHINE,
+                                                               TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE };
+    
     template<typename T> static std::optional<HEK::TagFourCC> script_value_type_to_fourcc(T type) {
         switch(static_cast<RIAT_ValueType>(type)) {
             case RIAT_ValueType::RIAT_VALUE_TYPE_SOUND:
@@ -523,39 +535,68 @@ namespace Invader::Parser {
             
             bool resolved = false;
             
-            try {
-                auto resolve_maybe = [&tags_directories, &r]() -> bool {
-                    return File::tag_path_to_file_path(r.first, tags_directories).has_value();
-                };
-                auto resolve_with_fourcc_maybe = [&resolve_maybe, &r](HEK::TagFourCC fourcc) -> bool {
-                    r.first.fourcc = fourcc;
-                    return resolve_maybe();
-                };
-                
-                if(path.fourcc == HEK::TAG_FOURCC_OBJECT) {
-                    resolved = resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_BIPED)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_VEHICLE)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_WEAPON)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_EQUIPMENT)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_GARBAGE)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_SCENERY)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_PLACEHOLDER)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_SOUND_SCENERY)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_DEVICE_CONTROL)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_DEVICE_MACHINE)
-                                || resolve_with_fourcc_maybe(TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE);
-                    if(!resolved) {
-                        path.fourcc = HEK::TAG_FOURCC_OBJECT;
+            if(!resolved) {
+                try {
+                    auto resolve_maybe = [&tags_directories, &r]() -> bool {
+                        return File::tag_path_to_file_path(r.first, tags_directories).has_value();
+                    };
+                    auto resolve_with_fourcc_maybe = [&resolve_maybe, &r](HEK::TagFourCC fourcc) -> bool {
+                        r.first.fourcc = fourcc;
+                        return resolve_maybe();
+                    };
+                    
+                    if(path.fourcc == HEK::TAG_FOURCC_OBJECT) {
+                        for(auto &g : OBJECT_FOURCCS) {
+                            if((resolved = resolve_with_fourcc_maybe(g))) {
+                                break;
+                            }
+                        }
+                        if(!resolved) {
+                            path.fourcc = HEK::TAG_FOURCC_OBJECT;
+                        }
+                    }
+                    else {
+                        resolved = resolve_maybe();
                     }
                 }
-                else {
-                    resolved = resolve_maybe();
+                catch(std::exception &) {}
+            }
+            
+            // See if it has the tag group explicitly mentioned
+            if(!resolved) {
+                auto tfp_maybe = File::split_tag_class_extension(r.first.path);
+                if(tfp_maybe.has_value()) {
+                    auto &tfp = *tfp_maybe;
+                    
+                    // Make sure the extension makes sense
+                    bool fourcc_matches = false;
+                    if(tfp.fourcc != path.fourcc) {
+                        if(path.fourcc == HEK::TAG_FOURCC_OBJECT) {
+                            for(auto &g : OBJECT_FOURCCS) {
+                                if((fourcc_matches = (g == tfp.fourcc))) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        fourcc_matches = true;
+                    }
+                    
+                    // Warn if so, but add it
+                    if(fourcc_matches) {
+                        if((resolved = File::tag_path_to_file_path(tfp, tags_directories).has_value())) {
+                            char w[1024];
+                            std::snprintf(w, sizeof(w), "%s.hsc:%zu:%zu: warning: using tag paths with explicit groups is a Halo 2 extension and may not work with stock tools or future release of Invader", source_files[n.file].name.string, n.line, n.column);
+                            warnings.emplace_back(w);
+                            path = tfp;
+                        }
+                    }
                 }
             }
-            catch(std::exception &) {}
             
             if(!resolved) {
-                eprintf_error("%s:%zu:%zu: error: can't find %s tag \"%s\"", source_files[n.file].name.string, n.line, n.column, HEK::tag_fourcc_to_extension(path.fourcc), path.path.c_str());
+                eprintf_error("%s.hsc:%zu:%zu: error: can't find %s tag \"%s\"", source_files[n.file].name.string, n.line, n.column, HEK::tag_fourcc_to_extension(path.fourcc), path.path.c_str());
                 throw InvalidTagDataException();
             }
             
@@ -739,44 +780,58 @@ namespace Invader::Parser {
             }
             
             auto *path = string_data + node.string_offset.read();
-            bool found = false;
             
+            std::optional<std::size_t> node_object_index;
+            
+            // Look for it
             for(auto &r : scenario.references) {
                 if(r.reference.path == path) {
                     if(*group == HEK::TagFourCC::TAG_FOURCC_OBJECT) {
-                        if(r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_BIPED)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_VEHICLE)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_WEAPON)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_EQUIPMENT)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_GARBAGE)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_SCENERY)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_PLACEHOLDER)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_SOUND_SCENERY)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_DEVICE_CONTROL)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_DEVICE_MACHINE)
-                        && r.reference.tag_fourcc != (TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE)) {
+                        bool should_continue = true;
+                        
+                        for(auto &n : OBJECT_FOURCCS) {
+                            if(!(should_continue = (r.reference.tag_fourcc == n))) {
+                                break;
+                            }
+                        }
+                        
+                        if(should_continue) {
                             continue;
                         }
                     }
                     else if(r.reference.tag_fourcc != *group) {
                         continue;
                     }
-                    auto index = r.reference.tag_id.index;
-                    node.data = r.reference.tag_id;
-                    found = true;
-            
-                    auto &new_dep = script_data_struct.dependencies.emplace_back();
-                    new_dep.offset = reinterpret_cast<std::byte *>(&node.data) - syntax_data;
-                    new_dep.tag_id_only = true;
-                    new_dep.tag_index = index;
-                    
+                    node_object_index = r.reference.tag_id.index;
                     break;
                 }
             }
-            if(!found) {
+            
+            // Explicit?
+            if(!node_object_index.has_value()) {
+                auto path_split = File::split_tag_class_extension(path);
+                if(path_split.has_value()) {
+                    for(auto &r : scenario.references) {
+                        if(r.reference.tag_fourcc == path_split->fourcc && r.reference.path == path_split->path) {
+                            node_object_index = r.reference.tag_id.index;
+                            break; 
+                        }
+                    }
+                }
+            }
+            
+            // Error!
+            if(!node_object_index.has_value()) {
                 eprintf_error("Couldn't find \"%s.%s\" in the references array. This is a bug. Please report it!\n", path, HEK::tag_fourcc_to_extension(*group));
                 std::terminate();
             }
+            
+            // If we found it, set it
+            node.data = HEK::TagID { static_cast<std::uint32_t>(*node_object_index) };
+            auto &new_dep = script_data_struct.dependencies.emplace_back();
+            new_dep.offset = reinterpret_cast<std::byte *>(&node.data) - syntax_data;
+            new_dep.tag_id_only = true;
+            new_dep.tag_index = *node_object_index;
         }
 
         // Add the new structs

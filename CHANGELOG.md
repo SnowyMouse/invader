@@ -3,8 +3,14 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-script: Using explicit extensions is now supported. Note that this is
+  not presently supported in any stock tools
+
 ### Fixed
 - invader-bitmap: Fixed extra tall unrolled cubemaps not being accepted
+- invader-script: Fixed a few instances of warning messages not having .hsc as
+  the path
 
 ## [0.47.1] - 2022-03-07
 ### Changed
