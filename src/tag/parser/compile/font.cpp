@@ -24,6 +24,7 @@ namespace Invader::Parser {
             auto last_index = table.size();
             table.resize(CHARACTER_TABLE_SIZE);
             
+            bool things_added = false;
             if(last_index < CHARACTER_TABLE_SIZE) {
                 for(std::size_t i = last_index; i < CHARACTER_TABLE_SIZE; i++) {
                     std::uint16_t character_index = (i & 0xFF) | ((t << 8) & 0xFF00);
@@ -32,10 +33,16 @@ namespace Invader::Parser {
                     for(std::size_t c = 0; c < character_count; c++) {
                         if(font.characters[c].character == character_index) {
                             value = c;
+                            things_added = true;
                             break;
                         }
                     }
                 }
+            }
+            
+            // Clear if we didn't add anything and it was empty before
+            if(!things_added && last_index == 0) {
+                table.clear();
             }
         }
     }
