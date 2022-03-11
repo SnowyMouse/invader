@@ -9,7 +9,7 @@ namespace Invader::Parser {
             this->shield_recharge_rate = 1.0F;
         }
         else {
-            this->shield_recharge_rate = 1.0F / this->recharge_time / TICK_RATE;
+            this->shield_recharge_rate = TICK_RATE_RECIPROCOL / this->recharge_time;
         }
     }
     void ModelCollisionGeometry::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {

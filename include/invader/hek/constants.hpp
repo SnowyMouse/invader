@@ -8,12 +8,13 @@
  * 
  * *While the game runs at 25 Hz on PAL, Bungie never changed tool.exe to account for this when building cache files. Instead, they changed a few select values and a few animations.
  */
-#define TICK_RATE 30.0
+#define TICK_RATE 30.0F
+#define TICK_RATE_RECIPROCOL (1.0F / TICK_RATE)
 
 /**
  * Number of world units per meter (1 world unit = 10 feet = 3.048 meters)
  */
-#define WORLD_UNITS_PER_METER 3.048
+#define WORLD_UNITS_PER_METER 3.048F
 
 /**
  * Halo's gravity is equal to 9.78 meters per second squared, or approximately
@@ -24,8 +25,8 @@
 /**
  * From Guerilla's self-documentation, measured in grams per milliliter
  */
-#define AIR_DENSITY 0.0011
-#define WATER_DENSITY 1.0
+#define AIR_DENSITY 0.0011F
+#define WATER_DENSITY 1.0F
 
 /**
  * Pi to 100 digits

@@ -163,7 +163,7 @@ namespace Invader::Parser {
             this->crouch_camera_velocity = 1.0F;
         }
         else {
-            this->crouch_camera_velocity = 1.0f / this->crouch_transition_time / TICK_RATE;
+            this->crouch_camera_velocity = TICK_RATE_RECIPROCOL / this->crouch_transition_time;
         }
         
         this->cosine_maximum_slope_angle = static_cast<float>(std::cos(this->maximum_slope_angle));
@@ -208,13 +208,13 @@ namespace Invader::Parser {
     void Projectile::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_PROJECTILE;
         compile_object(*this, workload, tag_index);
-        this->minimum_velocity /= TICK_RATE;
-        this->initial_velocity /= TICK_RATE;
-        this->final_velocity /= TICK_RATE;
+        this->minimum_velocity *= TICK_RATE_RECIPROCOL;
+        this->initial_velocity *= TICK_RATE_RECIPROCOL;
+        this->final_velocity *= TICK_RATE_RECIPROCOL;
     }
     void ProjectileMaterialResponse::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
-        this->potential_and.from /= TICK_RATE;
-        this->potential_and.to /= TICK_RATE;
+        this->potential_and.from *= TICK_RATE_RECIPROCOL;
+        this->potential_and.to *= TICK_RATE_RECIPROCOL;
     }
     void Scenery::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_SCENERY;
@@ -255,14 +255,14 @@ namespace Invader::Parser {
     }
 
     void WeaponTrigger::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
-        this->illumination_recovery_rate = this->illumination_recovery_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->illumination_recovery_time;
-        this->ejection_port_recovery_rate = this->ejection_port_recovery_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->ejection_port_recovery_time;
+        this->illumination_recovery_rate = this->illumination_recovery_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->illumination_recovery_time);
+        this->ejection_port_recovery_rate = this->ejection_port_recovery_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->ejection_port_recovery_time);
 
-        this->firing_acceleration_rate = this->acceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->acceleration_time;
-        this->firing_deceleration_rate = this->deceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->deceleration_time;
+        this->firing_acceleration_rate = this->acceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->acceleration_time);
+        this->firing_deceleration_rate = this->deceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->deceleration_time);
 
-        this->error_acceleration_rate = this->error_acceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->error_acceleration_time;
-        this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->error_deceleration_time;
+        this->error_acceleration_rate = this->error_acceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->error_acceleration_time);
+        this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->error_deceleration_time);
 
         // Jason Jones the accuracy of the weapon
         if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {

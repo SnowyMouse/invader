@@ -7,7 +7,7 @@
 
 namespace Invader::Parser {
     void Invader::Parser::ActorVariant::post_cache_deformat() {
-        this->grenade_velocity *= TICK_RATE;
+        this->grenade_velocity /= TICK_RATE_RECIPROCOL;
     }
 
     void Invader::Parser::DamageEffect::post_cache_deformat() {
@@ -29,14 +29,14 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::Projectile::post_cache_deformat() {
-        this->minimum_velocity *= TICK_RATE;
-        this->initial_velocity *= TICK_RATE;
-        this->final_velocity *= TICK_RATE;
+        this->minimum_velocity /= TICK_RATE_RECIPROCOL;
+        this->initial_velocity /= TICK_RATE_RECIPROCOL;
+        this->final_velocity /= TICK_RATE_RECIPROCOL;
     }
 
     void Invader::Parser::ProjectileMaterialResponse::post_cache_deformat() {
-        this->potential_and.from *= TICK_RATE;
-        this->potential_and.to *= TICK_RATE;
+        this->potential_and.from /= TICK_RATE_RECIPROCOL;
+        this->potential_and.to /= TICK_RATE_RECIPROCOL;
     }
 
     void Invader::Parser::ScenarioCutsceneTitle::post_cache_deformat() {

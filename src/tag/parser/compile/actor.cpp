@@ -7,7 +7,7 @@ namespace Invader::Parser {
     void Actor::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
         auto *actor = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
         
-        #define SET_INVERTED_VALUE(normal,inverted) { if(normal.read() > 0.0F) { inverted = 1.0F / (TICK_RATE * normal.read()); } else { inverted = 0.0F; } }
+        #define SET_INVERTED_VALUE(normal,inverted) { if(normal.read() > 0.0F) { inverted = TICK_RATE_RECIPROCOL / normal.read(); } else { inverted = 0.0F; } }
 
         SET_INVERTED_VALUE(actor->combat_perception_time, actor->inverse_combat_perception_time);
         SET_INVERTED_VALUE(actor->guard_perception_time, actor->inverse_guard_perception_time);
@@ -22,6 +22,6 @@ namespace Invader::Parser {
     
     void ActorVariant::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
         auto *actor_variant = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
-        actor_variant->grenade_velocity = actor_variant->grenade_velocity.read() / TICK_RATE;
+        actor_variant->grenade_velocity = actor_variant->grenade_velocity.read() * TICK_RATE_RECIPROCOL;
     }
 }

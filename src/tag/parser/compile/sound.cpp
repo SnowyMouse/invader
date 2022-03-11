@@ -238,7 +238,7 @@ namespace Invader::Parser {
     }
 
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, 1.0f / TICK_RATE);
+        this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, TICK_RATE_RECIPROCOL);
         this->unknown_ffffffff_0 = 0xFFFFFFFF;
         this->unknown_ffffffff_1 = 0xFFFFFFFF;
 
