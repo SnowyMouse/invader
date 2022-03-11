@@ -540,11 +540,11 @@ namespace Invader::File {
         
         // Check if included
         for(auto &i : include) {
-            if(!path_matches(path, i.c_str())) {
-                return false;
+            if(path_matches(path, i.c_str())) {
+                return true;
             }
         }
         
-        return true;
+        return !include.empty();
     }
 }

@@ -10,9 +10,13 @@ This is used for recording Invader's changes. This changelog is based on
   not presently supported in any stock tools
 
 ### Fixed
+- invader-bludgeon: Fixed -s narrowing searches instead of broadening them
 - invader-bitmap: Fixed extra tall unrolled cubemaps not being accepted
+- invader-compare: Fixed -s narrowing searches instead of broadening them
+- invader-extract: Fixed -s narrowing searches instead of broadening them
 - invader-script: Fixed a few instances of warning messages not having .hsc as
   the path
+- invader-strip: Fixed -s narrowing searches instead of broadening them
 
 ## [0.47.1] - 2022-03-07
 ### Changed
