@@ -545,6 +545,7 @@ namespace Invader::File {
             }
         }
         
-        return !include.empty();
+        // If include is empty, we're good
+        return include.empty();
     }
 }
