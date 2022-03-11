@@ -674,7 +674,96 @@ namespace Invader::Parser {
                 break;
             }
             case HEK::ScenarioType::SCENARIO_TYPE_MULTIPLAYER: {
-                // TODO: Check for 16 spawns for each CTF team, 16 spawns for all other gametypes
+                struct {
+                    std::list<std::size_t> ctf_red;
+                    std::list<std::size_t> ctf_blue;
+                    std::list<std::size_t> slayer;
+                    std::list<std::size_t> king;
+                    std::list<std::size_t> race;
+                    std::list<std::size_t> oddball;
+                } all_spawns;
+                
+                auto player_starting_location_count = this->player_starting_locations.size();
+                
+                for(std::size_t i = 0; i < player_starting_location_count; i++) {
+                    auto &s = this->player_starting_locations[i];
+                    
+                    auto add_for_type = [&s, &i, &all_spawns](auto t, auto add_for_type) -> void {
+                        switch(t) {
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_SLAYER:
+                                all_spawns.slayer.emplace_back(i);
+                                break;
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ODDBALL:
+                                all_spawns.oddball.emplace_back(i);
+                                break;
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_RACE:
+                                all_spawns.race.emplace_back(i);
+                                break;
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_KING_OF_THE_HILL:
+                                all_spawns.king.emplace_back(i);
+                                break;
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_CTF:
+                                if(s.team_index == 0) {
+                                    all_spawns.ctf_red.emplace_back(i);
+                                }
+                                if(s.team_index == 1) {
+                                    all_spawns.ctf_blue.emplace_back(i);
+                                }
+                                break;
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_GAMES:
+                                add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_CTF, add_for_type);
+                                // fallthrough
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_EXCEPT_CTF:
+                                add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_RACE, add_for_type);
+                                // fallthrough
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_EXCEPT_RACE_CTF:
+                                add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_SLAYER, add_for_type);
+                                add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ODDBALL, add_for_type);
+                                add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_KING_OF_THE_HILL, add_for_type);
+                                break;
+                            default:
+                                break;
+                        };
+                    };
+                    
+                    add_for_type(s.type_0, add_for_type);
+                    add_for_type(s.type_1, add_for_type);
+                    add_for_type(s.type_2, add_for_type);
+                    add_for_type(s.type_3, add_for_type);
+                }
+                
+                all_spawns.ctf_red.sort();
+                all_spawns.ctf_blue.sort();
+                all_spawns.slayer.sort();
+                all_spawns.king.sort();
+                all_spawns.race.sort();
+                all_spawns.oddball.sort();
+
+                all_spawns.ctf_red.unique();
+                all_spawns.ctf_blue.unique();
+                all_spawns.slayer.unique();
+                all_spawns.king.unique();
+                all_spawns.race.unique();
+                all_spawns.oddball.unique();
+                
+                #define COMPLAIN_IF_NOT_ENOUGH(what, name) if(all_spawns.what.empty()) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "There are no " name " spawns."); \
+                } \
+                else if(all_spawns.what.size() < 16) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "There are %zu/16 " name " spawns. This gametype may have spawning issues.", all_spawns.what.size()); \
+                }
+                
+                COMPLAIN_IF_NOT_ENOUGH(ctf_red, "red CTF")
+                COMPLAIN_IF_NOT_ENOUGH(ctf_blue, "blue CTF")
+                COMPLAIN_IF_NOT_ENOUGH(slayer, "Slayer")
+                COMPLAIN_IF_NOT_ENOUGH(king, "King of the Hill")
+                COMPLAIN_IF_NOT_ENOUGH(race, "Race")
+                COMPLAIN_IF_NOT_ENOUGH(oddball, "Oddball")
+                
+                #undef COMPLAIN_IF_NOT_ENOUGH
+                
+                // TODO: Complain about gametype flags
+                
                 break;
             }
             default: break;
