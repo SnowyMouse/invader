@@ -9,6 +9,11 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-script: Using "none" is now supported for tag paths. Note that this is
   not presently supported in any stock tools
 
+### Changed
+- invader-edit: Simple expressions are now supported in --set. Use `~+n` to add
+  n to the value, `~-n` to subtract n from the value, `~*n` to multiply the
+  value by n, `~/n` to divide the value by n, and `~` to not change the value.
+
 ### Fixed
 - invader-bludgeon: Fixed -s narrowing searches instead of broadening them
 - invader-bitmap: Fixed extra tall unrolled cubemaps not being accepted

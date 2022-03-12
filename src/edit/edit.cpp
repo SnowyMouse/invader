@@ -178,11 +178,17 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
                 
                 auto count = i.get_array_size();
                 
-                if(count == 0) {
-                    eprintf_error("%s::%s is empty", ps->struct_name(), member.c_str());
-                }
-                
                 auto access_range = get_range(key, key);
+                
+                if(count == 0) {
+                    // If we're accessing everything and it's empty, just return
+                    if(access_range.first == 0 && access_range.second == SIZE_MAX) {
+                        return;
+                    }
+                    
+                    eprintf_error("%s::%s is empty", ps->struct_name(), member.c_str());
+                    std::exit(EXIT_FAILURE);
+                }
                 
                 if(access_range.first == SIZE_MAX) {
                     access_range.first = count - 1;
@@ -412,27 +418,68 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
     else {
         const char *start = new_value.c_str();
         char *c;
-        std::vector<Invader::Parser::ParserStructValue::Number> values;
+        
+        enum Action {
+            SET, ADD, SUBTRACT, MULTIPLY, DIVIDE, NOP
+        };
+        
+        std::vector<std::pair<Invader::Parser::ParserStructValue::Number, Action>> values;
+        
+        
         while(*start) {
-            auto *current_path = start;
-            if(*start != '-' && *start != '.' && (*start < '0' || *start > '9')) {
-                eprintf_error("Invalid input value %s", current_path);
+            auto *cursor = start;
+            if(*start != '-' && *start != '.' && *start != '~' && (*start < '0' || *start > '9')) {
+                eprintf_error("Invalid input value %s", cursor);
                 std::exit(EXIT_FAILURE);
             }
-            switch(format) {
-                case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
-                    values.emplace_back(std::strtol(current_path, &c, 10));
-                    break;
-                case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
-                    double multiplier = 1.0;
-                    if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D ||type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
-                        multiplier = HALO_PI / 180.0;
-                    }
-                    values.emplace_back(std::strtod(current_path, &c) * multiplier);
-                    break;
+            
+            // What are we doing?
+            Action action = Action::SET;
+            if(*start == '~') {
+                cursor++;
+                switch(*cursor) {
+                    case 0:
+                    case ' ':
+                        action = Action::NOP;
+                        values.emplace_back(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? static_cast<std::int64_t>(0) : static_cast<double>(0.0), action);
+                        c = const_cast<char *>(cursor);
+                        break;
+                    case '+':
+                        action = Action::ADD;
+                        break;
+                    case '-':
+                        action = Action::SUBTRACT;
+                        break;
+                    case '*':
+                        action = Action::MULTIPLY;
+                        break;
+                    case '/':
+                        action = Action::DIVIDE;
+                        break;
+                    default:
+                        eprintf_error("Invalid input value %s", cursor);
+                        std::exit(EXIT_FAILURE);
                 }
-                default: std::terminate();
+                cursor++;
             }
+            
+            if(action != Action::NOP) {
+                switch(format) {
+                    case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+                        values.emplace_back(std::strtol(cursor, &c, 10), action);
+                        break;
+                    case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
+                        double multiplier = 1.0;
+                        if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
+                            multiplier = HALO_PI / 180.0;
+                        }
+                        values.emplace_back(std::strtod(cursor, &c) * multiplier, action);
+                        break;
+                    }
+                    default: std::terminate();
+                }
+            }
+                
             start = c;
             if(*start == ' ') {
                 start++;
@@ -446,12 +493,62 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
             }
         }
         
-        if(values.size() == value.get_value_count()) {
-            value.set_values(values);
+        auto value_count = values.size();
+        auto expected_value_count = value.get_value_count();
+        if(value_count == expected_value_count) {
+            auto current_values = value.get_values();
+            for(std::size_t i = 0; i < value_count; i++) {
+                auto &v = values[i];
+                auto &v_set = current_values[i];
+                
+                switch(v.second) {
+                    case Action::NOP:
+                        break;
+                    case Action::SET:
+                        v_set = v.first;
+                        break;
+                    case Action::ADD: {
+                        auto add = [&v_set](auto &a) -> void {
+                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) += a;
+                        };
+                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? add(std::get<std::int64_t>(v.first)) : add(std::get<double>(v.first));
+                        break;
+                    }
+                    case Action::SUBTRACT: {
+                        auto sub = [&v_set](auto &a) -> void {
+                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) -= a;
+                        };
+                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? sub(std::get<std::int64_t>(v.first)) : sub(std::get<double>(v.first));
+                        break;
+                    }
+                    case Action::DIVIDE: {
+                        auto div = [&v_set](auto &a) -> void {
+                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) /= a;
+                        };
+                        
+                        if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT && std::get<std::int64_t>(v.first) == 0) {
+                            eprintf_error("Cannot integer divide by 0");
+                            std::exit(EXIT_FAILURE);
+                        }
+                        
+                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? div(std::get<std::int64_t>(v.first)) : div(std::get<double>(v.first));
+                        break;
+                    }
+                    case Action::MULTIPLY: {
+                        auto mul = [&v_set](auto &a) -> void {
+                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) *= a;
+                        };
+                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? mul(std::get<std::int64_t>(v.first)) : mul(std::get<double>(v.first));
+                        break;
+                    }
+                }
+            }
+            
+            value.set_values(current_values);
             return;
         }
         else {
-            eprintf_error("Incorrect number of inputs for the value (got %zu, expected %zu)", values.size(), value.get_value_count());
+            eprintf_error("Incorrect number of inputs for the value (got %zu, expected %zu)", value_count, expected_value_count);
             std::exit(EXIT_FAILURE);
         }
     }
