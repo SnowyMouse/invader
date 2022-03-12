@@ -11,6 +11,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
 
+using namespace Invader;
 using namespace Invader::File;
 
 std::size_t refactor_tags(const std::filesystem::path &file_path, const std::vector<std::pair<TagFilePath, TagFilePath>> &replacements, bool check_only, bool dry_run) {
@@ -26,10 +27,10 @@ std::size_t refactor_tags(const std::filesystem::path &file_path, const std::vec
     std::size_t count = 0;
 
     try {
-        const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
-        Invader::HEK::TagFileHeader::validate_header(header, tag->size());
+        const auto *header = reinterpret_cast<const HEK::TagFileHeader *>(tag->data());
+        HEK::TagFileHeader::validate_header(header, tag->size());
 
-        auto tag_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
+        auto tag_data = Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
         count = tag_data->refactor_references(replacements);
         if(count) {
             file_data = tag_data->generate_hek_tag_data(header->tag_fourcc);
@@ -63,17 +64,20 @@ enum RefactorMode {
 int main(int argc, char * const *argv) {
     set_up_color_term();
     
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show license and credits.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes. This is useful for checking for errors before committing anything, although filesystem errors may not be caught.");
-    options.emplace_back("mode", 'M', 1, "Specify what to do with the file if it exists. If using move, then the tag is moved (the tag must exist on the filesystem) while also changing all references to the tag to the new path. If using no-move, then the tag is not moved (the destination tag must exist on the filesystem unless you use --unsafe) while also changing all references to the tag to the new path. If using copy, then the tag is copied (the tag must exist on the filesystem) and references to the tag are not changed except for other tags copied by this command. Can be: copy, move, no-move", "<mode>");
-    options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>");
-    options.emplace_back("unsafe", 'U', 0, "Do not require the destination tags to exist if using no-move");
-    options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
-    options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
-    options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>");
-    options.emplace_back("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. If --class or --recursive are used, this applies to the output of those. Otherwise, it applies to all tags.", "<a> <b>");
+    using namespace Invader;
+    
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show license and credits."),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
+        CommandLineOption("dry-run", 'D', 0, "Do not actually make any changes. This is useful for checking for errors before committing anything, although filesystem errors may not be caught."),
+        CommandLineOption("mode", 'M', 1, "Specify what to do with the file if it exists. If using move, then the tag is moved (the tag must exist on the filesystem) while also changing all references to the tag to the new path. If using no-move, then the tag is not moved (the destination tag must exist on the filesystem unless you use --unsafe) while also changing all references to the tag to the new path. If using copy, then the tag is copied (the tag must exist on the filesystem) and references to the tag are not changed except for other tags copied by this command. Can be: copy, move, no-move", "<mode>"),
+        CommandLineOption("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>"),
+        CommandLineOption("unsafe", 'U', 0, "Do not require the destination tags to exist if using no-move"),
+        CommandLineOption("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>"),
+        CommandLineOption("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>"),
+        CommandLineOption("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>"),
+        CommandLineOption("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. If --class or --recursive are used, this applies to the output of those. Otherwise, it applies to all tags.", "<a> <b>")
+    };
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
     static constexpr char USAGE[] = "<-M <mode>> [options]";
@@ -87,14 +91,14 @@ int main(int argc, char * const *argv) {
 
         std::vector<std::pair<std::string, std::string>> string_replacements;
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
-        std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> class_replacements;
-        std::vector<std::pair<Invader::HEK::TagFourCC, Invader::HEK::TagFourCC>> reverse_class_replacements;
+        std::vector<std::pair<HEK::TagFourCC, HEK::TagFourCC>> class_replacements;
+        std::vector<std::pair<HEK::TagFourCC, HEK::TagFourCC>> reverse_class_replacements;
         std::optional<std::pair<std::string, std::string>> recursive;
     } refactor_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
-        auto get_class = [](auto *argument) -> Invader::HEK::TagFourCC {
-            auto tag_class = Invader::HEK::tag_extension_to_fourcc(argument);
+    auto remaining_arguments = CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
+        auto get_class = [](auto *argument) -> HEK::TagFourCC {
+            auto tag_class = HEK::tag_extension_to_fourcc(argument);
             if(!tag_class) {
                 eprintf_error("Error: %s is not a valid tag class", argument);
                 std::exit(EXIT_FAILURE);
@@ -107,7 +111,7 @@ int main(int argc, char * const *argv) {
                 refactor_options.tags.emplace_back(arguments[0]);
                 return;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
                 return;
             case 'U':
@@ -150,7 +154,7 @@ int main(int argc, char * const *argv) {
                 refactor_options.single_tag = arguments[0];
                 return;
             case 'R':
-                refactor_options.string_replacements.emplace_back(Invader::File::preferred_path_to_halo_path(arguments[0]), Invader::File::preferred_path_to_halo_path(arguments[1]));
+                refactor_options.string_replacements.emplace_back(File::preferred_path_to_halo_path(arguments[0]), File::preferred_path_to_halo_path(arguments[1]));
                 return;
         }
     });
@@ -201,13 +205,13 @@ int main(int argc, char * const *argv) {
         for(auto &i : refactor_options.replacements) {
             bool nonexistant = true;
             for(auto &t : refactor_options.tags) {
-                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + Invader::HEK::tag_fourcc_to_extension(i.second.fourcc)))) {
+                if(std::filesystem::exists(std::filesystem::path(t) / (File::halo_path_to_preferred_path(i.second.path) + "." + HEK::tag_fourcc_to_extension(i.second.fourcc)))) {
                     nonexistant = false;
                     break;
                 }
             }
             if(nonexistant) {
-                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), Invader::HEK::tag_fourcc_to_extension(i.first.fourcc), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), Invader::HEK::tag_fourcc_to_extension(i.second.fourcc));
+                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", File::halo_path_to_preferred_path(i.first.path).c_str(), HEK::tag_fourcc_to_extension(i.first.fourcc), File::halo_path_to_preferred_path(i.second.path).c_str(), HEK::tag_fourcc_to_extension(i.second.fourcc));
                 failed = true;
             }
         }
@@ -221,7 +225,7 @@ int main(int argc, char * const *argv) {
     for(auto &r : class_replacements) {
         for(auto &t : all_tags) {
             if(t.tag_fourcc == r.second) {
-                auto split_from = *Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(t.tag_path));
+                auto split_from = *File::split_tag_class_extension(File::preferred_path_to_halo_path(t.tag_path));
                 auto split_to = split_from;
                 split_from.fourcc = r.first;
                 refactor_options.replacements.emplace_back(split_from, split_to);
@@ -268,7 +272,7 @@ int main(int argc, char * const *argv) {
         tag.tag_path = single_tag_maybe->path + "." + tag_fourcc_to_extension(single_tag_maybe->fourcc);
 
         // Find it
-        auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags);
+        auto file_path_maybe = File::tag_path_to_file_path(tag.tag_path, refactor_options.tags);
         if(!file_path_maybe.has_value()) {
             eprintf_error("Error: %s was not found in any tags directory", refactor_options.single_tag);
             return EXIT_FAILURE;
@@ -324,7 +328,7 @@ int main(int argc, char * const *argv) {
                 }
 
                 if(!added) {
-                    eprintf_error("Error: %s was not found.", Invader::File::halo_path_to_preferred_path(joined).c_str());
+                    eprintf_error("Error: %s was not found.", File::halo_path_to_preferred_path(joined).c_str());
                     return EXIT_FAILURE;
                 }
             }
@@ -346,7 +350,7 @@ int main(int argc, char * const *argv) {
         // If empty, try finding anything that has the string we're looking for
         if(replacements.empty()) {
             for(auto &t : all_tags) {
-                auto path_split = *Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(t.tag_path));
+                auto path_split = *File::split_tag_class_extension(File::preferred_path_to_halo_path(t.tag_path));
                 bool in_it = false;
                 
                 for(auto &i : refactor_options.string_replacements) {
@@ -485,7 +489,7 @@ int main(int argc, char * const *argv) {
             // If copying, only refactor the new tags (or original if dry run)
             skip = true;
             for(auto &i : replacements) {
-                if((refactor_options.dry_run ? i.first : i.second) == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
+                if((refactor_options.dry_run ? i.first : i.second) == File::split_tag_class_extension(File::preferred_path_to_halo_path(tag.tag_path))) {
                     skip = false;
                     break;
                 }
@@ -494,7 +498,7 @@ int main(int argc, char * const *argv) {
             // If we aren't performing a dry run, do not modify the original tags
             if(!skip && !refactor_options.dry_run) {
                 for(auto &i : replacements) {
-                    if(i.first == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
+                    if(i.first == File::split_tag_class_extension(File::preferred_path_to_halo_path(tag.tag_path))) {
                         skip = true;
                         break;
                     }
@@ -504,11 +508,11 @@ int main(int argc, char * const *argv) {
         
         // Skip some tags that cannot reference anything
         switch(tag.tag_fourcc) {
-            case Invader::HEK::TagFourCC::TAG_FOURCC_BITMAP:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_PHYSICS:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_STRING_LIST:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
-            case Invader::HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
+            case HEK::TagFourCC::TAG_FOURCC_BITMAP:
+            case HEK::TagFourCC::TAG_FOURCC_PHYSICS:
+            case HEK::TagFourCC::TAG_FOURCC_STRING_LIST:
+            case HEK::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST:
+            case HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT:
                 skip = true;
                 break;
             default:

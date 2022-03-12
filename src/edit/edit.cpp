@@ -18,6 +18,8 @@
 #include <windows.h>
 #endif
 
+using namespace Invader;
+
 enum ActionType {
     ACTION_TYPE_CHECKSUM,
     ACTION_TYPE_GET,
@@ -142,7 +144,7 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
     return { min, max };
 }
 
-static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std::vector<Invader::Parser::ParserStructValue> &array, std::string *bitfield, std::pair<std::size_t, std::size_t> *range) {
+static void build_array(Parser::ParserStruct *ps, std::string key, std::vector<Parser::ParserStructValue> &array, std::string *bitfield, std::pair<std::size_t, std::size_t> *range) {
     if(key == "") {
         eprintf_error("Expected value name");
         std::exit(EXIT_FAILURE);
@@ -169,7 +171,7 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
         auto *member_name = i.get_member_name();
         
         if(member_name && member_name == member) {
-            if(i.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+            if(i.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                 // End of key?
                 if(key.size() == 0) {
                     array.emplace_back(i);
@@ -220,7 +222,7 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
                 array.emplace_back(i);
                 
                 // Is this a bitfield? If so, set it!
-                if(i.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
+                if(i.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
                     if(key.size() == 0) {
                         eprintf_error("Expected bitfield but got the end of the key");
                         std::exit(EXIT_FAILURE);
@@ -245,7 +247,7 @@ static void build_array(Invader::Parser::ParserStruct *ps, std::string key, std:
     std::exit(EXIT_FAILURE);
 }
 
-static void require_writable_only(const std::vector<Invader::Parser::ParserStructValue> &values, bool writable_only) {
+static void require_writable_only(const std::vector<Parser::ParserStructValue> &values, bool writable_only) {
     if(writable_only) {
         for(auto &i : values) {
             if(i.is_read_only()) {
@@ -256,39 +258,39 @@ static void require_writable_only(const std::vector<Invader::Parser::ParserStruc
     }
 }
 
-static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::string &bitfield, bool writable_only) {
-    std::vector<Invader::Parser::ParserStructValue> values;
+static std::vector<Parser::ParserStructValue> get_values_for_key(Parser::ParserStruct *ps, std::string key, std::string &bitfield, bool writable_only) {
+    std::vector<Parser::ParserStructValue> values;
     build_array(ps, key, values, &bitfield, nullptr);
     require_writable_only(values, writable_only);
     return values;
 }
 
-static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, std::pair<std::size_t, std::size_t> &range, bool writable_only) {
-    std::vector<Invader::Parser::ParserStructValue> values;
+static std::vector<Parser::ParserStructValue> get_values_for_key(Parser::ParserStruct *ps, std::string key, std::pair<std::size_t, std::size_t> &range, bool writable_only) {
+    std::vector<Parser::ParserStructValue> values;
     build_array(ps, key, values, nullptr, &range);
     require_writable_only(values, writable_only);
     return values;
 }
 
-static std::vector<Invader::Parser::ParserStructValue> get_values_for_key(Invader::Parser::ParserStruct *ps, std::string key, bool writable_only) {
-    std::vector<Invader::Parser::ParserStructValue> values;
+static std::vector<Parser::ParserStructValue> get_values_for_key(Parser::ParserStruct *ps, std::string key, bool writable_only) {
+    std::vector<Parser::ParserStructValue> values;
     build_array(ps, key, values, nullptr, nullptr);
     require_writable_only(values, writable_only);
     return values;
 }
 
-static std::string get_value(const Invader::Parser::ParserStructValue &value, const std::string &bitmask) {
+static std::string get_value(const Parser::ParserStructValue &value, const std::string &bitmask) {
     auto format = value.get_number_format();
     auto type = value.get_type();
-    if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
+    if(format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
         switch(type) {
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 return value.read_string();
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
-                return Invader::File::halo_path_to_preferred_path(value.get_dependency().path) + "." + Invader::HEK::tag_fourcc_to_extension(value.get_dependency().tag_fourcc);
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+                return File::halo_path_to_preferred_path(value.get_dependency().path) + "." + HEK::tag_fourcc_to_extension(value.get_dependency().tag_fourcc);
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
                 return value.read_enum();
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
                 return std::to_string(value.read_bitfield(bitmask.c_str()) ? 1 : 0);
             default:
                 eprintf_error("Unsupported value type for this operation");
@@ -301,7 +303,7 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
         auto values = value.get_values();
         
         switch(format) {
-            case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+            case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
                 for(auto &i : values) {
                     if(str.size() > 0) {
                         str += " ";
@@ -309,14 +311,14 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
                     str += std::to_string(std::get<std::int64_t>(i));
                 }
                 break;
-            case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
+            case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
                 for(auto &i : values) {
                     if(str.size() > 0) {
                         str += " ";
                     }
                     
                     double multiplier = 1.0;
-                    if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D ||type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
+                    if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D ||type == Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
                         multiplier = 180.0 / HALO_PI;
                     }
                     
@@ -331,20 +333,20 @@ static std::string get_value(const Invader::Parser::ParserStructValue &value, co
     }
 }
 
-static void set_value(Invader::Parser::ParserStructValue &value, const std::string &new_value, const std::optional<std::string> bitfield = std::nullopt) {
+static void set_value(Parser::ParserStructValue &value, const std::string &new_value, const std::optional<std::string> bitfield = std::nullopt) {
     auto format = value.get_number_format();
     auto type = value.get_type();
     
     // Something special?
-    if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
+    if(format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
         switch(type) {
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 if(new_value.size() > 31) {
                     eprintf_error("String exceeds maximum length (%zu > 31)", new_value.size());
                     std::exit(EXIT_FAILURE);
                 }
                 return value.set_string(new_value.c_str());
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
                 auto &dep = value.get_dependency();
                 
                 // If the value is empty, just clear the path
@@ -354,7 +356,7 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                 
                 // Otherwise, attempt to parse what was given.
                 else try {
-                    auto new_path = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(new_value)).value();
+                    auto new_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(new_value)).value();
                     
                     auto allowed_classes = value.get_allowed_classes();
                     bool found = allowed_classes.empty();
@@ -383,7 +385,7 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                 
                 return;
             }
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
                 try {
                     return value.write_enum(new_value.c_str());
                 }
@@ -391,7 +393,7 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                     eprintf_error("Invalid enum value %s", new_value.c_str());
                     std::exit(EXIT_FAILURE);
                 }
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
                 try {
                     auto new_value_int = std::stoi(new_value);
                     switch(new_value_int) {
@@ -423,7 +425,7 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
             SET, ADD, SUBTRACT, MULTIPLY, DIVIDE, NOP
         };
         
-        std::vector<std::pair<Invader::Parser::ParserStructValue::Number, Action>> values;
+        std::vector<std::pair<Parser::ParserStructValue::Number, Action>> values;
         
         
         while(*start) {
@@ -441,7 +443,7 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                     case 0:
                     case ' ':
                         action = Action::NOP;
-                        values.emplace_back(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? static_cast<std::int64_t>(0) : static_cast<double>(0.0), action);
+                        values.emplace_back(format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? static_cast<std::int64_t>(0) : static_cast<double>(0.0), action);
                         c = const_cast<char *>(cursor);
                         break;
                     case '+':
@@ -465,12 +467,12 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
             
             if(action != Action::NOP) {
                 switch(format) {
-                    case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+                    case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
                         values.emplace_back(std::strtol(cursor, &c, 10), action);
                         break;
-                    case Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
+                    case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
                         double multiplier = 1.0;
-                        if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D || type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
+                        if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D || type == Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
                             multiplier = HALO_PI / 180.0;
                         }
                         values.emplace_back(std::strtod(cursor, &c) * multiplier, action);
@@ -511,14 +513,14 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                         auto add = [&v_set](auto &a) -> void {
                             std::get<typename std::remove_reference<decltype(a)>::type>(v_set) += a;
                         };
-                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? add(std::get<std::int64_t>(v.first)) : add(std::get<double>(v.first));
+                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? add(std::get<std::int64_t>(v.first)) : add(std::get<double>(v.first));
                         break;
                     }
                     case Action::SUBTRACT: {
                         auto sub = [&v_set](auto &a) -> void {
                             std::get<typename std::remove_reference<decltype(a)>::type>(v_set) -= a;
                         };
-                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? sub(std::get<std::int64_t>(v.first)) : sub(std::get<double>(v.first));
+                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? sub(std::get<std::int64_t>(v.first)) : sub(std::get<double>(v.first));
                         break;
                     }
                     case Action::DIVIDE: {
@@ -526,19 +528,19 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
                             std::get<typename std::remove_reference<decltype(a)>::type>(v_set) /= a;
                         };
                         
-                        if(format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT && std::get<std::int64_t>(v.first) == 0) {
+                        if(format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT && std::get<std::int64_t>(v.first) == 0) {
                             eprintf_error("Cannot integer divide by 0");
                             std::exit(EXIT_FAILURE);
                         }
                         
-                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? div(std::get<std::int64_t>(v.first)) : div(std::get<double>(v.first));
+                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? div(std::get<std::int64_t>(v.first)) : div(std::get<double>(v.first));
                         break;
                     }
                     case Action::MULTIPLY: {
                         auto mul = [&v_set](auto &a) -> void {
                             std::get<typename std::remove_reference<decltype(a)>::type>(v_set) *= a;
                         };
-                        format == Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? mul(std::get<std::int64_t>(v.first)) : mul(std::get<double>(v.first));
+                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? mul(std::get<std::int64_t>(v.first)) : mul(std::get<double>(v.first));
                         break;
                     }
                 }
@@ -558,9 +560,9 @@ static void set_value(Invader::Parser::ParserStructValue &value, const std::stri
 }
 
 // Ensure a struct has at least one of everything in everything (for listing)
-static Invader::Parser::ParserStruct &populate_struct(Invader::Parser::ParserStruct &ps) {
+static Parser::ParserStruct &populate_struct(Parser::ParserStruct &ps) {
     for(auto &i : ps.get_values()) {
-        if(i.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+        if(i.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
             i.insert_objects_in_array(0, 1);
             populate_struct(i.get_object_in_array(0));
         }
@@ -576,7 +578,7 @@ struct TagDataListTreeElement {
     TagDataListTreeElement(std::size_t level, const std::string &name, const std::string &type) : level(level), name(name), type(type) {}
 };
 
-static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDataListTreeElement> &output, bool with_values, std::size_t level = 0) {
+static void list_everything(Parser::ParserStruct &ps, std::vector<TagDataListTreeElement> &output, bool with_values, std::size_t level = 0) {
     for(auto &i : ps.get_values()) {
         auto *mv = i.get_member_name();
         if(!mv) {
@@ -588,101 +590,101 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
         std::string name = mv;
         
         switch(type) {
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE:
                 type_str = "array";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INT8:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_INT8:
                 type_str = "int8";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INT16:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_INT16:
                 type_str = "int16";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INT32:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_INT32:
                 type_str = "int32";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT8:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT8:
                 type_str = "uint8";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT16:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT16:
                 type_str = "uint16";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT32:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_UINT32:
                 type_str = "uint32";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_FLOAT:
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_FRACTION:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_FLOAT:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_FRACTION:
                 type_str = "float32";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE:
                 type_str = "angle (float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_INDEX:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_INDEX:
                 type_str = "index";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORARGB:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORARGB:
                 type_str = "color (ARGB float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORRGB:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORRGB:
                 type_str = "color (RGB float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORARGBINT:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_COLORARGBINT:
                 type_str = "color (A8R8G8B8)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT2DINT:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT2DINT:
                 type_str = "point2d (integer)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT2D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT2D:
                 type_str = "point2d (float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT3D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_POINT3D:
                 type_str = "point3d (float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_PLANE2D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_PLANE2D:
                 type_str = "plane2d (float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_PLANE3D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_PLANE3D:
                 type_str = "plane3d (float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_QUATERNION:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_QUATERNION:
                 type_str = "quaternion (float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY:
                 type_str = "dependency";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGID:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGID:
                 type_str = "bullshit";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 type_str = "string";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET:
                 type_str = "data";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM:
                 type_str = "enum";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
                 type_str = "bitmask";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_MATRIX:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_MATRIX:
                 type_str = "matrix (float32)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_VECTOR2D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_VECTOR2D:
                 type_str = "vector2d (float)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_VECTOR3D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_VECTOR3D:
                 type_str = "vector3d (float)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D:
                 type_str = "euler2d (float)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D:
                 type_str = "euler3d (float)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_RECTANGLE2D:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_RECTANGLE2D:
                 type_str = "rectangle2d (float)";
                 break;
-            case Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_GROUP_START:
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_GROUP_START:
                 type_str = "group";
                 break;
         }
@@ -692,7 +694,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
         }
         
         // Do we want to show the value or size?
-        if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+        if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
             if(with_values) {
                 name = name + "[" + std::to_string(i.get_array_size()) + "]";
             }
@@ -702,16 +704,16 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
         }
         
         else if(with_values) {
-            if(i.get_number_format() != Invader::Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
+            if(i.get_number_format() != Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_NONE) {
                 name = name + " (" + get_value(i, "") + ")";
             }
-            else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY) {
+            else if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY) {
                 auto &dep = i.get_dependency();
                 if(dep.path.size() > 0) {
-                    name = name + " (" + Invader::File::halo_path_to_preferred_path(dep.path) + "." + Invader::HEK::tag_fourcc_to_extension(dep.tag_fourcc) + ")";
+                    name = name + " (" + File::halo_path_to_preferred_path(dep.path) + "." + HEK::tag_fourcc_to_extension(dep.tag_fourcc) + ")";
                 }
             }
-            else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING) {
+            else if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING) {
                 name = name + " (" + i.get_string() + ")";
             }
         }
@@ -719,7 +721,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
         output.emplace_back(level, name, type_str);
         
         // If reflexive, list that stuff
-        if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+        if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
             auto count = i.get_array_size();
             std::size_t inner_level = level + 1;
             if(with_values) {
@@ -735,7 +737,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
         }
         
         // Or if it's a bitmask, do that too
-        else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
+        else if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
             for(auto &j : i.list_enum()) {
                 if(with_values) {
                     output.emplace_back(level + 1, std::string(j) + " " + (i.read_bitfield(j) ? "(1)" : "(0)"), "bitfield");
@@ -747,7 +749,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
         }
         
         // Or if it's an enum, list the values
-        else if(type == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM) {
+        else if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM) {
             for(auto &j : i.list_enum()) {
                 std::string name = j;
                 if(with_values && std::strcmp(i.read_enum(), j) == 0) {
@@ -759,7 +761,7 @@ static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<TagDa
     }
 }
 
-static void list_everything(Invader::Parser::ParserStruct &ps, std::vector<std::string> &output, bool with_values) {
+static void list_everything(Parser::ParserStruct &ps, std::vector<std::string> &output, bool with_values) {
     // Print the right column (description)
     std::size_t terminal_width = 80;
     
@@ -859,27 +861,26 @@ int main(int argc, char * const *argv) {
     SetConsoleOutputCP(65001);
     #endif
     
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show license and credits.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file.");
-    options.emplace_back("get", 'G', 1, "Get the value with the given key.", "<key>");
-    options.emplace_back("verify-checksum", 'V', 0, "Verify that the checksum in the header is correct and print the result.");
-    options.emplace_back("checksum", 'H', 0, "Output the calculated checksum of the tag.");
-    options.emplace_back("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>");
-    options.emplace_back("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>");
-    options.emplace_back("new", 'N', 0, "Create a new tag");
-    options.emplace_back("list", 'l', 0, "List all elements in a tag.");
-    options.emplace_back("list-values", 'L', 0, "List all elements and values in a tag. This may be slow on large tags.");
-    
-    options.emplace_back("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<file>");
-    options.emplace_back("save-as", 'O', 1, "Output the tag to a different path relative to the tags directory rather than overwriting it.", "<tag>");
-    
-    options.emplace_back("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>");
-    options.emplace_back("move", 'M', 2, "Swap the selected structs with the structs at the given index or \"end\" if the end of the array. The regions must not intersect.", "<key> <pos>");
-    options.emplace_back("erase", 'E', 1, "Delete the selected struct(s).", "<key>");
-    options.emplace_back("copy", 'c', 2, "Copy the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>");
-    options.emplace_back("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)");
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show license and credits."),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file."),
+        CommandLineOption("get", 'G', 1, "Get the value with the given key.", "<key>"),
+        CommandLineOption("verify-checksum", 'V', 0, "Verify that the checksum in the header is correct and print the result."),
+        CommandLineOption("checksum", 'H', 0, "Output the calculated checksum of the tag."),
+        CommandLineOption("set", 'S', 2, "Set the value at the given key to the given value.", "<key> <val>"),
+        CommandLineOption("count", 'C', 1, "Get the number of elements in the array at the given key.", "<key>"),
+        CommandLineOption("new", 'N', 0, "Create a new tag"),
+        CommandLineOption("list", 'l', 0, "List all elements in a tag."),
+        CommandLineOption("list-values", 'L', 0, "List all elements and values in a tag. This may be slow on large tags."),
+        CommandLineOption("output", 'o', 1, "Output the tag to a different path rather than overwriting it.", "<file>"),
+        CommandLineOption("save-as", 'O', 1, "Output the tag to a different path relative to the tags directory rather than overwriting it.", "<tag>"),
+        CommandLineOption("insert", 'I', 3, "Add # structs to the given index or \"end\" if the end of the array.", "<key> <#> <pos>"),
+        CommandLineOption("move", 'M', 2, "Swap the selected structs with the structs at the given index or \"end\" if the end of the array. The regions must not intersect.", "<key> <pos>"),
+        CommandLineOption("erase", 'E', 1, "Delete the selected struct(s).", "<key>"),
+        CommandLineOption("copy", 'c', 2, "Copy the selected struct(s) to the given index or \"end\" if the end of the array.", "<key> <pos>"),
+        CommandLineOption("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)")
+    };
 
     static constexpr char DESCRIPTION[] = "Edit tags via command-line.";
     static constexpr char USAGE[] = "[options] <tag.class>";
@@ -895,13 +896,13 @@ int main(int argc, char * const *argv) {
         std::optional<std::variant<std::string, std::filesystem::path>> overwrite_path;
     } edit_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
         switch(opt) {
             case 't':
                 edit_options.tags = arguments[0];
                 break;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
             case 'P':
                 edit_options.use_filesystem_path = true;
@@ -977,17 +978,17 @@ int main(int argc, char * const *argv) {
         file_path = std::string(remaining_arguments[0]);
     }
     else {
-        file_path = std::filesystem::path(edit_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
+        file_path = std::filesystem::path(edit_options.tags) / File::halo_path_to_preferred_path(remaining_arguments[0]);
     }
     
-    std::unique_ptr<Invader::Parser::ParserStruct> tag_struct;
+    std::unique_ptr<Parser::ParserStruct> tag_struct;
     
     // Make a new tag... or don't
-    Invader::HEK::TagFourCC tag_class;
+    HEK::TagFourCC tag_class;
     if(edit_options.new_tag) {
         try {
-            tag_class = Invader::File::split_tag_class_extension(file_path.string()).value().fourcc;
-            tag_struct = Invader::Parser::ParserStruct::generate_base_struct(tag_class);
+            tag_class = File::split_tag_class_extension(file_path.string()).value().fourcc;
+            tag_struct = Parser::ParserStruct::generate_base_struct(tag_class);
         }
         catch (std::exception &) {
             eprintf_error("Failed to create a new tag %s. Make sure the extension is correct.", file_path.string().c_str());
@@ -997,7 +998,7 @@ int main(int argc, char * const *argv) {
         // If we're verifying the checksum or viewing the checksum of a new tag, well... okay I guess
         if(edit_options.verify_checksum || edit_options.view_checksum) {
             if(edit_options.view_checksum) {
-                std::printf("0x%08X\n", reinterpret_cast<Invader::HEK::TagFileHeader *>(tag_struct->generate_hek_tag_data().data())->crc32.read());
+                std::printf("0x%08X\n", reinterpret_cast<HEK::TagFileHeader *>(tag_struct->generate_hek_tag_data().data())->crc32.read());
             }
             
             // Can't really verify a tag that never existed
@@ -1007,14 +1008,14 @@ int main(int argc, char * const *argv) {
         }
     }
     else {
-        auto value = Invader::File::open_file(file_path);
+        auto value = File::open_file(file_path);
         if(!value.has_value()) {
             eprintf_error("Failed to read %s", file_path.string().c_str());
             return EXIT_FAILURE;
         }
         
         try {
-            tag_struct = Invader::Parser::ParserStruct::parse_hek_tag_file(value->data(), value->size());
+            tag_struct = Parser::ParserStruct::parse_hek_tag_file(value->data(), value->size());
         }
         catch (std::exception &e) {
             eprintf_error("Failed to parse %s: %s", file_path.string().c_str(), e.what());
@@ -1023,7 +1024,7 @@ int main(int argc, char * const *argv) {
         
         // Verify checksum if desired
         if(edit_options.verify_checksum || edit_options.view_checksum) {
-            auto *header = reinterpret_cast<Invader::HEK::TagFileHeader *>(value->data());
+            auto *header = reinterpret_cast<HEK::TagFileHeader *>(value->data());
             std::uint32_t checksum = crc32(0, value->data() + sizeof(*header), value->size() - sizeof(*header));
             
             // Print the checksum
@@ -1042,7 +1043,7 @@ int main(int argc, char * const *argv) {
             }
         }
         
-        tag_class = reinterpret_cast<const Invader::HEK::TagFileHeader *>(value->data())->tag_fourcc;
+        tag_class = reinterpret_cast<const HEK::TagFileHeader *>(value->data())->tag_fourcc;
     }
     
     std::vector<std::string> output;
@@ -1051,7 +1052,7 @@ int main(int argc, char * const *argv) {
     for(auto &i : edit_options.actions) {
         switch(i.type) {
             case ActionType::ACTION_TYPE_LIST: {
-                list_everything(populate_struct(*Invader::Parser::ParserStruct::generate_base_struct(tag_class)), output, false);
+                list_everything(populate_struct(*Parser::ParserStruct::generate_base_struct(tag_class)), output, false);
                 break;
             }
             case ActionType::ACTION_TYPE_LIST_ALL_VALUES: {
@@ -1078,7 +1079,7 @@ int main(int argc, char * const *argv) {
             case ActionType::ACTION_TYPE_COUNT: {
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), false);
                 for(auto &k : arr) {
-                    if(k.get_type() == Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                    if(k.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         output.emplace_back(std::to_string(k.get_array_size()));
                     }
                     else {
@@ -1092,7 +1093,7 @@ int main(int argc, char * const *argv) {
                 should_save = true;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), edit_options.check_read_only);
                 for(auto &k : arr) {
-                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
                         std::exit(EXIT_FAILURE);
                     }
@@ -1114,7 +1115,7 @@ int main(int argc, char * const *argv) {
                 std::pair<std::size_t, std::size_t> range;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
                 for(auto &k : arr) {
-                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
                         std::exit(EXIT_FAILURE);
                     }
@@ -1137,7 +1138,7 @@ int main(int argc, char * const *argv) {
                 std::pair<std::size_t, std::size_t> range;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
                 for(auto &k : arr) {
-                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
                         std::exit(EXIT_FAILURE);
                     }
@@ -1160,7 +1161,7 @@ int main(int argc, char * const *argv) {
                 std::pair<std::size_t, std::size_t> range;
                 auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
                 for(auto &k : arr) {
-                    if(k.get_type() != Invader::Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
                         eprintf_error("%s is not an array", k.get_member_name());
                         std::exit(EXIT_FAILURE);
                     }
@@ -1213,14 +1214,14 @@ int main(int argc, char * const *argv) {
     if(should_save) {
         bool can_save = true;
         try {
-            can_save = Invader::File::split_tag_class_extension(file_path.string()).value().fourcc == tag_class;
+            can_save = File::split_tag_class_extension(file_path.string()).value().fourcc == tag_class;
         }
         catch(std::exception &) {
             can_save = false;
         }
         
         if(!can_save) {
-            eprintf_error("Cannot save: %s does not have the correct .%s extension", file_path.string().c_str(), Invader::HEK::tag_fourcc_to_extension(tag_class));
+            eprintf_error("Cannot save: %s does not have the correct .%s extension", file_path.string().c_str(), HEK::tag_fourcc_to_extension(tag_class));
             return EXIT_FAILURE;
         }
         
@@ -1229,7 +1230,7 @@ int main(int argc, char * const *argv) {
             std::filesystem::create_directories(file_path.parent_path(), ec);
         }
         
-        if(!Invader::File::save_file(file_path, tag_struct->generate_hek_tag_data(tag_class))) {
+        if(!File::save_file(file_path, tag_struct->generate_hek_tag_data(tag_class))) {
             eprintf_error("Unable to write to %s", file_path.string().c_str());
             return EXIT_FAILURE;
         }

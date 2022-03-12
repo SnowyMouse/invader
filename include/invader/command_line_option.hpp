@@ -85,8 +85,8 @@ namespace Invader {
          * @param handler       handler function to use
          * @return              a vector of all unhandled arguments
          */
-        template<typename DataType>
-        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const std::vector<CommandLineOption> &options, const char *usage, const char *description, std::size_t min_unhandled, std::size_t max_unhandled, DataType user_data, void (*handler)(char char_name, const std::vector<const char *> &arguments, DataType user_data)) {
+        template<typename DataType, typename Array>
+        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const Array &options, const char *usage, const char *description, std::size_t min_unhandled, std::size_t max_unhandled, DataType user_data, void (*handler)(char char_name, const std::vector<const char *> &arguments, DataType user_data)) {
             // Hold all unhandled arguments
             std::vector<const char *> unhandled_arguments;
 

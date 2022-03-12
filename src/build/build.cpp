@@ -80,28 +80,29 @@ int main(int argc, const char **argv) {
     
     std::string game_engine_arguments = std::string("Specify the game engine. This option is required. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
 
-    std::vector<CommandLineOption> options;
-    options.emplace_back("quiet", 'q', 0, "Only output error messages.");
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>");
-    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
-    options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
-    options.emplace_back("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine's stock maps.");
-    options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
-    options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
-    options.emplace_back("level", 'l', 1, "Set the compression level (Xbox maps only). Must be between 0 and 9. Default: 9", "<level>");
-    options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
-    options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
-    options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits to 2 GiB regardless of if the target engine will support the cache file.");
-    options.emplace_back("build-string", 'B', 1, "Set the build string in the header.", "<ver>");
-    options.emplace_back("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)");
-    options.emplace_back("anniversary-mode", 'a', 0, "Enable anniversary graphics and audio (CEA only)");
-    options.emplace_back("resource-maps", 'R', 1, "Specify the directory for loading resource maps. (by default this is the maps directory)", "<dir>");
-    options.emplace_back("tag-space", 'T', 1, "Override the tag space. This may result in a map that does not work with the stock games. You can specify the number of bytes, optionally suffixing with K (for KiB) or M (for MiB), or specify in hexadecimal the number of bytes (e.g. 0x1000).", "<size>");
-    options.emplace_back("resource-usage", 'r', 1, "Specify the behavior for using resource maps. Must be: none (don't use resource maps), check (check resource maps), always (always index tags in resource maps - Custom Edition only). Default: none", "<usage>");
+    const CommandLineOption options[] = {
+        CommandLineOption("quiet", 'q', 0, "Only output error messages."),
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>"),
+        CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>"),
+        CommandLineOption("maps", 'm', 1, "Use the specified maps directory.", "<dir>"),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
+        CommandLineOption("output", 'o', 1, "Output to a specific file.", "<file>"),
+        CommandLineOption("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine's stock maps."),
+        CommandLineOption("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>"),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag."),
+        CommandLineOption("rename-scenario", 'N', 1, "Rename the scenario.", "<name>"),
+        CommandLineOption("level", 'l', 1, "Set the compression level (Xbox maps only). Must be between 0 and 9. Default: 9", "<level>"),
+        CommandLineOption("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file."),
+        CommandLineOption("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings."),
+        CommandLineOption("extend-file-limits", 'E', 0, "Extend file size limits to 2 GiB regardless of if the target engine will support the cache file."),
+        CommandLineOption("build-string", 'B', 1, "Set the build string in the header.", "<ver>"),
+        CommandLineOption("stock-resource-bounds", 'b', 0, "Only index tags if the tag's index is within stock Custom Edition's resource map bounds. (Custom Edition only)"),
+        CommandLineOption("anniversary-mode", 'a', 0, "Enable anniversary graphics and audio (CEA only)"),
+        CommandLineOption("resource-maps", 'R', 1, "Specify the directory for loading resource maps. (by default this is the maps directory)", "<dir>"),
+        CommandLineOption("tag-space", 'T', 1, "Override the tag space. This may result in a map that does not work with the stock games. You can specify the number of bytes, optionally suffixing with K (for KiB) or M (for MiB), or specify in hexadecimal the number of bytes (e.g. 0x1000).", "<size>"),
+        CommandLineOption("resource-usage", 'r', 1, "Specify the behavior for using resource maps. Must be: none (don't use resource maps), check (check resource maps), always (always index tags in resource maps - Custom Edition only). Default: none", "<usage>")
+    };
 
     static constexpr char DESCRIPTION[] = "Build a cache file.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";

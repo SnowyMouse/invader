@@ -32,7 +32,7 @@ int main(int argc, const char **argv) {
         std::optional<LightmapMode> mode;
     } shadowmouse_options;
     
-    std::vector<CommandLineOption> options = {
+    const CommandLineOption options[] {
         CommandLineOption("tags", 't', 1, "Use the specified tags directory. Additional tags directories can be specified for searching shaders, but the tag will be output to the first one.", "<dir>"),
         CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
         CommandLineOption("export-mesh", 'E', 0, "Export a lightmap mesh to be imported and baked using an external program."),

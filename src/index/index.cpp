@@ -18,16 +18,17 @@ int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
 
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    std::vector<CommandLineOption> options = {
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info.")
+    };
 
     static constexpr char DESCRIPTION[] = "Create a file listing the tags of a map.";
     static constexpr char USAGE[] = "[options] <input-map> <output-txt>";
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<std::nullptr_t>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, nullptr, [](char opt, const auto &, std::nullptr_t) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<std::nullptr_t>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, nullptr, [](char opt, const auto &, std::nullptr_t) {
         switch(opt) {
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
         }
     });

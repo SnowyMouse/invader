@@ -1019,20 +1019,21 @@ int main(int argc, const char **argv) {
         bool filesystem_path = false;
     } model_options;
 
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path or data directory.");
-    options.emplace_back("type", 'T', 1, "Specify the type of model. Can be: model, gbxmodel", "<type>");
-    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Additional tags directories can be specified for searching shaders, but the tag will be output to the first one.", "<dir>");
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag path or data directory."),
+        CommandLineOption("type", 'T', 1, "Specify the type of model. Can be: model, gbxmodel", "<type>"),
+        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Additional tags directories can be specified for searching shaders, but the tag will be output to the first one.", "<dir>")
+    };
 
     static constexpr char DESCRIPTION[] = "Compile a model tag.";
     static constexpr char USAGE[] = "[options] <model-tag>";
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ModelOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, model_options, [](char opt, const auto &args, ModelOptions &model_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ModelOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, model_options, [](char opt, const auto &args, ModelOptions &model_options) {
         switch(opt) {
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
             case 'P':
                 model_options.filesystem_path = true;

@@ -473,28 +473,29 @@ int main(int argc, char *argv[]) {
     
     BitmapOptions bitmap_options;
 
-    std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show license and credits.");
-    options.emplace_back("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists.");
-    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>");
-    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, dxt1, or auto. 'auto' will be replaced with the best lossless format. Default (new tag): auto", "<type>");
-    options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d_textures, 3d_textures, cube_maps, interface_bitmaps, or sprites. Default (new tag): 2d_textures", "<type>");
-    options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
-    options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. This does not save in .bitmap tags. Can be: linear, nearest_alpha, nearest. Default (new tag): linear", "<type>");
-    options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
-    options.emplace_back("budget", 'B', 1, "Set the maximum length of a sprite sheet. Can be 32, 64, 128, 256, 512, or 1024. Default (new tag): 32", "<length>");
-    options.emplace_back("budget-count", 'C', 1, "Multiply the maximum length squared to set the maximum number of pixels. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
-    options.emplace_back("square-sheets", 'S', 0, "Force square sprite sheets (works around particles being incorrectly stretched).");
-    options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
-    options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0.0 to 1.0. Default (new tag): 0.026", "<height>");
-    options.emplace_back("alpha-bias", 'A', 1, "Set the alpha bias from -1.0 to 1.0. Default (new tag): 0.0", "<bias>");
-    options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha_blend, default, height_map, detail_map, light_map, vector_map. Default: default", "<usage>");
-    options.emplace_back("reg-point-hack", 'r', 1, "Ignore sequence borders when calculating registration point (AKA 'filthy sprite bug fix'). Can be: off or on. Default (new tag): off", "<val>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
-    options.emplace_back("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data.");
-    options.emplace_back("allow-non-power-of-two", 'n', 0, "Allow color plates with non-power-of-two, non-interface bitmaps.");
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show license and credits."),
+        CommandLineOption("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists."),
+        CommandLineOption("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>"),
+        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, dxt1, or auto. 'auto' will be replaced with the best lossless format. Default (new tag): auto", "<type>"),
+        CommandLineOption("type", 'T', 1, "Set the type of bitmap. Can be: 2d_textures, 3d_textures, cube_maps, interface_bitmaps, or sprites. Default (new tag): 2d_textures", "<type>"),
+        CommandLineOption("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>"),
+        CommandLineOption("mipmap-scale", 's', 1, "Mipmap scale type. This does not save in .bitmap tags. Can be: linear, nearest_alpha, nearest. Default (new tag): linear", "<type>"),
+        CommandLineOption("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>"),
+        CommandLineOption("budget", 'B', 1, "Set the maximum length of a sprite sheet. Can be 32, 64, 128, 256, 512, or 1024. Default (new tag): 32", "<length>"),
+        CommandLineOption("budget-count", 'C', 1, "Multiply the maximum length squared to set the maximum number of pixels. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>"),
+        CommandLineOption("square-sheets", 'S', 0, "Force square sprite sheets (works around particles being incorrectly stretched)."),
+        CommandLineOption("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>"),
+        CommandLineOption("bump-height", 'H', 1, "Set the apparent bumpmap height from 0.0 to 1.0. Default (new tag): 0.026", "<height>"),
+        CommandLineOption("alpha-bias", 'A', 1, "Set the alpha bias from -1.0 to 1.0. Default (new tag): 0.0", "<bias>"),
+        CommandLineOption("usage", 'u', 1, "Set the bitmap usage. Can be: alpha_blend, default, height_map, detail_map, light_map, vector_map. Default: default", "<usage>"),
+        CommandLineOption("reg-point-hack", 'r', 1, "Ignore sequence borders when calculating registration point (AKA 'filthy sprite bug fix'). Can be: off or on. Default (new tag): off", "<val>"),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the data."),
+        CommandLineOption("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data."),
+        CommandLineOption("allow-non-power-of-two", 'n', 0, "Allow color plates with non-power-of-two, non-interface bitmaps.")
+    };
 
     static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
     static constexpr char USAGE[] = "[options] <bitmap-tag>";

@@ -15,8 +15,11 @@
 int main(int argc, char * const *argv) {
     set_up_color_term();
     
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show license and credits.");
+    using namespace Invader;
+    
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show license and credits.")
+    };
 
     static constexpr char DESCRIPTION[] = "Scans for unknown hidden data in tags";
     static constexpr char USAGE[] = "[options] <map>";
@@ -24,16 +27,16 @@ int main(int argc, char * const *argv) {
     struct ScanOptions {
     } scan_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ScanOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, scan_options, [](char opt, const std::vector<const char *> &, ScanOptions &) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ScanOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, scan_options, [](char opt, const std::vector<const char *> &, ScanOptions &) {
         switch(opt) {
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
         }
     });
     
-    auto map_data = Invader::File::open_file(remaining_arguments[0]).value();
-    auto map = Invader::Map::map_with_copy(map_data.data(), map_data.size());
+    auto map_data = File::open_file(remaining_arguments[0]).value();
+    auto map = Map::map_with_copy(map_data.data(), map_data.size());
     auto tag_count = map.get_tag_count();
     
     for(std::size_t t = 0; t < tag_count; t++) {
@@ -42,14 +45,14 @@ int main(int argc, char * const *argv) {
             continue;
         }
         
-        #define DO_TAG_CLASS(c, v) case Invader::HEK::v: {\
-            Invader::Parser::c::scan_padding(tag);\
+        #define DO_TAG_CLASS(c, v) case HEK::v: {\
+            Parser::c::scan_padding(tag);\
             break;\
         }
         
         auto tci = tag.get_tag_fourcc();
-        if(tci == Invader::HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.get_cache_version() != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            Invader::Parser::ScenarioStructureBSP::scan_padding(tag, tag.get_base_struct<Invader::HEK::ScenarioStructureBSPCompiledHeader>().pointer);
+        if(tci == HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP && map.get_cache_version() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            Parser::ScenarioStructureBSP::scan_padding(tag, tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>().pointer);
             continue;
         }
         

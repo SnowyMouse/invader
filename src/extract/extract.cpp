@@ -33,18 +33,17 @@ int main(int argc, const char **argv) {
     } extract_options;
 
     // Command line options
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("maps", 'm', 1, "Use the specified maps directory to find bitmaps.map, sounds.map, and/or loc.map.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory to save tags.", "<dir>");
-    options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
-    options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
-    options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps.");
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
-    
-    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and extract these. Use multiple times for multiple queries. If unspecified, all tags will be extracted.", "<expr>");
-    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>");
-    
-    options.emplace_back("non-mp-globals", 'n', 0, "Enable extraction of non-multiplayer .globals");
+    const CommandLineOption options[] {
+        CommandLineOption("maps", 'm', 1, "Use the specified maps directory to find bitmaps.map, sounds.map, and/or loc.map.", "<dir>"),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory to save tags.", "<dir>"),
+        CommandLineOption("recursive", 'r', 0, "Extract tag dependencies"),
+        CommandLineOption("overwrite", 'O', 0, "Overwrite tags if they already exist"),
+        CommandLineOption("ignore-resources", 'G', 0, "Ignore resource maps."),
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info"),
+        CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and extract these. Use multiple times for multiple queries. If unspecified, all tags will be extracted.", "<expr>"),
+        CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>"),
+        CommandLineOption("non-mp-globals", 'n', 0, "Enable extraction of non-multiplayer .globals")
+    };
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
     static constexpr char USAGE[] = "[options] <map>";

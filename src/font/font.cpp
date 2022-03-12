@@ -44,6 +44,8 @@ static_assert(FONT_EXTENSION_COUNT == sizeof(FONT_EXTENSION_STR) / sizeof(*FONT_
 int main(int argc, char *argv[]) {
     set_up_color_term();
     
+    using namespace Invader;
+    
     // Options struct
     struct FontOptions {
         std::filesystem::path data = "data/";
@@ -54,19 +56,20 @@ int main(int argc, char *argv[]) {
     } font_options;
 
     // Command line options
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("font-size", 's', 1, "Set the font size in pixels.", "<px>");
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file.");
-    options.emplace_back("latin1", 'l', 0, "Use 256 characters only (smaller)");
+    const CommandLineOption options[] {
+        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption("font-size", 's', 1, "Set the font size in pixels.", "<px>"),
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file."),
+        CommandLineOption("latin1", 'l', 0, "Use 256 characters only (smaller)")
+    };
 
     static constexpr char DESCRIPTION[] = "Create font tags from OTF/TTF files.";
     static constexpr char USAGE[] = "[options] <font-tag>";
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, font_options, [](char opt, const auto &args, auto &font_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, font_options, [](char opt, const auto &args, auto &font_options) {
         switch(opt) {
             case 'd':
                 font_options.data = args[0];
@@ -93,7 +96,7 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
                 break;
         }
@@ -104,8 +107,8 @@ int main(int argc, char *argv[]) {
     FontExtension found_format = static_cast<FontExtension>(0);
     if(font_options.use_filesystem_path) {
         auto path = std::filesystem::path(remaining_arguments[0]);
-        auto font_tag_maybe = Invader::File::file_path_to_tag_path(path, font_options.tags);
-        auto font_data_maybe = Invader::File::file_path_to_tag_path(path, font_options.data);
+        auto font_tag_maybe = File::file_path_to_tag_path(path, font_options.tags);
+        auto font_data_maybe = File::file_path_to_tag_path(path, font_options.data);
         if(font_tag_maybe.has_value()) {
             if(std::filesystem::path(*font_tag_maybe).extension() == ".font") {
                 font_tag = *font_tag_maybe;
@@ -210,8 +213,8 @@ int main(int argc, char *argv[]) {
     FT_Done_FreeType(library);
 
     // Create
-    Invader::Parser::Font font= {};
-    std::vector<Invader::HEK::FontCharacter<Invader::HEK::BigEndian>> tag_characters;
+    Parser::Font font= {};
+    std::vector<HEK::FontCharacter<HEK::BigEndian>> tag_characters;
     auto &pixels = font.pixels;
 
     // Set up the character stuff
@@ -293,7 +296,7 @@ int main(int argc, char *argv[]) {
     // Write
     std::error_code ec;
     std::filesystem::create_directories(tag_path.parent_path(), ec);
-    if(!Invader::File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(Invader::TagFourCC::TAG_FOURCC_FONT, true))) {
+    if(!File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(TagFourCC::TAG_FOURCC_FONT, true))) {
         eprintf_error("Failed to save %s.", final_tag_path.c_str());
         return EXIT_FAILURE;
     }

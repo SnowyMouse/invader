@@ -22,12 +22,13 @@ int main(int argc, char **argv) {
     
     using namespace Invader;
 
-    std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
-    options.emplace_back("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: fast)");
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
+        CommandLineOption("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)"),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag."),
+        CommandLineOption("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: fast)")
+    };
 
     static constexpr char DESCRIPTION[] = "Edit tag files.";
     static constexpr char USAGE[] = "[options] [<tag1> [tag2] [...]]";

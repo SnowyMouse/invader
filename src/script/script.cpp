@@ -41,17 +41,18 @@ int main(int argc, const char **argv) {
     std::string game_engine_arguments = std::string("Specify the game engine. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
 
     // Add our options
-    std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("clear", 'c', 0, "Clear all script data from the scenario tag");
-    options.emplace_back("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.");
-    options.emplace_back("regenerate", 'R', 0, "Use the scenario tag's script source data as data.");
-    options.emplace_back("exclude-global-scripts", 'E', 0, "Do not use global_scripts source.");
-    options.emplace_back("reload-scripts", 'r', 0, "Only recompile sources referenced by the tag.");
-    options.emplace_back("explicit", 'e', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption("clear", 'c', 0, "Clear all script data from the scenario tag"),
+        CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>"),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag path directory."),
+        CommandLineOption("regenerate", 'R', 0, "Use the scenario tag's script source data as data."),
+        CommandLineOption("exclude-global-scripts", 'E', 0, "Do not use global_scripts source."),
+        CommandLineOption("reload-scripts", 'r', 0, "Only recompile sources referenced by the tag."),
+        CommandLineOption("explicit", 'e', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>"),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>")
+    };
 
     static constexpr char DESCRIPTION[] = "Compile scripts. Unless otherwise specified, global scripts are always compiled.";
     static constexpr char USAGE[] = "[options] <scenario>";

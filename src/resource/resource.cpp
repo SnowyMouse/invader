@@ -19,16 +19,17 @@ int main(int argc, const char **argv) {
     using namespace Invader::HEK;
     using namespace Invader;
 
-    std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either --with-index or --with-map to be specified at least once. Valid engines are: gbx-custom, gbx-demo, gbx-retail, mcc-cea.", "<id>");
-    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>");
-    options.emplace_back("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>");
-    options.emplace_back("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>");
-    options.emplace_back("show-matched", 'S', 0, "Print the paths of any matched tags found when using --concatenate.");
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>"),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
+        CommandLineOption("maps", 'm', 1, "Set the maps directory.", "<dir>"),
+        CommandLineOption("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either --with-index or --with-map to be specified at least once. Valid engines are: gbx-custom, gbx-demo, gbx-retail, mcc-cea.", "<id>"),
+        CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>"),
+        CommandLineOption("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>"),
+        CommandLineOption("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>"),
+        CommandLineOption("show-matched", 'S', 0, "Print the paths of any matched tags found when using --concatenate.")
+    };
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
     static constexpr char USAGE[] = "[options] -T <type>";

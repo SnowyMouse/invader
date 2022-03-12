@@ -11,14 +11,16 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
 
+using namespace Invader;
+
 enum Format {
     STRING_LIST_FORMAT_UNICODE,
     STRING_LIST_FORMAT_HMT,
     STRING_LIST_FORMAT_LATIN1
 };
 
-template <typename T, typename G, Invader::TagFourCC C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
-    using namespace Invader::HEK;
+template <typename T, typename G, TagFourCC C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
+    using namespace HEK;
 
     // Make the file header
     G tag_data = {};
@@ -92,12 +94,13 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::string &)
 int main(int argc, char * const *argv) {
     set_up_color_term();
     
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show license and credits.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Must be specified if a string tag is not present.");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show license and credits."),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Must be specified if a string tag is not present."),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the text file.")
+    };
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";
     static constexpr char USAGE[] = "[options] <tag>";
@@ -109,7 +112,7 @@ int main(int argc, char * const *argv) {
         bool use_filesystem_path = false;
     } string_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
         switch(opt) {
             case 't':
                 if(string_options.tags.has_value()) {
@@ -119,7 +122,7 @@ int main(int argc, char * const *argv) {
                 string_options.tags = arguments[0];
                 break;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
             case 'd':
                 string_options.data = arguments[0];
@@ -150,7 +153,7 @@ int main(int argc, char * const *argv) {
     std::string string_tag;
     if(string_options.use_filesystem_path) {
         std::vector<std::filesystem::path> data(&string_options.data, &string_options.data + 1);
-        auto string_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], data);
+        auto string_tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], data);
         if(string_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
             string_tag = std::filesystem::path(*string_tag_maybe).replace_extension().string();
         }
@@ -269,10 +272,10 @@ int main(int argc, char * const *argv) {
     std::vector<std::byte> final_data;
     switch(*string_options.format) {
         case STRING_LIST_FORMAT_UNICODE:
-            final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Parser::UnicodeStringList, TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_LATIN1:
-            final_data = generate_string_list_tag<char, Invader::Parser::StringList, Invader::TagFourCC::TAG_FOURCC_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char, Parser::StringList, TagFourCC::TAG_FOURCC_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
             final_data = generate_hud_message_text_tag(text);
@@ -292,7 +295,7 @@ int main(int argc, char * const *argv) {
     std::filesystem::create_directories(tag_path.parent_path(), ec);
     
     // Save
-    if(!Invader::File::save_file(output_path.c_str(), final_data)) {
+    if(!File::save_file(output_path.c_str(), final_data)) {
         eprintf_error("Error: Failed to write to %s.", output_path.c_str());
         return EXIT_FAILURE;
     }

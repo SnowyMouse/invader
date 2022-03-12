@@ -640,20 +640,21 @@ int main(int argc, const char **argv) {
     
     SoundOptions sound_options;
 
-    std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
-    options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit_pcm, ogg_vorbis, or xbox_adpcm. Default: 16-bit_pcm", "<fmt>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data or tag.");
-    options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
-    options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
-    options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. Default: 0.8", "<lvl>");
-    options.emplace_back("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>");
-    options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient_computers, ambient_machinery, ambient_nature, device_computers, device_door, device_force_field, device_machinery, device_nature, first_person_damage, game_event, music, object_impacts, particle_impacts, projectile_impact, projectile_detonation, scripted_dialog_force_unspatialized, scripted_dialog_other, scripted_dialog_player, scripted_effect, slow_particle_impacts, unit_dialog, unit_footsteps, vehicle_collision, vehicle_engine, weapon_charge, weapon_empty, weapon_fire, weapon_idle, weapon_overheat, weapon_ready, weapon_reload", "<class>");
-    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: CPU thread count");
+    const CommandLineOption options[] = {
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
+        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine."),
+        CommandLineOption("no-split", 'S', 0, "Do not split permutations."),
+        CommandLineOption("format", 'F', 1, "Set the format. Can be: 16-bit_pcm, ogg_vorbis, or xbox_adpcm. Default: 16-bit_pcm", "<fmt>"),
+        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the data or tag."),
+        CommandLineOption("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>"),
+        CommandLineOption("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>"),
+        CommandLineOption("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. Default: 0.8", "<lvl>"),
+        CommandLineOption("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>"),
+        CommandLineOption("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient_computers, ambient_machinery, ambient_nature, device_computers, device_door, device_force_field, device_machinery, device_nature, first_person_damage, game_event, music, object_impacts, particle_impacts, projectile_impact, projectile_detonation, scripted_dialog_force_unspatialized, scripted_dialog_other, scripted_dialog_player, scripted_effect, slow_particle_impacts, unit_dialog, unit_footsteps, vehicle_collision, vehicle_engine, weapon_charge, weapon_empty, weapon_fire, weapon_idle, weapon_overheat, weapon_ready, weapon_reload", "<class>"),
+        CommandLineOption("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: CPU thread count")
+    };
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";

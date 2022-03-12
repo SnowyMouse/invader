@@ -15,6 +15,7 @@
 
 #include "bludgeoner.hpp"
 
+using namespace Invader;
 using namespace Invader::Bludgeoner;
 
 struct BludgeonAction {
@@ -38,7 +39,7 @@ struct BludgeonAction {
     };
     
     const char *name;
-    std::optional<bool (*)(Invader::Parser::ParserStruct *s, bool fix)> fix_fn = std::nullopt;
+    std::optional<bool (*)(Parser::ParserStruct *s, bool fix)> fix_fn = std::nullopt;
     FixBit fix_bit = FixBit();
 };
 
@@ -95,9 +96,9 @@ static std::mutex bad_code_design_mutex;
                                              bad_code_design_mutex.unlock();
 
 static int bludgeon_tag(const std::filesystem::path &file_path, const std::string &tag_path, std::uint64_t fixes, bool &bludgeoned) {
-    using namespace Invader::Bludgeoner;
-    using namespace Invader::HEK;
-    using namespace Invader::File;
+    using namespace Bludgeoner;
+    using namespace HEK;
+    using namespace File;
 
     bludgeoned = false;
 
@@ -112,8 +113,8 @@ static int bludgeon_tag(const std::filesystem::path &file_path, const std::strin
     std::vector<std::byte> file_data;
     try {
         const auto *header = reinterpret_cast<const TagFileHeader *>(tag->data());
-        Invader::HEK::TagFileHeader::validate_header(header, tag->size());
-        auto parsed_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
+        HEK::TagFileHeader::validate_header(header, tag->size());
+        auto parsed_data = Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
 
         // No fixes; try to detect things
         bool issues_present = false;
@@ -152,7 +153,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, const std::strin
 
         // Do it!
         file_data = parsed_data->generate_hek_tag_data(header->tag_fourcc, true);
-        if(!Invader::File::save_file(file_path, file_data)) {
+        if(!File::save_file(file_path, file_data)) {
             badly_designed_printf(eprintf_error, "Error: Failed to write to %s.", file_path.string().c_str());
             return EXIT_FAILURE;
         }
@@ -168,14 +169,6 @@ static int bludgeon_tag(const std::filesystem::path &file_path, const std::strin
 int main(int argc, char * const *argv) {
     set_up_color_term();
     
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show license and credits.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
-    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count");
-    
-    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and bludgeon these. Use multiple times for multiple queries. If unspecified, all tags will be bludgeoned.", "<expr>");
-    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>");
-    
     std::string issues_list;
     for(auto &i : all_fixes) {
         if(!issues_list.empty()) {
@@ -185,7 +178,14 @@ int main(int argc, char * const *argv) {
     }
     issues_list = std::string("Type of bludgeoning. Can be: ") + issues_list;
     
-    options.emplace_back("type", 'T', 1, issues_list.c_str());
+    const CommandLineOption options[] {
+        CommandLineOption("info", 'i', 0, "Show license and credits."),
+        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count"),
+        CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and bludgeon these. Use multiple times for multiple queries. If unspecified, all tags will be bludgeoned.", "<expr>"),
+        CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>"),
+        CommandLineOption("type", 'T', 1, issues_list.c_str())
+    };
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options]";
@@ -198,7 +198,7 @@ int main(int argc, char * const *argv) {
         std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
     } bludgeon_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
         using namespace Invader;
         switch(opt) {
             case 't':
@@ -209,7 +209,7 @@ int main(int argc, char * const *argv) {
                 bludgeon_options.tags = arguments[0];
                 break;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
                 
             case 's':
@@ -253,7 +253,7 @@ int main(int argc, char * const *argv) {
 
     std::size_t success = 0;
     
-    auto all_virtual_tags = Invader::File::load_virtual_tag_folder(std::vector<std::filesystem::path>(&*bludgeon_options.tags, &*bludgeon_options.tags + 1));
+    auto all_virtual_tags = File::load_virtual_tag_folder(std::vector<std::filesystem::path>(&*bludgeon_options.tags, &*bludgeon_options.tags + 1));
     decltype(all_virtual_tags) all_tags;
     all_tags.reserve(all_virtual_tags.size());
     
@@ -262,7 +262,7 @@ int main(int argc, char * const *argv) {
     }
     else {
         for(auto &i : all_virtual_tags) {
-            if(Invader::File::path_matches(i.tag_path.c_str(), bludgeon_options.search, bludgeon_options.search_exclude)) {
+            if(File::path_matches(i.tag_path.c_str(), bludgeon_options.search, bludgeon_options.search_exclude)) {
                 all_tags.emplace_back(std::move(i));
             }
         }

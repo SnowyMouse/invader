@@ -339,9 +339,10 @@ int main(int argc, const char **argv) {
     }
 
     // Command line options
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, options_list.c_str(), "<type>");
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    const CommandLineOption options[] = {
+        CommandLineOption("type", 'T', 1, options_list.c_str(), "<type>"),
+        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info.")
+    };
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
