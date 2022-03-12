@@ -641,13 +641,13 @@ int main(int argc, const char **argv) {
     SoundOptions sound_options;
 
     const CommandLineOption options[] = {
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine."),
         CommandLineOption("no-split", 'S', 0, "Do not split permutations."),
         CommandLineOption("format", 'F', 1, "Set the format. Can be: 16-bit_pcm, ogg_vorbis, or xbox_adpcm. Default: 16-bit_pcm", "<fmt>"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the data or tag."),
         CommandLineOption("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>"),
         CommandLineOption("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>"),
         CommandLineOption("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. Default: 0.8", "<lvl>"),

@@ -18,7 +18,7 @@ int main(int argc, char * const *argv) {
     using namespace Invader;
     
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits.")
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO)
     };
 
     static constexpr char DESCRIPTION[] = "Scans for unknown hidden data in tags";

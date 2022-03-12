@@ -23,10 +23,10 @@ int main(int argc, char **argv) {
     using namespace Invader;
 
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag."),
         CommandLineOption("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: fast)")
     };
 

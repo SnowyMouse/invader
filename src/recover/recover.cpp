@@ -21,11 +21,11 @@ int main(int argc, const char **argv) {
     } recover_options;
 
     const CommandLineOption options[] = {
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("overwrite", 'O', 0, "Overwrite data if it already exists"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag path directory.")
     };
 
     static constexpr char DESCRIPTION[] = "Recover source data from tags.";

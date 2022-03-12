@@ -18,10 +18,10 @@ int main(int argc, char * const *argv) {
     using namespace Invader;
     
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the text file.")
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS)
     };
 
     static constexpr char DESCRIPTION[] = "Generate tag_collection tags.";

@@ -42,16 +42,16 @@ int main(int argc, const char **argv) {
 
     // Add our options
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("clear", 'c', 0, "Clear all script data from the scenario tag"),
         CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag path directory."),
         CommandLineOption("regenerate", 'R', 0, "Use the scenario tag's script source data as data."),
         CommandLineOption("exclude-global-scripts", 'E', 0, "Do not use global_scripts source."),
         CommandLineOption("reload-scripts", 'r', 0, "Only recompile sources referenced by the tag."),
-        CommandLineOption("explicit", 'e', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>"),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>")
+        CommandLineOption("explicit", 'e', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>")
     };
 
     static constexpr char DESCRIPTION[] = "Compile scripts. Unless otherwise specified, global scripts are always compiled.";

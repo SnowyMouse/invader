@@ -862,9 +862,9 @@ int main(int argc, char * const *argv) {
     #endif
     
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file."),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("get", 'G', 1, "Get the value with the given key.", "<key>"),
         CommandLineOption("verify-checksum", 'V', 0, "Verify that the checksum in the header is correct and print the result."),
         CommandLineOption("checksum", 'H', 0, "Output the calculated checksum of the tag."),

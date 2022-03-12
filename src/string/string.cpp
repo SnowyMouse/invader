@@ -95,11 +95,11 @@ int main(int argc, char * const *argv) {
     set_up_color_term();
     
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Must be specified if a string tag is not present."),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the text file.")
     };
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";

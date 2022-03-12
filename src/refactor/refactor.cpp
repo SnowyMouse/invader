@@ -67,8 +67,8 @@ int main(int argc, char * const *argv) {
     using namespace Invader;
     
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("dry-run", 'D', 0, "Do not actually make any changes. This is useful for checking for errors before committing anything, although filesystem errors may not be caught."),
         CommandLineOption("mode", 'M', 1, "Specify what to do with the file if it exists. If using move, then the tag is moved (the tag must exist on the filesystem) while also changing all references to the tag to the new path. If using no-move, then the tag is not moved (the destination tag must exist on the filesystem unless you use --unsafe) while also changing all references to the tag to the new path. If using copy, then the tag is copied (the tag must exist on the filesystem) and references to the tag are not changed except for other tags copied by this command. Can be: copy, move, no-move", "<mode>"),
         CommandLineOption("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>"),

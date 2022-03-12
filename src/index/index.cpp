@@ -19,7 +19,7 @@ int main(int argc, const char **argv) {
     using namespace Invader::HEK;
 
     std::vector<CommandLineOption> options = {
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info.")
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO)
     };
 
     static constexpr char DESCRIPTION[] = "Create a file listing the tags of a map.";

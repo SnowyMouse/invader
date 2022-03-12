@@ -179,8 +179,8 @@ int main(int argc, char * const *argv) {
     issues_list = std::string("Type of bludgeoning. Can be: ") + issues_list;
     
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count"),
         CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and bludgeon these. Use multiple times for multiple queries. If unspecified, all tags will be bludgeoned.", "<expr>"),
         CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>"),

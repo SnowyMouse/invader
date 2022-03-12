@@ -31,23 +31,24 @@ int main(int argc, const char **argv) {
         std::vector<std::string> tags_to_convert;
     } convert_options;
 
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("all", 'a', 0, "Convert all tags. This cannot be used with -s.");
-    options.emplace_back("single-tag", 's', 1, "Convert a specific tag. This can be specified multiple times for multiple tags, but cannot be used with -a.");
-    options.emplace_back("overwrite", 'O', 0, "Overwrite any output tags if they exist.");
-    options.emplace_back("tags", 't', 1, "Set the input tags directory.", "<dir>");
-    options.emplace_back("output-tags", 'o', 1, "Set the output tags directory.", "<dir>");
-    options.emplace_back("type", 'T', 1, "Type of conversion. Can be: gbxmodel-to-model (g2m), model-to-gbxmodel (m2g), chicago-extended-to-chicago (x2c)", "<type>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
+    const CommandLineOption options[] = {
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
+        CommandLineOption("all", 'a', 0, "Convert all tags. This cannot be used with -s."),
+        CommandLineOption("single-tag", 's', 1, "Convert a specific tag. This can be specified multiple times for multiple tags, but cannot be used with -a."),
+        CommandLineOption("overwrite", 'O', 0, "Overwrite any output tags if they exist."),
+        CommandLineOption("output-tags", 'o', 1, "Set the output tags directory.", "<dir>"),
+        CommandLineOption("type", 'T', 1, "Type of conversion. Can be: gbxmodel-to-model (g2m), model-to-gbxmodel (m2g), chicago-extended-to-chicago (x2c)", "<type>"),
+    };
 
     static constexpr char DESCRIPTION[] = "Convert from one tag type to another.";
     static constexpr char USAGE[] = "[options] <--all | -s <tag>>";
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ConvertOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, convert_options, [](char opt, const auto &args, ConvertOptions &compare_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ConvertOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, convert_options, [](char opt, const auto &args, ConvertOptions &compare_options) {
         switch(opt) {
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
                 
             case 'a':

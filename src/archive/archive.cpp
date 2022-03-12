@@ -67,17 +67,17 @@ int main(int argc, const char **argv) {
     std::string formats_argument = std::string("Specify format. Valid formats are: ") + list_formats() + ". Default format is 7z";
     
     const CommandLineOption options[] {
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("format", 'F', 1, formats_argument.c_str(), "<format>"),
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
         CommandLineOption("single-tag", 's', 0, "Archive a tag tree instead of a cache file."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
         CommandLineOption("exclude-matched", 'E', 1, "Exclude copying any tags that are also located in the specified directory and are functionally the same. Use multiple times to exclude multiple directories."),
         CommandLineOption("overwrite", 'O', 0, "Overwrite tags if they already exist if using --copy"),
         CommandLineOption("exclude", 'e', 1, "Exclude copying any tags that share a path with a tag in specified directory. Use multiple times to exclude multiple directories.", "<dir>"),
         CommandLineOption("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>"),
         CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag."),
         CommandLineOption("copy", 'C', 0, "Copy instead of making an archive."),
-        CommandLineOption("verbose", 'v', 0, "Print whether or not tags are omitted,  Do verbose comparisons."),
+        CommandLineOption("verbose", 'v', 0, "Print whether or not tags are omitted. Do verbose comparisons."),
         CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<id>")
     };
 

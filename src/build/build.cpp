@@ -81,16 +81,16 @@ int main(int argc, const char **argv) {
     std::string game_engine_arguments = std::string("Specify the game engine. This option is required. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
 
     const CommandLineOption options[] = {
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption("quiet", 'q', 0, "Only output error messages."),
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
         CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>"),
         CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>"),
-        CommandLineOption("maps", 'm', 1, "Use the specified maps directory.", "<dir>"),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
         CommandLineOption("output", 'o', 1, "Output to a specific file.", "<file>"),
         CommandLineOption("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine's stock maps."),
         CommandLineOption("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag."),
         CommandLineOption("rename-scenario", 'N', 1, "Rename the scenario.", "<name>"),
         CommandLineOption("level", 'l', 1, "Set the compression level (Xbox maps only). Must be between 0 and 9. Default: 9", "<level>"),
         CommandLineOption("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file."),

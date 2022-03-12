@@ -341,7 +341,7 @@ int main(int argc, const char **argv) {
     // Command line options
     const CommandLineOption options[] = {
         CommandLineOption("type", 'T', 1, options_list.c_str(), "<type>"),
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info.")
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO)
     };
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";

@@ -57,11 +57,11 @@ int main(int argc, char *argv[]) {
 
     // Command line options
     const CommandLineOption options[] {
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("font-size", 's', 1, "Set the font size in pixels.", "<px>"),
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the font data or tag file."),
         CommandLineOption("latin1", 'l', 0, "Use 256 characters only (smaller)")
     };
 

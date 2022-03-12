@@ -71,25 +71,24 @@ int main(int argc, const char **argv) {
         std::vector<std::string> search_exclude;
     } compare_options;
 
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("input", 'I', 0, "Add an input. This option is required before using --tags, --maps, --map, and --ignore-resources.");
-    options.emplace_back("tags", 't', 1, "Add a tags directory to the input. Specify multiple tag directories in order of precedence for the input. This option must be used after --input.");
-    options.emplace_back("maps", 'm', 1, "Add a maps directory to the input to specify where to find resource files for a map. This option must be used after --input.");
-    options.emplace_back("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used. This option must be used after --input.");
-    options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
-    options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
+    const CommandLineOption options[] = {
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption("input", 'I', 0, "Add an input. This option is required before using --tags, --maps, --map, and --ignore-resources."),
+        CommandLineOption("tags", 't', 1, "Add a tags directory to the input. Specify multiple tag directories in order of precedence for the input. This option must be used after --input."),
+        CommandLineOption("maps", 'm', 1, "Add a maps directory to the input to specify where to find resource files for a map. This option must be used after --input."),
+        CommandLineOption("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used. This option must be used after --input."),
+        CommandLineOption("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss."),
+        CommandLineOption("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences."),
+        CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and compare these. Use multiple times for multiple queries. If unspecified, all tags will be compared.", "<expr>"),
+        CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>"),
+        CommandLineOption("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>"),
+        CommandLineOption("show", 'S', 1, "Can be: all, matched, or mismatched. Default: all"),
+        CommandLineOption("ignore-resources", 'G', 0, "Ignore resource maps for the current map input. This option must be used after --input."),
+        CommandLineOption("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with --functional."),
+        CommandLineOption("all", 'a', 0, "Only match if tags are in all inputs."),
+        CommandLineOption("threads", 'j', 1, "Set the number of threads to use for comparison. Default: 1")
+    };
     
-    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards) and compare these. Use multiple times for multiple queries. If unspecified, all tags will be compared.", "<expr>");
-    options.emplace_back("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>");
-    
-    options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
-    options.emplace_back("show", 'S', 1, "Can be: all, matched, or mismatched. Default: all");
-    options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input. This option must be used after --input.");
-    options.emplace_back("verbose", 'v', 0, "Output more information on the differences between tags to standard output. This will not work with --functional.");
-    options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs.");
-    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for comparison. Default: 1");
-
     static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
     static constexpr char USAGE[] = "[options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]";
 

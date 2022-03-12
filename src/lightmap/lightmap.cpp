@@ -33,12 +33,12 @@ int main(int argc, const char **argv) {
     } shadowmouse_options;
     
     const CommandLineOption options[] {
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Additional tags directories can be specified for searching shaders, but the tag will be output to the first one.", "<dir>"),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("export-mesh", 'E', 0, "Export a lightmap mesh to be imported and baked using an external program."),
-        CommandLineOption("import-mesh", 'I', 0, "Import a lightmap mesh that was baked."),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag."),
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info.")
+        CommandLineOption("import-mesh", 'I', 0, "Import a lightmap mesh that was baked.")
     };
 
     static constexpr char DESCRIPTION[] = "Generate meshes to bake lightmaps using Blender's Cycles renderer.";

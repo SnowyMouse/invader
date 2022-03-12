@@ -474,11 +474,12 @@ int main(int argc, char *argv[]) {
     BitmapOptions bitmap_options;
 
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits."),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists."),
         CommandLineOption("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>"),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
         CommandLineOption("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, dxt1, or auto. 'auto' will be replaced with the best lossless format. Default (new tag): auto", "<type>"),
         CommandLineOption("type", 'T', 1, "Set the type of bitmap. Can be: 2d_textures, 3d_textures, cube_maps, interface_bitmaps, or sprites. Default (new tag): 2d_textures", "<type>"),
         CommandLineOption("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>"),
@@ -492,7 +493,6 @@ int main(int argc, char *argv[]) {
         CommandLineOption("alpha-bias", 'A', 1, "Set the alpha bias from -1.0 to 1.0. Default (new tag): 0.0", "<bias>"),
         CommandLineOption("usage", 'u', 1, "Set the bitmap usage. Can be: alpha_blend, default, height_map, detail_map, light_map, vector_map. Default: default", "<usage>"),
         CommandLineOption("reg-point-hack", 'r', 1, "Ignore sequence borders when calculating registration point (AKA 'filthy sprite bug fix'). Can be: off or on. Default (new tag): off", "<val>"),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the data."),
         CommandLineOption("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data."),
         CommandLineOption("allow-non-power-of-two", 'n', 0, "Allow color plates with non-power-of-two, non-interface bitmaps.")
     };

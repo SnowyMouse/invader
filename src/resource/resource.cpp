@@ -20,10 +20,10 @@ int main(int argc, const char **argv) {
     using namespace Invader;
 
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>"),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>"),
-        CommandLineOption("maps", 'm', 1, "Set the maps directory.", "<dir>"),
         CommandLineOption("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either --with-index or --with-map to be specified at least once. Valid engines are: gbx-custom, gbx-demo, gbx-retail, mcc-cea.", "<id>"),
         CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>"),
         CommandLineOption("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>"),

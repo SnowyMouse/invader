@@ -14,12 +14,15 @@
 int main(int argc, char * const *argv) {
     set_up_color_term();
     
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("reverse", 'R', 0, "Find all tags that depend on the tag, instead.");
-    options.emplace_back("recursive", 'r', 0, "Recursively get all depended tags.");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+    using namespace Invader;
+    
+    const CommandLineOption options[] {
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
+        CommandLineOption("reverse", 'R', 0, "Find all tags that depend on the tag, instead."),
+        CommandLineOption("recursive", 'r', 0, "Recursively get all depended tags."),
+    };
 
     static constexpr char DESCRIPTION[] = "Check dependencies for a tag.";
     static constexpr char USAGE[] = "[options] <tag.class>";
@@ -31,13 +34,13 @@ int main(int argc, char * const *argv) {
         bool use_filesystem_path = false;
     } dependency_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
         switch(opt) {
             case 't':
                 dependency_options.tags.push_back(arguments[0]);
                 break;
             case 'i':
-                Invader::show_version_info();
+                show_version_info();
                 std::exit(EXIT_SUCCESS);
             case 'R':
                 dependency_options.reverse = true;
@@ -59,13 +62,13 @@ int main(int argc, char * const *argv) {
     // Require a tag
     std::optional<std::string> tag_path;
     if(dependency_options.use_filesystem_path) { 
-        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags);
+        auto tag_path_maybe = File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags);
         if(tag_path_maybe.has_value()) {
-            tag_path = Invader::File::preferred_path_to_halo_path(*tag_path_maybe);
+            tag_path = File::preferred_path_to_halo_path(*tag_path_maybe);
         }
     }
     else {
-        auto file_path_maybe = Invader::File::tag_path_to_file_path(remaining_arguments[0], dependency_options.tags);
+        auto file_path_maybe = File::tag_path_to_file_path(remaining_arguments[0], dependency_options.tags);
         if(file_path_maybe.has_value() && std::filesystem::exists(*file_path_maybe)) {
             tag_path = remaining_arguments[0];
         }
@@ -75,7 +78,7 @@ int main(int argc, char * const *argv) {
         eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
         return EXIT_FAILURE;
     }
-    auto tag_path_split = Invader::File::split_tag_class_extension(*tag_path);
+    auto tag_path_split = File::split_tag_class_extension(*tag_path);
     if(!tag_path_split.has_value()) {
         eprintf_error("%s is not a valid font tag", remaining_arguments[0]);
         return EXIT_FAILURE;
@@ -83,7 +86,7 @@ int main(int argc, char * const *argv) {
 
     // Here's an array we can use to hold what we got
     bool success;
-    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_split->path.c_str(), tag_path_split->fourcc, dependency_options.tags, dependency_options.reverse, dependency_options.recursive, success);
+    auto found_tags = FoundTagDependency::find_dependencies(tag_path_split->path.c_str(), tag_path_split->fourcc, dependency_options.tags, dependency_options.reverse, dependency_options.recursive, success);
 
     if(!success) {
         return EXIT_FAILURE;
@@ -91,6 +94,6 @@ int main(int argc, char * const *argv) {
 
     // See what depended on it or what depends on this
     for(auto &tag : found_tags) {
-        oprintf("%s.%s%s\n", Invader::File::halo_path_to_preferred_path(tag.path).c_str(), Invader::HEK::tag_fourcc_to_extension(tag.fourcc), tag.broken ? " [BROKEN]" : "");
+        oprintf("%s.%s%s\n", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc), tag.broken ? " [BROKEN]" : "");
     }
 }

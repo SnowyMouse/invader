@@ -34,12 +34,13 @@ int main(int argc, const char **argv) {
 
     // Command line options
     const CommandLineOption options[] {
-        CommandLineOption("maps", 'm', 1, "Use the specified maps directory to find bitmaps.map, sounds.map, and/or loc.map.", "<dir>"),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory to save tags.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("recursive", 'r', 0, "Extract tag dependencies"),
         CommandLineOption("overwrite", 'O', 0, "Overwrite tags if they already exist"),
         CommandLineOption("ignore-resources", 'G', 0, "Ignore resource maps."),
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info"),
         CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and extract these. Use multiple times for multiple queries. If unspecified, all tags will be extracted.", "<expr>"),
         CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>"),
         CommandLineOption("non-mp-globals", 'n', 0, "Enable extraction of non-multiplayer .globals")

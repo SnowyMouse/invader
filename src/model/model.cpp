@@ -1020,11 +1020,11 @@ int main(int argc, const char **argv) {
     } model_options;
 
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show credits, source info, and other info."),
-        CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag path or data directory."),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("type", 'T', 1, "Specify the type of model. Can be: model, gbxmodel", "<type>"),
-        CommandLineOption("data", 'd', 1, "Use the specified data directory.", "<dir>"),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory. Additional tags directories can be specified for searching shaders, but the tag will be output to the first one.", "<dir>")
     };
 
     static constexpr char DESCRIPTION[] = "Compile a model tag.";

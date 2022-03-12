@@ -53,8 +53,8 @@ int main(int argc, char * const *argv) {
     set_up_color_term();
     
     const CommandLineOption options[] {
-        CommandLineOption("info", 'i', 0, "Show license and credits."),
-        CommandLineOption("tags", 't', 1, "Use the specified tags directory.", "<dir>"),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and strip these. Use multiple times for multiple queries. If unspecified, all tags will be stripped.", "<expr>"),
         CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>")
     };

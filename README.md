@@ -128,6 +128,7 @@ this project is split into different programs.
 - [invader-bitmap]
 - [invader-bludgeon]
 - [invader-build]
+- [invader-collection]
 - [invader-compare]
 - [invader-convert]
 - [invader-dependency]
@@ -160,7 +161,7 @@ Options:
   -e --exclude <dir>           Exclude copying any tags that share a path with
                                a tag in specified directory. Use multiple times
                                to exclude multiple directories.
-  -E --exclude-matched <dir>   Exclude copying any tags that are also located
+  -E --exclude-matched         Exclude copying any tags that are also located
                                in the specified directory and are functionally
                                the same. Use multiple times to exclude multiple
                                directories.
@@ -180,10 +181,10 @@ Options:
                                --copy
   -P --fs-path                 Use a filesystem path for the tag.
   -s --single-tag              Archive a tag tree instead of a cache file.
-  -t --tags <dir>              Use the specified tags directory. Use multiple
+  -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
-                               precedence.
-  -v --verbose                 Print whether or not tags are omitted, Do
+                               precedence. Default (if unset): "tags"
+  -v --verbose                 Print whether or not tags are omitted. Do
                                verbose comparisons.
 ```
 
@@ -208,7 +209,8 @@ Options:
   -C --budget-count <count>    Multiply the maximum length squared to set the
                                maximum number of pixels. Setting this to 0
                                disables budgeting. Default (new tag): 0
-  -d --data <dir>              Use the specified data directory.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -D --dithering <channels>    Apply dithering to 16-bit or p8 bitmaps. This
                                does not save in .bitmap tags. Can be: a, rgb,
                                or argb. Default: none
@@ -220,14 +222,14 @@ Options:
   -h --help                    Show this list of options.
   -H --bump-height <height>    Set the apparent bumpmap height from 0.0 to 1.0.
                                Default (new tag): 0.026
-  -i --info                    Show license and credits.
+  -i --info                    Show credits, source info, and other info.
   -I --ignore-tag              Ignore the tag data if the tag exists.
   -M --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
   -n --allow-non-power-of-two  Allow color plates with non-power-of-two,
                                non-interface bitmaps.
   -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
                                off or on. Default (new tag): off
-  -P --fs-path                 Use a filesystem path for the data.
+  -P --fs-path                 Use a filesystem path for the tag.
   -r --reg-point-hack <val>    Ignore sequence borders when calculating
                                registration point (AKA 'filthy sprite bug
                                fix'). Can be: off or on. Default (new tag): off
@@ -238,7 +240,8 @@ Options:
                                Default (new tag): linear
   -S --square-sheets           Force square sprite sheets (works around
                                particles being incorrectly stretched).
-  -t --tags <dir>              Use the specified tags directory.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
   -T --type <type>             Set the type of bitmap. Can be: 2d_textures,
                                3d_textures, cube_maps, interface_bitmaps, or
                                sprites. Default (new tag): 2d_textures
@@ -264,7 +267,7 @@ Options:
                                ignore these. Use multiple times for multiple
                                queries. This takes precedence over --search.
   -h --help                    Show this list of options.
-  -i --info                    Show license and credits.
+  -i --info                    Show credits, source info, and other info.
   -j --threads                 Set the number of threads to use for parallel
                                bludgeoning when using --all. Default: CPU
                                thread count
@@ -272,7 +275,8 @@ Options:
                                bludgeon these. Use multiple times for multiple
                                queries. If unspecified, all tags will be
                                bludgeoned.
-  -t --tags <dir>              Use the specified tags directory.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
   -T --type                    Type of bludgeoning. Can be:
                                broken-lens-flare-function-scale,
                                incorrect-sound-buffer, invalid-enums,
@@ -303,10 +307,9 @@ Options:
   -B --build-string <ver>      Set the build string in the header.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
-  -E --extend-file-limits      Extend file size limits beyond what is allowed
-                               by the target engine to its theoretical maximum
-                               size. This may create a map that will not work
-                               without a mod.
+  -E --extend-file-limits      Extend file size limits to 2 GiB regardless of
+                               if the target engine will support the cache
+                               file.
   -g --game-engine <engine>    Specify the game engine. This option is
                                required. Valid engines are: gbx-custom,
                                gbx-demo, gbx-retail, mcc-cea, native,
@@ -317,7 +320,8 @@ Options:
   -i --info                    Show credits, source info, and other info.
   -l --level <level>           Set the compression level (Xbox maps only). Must
                                be between 0 and 9. Default: 9
-  -m --maps <dir>              Use the specified maps directory.
+  -m --maps <dir>              Use the specified maps directory. Default:
+                               "maps"
   -N --rename-scenario <name>  Rename the scenario.
   -o --output <file>           Output to a specific file.
   -O --optimize                Optimize tag space. This will drastically
@@ -332,9 +336,9 @@ Options:
                                Default: none
   -R --resource-maps <dir>     Specify the directory for loading resource maps.
                                (by default this is the maps directory)
-  -t --tags <dir>              Use the specified tags directory. Use multiple
+  -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
-                               precedence.
+                               precedence. Default (if unset): "tags"
   -T --tag-space <size>        Override the tag space. This may result in a map
                                that does not work with the stock games. You can
                                specify the number of bytes, optionally
@@ -385,6 +389,25 @@ versions of the game. If you do not want it to do this, copy these respective
 tags to a different path. Custom maps (i.e. maps that don't use stock scenario
 tag names) are not affected by this. Also, if any changes are applied, a minor
 warning will be emitted.
+
+### invader-collection
+This program creates .tag_collection tag files from .txt files, where each path
+is on a separate line.
+
+```
+Usage: invader-collection [options] <tag>
+
+Generate tag_collection tags.
+
+Options:
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
+```
 
 ### invader-compare
 This program compares tags against maps, maps against maps, and tags against
@@ -459,12 +482,12 @@ Options:
   -i --info                    Show credits, source info, and other info.
   -o --output-tags <dir>       Set the output tags directory.
   -O --overwrite               Overwrite any output tags if they exist.
-  -P --fs-path                 Use a filesystem path for the tag path if
-                               specifying a tag.
+  -P --fs-path                 Use a filesystem path for the tag.
   -s --single-tag              Convert a specific tag. This can be specified
                                multiple times for multiple tags, but cannot be
                                used with -a.
-  -t --tags <dir>              Set the input tags directory.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
   -T --type <type>             Type of conversion. Can be: gbxmodel-to-model
                                (g2m), model-to-gbxmodel (m2g),
                                chicago-extended-to-chicago (x2c)
@@ -484,9 +507,9 @@ Options:
   -P --fs-path                 Use a filesystem path for the tag.
   -r --recursive               Recursively get all depended tags.
   -R --reverse                 Find all tags that depend on the tag, instead.
-  -t --tags <dir>              Use the specified tags directory. Use multiple
+  -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
-                               precedence.
+                               precedence. Default (if unset): "tags"
 ```
 
 ### invader-edit
@@ -508,7 +531,7 @@ Options:
   -G --get <key>               Get the value with the given key.
   -h --help                    Show this list of options.
   -H --checksum                Output the calculated checksum of the tag.
-  -i --info                    Show license and credits.
+  -i --info                    Show credits, source info, and other info.
   -I --insert <key> <#> <pos>  Add # structs to the given index or "end" if the
                                end of the array.
   -l --list                    List all elements in a tag.
@@ -524,11 +547,11 @@ Options:
                                overwriting it.
   -O --save-as <tag>           Output the tag to a different path relative to
                                the tags directory rather than overwriting it.
-  -P --fs-path                 Use a filesystem path for the font data or tag
-                               file.
+  -P --fs-path                 Use a filesystem path for the tag.
   -S --set <key> <val>         Set the value at the given key to the given
                                value.
-  -t --tags <dir>              Use the specified tags directory.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
   -V --verify-checksum         Verify that the checksum in the header is
                                correct and print the result.
 ```
@@ -548,11 +571,10 @@ Options:
                                recursive (default: fast)
   -n --no-safeguards           Allow all tag data to be edited (proceed at your
                                own risk)
-  -P --fs-path                 Use a filesystem path for the tag path if
-                               specifying a tag.
-  -t --tags <dir>              Use the specified tags directory. Use multiple
+  -P --fs-path                 Use a filesystem path for the tag.
+  -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
-                               precedence.
+                               precedence. Default (if unset): "tags"
 ```
 
 ### invader-extract
@@ -569,17 +591,19 @@ Options:
                                queries. This takes precedence over --search.
   -G --ignore-resources        Ignore resource maps.
   -h --help                    Show this list of options.
-  -i --info                    Show credits, source info, and other info
-  -m --maps <dir>              Use the specified maps directory to find
-                               bitmaps.map, sounds.map, and/or loc.map.
+  -i --info                    Show credits, source info, and other info.
+  -m --maps <dir>              Use the specified maps directory. Default:
+                               "maps"
   -n --non-mp-globals          Enable extraction of non-multiplayer .globals
   -O --overwrite               Overwrite tags if they already exist
+  -P --fs-path                 Use a filesystem path for the tag.
   -r --recursive               Extract tag dependencies
   -s --search <expr>           Search for tags (* and ? are wildcards) and
                                extract these. Use multiple times for multiple
                                queries. If unspecified, all tags will be
                                extracted.
-  -t --tags <dir>              Use the specified tags directory to save tags.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
 ```
 
 ### invader-font
@@ -591,12 +615,15 @@ Usage: invader-font [options] <font-tag>
 Create font tags from OTF/TTF files.
 
 Options:
-  -d --data <dir>              Set the data directory.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -P --fs-path                 Use a filesystem path for the font file.
+  -l --latin1                  Use 256 characters only (smaller)
+  -P --fs-path                 Use a filesystem path for the tag.
   -s --font-size <px>          Set the font size in pixels.
-  -t --tags <dir>              Set the tags directory.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
 ```
 
 ### invader-index
@@ -669,15 +696,14 @@ Usage: invader-model [options] <model-tag>
 Compile a model tag.
 
 Options:
-  -d --data <dir>              Use the specified data directory.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -P --fs-path                 Use a filesystem path for the tag path or data
-                               directory.
-  -t --tags <dir>              Use the specified tags directory. Additional
-                               tags directories can be specified for searching
-                               shaders, but the tag will be output to the first
-                               one.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -t --tags <dir>              Add the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence. Default (if unset): "tags"
   -T --type <type>             Specify the type of model. Can be: model,
                                gbxmodel
 ```
@@ -692,13 +718,14 @@ Usage: invader-recover [options] <tag.class>
 Recover source data from tags.
 
 Options:
-  -d --data <dir>              Use the specified data directory.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -O --overwrite               Overwrite data if it already exists
-  -P --fs-path                 Use a filesystem path for the tag path
-                               directory.
-  -t --tags <dir>              Use the specified tags directory.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
 ```
 
 ### invader-refactor
@@ -719,7 +746,7 @@ Options:
                                anything, although filesystem errors may not be
                                caught.
   -h --help                    Show this list of options.
-  -i --info                    Show license and credits.
+  -i --info                    Show credits, source info, and other info.
   -M --mode <mode>             Specify what to do with the file if it exists.
                                If using move, then the tag is moved (the tag
                                must exist on the filesystem) while also
@@ -745,9 +772,9 @@ Options:
                                Otherwise, it applies to all tags.
   -s --single-tag <path>       Make changes to a single tag, only, rather than
                                the whole tags directory.
-  -t --tags <dir>              Use the specified tags directory. Use multiple
+  -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
-                               precedence.
+                               precedence. Default (if unset): "tags"
   -T --tag <f> <t>             Refactor an individual tag. This can be
                                specified multiple times but cannot be used with
                                --recursive.
@@ -775,14 +802,15 @@ Options:
                                gbx-custom, gbx-demo, gbx-retail, mcc-cea.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -m --maps <dir>              Set the maps directory.
+  -m --maps <dir>              Use the specified maps directory. Default:
+                               "maps"
   -M --with-map <file>         Use a map file for the tags. This can be
                                specified multiple times.
   -S --show-matched            Print the paths of any matched tags found when
                                using --concatenate.
-  -t --tags <dir>              Use the specified tags directory. Use multiple
+  -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
-                               precedence.
+                               precedence. Default (if unset): "tags"
   -T --type <type>             Set the resource map. This option is required.
                                Can be: bitmaps, sounds, or loc.
   -w --with-index <file>       Use an index file for the tags, ensuring tags
@@ -803,7 +831,8 @@ Compile scripts. Unless otherwise specified, global scripts are always compiled.
 
 Options:
   -c --clear                   Clear all script data from the scenario tag
-  -d --data <dir>              Use the specified data directory.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -e --explicit <source>       Explicitly compile the given source in the
                                script directory. This argument can be used
                                multiple times.
@@ -814,14 +843,13 @@ Options:
                                xbox-ntsc-tw, xbox-pal
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -P --fs-path                 Use a filesystem path for the tag path
-                               directory.
+  -P --fs-path                 Use a filesystem path for the tag.
   -r --reload-scripts          Only recompile sources referenced by the tag.
   -R --regenerate              Use the scenario tag's script source data as
                                data.
-  -t --tags <dir>              Use the specified tags directory. Use multiple
+  -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
-                               precedence.
+                               precedence. Default (if unset): "tags"
 ```
 
 
@@ -866,7 +894,8 @@ Options:
   -C --channel-count <#>       Set the channel count. Can be: mono, stereo. By
                                default, this is determined based on the input
                                audio.
-  -d --data <dir>              Use the specified data directory.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -F --format <fmt>            Set the format. Can be: 16-bit_pcm, ogg_vorbis,
                                or xbox_adpcm. Default: 16-bit_pcm
   -h --help                    Show this list of options.
@@ -878,7 +907,7 @@ Options:
                                0.0 and 1.0. For Ogg Vorbis, higher levels
                                result in better quality but worse sizes.
                                Default: 0.8
-  -P --fs-path                 Use a filesystem path for the data or tag.
+  -P --fs-path                 Use a filesystem path for the tag.
   -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
                                and 44100. By default, this is determined based
                                on the input audio.
@@ -886,9 +915,8 @@ Options:
                                is necessary for longer sounds (e.g. music) when
                                being played in the original Halo engine.
   -S --no-split                Do not split permutations.
-  -t --tags <dir>              Use the specified tags directory. Use multiple
-                               times to add more directories, ordered by
-                               precedence.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
 ```
 
 Refer to [Creating a sound] for a guide on how to create sound tags.
@@ -906,21 +934,23 @@ Usage: invader-string [options] <tag>
 Generate string list tags.
 
 Options:
-  -d --data <dir>              Use the specified data directory.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -f --format                  Set string list format. Can be unicode or
-                               latin-1. Must be specified if a string tag is not
-                               present.
+                               latin-1. Must be specified if a string tag is
+                               not present.
   -h --help                    Show this list of options.
-  -i --info                    Show license and credits.
-  -P --fs-path                 Use a filesystem path for the text file.
-  -t --tags <dir>              Use the specified tags directory.
+  -i --info                    Show credits, source info, and other info.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
 ```
 
 ### invader-strip
 This program strips hidden data from tags and recalculates their CRC32 values.
 
 ```
-Usage: invader-strip [options] <-a | tag.class>
+Usage: invader-strip [options]
 
 Strips extra hidden data from tags.
 
@@ -929,12 +959,13 @@ Options:
                                ignore these. Use multiple times for multiple
                                queries. This takes precedence over --search.
   -h --help                    Show this list of options.
-  -i --info                    Show license and credits.
+  -i --info                    Show credits, source info, and other info.
   -s --search <expr>           Search for tags (* and ? are wildcards) and
                                strip these. Use multiple times for multiple
                                queries. If unspecified, all tags will be
                                stripped.
-  -t --tags <dir>              Use the specified tags directory.
+  -t --tags <dir>              Use the specified tags directory. Default:
+                               "tags"
 ```
 
 ## Frequently asked questions
@@ -1226,6 +1257,7 @@ to a point where it can be a better and free replacement for tool.exe.
 [invader-bitmap]: #invader-bitmap
 [invader-bludgeon]: #invader-bludgeon
 [invader-build]: #invader-build
+[invader-collection]: #invader-collection
 [invader-compare]: #invader-compare
 [invader-convert]: #invader-convert
 [invader-dependency]: #invader-dependency

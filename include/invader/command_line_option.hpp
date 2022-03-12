@@ -364,6 +364,33 @@ namespace Invader {
 
             return unhandled_arguments;
         }
+    
+        enum PresetCommandLineOption {
+            PRESET_COMMAND_LINE_OPTION_INFO,
+            PRESET_COMMAND_LINE_OPTION_DATA,
+            PRESET_COMMAND_LINE_OPTION_MAPS,
+            PRESET_COMMAND_LINE_OPTION_FS_PATH,
+            PRESET_COMMAND_LINE_OPTION_TAGS,
+            PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE
+        };
+        
+        static CommandLineOption from_preset(PresetCommandLineOption option) {
+            switch(option) {
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO:
+                    return CommandLineOption("info", 'i', 0, "Show credits, source info, and other info.");
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA:
+                    return CommandLineOption("data", 'd', 1, "Use the specified data directory. Default: \"data\"", "<dir>");
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS:
+                    return CommandLineOption("maps", 'm', 1, "Use the specified maps directory. Default: \"maps\"", "<dir>");
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS:
+                    return CommandLineOption("tags", 't', 1, "Use the specified tags directory. Default: \"tags\"", "<dir>");
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE:
+                    return CommandLineOption("tags", 't', 1, "Add the specified tags directory. Use multiple times to add more directories, ordered by precedence. Default (if unset): \"tags\"", "<dir>");
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH:
+                    return CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+            }
+            std::terminate();
+        };
     };
 }
 
