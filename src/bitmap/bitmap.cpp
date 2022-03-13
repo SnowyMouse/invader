@@ -104,7 +104,7 @@ struct BitmapOptions {
     bool regenerate = false;
 };
 
-template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagFourCC tag_fourcc) {
+template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, TagFourCC tag_fourcc) {
     // Let's begin
     std::filesystem::path data_path = bitmap_options.data;
 
@@ -254,7 +254,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     else {
         // Try to figure out the extension
         auto bitmap_data_path = (data_path / bitmap_tag).string();
-        for(auto i = found_format; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+        for(auto i = static_cast<SupportedFormatsInt>(0); i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
             std::string image_path = bitmap_data_path + SUPPORTED_FORMATS[i];
             if(std::filesystem::exists(image_path)) {
                 switch(i) {
@@ -690,29 +690,10 @@ int main(int argc, char *argv[]) {
 
     // Resolve the bitmap tag
     std::string bitmap_tag;
-    SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
     if(bitmap_options.filesystem_path) {
         auto bitmap_tag_maybe = File::file_path_to_tag_path(remaining_arguments[0], bitmap_options.tags);
         if(bitmap_tag_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
             bitmap_tag = std::filesystem::path(*bitmap_tag_maybe).replace_extension().string();
-        }
-        else if(!bitmap_options.regenerate) {
-            auto bitmap_file_maybe = File::file_path_to_tag_path(remaining_arguments[0], bitmap_options.data);
-            if(bitmap_file_maybe.has_value() && std::filesystem::exists(remaining_arguments[0])) {
-                SupportedFormatsInt i;
-                auto path_test = std::filesystem::path(*bitmap_file_maybe);
-                auto extension = path_test.extension();
-                bitmap_tag = std::filesystem::path(*bitmap_file_maybe).replace_extension().string();
-                for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
-                    if(extension == SUPPORTED_FORMATS[i]) {
-                        found_format = i;
-                        break;
-                    }
-                }
-            }
-            else {
-                eprintf_error("Failed to find a valid bitmap %s in the data or tags directories.", remaining_arguments[0]);
-            }
         }
         else {
             eprintf_error("Failed to find a valid bitmap %s in the tags directory.", remaining_arguments[0]);
@@ -732,5 +713,5 @@ int main(int argc, char *argv[]) {
 
     auto tag_path = bitmap_options.tags / bitmap_tag;
     auto final_path_bitmap = std::filesystem::path(tag_path) += ".bitmap";
-    return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format, TagFourCC::TAG_FOURCC_BITMAP);
+    return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, TagFourCC::TAG_FOURCC_BITMAP);
 }

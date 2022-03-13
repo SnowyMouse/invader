@@ -29,6 +29,11 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-strip: Renamed --search to --batch
 - invader-strip: A tag path OR --batch is now required
 
+### Removed
+- invader-bitmap: Removed specifying data paths with --fs-path
+- invader-font: Removed specifying data paths with --fs-path
+- invader-sound: Removed specifying data paths with --fs-path
+
 ## [0.47.1] - 2022-03-07
 ### Changed
 - invader-script: Clearing script data now deletes string and syntax data and

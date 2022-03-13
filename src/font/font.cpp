@@ -108,7 +108,6 @@ int main(int argc, char *argv[]) {
     if(font_options.use_filesystem_path) {
         auto path = std::filesystem::path(remaining_arguments[0]);
         auto font_tag_maybe = File::file_path_to_tag_path(path, font_options.tags);
-        auto font_data_maybe = File::file_path_to_tag_path(path, font_options.data);
         if(font_tag_maybe.has_value()) {
             if(std::filesystem::path(*font_tag_maybe).extension() == ".font") {
                 font_tag = *font_tag_maybe;
@@ -118,18 +117,8 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
             }
         }
-        else if(font_data_maybe) {
-            for(FontExtension i = found_format; i < FontExtension::FONT_EXTENSION_COUNT; i = static_cast<FontExtension>(i + 1)) {
-                if(FONT_EXTENSION_STR[i] == path.extension()) {
-                    font_tag = font_tag_maybe.value();
-                    found_format = i;
-                    break;
-                }
-            }
-        }
-        
-        if(font_tag.size() == 0) {
-            eprintf_error("Failed to find %s in the tags or data directories", remaining_arguments[0]);
+        else {
+            eprintf_error("Failed to find %s in %s", remaining_arguments[0], font_options.tags.string().c_str());
             return EXIT_FAILURE;
         }
         font_tag = std::filesystem::path(font_tag).replace_extension().string();

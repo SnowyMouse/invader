@@ -17,8 +17,8 @@ using namespace Invader;
 using namespace Invader::HEK;
 
 struct SoundOptions {
-    const char *data = "data";
-    const char *tags = "tags";
+    std::filesystem::path data = "data";
+    std::filesystem::path tags = "tags";
     std::optional<bool> split;
     std::optional<SoundFormat> format;
     bool fs_path = false;
@@ -763,12 +763,9 @@ int main(int argc, const char **argv) {
     // Get our paths and make sure a data directory exists
     std::string halo_tag_path;
     if(sound_options.fs_path) {
-        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], sound_options.data);
+        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], sound_options.tags);
         if(!tag_path_maybe.has_value()) {
-            tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], sound_options.tags);
-        }
-        if(!tag_path_maybe.has_value()) {
-            eprintf_error("Cannot find %s in %s or %s", remaining_arguments[0], sound_options.data, sound_options.tags);
+            eprintf_error("Cannot find %s in %s", remaining_arguments[0], sound_options.tags.string().c_str());
             return EXIT_FAILURE;
         }
     }
