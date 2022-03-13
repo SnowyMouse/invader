@@ -48,7 +48,7 @@ int main(int argc, const char **argv) {
         CommandLineOption("regenerate", 'R', 0, "Use the scenario tag's script source data as data."),
         CommandLineOption("exclude-global-scripts", 'E', 0, "Do not use global_scripts source."),
         CommandLineOption("reload-scripts", 'r', 0, "Only recompile sources referenced by the tag."),
-        CommandLineOption("explicit", 'e', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>")
+        CommandLineOption("explicit", 'x', 1, "Explicitly compile the given source in the script directory. This argument can be used multiple times.", "<source>")
     };
 
     static constexpr char DESCRIPTION[] = "Compile scripts. Unless otherwise specified, global scripts are always compiled.";
@@ -81,7 +81,7 @@ int main(int argc, const char **argv) {
                 script_options.clear = true;
                 break;
 
-            case 'e':
+            case 'x':
                 script_options.explicit_scripts.emplace_back(arguments[0]);
                 script_options.use_explicit = true;
                 break;

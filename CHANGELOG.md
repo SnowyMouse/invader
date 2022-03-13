@@ -4,10 +4,12 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
+- invader-bludgeon: Readded --fs-path
 - invader-script: Using explicit extensions is now supported. Note that this is
   not presently supported in any stock tools
 - invader-script: Using "none" is now supported for tag paths. Note that this is
   not presently supported in any stock tools
+- invader-strip: Readded --fs-path
 
 ### Changed
 - invader-edit: Simple expressions are now supported in --set. Use `~+n` to add
@@ -15,13 +17,17 @@ This is used for recording Invader's changes. This changelog is based on
   value by n, `~/n` to divide the value by n, and `~` to not change the value.
 
 ### Fixed
-- invader-bludgeon: Fixed -s narrowing searches instead of broadening them
+- invader-bludgeon: A tag path OR --batch is now required
+- invader-bludgeon: Fixed --batch narrowing searches instead of broadening them
+- invader-bludgeon: Renamed --search to --batch
 - invader-bitmap: Fixed extra tall unrolled cubemaps not being accepted
 - invader-compare: Fixed -s narrowing searches instead of broadening them
 - invader-extract: Fixed -s narrowing searches instead of broadening them
 - invader-script: Fixed a few instances of warning messages not having .hsc as
   the path
 - invader-strip: Fixed -s narrowing searches instead of broadening them
+- invader-strip: Renamed --search to --batch
+- invader-strip: A tag path OR --batch is now required
 
 ## [0.47.1] - 2022-03-07
 ### Changed

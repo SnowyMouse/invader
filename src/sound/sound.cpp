@@ -651,7 +651,7 @@ int main(int argc, const char **argv) {
         CommandLineOption("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>"),
         CommandLineOption("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>"),
         CommandLineOption("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. Default: 0.8", "<lvl>"),
-        CommandLineOption("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>"),
+        CommandLineOption("bitrate", 'R', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>"),
         CommandLineOption("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient_computers, ambient_machinery, ambient_nature, device_computers, device_door, device_force_field, device_machinery, device_nature, first_person_damage, game_event, music, object_impacts, particle_impacts, projectile_impact, projectile_detonation, scripted_dialog_force_unspatialized, scripted_dialog_other, scripted_dialog_player, scripted_effect, slow_particle_impacts, unit_dialog, unit_footsteps, vehicle_collision, vehicle_engine, weapon_charge, weapon_empty, weapon_fire, weapon_idle, weapon_overheat, weapon_ready, weapon_reload", "<class>"),
         CommandLineOption("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: CPU thread count")
     };
@@ -691,7 +691,7 @@ int main(int argc, const char **argv) {
                 sound_options.split = false;
                 break;
 
-            case 'b':
+            case 'R':
                 try {
                     sound_options.bitrate = static_cast<std::uint16_t>(std::stol(arguments[0]));
                 }

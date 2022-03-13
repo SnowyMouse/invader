@@ -36,6 +36,7 @@ namespace Invader::File {
         TagFilePath() = default;
         TagFilePath(const TagFilePath &copy) = default;
         TagFilePath(const std::string &path, TagFourCC fourcc) : path(path), fourcc(fourcc) {}
+        TagFilePath &operator=(const TagFilePath &) = default;
         
         std::strong_ordering operator<=>(const TagFilePath &other) const noexcept {
             auto space_ship = this->path <=> other.path;

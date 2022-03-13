@@ -55,8 +55,9 @@ int main(int argc, char * const *argv) {
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
-        CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and strip these. Use multiple times for multiple queries. If unspecified, all tags will be stripped.", "<expr>"),
-        CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>")
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH_EXCLUDE),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH)
     };
 
     static constexpr char DESCRIPTION[] = "Strips extra hidden data from tags.";
@@ -64,11 +65,12 @@ int main(int argc, char * const *argv) {
 
     struct StripOptions {
         std::filesystem::path tags = "tags";
+        bool fs_path = false;
         std::vector<std::string> search;
         std::vector<std::string> search_exclude;
     } strip_options;
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<StripOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, strip_options, [](char opt, const std::vector<const char *> &arguments, auto &strip_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<StripOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, strip_options, [](char opt, const std::vector<const char *> &arguments, auto &strip_options) {
         switch(opt) {
             case 't':
                 strip_options.tags = arguments[0];
@@ -76,17 +78,45 @@ int main(int argc, char * const *argv) {
             case 'i':
                 show_version_info();
                 std::exit(EXIT_SUCCESS);
-            case 's':
+            case 'b':
                 strip_options.search.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
                 break;
             case 'e':
                 strip_options.search_exclude.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
                 break;
+            case 'P':
+                strip_options.fs_path = true;
+                break;
         }
     });
+    
+    std::optional<File::TagFilePath> single_tag;
+    if(strip_options.search.empty() && strip_options.search_exclude.empty()) {
+        if(remaining_arguments.size() == 1) {
+            try {
+                single_tag = File::split_tag_class_extension(!strip_options.fs_path ? remaining_arguments[0] : File::file_path_to_tag_path(remaining_arguments[0], strip_options.tags).value()).value();
+            }
+            catch(std::exception &) {
+                eprintf_error("Invalid tag path %s", remaining_arguments[0]);
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        else {
+            eprintf_error("A tag path was expected. Use -h for more information.");
+            return EXIT_FAILURE;
+        }
+    }
+    else if(!remaining_arguments.empty()) {
+        eprintf_error("Can't use an extra tag path and -b. Use -h for more information.");
+        return EXIT_FAILURE;
+    }
 
     std::size_t success = 0;
     std::size_t total = 0;
+    
+    if(single_tag.has_value()) {
+        return strip_tag(File::tag_path_to_file_path(*single_tag, strip_options.tags).string().c_str(), File::halo_path_to_preferred_path(single_tag->join())) ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
     
     for(auto &i : File::load_virtual_tag_folder( { strip_options.tags } )) {
         if(File::path_matches(i.tag_path.c_str(), strip_options.search, strip_options.search_exclude)) {

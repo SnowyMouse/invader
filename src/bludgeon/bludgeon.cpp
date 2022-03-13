@@ -181,43 +181,45 @@ int main(int argc, char * const *argv) {
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH_EXCLUDE),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count"),
-        CommandLineOption("search", 's', 1, "Search for tags (* and ? are wildcards) and bludgeon these. Use multiple times for multiple queries. If unspecified, all tags will be bludgeoned.", "<expr>"),
-        CommandLineOption("search-exclude", 'e', 1, "Search for tags (* and ? are wildcards) and ignore these. Use multiple times for multiple queries. This takes precedence over --search.", "<expr>"),
         CommandLineOption("type", 'T', 1, issues_list.c_str())
     };
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
-    static constexpr char USAGE[] = "[options]";
+    static constexpr char USAGE[] = "[options] <-b [expr] | <tag>>";
 
     struct BludgeonOptions {
-        std::optional<std::filesystem::path> tags;
+        std::filesystem::path tags = "tags";
         std::uint64_t fixes = 0;
+        bool fs_path = false;
         std::vector<std::string> search;
         std::vector<std::string> search_exclude;
         std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
     } bludgeon_options;
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
         using namespace Invader;
         switch(opt) {
             case 't':
-                if(bludgeon_options.tags.has_value()) {
-                    eprintf_error("This tool does not support multiple tags directories.");
-                    std::exit(EXIT_FAILURE);
-                }
                 bludgeon_options.tags = arguments[0];
                 break;
             case 'i':
                 show_version_info();
                 std::exit(EXIT_SUCCESS);
                 
-            case 's':
+            case 'b':
                 bludgeon_options.search.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
                 break;
                 
             case 'e':
                 bludgeon_options.search_exclude.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
+                break;
+                
+            case 'P':
+                bludgeon_options.fs_path = true;
                 break;
                 
             case 'j':
@@ -245,22 +247,50 @@ int main(int argc, char * const *argv) {
         }
     });
     
-    if(!bludgeon_options.tags.has_value()) {
-        bludgeon_options.tags = "tags";
+    std::optional<File::TagFilePath> single_tag;
+    if(bludgeon_options.search.empty() && bludgeon_options.search_exclude.empty()) {
+        if(remaining_arguments.size() == 1) {
+            try {
+                single_tag = File::split_tag_class_extension(!bludgeon_options.fs_path ? remaining_arguments[0] : File::file_path_to_tag_path(remaining_arguments[0], bludgeon_options.tags).value()).value();
+            }
+            catch(std::exception &) {
+                eprintf_error("Invalid tag path %s", remaining_arguments[0]);
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        else {
+            eprintf_error("A tag path was expected. Use -h for more information.");
+            return EXIT_FAILURE;
+        }
     }
+    else if(!remaining_arguments.empty()) {
+        eprintf_error("Can't use an extra tag path and -b. Use -h for more information.");
+        return EXIT_FAILURE;
+    }
+    
 
     auto &fixes = bludgeon_options.fixes;
 
     std::size_t success = 0;
+    std::vector<File::TagFile> all_tags;
     
-    auto all_virtual_tags = File::load_virtual_tag_folder(std::vector<std::filesystem::path>(&*bludgeon_options.tags, &*bludgeon_options.tags + 1));
-    decltype(all_virtual_tags) all_tags;
-    all_tags.reserve(all_virtual_tags.size());
-    
-    if(bludgeon_options.search.empty() && bludgeon_options.search_exclude.empty()) {
-        all_tags = std::move(all_virtual_tags);
+    if(single_tag.has_value()) {
+        auto tf = File::tag_path_to_file_path(*single_tag, std::vector<std::filesystem::path> { bludgeon_options.tags });
+        if(tf.has_value()) {
+            auto &t = all_tags.emplace_back();
+            t.full_path = tf.value();
+            t.tag_directory = 0;
+            t.tag_path = single_tag->path;
+            t.tag_fourcc = single_tag->fourcc;
+        }
+        else {
+            eprintf_error("Can't find %s", remaining_arguments[0]);
+            std::exit(EXIT_FAILURE);
+        }
     }
     else {
+        auto all_virtual_tags = File::load_virtual_tag_folder(std::vector<std::filesystem::path>(&bludgeon_options.tags, &bludgeon_options.tags + 1));
+        all_tags.reserve(all_virtual_tags.size());
         for(auto &i : all_virtual_tags) {
             if(File::path_matches(i.tag_path.c_str(), bludgeon_options.search, bludgeon_options.search_exclude)) {
                 all_tags.emplace_back(std::move(i));

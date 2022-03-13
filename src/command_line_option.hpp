@@ -374,7 +374,9 @@ namespace Invader {
             PRESET_COMMAND_LINE_OPTION_FS_PATH,
             PRESET_COMMAND_LINE_OPTION_TAGS,
             PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE,
-            PRESET_COMMAND_LINE_OPTION_GAME_ENGINE
+            PRESET_COMMAND_LINE_OPTION_GAME_ENGINE,
+            PRESET_COMMAND_LINE_OPTION_BATCH,
+            PRESET_COMMAND_LINE_OPTION_BATCH_EXCLUDE
         };
         
         static CommandLineOption from_preset(PresetCommandLineOption option) {
@@ -403,6 +405,10 @@ namespace Invader {
                     
                     return CommandLineOption("game-engine", 'g', 1, std::string("Specify the game engine. Valid engines are: ") + engines, "<engine>");
                 }
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH:
+                    return CommandLineOption("batch", 'b', 1, "Run the command on all tags with a given expression.", "<expr>");
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH_EXCLUDE:
+                    return CommandLineOption("batch-exclude", 'e', 1, "Run the command on all tags that do not match a given expression. This takes precedence over --batch", "<expr>");
                     
             }
             std::terminate();
