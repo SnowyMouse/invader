@@ -257,23 +257,22 @@ Refer to [Creating a bitmap] for information on how to create bitmap tags.
 This program convinces broken tags to work with Invader.
 
 ```
-Usage: invader-bludgeon [options]
+Usage: invader-bludgeon [options] <-b [expr] | <tag>>
 
 Convinces tags to work with Invader.
 
 Options:
-  -e --search-exclude <expr>   Search for tags (* and ? are wildcards) and
-                               ignore these. Use multiple times for multiple
-                               queries. This takes precedence over --search.
+  -b --batch <expr>            Run the command on all tags with a given
+                               expression.
+  -e --batch-exclude <expr>    Run the command on all tags that do not match a
+                               given expression. This takes precedence over
+                               --batch
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -j --threads                 Set the number of threads to use for parallel
                                bludgeoning when using --all. Default: CPU
                                thread count
-  -s --search <expr>           Search for tags (* and ? are wildcards) and
-                               bludgeon these. Use multiple times for multiple
-                               queries. If unspecified, all tags will be
-                               bludgeoned.
+  -P --fs-path                 Use a filesystem path for the tag.
   -t --tags <dir>              Use the specified tags directory. Default:
                                "tags"
   -T --type                    Type of bludgeoning. Can be:
@@ -952,15 +951,14 @@ Usage: invader-strip [options]
 Strips extra hidden data from tags.
 
 Options:
-  -e --search-exclude <expr>   Search for tags (* and ? are wildcards) and
-                               ignore these. Use multiple times for multiple
-                               queries. This takes precedence over --search.
+  -b --batch <expr>            Run the command on all tags with a given
+                               expression.
+  -e --batch-exclude <expr>    Run the command on all tags that do not match a
+                               given expression. This takes precedence over
+                               --batch
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -s --search <expr>           Search for tags (* and ? are wildcards) and
-                               strip these. Use multiple times for multiple
-                               queries. If unspecified, all tags will be
-                               stripped.
+  -P --fs-path                 Use a filesystem path for the tag.
   -t --tags <dir>              Use the specified tags directory. Default:
                                "tags"
 ```
@@ -991,7 +989,7 @@ nevertheless.
 The most common issues can be fixed by running the following command:
 
 ```
-invader-bludgeon -T invalid-indices -T invalid-enums -T out-of-range
+invader-bludgeon -b "*" -T invalid-indices -T invalid-enums -T out-of-range
 ```
 
 The stock Halo Editing Kit also comes with a number of tags that reference model
@@ -1013,7 +1011,7 @@ case they have not. However, some HEK tags do not have this set for some reason.
 You can fix this by running this command:
 
 ```
-invader-strip
+invader-strip -b "*"
 ```
 
 Note that the above commands take `-t <path-to-tags-directory>` just like
