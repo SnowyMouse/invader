@@ -946,7 +946,7 @@ Options:
 This program strips hidden data from tags and recalculates their CRC32 values.
 
 ```
-Usage: invader-strip [options]
+Usage: invader-strip [options] <-b [expr] | <tag>>
 
 Strips extra hidden data from tags.
 

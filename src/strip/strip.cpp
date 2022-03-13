@@ -61,7 +61,7 @@ int main(int argc, char * const *argv) {
     };
 
     static constexpr char DESCRIPTION[] = "Strips extra hidden data from tags.";
-    static constexpr char USAGE[] = "[options]";
+    static constexpr char USAGE[] = "[options] <-b [expr] | <tag>>";
 
     struct StripOptions {
         std::filesystem::path tags = "tags";
