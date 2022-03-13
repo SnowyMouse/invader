@@ -5,7 +5,7 @@
 #include <vector>
 #include <optional>
 
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
 #include <invader/version.hpp>

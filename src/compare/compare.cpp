@@ -14,7 +14,7 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/extract/extraction.hpp>
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 
 using namespace Invader;
 

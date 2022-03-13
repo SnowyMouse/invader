@@ -6,7 +6,7 @@
 
 #include <QApplication>
 #include <QMessageBox>
-#include <invader/command_line_option.hpp>
+#include "../../command_line_option.hpp"
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include "tree/tag_tree_window.hpp"

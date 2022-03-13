@@ -10,7 +10,7 @@
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
 #include <invader/resource/hek/resource_map.hpp>
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 
 int main(int argc, const char **argv) {
     set_up_color_term();

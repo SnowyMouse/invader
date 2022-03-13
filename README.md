@@ -152,7 +152,7 @@ This program generates a .tar.xz archive containing all of the tags used to
 build a map.
 
 ```
-Usage: invader-archive [options] <scenario | -s tag.class>
+Usage: invader-archive [options] <-g <engine> <scenario> | -s tag.class>
 
 Generate .tar.xz archives of the tags required to build a cache file.
 
@@ -167,10 +167,9 @@ Options:
                                directories.
   -F --format <format>         Specify format. Valid formats are: 7z, tar-gz,
                                tar-xz, tar-zst, zip. Default format is 7z
-  -g --game-engine <id>        Specify the game engine. This option is
-                               required. Valid engines are: gbx-custom,
-                               gbx-demo, gbx-retail, mcc-cea, native,
-                               xbox-demo, xbox-ntsc, xbox-ntsc-jp,
+  -g --game-engine <engine>    Specify the game engine. Valid engines are:
+                               gbx-custom, gbx-demo, gbx-retail, mcc-cea,
+                               native, xbox-demo, xbox-ntsc, xbox-ntsc-jp,
                                xbox-ntsc-tw, xbox-pal
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
@@ -310,10 +309,9 @@ Options:
   -E --extend-file-limits      Extend file size limits to 2 GiB regardless of
                                if the target engine will support the cache
                                file.
-  -g --game-engine <engine>    Specify the game engine. This option is
-                               required. Valid engines are: gbx-custom,
-                               gbx-demo, gbx-retail, mcc-cea, native,
-                               xbox-demo, xbox-ntsc, xbox-ntsc-jp,
+  -g --game-engine <engine>    Specify the game engine. Valid engines are:
+                               gbx-custom, gbx-demo, gbx-retail, mcc-cea,
+                               native, xbox-demo, xbox-ntsc, xbox-ntsc-jp,
                                xbox-ntsc-tw, xbox-pal
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
@@ -788,18 +786,17 @@ stock tags to be present in order to be built. Files created by this tool are
 not guaranteed to work with existing cache files.
 
 ```
-Usage: invader-resource [options] -T <type>
+Usage: invader-resource [options] -g <engine> -T <type>
 
 Create resource maps.
 
 Options:
   -c --concatenate <file>      Concatenate against the resource map at a path.
                                This cannot be used with -T loc
-  -g --game-engine <id>        Specify the game engine. This option is
-                               required. Demo and retail maps also require
-                               either --with-index or --with-map to be
-                               specified at least once. Valid engines are:
-                               gbx-custom, gbx-demo, gbx-retail, mcc-cea.
+  -g --game-engine <engine>    Specify the game engine. Demo and retail maps
+                               also require either --with-index or --with-map
+                               to be specified at least once. Valid engines
+                               are: gbx-custom, gbx-demo, gbx-retail, mcc-cea.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Use the specified maps directory. Default:
@@ -811,8 +808,8 @@ Options:
   -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence. Default (if unset): "tags"
-  -T --type <type>             Set the resource map. This option is required.
-                               Can be: bitmaps, sounds, or loc.
+  -T --type <type>             Set the resource map. Can be: bitmaps, sounds,
+                               or loc.
   -w --with-index <file>       Use an index file for the tags, ensuring tags
                                are ordered in the same way (barring
                                duplicates).

@@ -10,10 +10,8 @@
 #include <invader/build/build_workload.hpp>
 #include <invader/map/map.hpp>
 #include <invader/dependency/found_tag_dependency.hpp>
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 #include <invader/file/file.hpp>
-
-#include "../build/build.hpp"
 
 struct Format {
     const char *name;
@@ -61,14 +59,14 @@ int main(int argc, const char **argv) {
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
-    static constexpr char USAGE[] = "[options] <scenario | -s tag.class>";
+    static constexpr char USAGE[] = "[options] <-g <engine> <scenario> | -s tag.class>";
     
-    std::string game_engine_arguments = std::string("Specify the game engine. This option is required. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
     std::string formats_argument = std::string("Specify format. Valid formats are: ") + list_formats() + ". Default format is 7z";
     
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_GAME_ENGINE),
         CommandLineOption("format", 'F', 1, formats_argument.c_str(), "<format>"),
         CommandLineOption("single-tag", 's', 0, "Archive a tag tree instead of a cache file."),
         CommandLineOption("exclude-matched", 'E', 1, "Exclude copying any tags that are also located in the specified directory and are functionally the same. Use multiple times to exclude multiple directories."),
@@ -77,8 +75,7 @@ int main(int argc, const char **argv) {
         CommandLineOption("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>"),
         CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag."),
         CommandLineOption("copy", 'C', 0, "Copy instead of making an archive."),
-        CommandLineOption("verbose", 'v', 0, "Print whether or not tags are omitted. Do verbose comparisons."),
-        CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<id>")
+        CommandLineOption("verbose", 'v', 0, "Print whether or not tags are omitted. Do verbose comparisons.")
     };
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {

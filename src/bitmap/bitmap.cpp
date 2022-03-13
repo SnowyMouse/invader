@@ -12,7 +12,7 @@
 #include <invader/bitmap/color_plate_scanner.hpp>
 #include <invader/bitmap/bitmap_processor.hpp>
 #include "bitmap_data_writer.hpp"
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
 

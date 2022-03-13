@@ -8,6 +8,8 @@
 #include <vector>
 #include <optional>
 
+#include <invader/hek/map.hpp>
+
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -46,7 +48,7 @@ namespace Invader {
          * @param description    description of the command line option, if any
          * @param parameters     parameters of the command line option, if any
          */
-        CommandLineOption(const char *full_name, const char char_name, int argument_count, const char *description = nullptr, const char *parameters = nullptr) : full_name(full_name), char_name(char_name), argument_count(argument_count), description(description ? std::optional<std::string>(std::string(description)) : std::nullopt), parameters(parameters ? std::optional<std::string>(std::string(parameters)) : std::nullopt) {}
+        CommandLineOption(const std::string &full_name, const char char_name, int argument_count, const std::string &description = std::string(), const std::string &parameters = std::string()) : full_name(full_name), char_name(char_name), argument_count(argument_count), description(!description.empty() ? std::optional<std::string>(std::string(description)) : std::nullopt), parameters(!parameters.empty() ? std::optional<std::string>(std::string(parameters)) : std::nullopt) {}
 
         /**
          * Get the full name of the command line option
@@ -371,7 +373,8 @@ namespace Invader {
             PRESET_COMMAND_LINE_OPTION_MAPS,
             PRESET_COMMAND_LINE_OPTION_FS_PATH,
             PRESET_COMMAND_LINE_OPTION_TAGS,
-            PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE
+            PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE,
+            PRESET_COMMAND_LINE_OPTION_GAME_ENGINE
         };
         
         static CommandLineOption from_preset(PresetCommandLineOption option) {
@@ -388,6 +391,19 @@ namespace Invader {
                     return CommandLineOption("tags", 't', 1, "Add the specified tags directory. Use multiple times to add more directories, ordered by precedence. Default (if unset): \"tags\"", "<dir>");
                 case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH:
                     return CommandLineOption("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+                case PresetCommandLineOption::PRESET_COMMAND_LINE_OPTION_GAME_ENGINE: {
+                    std::string engines;
+                        
+                    for(auto &i : Invader::HEK::GameEngineInfo::get_all_shorthands()) {
+                        if(!engines.empty()) {
+                            engines += ", ";
+                        }
+                        engines += i;
+                    }
+                    
+                    return CommandLineOption("game-engine", 'g', 1, std::string("Specify the game engine. Valid engines are: ") + engines, "<engine>");
+                }
+                    
             }
             std::terminate();
         };

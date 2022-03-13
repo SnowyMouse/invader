@@ -11,11 +11,9 @@
 #include <invader/map/map.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 #include <invader/file/file.hpp>
 #include <invader/tag/index/index.hpp>
-
-#include "build.hpp"
 
 static std::uint32_t read_str32(const char *err, const char *s) {
     // Make sure it starts with '0x'
@@ -78,15 +76,13 @@ int main(int argc, const char **argv) {
         bool use_anniverary_mode = false;
     } build_options;
     
-    std::string game_engine_arguments = std::string("Specify the game engine. This option is required. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
-
     const CommandLineOption options[] = {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_GAME_ENGINE),
         CommandLineOption("quiet", 'q', 0, "Only output error messages."),
-        CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>"),
         CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>"),
         CommandLineOption("output", 'o', 1, "Output to a specific file.", "<file>"),
         CommandLineOption("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine's stock maps."),

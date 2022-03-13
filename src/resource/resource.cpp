@@ -11,7 +11,7 @@
 #include <invader/resource/resource_map.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/resource/list/resource_list.hpp>
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 #include <invader/file/file.hpp>
 #include <invader/printf.hpp>
 
@@ -23,8 +23,8 @@ int main(int argc, const char **argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
-        CommandLineOption("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>"),
-        CommandLineOption("game-engine", 'g', 1, "Specify the game engine. This option is required. Demo and retail maps also require either --with-index or --with-map to be specified at least once. Valid engines are: gbx-custom, gbx-demo, gbx-retail, mcc-cea.", "<id>"),
+        CommandLineOption("type", 'T', 1, "Set the resource map. Can be: bitmaps, sounds, or loc.", "<type>"),
+        CommandLineOption("game-engine", 'g', 1, "Specify the game engine. Demo and retail maps also require either --with-index or --with-map to be specified at least once. Valid engines are: gbx-custom, gbx-demo, gbx-retail, mcc-cea.", "<engine>"),
         CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>"),
         CommandLineOption("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>"),
         CommandLineOption("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>"),
@@ -32,7 +32,7 @@ int main(int argc, const char **argv) {
     };
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
-    static constexpr char USAGE[] = "[options] -T <type>";
+    static constexpr char USAGE[] = "[options] -g <engine> -T <type>";
 
     struct ResourceOption {
         // Tags directory

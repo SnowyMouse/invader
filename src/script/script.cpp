@@ -5,12 +5,11 @@
 #include <cassert>
 #include <filesystem>
 #include <invader/printf.hpp>
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 #include <invader/version.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
-#include "../build/build.hpp"
 
 #include <riat/riat.hpp>
 
@@ -38,16 +37,14 @@ int main(int argc, const char **argv) {
     } script_options;
     script_options.path = *argv;
     
-    std::string game_engine_arguments = std::string("Specify the game engine. Valid engines are: ") + Build::get_comma_separated_game_engine_shorthands();
-
     // Add our options
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_GAME_ENGINE),
         CommandLineOption("clear", 'c', 0, "Clear all script data from the scenario tag"),
-        CommandLineOption("game-engine", 'g', 1, game_engine_arguments.c_str(), "<engine>"),
         CommandLineOption("regenerate", 'R', 0, "Use the scenario tag's script source data as data."),
         CommandLineOption("exclude-global-scripts", 'E', 0, "Do not use global_scripts source."),
         CommandLineOption("reload-scripts", 'r', 0, "Only recompile sources referenced by the tag."),
@@ -55,7 +52,7 @@ int main(int argc, const char **argv) {
     };
 
     static constexpr char DESCRIPTION[] = "Compile scripts. Unless otherwise specified, global scripts are always compiled.";
-    static constexpr char USAGE[] = "[options] <scenario>";
+    static constexpr char USAGE[] = "[options] -g <engine> <scenario>";
 
     // Parse arguments
     auto remaining_arguments = CommandLineOption::parse_arguments<ScriptOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, script_options, [](char opt, const auto &arguments, ScriptOption &script_options) {

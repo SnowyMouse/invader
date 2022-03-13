@@ -9,7 +9,7 @@
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
-#include <invader/command_line_option.hpp>
+#include "../command_line_option.hpp"
 #include <invader/model/jms.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/model.hpp>
