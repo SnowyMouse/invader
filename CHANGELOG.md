@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- Fixed MinGW builds expanding wildcards to filenames preventing "*" from being used in arguments like "--batch"
+
 ## [0.48.0] - 2022-03-13
 ### Added
 - invader-bludgeon: Readded --fs-path
@@ -420,7 +424,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Removed
 - invader: Removed the spheroid definitions as well as support for extracting
   and building maps with spheroid tags.
-  
+
 ### Removed
 - invader-resource: Removed --padding. Use --concatenate instead.
 
@@ -710,7 +714,7 @@ in the levels "Truth and Reconciliation" and "Keyes")
   set to null now fails to build, as this crashes the game
 - invader-edit-qt: Mousing over a tag now displays the file size and path of the
   tag
-  
+
 ### Fixed
 - invader-archive: Fixed .model references being converted to .gbxmodel when
   checking for dependencies
@@ -751,7 +755,7 @@ in the levels "Truth and Reconciliation" and "Keyes")
 - invader-bludgeon: Added `-T invalid-strings`
 - invader-compare: Added `--by-path` or `-B` which sets how paths are compared
   This can be useful for finding duplicate tags regardless of paths. You can use
-  `-B any` to match any tags regardless of tag path (useful if inputs are 
+  `-B any` to match any tags regardless of tag path (useful if inputs are
   different) or `-B different` to only match against tags with differing paths
   (useful if both inputs are the same)
 - invader-edit-qt: Added a Goto menu to go to top level structs quickly
@@ -837,7 +841,7 @@ in the levels "Truth and Reconciliation" and "Keyes")
 ### Fixed
 - invader: Fixed decompressing vertices not calculating weight correctly
 - invader: Fixed compressing vertices using local node indices instead of actual
-  indices (this affects Xbox map compilation support, mainly, which isn't yet 
+  indices (this affects Xbox map compilation support, mainly, which isn't yet
   implemented)
 - invader-build: Fixed an issue where participants were set as valid when they
   shouldn't have (fixes unused dialogue being played in maps like b30 and a50)
