@@ -8,6 +8,11 @@ if(${INVADER_RESOURCE})
     add_executable(invader-resource
         src/resource/resource.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-resource PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-resource invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-resource)

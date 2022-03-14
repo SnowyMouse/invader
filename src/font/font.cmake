@@ -15,6 +15,10 @@ if(${INVADER_FONT})
         src/font/font.cpp
     )
 
+    if(MINGW)
+        target_sources(invader-font PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_include_directories(invader-font
         PUBLIC ${FREETYPE_INCLUDE_DIRS}
     )
@@ -23,13 +27,11 @@ if(${INVADER_FONT})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-font)
 
-
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set_source_files_properties(src/font/font.cpp
             PROPERTIES COMPILE_FLAGS -Wno-old-style-cast
         )
     endif()
-    
-    do_windows_rc(invader-font invader-font.exe "Invader font tag generation tool")
 
+    do_windows_rc(invader-font invader-font.exe "Invader font tag generation tool")
 endif()

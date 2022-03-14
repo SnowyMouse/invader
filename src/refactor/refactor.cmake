@@ -8,6 +8,11 @@ if(${INVADER_REFACTOR})
     add_executable(invader-refactor
         src/refactor/refactor.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-refactor PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-refactor invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-refactor)

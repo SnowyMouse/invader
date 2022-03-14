@@ -8,7 +8,14 @@ if(${INVADER_SCAN})
     add_executable(invader-scan
         src/scan/scan.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-scan PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-scan invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-scan)
+
+    do_windows_rc(invader-scan invader-scan.exe "Scan cache files for unknown tag fields")
 endif()

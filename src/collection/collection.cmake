@@ -8,9 +8,14 @@ if(${INVADER_COLLECTION})
     add_executable(invader-collection
         src/collection/collection.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-collection PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-collection invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-collection)
-    
+
     do_windows_rc(invader-collection invader-collection.exe "Invader tag_collection tag generation tool")
 endif()

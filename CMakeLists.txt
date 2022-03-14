@@ -51,9 +51,12 @@ endif()
 if(MINGW)
     # If it's MinGW, this may be required to prevent linking errors
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fstack-protector")
-    
+
     # Windows 10 stuff too
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--major-os-version 10")
+
+    # This source file disables MinGW's insane command line wildcard expansion
+    set(MINGW_CRT_NOGLOB src/mingw_crt_noglob.cpp)
 endif()
 
 # Turn on console messages

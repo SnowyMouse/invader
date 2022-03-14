@@ -9,9 +9,14 @@ if(${INVADER_INFO})
         src/info/info.cpp
         src/info/info_def.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-info PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-info invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-info)
-    
+
     do_windows_rc(invader-info invader-info.exe "Invader map information tool")
 endif()

@@ -8,8 +8,14 @@ if(${INVADER_SOUND})
     add_executable(invader-sound
         src/sound/sound.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-sound PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-sound invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-sound)
+
     do_windows_rc(invader-sound invader-sound.exe "Invader sound tag generation tool")
 endif()

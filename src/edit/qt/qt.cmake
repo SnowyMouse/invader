@@ -8,16 +8,12 @@ if(${INVADER_EDIT_QT})
     if(${INVADER_WIN32_EXE_STATIC_LINK})
         set(USE_STATIC_QT_BY_DEFAULT ON)
     endif()
-    
+
     find_package(Qt5 COMPONENTS Core Widgets Multimedia REQUIRED)
 
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
 
-    if(WIN32)
-        set(INVADER_EDIT_QT_RC "src/edit/qt/qt.rc")
-    endif()
-    
     add_executable(invader-edit-qt
         src/edit/qt/qt.cpp
         src/edit/qt/editor/subwindow/tag_editor_bitmap_subwindow.cpp
@@ -35,16 +31,22 @@ if(${INVADER_EDIT_QT})
         src/edit/qt/tree/tag_tree_widget.cpp
         src/edit/qt/tree/tag_tree_window.cpp
         src/edit/qt/qtres.qrc
-        ${INVADER_EDIT_QT_RC}
     )
 
     if(WIN32)
-        target_sources(invader-edit-qt PRIVATE src/edit/qt/theme.cpp)
+        target_sources(invader-edit-qt
+            PRIVATE src/edit/qt/theme.cpp
+            PRIVATE src/edit/qt/qt.rc
+        )
     endif()
-    
+
+    if(MINGW)
+        target_sources(invader-edit-qt PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     if(${INVADER_WIN32_EXE_STATIC_LINK})
         target_link_libraries(invader-edit-qt -static qwindows qwindowsvistastyle Qt5::QWindowsAudioPlugin Qt5EventDispatcherSupport Qt5WindowsUIAutomationSupport Qt5VulkanSupport Qt5AccessibilitySupport Qt5FontDatabaseSupport Qt5ThemeSupport wtsapi32 qwindowsvistastyle)
-        
+
         target_compile_definitions(invader-edit-qt PRIVATE INVADER_WIN32_EXE_STATIC_LINK)
     endif()
 

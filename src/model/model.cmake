@@ -8,6 +8,11 @@ if(${INVADER_MODEL})
     add_executable(invader-model
         src/model/model.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-model PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-model invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-model)

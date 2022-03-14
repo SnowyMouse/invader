@@ -8,9 +8,14 @@ if(${INVADER_COMPARE})
     add_executable(invader-compare
         src/compare/compare.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-compare PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-compare invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-compare)
-    
+
     do_windows_rc(invader-compare invader-compare.exe "Invader tag comparison tool")
 endif()

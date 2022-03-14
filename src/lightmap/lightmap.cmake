@@ -9,10 +9,15 @@ if(${INVADER_LIGHTMAP})
         src/lightmap/lightmap.cpp
         src/lightmap/actions.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-lightmap PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-lightmap invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-lightmap)
-    
+
     do_windows_rc(invader-lightmap invader-lightmap "Invader lightmap compilation tool")
 endif()
 

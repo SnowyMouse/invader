@@ -8,6 +8,11 @@ if(${INVADER_INDEX})
     add_executable(invader-index
         src/index/index.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-index PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-index invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-index)

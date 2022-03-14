@@ -8,8 +8,14 @@ if(${INVADER_STRING})
     add_executable(invader-string
         src/string/string.cpp
     )
+
+    if(MINGW)
+        target_sources(invader-string PRIVATE ${MINGW_CRT_NOGLOB})
+    endif()
+
     target_link_libraries(invader-string invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-string)
+
     do_windows_rc(invader-string invader-string.exe "Invader string tag generation tool")
 endif()
