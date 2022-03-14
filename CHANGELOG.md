@@ -4,7 +4,11 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Fixed
-- Fixed MinGW builds expanding wildcards to filenames preventing "*" from being used in arguments like "--batch"
+- Fixed MinGW builds expanding wildcards to filenames preventing `*` from being used in arguments like `--batch`
+- invader-bitmap: Fixed the `enable diffusion dithering` flag not being respected on bitmap creation.
+
+### Removed
+- invader-bitmap: Removed the option to dither the alpha channel and color channels separately as this can not be preserved by the `enable diffusion dithering` flag.
 
 ## [0.48.0] - 2022-03-13
 ### Added

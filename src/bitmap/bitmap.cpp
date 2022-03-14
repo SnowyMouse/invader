@@ -148,6 +148,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(!bitmap_options.usage.has_value()) {
             bitmap_options.usage = bitmap_tag_data.usage;
         }
+        if(!bitmap_options.dithering.has_value()) {
+            bitmap_options.dithering = (bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_ENABLE_DIFFUSION_DITHERING);
+        }
         if(!bitmap_options.palettize.has_value()) {
             bitmap_options.palettize = !(bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
         }
@@ -200,8 +203,6 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
     DEFAULT_VALUE(bitmap_options.alpha_bias,0.0F);
     DEFAULT_VALUE(bitmap_options.dithering,false);
-    DEFAULT_VALUE(bitmap_options.dither_alpha,false);
-    DEFAULT_VALUE(bitmap_options.dither_color,false);
     DEFAULT_VALUE(bitmap_options.filthy_sprite_bug_fix,false);
     DEFAULT_VALUE(bitmap_options.sprite_spacing,0);
 
@@ -361,7 +362,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bitmap_options.format = std::nullopt;
         }
         
-        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format, bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value());
+        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format, bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dithering.value(), bitmap_options.dithering.value(), bitmap_options.dithering.value(), bitmap_options.dithering.value());
     }
     catch (std::exception &e) {
         eprintf_error("Failed to generate bitmap data: %s", e.what());
@@ -417,7 +418,8 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
     bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
     bitmap_tag_data.alpha_bias = bitmap_options.alpha_bias.value_or(0.0F);
-    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) | 
+    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_ENABLE_DIFFUSION_DITHERING & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) | 
+                            (*bitmap_options.dithering ? HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_ENABLE_DIFFUSION_DITHERING : 0) | 
                             (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | 
                             (*bitmap_options.filthy_sprite_bug_fix ? HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX : 0);
     if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
@@ -479,7 +481,7 @@ int main(int argc, char *argv[]) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists."),
-        CommandLineOption("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>"),
+        CommandLineOption("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. Can be: off or on. Default (new tag): off", "<val>"),
         CommandLineOption("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, dxt1, or auto. 'auto' will be replaced with the best lossless format. Default (new tag): auto", "<type>"),
         CommandLineOption("type", 'T', 1, "Set the type of bitmap. Can be: 2d_textures, 3d_textures, cube_maps, interface_bitmaps, or sprites. Default (new tag): 2d_textures", "<type>"),
         CommandLineOption("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>"),
@@ -600,37 +602,23 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'D':
-                if(std::strcmp(arguments[0],"a") == 0) {
-                    bitmap_options.dither_alpha = true;
-                    bitmap_options.dither_color = false;
+                if(std::strcmp(arguments[0],"on") == 0) {
                     bitmap_options.dithering = true;
                 }
-                else if(std::strcmp(arguments[0],"rgb") == 0) {
-                    bitmap_options.dither_color = true;
-                    bitmap_options.dither_alpha = false;
-                    bitmap_options.dithering = true;
-                }
-                else if(std::strcmp(arguments[0],"argb") == 0) {
-                    bitmap_options.dither_alpha = true;
-                    bitmap_options.dither_color = true;
-                    bitmap_options.dithering = true;
-                }
-                else if(std::strcmp(arguments[0],"none") == 0) {
-                    bitmap_options.dither_alpha = false;
-                    bitmap_options.dither_color = false;
+                else if(std::strcmp(arguments[0],"off") == 0) {
                     bitmap_options.dithering = false;
                 }
                 else {
-                    eprintf_error("Unknown dither type %s", arguments[0]);
+                    eprintf_error("Unknown dithering setting %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'p':
-                if(strcmp(arguments[0],"on") == 0) {
+                if(std::strcmp(arguments[0],"on") == 0) {
                     bitmap_options.palettize = true;
                 }
-                else if(strcmp(arguments[0],"off") == 0) {
+                else if(std::strcmp(arguments[0],"off") == 0) {
                     bitmap_options.palettize = false;
                 }
                 else {
