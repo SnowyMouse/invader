@@ -13,6 +13,7 @@ This is used for recording Invader's changes. This changelog is based on
   used in arguments like `--batch`
 - invader-bitmap: Fixed the `enable diffusion dithering` flag not being
   respected on bitmap creation.
+- invader-script: Fixed projectiles not being searched.
 
 ### Removed
 - invader-bitmap: Removed the option to dither the alpha channel and color

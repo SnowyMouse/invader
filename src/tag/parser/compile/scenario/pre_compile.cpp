@@ -18,6 +18,7 @@ namespace Invader::Parser {
     static constexpr const HEK::TagFourCC OBJECT_FOURCCS[] = { TagFourCC::TAG_FOURCC_BIPED, 
                                                                TagFourCC::TAG_FOURCC_VEHICLE,
                                                                TagFourCC::TAG_FOURCC_WEAPON,
+                                                               TagFourCC::TAG_FOURCC_PROJECTILE,
                                                                TagFourCC::TAG_FOURCC_EQUIPMENT,
                                                                TagFourCC::TAG_FOURCC_GARBAGE,
                                                                TagFourCC::TAG_FOURCC_SCENERY,
