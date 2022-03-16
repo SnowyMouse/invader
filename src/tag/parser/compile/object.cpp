@@ -3,10 +3,13 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/compile/shader.hpp>
+#include <invader/tag/parser/compile/object.hpp>
 
 #include "hud_interface.hpp"
 
 namespace Invader::Parser {
+    
+    
     template <typename T> static void fix_render_bounding_radius(T &tag) {
         tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
@@ -714,5 +717,145 @@ namespace Invader::Parser {
         calculate_object_predicted_resources(workload, struct_index);
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
         validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
+    }
+    
+    template<typename From, typename To> static void convert_object(const From &from, To &to) {
+        to.flags = from.flags;
+        to.bounding_radius = from.bounding_radius;
+        to.bounding_offset = from.bounding_offset;
+        to.origin_offset = from.origin_offset;
+        to.acceleration_scale = from.acceleration_scale;
+        to.scales_change_colors = from.scales_change_colors;
+        to.model = from.model;
+        to.animation_graph = from.animation_graph;
+        to.collision_model = from.collision_model;
+        to.physics = from.physics;
+        to.modifier_shader = from.modifier_shader;
+        to.creation_effect = from.creation_effect;
+        to.render_bounding_radius = from.render_bounding_radius;
+        to.a_in = from.a_in;
+        to.b_in = from.b_in;
+        to.c_in = from.c_in;
+        to.d_in = from.d_in;
+        to.hud_text_message_index = from.hud_text_message_index;
+        to.forced_shader_permutation_index = from.forced_shader_permutation_index;
+        to.attachments = from.attachments;
+        to.widgets = from.widgets;
+        to.functions = from.functions;
+        to.change_colors = from.change_colors;
+    }
+    
+    template<typename From, typename To> static void convert_unit(const From &from, To &to) {
+        convert_object(from, to);
+        to.unit_flags = from.unit_flags;
+        to.default_team = from.default_team;
+        to.constant_sound_volume = from.constant_sound_volume;
+        to.rider_damage_fraction = from.rider_damage_fraction;
+        to.integrated_light_toggle = from.integrated_light_toggle;
+        to.unit_a_in = from.unit_a_in;
+        to.unit_b_in = from.unit_b_in;
+        to.unit_c_in = from.unit_c_in;
+        to.unit_d_in = from.unit_d_in;
+        to.camera_field_of_view = from.camera_field_of_view;
+        to.camera_stiffness = from.camera_stiffness;
+        to.camera_marker_name = from.camera_marker_name;
+        to.camera_submerged_marker_name = from.camera_submerged_marker_name;
+        to.pitch_auto_level = from.pitch_auto_level;
+        to.pitch_range = from.pitch_range;
+        to.camera_tracks = from.camera_tracks;
+        to.seat_acceleration_scale = from.seat_acceleration_scale;
+        to.soft_ping_threshold = from.soft_ping_threshold;
+        to.soft_ping_interrupt_time = from.soft_ping_interrupt_time;
+        to.hard_ping_threshold = from.hard_ping_threshold;
+        to.hard_ping_interrupt_time = from.hard_ping_interrupt_time;
+        to.hard_death_threshold = from.hard_death_threshold;
+        to.feign_death_threshold = from.feign_death_threshold;
+        to.feign_death_time = from.feign_death_time;
+        to.distance_of_evade_anim = from.distance_of_evade_anim;
+        to.distance_of_dive_anim = from.distance_of_dive_anim;
+        to.stunned_movement_threshold = from.stunned_movement_threshold;
+        to.feign_death_chance = from.feign_death_chance;
+        to.feign_repeat_chance = from.feign_repeat_chance;
+        to.spawned_actor = from.spawned_actor;
+        to.spawned_actor_count = from.spawned_actor_count;
+        to.spawned_velocity = from.spawned_velocity;
+        to.aiming_velocity_maximum = from.aiming_velocity_maximum;
+        to.aiming_acceleration_maximum = from.aiming_acceleration_maximum;
+        to.casual_aiming_modifier = from.casual_aiming_modifier;
+        to.looking_velocity_maximum = from.looking_velocity_maximum;
+        to.looking_acceleration_maximum = from.looking_acceleration_maximum;
+        to.ai_vehicle_radius = from.ai_vehicle_radius;
+        to.ai_danger_radius = from.ai_danger_radius;
+        to.melee_damage = from.melee_damage;
+        to.motion_sensor_blip_size = from.motion_sensor_blip_size;
+        to.metagame_type = from.metagame_type;
+        to.metagame_class = from.metagame_class;
+        to.new_hud_interfaces = from.new_hud_interfaces;
+        to.dialogue_variants = from.dialogue_variants;
+        to.grenade_velocity = from.grenade_velocity;
+        to.grenade_type = from.grenade_type;
+        to.grenade_count = from.grenade_count;
+        to.soft_ping_interrupt_ticks = from.soft_ping_interrupt_ticks;
+        to.hard_ping_interrupt_ticks = from.hard_ping_interrupt_ticks;
+        to.powered_seats = from.powered_seats;
+        to.weapons = from.weapons;
+        to.seats = from.seats;
+    }
+    
+    void convert_object(const ParserStruct &from, ParserStruct &to) {
+        auto convert_unit_maybe = [](auto *a, auto *b) -> bool {
+            if(a && b) {
+                convert_unit(*a, *b);
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        auto convert_object_maybe = [](auto *a, auto *b) -> bool {
+            if(a && b) {
+                convert_object(*a, *b);
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        
+#define ATTEMPT_CONVERT_TYPE(FROM) (\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Biped *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Vehicle *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Weapon *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Equipment *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Garbage *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Projectile *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Scenery *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::DeviceMachine *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::DeviceControl *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::DeviceLightFixture *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Placeholder *>(&to)) ||\
+                                   convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::SoundScenery *>(&to))\
+                                   )
+        
+        
+        if(convert_unit_maybe(dynamic_cast<const Parser::Biped *>(&from), dynamic_cast<Parser::Vehicle *>(&to)) ||
+           convert_unit_maybe(dynamic_cast<const Parser::Vehicle *>(&from), dynamic_cast<Parser::Biped *>(&to)) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Biped) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Vehicle) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Weapon) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Equipment) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Garbage) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Projectile) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Scenery) ||
+           ATTEMPT_CONVERT_TYPE(Parser::DeviceMachine) ||
+           ATTEMPT_CONVERT_TYPE(Parser::DeviceControl) ||
+           ATTEMPT_CONVERT_TYPE(Parser::DeviceLightFixture) ||
+           ATTEMPT_CONVERT_TYPE(Parser::Placeholder) ||
+           ATTEMPT_CONVERT_TYPE(Parser::SoundScenery)) {
+            return;
+        }
+        
+        eprintf_error("convert_object(): Conversion error between %s and %s! This is a bug!", from.struct_name(), to.struct_name());
+        std::terminate();
     }
 }

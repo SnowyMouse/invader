@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Added
 - invader-convert: Added -b/-e for batching
+- invader-convert: Added object-to-object conversion (you can convert any object
+  type into another with varying results)
 
 ### Changed
 - invader-convert: Tag groups now have to be explicitly set with --groups rather

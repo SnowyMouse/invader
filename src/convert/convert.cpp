@@ -9,11 +9,43 @@
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/tag/parser/compile/model.hpp>
 #include <invader/tag/parser/compile/shader.hpp>
+#include <invader/tag/parser/compile/object.hpp>
 
 using namespace Invader;
 
+template<typename T> static std::unique_ptr<Parser::ParserStruct> convert_object_template(Parser::ParserStruct &input) {
+    std::unique_ptr<Parser::ParserStruct> output;
+    output = std::make_unique<T>();
+    Parser::convert_object(input, *output);
+    return output;
+}
+
 // Get the conversion function
 static std::optional<std::unique_ptr<Parser::ParserStruct> (*)(Parser::ParserStruct &)> conversion_function(HEK::TagFourCC from, HEK::TagFourCC to) noexcept {
+    // We should't convert things to themselves
+    if(from == to) {
+        return std::nullopt;
+    }
+    
+    if(IS_OBJECT_TAG(from) && IS_OBJECT_TAG(to)) {
+        switch(to) {
+            case HEK::TagFourCC::TAG_FOURCC_BIPED: return convert_object_template<Parser::Biped>;
+            case HEK::TagFourCC::TAG_FOURCC_VEHICLE: return convert_object_template<Parser::Vehicle>;
+            case HEK::TagFourCC::TAG_FOURCC_WEAPON: return convert_object_template<Parser::Weapon>;
+            case HEK::TagFourCC::TAG_FOURCC_EQUIPMENT: return convert_object_template<Parser::Equipment>;
+            case HEK::TagFourCC::TAG_FOURCC_GARBAGE: return convert_object_template<Parser::Garbage>;
+            case HEK::TagFourCC::TAG_FOURCC_PROJECTILE: return convert_object_template<Parser::Projectile>;
+            case HEK::TagFourCC::TAG_FOURCC_SCENERY: return convert_object_template<Parser::Scenery>;
+            case HEK::TagFourCC::TAG_FOURCC_DEVICE_MACHINE: return convert_object_template<Parser::DeviceMachine>;
+            case HEK::TagFourCC::TAG_FOURCC_DEVICE_CONTROL: return convert_object_template<Parser::DeviceControl>;
+            case HEK::TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE: return convert_object_template<Parser::DeviceLightFixture>;
+            case HEK::TagFourCC::TAG_FOURCC_PLACEHOLDER: return convert_object_template<Parser::Placeholder>;
+            case HEK::TagFourCC::TAG_FOURCC_SOUND_SCENERY: return convert_object_template<Parser::SoundScenery>;
+            default: break;
+        }
+    }
+    
+    // Others?
     switch(from) {
         case HEK::TagFourCC::TAG_FOURCC_MODEL:
             if(to == HEK::TagFourCC::TAG_FOURCC_GBXMODEL) {
@@ -70,9 +102,9 @@ int main(int argc, const char **argv) {
     static constexpr char DESCRIPTION[] = "Convert from one tag type to another.\n"
                                           "\n"
                                           "Supported conversions:\n"
-                                          "  biped                               --> vehicle\n"
                                           "  gbxmodel                            --> model\n"
                                           "  model                               --> gbxmodel\n"
+                                          "  object (any)                        --> object (any)\n"
                                           "  shader_transparent_chicago_extended --> shader_transparent_chicago\n"
                                           "";
     static constexpr char USAGE[] = "[options] <-g <from> <to>> <-b <expr>|tag>";
