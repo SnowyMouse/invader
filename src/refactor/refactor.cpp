@@ -74,9 +74,9 @@ int main(int argc, char * const *argv) {
         CommandLineOption("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>"),
         CommandLineOption("unsafe", 'U', 0, "Do not require the destination tags to exist if using no-move"),
         CommandLineOption("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>"),
-        CommandLineOption("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>"),
+        CommandLineOption("group", 'G', 2, "Refactor all tags of a given group to another group. All tags in the destination group must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>"),
         CommandLineOption("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>"),
-        CommandLineOption("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. If --class or --recursive are used, this applies to the output of those. Otherwise, it applies to all tags.", "<a> <b>")
+        CommandLineOption("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. If --group or --recursive are used, this applies to the output of those. Otherwise, it applies to all tags.", "<a> <b>")
     };
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
@@ -91,19 +91,19 @@ int main(int argc, char * const *argv) {
 
         std::vector<std::pair<std::string, std::string>> string_replacements;
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
-        std::vector<std::pair<HEK::TagFourCC, HEK::TagFourCC>> class_replacements;
-        std::vector<std::pair<HEK::TagFourCC, HEK::TagFourCC>> reverse_class_replacements;
+        std::vector<std::pair<HEK::TagFourCC, HEK::TagFourCC>> group_replacements;
+        std::vector<std::pair<HEK::TagFourCC, HEK::TagFourCC>> reverse_group_replacements;
         std::optional<std::pair<std::string, std::string>> recursive;
     } refactor_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
-        auto get_class = [](auto *argument) -> HEK::TagFourCC {
-            auto tag_class = HEK::tag_extension_to_fourcc(argument);
-            if(!tag_class) {
-                eprintf_error("Error: %s is not a valid tag class", argument);
+        auto get_group = [](auto *argument) -> HEK::TagFourCC {
+            auto tag_group = HEK::tag_extension_to_fourcc(argument);
+            if(!tag_group) {
+                eprintf_error("Error: %s is not a valid tag group", argument);
                 std::exit(EXIT_FAILURE);
             }
-            return tag_class;
+            return tag_group;
         };
         
         switch(opt) {
@@ -135,8 +135,8 @@ int main(int argc, char * const *argv) {
             case 'r':
                 refactor_options.recursive = { arguments[0], arguments[1] };
                 return;
-            case 'c':
-                refactor_options.class_replacements.emplace_back(get_class(arguments[0]), get_class(arguments[1]));
+            case 'G':
+                refactor_options.group_replacements.emplace_back(get_group(arguments[0]), get_group(arguments[1]));
                 return;
             case 'T':
                 try {
@@ -160,15 +160,15 @@ int main(int argc, char * const *argv) {
     });
 
     auto &replacements = refactor_options.replacements;
-    auto &class_replacements = refactor_options.class_replacements;
+    auto &group_replacements = refactor_options.group_replacements;
     
     if(replacements.size() && refactor_options.recursive) {
         eprintf_error("Error: --recursive and --tag cannot be used at the same time");
         return EXIT_FAILURE;
     }
     
-    if(class_replacements.size() && refactor_options.recursive) {
-        eprintf_error("Error: --recursive and --class cannot be used at the same time");
+    if(group_replacements.size() && refactor_options.recursive) {
+        eprintf_error("Error: --recursive and --group cannot be used at the same time");
         return EXIT_FAILURE;
     }
     
@@ -221,8 +221,8 @@ int main(int argc, char * const *argv) {
         }
     }
     
-    // Resolve all class replacements
-    for(auto &r : class_replacements) {
+    // Resolve all group replacements
+    for(auto &r : group_replacements) {
         for(auto &t : all_tags) {
             if(t.tag_fourcc == r.second) {
                 auto split_from = *File::split_tag_class_extension(File::preferred_path_to_halo_path(t.tag_path));
@@ -233,11 +233,11 @@ int main(int argc, char * const *argv) {
         }
     }
     
-    // Make sure we aren't changing tag classes if move
+    // Make sure we aren't changing tag groupes if move
     if(move_or_copy_file) {
         for(auto &t : refactor_options.replacements) {
             if(t.first.fourcc != t.second.fourcc) {
-                eprintf_error("Error: Tag classes cannot be changed with -M move or -M copy");
+                eprintf_error("Error: Tag groupes cannot be changed with -M move or -M copy");
                 return EXIT_FAILURE;
             }
         }
@@ -334,11 +334,11 @@ int main(int argc, char * const *argv) {
             }
         }
 
-        // If we're moving tags, we can't change tag classes
+        // If we're moving tags, we can't change tag groupes
         if(move_or_copy_file && !refactor_options.dry_run) {
             for(auto &i : replacements) {
                 if(i.first.fourcc != i.second.fourcc) {
-                    eprintf_error("Error: Tag class cannot be changed if moving tags.");
+                    eprintf_error("Error: Tag group cannot be changed if moving tags.");
                     return EXIT_FAILURE;
                 }
             }

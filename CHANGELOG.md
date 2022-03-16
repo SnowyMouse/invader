@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-edit-qt: Upgraded Qt5 to Qt6
 - invader-edit-qt: Changed the audio backend to use SDL2
+- invader-refactor: --class/-c was renamed to --group/-G
 
 ### Fixed
 - Fixed MinGW builds expanding wildcards to filenames preventing `*` from being
