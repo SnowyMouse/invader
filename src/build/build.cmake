@@ -9,11 +9,7 @@ if(${INVADER_BUILD})
         src/build/build.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-build PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-build invader)
+    target_link_libraries(invader-build invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-build)
 

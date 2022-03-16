@@ -18,15 +18,11 @@ if(${INVADER_BITMAP})
         src/bitmap/bitmap_data_writer.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-bitmap PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
     target_include_directories(invader-bitmap
         PUBLIC ${TIFF_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-bitmap ${TIFF_LIBRARIES} invader)
+    target_link_libraries(invader-bitmap ${TIFF_LIBRARIES} invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-bitmap)
 

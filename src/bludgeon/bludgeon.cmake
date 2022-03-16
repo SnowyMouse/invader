@@ -10,11 +10,7 @@ if(${INVADER_BLUDGEON})
         src/bludgeon/bludgeoner.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-bludgeon PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-bludgeon invader)
+    target_link_libraries(invader-bludgeon invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-bludgeon)
 

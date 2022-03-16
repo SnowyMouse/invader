@@ -9,11 +9,7 @@ if(${INVADER_EDIT})
         src/edit/edit.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-edit PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-edit invader)
+    target_link_libraries(invader-edit invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-edit)
 

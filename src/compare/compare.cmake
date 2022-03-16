@@ -9,11 +9,7 @@ if(${INVADER_COMPARE})
         src/compare/compare.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-compare PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-compare invader)
+    target_link_libraries(invader-compare invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-compare)
 

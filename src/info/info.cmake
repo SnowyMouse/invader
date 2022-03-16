@@ -10,11 +10,7 @@ if(${INVADER_INFO})
         src/info/info_def.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-info PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-info invader)
+    target_link_libraries(invader-info invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-info)
 

@@ -9,11 +9,7 @@ if(${INVADER_REFACTOR})
         src/refactor/refactor.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-refactor PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-refactor invader)
+    target_link_libraries(invader-refactor invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-refactor)
     do_windows_rc(invader-refactor invader-refactor.exe "Invader tag refactor tool")

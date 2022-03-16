@@ -54,9 +54,15 @@ if(MINGW)
 
     # Windows 10 stuff too
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--major-os-version 10")
-
-    # This source file disables MinGW's insane command line wildcard expansion
-    set(MINGW_CRT_NOGLOB src/mingw_crt_noglob.cpp)
+    
+    # MinGW does this weird globbing thing by default to account for poor shells
+    # when we do *not* want it since "*" is used for pattern matching.
+    #
+    # You can use bash on Windows now anyway.
+    add_library(invader-crt-noglob OBJECT
+        mingw_crt_noglob.cpp
+    )
+    set(INVADER_CRT_NOGLOB "invader-crt-noglob")
 endif()
 
 # Turn on console messages

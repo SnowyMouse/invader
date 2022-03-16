@@ -9,11 +9,7 @@ if(${INVADER_EXTRACT})
         src/extract/extract.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-extract PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-extract invader)
+    target_link_libraries(invader-extract invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-extract)
 

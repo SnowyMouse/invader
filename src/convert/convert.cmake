@@ -9,11 +9,7 @@ if(${INVADER_CONVERT})
         src/convert/convert.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-convert PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-convert invader)
+    target_link_libraries(invader-convert invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-convert)
 

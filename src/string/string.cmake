@@ -9,11 +9,7 @@ if(${INVADER_STRING})
         src/string/string.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-string PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-string invader)
+    target_link_libraries(invader-string invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-string)
 

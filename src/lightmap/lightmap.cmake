@@ -10,11 +10,7 @@ if(${INVADER_LIGHTMAP})
         src/lightmap/actions.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-lightmap PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-lightmap invader)
+    target_link_libraries(invader-lightmap invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-lightmap)
 

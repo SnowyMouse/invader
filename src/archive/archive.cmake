@@ -14,13 +14,9 @@ if(${INVADER_ARCHIVE})
         src/archive/archive.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-archive PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
     target_include_directories(invader-archive PUBLIC ${LibArchive_INCLUDE_DIRS})
 
-    target_link_libraries(invader-archive invader ${LibArchive_LIBRARIES})
+    target_link_libraries(invader-archive invader ${LibArchive_LIBRARIES} ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-archive)
 

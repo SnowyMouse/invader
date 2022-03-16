@@ -9,11 +9,7 @@ if(${INVADER_STRIP})
         src/strip/strip.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-strip PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-strip invader)
+    target_link_libraries(invader-strip invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-strip)
 

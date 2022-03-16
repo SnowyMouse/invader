@@ -9,11 +9,7 @@ if(${INVADER_COLLECTION})
         src/collection/collection.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-collection PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-collection invader)
+    target_link_libraries(invader-collection invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-collection)
 

@@ -9,11 +9,7 @@ if(${INVADER_SOUND})
         src/sound/sound.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-sound PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-sound invader)
+    target_link_libraries(invader-sound invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-sound)
 

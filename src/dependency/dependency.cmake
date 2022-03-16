@@ -9,11 +9,7 @@ if(${INVADER_DEPENDENCY})
         src/dependency/dependency.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-dependency PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-dependency invader)
+    target_link_libraries(invader-dependency invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-dependency)
 

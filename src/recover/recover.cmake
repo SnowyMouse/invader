@@ -15,15 +15,11 @@ if(${INVADER_RECOVER})
         src/recover/recover_method.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-recover PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
     target_include_directories(invader-recover
         PUBLIC ${TIFF_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-recover ${TIFF_LIBRARIES} invader)
+    target_link_libraries(invader-recover ${TIFF_LIBRARIES} invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-recover)
 

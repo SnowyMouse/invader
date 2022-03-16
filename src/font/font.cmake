@@ -15,15 +15,11 @@ if(${INVADER_FONT})
         src/font/font.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-font PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
     target_include_directories(invader-font
         PUBLIC ${FREETYPE_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-font invader ${FREETYPE_LIBRARIES})
+    target_link_libraries(invader-font invader ${FREETYPE_LIBRARIES} ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-font)
 

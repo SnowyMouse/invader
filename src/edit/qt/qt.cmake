@@ -34,11 +34,7 @@ if(${INVADER_EDIT_QT})
         )
     endif()
 
-    if(MINGW)
-        target_sources(invader-edit-qt PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-edit-qt invader Qt6::Widgets ${SDL2_LIBRARIES})
+    target_link_libraries(invader-edit-qt invader Qt6::Widgets ${SDL2_LIBRARIES} ${INVADER_CRT_NOGLOB})
     target_include_directories(invader-edit-qt PUBLIC ${Qt6Widgets_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-edit-qt)

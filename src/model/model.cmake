@@ -9,11 +9,7 @@ if(${INVADER_MODEL})
         src/model/model.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-model PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-model invader)
+    target_link_libraries(invader-model invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-model)
 

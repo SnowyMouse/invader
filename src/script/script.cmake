@@ -9,11 +9,7 @@ if(${INVADER_SCRIPT})
         src/script/script.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-script PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-script invader)
+    target_link_libraries(invader-script invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-script)
 

@@ -9,11 +9,7 @@ if(${INVADER_INDEX})
         src/index/index.cpp
     )
 
-    if(MINGW)
-        target_sources(invader-index PRIVATE ${MINGW_CRT_NOGLOB})
-    endif()
-
-    target_link_libraries(invader-index invader)
+    target_link_libraries(invader-index invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-index)
 
