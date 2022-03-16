@@ -60,7 +60,7 @@ if(MINGW)
     #
     # You can use bash on Windows now anyway.
     add_library(invader-crt-noglob OBJECT
-        mingw_crt_noglob.cpp
+        src/mingw_crt_noglob.cpp
     )
     set(INVADER_CRT_NOGLOB "invader-crt-noglob")
 endif()
