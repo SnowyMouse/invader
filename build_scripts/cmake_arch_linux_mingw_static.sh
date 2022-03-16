@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Use this shell script if you want to compile Invader on Arch Linux via the
+# ownstuff MinGW packages
+
 # Check for arguments
 if [[ "$#" -lt "1" ]]; then
     echo "Usage: $0 <invader-src> [...]"
@@ -15,7 +18,7 @@ if [[ ! -f "$CMAKE" ]]; then
 fi
 
 # Make sure it points to an actual CMake project
-BUILD_DEP_PATH=$(realpath "$1/build_scripts/cmake_arch_linux_mingw.cmake")
+BUILD_DEP_PATH=$(realpath "$1/build_scripts/cmake_arch_linux_mingw_static.cmake")
 if [[ ! -f "$BUILD_DEP_PATH" ]]; then
     echo "No build script file found at $BUILD_DEP_PATH"
     $0
