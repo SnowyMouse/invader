@@ -315,7 +315,7 @@ namespace Invader::HEK {
     /**
      * Return the tag class of the extension or TagClass::TAG_FOURCC_NULL if failed or extension is nullptr.
      * @param  extension This is the extension being looked up.
-     * @return           This is the equivalent tag class int of the extesion or TagClass::TAG_FOURCC_NULL if failed.
+     * @return           This is the equivalent tag class int of the extension or TagClass::TAG_FOURCC_NULL if failed.
      */
     TagFourCC tag_extension_to_fourcc(const char *extension) noexcept;
 }
