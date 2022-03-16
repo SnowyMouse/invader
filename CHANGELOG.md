@@ -3,7 +3,12 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-convert: Added -b/-e for batching
+
 ### Changed
+- invader-convert: Tag groups now have to be explicitly set with --groups rather
+  than --type (sorry if some groups are really long; this is important though!)
 - invader-edit-qt: Upgraded Qt5 to Qt6
 - invader-edit-qt: Changed the audio backend to use SDL2
 - invader-refactor: --class/-c was renamed to --group/-G
@@ -19,6 +24,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Removed the option to dither the alpha channel and color
   channels separately as this can not be preserved by the
   `enable diffusion dithering` flag.
+- invader-convert: Removed --all
+- invader-convert: Removed --type (use --groups)
 
 ## [0.48.0] - 2022-03-13
 ### Added
