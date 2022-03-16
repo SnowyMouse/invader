@@ -3,12 +3,20 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Changed
+- invader-edit-qt: Upgraded Qt5 to Qt6
+- invader-edit-qt: Changed the audio backend to use SDL2
+
 ### Fixed
-- Fixed MinGW builds expanding wildcards to filenames preventing `*` from being used in arguments like `--batch`
-- invader-bitmap: Fixed the `enable diffusion dithering` flag not being respected on bitmap creation.
+- Fixed MinGW builds expanding wildcards to filenames preventing `*` from being
+  used in arguments like `--batch`
+- invader-bitmap: Fixed the `enable diffusion dithering` flag not being
+  respected on bitmap creation.
 
 ### Removed
-- invader-bitmap: Removed the option to dither the alpha channel and color channels separately as this can not be preserved by the `enable diffusion dithering` flag.
+- invader-bitmap: Removed the option to dither the alpha channel and color
+  channels separately as this can not be preserved by the
+  `enable diffusion dithering` flag.
 
 ## [0.48.0] - 2022-03-13
 ### Added

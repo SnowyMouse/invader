@@ -3,8 +3,10 @@
 #ifndef INVADER__EDIT__QT__TAG_EDITOR_SOUND_SUBWINDOW_HPP
 #define INVADER__EDIT__QT__TAG_EDITOR_SOUND_SUBWINDOW_HPP
 
-#include <QAudio>
 #include <optional>
+#include <QTimer>
+
+#include <SDL2/SDL.h>
 
 #include "tag_editor_subwindow.hpp"
 
@@ -38,7 +40,7 @@ namespace Invader::EditQt {
          */
         TagEditorSoundSubwindow(TagEditorWindow *parent_window);
 
-        ~TagEditorSoundSubwindow() = default;
+        ~TagEditorSoundSubwindow();
 
     private:
         /**
@@ -61,7 +63,6 @@ namespace Invader::EditQt {
 
         std::uint32_t sample_rate;
         std::uint32_t channel_count;
-        std::optional<std::uint32_t> bits_per_sample;
         std::vector<std::byte> silence;
 
         std::vector<std::byte> all_pcm;
@@ -78,19 +79,24 @@ namespace Invader::EditQt {
         QCheckBox *loop;
         QAudioOutput *output = nullptr;
         QIODevice *device = nullptr;
+        
+        SDL_AudioDeviceID sdl_audio_device_id;
+        SDL_AudioSpec sdl_audio_spec;
 
-        bool playing = false;
-
-        void state_changed(QAudio::State);
         void play_sound();
         void stop_sound();
         void play_sample();
         void change_sample();
         void update_time_label();
-        void change_volume(float volume);
         void update_pitch_range_permutations();
 
         void closeEvent(QCloseEvent *) override;
+        
+        void do_the_thing(Uint8 *stream, int len) noexcept;
+        
+        SDL_AudioStream *stream = nullptr;
+        
+        QTimer sample_timer;
     };
 }
 

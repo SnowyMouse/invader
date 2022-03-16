@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifdef INVADER_WIN32_EXE_STATIC_LINK
-#include <QtPlugin>
-#endif
+#include <SDL2/SDL.h>
 
+#include <QTimer>
+#include <QPushButton>
 #include <QApplication>
 #include <QMessageBox>
 #include "../../command_line_option.hpp"
@@ -11,17 +11,17 @@
 #include <invader/printf.hpp>
 #include "tree/tag_tree_window.hpp"
 
-#ifdef INVADER_WIN32_EXE_STATIC_LINK
-Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
-Q_IMPORT_PLUGIN(QWindowsAudioPlugin)
+#ifdef _WIN32
+#include <QtPlugin>
+//Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+//Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
 #endif
 
 int main(int argc, char **argv) {
     set_up_color_term();
     
     using namespace Invader;
-
+    
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
@@ -86,10 +86,32 @@ int main(int argc, char **argv) {
     }
     
     File::check_working_directory("./guerillabeta.map");
+
+    // Enable SDL audio
+    int r = SDL_Init(SDL_INIT_AUDIO);
+    if(r != 0) {
+        eprintf_error("SDL_Init error: %s", SDL_GetError());
+    }
     
     // Instantiate the application
     QApplication a(argc, argv);
     a.setWindowIcon(QIcon(":icon/invader-edit-qt.ico"));
+    
+    QTimer timer;
+    auto handle_events = []() {
+        SDL_Event event;
+        while(SDL_PollEvent(&event)) {
+            switch(event.type) {
+                case SDL_EventType::SDL_QUIT:
+                    SDL_Quit();
+                    std::exit(EXIT_FAILURE);
+                    break;
+                default: break;
+            }
+        }
+    };
+    timer.callOnTimeout(handle_events);
+    timer.start();
 
     // Instantiate the window
     Invader::EditQt::TagTreeWindow w;
@@ -101,15 +123,16 @@ int main(int argc, char **argv) {
     
     // Give a spiel
     if(edit_qt_options.disable_safeguards) {
-        QMessageBox message(QMessageBox::Warning, "You think you want this, but you actually don't.", "WARNING: Safeguards have been disabled.\n\nManually editing data that is normally read-only will likely break your tags.\n\nRemember: If something is normally read-only, then there is a much better program for modifying it than a tag editor.", QMessageBox::Ok | QMessageBox::Cancel);
+        QMessageBox message(QMessageBox::Warning, "You think you want this, but you actually don't.", "WARNING: Safeguards have been disabled.\n\nManually editing data that is normally read-only will likely break your tags.\n\nRemember: If something is normally read-only, then there is a much better program for modifying it than a tag editor.", QMessageBox::Cancel);
         message.setDefaultButton(QMessageBox::Cancel);
-        message.setButtonText(QMessageBox::Ok, "Time to break some tags!");
-        if(message.exec() != QMessageBox::Ok) {
+        auto *break_some_tags = message.addButton("Time to break some tags!", QMessageBox::ButtonRole::AcceptRole);
+        message.exec();
+        if(message.clickedButton() != break_some_tags) {
             std::exit(EXIT_FAILURE);
         }
         w.set_safeguards(false);
     }
-
+    
     // Show it!
     w.show();
 
@@ -119,6 +142,12 @@ int main(int argc, char **argv) {
         tags.emplace_back(i);
     }
     w.open_tags_when_ready(tags, edit_qt_options.fs_path);
+    
+    // Get the result?
+    int result = a.exec();
+    
+    // Exit SDL
+    SDL_Quit();
 
-    return a.exec();
+    return result;
 }

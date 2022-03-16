@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QAudioDeviceInfo>
-#include <QAudioOutput>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -19,6 +17,8 @@
 
 #undef LittleEndian
 #undef BigEndian
+
+#define CONVERSION_BITS_PER_SAMPLE 16
 
 namespace Invader::EditQt {
     void TagEditorSoundSubwindow::update() {
@@ -134,7 +134,7 @@ namespace Invader::EditQt {
             this->update_permutation_list();
         }
 
-        this->play_button->setEnabled(actual_permutations > 0);
+        this->play_button->setEnabled(actual_permutations > 0 && this->sdl_audio_device_id != 0);
         this->actual_permutation->setEnabled(actual_permutations > 0);
         this->permutation->setEnabled(actual_permutations > 0);
         this->loop->setEnabled(actual_permutations > 0);
@@ -142,6 +142,77 @@ namespace Invader::EditQt {
     }
 
     TagEditorSoundSubwindow::TagEditorSoundSubwindow(TagEditorWindow *parent_window) : TagEditorSubwindow(parent_window) {
+        unsigned int channel_count;
+        std::uint32_t sample_rate;
+        
+        auto get_it = [&channel_count, &sample_rate](auto *what) {
+            switch(what->sample_rate) {
+                case HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ:
+                    sample_rate = 44100;
+                    break;
+                case HEK::SoundSampleRate::SOUND_SAMPLE_RATE_22050_HZ:
+                    sample_rate = 22050;
+                    break;
+                default:
+                    std::terminate();
+            }
+            switch(what->channel_count) {
+                case HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO:
+                    channel_count = 1;
+                    break;
+                case HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_STEREO:
+                    channel_count = 2;
+                    break;
+                default:
+                    std::terminate();
+            }
+        };
+        
+        // Depending on the class, get the thing
+        auto *parser_data = this->get_parent_window()->get_parser_data();
+        switch(this->get_parent_window()->get_file().tag_fourcc) {
+            case TagFourCC::TAG_FOURCC_SOUND:
+                get_it(dynamic_cast<Parser::Sound *>(parser_data));
+                break;
+            default:
+                std::terminate();
+        }
+        
+        this->channel_count = channel_count;
+        this->sample_rate = sample_rate;
+        
+        SDL_AudioSpec request = {}, result = {}, preferred = {};
+        request.userdata = this;
+
+        int q = SDL_GetAudioDeviceSpec(0, 0, &preferred);
+        request.freq = preferred.freq;
+        request.samples = preferred.samples;
+        request.channels = preferred.channels;
+        
+        if(q != 0) {
+            eprintf_error("Got an error with SDL_GetAudioDeviceSpec(): %s", SDL_GetError());
+        }
+        else {
+            this->sdl_audio_device_id = SDL_OpenAudioDevice(nullptr, 0, &request, &result, 0);
+            if(this->sdl_audio_device_id == 0) {
+                eprintf_error("Got an error with SDL_OpenAudioDevice(): %s", SDL_GetError());
+            }
+        }
+        
+        if(this->sdl_audio_device_id != 0) {
+            // Create a stream (required for resampling)
+            this->stream = SDL_NewAudioStream(AUDIO_S16SYS, this->channel_count, this->sample_rate, result.format, result.channels, result.freq);
+            if(this->stream == nullptr) {
+                eprintf_error("SDL_NewAudioStream() fail: %s", SDL_GetError());
+                SDL_CloseAudioDevice(this->sdl_audio_device_id);
+                this->sdl_audio_device_id = 0;
+            }
+        }
+        
+        if(this->sdl_audio_device_id == 0) {
+            QMessageBox(QMessageBox::Icon::Critical, "Error", "SDL audio could not be initialized. Playback will be disabled!", QMessageBox::Ok).exec();
+        }
+        
         this->update();
         this->adjustSize();
         this->setMaximumHeight(this->height());
@@ -149,6 +220,8 @@ namespace Invader::EditQt {
         this->setMaximumWidth(this->width());
         this->setMinimumWidth(this->width());
         this->center_window();
+        
+        this->sample_timer.callOnTimeout(this, &TagEditorSoundSubwindow::play_sample);
     }
 
     void TagEditorSoundSubwindow::update_permutation_list() {
@@ -221,22 +294,12 @@ namespace Invader::EditQt {
 
         auto &permutations = this->get_pitch_range()->permutations;
         std::vector<std::byte> pcm;
-        auto &bits_per_sample = this->bits_per_sample;
 
-        auto add_to_pcm = [&pcm, &bits_per_sample](const SoundReader::Sound &what) {
+        auto add_to_pcm = [&pcm](const SoundReader::Sound &what) {
             std::vector<std::byte> new_pcm;
             const auto *pcm_data = &what.pcm;
-            if(!bits_per_sample.has_value()) {
-                bits_per_sample = what.bits_per_sample;
-                if(*bits_per_sample > 24) {
-                    *bits_per_sample = 24;
-                }
-                else if(*bits_per_sample < 16) {
-                    *bits_per_sample = 16;
-                }
-            }
-            if(what.bits_per_sample != *bits_per_sample) {
-                new_pcm = SoundEncoder::convert_int_to_int(what.pcm, what.bits_per_sample, *bits_per_sample);
+            if(what.bits_per_sample != CONVERSION_BITS_PER_SAMPLE) {
+                new_pcm = SoundEncoder::convert_int_to_int(what.pcm, what.bits_per_sample, CONVERSION_BITS_PER_SAMPLE);
                 pcm_data = &new_pcm;
             }
             pcm.insert(pcm.end(), pcm_data->begin(), pcm_data->end());
@@ -264,59 +327,15 @@ namespace Invader::EditQt {
             }
             catch(Invader::InvalidInputSoundException &) {
                 pcm.clear();
-                bits_per_sample = bits_per_sample.value_or(16);
                 QMessageBox(QMessageBox::Icon::Critical, "Error", "Failed to load all data.\n\nThe tag may be corrupt.", QMessageBox::Ok).exec();
             }
         }
-
-        // Set up the audio thing
-        if(!this->output) {
-            QAudioFormat format;
-            format.setSampleRate(this->sample_rate);
-            format.setChannelCount(this->channel_count);
-            format.setSampleSize(*bits_per_sample);
-            format.setCodec("audio/pcm");
-            format.setByteOrder(QAudioFormat::LittleEndian);
-            format.setSampleType(QAudioFormat::SignedInt);
-
-            // Check if it works
-            QAudioDeviceInfo info = QAudioDeviceInfo::defaultOutputDevice();
-            if(!info.isFormatSupported(format)) {
-                QAudioDeviceInfo device = QAudioDeviceInfo::defaultOutputDevice();
-                oprintf("Querying %s...\n", device.deviceName().toLatin1().data());
-
-                for(int i : device.supportedSampleRates()) {
-                    oprintf("    %.03f kHz\n", i / 1000.0);
-                }
-
-                for(int i : device.supportedSampleSizes()) {
-                    oprintf("    %i-bit\n", i);
-                }
-
-                for(auto i : device.supportedCodecs()) {
-                    oprintf("    %s\n", i.toLatin1().data());
-                }
-
-                char message[256];
-                std::snprintf(message, sizeof(message), "Your default output device does not support playback of this sound (%.03f kHz, %u ch, %u-bit)\n\nMake sure you're not using a dinosaur.", this->sample_rate / 1000.0, this->channel_count, *bits_per_sample);
-                QMessageBox(QMessageBox::Icon::Critical, "Error", message, QMessageBox::Ok).exec();
-                return;
-            }
-
-            this->output = new QAudioOutput(format, this);
-            connect(this->output, &QAudioOutput::stateChanged, this, &TagEditorSoundSubwindow::state_changed);
-            this->output->setNotifyInterval(1);
-            connect(this->output, &QAudioOutput::notify, this, &TagEditorSoundSubwindow::play_sample);
-            this->device = this->output->start();
-            this->silence = std::vector<std::byte>(static_cast<std::size_t>(this->output->periodSize()), std::byte());
-        }
-
-        this->playing = false;
+        
         this->all_pcm = pcm;
         this->sample = 0;
         this->slider->blockSignals(true);
         this->slider->setValue(0);
-        this->sample_granularity = this->channel_count * (*this->bits_per_sample / 8);
+        this->sample_granularity = this->channel_count * (CONVERSION_BITS_PER_SAMPLE / 8);
         this->slider->setMaximum(this->all_pcm.size() / this->sample_granularity);
         this->slider->blockSignals(false);
         this->update_time_label();
@@ -325,35 +344,12 @@ namespace Invader::EditQt {
     }
 
     Parser::SoundPitchRange *TagEditorSoundSubwindow::get_pitch_range() noexcept {
-        auto &sample_rate = this->sample_rate;
-        auto &channel_count = this->channel_count;
         int index = this->pitch_range->currentIndex();
         if(index < 0) {
             return nullptr;
         }
         
-        auto get_it = [&channel_count, &sample_rate, &index](auto *what) -> Parser::SoundPitchRange * {
-            switch(what->sample_rate) {
-                case HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ:
-                    sample_rate = 44100;
-                    break;
-                case HEK::SoundSampleRate::SOUND_SAMPLE_RATE_22050_HZ:
-                    sample_rate = 22050;
-                    break;
-                default:
-                    std::terminate();
-            }
-            switch(what->channel_count) {
-                case HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO:
-                    channel_count = 1;
-                    break;
-                case HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_STEREO:
-                    channel_count = 2;
-                    break;
-                default:
-                    std::terminate();
-            }
-
+        auto get_it = [&index](auto *what) -> Parser::SoundPitchRange * {
             if(what->pitch_ranges.size()) {
                 return what->pitch_ranges.data() + index;
             }
@@ -372,92 +368,114 @@ namespace Invader::EditQt {
         }
     }
 
-    void TagEditorSoundSubwindow::state_changed(QAudio::State state) {
-        switch(state) {
-            case QAudio::State::ActiveState:
-                break;
-            case QAudio::State::IdleState:
-            case QAudio::State::InterruptedState:
-            case QAudio::State::StoppedState:
-            case QAudio::State::SuspendedState:
-                this->stop_sound();
-                break;
-        }
-    }
-
     void TagEditorSoundSubwindow::play_sound() {
         this->stop_button->setEnabled(true);
         this->play_button->setEnabled(false);
-        this->playing = true;
         if(this->sample >= this->all_pcm.size()) {
             this->sample = 0;
         }
         this->update_time_label();
-        this->play_sample();
+        SDL_PauseAudioDevice(this->sdl_audio_device_id, 0);
+        this->sample_timer.start(1);
     }
 
     void TagEditorSoundSubwindow::stop_sound() {
-        this->play_button->setEnabled(true);
+        this->play_button->setEnabled(this->sdl_audio_device_id != 0);
         this->stop_button->setEnabled(false);
-        this->playing = false;
+        this->sample_timer.stop();
     }
 
     void TagEditorSoundSubwindow::play_sample() {
+        const auto *data = this->all_pcm.data();
+        auto end = this->all_pcm.size();
+        
         // If we're done, stop
-        if(!this->playing || this->all_pcm.size() == 0) {
+        if(end == 0) {
             this->stop_sound();
             return;
         }
-
-        // How much data can we send?
-        std::size_t allowed_pcm_data = static_cast<std::size_t>(this->output->periodSize());
-        std::size_t free_data = static_cast<std::size_t>(this->output->bytesFree());
-        std::size_t loops = free_data / allowed_pcm_data;
-        bool play_in_loop = this->loop->checkState() == Qt::Checked;
-        auto *data = reinterpret_cast<const char *>(this->all_pcm.data());
-
-        if(play_in_loop) {
-            // If we are looping, keep doing it until it's happy
-            for(std::size_t l = 0; l < loops; l++) {
-                std::size_t loop_data_remaining = allowed_pcm_data;
-                while(loop_data_remaining) {
-                    std::size_t pcm_data_remaining = this->all_pcm.size() - this->sample;
-                    std::size_t pcm_data_to_play = pcm_data_remaining > loop_data_remaining ? loop_data_remaining : pcm_data_remaining;
-                    if(pcm_data_to_play == 0) {
-                        this->sample = 0;
-                        continue;
-                    }
-                    std::size_t pcm_data_increment = this->device->write(data + this->sample, pcm_data_to_play);
-                    loop_data_remaining -= pcm_data_increment;
-                    this->sample += pcm_data_increment;
-                }
+        
+        auto *this_window = this;
+        auto update_info = [&this_window]() {
+            this_window->slider->blockSignals(true);
+            this_window->slider->setValue(this_window->sample / this_window->sample_granularity);
+            this_window->slider->blockSignals(false);
+            this_window->update_time_label();
+        };
+        
+        // Play in a loop?
+        bool play_in_loop = this->loop->isChecked();
+        
+        // Are we running low on samples?
+        while(true) {
+            auto queued_size = SDL_GetQueuedAudioSize(this->sdl_audio_device_id);
+            if(queued_size > 4096*8) {
+                break;
             }
-        }
-        else {
-            // If we aren't looping, play what we can
-            bool was_anything_played_at_all = false;
-            for(std::size_t l = 0; l < loops; l++) {
-                std::size_t pcm_data_remaining = this->all_pcm.size() - this->sample;
-                std::size_t pcm_data_to_play = pcm_data_remaining > allowed_pcm_data ? allowed_pcm_data : pcm_data_remaining;
-                if(pcm_data_to_play == 0) {
-                    this->device->write(reinterpret_cast<const char *>(this->silence.data()), this->silence.size());
+            
+            // Have we reached the end?
+            if(this->sample == end) {
+                // Loop!
+                if(play_in_loop) {
+                    this->sample = 0;
                 }
+                
+                // No looping. Okay, anything queued?
+                else if(queued_size != 0) {
+                    SDL_AudioStreamFlush(this->stream);
+                }
+                
+                // No looping. Nothing is queued.
                 else {
-                    std::size_t pcm_data_increment = this->device->write(data + this->sample, pcm_data_to_play);
-                    this->sample += pcm_data_increment;
-                    was_anything_played_at_all = true;
+                    update_info();
+                    return;
                 }
             }
-            if(loops && !was_anything_played_at_all) {
+            
+            // Get the resampled audio
+            std::byte audio_buffer[4096] = {};
+            auto amount = SDL_AudioStreamGet(this->stream, audio_buffer, sizeof(audio_buffer));
+            
+            // Error
+            if(amount < 0) {
+                eprintf_error("SDL_AudioStreamGet() error: %s", SDL_GetError());
+                update_info();
                 this->stop_sound();
+                return;
+            }
+            
+            // Queue the audio
+            if(amount != 0) {
+                auto result = SDL_QueueAudio(this->sdl_audio_device_id, audio_buffer, amount);
+                if(result != 0) {
+                    eprintf_error("SDL_QueueAudio() error: %s", SDL_GetError());
+                    update_info();
+                    this->stop_sound();
+                    return;
+                }
+            }
+            
+            // No audio left. We have to get more
+            else {
+                auto *cursor = data + this->sample;
+                auto remainder = std::min(end - this->sample, static_cast<std::size_t>(512));
+                
+                int result = SDL_AudioStreamPut(this->stream, cursor, remainder);
+                if(result != 0) {
+                    std::printf("%zu %zu\n", this->sample, remainder);
+                    
+                    eprintf_error("SDL_AudioStreamPut() error: %s", SDL_GetError());
+                    update_info();
+                    this->stop_sound();
+                    return;
+                }
+                
+                this->sample += remainder;
             }
         }
-
-        this->slider->blockSignals(true);
-        this->slider->setValue(this->sample / this->sample_granularity);
-        this->slider->blockSignals(false);
-
-        this->update_time_label();
+        
+        // Update everything
+        update_info();
     }
 
     void TagEditorSoundSubwindow::change_sample() {
@@ -467,6 +485,12 @@ namespace Invader::EditQt {
 
     void TagEditorSoundSubwindow::closeEvent(QCloseEvent *) {
         this->stop_sound();
+        
+        // If we failed, delete us
+        if(this->sdl_audio_device_id == 0) {
+            this->get_parent_window()->subwindow = nullptr;
+            this->deleteLater();
+        }
     }
 
     void TagEditorSoundSubwindow::update_time_label() {
@@ -483,8 +507,15 @@ namespace Invader::EditQt {
         std::snprintf(format, sizeof(format), "%02zu:%02zu.%02zu / %02zu:%02zu.%02zu", minutes % 100, seconds % 60, centiseconds % 100, total_minutes % 100, total_seconds % 60, total_centiseconds % 100);
         this->time->setText(format);
     }
-
-    void TagEditorSoundSubwindow::change_volume(float volume) {
-        this->output->setVolume(QAudio::convertVolume(volume, QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale));
+    
+    TagEditorSoundSubwindow::~TagEditorSoundSubwindow() {
+        if(this->stream) {
+            SDL_FreeAudioStream(this->stream);
+            this->stream = nullptr;
+        }
+        
+        if(this->sdl_audio_device_id != 0) {
+            SDL_CloseAudioDevice(this->sdl_audio_device_id);
+        }
     }
 }

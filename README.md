@@ -74,14 +74,15 @@ some of these dependencies may have their own dependencies (and so on), but if
 you use a package manager to get them, then it should take care of that for you.
 
 ##### Required dependencies
-- C++17 compiler with support for `filesystem`
+- C++17 compiler
 - C11 compiler
 - CMake 3.12 or newer
 - Python 3.7 or newer
 - LibTIFF 3.6 or newer
 - libvorbis 1.3.6 or newer
 - libsamplerate 0.1.9 or newer
-- Qt5
+- Qt6
+- SDL2
 - zlib
 
 ##### Optional dependencies

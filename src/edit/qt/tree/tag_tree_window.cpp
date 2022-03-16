@@ -11,9 +11,9 @@
 #include <QStatusBar>
 #include <QCloseEvent>
 #include <QClipboard>
-#include <QDesktopWidget>
 #include <QDesktopServices>
 #include <QInputDialog>
+#include <SDL2/SDL.h>
 #include <QThread>
 #include "tag_tree_window.hpp"
 #include "tag_tree_widget.hpp"
