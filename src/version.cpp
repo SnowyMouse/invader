@@ -40,6 +40,7 @@ namespace Invader {
                "  libvorbis (Ogg Vorbis encoding) - https://xiph.org/vorbis/\n"
                "  Qt (GUI toolkit)                - https://www.qt.io/\n"
                "  Rat In a Tube (HSC compiling)   - https://github.com/SnowyMouse/riat\n"
+               "  SDL (audio playback)            - https://www.libsdl.org/\n"
                "  Secret Rabbit Code (resampling) - http://www.mega-nerd.com/SRC/\n"
                "  STB library (image decoding)    - https://github.com/nothings/stb\n"
                "  zlib (DEFLATE compression)      - https://zlib.net/\n"

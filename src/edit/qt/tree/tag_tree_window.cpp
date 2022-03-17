@@ -229,6 +229,7 @@ namespace Invader::EditQt {
         REPLACE_HL("https://sourceforge.net/projects/libsquish/");
         REPLACE_HL("https://xiph.org/vorbis/");
         REPLACE_HL("https://www.qt.io/");
+        REPLACE_HL("https://www.libsdl.org/");
         REPLACE_HL("https://github.com/SnowyMouse/riat");
         REPLACE_HL("http://www.mega-nerd.com/SRC/");
         REPLACE_HL("https://github.com/nothings/stb");
