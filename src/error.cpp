@@ -31,7 +31,6 @@ void set_up_color_term() noexcept {
         on_color_term = SetConsoleMode(stdout_handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING | stdout_mode) && SetConsoleMode(stderr_handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING | stderr_mode);
     }
     #endif
-    on_color_term = true;
 }
 
 bool is_on_color_term() noexcept {
