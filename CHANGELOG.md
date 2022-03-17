@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
+- Added INVADER_FORCE_COLORS as an environment variable which can be used to
+  force colors on ("1") or off ("0")
 - invader-convert: Added -b/-e for batching
 - invader-convert: Added object-to-object conversion (you can convert any object
   type into another with varying results)

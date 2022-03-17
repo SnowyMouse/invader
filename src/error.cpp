@@ -15,6 +15,22 @@ namespace Invader {
 static bool on_color_term = false;
 
 void set_up_color_term() noexcept {
+    // Allow forcing colors
+    auto *force_colors = std::getenv("INVADER_FORCE_COLORS");
+    if(force_colors) {
+        if(std::strcmp(force_colors, "1") == 0) {
+            on_color_term = true;
+            return;
+        }
+        else if(std::strcmp(force_colors, "0") == 0) {
+            on_color_term = false;
+            return;
+        }
+        else {
+            eprintf_error("Unknown INVADER_FORCE_COLORS value \"%s\" (should be 0 or 1)", force_colors);
+        }
+    }
+    
     #ifdef __linux__
     on_color_term = isatty(fileno(stdout) && isatty(fileno(stderr)) && std::getenv("TERM") && ((std::strcmp(std::getenv("TERM"), "xterm-256color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-16color") == 0)));
     #elif (defined(_WIN32))
