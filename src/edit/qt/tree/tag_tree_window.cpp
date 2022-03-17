@@ -179,6 +179,31 @@ namespace Invader::EditQt {
     void TagTreeWindow::refresh_view() {
         this->reload_tags(true);
     }
+    
+    static QString format_hyperlinks(QString a) {
+        int cursor = 0;
+        while(true) {
+            // Find the next 'http' (matches https://)
+            cursor = a.indexOf("http", cursor);
+            if(cursor == -1) {
+                break;
+            }
+            
+            // Each URL has a whitespace after it
+            int next_space = a.indexOf(QRegularExpression("\\s"), cursor);
+            
+            // Get the URL
+            auto url = a.mid(cursor, (next_space - cursor));
+            
+            // Format a hyperlink and replace the text
+            auto replacement = "<a href=\"" + url + "\">" + url + "</a>";
+            a.replace(cursor, url.length(), replacement);
+            
+            // Put our cursor at the end
+            cursor += replacement.length();
+        }
+        return a;
+    }
 
     void TagTreeWindow::show_about_window() {
         // Instantiate it
@@ -212,32 +237,12 @@ namespace Invader::EditQt {
         label->setTextInteractionFlags(Qt::TextBrowserInteraction);
         label->setOpenExternalLinks(true);
         
+        // Fix hyperlinks
+        label->setText(format_hyperlinks(label->text()));
+        
         // Replace line breaks with <br>s
         label->setText(label->text().replace("  ", "&nbsp;&nbsp;"));
         label->setText(label->text().replace("\n", "<br />"));
-        
-        // Replace the hyperlinks
-        #define REPLACE_HL(what) label->setText(label->text().replace(label->text().indexOf(what), QString(what).size(), "<a href=\"" what "\">" what "</a>"));
-        REPLACE_HL("https://invader.opencarnage.net/builds/nightly/")
-        REPLACE_HL("https://invader.opencarnage.net")
-        REPLACE_HL("https://github.com/SnowyMouse/invader");
-        
-        REPLACE_HL("https://www.freetype.org/");
-        REPLACE_HL("https://www.libarchive.org/");
-        REPLACE_HL("https://github.com/xiph/flac");
-        REPLACE_HL("http://www.libtiff.org/");
-        REPLACE_HL("https://sourceforge.net/projects/libsquish/");
-        REPLACE_HL("https://xiph.org/vorbis/");
-        REPLACE_HL("https://www.qt.io/");
-        REPLACE_HL("https://www.libsdl.org/");
-        REPLACE_HL("https://github.com/SnowyMouse/riat");
-        REPLACE_HL("http://www.mega-nerd.com/SRC/");
-        REPLACE_HL("https://github.com/nothings/stb");
-        REPLACE_HL("https://zlib.net/");
-        REPLACE_HL("https://www.gnu.org/licenses/gpl-3.0.txt");
-        
-        
-        #undef REPLACE_HL
         
         vbox_layout->addWidget(icon_label_widget);
         vbox_layout->addWidget(label);
