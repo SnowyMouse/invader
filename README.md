@@ -211,9 +211,8 @@ Options:
                                disables budgeting. Default (new tag): 0
   -d --data <dir>              Use the specified data directory. Default:
                                "data"
-  -D --dithering <channels>    Apply dithering to 16-bit or p8 bitmaps. This
-                               does not save in .bitmap tags. Can be: a, rgb,
-                               or argb. Default: none
+  -D --dithering <val>         Apply dithering to 16-bit or p8 bitmaps. Can be:
+                               off or on. Default (new tag): off
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, dxt1, or auto. 'auto'
@@ -735,14 +734,14 @@ Usage: invader-refactor <-M <mode>> [options]
 Find and replace tag references.
 
 Options:
-  -c --class <f> <t>           Refactor all tags of a given class to another
-                               class. All tags in the destination class must
-                               exist. This can be specified multiple times but
-                               cannot be used with --recursive or -M move.
   -D --dry-run                 Do not actually make any changes. This is useful
                                for checking for errors before committing
                                anything, although filesystem errors may not be
                                caught.
+  -g --group <f> <t>           Refactor all tags of a given group to another
+                               group. All tags in the destination group must
+                               exist. This can be specified multiple times but
+                               cannot be used with --recursive or -M move.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -M --mode <mode>             Specify what to do with the file if it exists.
@@ -765,7 +764,7 @@ Options:
                                operation and cannot be used with --tag.
   -R --replace-string <a> <b>  Replaces all instances in a path of <a> with
                                <b>. This can be used multiple times for
-                               multiple replacements. If --class or --recursive
+                               multiple replacements. If --group or --recursive
                                are used, this applies to the output of those.
                                Otherwise, it applies to all tags.
   -s --single-tag <path>       Make changes to a single tag, only, rather than
