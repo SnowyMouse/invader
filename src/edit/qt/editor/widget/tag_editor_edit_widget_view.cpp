@@ -67,7 +67,7 @@ namespace Invader::EditQt {
             vbox_layout->addStretch(1);
         }
         else {
-            this->setFrameStyle(QFrame::Panel | QFrame::Raised);
+            this->setFrameStyle(static_cast<int>(QFrame::Panel) | QFrame::Raised);
             this->setLineWidth(2);
         }
     }

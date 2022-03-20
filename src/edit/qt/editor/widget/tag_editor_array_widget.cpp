@@ -56,7 +56,7 @@ namespace Invader::EditQt {
         header_layout->addWidget(title_label);
         header_layout->addWidget(this->reflexive_index);
         header_layout->addWidget(this->spin_box);
-        header->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        header->setFrameStyle(static_cast<int>(QFrame::Panel) | QFrame::Raised);
         header->setLineWidth(2);
         header_layout->setContentsMargins(8, 8, 8, 8);
 
