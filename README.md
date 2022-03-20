@@ -710,13 +710,18 @@ This program recovers source data from bitmaps (if color plate data is present),
 models, string lists, tag collections, and scenario scripts.
 
 ```
-Usage: invader-recover [options] <tag.class>
+Usage: invader-recover [options] <-b <expr> | <tag.group>>
 
 Recover source data from tags.
 
 Options:
+  -b --batch <expr>            Run the command on all tags with a given
+                               expression.
   -d --data <dir>              Use the specified data directory. Default:
                                "data"
+  -e --batch-exclude <expr>    Run the command on all tags that do not match a
+                               given expression. This takes precedence over
+                               --batch
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -O --overwrite               Overwrite data if it already exists

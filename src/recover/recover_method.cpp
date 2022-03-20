@@ -15,23 +15,22 @@ namespace Invader::Recover {
         std::filesystem::create_directories(path.parent_path());
     }
 
-    [[noreturn]] static void create_directories_save_and_quit(const std::filesystem::path &path, const std::vector<std::byte> &data) {
+    static bool create_directories_save_and_quit(const std::filesystem::path &path, const std::vector<std::byte> &data) {
         create_directories_for_path(path);
 
         // Save it
         if(!File::save_file(path, data)) {
             eprintf_error("Failed to write to %s", path.string().c_str());
-            std::exit(EXIT_FAILURE);
+            return false;
         }
-
-        oprintf_success("Recovered %s", path.string().c_str());
-        std::exit(EXIT_SUCCESS);
+        
+        return true;
     }
 
-    static void recover_tag_collection(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+    static std::optional<bool> recover_tag_collection(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *tag_collection = dynamic_cast<const Parser::TagCollection *>(&tag);
         if(!tag_collection) {
-            return;
+            return std::nullopt;
         }
 
         // Output it
@@ -44,15 +43,15 @@ namespace Invader::Recover {
         auto file_path = data / (path + ".txt");
 
         if(std::filesystem::exists(file_path) && !overwrite) {
-            oprintf_success_warn("Skipped %s\n", file_path.string().c_str());
-            std::exit(EXIT_SUCCESS);
+            oprintf_success_warn("%s already exists", file_path.string().c_str());
+            return false;
         }
 
         auto *output_data = output.data();
-        create_directories_save_and_quit(file_path, std::vector<std::byte>(reinterpret_cast<const std::byte *>(output_data), reinterpret_cast<const std::byte *>(output_data + output.size())));
+        return create_directories_save_and_quit(file_path, std::vector<std::byte>(reinterpret_cast<const std::byte *>(output_data), reinterpret_cast<const std::byte *>(output_data + output.size())));
     }
 
-    static void recover_bitmap(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+    static std::optional<bool> recover_bitmap(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *bitmap = dynamic_cast<const Parser::Bitmap *>(&tag);
         auto file_path = data / (path + ".tif");
 
@@ -62,13 +61,13 @@ namespace Invader::Recover {
             height = bitmap->color_plate_height;
         }
         else {
-            return;
+            return std::nullopt;
         }
 
         // Does it already exist?
         if(std::filesystem::exists(file_path) && !overwrite) {
-            oprintf_success_warn("Skipped %s\n", file_path.string().c_str());
-            std::exit(EXIT_SUCCESS);
+            oprintf_success_warn("%s already exists", file_path.string().c_str());
+            return false;
         }
 
         // Decompress it
@@ -77,7 +76,7 @@ namespace Invader::Recover {
         // Do we have color plate data?
         if(!decompressed_stuff.has_value()) {
             eprintf_warn("No color plate data to recover from - tag likely extracted");
-            std::exit(EXIT_FAILURE);
+            return false;
         }
 
         // Let's begin
@@ -87,7 +86,7 @@ namespace Invader::Recover {
         auto *tiff = TIFFOpen(file_path_str.c_str(), "w");
         if(!tiff) {
             eprintf_error("Failed to open %s for writing", file_path_str.c_str());
-            std::exit(EXIT_FAILURE);
+            return false;
         }
 
         TIFFSetField(tiff, TIFFTAG_IMAGEWIDTH, width);
@@ -119,7 +118,7 @@ namespace Invader::Recover {
 
         oprintf_success("Recovered %s", file_path_str.c_str());
 
-        std::exit(EXIT_SUCCESS);
+        return true;
     }
 
     static const char *ALL_LODS[] = {
@@ -130,7 +129,7 @@ namespace Invader::Recover {
         "superlow"
     };
 
-    template<typename T> static void make_jms(const T &model, const std::string &permutation, std::size_t lod, const std::filesystem::path &models_path, bool local_nodes, bool overwrite) {
+    template<typename T> static std::optional<bool> make_jms(const T &model, const std::string &permutation, std::size_t lod, const std::filesystem::path &models_path, bool local_nodes, bool overwrite) {
         JMS jms;
 
         // Set the checksum value
@@ -348,7 +347,7 @@ namespace Invader::Recover {
 
         // If we didn't get anything, return
         if(jms.triangles.size() == 0) {
-            return;
+            return std::nullopt;
         }
 
         // Filename memery
@@ -357,23 +356,24 @@ namespace Invader::Recover {
         auto *jms_data = string_data.data();
         
         if(std::filesystem::exists(filename) && !overwrite) {
-            oprintf_success_warn("Skipped %s", filename.string().c_str());
-            return;
+            oprintf_success_warn("%s already exists", filename.string().c_str());
+            return std::nullopt;
         }
         
         if(File::save_file(filename, std::vector<std::byte>(reinterpret_cast<std::byte *>(jms_data), reinterpret_cast<std::byte *>(jms_data + string_data.size())))) {
             oprintf_success("Recovered %s", filename.string().c_str());
+            return true;
         }
         else {
             eprintf_error("Failed to write to %s", filename.string().c_str());
-            std::exit(EXIT_FAILURE);
+            return false;
         }
     }
 
-    template<typename T> static void recover_jms(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+    template<typename T> static std::optional<bool> recover_jms(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *model = dynamic_cast<const T *>(&tag);
         if(!model) {
-            return;
+            return std::nullopt;
         }
 
         // Check if the parent filename is the same
@@ -382,7 +382,7 @@ namespace Invader::Recover {
         if(parent_path_path.filename() != path_path.filename()) {
             eprintf_error("Cannot recover due to parent filename not matching tag filename");
             eprintf_error("Parent filename is %s, but the tag's filename is %s", parent_path_path.filename().string().c_str(), path_path.filename().string().c_str());
-            std::exit(EXIT_FAILURE);
+            return false;
         }
 
         // Models
@@ -417,24 +417,31 @@ namespace Invader::Recover {
         }
 
         // Make all permutations
+        bool recovered_anything = false;
         for(auto &p : permutations) {
             for(std::size_t i = 0; i < sizeof(ALL_LODS) / sizeof(*ALL_LODS); i++) {
-                make_jms(*model, p, i, model_directory, local_nodes, overwrite);
+                auto jms_operation = make_jms(*model, p, i, model_directory, local_nodes, overwrite);
+                if(jms_operation.has_value() && *jms_operation == false) {
+                    return false;
+                }
+                else {
+                    recovered_anything = recovered_anything || (jms_operation.has_value() && *jms_operation == true);
+                }
             }
         }
 
-        std::exit(EXIT_SUCCESS);
+        return recovered_anything;
     }
 
-    static void recover_string_list(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+    static std::optional<bool> recover_string_list(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *unicode_string_list = dynamic_cast<const Parser::UnicodeStringList *>(&tag);
         auto *string_list = dynamic_cast<const Parser::StringList *>(&tag);
 
         auto data_path = data / (path + ".txt");
 
         if(std::filesystem::exists(data_path) && !overwrite) {
-            oprintf_success_warn("Skipped %s\n", data_path.string().c_str());
-            std::exit(EXIT_SUCCESS);
+            oprintf_success_warn("%s already exists", data_path.string().c_str());
+            return false;
         }
 
         if(string_list) {
@@ -442,7 +449,7 @@ namespace Invader::Recover {
 
             if(Parser::check_for_broken_strings(*string_list)) {
                 eprintf_error("String list has broken strings - tag is corrupt or edited improperly");
-                std::exit(EXIT_FAILURE);
+                return false;
             }
 
             // Just do it!
@@ -461,7 +468,7 @@ namespace Invader::Recover {
             // Oh... also, is this broken?
             if(Parser::check_for_broken_strings(*unicode_string_list)) {
                 eprintf_error("String list has broken strings - tag is corrupt or edited improperly");
-                std::exit(EXIT_FAILURE);
+                return false;
             }
 
             // Go through each string and add it
@@ -477,19 +484,21 @@ namespace Invader::Recover {
             create_directories_save_and_quit(data_path, std::vector<std::byte>(final_result, final_result_end));
         }
         else {
-            return;
+            return std::nullopt;
         }
+        
+        return true;
     }
 
-    static void recover_scripts(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+    static std::optional<bool> recover_scripts(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *scenario = dynamic_cast<const Parser::Scenario *>(&tag);
         if(!scenario) {
-            return;
+            return std::nullopt;
         }
 
         if(scenario->source_files.size() == 0) {
             eprintf_warn("Scenario does not have any script source data to recover");
-            std::exit(EXIT_FAILURE);
+            return false;
         }
 
         // Scripts
@@ -500,6 +509,7 @@ namespace Invader::Recover {
         std::filesystem::create_directories(scripts_directory, ec);
 
         // Write it all
+        bool recovered_anything = false;
         for(auto &hsc : scenario->source_files) {
             std::filesystem::path hsc_path;
             std::string script_name = hsc.name.string;
@@ -514,7 +524,7 @@ namespace Invader::Recover {
             bool exists = std::filesystem::exists(hsc_path);
             
             if(exists && !overwrite) {
-                oprintf_success_warn("Skipped %s", hsc_path.string().c_str());
+                oprintf_success_warn("%s already exists", hsc_path.string().c_str());
                 continue;
             }
             
@@ -526,29 +536,39 @@ namespace Invader::Recover {
             
             if(File::save_file(hsc_path, hsc.source)) {
                 oprintf_success("Recovered %s", hsc_path.string().c_str());
+                recovered_anything = true;
             }
             else {
                 eprintf_error("Failed to write to %s", hsc_path.string().c_str());
-                std::exit(EXIT_FAILURE);
+                return false;
             }
         }
 
-        std::exit(EXIT_SUCCESS);
+        return recovered_anything;
     }
 
-    void recover_model(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
-        recover_jms<Parser::Model>(tag, path, data, overwrite);
-        recover_jms<Parser::GBXModel>(tag, path, data, overwrite);
+    std::optional<bool> recover_model(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+        auto a = recover_jms<Parser::Model>(tag, path, data, overwrite);
+        if(a.has_value()) {
+            return a;
+        }
+        else {
+            return recover_jms<Parser::GBXModel>(tag, path, data, overwrite);
+        }
     }
 
-    void recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc, bool overwrite) {
-        recover_bitmap(tag, path, data, overwrite);
-        recover_tag_collection(tag, path, data, overwrite);
-        recover_model(tag, path, data, overwrite);
-        recover_string_list(tag, path, data, overwrite);
-        recover_scripts(tag, path, data, overwrite);
-
-        eprintf_warn("Data cannot be recovered from tag class %s", HEK::tag_fourcc_to_extension(tag_fourcc));
-        std::exit(EXIT_FAILURE);
+    bool recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc, bool overwrite) {
+        #define ATTEMPT_RECOVER(fn) if(!a.has_value()) { a = fn(tag, path, data, overwrite); }
+        std::optional<bool> a;
+        ATTEMPT_RECOVER(recover_bitmap)
+        ATTEMPT_RECOVER(recover_tag_collection)
+        ATTEMPT_RECOVER(recover_model)
+        ATTEMPT_RECOVER(recover_string_list)
+        ATTEMPT_RECOVER(recover_scripts)
+        if(!a.has_value()) {
+            eprintf_warn("Data cannot be recovered from %s tags", HEK::tag_fourcc_to_extension(tag_fourcc));
+            a = false;
+        }
+        return a.value();
     }
 }
