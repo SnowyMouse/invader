@@ -16,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
   than --type (sorry if some groups are really long; this is important though!)
 - invader-edit-qt: Upgraded Qt5 to Qt6
 - invader-edit-qt: Changed the audio backend to use SDL2
+- invader-edit-qt: Holding shift when clicking "Open..." on a tag reference will
+  now close the current window before opening the referenced tag
 - invader-refactor: --class/-c was renamed to --group/-G
 
 ### Fixed

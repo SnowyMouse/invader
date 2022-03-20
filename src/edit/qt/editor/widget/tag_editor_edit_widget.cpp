@@ -11,6 +11,7 @@
 #include <QStandardItemModel>
 #include <QColorDialog>
 #include <QStandardItem>
+#include <QGuiApplication>
 #include <QCheckBox>
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -948,7 +949,19 @@ namespace Invader::EditQt {
     void TagEditorEditWidget::open_dependency() {
         char path_to_open[1024];
         std::snprintf(path_to_open, sizeof(path_to_open), "%s.%s", this->textbox_widgets[0]->text().toLatin1().data(), reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLower().toLatin1().data());
-        this->get_editor_window()->get_parent_window()->open_tag(path_to_open, false);
+        
+        auto *editor_window = this->get_editor_window();
+        auto *parent_window = editor_window->get_parent_window();
+        
+        // Check if shift is held down. If so, close
+        if(QGuiApplication::queryKeyboardModifiers() & Qt::KeyboardModifiers::enum_type::ShiftModifier) {
+            if(!editor_window->close()) {
+                return;
+            }
+        }
+        
+        // Open
+        parent_window->open_tag(path_to_open, false);
     }
     
     static void set_error_level_textbox(QLineEdit *textbox, int error) {
