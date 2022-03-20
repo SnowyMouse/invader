@@ -402,28 +402,21 @@ namespace Invader::EditQt {
         this->perform_open();
     }
 
-    void TagTreeWindow::cleanup_windows(TagEditorWindow *also_close) {
-        bool window_closed;
-        do {
-            window_closed = false;
-            for(auto &w : this->open_documents) {
-                if(w->isHidden() || w.get() == also_close) {
-                    w.release()->deleteLater();
-                    this->open_documents.erase(this->open_documents.begin() + (&w - this->open_documents.data()));
-                    window_closed = true;
-                    break;
-                }
+    void TagTreeWindow::cleanup_window(TagEditorWindow *window) {
+        for(auto &w : this->open_documents) {
+            if(w.get() == window) {
+                w.release()->deleteLater();
+                this->open_documents.erase(this->open_documents.begin() + (&w - this->open_documents.data()));
+                break;
             }
         }
-        while(window_closed);
     }
 
     bool TagTreeWindow::close_all_open_tags() {
         while(this->open_documents.size() > 0) {
-            if(!this->open_documents[0]->isHidden() && !this->open_documents[0]->close()) {
+            if(!this->open_documents[0]->close()) {
                 return false; // failed to close due to user input
             }
-            this->cleanup_windows();
         }
         return true;
     }
@@ -463,7 +456,7 @@ namespace Invader::EditQt {
         }
     }
 
-    void TagTreeWindow::open_tag(const char *path, bool full_path) {
+    TagEditorWindow *TagTreeWindow::open_tag(const char *path, bool full_path, bool hidden) {
         // See if we can figure out this path
         File::TagFile tag;
         bool found = false;
@@ -536,24 +529,21 @@ namespace Invader::EditQt {
             std::snprintf(tagpath, sizeof(tagpath), "Failed to find %s.\n\nMake sure the path is correct.", path);
             QMessageBox box(QMessageBox::Critical, "Failed to find a tag", tagpath, QMessageBox::Cancel);
             box.exec();
-            return;
+            return nullptr;
         }
-
-        // Clean some things up
-        this->cleanup_windows();
 
         // Do we have it open already?
         for(auto &doc : this->open_documents) {
             if(doc->isVisible() && doc->get_file().full_path == tag.full_path) {
                 doc->raise();
                 QApplication::setActiveWindow(doc.get());
-                return;
+                return doc.get();
             }
         }
 
         // Don't open something if we're busy
         if(this->opening_tag) {
-            return;
+            return nullptr;
         }
 
         // Open; benchmark
@@ -569,12 +559,17 @@ namespace Invader::EditQt {
         auto *window = document.get();
         if(!window->is_successfully_opened()) {
             document.release()->deleteLater();
-            return;
+            return nullptr;
         }
-        window->show();
+        
+        if(!hidden) {
+            window->show();
+        }
+            
         this->open_documents.emplace_back(std::move(document));
         auto end = std::chrono::steady_clock::now();
         std::printf("Opened %s in %zu ms\n", tag.full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+        return window;
     }
 
     bool TagTreeWindow::perform_new() {

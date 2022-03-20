@@ -953,15 +953,17 @@ namespace Invader::EditQt {
         auto *editor_window = this->get_editor_window();
         auto *parent_window = editor_window->get_parent_window();
         
-        // Check if shift is held down. If so, close
-        if(QGuiApplication::queryKeyboardModifiers() & Qt::KeyboardModifiers::enum_type::ShiftModifier) {
-            if(!editor_window->close()) {
-                return;
-            }
-        }
+        auto replace = QGuiApplication::queryKeyboardModifiers() & Qt::KeyboardModifiers::enum_type::ShiftModifier;
         
         // Open
-        parent_window->open_tag(path_to_open, false);
+        auto *tag_window = parent_window->open_tag(path_to_open, false, replace);
+        if(tag_window != nullptr && replace) {
+            if(!editor_window->close()) {
+                tag_window->close();
+                return;
+            }
+            tag_window->show();
+        }
     }
     
     static void set_error_level_textbox(QLineEdit *textbox, int error) {

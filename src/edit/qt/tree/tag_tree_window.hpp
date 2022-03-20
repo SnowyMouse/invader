@@ -96,8 +96,10 @@ namespace Invader::EditQt {
          * Attempt to open the tag with the given path
          * @param path      path to open
          * @param full_path this is the full path
+         * @param hidden    initially don't show the window
+         * @return          opened window if successful, or nullptr if not
          */
-        void open_tag(const char *path, bool full_path);
+        TagEditorWindow *open_tag(const char *path, bool full_path, bool hidden = false);
         
         /**
          * Set whether or not to do fast listing
@@ -126,8 +128,8 @@ namespace Invader::EditQt {
         /** Show the about window */
         void show_about_window();
 
-        /** Free all closed tags */
-        void cleanup_windows(TagEditorWindow *also_close = nullptr);
+        /** Free the given window */
+        void cleanup_window(TagEditorWindow *window);
 
         /** Close all open tags and then cleanup */
         bool close_all_open_tags();

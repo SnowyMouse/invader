@@ -267,7 +267,7 @@ namespace Invader::EditQt {
         }
 
         // Clean up
-        this->parent_window->cleanup_windows(this);
+        this->parent_window->cleanup_window(this);
     }
 
     bool TagEditorWindow::perform_save() {
