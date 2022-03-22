@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.49.0] - 2022-03-22
 ### Added
 - Added INVADER_FORCE_COLORS as an environment variable which can be used to
   force colors on ("1") or off ("0")
@@ -2306,5 +2306,6 @@ image as one bitmap
 [0.47.0]: https://github.com/SnowyMouse/invader/compare/0.46.3...0.47.0
 [0.47.1]: https://github.com/SnowyMouse/invader/compare/0.47.0...0.47.1
 [0.48.0]: https://github.com/SnowyMouse/invader/compare/0.47.1...0.48.0
+[0.48.0]: https://github.com/SnowyMouse/invader/compare/0.48.0...0.49.0
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.48.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.49.0...master
