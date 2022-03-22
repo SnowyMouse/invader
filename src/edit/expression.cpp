@@ -339,11 +339,19 @@ template <typename Number, Number number_from_value(const std::string &what)> st
     return recursively_evaluate_token(main_group, input, recursively_evaluate_token);
 }
 
+static double string_to_double(const std::string &what) {
+    return std::stod(what);
+}
+
+static std::int64_t string_to_int(const std::string &what) {
+    return std::stoll(what);
+}
+
 namespace Invader::Edit {
     double evaluate_expression(const char *expression, double input) {
-        return evaluate_expression_of_type<double, [](const std::string &n) { return std::stod(n); } >(expression, input);
+        return evaluate_expression_of_type<double, string_to_double>(expression, input);
     }
     std::int64_t evaluate_expression(const char *expression, std::int64_t input) {
-        return evaluate_expression_of_type<long long, [](const std::string &n) { return std::stoll(n); } >(expression, input);
+        return evaluate_expression_of_type<std::int64_t, string_to_int>(expression, input);
     }
 }
