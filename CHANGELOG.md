@@ -26,7 +26,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Changed the audio backend to use SDL2
 - invader-edit-qt: Holding shift when clicking "Open..." on a tag reference will
   now close the current window before opening the referenced tag
-- invader-refactor: --class/-c was renamed to --group/-G
+- invader-refactor: --class/-c was renamed to --groups/-g
 
 ### Fixed
 - Fixed MinGW builds expanding wildcards to filenames preventing `*` from being

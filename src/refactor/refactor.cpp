@@ -74,9 +74,9 @@ int main(int argc, char * const *argv) {
         CommandLineOption("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>"),
         CommandLineOption("unsafe", 'U', 0, "Do not require the destination tags to exist if using no-move"),
         CommandLineOption("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>"),
-        CommandLineOption("group", 'g', 2, "Refactor all tags of a given group to another group. All tags in the destination group must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>"),
+        CommandLineOption("groups", 'g', 2, "Refactor all tags of a given group to another group. All tags in the destination group must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>"),
         CommandLineOption("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>"),
-        CommandLineOption("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. If --group or --recursive are used, this applies to the output of those. Otherwise, it applies to all tags.", "<a> <b>")
+        CommandLineOption("replace-string", 'R', 2, "Replaces all instances in a path of <a> with <b>. This can be used multiple times for multiple replacements. If --groups or --recursive are used, this applies to the output of those. Otherwise, it applies to all tags.", "<a> <b>")
     };
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
@@ -168,7 +168,7 @@ int main(int argc, char * const *argv) {
     }
     
     if(group_replacements.size() && refactor_options.recursive) {
-        eprintf_error("Error: --recursive and --group cannot be used at the same time");
+        eprintf_error("Error: --recursive and --groups cannot be used at the same time");
         return EXIT_FAILURE;
     }
     
