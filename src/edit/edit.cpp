@@ -50,7 +50,7 @@ static std::string get_top_member_name(const std::string &key, std::string &afte
     
     if(c == key_str) {
         eprintf_error("Invalid key %s", key.c_str());
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     auto return_value = std::string(key_str, c);
@@ -64,19 +64,19 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
     
     if(key_str[0] == 0) {
         eprintf_error("Expected range at end of key");
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     if(key_str[0] != '[') {
         eprintf_error("Invalid range in key %s", key.c_str());
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     for(; *key_end != ']'; key_end++) {
         // Unexpected end?
         if(*key_end == 0) {
             eprintf_error("Invalid range in key %s", key.c_str());
-            std::exit(EXIT_FAILURE);
+            throw std::exception();
         }
     }
     
@@ -104,7 +104,7 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
     // Okay
     if(hyphens > 1) {
         eprintf_error("Invalid range %s", range_str.c_str());
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     if(hyphens == 0) {
@@ -134,13 +134,14 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
         }
         catch (std::exception &) {
             eprintf_error("Invalid range %s", range_str.c_str());
+            throw;
         }
     }
     
     // Did we exceed things?
     if(min > max) {
         eprintf_error("Invalid range %s", range_str.c_str());
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     return { min, max };
@@ -149,7 +150,7 @@ static std::pair<std::size_t, std::size_t> get_range(const std::string &key, std
 static void build_array(Parser::ParserStruct *ps, std::string key, std::vector<Parser::ParserStructValue> &array, std::string *bitfield, std::pair<std::size_t, std::size_t> *range) {
     if(key == "") {
         eprintf_error("Expected value name");
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     if(key[0] == '.') {
@@ -157,13 +158,13 @@ static void build_array(Parser::ParserStruct *ps, std::string key, std::vector<P
     }
     else {
         eprintf_error("Expected a dot before key %s", key.c_str());
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     auto member = get_top_member_name(key, key);
     if(member == "") {
         eprintf_error("No member name given for array");
-        std::exit(EXIT_FAILURE);
+        throw std::exception();
     }
     
     auto &values = ps->get_values();
@@ -191,7 +192,7 @@ static void build_array(Parser::ParserStruct *ps, std::string key, std::vector<P
                     }
                     
                     eprintf_error("%s::%s is empty", ps->struct_name(), member.c_str());
-                    std::exit(EXIT_FAILURE);
+                    throw std::exception();
                 }
                 
                 if(access_range.first == SIZE_MAX) {
@@ -204,7 +205,7 @@ static void build_array(Parser::ParserStruct *ps, std::string key, std::vector<P
                 
                 if(count < access_range.first || count <= access_range.second) {
                     eprintf_error("%zu-%zu is out of bounds for %s::%s (%zu element%s)", access_range.first, access_range.second, ps->struct_name(), member.c_str(), count, count == 1 ? "" : "s");
-                    std::exit(EXIT_FAILURE);
+                    throw std::exception();
                 }
                 
                 // Are we returning a range?
@@ -227,17 +228,17 @@ static void build_array(Parser::ParserStruct *ps, std::string key, std::vector<P
                 if(i.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK) {
                     if(key.size() == 0) {
                         eprintf_error("Expected bitfield but got the end of the key");
-                        std::exit(EXIT_FAILURE);
+                        throw std::exception();
                     }
                     else if(key[0] != '.') {
                         eprintf_error("Expected bitfield but got %s", key.c_str());
-                        std::exit(EXIT_FAILURE);
+                        throw std::exception();
                     }
                     *bitfield = key.substr(1);
                 }
                 else if(key.size() != 0) {
                     eprintf_error("Expected end of key but got %s", key.c_str());
-                    std::exit(EXIT_FAILURE);
+                    throw std::exception();
                 }
                 
                 return;
@@ -246,7 +247,7 @@ static void build_array(Parser::ParserStruct *ps, std::string key, std::vector<P
     }
     
     eprintf_error("%s::%s does not exist", ps->struct_name(), member.c_str());
-    std::exit(EXIT_FAILURE);
+    throw std::exception();
 }
 
 static void require_writable_only(const std::vector<Parser::ParserStructValue> &values, bool writable_only) {
@@ -254,7 +255,7 @@ static void require_writable_only(const std::vector<Parser::ParserStructValue> &
         for(auto &i : values) {
             if(i.is_read_only()) {
                 eprintf_error("%s is read-only", i.get_member_name());
-                std::exit(EXIT_FAILURE);
+                throw std::exception();
             }
         }
     }
@@ -296,7 +297,7 @@ static std::string get_value(const Parser::ParserStructValue &value, const std::
                 return std::to_string(value.read_bitfield(bitmask.c_str()) ? 1 : 0);
             default:
                 eprintf_error("Unsupported value type for this operation");
-                std::exit(EXIT_FAILURE);
+                throw std::exception();
         }
     }
     
@@ -345,7 +346,7 @@ static void set_value(Parser::ParserStructValue &value, const std::string &new_v
             case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 if(new_value.size() > 31) {
                     eprintf_error("String exceeds maximum length (%zu > 31)", new_value.size());
-                    std::exit(EXIT_FAILURE);
+                    throw std::exception();
                 }
                 return value.set_string(new_value.c_str());
             case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
@@ -375,14 +376,14 @@ static void set_value(Parser::ParserStructValue &value, const std::string &new_v
                     }
                     else {
                         eprintf_error("%s tags cannot be referenced here", tag_fourcc_to_extension(new_path.fourcc));
-                        std::exit(EXIT_FAILURE);
+                        throw std::exception();
                     }
                 }
                 
                 // Hopefully no one comments on the fact I wrote "else try" a few lines up as if it was something equivalent to "else if".
                 catch (std::exception &) {
                     eprintf_error("Invalid tag path %s", new_value.c_str());
-                    std::exit(EXIT_FAILURE);
+                    throw std::exception();
                 }
                 
                 return;
@@ -393,7 +394,7 @@ static void set_value(Parser::ParserStructValue &value, const std::string &new_v
                 }
                 catch (std::exception &) {
                     eprintf_error("Invalid enum value %s", new_value.c_str());
-                    std::exit(EXIT_FAILURE);
+                    throw std::exception();
                 }
             case Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK:
                 try {
@@ -405,16 +406,16 @@ static void set_value(Parser::ParserStructValue &value, const std::string &new_v
                             return value.write_bitfield(bitfield.value().c_str(), true);
                         default:
                             eprintf_error("Bitfields can only be set to 0 or 1");
-                            std::exit(EXIT_FAILURE);
+                            throw std::exception();
                     }
                 }
                 catch (std::exception &) {
                     eprintf_error("Invalid bitmask/value %s => %s", bitfield.value().c_str(), new_value.c_str());
-                    std::exit(EXIT_FAILURE);
+                    throw std::exception();
                 }
             default:
                 eprintf_error("Unsupported value type");
-                std::exit(EXIT_FAILURE);
+                throw std::exception();
         }
     }
     
@@ -423,6 +424,7 @@ static void set_value(Parser::ParserStructValue &value, const std::string &new_v
         auto expected_value_count = value.get_value_count();
         
         std::vector<std::string> expressions;
+        expressions.reserve(expected_value_count);
         
         const char *start = new_value.c_str();
         const char *cursor;
@@ -437,7 +439,7 @@ static void set_value(Parser::ParserStructValue &value, const std::string &new_v
         
         if(expressions.size() != expected_value_count) {
             eprintf_error("Expected %zu comma-separated value%s but only got %zu", expected_value_count, expected_value_count == 1 ? "" : "s", expressions.size());
-            std::exit(EXIT_FAILURE);
+            throw std::exception();
         }
         
         auto all_values = value.get_values();
@@ -763,7 +765,8 @@ int main(int argc, char * const *argv) {
     
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
-        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH_EXCLUDE),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("get", 'G', 1, "Get the value with the given key.", "<key>"),
         CommandLineOption("verify-checksum", 'V', 0, "Verify that the checksum in the header is correct and print the result."),
@@ -783,7 +786,7 @@ int main(int argc, char * const *argv) {
     };
 
     static constexpr char DESCRIPTION[] = "Edit tags via command-line.";
-    static constexpr char USAGE[] = "[options] <tag.class>";
+    static constexpr char USAGE[] = "[options] <-b <expr>|tag.class>";
 
     struct EditOptions {
         std::filesystem::path tags = "tags";
@@ -793,10 +796,11 @@ int main(int argc, char * const *argv) {
         bool check_read_only = true;
         bool verify_checksum = false;
         bool view_checksum = false;
+        std::vector<std::string> batch, batch_exclude;
         std::optional<std::variant<std::string, std::filesystem::path>> overwrite_path;
     } edit_options;
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<EditOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, edit_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_options) {
         switch(opt) {
             case 't':
                 edit_options.tags = arguments[0];
@@ -804,8 +808,11 @@ int main(int argc, char * const *argv) {
             case 'i':
                 show_version_info();
                 std::exit(EXIT_SUCCESS);
-            case 'P':
-                edit_options.use_filesystem_path = true;
+            case 'b':
+                edit_options.batch.emplace_back(arguments[0]);
+                break;
+            case 'e':
+                edit_options.batch_exclude.emplace_back(arguments[0]);
                 break;
             case 'C':
                 edit_options.actions.emplace_back(Actions { ActionType::ACTION_TYPE_COUNT, arguments[0], {}, 0, 0 });
@@ -872,177 +879,169 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
+    
+    auto use_batching = !(edit_options.batch.empty() && edit_options.batch_exclude.empty());
+    if(use_batching != remaining_arguments.empty()) {
+        eprintf_error("Expected batching or a tag path but not both.");
+        return EXIT_FAILURE;
+    }
 
-    std::filesystem::path file_path;
-    if(edit_options.use_filesystem_path) {
-        file_path = std::string(remaining_arguments[0]);
-    }
-    else {
-        file_path = std::filesystem::path(edit_options.tags) / File::halo_path_to_preferred_path(remaining_arguments[0]);
-    }
-    
-    std::unique_ptr<Parser::ParserStruct> tag_struct;
-    
-    // Make a new tag... or don't
-    HEK::TagFourCC tag_class;
-    if(edit_options.new_tag) {
-        try {
-            tag_class = File::split_tag_class_extension(file_path.string()).value().fourcc;
-            tag_struct = Parser::ParserStruct::generate_base_struct(tag_class);
-        }
-        catch (std::exception &) {
-            eprintf_error("Failed to create a new tag %s. Make sure the extension is correct.", file_path.string().c_str());
-            return EXIT_FAILURE;
-        }
+    auto do_it_do_it_do_it_do_it = [&edit_options](const std::string &tag_path) -> bool {
+        std::filesystem::path file_path = std::filesystem::path(edit_options.tags) / tag_path;
+        std::unique_ptr<Parser::ParserStruct> tag_struct;
         
-        // If we're verifying the checksum or viewing the checksum of a new tag, well... okay I guess
-        if(edit_options.verify_checksum || edit_options.view_checksum) {
-            if(edit_options.view_checksum) {
-                std::printf("0x%08X\n", reinterpret_cast<HEK::TagFileHeader *>(tag_struct->generate_hek_tag_data().data())->crc32.read());
+        // Make a new tag... or don't
+        HEK::TagFourCC tag_class;
+        if(edit_options.new_tag) {
+            try {
+                tag_class = File::split_tag_class_extension(file_path.string()).value().fourcc;
+                tag_struct = Parser::ParserStruct::generate_base_struct(tag_class);
+            }
+            catch (std::exception &) {
+                eprintf_error("Failed to create a new tag %s. Make sure the extension is correct.", file_path.string().c_str());
+                return false;
             }
             
-            // Can't really verify a tag that never existed
-            if(edit_options.verify_checksum) {
-                std::printf("matched\n");
-            }
-        }
-    }
-    else {
-        auto value = File::open_file(file_path);
-        if(!value.has_value()) {
-            eprintf_error("Failed to read %s", file_path.string().c_str());
-            return EXIT_FAILURE;
-        }
-        
-        try {
-            tag_struct = Parser::ParserStruct::parse_hek_tag_file(value->data(), value->size());
-        }
-        catch (std::exception &e) {
-            eprintf_error("Failed to parse %s: %s", file_path.string().c_str(), e.what());
-            return EXIT_FAILURE;
-        }
-        
-        // Verify checksum if desired
-        if(edit_options.verify_checksum || edit_options.view_checksum) {
-            auto *header = reinterpret_cast<HEK::TagFileHeader *>(value->data());
-            std::uint32_t checksum = crc32(0, value->data() + sizeof(*header), value->size() - sizeof(*header));
-            
-            // Print the checksum
-            if(edit_options.view_checksum) {
-                std::printf("0x%08X\n", checksum);
-            }
-            
-            // Verify it's correct
-            if(edit_options.verify_checksum) {
-                if(header->crc32 == ~crc32(0, value->data() + sizeof(*header), value->size() - sizeof(*header))) {
+            // If we're verifying the checksum or viewing the checksum of a new tag, well... okay I guess
+            if(edit_options.verify_checksum || edit_options.view_checksum) {
+                if(edit_options.view_checksum) {
+                    std::printf("0x%08X\n", reinterpret_cast<HEK::TagFileHeader *>(tag_struct->generate_hek_tag_data().data())->crc32.read());
+                }
+                
+                // Can't really verify a tag that never existed
+                if(edit_options.verify_checksum) {
                     std::printf("matched\n");
                 }
-                else {
-                    std::printf("mismatched\n");
-                }
             }
         }
-        
-        tag_class = reinterpret_cast<const HEK::TagFileHeader *>(value->data())->tag_fourcc;
-    }
-    
-    std::vector<std::string> output;
-    bool should_save = edit_options.new_tag; // by default only save if making a new tag. this will be set to true if --set, --insert, --copy, --move, or --delete are used too
-    
-    for(auto &i : edit_options.actions) {
-        switch(i.type) {
-            case ActionType::ACTION_TYPE_LIST: {
-                list_everything(populate_struct(*Parser::ParserStruct::generate_base_struct(tag_class)), output, false);
-                break;
+        else {
+            auto value = File::open_file(file_path);
+            if(!value.has_value()) {
+                eprintf_error("Failed to read %s", file_path.string().c_str());
+                return false;
             }
-            case ActionType::ACTION_TYPE_LIST_ALL_VALUES: {
-                list_everything(*tag_struct, output, true);
-                break;
+            
+            try {
+                tag_struct = Parser::ParserStruct::parse_hek_tag_file(value->data(), value->size());
             }
-            case ActionType::ACTION_TYPE_GET: {
-                std::string bitfield;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, false);
-                for(auto &k : arr) {
-                    output.emplace_back(get_value(k, bitfield));
+            catch (std::exception &e) {
+                eprintf_error("Failed to parse %s: %s", file_path.string().c_str(), e.what());
+                return false;
+            }
+            
+            // Verify checksum if desired
+            if(edit_options.verify_checksum || edit_options.view_checksum) {
+                auto *header = reinterpret_cast<HEK::TagFileHeader *>(value->data());
+                std::uint32_t checksum = crc32(0, value->data() + sizeof(*header), value->size() - sizeof(*header));
+                
+                // Print the checksum
+                if(edit_options.view_checksum) {
+                    std::printf("0x%08X\n", checksum);
                 }
-                break;
-            }
-            case ActionType::ACTION_TYPE_SET: {
-                std::string bitfield;
-                should_save = true;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, edit_options.check_read_only);
-                for(auto &k : arr) {
-                    set_value(k, i.value, bitfield);
-                }
-                break;
-            }
-            case ActionType::ACTION_TYPE_COUNT: {
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), false);
-                for(auto &k : arr) {
-                    if(k.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
-                        output.emplace_back(std::to_string(k.get_array_size()));
+                
+                // Verify it's correct
+                if(edit_options.verify_checksum) {
+                    if(header->crc32 == ~crc32(0, value->data() + sizeof(*header), value->size() - sizeof(*header))) {
+                        std::printf("matched\n");
                     }
                     else {
-                        eprintf_error("%s is not an array", k.get_member_name());
-                        std::exit(EXIT_FAILURE);
+                        std::printf("mismatched\n");
                     }
                 }
-                break;
             }
-            case ActionType::ACTION_TYPE_INSERT: {
-                should_save = true;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), edit_options.check_read_only);
-                for(auto &k : arr) {
-                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
-                        eprintf_error("%s is not an array", k.get_member_name());
-                        std::exit(EXIT_FAILURE);
+            
+            tag_class = reinterpret_cast<const HEK::TagFileHeader *>(value->data())->tag_fourcc;
+        }
+        
+        std::vector<std::string> output;
+        bool should_save = edit_options.new_tag; // by default only save if making a new tag. this will be set to true if --set, --insert, --copy, --move, or --delete are used too
+        
+        for(auto &i : edit_options.actions) {
+            switch(i.type) {
+                case ActionType::ACTION_TYPE_LIST: {
+                    list_everything(populate_struct(*Parser::ParserStruct::generate_base_struct(tag_class)), output, false);
+                    break;
+                }
+                case ActionType::ACTION_TYPE_LIST_ALL_VALUES: {
+                    list_everything(*tag_struct, output, true);
+                    break;
+                }
+                case ActionType::ACTION_TYPE_GET: {
+                    std::string bitfield;
+                    auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, false);
+                    for(auto &k : arr) {
+                        output.emplace_back(get_value(k, bitfield));
                     }
-                    try {
+                    break;
+                }
+                case ActionType::ACTION_TYPE_SET: {
+                    std::string bitfield;
+                    should_save = true;
+                    auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), bitfield, edit_options.check_read_only);
+                    for(auto &k : arr) {
+                        set_value(k, i.value, bitfield);
+                    }
+                    break;
+                }
+                case ActionType::ACTION_TYPE_COUNT: {
+                    auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), false);
+                    for(auto &k : arr) {
+                        if(k.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                            output.emplace_back(std::to_string(k.get_array_size()));
+                        }
+                        else {
+                            eprintf_error("%s is not an array", k.get_member_name());
+                            throw std::exception();
+                        }
+                    }
+                    break;
+                }
+                case ActionType::ACTION_TYPE_INSERT: {
+                    should_save = true;
+                    auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), edit_options.check_read_only);
+                    for(auto &k : arr) {
+                        if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                            eprintf_error("%s is not an array", k.get_member_name());
+                            throw std::exception();
+                        }
+                        
                         if(i.count + k.get_array_size() > k.get_array_maximum_size()) {
                             eprintf_error("%s's maximum size of %zu exceeded", k.get_member_name(), k.get_array_maximum_size());
-                            std::exit(EXIT_FAILURE);
+                            throw std::exception();
                         }
                         k.insert_objects_in_array(i.position == SIZE_MAX ? k.get_array_size() : i.position, i.count);
                     }
-                    catch(std::exception &) {
-                        std::exit(EXIT_FAILURE);
-                    }
+                    break;
                 }
-                break;
-            }
-            case ActionType::ACTION_TYPE_DELETE: {
-                should_save = true;
-                std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
-                for(auto &k : arr) {
-                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
-                        eprintf_error("%s is not an array", k.get_member_name());
-                        std::exit(EXIT_FAILURE);
-                    }
-                    try {
+                case ActionType::ACTION_TYPE_DELETE: {
+                    should_save = true;
+                    std::pair<std::size_t, std::size_t> range;
+                    auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
+                    for(auto &k : arr) {
+                        if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                            eprintf_error("%s is not an array", k.get_member_name());
+                            throw std::exception();
+                        }
+                        
                         std::size_t iterations = range.second - range.first + 1;
                         if(k.get_array_size() - iterations < k.get_array_minimum_size()) {
                             eprintf_error("%s's minimum size of %zu exceeded", k.get_member_name(), k.get_array_maximum_size());
-                            std::exit(EXIT_FAILURE);
+                            throw std::exception();
                         }
                         k.delete_objects_in_array(range.first, iterations);
                     }
-                    catch(std::exception &) {
-                        std::exit(EXIT_FAILURE);
-                    }
+                    break;
                 }
-                break;
-            }
-            case ActionType::ACTION_TYPE_MOVE: {
-                should_save = true;
-                std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
-                for(auto &k : arr) {
-                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
-                        eprintf_error("%s is not an array", k.get_member_name());
-                        std::exit(EXIT_FAILURE);
-                    }
-                    try {
+                case ActionType::ACTION_TYPE_MOVE: {
+                    should_save = true;
+                    std::pair<std::size_t, std::size_t> range;
+                    auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
+                    for(auto &k : arr) {
+                        if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                            eprintf_error("%s is not an array", k.get_member_name());
+                            throw std::exception();
+                        }
+                        
                         std::size_t to = i.position == SIZE_MAX ? k.get_array_size() : i.position;
                         std::size_t iterations = range.second - range.first + 1;
                         if(to == range.first) {
@@ -1050,93 +1049,117 @@ int main(int argc, char * const *argv) {
                         }
                         k.swap_objects_in_array(range.first, to, iterations);
                     }
-                    catch(std::exception &) {
-                        std::exit(EXIT_FAILURE);
-                    }
+                    break;
                 }
-                break;
-            }
-            case ActionType::ACTION_TYPE_COPY: {
-                should_save = true;
-                std::pair<std::size_t, std::size_t> range;
-                auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
-                for(auto &k : arr) {
-                    if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
-                        eprintf_error("%s is not an array", k.get_member_name());
-                        std::exit(EXIT_FAILURE);
-                    }
-                    try {
+                case ActionType::ACTION_TYPE_COPY: {
+                    should_save = true;
+                    std::pair<std::size_t, std::size_t> range;
+                    auto arr = get_values_for_key(tag_struct.get(), i.key == "" ? "" : (std::string(".") + i.key), range, edit_options.check_read_only);
+                    for(auto &k : arr) {
+                        if(k.get_type() != Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                            eprintf_error("%s is not an array", k.get_member_name());
+                            throw std::exception();
+                        }
+                        
                         std::size_t to = i.position == SIZE_MAX ? k.get_array_size() : i.position;
                         std::size_t iterations = range.second - range.first + 1;
                         
                         if(iterations + k.get_array_size() > k.get_array_maximum_size()) {
                             eprintf_error("%s's maximum size of %zu exceeded", k.get_member_name(), k.get_array_maximum_size());
-                            std::exit(EXIT_FAILURE);
+                            throw std::exception();
                         }
                         
                         k.duplicate_objects_in_array(range.first, to, iterations);
                     }
-                    catch(std::exception &) {
-                        std::exit(EXIT_FAILURE);
-                    }
+                    break;
                 }
-                break;
+                default:
+                    eprintf_error("Unimplemented");
+                    std::exit(EXIT_FAILURE);
             }
-            default:
-                eprintf_error("Unimplemented");
-                std::exit(EXIT_FAILURE);
         }
-    }
-    
-    for(auto &i : output) {
-        std::printf("%s\n", i.c_str());
-    }
-    
-    // If we're overwriting a file that isn't the main one, let's find out what
-    bool create_directories_if_possible = false;
-    
-    if(edit_options.overwrite_path.has_value()) {
-        should_save = true;
         
-        auto &p = *edit_options.overwrite_path;
-        auto *path = std::get_if<std::filesystem::path>(&p);
-        auto *str = std::get_if<std::string>(&p);
+        for(auto &i : output) {
+            std::puts(i.c_str());
+        }
         
-        if(path) {
-            file_path = *path;
+        // If we're overwriting a file that isn't the main one, let's find out what
+        bool create_directories_if_possible = false;
+        
+        if(edit_options.overwrite_path.has_value()) {
+            should_save = true;
+            
+            auto &p = *edit_options.overwrite_path;
+            auto *path = std::get_if<std::filesystem::path>(&p);
+            auto *str = std::get_if<std::string>(&p);
+            
+            if(path) {
+                file_path = *path;
+            }
+            else {
+                file_path = edit_options.tags / *str;
+                create_directories_if_possible = true; // if using a virtual path, we can create directories as needed
+            }
+        }
+        
+        if(should_save) {
+            bool can_save = true;
+            try {
+                can_save = File::split_tag_class_extension(file_path.string()).value().fourcc == tag_class;
+            }
+            catch(std::exception &) {
+                can_save = false;
+            }
+            
+            if(!can_save) {
+                eprintf_error("Cannot save: %s does not have the correct .%s extension", file_path.string().c_str(), HEK::tag_fourcc_to_extension(tag_class));
+                return false;
+            }
+            
+            if(create_directories_if_possible) {
+                std::error_code ec;
+                std::filesystem::create_directories(file_path.parent_path(), ec);
+            }
+            
+            if(!File::save_file(file_path, tag_struct->generate_hek_tag_data(tag_class))) {
+                eprintf_error("Unable to write to %s", file_path.string().c_str());
+                return false;
+            }
+            return true;
         }
         else {
-            file_path = edit_options.tags / *str;
-            create_directories_if_possible = true; // if using a virtual path, we can create directories as needed
+            return true;
         }
-    }
+    };
     
-    if(should_save) {
-        bool can_save = true;
-        try {
-            can_save = File::split_tag_class_extension(file_path.string()).value().fourcc == tag_class;
-        }
-        catch(std::exception &) {
-            can_save = false;
+    if(use_batching) {
+        auto v = File::load_virtual_tag_folder({edit_options.tags});
+        std::size_t count = 0;
+        std::size_t total = 0;
+        for(auto &t : v) {
+            if(File::path_matches(t.tag_path.c_str(), edit_options.batch, edit_options.batch_exclude)) {
+                try {
+                    if(do_it_do_it_do_it_do_it(File::halo_path_to_preferred_path(t.tag_path))) {
+                        count++;
+                        oprintf_success("Successfully edited %s", t.tag_path.c_str());
+                    }
+                }
+                catch(std::exception &e) {
+                    eprintf_error("Failed to edit %s", t.tag_path.c_str());
+                }
+                total++;
+            }
         }
         
-        if(!can_save) {
-            eprintf_error("Cannot save: %s does not have the correct .%s extension", file_path.string().c_str(), HEK::tag_fourcc_to_extension(tag_class));
-            return EXIT_FAILURE;
+        auto error_count = total - count;
+        if(error_count > 0) {
+            oprintf_success_warn("Edited %zu out of %zu tag%s (%zu error%s)", count, total, total == 1 ? "" : "s", error_count, error_count == 1 ? "" : "s");
         }
-        
-        if(create_directories_if_possible) {
-            std::error_code ec;
-            std::filesystem::create_directories(file_path.parent_path(), ec);
+        else {
+            oprintf_success("Edited %zu out of %zu tag%s", count, total, total == 1 ? "" : "s");
         }
-        
-        if(!File::save_file(file_path, tag_struct->generate_hek_tag_data(tag_class))) {
-            eprintf_error("Unable to write to %s", file_path.string().c_str());
-            return EXIT_FAILURE;
-        }
-        return EXIT_SUCCESS;
     }
     else {
-        return EXIT_SUCCESS;
+        return do_it_do_it_do_it_do_it(File::halo_path_to_preferred_path(remaining_arguments[0])) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 }

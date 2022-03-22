@@ -9,6 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-convert: Added -b/-e for batching
 - invader-convert: Added object-to-object conversion (you can convert any object
   type into another with varying results)
+- invader-edit: Added -b/-e for batching
 - invader-recover: Added -b/-e for batching
 
 ### Changed
@@ -40,6 +41,7 @@ This is used for recording Invader's changes. This changelog is based on
   `enable diffusion dithering` flag.
 - invader-convert: Removed --all
 - invader-convert: Removed --type (use --groups)
+- invader-edit: Removed --fs-path
 - invader-recover: Removed --fs-path
 
 ## [0.48.0] - 2022-03-13
