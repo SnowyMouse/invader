@@ -9,6 +9,8 @@
 #include "../crc/crc32.h"
 #include <string>
 
+#include "expression.hpp"
+
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -306,7 +308,7 @@ static std::string get_value(const Parser::ParserStructValue &value, const std::
             case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
                 for(auto &i : values) {
                     if(str.size() > 0) {
-                        str += " ";
+                        str += ",";
                     }
                     str += std::to_string(std::get<std::int64_t>(i));
                 }
@@ -314,7 +316,7 @@ static std::string get_value(const Parser::ParserStructValue &value, const std::
             case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
                 for(auto &i : values) {
                     if(str.size() > 0) {
-                        str += " ";
+                        str += ",";
                     }
                     
                     double multiplier = 1.0;
@@ -416,147 +418,45 @@ static void set_value(Parser::ParserStructValue &value, const std::string &new_v
         }
     }
     
-    // Basic numerical value?
+    // Numeric value?
     else {
-        const char *start = new_value.c_str();
-        char *c;
-        
-        enum Action {
-            SET, ADD, SUBTRACT, MULTIPLY, DIVIDE, NOP
-        };
-        
-        std::vector<std::pair<Parser::ParserStructValue::Number, Action>> values;
-        
-        
-        while(*start) {
-            auto *cursor = start;
-            if(*start != '-' && *start != '.' && *start != '~' && (*start < '0' || *start > '9')) {
-                eprintf_error("Invalid input value %s", cursor);
-                std::exit(EXIT_FAILURE);
-            }
-            
-            // What are we doing?
-            Action action = Action::SET;
-            if(*start == '~') {
-                cursor++;
-                switch(*cursor) {
-                    case 0:
-                    case ' ':
-                        action = Action::NOP;
-                        values.emplace_back(format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? static_cast<std::int64_t>(0) : static_cast<double>(0.0), action);
-                        c = const_cast<char *>(cursor);
-                        break;
-                    case '+':
-                        action = Action::ADD;
-                        break;
-                    case '-':
-                        action = Action::SUBTRACT;
-                        break;
-                    case '*':
-                        action = Action::MULTIPLY;
-                        break;
-                    case '/':
-                        action = Action::DIVIDE;
-                        break;
-                    default:
-                        eprintf_error("Invalid input value %s", cursor);
-                        std::exit(EXIT_FAILURE);
-                }
-                cursor++;
-            }
-            
-            if(action != Action::NOP) {
-                switch(format) {
-                    case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
-                        values.emplace_back(std::strtol(cursor, &c, 10), action);
-                        break;
-                    case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
-                        double multiplier = 1.0;
-                        if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE || type == Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER2D || type == Parser::ParserStructValue::ValueType::VALUE_TYPE_EULER3D) {
-                            multiplier = HALO_PI / 180.0;
-                        }
-                        values.emplace_back(std::strtod(cursor, &c) * multiplier, action);
-                        break;
-                    }
-                    default: std::terminate();
-                }
-            }
-                
-            start = c;
-            if(*start == ' ') {
-                start++;
-            }
-            else if(*start == 0) {
-                break;
-            }
-            else {
-                eprintf_error("Invalid input value %s", new_value.c_str());
-                std::exit(EXIT_FAILURE);
-            }
-        }
-        
-        auto value_count = values.size();
         auto expected_value_count = value.get_value_count();
-        if(value_count == expected_value_count) {
-            auto current_values = value.get_values();
-            for(std::size_t i = 0; i < value_count; i++) {
-                auto &v = values[i];
-                auto &v_set = current_values[i];
-                
-                switch(v.second) {
-                    case Action::NOP:
-                        break;
-                    case Action::SET:
-                        v_set = v.first;
-                        break;
-                    case Action::ADD: {
-                        auto add = [&v_set](auto &a) -> void {
-                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) += a;
-                        };
-                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? add(std::get<std::int64_t>(v.first)) : add(std::get<double>(v.first));
-                        break;
-                    }
-                    case Action::SUBTRACT: {
-                        auto sub = [&v_set](auto &a) -> void {
-                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) -= a;
-                        };
-                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? sub(std::get<std::int64_t>(v.first)) : sub(std::get<double>(v.first));
-                        break;
-                    }
-                    case Action::DIVIDE: {
-                        auto div = [&v_set](auto &a) -> void {
-                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) /= a;
-                        };
-                        
-                        if(format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT && std::get<std::int64_t>(v.first) == 0) {
-                            eprintf_error("Cannot integer divide by 0");
-                            std::exit(EXIT_FAILURE);
-                        }
-                        
-                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? div(std::get<std::int64_t>(v.first)) : div(std::get<double>(v.first));
-                        break;
-                    }
-                    case Action::MULTIPLY: {
-                        auto mul = [&v_set](auto &a) -> void {
-                            std::get<typename std::remove_reference<decltype(a)>::type>(v_set) *= a;
-                        };
-                        format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT ? mul(std::get<std::int64_t>(v.first)) : mul(std::get<double>(v.first));
-                        break;
-                    }
-                }
+        
+        std::vector<std::string> expressions;
+        
+        const char *start = new_value.c_str();
+        const char *cursor;
+        for(cursor = start; *cursor != 0; cursor++) {
+            if(*cursor == ',') {
+                expressions.emplace_back(start, cursor);
+                start = ++cursor;
+                continue;
             }
-            
-            value.set_values(current_values);
-            return;
         }
-        else {
-            eprintf_error("Incorrect number of inputs for the value (got %zu, expected %zu)", value_count, expected_value_count);
+        expressions.emplace_back(start, cursor);
+        
+        if(expressions.size() != expected_value_count) {
+            eprintf_error("Expected %zu comma-separated value%s but only got %zu", expected_value_count, expected_value_count == 1 ? "" : "s", expressions.size());
             std::exit(EXIT_FAILURE);
         }
+        
+        auto all_values = value.get_values();
+        for(std::size_t i = 0; i < expected_value_count; i++) {
+            auto &v = all_values[i];
+            auto *e = expressions[i].c_str();
+            switch(value.get_number_format()) {
+                case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+                    v = Edit::evaluate_expression(e, std::get<std::int64_t>(v));
+                    break;
+                case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT:
+                    v = Edit::evaluate_expression(e, std::get<double>(v));
+                    break;
+                default:
+                    std::terminate();
+            }
+        }
+        value.set_values(all_values);
     }
-    
-    eprintf_error("Unimplemented");
-    std::exit(EXIT_FAILURE);
 }
 
 // Ensure a struct has at least one of everything in everything (for listing)

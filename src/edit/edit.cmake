@@ -7,6 +7,7 @@ endif()
 if(${INVADER_EDIT})
     add_executable(invader-edit
         src/edit/edit.cpp
+        src/edit/expression.cpp
     )
 
     target_link_libraries(invader-edit invader ${INVADER_CRT_NOGLOB})

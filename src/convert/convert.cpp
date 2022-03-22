@@ -186,7 +186,7 @@ int main(int argc, const char **argv) {
     std::vector<File::TagFilePath> paths;
     if(batching) {
         for(auto &i : File::load_virtual_tag_folder(tags_vector)) {
-            if(i.tag_fourcc == convert_options.conversion->first && File::path_matches(i.tag_path.c_str(), convert_options.batch, convert_options.batch_exclude)) {
+            if(i.tag_fourcc == convert_options.conversion->first && File::path_matches((i.tag_path + "." + HEK::tag_fourcc_to_extension(convert_options.conversion->first)).c_str(), convert_options.batch, convert_options.batch_exclude)) {
                 paths.emplace_back(File::split_tag_class_extension(File::halo_path_to_preferred_path(i.tag_path)).value());
             }
         }

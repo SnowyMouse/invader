@@ -14,6 +14,13 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-convert: Tag groups now have to be explicitly set with --groups rather
   than --type (sorry if some groups are really long; this is important though!)
+- invader-edit: --set now takes more complex expressions, with "n" now taking
+  the place of what "~" was. For example, --set "-2n+1" now multiplies the value
+  by -2 and then adds 1. This is incompatible with older --set inputs, thus
+  values for vectors must now be separated with commas instead of whitespace.
+  For example, "-2,-5,2" instead of "-2 -5 2". Whitespace is ignored.
+- invader-edit: --get on vectors are now comma-separated instead of with
+  whitespace (due to the new expression parser)
 - invader-edit-qt: Upgraded Qt5 to Qt6
 - invader-edit-qt: Changed the audio backend to use SDL2
 - invader-edit-qt: Holding shift when clicking "Open..." on a tag reference will
