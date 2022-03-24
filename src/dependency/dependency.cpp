@@ -20,12 +20,12 @@ int main(int argc, char * const *argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
-        CommandLineOption("reverse", 'R', 0, "Find all tags that depend on the tag, instead."),
+        CommandLineOption("reverse", 'R', 0, "Find all tags that depend on the tag, instead. The tag does not have to exist if not using --fs-path."),
         CommandLineOption("recursive", 'r', 0, "Recursively get all depended tags."),
     };
 
     static constexpr char DESCRIPTION[] = "Check dependencies for a tag.";
-    static constexpr char USAGE[] = "[options] <tag.class>";
+    static constexpr char USAGE[] = "[options] <tag.group>";
 
     struct DependencyOption {
         bool reverse = false;
@@ -66,21 +66,18 @@ int main(int argc, char * const *argv) {
         if(tag_path_maybe.has_value()) {
             tag_path = File::preferred_path_to_halo_path(*tag_path_maybe);
         }
-    }
-    else {
-        auto file_path_maybe = File::tag_path_to_file_path(remaining_arguments[0], dependency_options.tags);
-        if(file_path_maybe.has_value() && std::filesystem::exists(*file_path_maybe)) {
-            tag_path = remaining_arguments[0];
+        else {
+            eprintf_error("Failed to find a valid tag %s", remaining_arguments[0]);
+            return EXIT_FAILURE;
         }
     }
-    
-    if(!tag_path.has_value()) {
-        eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
-        return EXIT_FAILURE;
+    else {
+        tag_path = File::halo_path_to_preferred_path(remaining_arguments[0]);
     }
+    
     auto tag_path_split = File::split_tag_class_extension(*tag_path);
     if(!tag_path_split.has_value()) {
-        eprintf_error("%s is not a valid font tag", remaining_arguments[0]);
+        eprintf_error("%s is not a valid tag path", remaining_arguments[0]);
         return EXIT_FAILURE;
     }
 
@@ -96,4 +93,6 @@ int main(int argc, char * const *argv) {
     for(auto &tag : found_tags) {
         oprintf("%s.%s%s\n", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc), tag.broken ? " [BROKEN]" : "");
     }
+    
+    return EXIT_SUCCESS;
 }
