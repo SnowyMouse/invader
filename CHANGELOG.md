@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-dependency: Fixed having to recompile scripts
+
 ## [0.49.0] - 2022-03-22
 ### Added
 - Added INVADER_FORCE_COLORS as an environment variable which can be used to

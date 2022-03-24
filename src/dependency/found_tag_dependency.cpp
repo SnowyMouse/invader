@@ -3,25 +3,38 @@
 #include <invader/dependency/found_tag_dependency.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
-#include <invader/build/build_workload.hpp>
+#include <invader/tag/parser/parser_struct.hpp>
 
 #include <filesystem>
 
 namespace Invader {
-    static std::vector<File::TagFilePath> get_dependencies(const BuildWorkload &tag_compiled) {
+    static std::vector<File::TagFilePath> get_dependencies(const std::byte *tag_data, std::size_t tag_data_length) {
         std::vector<File::TagFilePath> dependencies;
-        for(auto &s : tag_compiled.structs) {
-            for(auto &d : s.dependencies) {
-                // Skip anything referencing ourselves
-                if(d.tag_index == 0) {
-                    continue;
+        
+        auto recursively_get_dependencies = [&dependencies](const Parser::ParserStruct &st, auto &recursively_get_dependencies) -> void {
+            for(auto &v : st.get_values()) {
+                switch(v.get_type()) {
+                    case Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE: {
+                        auto count = v.get_array_size();
+                        for(std::size_t i = 0; i < count; i++) {
+                            recursively_get_dependencies(v.get_object_in_array(i), recursively_get_dependencies);
+                        }
+                        break;
+                    }
+                    case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+                        auto &dep = v.get_dependency();
+                        if(!dep.path.empty()) {
+                            dependencies.emplace_back(File::halo_path_to_preferred_path(dep.path), dep.tag_fourcc);
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-
-                // Continue
-                auto &tag = tag_compiled.tags[d.tag_index];
-                dependencies.emplace_back(tag.path, tag.tag_fourcc);
             }
-        }
+        };
+        
+        recursively_get_dependencies(*Parser::ParserStruct::parse_hek_tag_file(tag_data, tag_data_length), recursively_get_dependencies);
+        
         return dependencies;
     }
 
@@ -44,7 +57,7 @@ namespace Invader {
                     }
 
                     try {
-                        auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
+                        auto dependencies = get_dependencies(tag_data->data(), tag_data->size());
                         for(auto &dependency : dependencies) {
                             // Make sure it's not in found_tags
                             bool dupe = false;
@@ -59,7 +72,7 @@ namespace Invader {
                             }
 
                             auto class_to_use = dependency.fourcc;
-                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_fourcc_to_extension(class_to_use));
+                            std::string path_copy = dependency.join();
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
@@ -99,7 +112,7 @@ namespace Invader {
         }
         else {
             // Turn all forward slashes into backslashes if not on Windows
-            std::string tag_path_to_find = File::preferred_path_to_halo_path(tag_path_to_find_2);
+            std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
 
             // Iterate
             for(auto &tags_directory : tags) {
@@ -148,7 +161,7 @@ namespace Invader {
 
                             // Attempt to parse
                             try {
-                                auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
+                                auto dependencies = get_dependencies(tag_data->data(), tag_data->size());
                                 for(auto &dependency : dependencies) {
                                     if(dependency.path == tag_path_to_find && dependency.fourcc == tag_int_to_find) {
                                         found_tags.emplace_back(dir_tag_path, fourcc, false, file.path());
