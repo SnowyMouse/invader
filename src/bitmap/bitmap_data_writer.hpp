@@ -12,7 +12,7 @@ namespace Invader {
     /**
      * if format is nullopt, it will determine one
      */
-    void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, std::optional<BitmapFormat> &format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue);
+    void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, std::optional<BitmapFormat> &format, BitmapType bitmap_type, bool palettize, bool dither);
 }
 
 #endif

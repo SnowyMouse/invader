@@ -81,7 +81,7 @@ struct BitmapOptions {
     bool force_square_sprite_sheets = false;
 
     // Dithering?
-    std::optional<bool> dither_alpha, dither_color, dithering;
+    std::optional<bool> dithering;
 
     // Sharpen and blur; legacy support for older tags and should not be used in newer ones
     std::optional<float> sharpen;
@@ -362,7 +362,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bitmap_options.format = std::nullopt;
         }
         
-        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format, bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dithering.value(), bitmap_options.dithering.value(), bitmap_options.dithering.value(), bitmap_options.dithering.value());
+        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format, bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dithering.value());
     }
     catch (std::exception &e) {
         eprintf_error("Failed to generate bitmap data: %s", e.what());

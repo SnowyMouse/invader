@@ -7,7 +7,7 @@
 #include <algorithm>
 
 namespace Invader {
-    void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, std::optional<BitmapFormat> &format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
+    void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, std::optional<BitmapFormat> &format, BitmapType bitmap_type, bool palettize, bool dither) {
         using namespace Invader::HEK;
 
         auto bitmap_count = scanned_color_plate.bitmaps.size();
@@ -134,7 +134,7 @@ namespace Invader {
             
             // Go through each mipmap; compress
             bitmap.mipmap_count = mipmap_count;
-            auto encoded_pixels = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, bitmap.width, bitmap.height, bitmap.depth, bitmap.type, bitmap.mipmap_count, dither_alpha, dither_red, dither_green, dither_blue);
+            auto encoded_pixels = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, bitmap.width, bitmap.height, bitmap.depth, bitmap.type, bitmap.mipmap_count, dither);
             bitmap_data_pixels.insert(bitmap_data_pixels.end(), encoded_pixels.begin(), encoded_pixels.end());
 
             BitmapDataFlags flags = {};
