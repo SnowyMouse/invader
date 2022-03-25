@@ -5,7 +5,6 @@
 #include <invader/printf.hpp>
 #include <invader/bitmap/bitmap_encode.hpp>
 #include <algorithm>
-#include <squish.h>
 
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, std::optional<BitmapFormat> &format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
@@ -70,6 +69,9 @@ namespace Invader {
         
         oprintf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
         
+        bool warn_on_semi_transparent_1_bit_alpha = false;
+        bool warn_on_lost_color = false;
+        
         for(std::size_t i = 0; i < bitmap_count; i++) {
             // Write all of the fields here
             auto &bitmap = bitmap_data.emplace_back();
@@ -117,11 +119,22 @@ namespace Invader {
                 compressed = false;
                 bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP;
             }
-
+            
+            // Warn on 1-bit alpha being memed away
+            if(should_p8 || format == BitmapFormat::BITMAP_FORMAT_DXT1) {
+                for(auto &p : bitmap_color_plate.pixels) {
+                    if(p.alpha != 0 && p.alpha != 255) {
+                        warn_on_semi_transparent_1_bit_alpha = true;
+                    }
+                    if(p.alpha != 255 && (p.red != 0 || p.green != 0 || p.blue != 0)) {
+                        warn_on_lost_color = true;
+                    }
+                }
+            }
+            
             // Go through each mipmap; compress
             bitmap.mipmap_count = mipmap_count;
             auto encoded_pixels = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, bitmap.width, bitmap.height, bitmap.depth, bitmap.type, bitmap.mipmap_count, dither_alpha, dither_red, dither_green, dither_blue);
-            
             bitmap_data_pixels.insert(bitmap_data_pixels.end(), encoded_pixels.begin(), encoded_pixels.end());
 
             BitmapDataFlags flags = {};
@@ -147,6 +160,14 @@ namespace Invader {
             #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
             oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(encoded_pixels.size()));
+        }
+        
+        if(warn_on_semi_transparent_1_bit_alpha) {
+            eprintf_warn("Compressing semi-transparent pixels to 1-bit alpha.");
+        }
+        
+        if(warn_on_lost_color) {
+            eprintf_warn("Compressing transparent non-black pixels. Color may be lost.");
         }
     }
 }
