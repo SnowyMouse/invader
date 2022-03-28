@@ -405,8 +405,13 @@
                 "display_name": "disabled color"
             },
             {
+                "name": "meter min alpha",
+                "type": "float",
+                "display_name": "min alpha"
+            },
+            {
                 "type": "pad",
-                "size": 16
+                "size": 12
             },
             {
                 "name": "meter minimum fraction cutoff",
@@ -796,8 +801,13 @@
                 "display_name": "disabled color"
             },
             {
+                "name": "shield panel meter min alpha",
+                "type": "float",
+                "display_name": "min alpha"
+            },
+            {
                 "type": "pad",
-                "size": 16
+                "size": 12
             },
             {
                 "name": "shield panel meter overcharge minimum color",
@@ -1031,8 +1041,13 @@
                 "display_name": "disabled color"
             },
             {
+                "name": "health panel meter min alpha",
+                "type": "float",
+                "display_name": "min alpha"
+            },
+            {
                 "type": "pad",
-                "size": 16
+                "size": 12
             },
             {
                 "name": "health panel meter medium health left color",
