@@ -386,8 +386,12 @@
                 "type": "ColorARGBInt"
             },
             {
+                "name": "min alpha",
+                "type": "float"
+            },
+            {
                 "type": "pad",
-                "size": 16
+                "size": 12
             },
             {
                 "type": "pad",
