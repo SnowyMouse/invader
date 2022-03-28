@@ -121,7 +121,8 @@
             {
                 "name": "multitex overlay",
                 "type": "TagReflexive",
-                "struct": "HUDInterfaceMultitextureOverlay"
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -293,7 +294,8 @@
                 "name": "background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay"
+                "display_name": "multitex overlay",
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -587,7 +589,8 @@
                 "name": "hud background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay"
+                "display_name": "multitex overlay",
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -688,7 +691,8 @@
                 "name": "shield panel background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay"
+                "display_name": "multitex overlay",
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -928,7 +932,8 @@
                 "name": "health panel background multitex overlay",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay"
+                "display_name": "multitex overlay",
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -1159,7 +1164,8 @@
             {
                 "name": "motion sensor background multitex overlays",
                 "type": "TagReflexive",
-                "struct": "HUDInterfaceMultitextureOverlay"
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -1259,7 +1265,8 @@
             {
                 "name": "motion sensor foreground multitex overlays",
                 "type": "TagReflexive",
-                "struct": "HUDInterfaceMultitextureOverlay"
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "maximum": 30
             },
             {
                 "type": "pad",
@@ -1314,7 +1321,8 @@
             {
                 "name": "overlays",
                 "type": "TagReflexive",
-                "struct": "UnitHUDInterfaceAuxiliaryOverlay"
+                "struct": "UnitHUDInterfaceAuxiliaryOverlay",
+                "maximum": 16
             },
             {
                 "type": "pad",
@@ -1323,12 +1331,14 @@
             {
                 "name": "sounds",
                 "type": "TagReflexive",
-                "struct": "UnitHUDInterfaceHUDSound"
+                "struct": "UnitHUDInterfaceHUDSound",
+                "maximum": 12
             },
             {
                 "name": "meters",
                 "type": "TagReflexive",
-                "struct": "UnitHUDInterfaceAuxiliaryPanel"
+                "struct": "UnitHUDInterfaceAuxiliaryPanel",
+                "maximum": 16
             },
             {
                 "type": "pad",
