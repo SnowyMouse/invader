@@ -51,7 +51,8 @@
             "shotgun",
             "needler",
             "plasma pistol",
-            "plasma rifle"
+            "plasma rifle",
+            "rocket launcher"
         ],
         "type": "enum"
     },
