@@ -35,7 +35,6 @@ int main(int argc, const char **argv) {
     // Command line options
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
-        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("recursive", 'r', 0, "Extract tag dependencies"),
