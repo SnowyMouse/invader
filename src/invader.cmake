@@ -165,10 +165,18 @@ add_custom_command(
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/color_code/color_codes_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/color_code/color_codes" "${CMAKE_CURRENT_BINARY_DIR}/color_code.cpp"
 )
 
+# Custom definitions?
+set(INVADER_DEFINITIONS_DIR "" CACHE PATH "Set a custom directory containing .json definitions for Invader")
+if("${INVADER_DEFINITIONS_DIR}" STREQUAL "")
+    file(GLOB INVADER_ALL_DEFINITION_JSON "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*.json")
+else()
+    file(GLOB INVADER_ALL_DEFINITION_JSON "${INVADER_DEFINITIONS_DIR}/*.json")
+endif()
+
 # Include definition script
 add_custom_command(
     OUTPUT ${INVADER_PARSER_FILES}
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" ${INVADER_PARSER_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" ${INVADER_PARSER_FILES} ${INVADER_ALL_DEFINITION_JSON}
 )
 
 # Include version script
