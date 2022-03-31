@@ -16,8 +16,10 @@
 namespace Invader::File {
     std::optional<std::vector<std::byte>> open_file(const std::filesystem::path &path) {
         // Attempt to open it
+        auto path_string = path.string();
         std::FILE *file = std::fopen(path.string().c_str(), "rb");
         if(!file) {
+            eprintf("Error: Failed to open %s for reading.\n", path_string.c_str());
             return std::nullopt;
         }
 
@@ -30,6 +32,7 @@ namespace Invader::File {
         auto sizel = _ftelli64(file);
         if(sizel < 0) {
             std::fclose(file);
+            eprintf("Error: Failed to query the size of %s for reading.\n", path_string.c_str());
             return std::nullopt;
         }
         auto size = static_cast<std::size_t>(sizel);
@@ -43,6 +46,7 @@ namespace Invader::File {
         // Get the size and make sure we can use it
         if(size > file_data.max_size()) {
             std::fclose(file);
+            eprintf("Error: %s is too large to read.\n", path_string.c_str());
             return std::nullopt;
         }
 
@@ -56,6 +60,7 @@ namespace Invader::File {
             long amount_to_read = (size - offset) > LONG_MAX ? LONG_MAX : (size - offset);
             if(std::fread(data, amount_to_read, 1, file) != 1) {
                 std::fclose(file);
+                eprintf("Error: Could not read all bytes from %s\n", path_string.c_str());
                 return std::nullopt;
             }
 
@@ -70,14 +75,17 @@ namespace Invader::File {
 
     bool save_file(const std::filesystem::path &path, const std::vector<std::byte> &data) {
         // Open the file
-        std::FILE *f = std::fopen(path.string().c_str(), "wb");
+        auto path_string = path.string();
+        std::FILE *f = std::fopen(path_string.c_str(), "wb");
         if(!f) {
+            eprintf("Error: Failed to open %s for writing.\n", path_string.c_str());
             return false;
         }
 
         // Write
         if(std::fwrite(data.data(), data.size(), 1, f) != 1) {
             std::fclose(f);
+            eprintf("Error: Failed to write to %s.\n", path_string.c_str());
             return false;
         }
 
