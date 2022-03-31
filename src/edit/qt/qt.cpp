@@ -77,12 +77,26 @@ int main(int argc, char **argv) {
     if(edit_qt_options.tags.size() == 0) {
         edit_qt_options.tags.push_back("tags");
     }
+    
+    // Instantiate the application
+    QApplication a(argc, argv);
+    a.setWindowIcon(QIcon(":icon/invader-edit-qt.ico"));
 
+    // Check if some directories are missing
+    bool should_exit = false;
     for(auto &t : edit_qt_options.tags) {
         if(!std::filesystem::is_directory(t)) {
-            eprintf_error("Error: %s does not exist or is not a valid directory", t.string().c_str());
-            return EXIT_FAILURE;
+            char error_message[2048];
+            std::snprintf(error_message, sizeof(error_message), "%s does not exist or is not a valid directory", t.string().c_str());
+            eprintf_error("Error: %s", error_message);
+            QMessageBox(QMessageBox::Critical, "Tags directory not found", error_message, QMessageBox::Ok).exec();
+            should_exit = true;
         }
+    }
+    
+    // If we should exit, then exit!
+    if(should_exit) {
+        return EXIT_FAILURE;
     }
     
     File::check_working_directory("./guerillabeta.map");
@@ -92,10 +106,6 @@ int main(int argc, char **argv) {
     if(r != 0) {
         eprintf_error("SDL_Init error: %s", SDL_GetError());
     }
-    
-    // Instantiate the application
-    QApplication a(argc, argv);
-    a.setWindowIcon(QIcon(":icon/invader-edit-qt.ico"));
     
     QTimer timer;
     auto handle_events = []() {
