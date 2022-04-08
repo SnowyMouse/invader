@@ -534,7 +534,7 @@ namespace Invader::Recover {
                 source.resize(source.size() - 1);
             }
             
-            if(File::save_file(hsc_path, hsc.source)) {
+            if(File::save_file(hsc_path, source)) {
                 oprintf_success("Recovered %s", hsc_path.string().c_str());
                 recovered_anything = true;
             }

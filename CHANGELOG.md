@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Fixed
 - invader-dependency: Fixed having to recompile scripts
+- invader-recover: Fixed null terminator being included in recovered script hsc
 
 ## [0.49.0] - 2022-03-22
 ### Added
