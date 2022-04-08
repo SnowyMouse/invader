@@ -4,7 +4,6 @@
 #include <invader/build/build_workload.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
-#include <invader/script/compiler.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 
 namespace Invader::Parser {

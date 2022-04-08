@@ -3,8 +3,13 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Changed
+- invader-extract: Rewrote the script decompiler. Scripts are now split on every
+  256 KiB, a header is included in each script, and code output is more optimal.
+
 ### Fixed
 - invader-dependency: Fixed having to recompile scripts
+- invader-extract: Fixed top-level begin blocks being added
 - invader-recover: Fixed null terminator being included in recovered script hsc
 
 ## [0.49.0] - 2022-03-22
