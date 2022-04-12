@@ -796,6 +796,27 @@
         "size": 48
     },
     {
+        "name": "ScenarioScavengerHuntObjects",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "object name index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            }
+        ],
+        "title": "name",
+        "size": 36
+    },
+    {
         "name": "ScenarioObjectName",
         "type": "struct",
         "fields": [
@@ -3510,8 +3531,14 @@
                 "maximum": 1024
             },
             {
+                "name": "scavenger hunt objects",
+                "type": "TagReflexive",
+                "struct": "ScenarioScavengerHuntObjects",
+                "maximum": 16
+            },
+            {
                 "type": "pad",
-                "size": 224
+                "size": 212
             },
             {
                 "name": "object names",
