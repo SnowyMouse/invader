@@ -31,17 +31,14 @@ namespace Invader::EditQt {
         auto &widgets = this->widgets;
 
         auto add_widget = [&alternate, &vbox_layout, &widgets](QWidget *widget) {
-            QPalette palette;
-            widget->setAutoFillBackground(true);
-
             if(alternate) {
-                palette.setColor(QPalette::Window, QApplication::palette().color(QPalette::Midlight));
+                widget->setBackgroundRole(QPalette::Midlight);
             }
             else {
-                palette.setColor(QPalette::Window, QApplication::palette().color(QPalette::Window));
+                widget->setBackgroundRole(QPalette::Window);
             }
 
-            widget->setPalette(palette);
+            widget->setAutoFillBackground(true);
             vbox_layout->addWidget(widget);
             widgets.emplace_back(widget);
 
