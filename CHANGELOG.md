@@ -4,11 +4,13 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Changed
+- Added definitions for the April 2022 update of CEA.
 - invader-extract: Rewrote the script decompiler. Scripts are now split on every
   256 KiB, a header is included in each script, and code output is more optimal.
 
 ### Fixed
 - invader-dependency: Fixed having to recompile scripts
+- invader-edit-qt: Fixed alternating color background not working on blocks
 - invader-extract: Fixed top-level begin blocks being added
 - invader-recover: Fixed null terminator being included in recovered script hsc
 
