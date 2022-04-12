@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.49.1] - 2022-04-12
 ### Changed
 - Added definitions for the April 2022 update of CEA.
 - invader-extract: Rewrote the script decompiler. Scripts are now split on every
