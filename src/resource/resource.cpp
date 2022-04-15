@@ -39,7 +39,7 @@ int main(int argc, const char **argv) {
         std::vector<std::filesystem::path> tags;
 
         // Maps directory
-        const char *maps = "maps";
+        std::filesystem::path maps = "maps";
 
         // Resource map type
         std::optional<ResourceMapType> type;
@@ -246,7 +246,6 @@ int main(int argc, const char **argv) {
     for(auto &listed_tag : tags_list) {
         // First let's open it
         TagFourCC tag_fourcc = TagFourCC::TAG_FOURCC_NONE;
-        std::vector<std::byte> tag_data;
 
         // But if we don't know the extension, we need to find that first!
         if(listed_tag.fourcc == TagFourCC::TAG_FOURCC_NONE) {
@@ -313,18 +312,6 @@ int main(int argc, const char **argv) {
 
         if(tag_fourcc != listed_tag.fourcc) {
             eprintf_error("Expected %s. Got %s instead.", tag_fourcc_to_extension(tag_fourcc), tag_fourcc_to_extension(listed_tag.fourcc));
-        }
-
-        for(auto &tags_folder : resource_options.tags) {
-            auto tag_path_path = std::filesystem::path(tags_folder) / tag_path;
-            tag_data = Invader::File::open_file(tag_path_path).value_or(std::vector<std::byte>());
-            if(tag_data.size()) {
-                break;
-            }
-        }
-
-        if(tag_data.size() == 0) {
-            eprintf_error("Failed to open %s.", tag_path.c_str());
         }
 
         // This may be needed
