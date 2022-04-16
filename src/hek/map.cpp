@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/hek/map.hpp>
+#include <hiat/hiat.h>
 #include <invader/version.hpp>
 #include <variant>
 #include <optional>
@@ -130,7 +131,7 @@ namespace Invader::HEK {
             .tag_space_length = 64 * 1024 * 1024,
             .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
             .maximum_scenario_script_nodes = MCC_CEA_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_MCC_CEA,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEA,
             .scenario_name_and_file_name_must_be_equal = false,
             .supports_external_bitmaps_map = true,
             PC_BOILERPLATE
@@ -146,7 +147,7 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_DEMO,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEGBXDemo,
             .supports_external_bitmaps_map = true,
             .supports_external_sounds_map = true,
             PC_BOILERPLATE
@@ -162,7 +163,7 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_CUSTOM_EDITION,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCustomEdition,
             .supports_external_bitmaps_map = true,
             .supports_external_sounds_map = true,
             .supports_external_loc_map = true,
@@ -180,7 +181,7 @@ namespace Invader::HEK {
             .tag_space_length = GEARBOX_TAG_SPACE_LENGTH,
             .maximum_file_size = GEARBOX_MAX_FILE_SIZE,
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_GEARBOX_RETAIL,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEGBX,
             .supports_external_bitmaps_map = true,
             .supports_external_sounds_map = true,
             PC_BOILERPLATE
@@ -197,7 +198,7 @@ namespace Invader::HEK {
             .maximum_file_size = xbox_max_file_size,
             
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEXboxNTSC,
             .uses_compression = true,
             
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_2276)
@@ -214,7 +215,7 @@ namespace Invader::HEK {
             .maximum_file_size = xbox_max_file_size,
             
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEXboxNTSC,
             .uses_compression = true,
             
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
@@ -231,7 +232,7 @@ namespace Invader::HEK {
             .maximum_file_size = xbox_max_file_size,
             
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEXboxNTSC,
             .uses_compression = true,
             
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
@@ -248,7 +249,7 @@ namespace Invader::HEK {
             .maximum_file_size = xbox_max_file_size,
             
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEXboxNTSC,
             .uses_compression = true,
             
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)
@@ -265,7 +266,7 @@ namespace Invader::HEK {
             .maximum_file_size = static_cast<Pointer64>(INT32_MAX),
             
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEXboxNTSC,
             .uses_compression = true
         },
         {
@@ -280,7 +281,7 @@ namespace Invader::HEK {
             .maximum_file_size = xbox_demo_max_file_size,
             
             .maximum_scenario_script_nodes = ORIGINAL_MAXIMUM_SCENARIO_SCRIPT_NODES,
-            .scenario_script_compile_target = RIAT_CompileTarget::RIAT_COMPILE_TARGET_XBOX,
+            .scenario_script_compile_target = HIATCompileTarget::HIAT_HaloCEXboxNTSC,
             .uses_compression = true,
             
             XBOX_BOILERPLATE(XBOX_REQUIRED_TAGS_ALL_EVERYTHING_ELSE)

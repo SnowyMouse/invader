@@ -12,7 +12,6 @@
 #include "../resource/resource_map.hpp"
 #include "../tag/parser/parser.hpp"
 #include "../error_handler/error_handler.hpp"
-#include <riat/riat.h>
 
 namespace Invader {
     class BuildWorkload : public ErrorHandler {
@@ -77,11 +76,6 @@ namespace Invader {
              * How verbose to make the output
              */
             BuildVerbosity verbosity = BuildVerbosity::BUILD_VERBOSITY_SHOW_ALL;
-            
-            /**
-             * Script optimization level
-             */
-            RIAT_OptimizationLevel script_optimization_level = RIAT_OptimizationLevel::RIAT_OPTIMIZATION_PREVENT_GENERATIONAL_LOSS;
             
             /**
              * Forge the CRC32?

@@ -7,7 +7,7 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 
-#include <riat/riat.hpp>
+#include <hiat/hiat.hpp>
 
 namespace Invader::Parser {
     static void merge_child_scenarios(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
@@ -28,30 +28,30 @@ namespace Invader::Parser {
                                                                TagFourCC::TAG_FOURCC_DEVICE_MACHINE,
                                                                TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE };
     
-    template<typename T> static std::optional<HEK::TagFourCC> script_value_type_to_fourcc(T type) {
-        switch(static_cast<RIAT_ValueType>(type)) {
-            case RIAT_ValueType::RIAT_VALUE_TYPE_SOUND:
+    static std::optional<HEK::TagFourCC> script_value_type_to_fourcc(HEK::ScenarioScriptValueType type) {
+        switch(type) {
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
                 return HEK::TAG_FOURCC_SOUND;
 
-            case RIAT_ValueType::RIAT_VALUE_TYPE_EFFECT:
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
                 return HEK::TAG_FOURCC_EFFECT;
 
-            case RIAT_ValueType::RIAT_VALUE_TYPE_DAMAGE:
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
                 return HEK::TAG_FOURCC_DAMAGE_EFFECT;
 
-            case RIAT_ValueType::RIAT_VALUE_TYPE_LOOPING_SOUND:
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
                 return HEK::TAG_FOURCC_SOUND_LOOPING;
 
-            case RIAT_ValueType::RIAT_VALUE_TYPE_ANIMATION_GRAPH:
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
                 return HEK::TAG_FOURCC_MODEL_ANIMATIONS;
 
-            case RIAT_ValueType::RIAT_VALUE_TYPE_ACTOR_VARIANT:
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
                 return HEK::TAG_FOURCC_ACTOR_VARIANT;
 
-            case RIAT_ValueType::RIAT_VALUE_TYPE_DAMAGE_EFFECT:
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
                 return HEK::TAG_FOURCC_DAMAGE_EFFECT;
 
-            case RIAT_ValueType::RIAT_VALUE_TYPE_OBJECT_DEFINITION:
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
                 return HEK::TAG_FOURCC_OBJECT;
 
             default:
@@ -59,12 +59,9 @@ namespace Invader::Parser {
         }
     }
     
-    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, RIAT_OptimizationLevel optimization_level, std::vector<std::string> &warnings, const std::vector<std::filesystem::path> &tags_directories, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
+    void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, std::vector<std::string> &warnings, const std::vector<std::filesystem::path> &tags_directories, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
         // Instantiate it
-        RIAT::Instance instance;
-        instance.set_compile_target(info.scenario_script_compile_target);
-        instance.set_optimization_level(optimization_level);
-        instance.set_user_data(&warnings);
+        HIAT::Compiler instance(static_cast<HIATCompileTarget>(info.scenario_script_compile_target));
         
         // Open the hud message text
         Parser::HUDMessageText hmt;
@@ -106,13 +103,6 @@ namespace Invader::Parser {
                 }
             }
         }
-    
-        // Any warnings get eaten up here
-        instance.set_warn_callback([](RIAT_Instance *instance, const char *message, const char *file, std::size_t line, std::size_t column) {
-            char fmt_message[512];
-            std::snprintf(fmt_message, sizeof(fmt_message), "%s.hsc:%zu:%zu: warning: %s", file, line, column, message);
-            reinterpret_cast<std::vector<std::string> *>(riat_instance_get_user_data(instance))->emplace_back(fmt_message);
-        });
         
         // Load the input from script_source
         decltype(scenario.source_files) source_files;
@@ -140,13 +130,20 @@ namespace Invader::Parser {
         // Load the scripts
         try {
             for(auto &source : source_files) {
-                instance.load_script_source(reinterpret_cast<const char *>(source.source.data()), source.source.size(), std::string(source.name.string).c_str());
+                instance.read_script_data(reinterpret_cast<const std::uint8_t *>(source.source.data()), source.source.size(), (std::string(source.name.string) + ".hsc").c_str());
             }
             instance.compile_scripts();
         }
         catch(std::exception &e) {
             eprintf_error("Script compilation error: %s", e.what());
             throw InvalidTagDataException();
+        }
+        
+        // Check warnings
+        for(auto &e : instance.get_warnings()) {
+            char fmt_message[512];
+            std::snprintf(fmt_message, sizeof(fmt_message), "%s:%zu:%zu: warning: %s", e.get_file(), e.get_line(), e.get_column(), e.get_reason());
+            warnings.emplace_back(fmt_message);
         }
         
         std::size_t node_limit = info.maximum_scenario_script_nodes;
@@ -199,31 +196,40 @@ namespace Invader::Parser {
             new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GARBAGE_COLLECTABLE;
             
             // Here's the type
-            new_node.type = static_cast<Invader::HEK::ScenarioScriptValueType>(n.type);
-            new_node.index_union = new_node.type;
+            new_node.type = static_cast<Invader::HEK::ScenarioScriptValueType>(n.value_type);
+            
+            // Set this. It's sometimes important
+            new_node.index_union = n.index_union;
             
             // Set this stuff
-            if(n.is_primitive) {
+            bool is_primitive = n.node_type == HIATNodeTypeC::HIAT_Primitive || n.node_type == HIATNodeTypeC::HIAT_Global;
+            bool is_global = n.node_type == HIATNodeTypeC::HIAT_Global;
+            bool is_script_call = n.node_type == HIATNodeTypeC::HIAT_ScriptCall;
+            if(is_primitive) {
                 new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE;
-                if(n.is_global) {
+                if(is_global) {
                     new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL;
+                    new_node.data.long_int = n.node_data.long_int;
                 }
                 else {
-                    switch(n.type) {
-                        case RIAT_ValueType::RIAT_VALUE_TYPE_BOOLEAN:
-                            new_node.data.bool_int = n.bool_int;
+                    new_node.data.long_int = 0xFFFFFFFF;
+                    
+                    switch(new_node.type) {
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_BOOLEAN:
+                            new_node.data.bool_int = n.node_data.boolean;
                             break;
-                        case RIAT_ValueType::RIAT_VALUE_TYPE_SCRIPT:
-                        case RIAT_ValueType::RIAT_VALUE_TYPE_SHORT:
-                        case RIAT_ValueType::RIAT_VALUE_TYPE_TEAM:
-                        case RIAT_ValueType::RIAT_VALUE_TYPE_GAME_DIFFICULTY:
-                            new_node.data.short_int = n.short_int;
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SCRIPT:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SHORT:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_TEAM:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_GAME_DIFFICULTY:
+                            new_node.data.short_int = n.node_data.short_int;
                             break;
-                        case RIAT_ValueType::RIAT_VALUE_TYPE_LONG:
-                            new_node.data.long_int = n.long_int;
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LONG:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_FUNCTION_NAME:
+                            new_node.data.long_int = n.node_data.long_int;
                             break;
-                        case RIAT_ValueType::RIAT_VALUE_TYPE_REAL:
-                            new_node.data.real = n.real;
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_REAL:
+                            new_node.data.real = n.node_data.real;
                             break;
                         default:
                             break;
@@ -231,11 +237,10 @@ namespace Invader::Parser {
                 }
             }
             else {
-                new_node.data.tag_id.id = format_index_to_id(n.child_node);
+                new_node.data.tag_id.id = format_index_to_id(n.node_data.offset);
                 
-                if(n.is_script_call) {
+                if(is_script_call) {
                     new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL;
-                    new_node.index_union = n.call_index;
                 }
             }
             
@@ -248,7 +253,7 @@ namespace Invader::Parser {
             }
             
             // Get the index of the thing
-            auto find_thing = [&n, &warnings, &source_files, &new_node](auto &array, const char *name) -> std::size_t {
+            auto find_thing = [&n, &warnings, &new_node](auto &array, const char *name) -> std::size_t {
                 if(std::strcmp(name, "none") == 0) {
                     return SIZE_MAX;
                 }
@@ -285,7 +290,7 @@ namespace Invader::Parser {
                 
                 if(multiple_instances) {
                     char warning[512];
-                    std::snprintf(warning, sizeof(warning), "%s.hsc:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), name, first_instance);
+                    std::snprintf(warning, sizeof(warning), "%s:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", n.file, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), name, first_instance);
                     warnings.emplace_back(warning);
                 }
                 
@@ -294,26 +299,26 @@ namespace Invader::Parser {
             
             // Make sure the thing it refers to exists. If so, save the index.
             try {
-                if(n.is_primitive && !n.is_global) {
+                if(n.node_type == HIATNodeTypeC::HIAT_Primitive) {
                     switch(new_node.type) {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_RECORDING:
-                            new_node.data.long_int = find_thing(scenario.recorded_animations, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.recorded_animations, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_AI_COMMAND_LIST:
-                            new_node.data.long_int = find_thing(scenario.command_lists, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.command_lists, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CONVERSATION:
-                            new_node.data.long_int = find_thing(scenario.ai_conversations, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.ai_conversations, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_GROUP:
-                            new_node.data.long_int = find_thing(scenario.device_groups, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.device_groups, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_TRIGGER_VOLUME:
-                            new_node.data.long_int = find_thing(scenario.trigger_volumes, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.trigger_volumes, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_AI: {
@@ -367,19 +372,19 @@ namespace Invader::Parser {
                         }
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_TITLE:
-                            new_node.data.long_int = find_thing(scenario.cutscene_titles, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.cutscene_titles, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_FLAG:
-                            new_node.data.long_int = find_thing(scenario.cutscene_flags, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.cutscene_flags, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_CAMERA_POINT:
-                            new_node.data.long_int = find_thing(scenario.cutscene_camera_points, n.string_data);
+                            new_node.data.short_int = find_thing(scenario.cutscene_camera_points, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_HUD_MESSAGE:
-                            new_node.data.long_int = find_thing(hmt.messages, n.string_data);
+                            new_node.data.short_int = find_thing(hmt.messages, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_NAVPOINT:
-                            new_node.data.long_int = find_thing(hud_globals.waypoint_arrows, n.string_data);
+                            new_node.data.short_int = find_thing(hud_globals.waypoint_arrows, n.string_data);
                             break;
                             
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_NAME:
@@ -435,7 +440,7 @@ namespace Invader::Parser {
                                 
                                 do_object_index_check_now:
                                 if(!something_corresponds_to_this) {
-                                    eprintf_error("%s.hsc:%zu:%zu: error: '%s' is an object name that does not correspond to any object or AI conversation and is thus invalid for use in scripts", source_files[n.file].name.string, n.line, n.column, n.string_data);
+                                    eprintf_error("%s:%zu:%zu: error: '%s' is an object name that does not correspond to any object or AI conversation and is thus invalid for use in scripts", n.file, n.line, n.column, n.string_data);
                                     throw InvalidTagDataException();
                                 }
                             }
@@ -452,7 +457,7 @@ namespace Invader::Parser {
                 throw;
             }
             catch(std::exception &) {
-                eprintf_error("%s.hsc:%zu:%zu: error: can't find %s '%s'", source_files[n.file].name.string, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data);
+                eprintf_error("%s:%zu:%zu: error: can't find %s '%s'", n.file, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), n.string_data);
                 throw InvalidTagDataException();
             }
         }
@@ -487,9 +492,7 @@ namespace Invader::Parser {
         for(std::size_t s = 0; s < script_count; s++) {
             auto &new_script = new_scripts[s];
             const auto &cmp_script = scripts[s];
-            
-            static_assert(sizeof(new_script.name.string) == sizeof(cmp_script.name));
-            memcpy(new_script.name.string, cmp_script.name, sizeof(cmp_script.name));
+            std::strncpy(new_script.name.string, cmp_script.name, sizeof(new_script.name.string));
             
             new_script.return_type = static_cast<decltype(new_script.return_type)>(cmp_script.return_type);
             new_script.script_type = static_cast<decltype(new_script.script_type)>(cmp_script.script_type);
@@ -503,12 +506,12 @@ namespace Invader::Parser {
             auto &node = nodes[n];
             
             // Skip non-primitives/globals
-            if(!node.is_primitive || node.is_global) {
+            if(node.node_type != HIATNodeTypeC::HIAT_Primitive) {
                 continue;
             }
             
             // Check if we know the group
-            auto group = script_value_type_to_fourcc(node.type);
+            auto group = script_value_type_to_fourcc(static_cast<HEK::ScenarioScriptValueType>(node.value_type));
             if(!group.has_value()) {
                 continue;
             }
@@ -588,7 +591,7 @@ namespace Invader::Parser {
                     if(fourcc_matches) {
                         if((resolved = File::tag_path_to_file_path(tfp, tags_directories).has_value())) {
                             char w[1024];
-                            std::snprintf(w, sizeof(w), "%s.hsc:%zu:%zu: warning: using tag paths with explicit groups is a Halo 2 extension and may not work with stock tools or any future release of Invader", source_files[n.file].name.string, n.line, n.column);
+                            std::snprintf(w, sizeof(w), "%s:%zu:%zu: warning: using tag paths with explicit groups is a Halo 2 extension and may not work with stock tools or any future release of Invader", n.file, n.line, n.column);
                             warnings.emplace_back(w);
                             path = tfp;
                         }
@@ -602,14 +605,14 @@ namespace Invader::Parser {
             if(!resolved && r.first.path == "none") {
                 resolved = true;
                 char w[1024];
-                std::snprintf(w, sizeof(w), "%s.hsc:%zu:%zu: warning: using null tag paths is a Halo 3 extension and may not work with stock tools or any future release of Invader", source_files[n.file].name.string, n.line, n.column);
+                std::snprintf(w, sizeof(w), "%s:%zu:%zu: warning: using null tag paths is a Halo 3 extension and may not work with stock tools or any future release of Invader", n.file, n.line, n.column);
                 warnings.emplace_back(w);
                 path = r.first;
                 skip_adding = true;
             }
             
             if(!resolved) {
-                eprintf_error("%s.hsc:%zu:%zu: error: can't find %s tag \"%s\"", source_files[n.file].name.string, n.line, n.column, HEK::tag_fourcc_to_extension(path.fourcc), path.path.c_str());
+                eprintf_error("%s:%zu:%zu: error: can't find %s tag \"%s\"", n.file, n.line, n.column, HEK::tag_fourcc_to_extension(path.fourcc), path.path.c_str());
                 throw InvalidTagDataException();
             }
             
@@ -627,9 +630,7 @@ namespace Invader::Parser {
         for(std::size_t g = 0; g < global_count; g++) {
             auto &new_global = new_globals[g];
             const auto &cmp_global = globals[g];
-            
-            static_assert(sizeof(new_global.name.string) == sizeof(cmp_global.name));
-            memcpy(new_global.name.string, cmp_global.name, sizeof(cmp_global.name));
+            std::strncpy(new_global.name.string, cmp_global.name, sizeof(new_global.name.string));
             
             new_global.type = static_cast<decltype(new_global.type)>(cmp_global.value_type);
             new_global.initialization_expression_index = format_index_to_id(cmp_global.first_node);
@@ -818,7 +819,7 @@ namespace Invader::Parser {
         // Recompile scripts
         try {
             std::vector<std::string> warnings;
-            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), workload.get_build_parameters()->script_optimization_level, warnings, workload.get_build_parameters()->tags_directories);
+            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), warnings, workload.get_build_parameters()->tags_directories);
             for(auto &w : warnings) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
             }

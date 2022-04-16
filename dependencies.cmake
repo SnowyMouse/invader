@@ -20,8 +20,9 @@ find_package(SDL2)
 find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 find_package(SDL2 REQUIRED)
 
-# Load RIAT
-add_subdirectory(ext/riat)
+# Load Hamster in a Tube
+add_subdirectory(ext/corrosion)
+corrosion_import_crate(MANIFEST_PATH ext/hiat/Cargo.toml)
 
 # Audio things
 set(DEP_AUDIO_LIBRARIES FLAC vorbisenc vorbisfile vorbis ogg samplerate)

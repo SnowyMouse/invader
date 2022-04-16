@@ -11,8 +11,6 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 
-#include <riat/riat.hpp>
-
 int main(int argc, const char **argv) {
     set_up_color_term();
     
@@ -267,7 +265,7 @@ int main(int argc, const char **argv) {
         }
         
         // Compile
-        Parser::compile_scripts(s, *script_options.engine, RIAT_OptimizationLevel::RIAT_OPTIMIZATION_PREVENT_GENERATIONAL_LOSS, warnings, script_options.tags, source_files);
+        Parser::compile_scripts(s, *script_options.engine, warnings, script_options.tags, source_files);
         
         // Clear?
         if(script_options.clear) {
