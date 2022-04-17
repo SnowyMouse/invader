@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untragged]
+### Fixed
+- Rewrote the script parser, improving accuracy and fixing a bug with desyncing
+  on co-op on Halo: The Master Chief Collection.
+
 ## [0.49.1] - 2022-04-12
 ### Changed
 - Added definitions for the April 2022 update of CEA.
