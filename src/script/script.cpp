@@ -132,7 +132,7 @@ int main(int argc, const char **argv) {
     // Now get the file path
     auto tag_path = File::tag_path_to_file_path(scenario + ".scenario", script_options.tags);
     if(!tag_path.has_value()) {
-        eprintf_error("Failed to find a valid scenario tags %s.scenario", File::halo_path_to_preferred_path(scenario).c_str());
+        eprintf_error("Failed to find a valid scenario tag %s.scenario", File::halo_path_to_preferred_path(scenario).c_str());
         return EXIT_FAILURE;
     }
     
