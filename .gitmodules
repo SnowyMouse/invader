@@ -1,6 +1,3 @@
-[submodule "ext/corrosion"]
-	path = ext/corrosion
-	url = https://github.com/corrosion-rs/corrosion
 [submodule "ext/hiat"]
 	path = ext/hiat
 	url = https://github.com/SnowyMouse/hiat
