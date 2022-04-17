@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-# Require at least version 3.12
-cmake_minimum_required(VERSION 3.12)
+# Require at least version 3.14
+cmake_minimum_required(VERSION 3.14)
 
 # Project name - You should change this if you're making a fork
 project(Invader

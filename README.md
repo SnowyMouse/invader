@@ -74,9 +74,9 @@ some of these dependencies may have their own dependencies (and so on), but if
 you use a package manager to get them, then it should take care of that for you.
 
 ##### Required dependencies
-- C++17 compiler
+- C++20 compiler
 - C11 compiler
-- CMake 3.12 or newer
+- CMake 3.14 or newer
 - Python 3.7 or newer
 - LibTIFF 3.6 or newer
 - libvorbis 1.3.6 or newer
@@ -84,6 +84,7 @@ you use a package manager to get them, then it should take care of that for you.
 - Qt6
 - SDL2
 - zlib
+- [Corrosion](https://github.com/corrosion-rs/corrosion) 0.1
 
 ##### Optional dependencies
 - LibArchive ([invader-archive])
