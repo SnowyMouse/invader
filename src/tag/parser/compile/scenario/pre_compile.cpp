@@ -492,7 +492,7 @@ namespace Invader::Parser {
         for(std::size_t s = 0; s < script_count; s++) {
             auto &new_script = new_scripts[s];
             const auto &cmp_script = scripts[s];
-            std::strncpy(new_script.name.string, cmp_script.name, sizeof(new_script.name.string));
+            std::strncpy(new_script.name.string, cmp_script.name, sizeof(new_script.name.string) - 1);
             
             new_script.return_type = static_cast<decltype(new_script.return_type)>(cmp_script.return_type);
             new_script.script_type = static_cast<decltype(new_script.script_type)>(cmp_script.script_type);
@@ -630,7 +630,7 @@ namespace Invader::Parser {
         for(std::size_t g = 0; g < global_count; g++) {
             auto &new_global = new_globals[g];
             const auto &cmp_global = globals[g];
-            std::strncpy(new_global.name.string, cmp_global.name, sizeof(new_global.name.string));
+            std::strncpy(new_global.name.string, cmp_global.name, sizeof(new_global.name.string) - 1);
             
             new_global.type = static_cast<decltype(new_global.type)>(cmp_global.value_type);
             new_global.initialization_expression_index = format_index_to_id(cmp_global.first_node);
