@@ -20,7 +20,7 @@ find_package(SDL2)
 find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 find_package(SDL2 REQUIRED)
 
-# Load Hamster in a Tube
+# Load Rat In a Tube
 find_package(Corrosion REQUIRED)
 corrosion_import_crate(MANIFEST_PATH ext/riat/Cargo.toml)
 
