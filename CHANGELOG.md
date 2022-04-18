@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untragged]
+### Changed
+- invader-extract: If a scenario tags' source data could not be extracted, it
+  will no longer try to save the scenario tag without script data.
+
 ### Fixed
 - Rewrote the script parser, improving accuracy and fixing a bug with desyncing
   on co-op on Halo: The Master Chief Collection.

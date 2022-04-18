@@ -436,7 +436,7 @@ namespace Invader::Parser {
                 return true;
             }
             catch(std::exception &e) {
-                eprintf_error("Failed to decompile scripts; scenario will not have any source data: %s", e.what());
+                eprintf_error("Failed to decompile scripts: %s", e.what());
                 scenario.source_files.clear();
                 return false;
             }
@@ -474,7 +474,11 @@ namespace Invader::Parser {
         }
 
         // Put scripts in if need be
-        fix_missing_script_source_data(*this, true);
+        if(!this->scripts.empty() || !this->globals.empty()) {
+            if(!fix_missing_script_source_data(*this, true)) {
+                throw InvalidTagDataException();
+            }
+        }
 
         // And lastly, for consistency sake, remove all tag IDs and zero out the pointer
         this->postprocess_hek_data();
