@@ -22,7 +22,7 @@ find_package(SDL2 REQUIRED)
 
 # Load Hamster in a Tube
 find_package(Corrosion REQUIRED)
-corrosion_import_crate(MANIFEST_PATH ext/hiat/Cargo.toml)
+corrosion_import_crate(MANIFEST_PATH ext/riat/Cargo.toml)
 
 # Audio things
 set(DEP_AUDIO_LIBRARIES FLAC vorbisenc vorbisfile vorbis ogg samplerate)

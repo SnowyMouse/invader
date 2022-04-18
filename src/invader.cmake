@@ -238,7 +238,7 @@ add_custom_command(
 set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
 
 # Include that
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS} ext/hiat/hiatc/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS} ext/riat/riatc/include)
 
 # Link against everything
-target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES} ${DEP_SQUISH_LIBRARIES} hiatc)
+target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES} ${DEP_SQUISH_LIBRARIES} riatc)

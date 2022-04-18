@@ -7,7 +7,7 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 
-#include <hiat/hiat.hpp>
+#include <riat/riat.hpp>
 
 namespace Invader::Parser {
     static void merge_child_scenarios(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
@@ -61,7 +61,7 @@ namespace Invader::Parser {
     
     void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, std::vector<std::string> &warnings, const std::vector<std::filesystem::path> &tags_directories, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
         // Instantiate it
-        HIAT::Compiler instance(static_cast<HIATCompileTarget>(info.scenario_script_compile_target));
+        RIAT::Compiler instance(static_cast<RIATCompileTarget>(info.scenario_script_compile_target));
         
         // Open the hud message text
         Parser::HUDMessageText hmt;
@@ -206,9 +206,9 @@ namespace Invader::Parser {
             new_node.index_union = n.index_union;
             
             // Set this stuff
-            bool is_primitive = n.node_type == HIATNodeTypeC::HIAT_Primitive || n.node_type == HIATNodeTypeC::HIAT_Global;
-            bool is_global = n.node_type == HIATNodeTypeC::HIAT_Global;
-            bool is_script_call = n.node_type == HIATNodeTypeC::HIAT_ScriptCall;
+            bool is_primitive = n.node_type == RIATNodeTypeC::RIAT_Primitive || n.node_type == RIATNodeTypeC::RIAT_Global;
+            bool is_global = n.node_type == RIATNodeTypeC::RIAT_Global;
+            bool is_script_call = n.node_type == RIATNodeTypeC::RIAT_ScriptCall;
             if(is_primitive) {
                 new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE;
                 if(is_global) {
@@ -303,7 +303,7 @@ namespace Invader::Parser {
             
             // Make sure the thing it refers to exists. If so, save the index.
             try {
-                if(n.node_type == HIATNodeTypeC::HIAT_Primitive) {
+                if(n.node_type == RIATNodeTypeC::RIAT_Primitive) {
                     switch(new_node.type) {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_RECORDING:
                             new_node.data.short_int = find_thing(scenario.recorded_animations, n.string_data);
@@ -519,7 +519,7 @@ namespace Invader::Parser {
             auto &node = nodes[n];
             
             // Skip non-primitives/globals
-            if(node.node_type != HIATNodeTypeC::HIAT_Primitive) {
+            if(node.node_type != RIATNodeTypeC::RIAT_Primitive) {
                 continue;
             }
             

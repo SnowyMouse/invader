@@ -75,7 +75,7 @@ namespace Invader::HEK {
         /** Maximum script nodes allowed for the target engine */
         std::uint16_t maximum_scenario_script_nodes = UINT16_MAX;
         
-        /** Compile target for scenario scripts (cast to HIATCompileTarget) */
+        /** Compile target for scenario scripts (cast to RIATCompileTarget) */
         int scenario_script_compile_target = 0;
         
         bool scenario_name_and_file_name_must_be_equal = true;
