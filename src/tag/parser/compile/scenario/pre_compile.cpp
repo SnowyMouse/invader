@@ -65,7 +65,8 @@ namespace Invader::Parser {
         
         // Open the hud message text
         Parser::HUDMessageText hmt;
-        if(!scenario.hud_messages.path.empty()) {
+        bool hmt_exists = !scenario.hud_messages.path.empty();
+        if(hmt_exists) {
             auto file_path = File::tag_path_to_file_path(File::halo_path_to_preferred_path(scenario.hud_messages.path) + ".hud_message_text", tags_directories);
             if(file_path.has_value()) {
                 auto hud_message_text_data = File::open_file(*file_path);
@@ -80,7 +81,9 @@ namespace Invader::Parser {
         // Eventually get the HUD globals tag
         Parser::HUDGlobals hud_globals;
         auto globals_file_path = File::tag_path_to_file_path(File::halo_path_to_preferred_path("globals\\globals.globals"), tags_directories);
-        if(globals_file_path.has_value()) {
+        bool globals_exists = globals_file_path.has_value();
+        bool hud_globals_exists = false;
+        if(globals_exists) {
             auto globals_data = File::open_file(*globals_file_path);
             if(!globals_data.has_value()) {
                 eprintf_error("Failed to open %s\n", globals_file_path->string().c_str());
@@ -99,6 +102,7 @@ namespace Invader::Parser {
                             throw std::exception();
                         }
                         hud_globals = Parser::HUDGlobals::parse_hek_tag_file(hud_globals_data->data(), hud_globals_data->size());
+                        hud_globals_exists = true;
                     }
                 }
             }
@@ -381,9 +385,18 @@ namespace Invader::Parser {
                             new_node.data.short_int = find_thing(scenario.cutscene_camera_points, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_HUD_MESSAGE:
+                            if(!hmt_exists) {
+                                eprintf_error("Unable to locate a HUD message if no hud_message_text tag is referenced by the scenario");
+                            }
                             new_node.data.short_int = find_thing(hmt.messages, n.string_data);
                             break;
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_NAVPOINT:
+                            if(!globals_exists) {
+                                eprintf_error("Unable to locate a navpoint if no globals tag is present, as a hud_globals tag cannot be found");
+                            }
+                            else if(!hud_globals_exists) {
+                                eprintf_error("Unable to locate a navpoint if no hud_globals tag is referenced by the globals tag");
+                            }
                             new_node.data.short_int = find_thing(hud_globals.waypoint_arrows, n.string_data);
                             break;
                             
