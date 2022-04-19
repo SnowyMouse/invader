@@ -116,57 +116,68 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string
     const auto *c = str.c_str();
     
     while(true) {
-        if(c[i] == 0 && i != string_length) {
+        auto last_char = i == string_length;
+        
+        if(c[i] == 0 && !last_char) {
             eprintf_error("Null character is present in the file.");
             std::exit(EXIT_FAILURE);
         }
         
         // End of line?
-        if(c[i] == '\r' || c[i] == '\n' || c[i] == 0) {
-            unsigned int increment;
+        if(c[i] == '\r' || c[i] == '\n' || last_char) {
+            unsigned int increment = 0;
             if(c[i] == '\r') {
                 if(c[i + 1] != '\n') {
                     eprintf_error("CR with unaccompanied LF character.");
                     std::exit(EXIT_FAILURE);
                 }
+                increment = 2;
+            }
+            else if(c[i] == '\n') {
                 increment = 1;
             }
-            else {
-                increment = 0;
-            }
             
-            bool found_equals = false;
-            auto line_start_str = c + line_start;
-            for(auto *j = line_start_str; j < c + i; j++) {
-                if(*j == '=') {
-                    found_equals = true;
-                    
-                    auto key16 = std::u16string(line_start_str, j);
-                    std::string key;
-                    key.reserve(sizeof(key16));
-                    for(auto i : key16) {
-                        key.push_back(i);
-                    }
-                    
-                    auto value = std::u16string(j + 1, c + i);
-                    for(auto &s : strings) {
-                        if(s.first == key) {
-                            eprintf_error("Error: Duplicate %s keys.", key.c_str());
-                            std::exit(EXIT_FAILURE);
+            // If line is not empty, parse
+            if(i != line_start) {
+                bool found_equals = false;
+                auto line_start_str = c + line_start;
+                for(auto *j = line_start_str; j < c + i; j++) {
+                    if(*j == '=') {
+                        found_equals = true;
+                        
+                        auto key16 = std::u16string(line_start_str, j);
+                        std::string key;
+                        key.reserve(sizeof(key16));
+                        for(auto i : key16) {
+                            key.push_back(i);
                         }
+                        
+                        auto value = std::u16string(j + 1, c + i);
+                        for(auto &s : strings) {
+                            if(s.first == key) {
+                                eprintf_error("Error: Duplicate %s keys.", key.c_str());
+                                std::exit(EXIT_FAILURE);
+                            }
+                        }
+                        strings.emplace_back(key, value);
+                        
+                        break;
                     }
-                    strings.emplace_back(key, value);
-                    
-                    break;
                 }
-            }
-            if(!found_equals) {
-                eprintf_error("Line %zu needs to be formatted as key=value be valid.", strings.size() + 1);
-                std::exit(EXIT_FAILURE);
+                if(!found_equals) {
+                    eprintf_error("Line %zu needs to be formatted as key=value be valid.", strings.size() + 1);
+                    std::exit(EXIT_FAILURE);
+                }
             }
                 
             i += increment;
-            line_start = i + 1;
+            line_start = i;
+            
+            if(last_char) {
+                break;
+            }
+            
+            continue;
         }
         
         // Break on null terminator
