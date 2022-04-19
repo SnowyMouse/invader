@@ -400,7 +400,7 @@ int main(int argc, char * const *argv) {
             break;
     }
 
-    auto input_path = (string_options.data / string_tag).string() + valid_extension;
+    auto input_path = string_options.data / (string_tag + valid_extension);
     auto output_path = string_options.tags / (string_tag + output_extension);
     
     auto file_data = Invader::File::open_file(input_path);
@@ -439,7 +439,7 @@ int main(int argc, char * const *argv) {
     // If it's 16-bit, parse it as such.
     if(is_16_bit) {
         if(((reinterpret_cast<std::uintptr_t>(end16) - reinterpret_cast<std::uintptr_t>(start16)) % sizeof(*start16)) != 0) {
-            eprintf_error("File %s has a 16-bit BOM but is not actually 16-bit", input_path.c_str());
+            eprintf_error("File %s has a 16-bit BOM but is not actually 16-bit", input_path.string().c_str());
             return EXIT_FAILURE;
         }
         chars_16bit = { start16, end16 };
@@ -452,7 +452,7 @@ int main(int argc, char * const *argv) {
     }
     else {
         if(*string_options.format == Format::STRING_LIST_FORMAT_HMT) {
-            eprintf_error("File %s is not 16-bit, but .hmt files must be 16-bit", input_path.c_str());
+            eprintf_error("File %s is not 16-bit, but .hmt files must be 16-bit", input_path.string().c_str());
             return EXIT_FAILURE;
         }
         chars_16bit.reserve(input_size);
@@ -483,8 +483,8 @@ int main(int argc, char * const *argv) {
     std::filesystem::create_directories(tag_path.parent_path(), ec);
     
     // Save
-    if(!File::save_file(output_path.c_str(), final_data)) {
-        eprintf_error("Error: Failed to write to %s.", output_path.c_str());
+    if(!File::save_file(output_path, final_data)) {
+        eprintf_error("Error: Failed to write to %s.", output_path.string().c_str());
         return EXIT_FAILURE;
     }
 
