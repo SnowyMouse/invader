@@ -16,7 +16,7 @@ using namespace Invader;
 enum Format {
     STRING_LIST_FORMAT_UNICODE,
     STRING_LIST_FORMAT_HMT,
-    STRING_LIST_FORMAT_LATIN1
+    STRING_LIST_FORMAT_1252
 };
 
 template <typename OUTPUT_TYPE, typename TAG_STRUCT, TagFourCC FOURCC> static std::vector<std::byte> generate_string_list_tag(const std::u16string &input_string) {
@@ -107,9 +107,195 @@ template <typename OUTPUT_TYPE, typename TAG_STRUCT, TagFourCC FOURCC> static st
     return tag_data.generate_hek_tag_data(FOURCC, true);
 }
 
-static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string &) {
-    eprintf_error("Error: Unimplemented.");
-    std::exit(EXIT_FAILURE);
+static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string &str) {
+    std::vector<std::pair<std::string, std::u16string>> strings;
+    
+    std::size_t line_start = 0;
+    std::size_t i = line_start;
+    auto string_length = str.size();
+    const auto *c = str.c_str();
+    
+    while(true) {
+        if(c[i] == 0 && i != string_length) {
+            eprintf_error("Null character is present in the file.");
+            std::exit(EXIT_FAILURE);
+        }
+        
+        // End of line?
+        if(c[i] == '\r' || c[i] == '\n' || c[i] == 0) {
+            unsigned int increment;
+            if(c[i] == '\r') {
+                if(c[i + 1] != '\n') {
+                    eprintf_error("CR with unaccompanied LF character.");
+                    std::exit(EXIT_FAILURE);
+                }
+                increment = 1;
+            }
+            else {
+                increment = 0;
+            }
+            
+            bool found_equals = false;
+            auto line_start_str = c + line_start;
+            for(auto *j = line_start_str; j < c + i; j++) {
+                if(*j == '=') {
+                    found_equals = true;
+                    
+                    auto key16 = std::u16string(line_start_str, j);
+                    std::string key;
+                    key.reserve(sizeof(key16));
+                    for(auto i : key16) {
+                        key.push_back(i);
+                    }
+                    
+                    auto value = std::u16string(j + 1, c + i);
+                    for(auto &s : strings) {
+                        if(s.first == key) {
+                            eprintf_error("Error: Duplicate %s keys.", key.c_str());
+                            std::exit(EXIT_FAILURE);
+                        }
+                    }
+                    strings.emplace_back(key, value);
+                    
+                    break;
+                }
+            }
+            if(!found_equals) {
+                eprintf_error("Line %zu needs to be formatted as key=value be valid.", strings.size() + 1);
+                std::exit(EXIT_FAILURE);
+            }
+                
+            i += increment;
+            line_start = i + 1;
+        }
+        
+        // Break on null terminator
+        if(c[i] == 0) {
+            break;
+        }
+        
+        i++;
+    }
+    
+    // Make the thing
+    Invader::Parser::HUDMessageText tag_data = {};
+    tag_data.messages.reserve(strings.size());
+    
+    std::vector<char16_t> text_data;
+    
+    for(auto &s : strings) {
+        auto &m = tag_data.messages.emplace_back();
+        auto &k = s.first;
+        auto *key_str = k.c_str();
+        auto key_length = k.size();
+        if(key_length >= sizeof(m.name)) {
+            eprintf_error("Key '%s' exceeds %zu characters", key_str, sizeof(m.name));
+            std::exit(EXIT_FAILURE);
+        }
+        std::strncpy(m.name.string, key_str, key_length);
+        
+        m.start_index_into_text_blob = text_data.size();
+        
+        auto start_element = tag_data.message_elements.size();
+        m.start_index_of_message_block = start_element;
+        
+        auto *message_str = s.second.c_str();
+        auto *word_start = message_str;
+        for(auto *c = message_str; true; c++) {
+            // Control
+            if(*word_start == '%' && (*c == ' ' || *c == 0)) {
+                std::u16string thing = { word_start + 1, c };
+                static constexpr const char16_t *ALL_MESSAGE_TYPES[] = {
+                    u"a-button",
+                    u"b-button",
+                    u"x-button",
+                    u"y-button",
+                    u"black-button",
+                    u"white-button",
+                    u"left-trigger",
+                    u"right-trigger",
+                    u"dpad-up",
+                    u"dpad-down",
+                    u"dpad-left",
+                    u"dpad-right",
+                    u"start-button",
+                    u"back-button",
+                    u"left-thumb",
+                    u"right-thumb",
+                    u"left-stick",
+                    u"right-stick",
+                    u"action",
+                    u"throw-grenade",
+                    u"primary-trigger",
+                    u"integrated-light",
+                    u"jump",
+                    u"use-equipment",
+                    u"rotate-weapons",
+                    u"rotate-grenades",
+                    u"crouch",
+                    u"zoom",
+                    u"accept",
+                    u"back",
+                    u"move",
+                    u"look",
+                    u"custom-1",
+                    u"custom-2",
+                    u"custom-3",
+                    u"custom-4",
+                    u"custom-5",
+                    u"custom-6",
+                    u"custom-7",
+                    u"custom-8"
+                };
+                
+                bool found = false;
+                for(std::size_t i = 0; i < sizeof(ALL_MESSAGE_TYPES) - sizeof(ALL_MESSAGE_TYPES[0]); i++) {
+                    if(thing == ALL_MESSAGE_TYPES[i]) {
+                        auto &element = tag_data.message_elements.emplace_back();
+                        element.type = 1;
+                        element.data = i;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if(!found) {
+                    std::string c(thing.begin(), thing.end());
+                    eprintf_error("Unknown control code %s.", c.c_str());
+                    std::exit(EXIT_FAILURE);
+                }
+                
+                word_start = c;
+            }
+            
+            // Non-control
+            else if(*word_start != '%' && (*c == '%' || *c == 0)) {
+                if(c != word_start) {
+                    auto &element = tag_data.message_elements.emplace_back();
+                    element.type = 0;
+                    element.data = (c - word_start) + 1;
+                    text_data.insert(text_data.end(), word_start, c); // insert the string
+                    text_data.emplace_back(); // and the null terminator
+                }
+                word_start = c;
+            }
+            
+            if(*c == 0) {
+                break;
+            }
+        }
+        
+        m.panel_count = tag_data.message_elements.size() - start_element;
+    }
+    
+    auto text_data_bytes_start = text_data.data();
+    auto text_data_bytes_end = text_data_bytes_start + text_data.size();
+    
+    tag_data.text_data = { reinterpret_cast<std::byte *>(text_data_bytes_start), reinterpret_cast<std::byte *>(text_data_bytes_end) };
+    
+    oprintf_success("Generated a HUD message text list with %zu string%s.", strings.size(), strings.size() == 1 ? "" : "s");
+    
+    return tag_data.generate_hek_tag_data(HEK::TagFourCC::TAG_FOURCC_HUD_MESSAGE_TEXT, true);
 }
 
 int main(int argc, char * const *argv) {
@@ -152,7 +338,7 @@ int main(int argc, char * const *argv) {
                     string_options.format = Format::STRING_LIST_FORMAT_UNICODE;
                 }
                 else if(std::strcmp(arguments[0], "string_list") == 0) {
-                    string_options.format = Format::STRING_LIST_FORMAT_LATIN1;
+                    string_options.format = Format::STRING_LIST_FORMAT_1252;
                 }
                 else if(std::strcmp(arguments[0], "hud_message_text") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_HMT;
@@ -195,7 +381,7 @@ int main(int argc, char * const *argv) {
         case Format::STRING_LIST_FORMAT_HMT:
             output_extension = ".hud_message_text";
             break;
-        case Format::STRING_LIST_FORMAT_LATIN1:
+        case Format::STRING_LIST_FORMAT_1252:
             output_extension = ".string_list";
             break;
         case Format::STRING_LIST_FORMAT_UNICODE:
@@ -270,17 +456,12 @@ int main(int argc, char * const *argv) {
         case STRING_LIST_FORMAT_UNICODE:
             final_data = generate_string_list_tag<char16_t, Parser::UnicodeStringList, TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST>(chars_16bit);
             break;
-        case STRING_LIST_FORMAT_LATIN1:
+        case STRING_LIST_FORMAT_1252:
             final_data = generate_string_list_tag<char8_t, Parser::StringList, TagFourCC::TAG_FOURCC_STRING_LIST>(chars_16bit);
             break;
         case STRING_LIST_FORMAT_HMT:
             final_data = generate_hud_message_text_tag(chars_16bit);
             break;
-    }
-    
-    if(final_data.size() == 0) {
-        eprintf_error("String list was empty. Make sure your text file ends with a newline.");
-        return EXIT_FAILURE;
     }
 
     // Write it all

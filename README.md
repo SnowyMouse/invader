@@ -937,9 +937,9 @@ Generate string list tags.
 Options:
   -d --data <dir>              Use the specified data directory. Default:
                                "data"
-  -f --format                  Set string list format. Can be unicode or
-                               latin-1. Must be specified if a string tag is
-                               not present.
+  -G --group <group>           Specify the type of string tag. Can be:
+                               hud_message_text, string_list,
+                               unicode_string_list
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the tag.

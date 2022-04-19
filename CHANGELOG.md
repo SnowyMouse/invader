@@ -3,9 +3,13 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-string: Added support for making hud_message_text tags.
+
 ### Changed
 - invader-extract: If a scenario tags' source data could not be extracted, it
   will no longer try to save the scenario tag without script data.
+- invader-string: Changed --format to --group
 
 ### Fixed
 - Rewrote the script parser, improving accuracy and fixing a bug with desyncing
