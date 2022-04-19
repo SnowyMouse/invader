@@ -405,7 +405,7 @@ int main(int argc, char * const *argv) {
     
     auto file_data = Invader::File::open_file(input_path);
     if(!file_data.has_value()) {
-        eprintf_error("Failed to read %s", input_path.c_str());
+        eprintf_error("Failed to read %s", input_path.string().c_str());
         return EXIT_FAILURE;
     }
 
