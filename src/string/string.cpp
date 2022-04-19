@@ -317,11 +317,11 @@ int main(int argc, char * const *argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
-        CommandLineOption("type", 'T', 1, "Specify the type of string tag. Can be: hud_message_text, string_list, unicode_string_list", "<group>"),
+        CommandLineOption("type", 'T', 1, "Specify the type of string tag. Can be: hud_message_text, string_list, unicode_string_list", "<type>"),
     };
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";
-    static constexpr char USAGE[] = "[options] -G <group> <tag>";
+    static constexpr char USAGE[] = "[options] -T <type> <tag>";
 
     struct StringOptions {
         std::filesystem::path data = "data";
@@ -344,7 +344,7 @@ int main(int argc, char * const *argv) {
             case 'P':
                 string_options.use_filesystem_path = true;
                 break;
-            case 'G':
+            case 'T':
                 if(std::strcmp(arguments[0], "unicode_string_list") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_UNICODE;
                 }

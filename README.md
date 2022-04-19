@@ -930,21 +930,21 @@ strings are stored in a .txt file, with each string ending with a line,
 `###END-STRING###`.
 
 ```
-Usage: invader-string [options] <tag>
+Usage: invader-string [options] -T <type> <tag>
 
 Generate string list tags.
 
 Options:
   -d --data <dir>              Use the specified data directory. Default:
                                "data"
-  -G --group <group>           Specify the type of string tag. Can be:
-                               hud_message_text, string_list,
-                               unicode_string_list
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the tag.
   -t --tags <dir>              Use the specified tags directory. Default:
                                "tags"
+  -T --type <type>             Specify the type of string tag. Can be:
+                               hud_message_text, string_list,
+                               unicode_string_list
 ```
 
 ### invader-strip
