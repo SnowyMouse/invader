@@ -19,26 +19,31 @@ enum Format {
     STRING_LIST_FORMAT_LATIN1
 };
 
-template <typename T, typename G, TagFourCC C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
+template <typename OUTPUT_TYPE, typename TAG_STRUCT, TagFourCC FOURCC> static std::vector<std::byte> generate_string_list_tag(const std::u16string &input_string) {
     using namespace HEK;
 
     // Make the file header
-    G tag_data = {};
+    TAG_STRUCT tag_data = {};
 
     // Start building a list of strings
-    std::vector<std::string> strings;
+    std::vector<std::u16string> strings;
     std::size_t string_length = input_string.size();
-    const char *c = input_string.c_str();
+    const auto *c = input_string.c_str();
 
     // Separate into lines
-    std::string string;
+    std::u16string string;
     std::size_t line_start = 0;
     bool character_found = false;
-    static const char LINE_ENDING[] = "\r\n";
+    static const char16_t LINE_ENDING[] = u"\r\n";
     for(std::size_t i = 0; i < string_length; i++) {
         if(c[i] == '\r' || c[i] == '\n') {
             unsigned int increment;
-            if(c[i] == '\r' && c[i + 1] == '\n') {
+            if(c[i] == '\r') {
+                if(c[i + 1] != '\n') {
+                    eprintf_error("Error: CR with unaccompanied LF character.");
+                    std::exit(EXIT_FAILURE);
+                }
+                
                 increment = 1;
             }
             else if(c[i] == 0) {
@@ -49,15 +54,17 @@ template <typename T, typename G, TagFourCC C> static std::vector<std::byte> gen
                 increment = 0;
                 character_found = true;
             }
-            std::string line(c + line_start, c + i);
-            if(line == "###END-STRING###") {
-                strings.emplace_back(string, 0, string.size() - (sizeof(LINE_ENDING) - 1));
+            
+            std::u16string line(c + line_start, c + i);
+            if(line == u"###END-STRING###") {
+                strings.emplace_back(string, 0, string.size() - 2); // -2 for CRLF
                 string.clear();
                 character_found = false;
             }
             else {
                 string += line + LINE_ENDING;
             }
+            
             i += increment;
             line_start = i + 1;
         }
@@ -73,20 +80,29 @@ template <typename T, typename G, TagFourCC C> static std::vector<std::byte> gen
     for(auto &str : strings) {
         auto &new_string = tag_data.strings.emplace_back();
         auto &new_string_data = new_string.string;
+        
+        auto *string_start = str.c_str();
+        auto *string_end = string_start + str.size() + 1;
 
-        if(sizeof(T) == sizeof(char16_t)) {
-            auto string_data = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(reinterpret_cast<const char *>(str.c_str()));
-            new_string_data = std::vector<std::byte>(reinterpret_cast<const std::byte *>(string_data.c_str()), reinterpret_cast<const std::byte *>(string_data.c_str() + string_data.size() + 1));
+        if(sizeof(OUTPUT_TYPE) == sizeof(char16_t)) {
+            auto *string_start_byte = reinterpret_cast<const std::byte *>(string_start);
+            auto *string_end_byte = reinterpret_cast<const std::byte *>(string_end);
+            new_string_data = std::vector<std::byte>(string_start_byte, string_end_byte);
         }
         else {
-            new_string_data = std::vector<std::byte>(reinterpret_cast<const std::byte *>(str.c_str()), reinterpret_cast<const std::byte *>(str.c_str() + str.size() + 1));
+            std::vector<std::byte> converted_8bit_text;
+            converted_8bit_text.reserve(string_end - string_start);
+            for(auto *s = string_start; s < string_end; s++) {
+                converted_8bit_text.emplace_back(static_cast<std::byte>(*s));
+            }
+            new_string_data = std::move(converted_8bit_text);
         }
     }
 
-    return tag_data.generate_hek_tag_data(C, true);
+    return tag_data.generate_hek_tag_data(FOURCC, true);
 }
 
-static std::vector<std::byte> generate_hud_message_text_tag(const std::string &) {
+static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string &) {
     eprintf_error("Error: Unimplemented.");
     std::exit(EXIT_FAILURE);
 }
@@ -99,15 +115,15 @@ int main(int argc, char * const *argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
-        CommandLineOption("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Must be specified if a string tag is not present."),
+        CommandLineOption("group", 'G', 1, "Specify the type of string tag. Can be: hud_message_text, string_list, unicode_string_list", "<group>"),
     };
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";
-    static constexpr char USAGE[] = "[options] <tag>";
+    static constexpr char USAGE[] = "[options] -G <group> <tag>";
 
     struct StringOptions {
         std::filesystem::path data = "data";
-        std::optional<std::filesystem::path> tags;
+        std::filesystem::path tags = "tags";
         std::optional<Format> format;
         bool use_filesystem_path = false;
     } string_options;
@@ -115,10 +131,6 @@ int main(int argc, char * const *argv) {
     auto remaining_arguments = CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
         switch(opt) {
             case 't':
-                if(string_options.tags.has_value()) {
-                    eprintf_error("This tool does not support multiple tags directories.");
-                    std::exit(EXIT_FAILURE);
-                }
                 string_options.tags = arguments[0];
                 break;
             case 'i':
@@ -130,21 +142,27 @@ int main(int argc, char * const *argv) {
             case 'P':
                 string_options.use_filesystem_path = true;
                 break;
-            case 'f':
-                if(std::strcmp(arguments[0], "utf-16") == 0) {
+            case 'G':
+                if(std::strcmp(arguments[0], "unicode_string_list") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_UNICODE;
                 }
-                else if(std::strcmp(arguments[0], "latin-1") == 0) {
+                else if(std::strcmp(arguments[0], "string_list") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_LATIN1;
                 }
-                else if(std::strcmp(arguments[0], "hmt") == 0) {
+                else if(std::strcmp(arguments[0], "hud_message_text") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_HMT;
+                }
+                else {
+                    eprintf_error("Invalid group %s. Use -h for more information.", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
         }
     });
-    if(!string_options.tags.has_value()) {
-        string_options.tags = "tags";
+    
+    if(!string_options.format.has_value()) {
+        eprintf_error("No tag group specified. Use -h for more information.");
+        return EXIT_FAILURE;
     }
 
     const char *valid_extension = string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt";
@@ -165,46 +183,6 @@ int main(int argc, char * const *argv) {
     else {
         string_tag = remaining_arguments[0];
     }
-
-    // Ensure it's lowercase
-    for(const char *c = string_tag.c_str(); *c; c++) {
-        if(*c >= 'A' && *c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", string_tag.c_str());
-            return EXIT_FAILURE;
-        }
-    }
-
-    // Make sure we have a tags directory
-    std::filesystem::path tags_path(*string_options.tags);
-    if(!std::filesystem::is_directory(tags_path)) {
-        eprintf_error("Directory %s was not found or is not a directory", string_options.tags->string().c_str());
-        return EXIT_FAILURE;
-    }
-    
-    // If we don't have it, find it
-    auto tag_path_absolute = (tags_path / string_tag);
-    if(!string_options.format.has_value()) {
-        int found = 0;
-        if(std::filesystem::exists(tag_path_absolute.string() + std::string(".string_list"))) {
-            string_options.format = Format::STRING_LIST_FORMAT_LATIN1;
-            found++;
-        }
-        if(std::filesystem::exists(tag_path_absolute.string() + std::string(".unicode_string_list"))) {
-            string_options.format = Format::STRING_LIST_FORMAT_UNICODE;
-            found++;
-        }
-        if(found == 0) {
-            eprintf_error("Cannot auto-determine format if no string list tags by the path exist");
-            return EXIT_FAILURE;
-        }
-        else if(found > 1) {
-            eprintf_error("Cannot auto-determine format if multiple string list tags by the path exist");
-            return EXIT_FAILURE;
-        }
-    }
-    
-    // Make the data path
-    std::filesystem::path data_path(string_options.data);
     
     // Figure out our extension
     const char *output_extension = nullptr;
@@ -220,65 +198,78 @@ int main(int argc, char * const *argv) {
             break;
     }
 
-    auto input_path = (data_path / string_tag).string() + valid_extension;
-    auto output_path = tag_path_absolute.string() + output_extension;
-
-    // Open a file
-    std::FILE *f = std::fopen(input_path.c_str(), "rb");
-    if(!f) {
-        eprintf_error("Failed to open %s for reading.", input_path.c_str());
+    auto input_path = (string_options.data / string_tag).string() + valid_extension;
+    auto output_path = string_options.tags / (string_tag + output_extension);
+    
+    auto file_data = Invader::File::open_file(input_path);
+    if(!file_data.has_value()) {
+        eprintf_error("Failed to read %s", input_path.c_str());
         return EXIT_FAILURE;
     }
-
-    std::fseek(f, 0, SEEK_END);
-    std::size_t size = std::ftell(f);
-    std::fseek(f, 0, SEEK_SET);
-    auto file_data = std::make_unique<std::byte []>(size);
-    if(!std::fread(file_data.get(), size, 1, f)) {
-        eprintf_error("Failed to read %s.", input_path.c_str());
-        std::fclose(f);
-        return EXIT_FAILURE;
-    }
-    std::fclose(f);
 
     // Determine the encoding of it
-    bool source_is_utf16 = false;
-    char *c = reinterpret_cast<char *>(file_data.get());
-    char *c_end = c + size;
-    for(char *i = c; i < c_end; i++) {
-        if(*i == 0) {
-            source_is_utf16 = true;
-            break;
+    auto *input_data = file_data->data();
+    auto bom = reinterpret_cast<std::uint16_t *>(input_data);
+    auto input_size = file_data->size();
+    std::u16string chars_16bit;
+    
+    bool is_16_bit = false;
+    bool is_host_endian = false;
+    
+    auto *start16 = reinterpret_cast<char16_t *>(bom + 1);
+    auto *end16 = reinterpret_cast<char16_t *>(input_data + input_size);
+    
+    auto *start8 = reinterpret_cast<char8_t *>(input_data);
+    auto *end8 = reinterpret_cast<char8_t *>(input_data + input_size);
+    
+    // Is it big enough to hold a BOM? If so, read it.
+    if(input_size >= sizeof(*bom)) {
+        if(*bom == 0xFEFF) {
+            is_host_endian = true;
+            is_16_bit = true;
+        }
+        else if(*bom == 0xFFFE) {
+            is_host_endian = false;
+            is_16_bit = true;
         }
     }
-
-    // If it is utf-16, try to convert it to utf-8
-    std::string text;
-    if(source_is_utf16) {
-        auto *data = reinterpret_cast<char16_t *>(file_data.get());
-        if(*data == 0xFEFF) {
-            data ++;
+    
+    // If it's 16-bit, parse it as such.
+    if(is_16_bit) {
+        if(((reinterpret_cast<std::uintptr_t>(end16) - reinterpret_cast<std::uintptr_t>(start16)) % sizeof(*start16)) != 0) {
+            eprintf_error("File %s has a 16-bit BOM but is not actually 16-bit", input_path.c_str());
+            return EXIT_FAILURE;
         }
-        text = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(reinterpret_cast<char16_t *>(data));
+        chars_16bit = { start16, end16 };
+        if(!is_host_endian) {
+            for(auto &c : chars_16bit) {
+                auto u16 = static_cast<std::uint16_t>(c);
+                c = static_cast<char16_t>((u16 << 8) | (u16 >> 8));
+            }
+        }
     }
     else {
-        text = std::string(reinterpret_cast<char *>(file_data.get()));
+        if(*string_options.format == Format::STRING_LIST_FORMAT_HMT) {
+            eprintf_error("File %s is not 16-bit, but .hmt files must be 16-bit", input_path.c_str());
+            return EXIT_FAILURE;
+        }
+        chars_16bit.reserve(input_size);
+        for(auto *i = start8; i < end8; i++) {
+            chars_16bit.push_back(*i);
+        }
     }
-
-    // Delete the input file data
-    file_data.reset();
 
     // Generate the data
     std::vector<std::byte> final_data;
     switch(*string_options.format) {
         case STRING_LIST_FORMAT_UNICODE:
-            final_data = generate_string_list_tag<char16_t, Parser::UnicodeStringList, TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Parser::UnicodeStringList, TagFourCC::TAG_FOURCC_UNICODE_STRING_LIST>(chars_16bit);
             break;
         case STRING_LIST_FORMAT_LATIN1:
-            final_data = generate_string_list_tag<char, Parser::StringList, TagFourCC::TAG_FOURCC_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char8_t, Parser::StringList, TagFourCC::TAG_FOURCC_STRING_LIST>(chars_16bit);
             break;
         case STRING_LIST_FORMAT_HMT:
-            final_data = generate_hud_message_text_tag(text);
+            final_data = generate_hud_message_text_tag(chars_16bit);
             break;
     }
     
