@@ -33,9 +33,13 @@ template <typename OUTPUT_TYPE, typename TAG_STRUCT, TagFourCC FOURCC> static st
     // Separate into lines
     std::u16string string;
     std::size_t line_start = 0;
-    bool character_found = false;
+    bool middle_of_string = false;
     static const char16_t LINE_ENDING[] = u"\r\n";
     for(std::size_t i = 0; i < string_length; i++) {
+        if(c[i] == 0) {
+            eprintf_error("Error: Null character is present in the file.");
+            std::exit(EXIT_FAILURE);
+        }
         if(c[i] == '\r' || c[i] == '\n') {
             unsigned int increment;
             if(c[i] == '\r') {
@@ -46,20 +50,16 @@ template <typename OUTPUT_TYPE, typename TAG_STRUCT, TagFourCC FOURCC> static st
                 
                 increment = 1;
             }
-            else if(c[i] == 0) {
-                eprintf_error("Error: Null character is present in the file.");
-                std::exit(EXIT_FAILURE);
-            }
             else {
                 increment = 0;
-                character_found = true;
             }
             
             std::u16string line(c + line_start, c + i);
+            middle_of_string = true;
             if(line == u"###END-STRING###") {
                 strings.emplace_back(string, 0, string.size() - 2); // -2 for CRLF
                 string.clear();
-                character_found = false;
+                middle_of_string = false;
             }
             else {
                 string += line + LINE_ENDING;
@@ -68,10 +68,13 @@ template <typename OUTPUT_TYPE, typename TAG_STRUCT, TagFourCC FOURCC> static st
             i += increment;
             line_start = i + 1;
         }
+        else {
+            middle_of_string = true;
+        }
     }
     
     // Did we have any text left?
-    if(character_found) {
+    if(middle_of_string) {
         eprintf_error("Error: Missing ###END-STRING### after string.");
         std::exit(EXIT_FAILURE);
     }
@@ -98,6 +101,8 @@ template <typename OUTPUT_TYPE, typename TAG_STRUCT, TagFourCC FOURCC> static st
             new_string_data = std::move(converted_8bit_text);
         }
     }
+    
+    oprintf_success("Generated a string list with %zu string%s.", strings.size(), strings.size() == 1 ? "" : "s");
 
     return tag_data.generate_hek_tag_data(FOURCC, true);
 }
