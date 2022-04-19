@@ -317,7 +317,7 @@ int main(int argc, char * const *argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
-        CommandLineOption("group", 'G', 1, "Specify the type of string tag. Can be: hud_message_text, string_list, unicode_string_list", "<group>"),
+        CommandLineOption("type", 'T', 1, "Specify the type of string tag. Can be: hud_message_text, string_list, unicode_string_list", "<group>"),
     };
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";

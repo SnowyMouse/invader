@@ -9,7 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-extract: If a scenario tags' source data could not be extracted, it
   will no longer try to save the scenario tag without script data.
-- invader-string: Changed --format to --group
+- invader-string: Changed --format to --type
 
 ### Fixed
 - Rewrote the script parser, improving accuracy and fixing a bug with desyncing
