@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untragged]
+## [Untagged]
 ### Changed
 - invader-extract: If a scenario tags' source data could not be extracted, it
   will no longer try to save the scenario tag without script data.
@@ -2327,6 +2327,7 @@ image as one bitmap
 [0.47.0]: https://github.com/SnowyMouse/invader/compare/0.46.3...0.47.0
 [0.47.1]: https://github.com/SnowyMouse/invader/compare/0.47.0...0.47.1
 [0.48.0]: https://github.com/SnowyMouse/invader/compare/0.47.1...0.48.0
-[0.48.0]: https://github.com/SnowyMouse/invader/compare/0.48.0...0.49.0
+[0.49.0]: https://github.com/SnowyMouse/invader/compare/0.48.0...0.49.0
+[0.49.1]: https://github.com/SnowyMouse/invader/compare/0.49.0...0.49.1
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.49.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.49.1...master
