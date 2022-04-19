@@ -214,7 +214,7 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string
         auto *word_start = message_str;
         for(auto *c = message_str; true; c++) {
             // Control
-            if(*word_start == '%' && (*c == ' ' || *c == 0)) {
+            if(*word_start == '%') {
                 std::u16string thing = { word_start + 1, c };
                 static constexpr const char16_t *ALL_MESSAGE_TYPES[] = {
                     u"a-button",
@@ -260,23 +260,22 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string
                 };
                 
                 bool found = false;
-                for(std::size_t i = 0; i < sizeof(ALL_MESSAGE_TYPES) - sizeof(ALL_MESSAGE_TYPES[0]); i++) {
+                for(std::size_t i = 0; i < sizeof(ALL_MESSAGE_TYPES) / sizeof(*ALL_MESSAGE_TYPES); i++) {
                     if(thing == ALL_MESSAGE_TYPES[i]) {
                         auto &element = tag_data.message_elements.emplace_back();
                         element.type = 1;
                         element.data = i;
                         found = true;
+                        word_start = c;
                         break;
                     }
                 }
                 
-                if(!found) {
+                if(!found && *c == 0) {
                     std::string c(thing.begin(), thing.end());
-                    eprintf_error("Unknown control code %s.", c.c_str());
+                    eprintf_error("Unknown button type \"%s\"", c.c_str());
                     std::exit(EXIT_FAILURE);
                 }
-                
-                word_start = c;
             }
             
             // Non-control
