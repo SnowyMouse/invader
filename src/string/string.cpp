@@ -238,7 +238,7 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string
             }
             
             // Non-control
-            else if(*word_start != '%' && (*c == '%' || *c == 0)) {
+            else if(*word_start != '%' && (*c == '%' || *c == 0 || ((c - word_start) == 0xFF))) {
                 if(c != word_start) {
                     auto &element = tag_data.message_elements.emplace_back();
                     element.type = 0;
