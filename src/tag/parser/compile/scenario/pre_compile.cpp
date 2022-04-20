@@ -873,7 +873,7 @@ namespace Invader::Parser {
                     source_file.source = std::move(data);
                 }
                 else {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to open %s", i.c_str());
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to open %s", i.string().c_str());
                     throw FailedToOpenFileException();
                 }
             }
