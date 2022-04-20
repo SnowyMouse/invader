@@ -82,8 +82,8 @@ namespace Invader::File {
             return false;
         }
 
-        // Write
-        if(std::fwrite(data.data(), data.size(), 1, f) != 1) {
+        // Write if there is data to write
+        if(!data.empty() && std::fwrite(data.data(), data.size(), 1, f) != 1) {
             std::fclose(f);
             eprintf("Error: Failed to write to %s.\n", path_string.c_str());
             return false;
