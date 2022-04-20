@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.50.0] - 2022-04-20
 ### Added
 - invader-build: Added --script-source (can be `tags` or `data`) which specifies
   where to read script source data from.
@@ -2338,5 +2338,6 @@ image as one bitmap
 [0.48.0]: https://github.com/SnowyMouse/invader/compare/0.47.1...0.48.0
 [0.49.0]: https://github.com/SnowyMouse/invader/compare/0.48.0...0.49.0
 [0.49.1]: https://github.com/SnowyMouse/invader/compare/0.49.0...0.49.1
+[0.50.0]: https://github.com/SnowyMouse/invader/compare/0.49.1...0.50.0
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.49.1...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.0...master
