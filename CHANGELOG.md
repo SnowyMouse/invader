@@ -4,10 +4,14 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
+- invader-build: Added --script-source (can be `tags` or `data`) which specifies
+  where to read script source data from.
 - invader-recover: Added support for recovering hud_message_text tags.
 - invader-string: Added support for making hud_message_text tags.
 
 ### Changed
+- invader-build: The default script source location is now the data folder. Use
+  `-S tags` to use the old method.
 - invader-extract: If a scenario tags' source data could not be extracted, it
   will no longer try to save the scenario tag without script data.
 - invader-string: Changed --format to --type

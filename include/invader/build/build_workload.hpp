@@ -53,6 +53,16 @@ namespace Invader {
             std::vector<std::filesystem::path> tags_directories;
             
             /**
+             * Data directory to use
+             */
+            std::filesystem::path data_directory;
+            
+            /**
+             * Use the tag data to get script source data
+             */
+            bool use_tags_for_script_data = false;
+            
+            /**
              * Index to use
              */
             std::optional<std::vector<File::TagFilePath>> index;

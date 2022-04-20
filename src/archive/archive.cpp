@@ -221,6 +221,7 @@ int main(int argc, const char **argv) {
             BuildWorkload::BuildParameters parameters(*archive_options.engine);
             parameters.scenario = base_tag;
             parameters.tags_directories = archive_options.tags;
+            parameters.use_tags_for_script_data = true; // TODODILE: use data folder and implement tags/ and data/ split in output archive
             if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 parameters.details.build_compression_level = 0;
             }

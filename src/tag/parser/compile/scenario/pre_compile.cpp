@@ -820,6 +820,65 @@ namespace Invader::Parser {
     }
     
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
+        auto &build_parameters = *workload.get_build_parameters();
+            
+        if(!build_parameters.use_tags_for_script_data) {
+            scenario.source_files.clear();
+            
+            // Data directory?
+            const auto &data_directory = build_parameters.data_directory;
+            std::error_code ec;
+            if(!std::filesystem::exists(data_directory, ec)) {
+                eprintf_error("Data directory \"%s\" does not exist", data_directory.string().c_str());
+                throw FailedToOpenFileException();
+            }
+            
+            std::vector<std::filesystem::path> all_scripts_to_compile;
+            
+            // Add global_scripts if present
+            auto global_scripts = data_directory / "global_scripts.hsc";
+            if(std::filesystem::exists(global_scripts, ec)) {
+                all_scripts_to_compile.emplace_back(std::move(global_scripts));
+            }
+            
+            // Add all scripts if present
+            auto scenario_script_directory = (data_directory / File::halo_path_to_preferred_path(build_parameters.scenario)).parent_path() / "scripts";
+            if(std::filesystem::is_directory(scenario_script_directory, ec)) {
+                for(auto &i : std::filesystem::directory_iterator(scenario_script_directory)) {
+                    if(i.is_regular_file()) {
+                        auto &path = i.path();
+                        if(path.extension() == ".hsc") {
+                            all_scripts_to_compile.emplace_back(path);
+                        }
+                    }
+                }
+            }
+            
+            // Add all the things
+            for(const auto &i : all_scripts_to_compile) {
+                auto p = i.filename().replace_extension().string();
+                auto &source_file = scenario.source_files.emplace_back();
+                if(p.size() >= sizeof(source_file.name.string)) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script file %s has too long of a filename", p.c_str());
+                    throw InvalidTagDataException();
+                }
+                source_file.name.string[sizeof(source_file.name.string) - 1] = 0;
+                std::strncpy(source_file.name.string, p.c_str(), sizeof(source_file.name.string) - 1);
+                
+                // Open it?
+                auto script_data = File::open_file(i);
+                if(script_data.has_value()) {
+                    auto &data = *script_data;
+                    data.emplace_back();
+                    source_file.source = std::move(data);
+                }
+                else {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to open %s", i.c_str());
+                    throw FailedToOpenFileException();
+                }
+            }
+        }
+        
         // If we have scripts, do stuff
         if((scenario.scripts.size() > 0 || scenario.globals.size() > 0) && scenario.source_files.size() == 0) {
             if(!workload.disable_error_checking) {
@@ -832,7 +891,8 @@ namespace Invader::Parser {
         // Recompile scripts
         try {
             std::vector<std::string> warnings;
-            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(workload.get_build_parameters()->details.build_game_engine), warnings, workload.get_build_parameters()->tags_directories);
+            
+            compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(build_parameters.details.build_game_engine), warnings, build_parameters.tags_directories);
             for(auto &w : warnings) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
             }

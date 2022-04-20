@@ -327,6 +327,7 @@ std::string Invader::Lightmap::export_lightmap_mesh(const char *scenario, const 
     BuildWorkload::BuildParameters parameters;
     parameters.verbosity = BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET;
     parameters.tags_directories = tags_directories;
+    parameters.use_tags_for_script_data = true;
     parameters.scenario = scenario;
     parameters.details.build_compress = false;
     

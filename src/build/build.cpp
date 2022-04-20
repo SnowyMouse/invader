@@ -52,6 +52,7 @@ int main(int argc, const char **argv) {
     // Parameters
     struct BuildOptions {
         std::filesystem::path maps = "maps";
+        std::filesystem::path data = "data";
         std::optional<std::filesystem::path> resource_map_path;
         std::vector<std::filesystem::path> tags;
         std::optional<std::filesystem::path> output;
@@ -74,15 +75,18 @@ int main(int argc, const char **argv) {
         bool auto_forge = false;
         bool do_not_auto_forge = false;
         bool use_anniverary_mode = false;
+        bool use_tags_for_script_source = false;
     } build_options;
     
     const CommandLineOption options[] = {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
+        CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_GAME_ENGINE),
         CommandLineOption("quiet", 'q', 0, "Only output error messages."),
+        CommandLineOption("script-source", 'S', 1, "Specify the script source data location. Can be \"data\" or \"tags\". Default: data"),
         CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>"),
         CommandLineOption("output", 'o', 1, "Output to a specific file.", "<file>"),
         CommandLineOption("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine's stock maps."),
@@ -114,6 +118,10 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(arguments[0], "always") == 0) {
                     build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+                }
+                else {
+                    eprintf_error("Unknown resource-usage parameter %s. Use -h for more information.", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
             case 'q':
@@ -159,10 +167,24 @@ int main(int argc, const char **argv) {
                     }
                 }
                 catch(std::exception &) {
-                    eprintf_error("Invalid compression level %s", arguments[0]);
+                    eprintf_error("Invalid compression level %s. Use -h for more information.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
+                
+            case 'S':
+                if(std::strcmp(arguments[0], "tags") == 0) {
+                    build_options.use_tags_for_script_source = true;
+                }
+                else if(std::strcmp(arguments[0], "data") == 0) {
+                    build_options.use_tags_for_script_source = true;
+                }
+                else {
+                    eprintf_error("Unknown script-source parameter %s. Use -h for more information.", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+                
             case 'A':
                 build_options.auto_forge = true;
                 break;
@@ -172,7 +194,7 @@ int main(int argc, const char **argv) {
                     build_options.engine = engine_maybe;
                 }
                 else {
-                    eprintf_error("Unknown engine %s", arguments[0]);
+                    eprintf_error("Unknown engine %s. Use -h for more information.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 
@@ -196,6 +218,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'H':
                 build_options.hide_pedantic_warnings = true;
+                break;
+            case 'd':
+                build_options.data = arguments[0];
                 break;
             case 'T':
                 try {
@@ -325,7 +350,9 @@ int main(int argc, const char **argv) {
         const auto &engine_info = *(*build_options.engine);
         BuildWorkload::BuildParameters parameters(engine_info.engine);
         
+        parameters.use_tags_for_script_data = build_options.use_tags_for_script_source;
         parameters.tags_directories = build_options.tags;
+        parameters.data_directory = build_options.data;
         parameters.scenario = scenario;
         parameters.rename_scenario = build_options.rename_scenario;
         parameters.optimize_space = build_options.optimize_space;

@@ -306,6 +306,8 @@ Options:
   -B --build-string <ver>      Set the build string in the header.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
+  -d --data <dir>              Use the specified data directory. Default:
+                               "data"
   -E --extend-file-limits      Extend file size limits to 2 GiB regardless of
                                if the target engine will support the cache
                                file.
@@ -334,6 +336,8 @@ Options:
                                Default: none
   -R --resource-maps <dir>     Specify the directory for loading resource maps.
                                (by default this is the maps directory)
+  -S --script-source           Specify the script source data location. Can be
+                               "data" or "tags". Default: data
   -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence. Default (if unset): "tags"
