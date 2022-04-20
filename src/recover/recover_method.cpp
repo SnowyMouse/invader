@@ -117,7 +117,7 @@ namespace Invader::Recover {
 
         TIFFClose(tiff);
 
-        oprintf_success("Recovered %s", file_path_str.c_str());
+        oprintf("Recovered data file %s\n", file_path_str.c_str());
 
         return true;
     }
@@ -362,7 +362,7 @@ namespace Invader::Recover {
         }
         
         if(File::save_file(filename, std::vector<std::byte>(reinterpret_cast<std::byte *>(jms_data), reinterpret_cast<std::byte *>(jms_data + string_data.size())))) {
-            oprintf_success("Recovered %s", filename.string().c_str());
+            oprintf("Recovered data file %s\n", filename.string().c_str());
             return true;
         }
         else {
@@ -539,7 +539,7 @@ namespace Invader::Recover {
             }
             
             if(File::save_file(hsc_path, source)) {
-                oprintf_success("Recovered %s", hsc_path.string().c_str());
+                oprintf("Recovered data file %s\n", hsc_path.string().c_str());
                 recovered_anything = true;
             }
             else {
@@ -667,7 +667,7 @@ namespace Invader::Recover {
         std::filesystem::create_directories(file_path.parent_path(), ec);
         
         if(File::save_file(file_path, std::vector<std::byte>(reinterpret_cast<std::byte *>(output_file.data()), reinterpret_cast<std::byte *>(output_file.data() + output_file.size())))) {
-            oprintf_success("Recovered %s", file_path.string().c_str());
+            oprintf("Recovered data file %s\n", file_path.string().c_str());
             return true;
         }
         else {
