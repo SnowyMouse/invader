@@ -862,7 +862,6 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script file %s has too long of a filename", p.c_str());
                     throw InvalidTagDataException();
                 }
-                source_file.name.string[sizeof(source_file.name.string) - 1] = 0;
                 std::strncpy(source_file.name.string, p.c_str(), sizeof(source_file.name.string) - 1);
                 
                 // Open it?
