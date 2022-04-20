@@ -336,7 +336,7 @@ Options:
                                Default: none
   -R --resource-maps <dir>     Specify the directory for loading resource maps.
                                (by default this is the maps directory)
-  -S --script-source           Specify the script source data location. Can be
+  -S --script-source <source>  Specify the script source data location. Can be
                                "data" or "tags". Default: data
   -t --tags <dir>              Add the specified tags directory. Use multiple
                                times to add more directories, ordered by

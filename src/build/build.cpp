@@ -86,7 +86,7 @@ int main(int argc, const char **argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_GAME_ENGINE),
         CommandLineOption("quiet", 'q', 0, "Only output error messages."),
-        CommandLineOption("script-source", 'S', 1, "Specify the script source data location. Can be \"data\" or \"tags\". Default: data"),
+        CommandLineOption("script-source", 'S', 1, "Specify the script source data location. Can be \"data\" or \"tags\". Default: data", "<source>"),
         CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>"),
         CommandLineOption("output", 'o', 1, "Output to a specific file.", "<file>"),
         CommandLineOption("auto-forge", 'A', 0, "Ensure the map will be network compatible with the target engine's stock maps."),
