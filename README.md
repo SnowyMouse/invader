@@ -925,9 +925,13 @@ Refer to [Creating a sound] for a guide on how to create sound tags.
 [Creating a sound]: https://github.com/SnowyMouse/invader/wiki/Creating-a-sound
 
 ### invader-string
-This program generates string tags. If building a unicode or latin-1 tag,
-strings are stored in a .txt file, with each string ending with a line,
-`###END-STRING###`.
+This program generates string tags.
+
+If building a 16-bit (unicode) or 8-bit string list, strings are stored in a
+.txt file, with each string ending with a line, `###END-STRING###`.
+
+If building hud_message_text tags, strings are stored in a .hmt file with each
+string stored as a `key=value` line.
 
 ```
 Usage: invader-string [options] -T <type> <tag>

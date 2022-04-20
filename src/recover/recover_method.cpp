@@ -8,6 +8,7 @@
 #include <invader/model/jms.hpp>
 #include <invader/tag/parser/compile/string_list.hpp>
 #include "recover_method.hpp"
+#include "../string/button_type.hpp"
 
 namespace Invader::Recover {
     static void create_directories_for_path(const std::filesystem::path &path) {
@@ -436,6 +437,9 @@ namespace Invader::Recover {
     static std::optional<bool> recover_string_list(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
         auto *unicode_string_list = dynamic_cast<const Parser::UnicodeStringList *>(&tag);
         auto *string_list = dynamic_cast<const Parser::StringList *>(&tag);
+        if(string_list == nullptr && unicode_string_list == nullptr) {
+            return std::nullopt;
+        }
 
         auto data_path = data / (path + ".txt");
 
@@ -484,7 +488,7 @@ namespace Invader::Recover {
             create_directories_save_and_quit(data_path, std::vector<std::byte>(final_result, final_result_end));
         }
         else {
-            return std::nullopt;
+            std::terminate();
         }
         
         return true;
@@ -557,6 +561,120 @@ namespace Invader::Recover {
         }
     }
 
+    std::optional<bool> recover_hud_message_text(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, bool overwrite) {
+        auto *hmt = dynamic_cast<const Parser::HUDMessageText *>(&tag);
+        if(hmt == nullptr) {
+            return std::nullopt;
+        }
+        
+        auto file_path = data / std::filesystem::path(path + ".hmt");
+        if(std::filesystem::exists(file_path)) {
+            oprintf_success_warn("%s already exists", file_path.string().c_str());
+            return false;
+        }
+        
+        std::vector<char16_t> output_file;
+        
+        auto message_count = hmt->messages.size();
+        const auto *string_data = reinterpret_cast<const char16_t *>(hmt->text_data.data());
+        auto string_data_size = hmt->text_data.size() / sizeof(*string_data);
+        auto element_count = hmt->message_elements.size();
+        
+        for(std::size_t e = 0; e < element_count; e++) {
+            auto &element = hmt->message_elements[e];
+            if(element.type == 0) {
+                continue;
+            }
+            else if(element.type == 1) {
+                if(element.data >= static_cast<std::int8_t>(sizeof(ALL_MESSAGE_TYPES) / sizeof(*ALL_MESSAGE_TYPES))) {
+                    eprintf_error("Element #%zu has an incorrect button type", e);
+                    return false;
+                }
+                continue;
+            }
+            else {
+                eprintf_error("Element #%zu has an unknown type", e);
+                return false;
+            }
+        }
+        
+        // Put BOM here
+        output_file.emplace_back(static_cast<char16_t>(0xFEFF));
+        
+        for(std::size_t m = 0; m < message_count; m++) {
+            auto &message = hmt->messages[m];
+            for(const char *i = message.name.string; i < message.name.string + 32 && *i != 0; i++) {
+                output_file.emplace_back(*i);
+            }
+            output_file.emplace_back('=');
+            
+            // Bounds check
+            auto first_index = static_cast<std::size_t>(message.start_index_of_message_block);
+            auto count = static_cast<std::size_t>(message.panel_count);
+            auto end_index = first_index + count;
+            if(end_index > element_count) {
+                eprintf_error("Message #%zu (%s) has an out-of-bounds range", m, message.name.string);
+                return false;
+            }
+            
+            // Let's go through each element
+            auto cursor = static_cast<std::size_t>(message.start_index_into_text_blob);
+            for(std::size_t e = first_index; e < end_index; e++) {
+                auto &element = hmt->message_elements[e];
+                
+                // This value is actually unsigned, but Guerilla reads it as signed
+                auto d = static_cast<std::uint8_t>(element.data);
+                if(element.type == 0) {
+                    auto end = cursor + d;
+                    if(cursor > end) {
+                        std::terminate();
+                    }
+                    
+                    if(end > string_data_size) {
+                        eprintf_error("Message #%zu (%s) has an out-of-bounds string range", m, message.name.string);
+                        return false;
+                    }
+                    
+                    while(cursor != end) {
+                        if(cursor > end) {
+                            std::terminate();
+                        }
+                        
+                        auto character = string_data[cursor++];
+                        if(character != 0) {
+                            output_file.emplace_back(character);
+                        }
+                    }
+                }
+                
+                else if(element.type == 1) {
+                    output_file.emplace_back('%');
+                    for(auto *c = ALL_MESSAGE_TYPES[d]; *c != 0; c++) {
+                        output_file.emplace_back(*c);
+                    }
+                }
+                
+                else {
+                    std::terminate();
+                }
+            }
+            
+            output_file.emplace_back('\r');
+            output_file.emplace_back('\n');
+        }
+        
+        std::error_code ec;
+        std::filesystem::create_directories(file_path.parent_path(), ec);
+        
+        if(File::save_file(file_path, std::vector<std::byte>(reinterpret_cast<std::byte *>(output_file.data()), reinterpret_cast<std::byte *>(output_file.data() + output_file.size())))) {
+            oprintf_success("Recovered %s", file_path.string().c_str());
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     bool recover(const Parser::ParserStruct &tag, const std::string &path, const std::filesystem::path &data, HEK::TagFourCC tag_fourcc, bool overwrite) {
         #define ATTEMPT_RECOVER(fn) if(!a.has_value()) { a = fn(tag, path, data, overwrite); }
         std::optional<bool> a;
@@ -565,6 +683,7 @@ namespace Invader::Recover {
         ATTEMPT_RECOVER(recover_model)
         ATTEMPT_RECOVER(recover_string_list)
         ATTEMPT_RECOVER(recover_scripts)
+        ATTEMPT_RECOVER(recover_hud_message_text)
         if(!a.has_value()) {
             eprintf_warn("Data cannot be recovered from %s tags", HEK::tag_fourcc_to_extension(tag_fourcc));
             a = false;

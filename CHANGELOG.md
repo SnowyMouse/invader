@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Added
+- invader-recover: Added support for recovering hud_message_text tags.
 - invader-string: Added support for making hud_message_text tags.
 
 ### Changed
