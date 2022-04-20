@@ -568,7 +568,7 @@ namespace Invader::Recover {
         }
         
         auto file_path = data / std::filesystem::path(path + ".hmt");
-        if(std::filesystem::exists(file_path)) {
+        if(!overwrite && std::filesystem::exists(file_path)) {
             oprintf_success_warn("%s already exists", file_path.string().c_str());
             return false;
         }
