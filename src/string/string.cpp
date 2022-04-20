@@ -216,37 +216,37 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::u16string
         auto *word_start = message_str;
         for(auto *c = message_str; true; c++) {
             // Control
-            if(*word_start == '%') {
-                std::u16string thing = { word_start + 1, c };
-                bool found = false;
-                for(std::size_t i = 0; i < sizeof(ALL_MESSAGE_TYPES) / sizeof(*ALL_MESSAGE_TYPES); i++) {
-                    if(thing == ALL_MESSAGE_TYPES[i]) {
-                        auto &element = tag_data.message_elements.emplace_back();
-                        element.type = 1;
-                        element.data = i;
-                        found = true;
-                        word_start = c;
-                        break;
+            if(c != word_start) {
+                if(*word_start == '%') {
+                    std::u16string thing = { word_start + 1, c };
+                    bool found = false;
+                    for(std::size_t i = 0; i < sizeof(ALL_MESSAGE_TYPES) / sizeof(*ALL_MESSAGE_TYPES); i++) {
+                        if(thing == ALL_MESSAGE_TYPES[i]) {
+                            auto &element = tag_data.message_elements.emplace_back();
+                            element.type = 1;
+                            element.data = i;
+                            found = true;
+                            word_start = c;
+                            break;
+                        }
+                    }
+                    
+                    if(!found && *c == 0) {
+                        std::string c(thing.begin(), thing.end());
+                        eprintf_error("Unknown button type \"%s\"", c.c_str());
+                        std::exit(EXIT_FAILURE);
                     }
                 }
                 
-                if(!found && *c == 0) {
-                    std::string c(thing.begin(), thing.end());
-                    eprintf_error("Unknown button type \"%s\"", c.c_str());
-                    std::exit(EXIT_FAILURE);
-                }
-            }
-            
-            // Non-control
-            else if(*word_start != '%' && (*c == '%' || *c == 0 || ((c - word_start) == 0xFF))) {
-                if(c != word_start) {
+                // Non-control
+                else if(*word_start != '%' && (*c == '%' || *c == 0 || ((c - word_start) == 0xFF))) {
                     auto &element = tag_data.message_elements.emplace_back();
                     element.type = 0;
                     element.data = (c - word_start) + 1;
                     text_data.insert(text_data.end(), word_start, c); // insert the string
                     text_data.emplace_back(); // and the null terminator
+                    word_start = c;
                 }
-                word_start = c;
             }
             
             if(*c == 0) {

@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-recover: Fixed %crouch being extracted as %zoom and vice versa
+- invader-string: Fixed an exception error when generating hud_message_text tags
+- invader-string: Fixed %crouch being treated as %zoom and vice versa
+
 ## [0.50.0] - 2022-04-20
 ### Added
 - invader-build: Added --script-source (can be `tags` or `data`) which specifies
