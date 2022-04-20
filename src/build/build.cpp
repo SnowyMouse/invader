@@ -177,7 +177,7 @@ int main(int argc, const char **argv) {
                     build_options.use_tags_for_script_source = true;
                 }
                 else if(std::strcmp(arguments[0], "data") == 0) {
-                    build_options.use_tags_for_script_source = true;
+                    build_options.use_tags_for_script_source = false;
                 }
                 else {
                     eprintf_error("Unknown script-source parameter %s. Use -h for more information.", arguments[0]);
