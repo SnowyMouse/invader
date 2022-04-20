@@ -9,7 +9,8 @@
             },
             {
                 "name": "data",
-                "type": "int8",
+                "type": "uint8",
+                "retcon_note": "this is read as signed in guerilla, but it's actually unsigned in-game!",
                 "endian": null
             }
         ],
@@ -35,7 +36,8 @@
             },
             {
                 "name": "panel count",
-                "type": "int8",
+                "type": "uint8",
+                "retcon_note": "this is read as signed in guerilla, but it's actually unsigned in-game!",
                 "endian": null
             },
             {
