@@ -266,6 +266,8 @@ namespace Invader::Parser {
 
         this->error_acceleration_rate = this->error_acceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->error_acceleration_time);
         this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->error_deceleration_time);
+        
+        this->flags |= 0x10000;
 
         // Jason Jones the accuracy of the weapon
         if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {

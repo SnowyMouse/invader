@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Changed
+- invader-compare: Made map comparison more tolerant if no resource map is used
+  when performing a comparison.
+
 ## [0.50.1] - 2022-04-20
 ### Changed
 - invader-recover: Changed text output slightly
