@@ -250,10 +250,6 @@ int main(int argc, const char **argv) {
     
     // Automatically make up maps directories for any map when necessary, then open their respective resources
     for(auto &i : compare_options.inputs) {
-        if(i.map.has_value() && !i.maps.has_value()) {
-            i.maps = std::filesystem::absolute(*i.map).parent_path();
-        }
-        
         // Check if it matches our filters
         auto add_if_matched = [&i, &compare_options](Invader::File::TagFilePath &&path) {
             if(File::path_matches(Invader::File::preferred_path_to_halo_path(path.join()).c_str(), compare_options.search, compare_options.search_exclude)) {
@@ -262,12 +258,23 @@ int main(int argc, const char **argv) {
         };
             
         if(i.map.has_value()) {
+            // If we don't have a maps directory explicitly set, use the current directory of the map
+            auto maps = i.maps.value_or(std::filesystem::absolute(*i.map).parent_path());
+            
             // Load resource maps
             std::vector<std::byte> loc, bitmaps, sounds;
             if(i.maps.has_value() && !i.ignore_resource_maps) {
-                loc = File::open_file(*i.maps / "loc.map").value_or(std::vector<std::byte>());
-                bitmaps = File::open_file(*i.maps / "bitmaps.map").value_or(std::vector<std::byte>());
-                sounds = File::open_file(*i.maps / "sounds.map").value_or(std::vector<std::byte>());
+                auto open_if_present = [](const std::filesystem::path &path) -> std::vector<std::byte> {
+                    if(std::filesystem::exists(path)) {
+                        return File::open_file(path).value_or(std::vector<std::byte>());
+                    }
+                    else {
+                        return {};
+                    }
+                };
+                loc = open_if_present(*i.maps / "loc.map");
+                bitmaps = open_if_present(*i.maps / "bitmaps.map");
+                sounds = open_if_present(*i.maps / "sounds.map");
             }
         
             auto data = File::open_file(*i.map);
