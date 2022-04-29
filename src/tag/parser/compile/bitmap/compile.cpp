@@ -54,6 +54,9 @@ namespace Invader::Parser {
             }
         }
         
+        // Get the bitmap count
+        auto bitmap_data_count = bitmap->bitmap_data.size();
+        
         // Loop through again, but make sure sprites are present when needed and not present when not needed
         bool has_sprites = false;
         for(auto &sequence : bitmap->bitmap_group_sequence) {
@@ -61,23 +64,62 @@ namespace Invader::Parser {
                 break;
             }
         }
-        bool errored_on_sprites = false;
         if(has_sprites && bitmap->type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap has sprites but is not a sprites bitmap type", tag_index);
-            errored_on_sprites = true;
-        }
-        else if(!has_sprites && bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES && bitmap->bitmap_data.size() > 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap with bitmap data is marked as sprites, but no sprites are present", tag_index);
-            errored_on_sprites = true;
-        }
-        if(errored_on_sprites) {
-            eprintf_warn("To fix this, recompile the bitmap");
             throw InvalidTagDataException();
+        }
+        else if(!has_sprites && bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES && bitmap_data_count > 0) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap with bitmap data is marked as sprites, but no sprites are present", tag_index);
+            throw InvalidTagDataException();
+        }
+        
+        // We need bitmap sequences
+        if(bitmap->bitmap_group_sequence.empty()) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap has no sequences", tag_index);
+            throw InvalidTagDataException();
+        }
+        
+        // Validate the sequence ranges
+        if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+            std::vector<bool> mapped_out(bitmap_data_count, false);
+            auto sequence_count = bitmap->bitmap_group_sequence.size();
+            
+            // Go through each sequence and check if each bitmap in each sequence is in-range and mapped out
+            for(std::size_t si = 0; si < sequence_count; si++) {
+                auto &s = bitmap->bitmap_group_sequence[si];
+                if(s.bitmap_count == 0) { // empty sequences get skipped
+                    continue;
+                }
+                auto start = static_cast<std::size_t>(s.first_bitmap_index);
+                auto end = start + s.bitmap_count;
+                
+                for(std::size_t i = start; i < end; i++) {
+                    if(i < bitmap_data_count) {
+                        mapped_out[i] = true;
+                    }
+                    else {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu has an out-of-bounds sequence ([%zu-%zu) >= %zu)", si, start, end, bitmap_data_count);
+                        throw InvalidTagDataException();
+                    }
+                }
+            }
+            
+            // Make sure each bitmap is accounted for
+            std::size_t unaccounted_bitmaps = 0;
+            for(std::size_t bi = 0; bi < bitmap_data_count; bi++) {
+                if(mapped_out[bi] == false) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap #%zu is not referenced by a sequence", bi);
+                    unaccounted_bitmaps++;
+                }
+            }
+            if(unaccounted_bitmaps > 0) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%zu bitmap data %s not referenced by a sequence", unaccounted_bitmaps, unaccounted_bitmaps > 1 ? "are" : "is");
+                throw InvalidTagDataException();
+            }
         }
         
         auto max_size = bitmap->processed_pixel_data.size();
         auto *pixel_data = bitmap->processed_pixel_data.data();
-        std::size_t bitmap_data_count = bitmap->bitmap_data.size();
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
         auto xbox = engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX;
         
@@ -86,7 +128,7 @@ namespace Invader::Parser {
             bool compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
             
             if(data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as swizzled which is unsupported for compiling maps", b);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as swizzled which is invalid for bitmap tag files", b);
                 throw InvalidTagDataException();
             }
             
