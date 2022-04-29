@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Changed
+- invader-build: Errors if there are no bitmap sequences or bitmap sequences are
+  invalid for bitmap tags. Not having sequences causes crashes in some cases.
 - invader-compare: Made map comparison more tolerant if no resource map is used
   when performing a comparison.
 
