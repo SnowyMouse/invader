@@ -2,12 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.50.2] - 2022-04-30
 ### Changed
 - invader-build: Errors if there are no bitmap sequences or bitmap sequences are
   invalid for bitmap tags. Not having sequences causes crashes in some cases.
 - invader-compare: Made map comparison more tolerant if no resource map is used
   when performing a comparison.
+- invader-script: Added support for the MCC scripting functions and globals
+  added in the April 2022 update.
 
 ## [0.50.1] - 2022-04-20
 ### Changed
@@ -2356,5 +2358,6 @@ image as one bitmap
 [0.49.1]: https://github.com/SnowyMouse/invader/compare/0.49.0...0.49.1
 [0.50.0]: https://github.com/SnowyMouse/invader/compare/0.49.1...0.50.0
 [0.50.1]: https://github.com/SnowyMouse/invader/compare/0.50.0...0.50.1
+[0.50.2]: https://github.com/SnowyMouse/invader/compare/0.50.1...0.50.2
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.1...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.2...master
