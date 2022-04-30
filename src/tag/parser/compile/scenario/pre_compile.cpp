@@ -132,11 +132,12 @@ namespace Invader::Parser {
         }
         
         // Load the scripts
+        RIAT::CompilerScriptResult result;
         try {
             for(auto &source : source_files) {
                 instance.read_script_data(reinterpret_cast<const std::uint8_t *>(source.source.data()), source.source.size(), (std::string(source.name.string) + ".hsc").c_str());
             }
-            instance.compile_scripts();
+            result = instance.compile_scripts();
         }
         catch(std::exception &e) {
             eprintf_error("Script compilation error: %s", e.what());
@@ -144,7 +145,7 @@ namespace Invader::Parser {
         }
         
         // Check warnings
-        for(auto &e : instance.get_warnings()) {
+        for(auto &e : result.get_warnings()) {
             char fmt_message[512];
             std::snprintf(fmt_message, sizeof(fmt_message), "%s:%zu:%zu: warning: %s", e.get_file(), e.get_line(), e.get_column(), e.get_reason());
             warnings.emplace_back(fmt_message);
@@ -152,9 +153,9 @@ namespace Invader::Parser {
         
         std::size_t node_limit = info.maximum_scenario_script_nodes;
         
-        auto scripts = instance.get_scripts();
-        auto globals = instance.get_globals();
-        auto nodes = instance.get_nodes();
+        auto scripts = result.get_scripts();
+        auto globals = result.get_globals();
+        auto nodes = result.get_nodes();
         
         std::size_t node_count = nodes.size();
         
