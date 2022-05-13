@@ -321,7 +321,7 @@ int main(int argc, char * const *argv) {
     });
     
     if(!string_options.format.has_value()) {
-        eprintf_error("No tag group specified. Use -h for more information.");
+        eprintf_error("No type specified. Use -h for more information.");
         return EXIT_FAILURE;
     }
 
