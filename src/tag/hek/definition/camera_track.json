@@ -23,7 +23,8 @@
         "fields": [
             {
                 "name": "flags",
-                "type": "IsUnusedFlag"
+                "type": "IsUnusedFlag",
+                "unused": true
             },
             {
                 "name": "control points",
