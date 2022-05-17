@@ -154,7 +154,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     std::uint32_t highest_sample_rate = 0;
     std::vector<std::pair<std::vector<SoundReader::Sound>, std::string>> pitch_ranges;
 
-    oprintf("Loading sounds... ");
+    oprintf("Loading sounds...\n");
     oflush();
 
     // Load the sounds
@@ -184,8 +184,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             }
         }
     }
-
-    oprintf("done!\n");
 
     // Force channel count
     if(sound_options.channel_count.has_value()) {
@@ -230,7 +228,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
 
     // Resample permutations when needed
-    oprintf("Processing sounds... ");
+    oprintf("Processing sounds...\n");
     oflush();
     std::size_t total_sound_count = 0;
     std::atomic<std::size_t> thread_count = 0;
@@ -261,8 +259,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     // Wait until done
     wait_until_threads_are_done();
-
-    oprintf("done!\n");
 
     // Remove pitch ranges that are present in the tag but not in what we found
     while(true) {
@@ -817,14 +813,14 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
         // Get the sound
         SoundReader::Sound sound = {};
         try {
-            if(extension == ".wav") {
+            if(extension == ".wav" || extension == ".wave") {
                 sound = SoundReader::sound_from_wav_file(path);
             }
             else if(extension == ".flac") {
                 sound = SoundReader::sound_from_flac_file(path);
             }
             else {
-                eprintf_error("Unknown file format for %s", path.string().c_str());
+                eprintf_error("Unsupported input file %s.\nSupported input formats are Free Lossless Audio Codec (.flac) or Waveform Audio (.wav, .wave).", path.string().c_str());
                 std::exit(EXIT_FAILURE);
             }
         }
