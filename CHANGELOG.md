@@ -2,7 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.50.3] - 2022-05-18
+### Changed
+- Change camera_track definition to omit an unused flag
+
 ### Fixed
 - invader-sound: Fixed mouth data not being saved on tag creation
 - invader-sound: Fixed importing 8-bit wave files
@@ -2365,5 +2368,6 @@ image as one bitmap
 [0.50.0]: https://github.com/SnowyMouse/invader/compare/0.49.1...0.50.0
 [0.50.1]: https://github.com/SnowyMouse/invader/compare/0.50.0...0.50.1
 [0.50.2]: https://github.com/SnowyMouse/invader/compare/0.50.1...0.50.2
+[0.50.3]: https://github.com/SnowyMouse/invader/compare/0.50.2...0.50.3
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.2...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.3...master
