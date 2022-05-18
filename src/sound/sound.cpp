@@ -461,9 +461,10 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 };
 
                 // Generate mouth data if needed
+                std::vector<std::byte> mouth_data;
                 if(is_dialogue) {
                     // Convert samples to 8-bit unsigned so we can use it to generate mouth data
-                    auto samples_float = SoundEncoder::convert_int_to_float(permutation->pcm, permutation->bits_per_sample);
+                    auto samples_float = SoundEncoder::convert_int_to_float(pcm, permutation->bits_per_sample);
                     std::vector<std::uint8_t> pcm_8_bit;
                     pcm_8_bit.reserve(samples_float.size());
                     for(auto &f : samples_float) {
@@ -474,7 +475,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         pcm_8_bit.emplace_back(static_cast<std::uint8_t>(ff * UINT8_MAX));
                     }
                     samples_float = {};
-                    generate_mouth_data(pcm_8_bit);
+                    mouth_data = generate_mouth_data(pcm_8_bit);
                 }
 
                 // Do the encoding thing
@@ -523,6 +524,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 p.samples = samples;
                 p.buffer_size = buffer_size;
                 p.samples.shrink_to_fit();
+                p.mouth_data = mouth_data;
                 mutex->unlock();
 
                 // Finish up
