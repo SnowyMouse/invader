@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-sound: Fixed mouth data not being saved on tag creation
+- invader-sound: Fixed importing 8-bit wave files
+- invader-sound: Fixed importing sounds with mixed case file extensions
+
 ## [0.50.2] - 2022-04-30
 ### Changed
 - invader-build: Errors if there are no bitmap sequences or bitmap sequences are
