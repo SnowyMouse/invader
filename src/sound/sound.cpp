@@ -811,6 +811,9 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
             std::exit(EXIT_FAILURE);
         }
         auto extension = path.extension().string();
+        for(auto &c : extension) {
+            c = std::tolower(c);
+        }
 
         // Get the sound
         SoundReader::Sound sound = {};
