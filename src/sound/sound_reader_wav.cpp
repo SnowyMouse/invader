@@ -102,6 +102,11 @@ namespace Invader::SoundReader {
         if(fmt_subchunk.audio_format == 1) {
             result.pcm = std::vector<std::byte>(data_size);
             std::memcpy(result.pcm.data(), data + offset, data_size);
+            if(result.bits_per_sample == 8) {
+                for(auto &i : result.pcm) {
+                i = static_cast<std::byte>(static_cast<std::uint8_t>(i) ^ 0x80);
+                }
+            }
         }
         else if(fmt_subchunk.audio_format == 3) {
             std::vector<float> pcm_float(data_size / sizeof(*pcm_float.data()));
