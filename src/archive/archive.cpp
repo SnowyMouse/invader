@@ -417,6 +417,7 @@ int main(int argc, const char **argv) {
             auto str_path = archive_list[i].first.string();
             const char *path = str_path.c_str();
 
+            // libarchive always needs POSIX paths.
             auto archive_path = archive_list[i].second;
             for(char &c : archive_path) {
                 if(c == std::filesystem::path::preferred_separator) {

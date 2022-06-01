@@ -2375,5 +2375,6 @@ image as one bitmap
 [0.50.1]: https://github.com/SnowyMouse/invader/compare/0.50.0...0.50.1
 [0.50.2]: https://github.com/SnowyMouse/invader/compare/0.50.1...0.50.2
 [0.50.3]: https://github.com/SnowyMouse/invader/compare/0.50.2...0.50.3
+[0.50.4]: https://github.com/SnowyMouse/invader/compare/0.50.3...0.50.4
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.3...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.4...master
