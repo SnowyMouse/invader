@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-archive: Fix for the previous fix of fixing Windows path separators
+  being used instead of portable UNIX path separators when making .7z files.
+- invader-script: "default" is now correctly supported as a team name.
+
 ## [0.50.3] - 2022-05-18
 ### Changed
 - Change camera_track definition to omit an unused flag

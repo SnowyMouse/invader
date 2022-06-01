@@ -415,16 +415,18 @@ int main(int argc, const char **argv) {
         // Go through each tag path we got
         for(std::size_t i = 0; i < archive_list.size(); i++) {
             auto str_path = archive_list[i].first.string();
-            for(char &c : str_path) {
+            const char *path = str_path.c_str();
+
+            auto archive_path = archive_list[i].second;
+            for(char &c : archive_path) {
                 if(c == std::filesystem::path::preferred_separator) {
                     c = '/';
                 }
             }
-            const char *path = str_path.c_str();
 
             // Begin
             auto *entry = archive_entry_new();
-            archive_entry_set_pathname(entry, archive_list[i].second.c_str());
+            archive_entry_set_pathname(entry, archive_path.c_str());
             archive_entry_set_perm(entry, 0644);
             archive_entry_set_filetype(entry, AE_IFREG);
 
