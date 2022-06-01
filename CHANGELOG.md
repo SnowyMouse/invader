@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.50.4] - 2022-06-01
 ### Fixed
 - invader-archive: Fix for the previous fix of fixing Windows path separators
   being used instead of portable UNIX path separators when making .7z files.
