@@ -451,7 +451,8 @@
             {
                 "name": "camera tracks",
                 "type": "TagReflexive",
-                "struct": "UnitCameraTrack"
+                "struct": "UnitCameraTrack",
+                "maximum": 2
             },
             {
                 "name": "seat acceleration scale",
