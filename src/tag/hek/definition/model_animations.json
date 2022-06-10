@@ -745,7 +745,8 @@
             },
             {
                 "name": "flags",
-                "type": "ModelAnimationsAnimationFlags"
+                "type": "ModelAnimationsAnimationFlags",
+                "read_only": true
             },
             {
                 "name": "sound",
@@ -911,7 +912,8 @@
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimation",
                 "read_only": true,
-                "maximum": 2048
+                "maximum": 512,
+                "extended_maximum": 2048
             }
         ],
         "type": "struct",
