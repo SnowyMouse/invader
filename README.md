@@ -21,6 +21,10 @@ This readme addresses a few topics:
 - [Frequently asked questions]
 
 ## Staying up-to-date
+Note there is no automatic update mechanism in place of these builds or any
+notification system. You are responsible for ensuring you have the latest
+Invader build. For an explanation, see [Why don't I get notified of updates?].
+
 To check if you are on an up-to-date version, run one of the tools (e.g.
 invader-info) with the `-i` parameter. On the top of the output is the version
 number that corresponds to the installation of Invader (e.g.
@@ -45,7 +49,7 @@ Invader can be obtained by either downloading pre-compiled binaries or
 compiling from source.
 
 ### Precompiled builds (Windows)
-You can download precompiled [Windows build]. These will typically be up-to-date
+You can download precompiled [Windows builds]. These will typically be up-to-date
 unless commits were made very recently.
 
 Note that these builds are Windows-only. So, if you are not on Windows, you
@@ -54,7 +58,7 @@ should not use these builds.
 Also note that these builds require Windows 10 or later. Windows 8 and older are
 unsupported due to dependencies now requiring later versions of Windows.
 
-[Windows Builds]: https://github.com/SnowyMouse/invader/releases
+[Windows builds]: https://github.com/SnowyMouse/invader/releases
 
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader
@@ -994,6 +998,7 @@ Invader's development.
 - [The HEK says my bitmap tag is "too large" when opening.]
 - [How close to completion is Invader?]
 - [Should I use invader-build for my map right now?]
+- [Why don't I get notified of updates?]
 
 ### I get errors when building HEK tags or tags extracted with invader-extract
 The stock Halo Editing Kit tags as well as a number of extracted tags have a
@@ -1245,6 +1250,32 @@ while tool.exe is basically the reference when it comes to building cache files.
 However, we do ask that you consider testing invader-build so we can improve it
 to a point where it can be a better and free replacement for tool.exe.
 
+### Why don't I get notified of updates?
+Automatic updates sound like a good idea, but there are a few issues with this.
+
+It is obvious that, if the update server is hijacked, they can put malware on
+these servers. Using signatures will protect current builds from automatically
+updating as it would fail validation, and this is what many auto update
+implementations utilize.
+
+However, there is still the matter that, every time the software is used, the
+software communicates a server. This, in fact, is an issue that current builds
+of the Halo: CE mod tools. If you use software from the Halo: CE mod tools, it
+will tell Steam to set your playing status to the Halo: CE mod tools.
+
+This also incurs some additional overhead when starting the software. Imagine
+having to ping a server hundreds of times in a second whenever using a `find`
+invocation.
+
+And, of course, there are tons of security considerations whenever we want to
+connect to anything on a network.
+
+And lastly (and the biggest reason), while we try to ensure our builds are not
+too buggy, there is always a chance you could automatically update into a
+totally broken build of Invader.
+
+For these reasons, we have decided to not implement automatic updating.
+
 [Staying up-to-date]: #staying-up-to-date
 [Contributing]: #contributing
 [Getting Invader]: #getting-invader
@@ -1263,6 +1294,7 @@ to a point where it can be a better and free replacement for tool.exe.
 [The HEK says my bitmap tag is "too large" when opening.]: #the-hek-says-my-bitmap-tag-is-too-large-when-opening
 [How close to completion is Invader?]: #how-close-to-completion-is-invader
 [Should I use invader-build for my map right now?]: #should-i-use-invader-build-for-my-map-right-now
+[Why don't I get notified of updates?]: #why-dont-i-get-notified-of-updates
 
 [invader-archive]: #invader-archive
 [invader-bitmap]: #invader-bitmap
