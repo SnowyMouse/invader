@@ -44,14 +44,17 @@ See CONTRIBUTING.md.
 Invader can be obtained by either downloading pre-compiled binaries or
 compiling from source.
 
-### Nightly builds (Windows)
-You can download precompiled [Nightly Builds]. These will usually be up-to-date
+### Precompiled builds (Windows)
+You can download precompiled [Windows build]. These will typically be up-to-date
 unless commits were made very recently.
 
 Note that these builds are Windows-only. So, if you are not on Windows, you
 should not use these builds.
 
-[Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
+Also note that these builds require Windows 10 or later. Windows 8 and older are
+unsupported due to dependencies now requiring later versions of Windows.
+
+[Windows Builds]: https://github.com/SnowyMouse/invader/releases
 
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader
