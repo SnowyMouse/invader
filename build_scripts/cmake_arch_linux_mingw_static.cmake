@@ -8,6 +8,8 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
 
     # Set these
     set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -lwinpthread")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFLAC__NO_DLL")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFLAC__NO_DLL")
 
     # From https://github.com/Martchus/PKGBUILDs/blob/master/cmake/mingw-w64-static/toolchain-mingw-static.cmake
     set(pkgcfg_lib_libbrotlicommon_brotlicommon "${INVADER_MINGW_PREFIX}/lib/libbrotlicommon-static.a" CACHE INTERNAL "static libbrotlicommon")
