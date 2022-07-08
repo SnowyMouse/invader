@@ -13,6 +13,29 @@ Invader is not licensed under ANY earlier or later revision of the GNU General
 Public License, nor is it licensed under ANY other license at all EXCEPT at the
 discretion of Snowy.
 
+### Content made with Invader
+Content made with Invader is not subject to Invader's licensing in any way. If
+you create original content with Invader, you own the rights to it including
+any sort of distribution and sublicensing rights (by default).
+
+However, if you choose to use, modify, or derive pre-existing content using
+Invader, Invader does not affect the rights to that content. This means it may
+still belong to its original owner(s) even if you extracted it! Invader neither
+gives you the right nor a license to use or modify existing content. This also
+includes any and all content supplied by the original game(s) including (but
+not limited to) tag files or cache files.
+
+For example, if you use any of MCC's officially released maps or tags to make
+custom content, you own all the tags you create with Invader, but the usage of
+tags derived from MCC would be bound by the [MCC EULA].
+
+Note: If you do not use any MCC-derived assets, it is important to note that
+cache files made with Invader can still be bound by the MCC EULA if you later
+make these maps available on MCC. This is not a condition of using Invader but
+actually a condition of using MCC!
+
+[MCC EULA]: https://www.halowaypoint.com/halo-the-master-chief-collection/eula
+
 ## ADPCM codec
 The ADPCM encoder and MosesofEgypt's Xbox ADPCM modifications are BSD ("new" BSD
 3-clause license) and MIT, respectively. Licenses can be found at
