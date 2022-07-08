@@ -30,7 +30,7 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                 cpp_read_cache_file_data.write("            try {\n")
                 cpp_read_cache_file_data.write("                auto &referenced_tag = tag.get_map().get_tag(r.{}.tag_id.index);\n".format(name))
                 cpp_read_cache_file_data.write("                if(referenced_tag.get_tag_fourcc() != r.{}.tag_fourcc) {{\n".format(name))
-                cpp_read_cache_file_data.write("                    eprintf_error(\"Corrupt tag reference (class in reference does not match class in referenced tag)\");\n")
+                cpp_read_cache_file_data.write("                    eprintf_error(\"Corrupt tag reference (group in reference does not match group in referenced tag)\");\n")
                 cpp_read_cache_file_data.write("                    throw InvalidTagDataException();\n")
                 cpp_read_cache_file_data.write("                }\n")
                 cpp_read_cache_file_data.write("                r.{}.path = referenced_tag.get_path();\n".format(name))
@@ -47,7 +47,7 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                     cpp_read_cache_file_data.write("        else if(r.{}.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_NULL) {{\n".format(name))
                     cpp_read_cache_file_data.write("            r.{}.tag_fourcc = HEK::TagFourCC::TAG_FOURCC_{};\n".format(name, struct["classes"][0].upper()))
                     cpp_read_cache_file_data.write("        }\n")
-                    
+
             elif struct["type"] == "TagReflexive":
                 cpp_read_cache_file_data.write("        std::size_t l_{}_count = l.{}.count.read();\n".format(name, name))
                 cpp_read_cache_file_data.write("        auto l_{}_pointer = l.{}.pointer.read();\n".format(name, name))
