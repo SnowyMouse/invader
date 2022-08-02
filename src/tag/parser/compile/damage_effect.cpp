@@ -4,6 +4,10 @@
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
+    void ContinuousDamageEffect::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->camera_shaking_wobble_period *= TICK_RATE;
+    }
+
     void DamageEffect::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->camera_shaking_wobble_period *= TICK_RATE;
 

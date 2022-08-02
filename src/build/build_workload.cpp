@@ -669,6 +669,7 @@ namespace Invader {
             COMPILE_TAG_CLASS(ModelAnimations, TAG_FOURCC_MODEL_ANIMATIONS)
             COMPILE_TAG_CLASS(Biped, TAG_FOURCC_BIPED)
             COMPILE_TAG_CLASS(Bitmap, TAG_FOURCC_BITMAP)
+            COMPILE_TAG_CLASS(ContinuousDamageEffect, TAG_FOURCC_CONTINUOUS_DAMAGE_EFFECT)
             COMPILE_TAG_CLASS(ModelCollisionGeometry, TAG_FOURCC_MODEL_COLLISION_GEOMETRY)
             COMPILE_TAG_CLASS(ColorTable, TAG_FOURCC_COLOR_TABLE)
             COMPILE_TAG_CLASS(Contrail, TAG_FOURCC_CONTRAIL)
@@ -800,7 +801,6 @@ namespace Invader {
             // We don't have any way of handling these tags
             case TagFourCC::TAG_FOURCC_PREFERENCES_NETWORK_GAME:
             case TagFourCC::TAG_FOURCC_SPHEROID:
-            case TagFourCC::TAG_FOURCC_CONTINUOUS_DAMAGE_EFFECT:
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_fourcc_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
                 

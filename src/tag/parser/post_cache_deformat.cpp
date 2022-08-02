@@ -10,6 +10,10 @@ namespace Invader::Parser {
         this->grenade_velocity /= TICK_RATE_RECIPROCOL;
     }
 
+    void Invader::Parser::ContinuousDamageEffect::post_cache_deformat() {
+        this->camera_shaking_wobble_period /= TICK_RATE;
+    }
+
     void Invader::Parser::DamageEffect::post_cache_deformat() {
         this->camera_shaking_wobble_period /= TICK_RATE;
     }
