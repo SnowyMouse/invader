@@ -245,6 +245,11 @@ namespace Invader::Bludgeoner {
                 return false;
             }
             
+            // We can't handle sprites here
+            if(b->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+                return false;
+            }
+            
             bool fixed = false;
             auto bitmap_count = b->bitmap_data.size();
             if(bitmap_count >= NULL_INDEX) {
