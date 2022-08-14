@@ -137,7 +137,11 @@
             },
             {
                 "name": "damage instantaneous acceleration",
-                "type": "Vector3D"
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
             },
             {
                 "name": "dirt",
