@@ -41,9 +41,20 @@ namespace Invader::Parser {
     }
 
     template <typename T> static void do_pre_compile(T *bitmap, BuildWorkload &workload, std::size_t tag_index) {
-        // Delete null group sequences at the end
-        while(bitmap->bitmap_group_sequence.size() > 0 && bitmap->bitmap_group_sequence[bitmap->bitmap_group_sequence.size() - 1].first_bitmap_index == NULL_INDEX) {
+        auto erase_last_sequence = [&bitmap]() {
             bitmap->bitmap_group_sequence.erase(bitmap->bitmap_group_sequence.begin() + (bitmap->bitmap_group_sequence.size() - 1));
+        };
+        
+        // Delete empty sequences at the end
+        if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+            while(!bitmap->bitmap_group_sequence.empty() && bitmap->bitmap_group_sequence[bitmap->bitmap_group_sequence.size() - 1].sprites.empty()) {
+                erase_last_sequence();
+            }
+        }
+        else {
+            while(!bitmap->bitmap_group_sequence.empty() && bitmap->bitmap_group_sequence[bitmap->bitmap_group_sequence.size() - 1].bitmap_count == 0) {
+                erase_last_sequence();
+            }
         }
         
         // Zero out these if we're sprites (this is completely *insane* but that's what tool.exe does)
