@@ -2,6 +2,15 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.50.5] - 2022-08-14
+### Added
+- Added continuous_damage_effect.
+- invader-bludgeon: Added -T missing-bitmap-sequences.
+
+### Fixed
+- Set maximum count of unit camera track references to 2.
+- Made some flags read-only in model_animations.
+
 ## [0.50.4] - 2022-06-01
 ### Fixed
 - invader-archive: Fix for the previous fix of fixing Windows path separators
@@ -2376,5 +2385,6 @@ image as one bitmap
 [0.50.2]: https://github.com/SnowyMouse/invader/compare/0.50.1...0.50.2
 [0.50.3]: https://github.com/SnowyMouse/invader/compare/0.50.2...0.50.3
 [0.50.4]: https://github.com/SnowyMouse/invader/compare/0.50.3...0.50.4
+[0.50.5]: https://github.com/SnowyMouse/invader/compare/0.50.4...0.50.5
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.4...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.50.5...master
