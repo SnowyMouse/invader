@@ -238,4 +238,41 @@ namespace Invader::Bludgeoner {
             }
         }(dynamic_cast<Invader::Parser::Sound *>(s));
     }
+    
+    bool missing_bitmap_sequences_fix(Parser::ParserStruct *b, bool fix) {
+        return [&fix](auto *b) -> bool {
+            if(b == nullptr) {
+                return false;
+            }
+            
+            bool fixed = false;
+            auto bitmap_count = b->bitmap_data.size();
+            if(bitmap_count >= NULL_INDEX) {
+                return false; // can't fix if too many bitmaps to reference
+            }
+            
+            for(std::size_t i = 0; i < bitmap_count; i++) {
+                bool found = false;
+                for(auto &s: b->bitmap_group_sequence) {
+                    std::size_t start = s.first_bitmap_index;
+                    std::size_t end = start + s.bitmap_count;
+                    if(i >= start && i < end) {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    if(!fix) {
+                        return true; // we found an unreferenced bitmap data but we do not need to go any further
+                    }
+                    auto &s = b->bitmap_group_sequence.emplace_back();
+                    s.first_bitmap_index = static_cast<HEK::Index>(i);
+                    s.bitmap_count = 1;
+                    fixed = true;
+                }
+            }
+            
+            return fixed;
+        }(dynamic_cast<Invader::Parser::Bitmap *>(b));
+    }
 }

@@ -85,6 +85,9 @@ static BludgeonAction all_fixes[] = {
     /** Fix invalid values that are out of bounds for their ranges */
     { .name = "out-of-range", .fix_fn = broken_range_fix },
     
+    /** Fix sequences being missing in bitmaps */
+    { .name = "missing-bitmap-sequences", .fix_fn = missing_bitmap_sequences_fix },
+    
     /** Fix everything */
     { .name = "everything", .fix_bit = static_cast<std::uint64_t>(~0) }
 };

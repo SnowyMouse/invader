@@ -292,7 +292,8 @@ Options:
                                invalid-uppercase-references,
                                mismatched-sound-enums, missing-script-source,
                                missing-vertices, nonnormal-vectors,
-                               out-of-range, everything
+                               out-of-range, missing-bitmap-sequences,
+                               everything
 ```
 
 ### invader-build
