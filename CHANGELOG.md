@@ -2,11 +2,6 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Untagged
-### Fixed
-- invader-bludgeon: Fixed missing-bitmap-sequences applying to sprites
-- invader-build: Fixed some empty sequences being put in maps for sprites
-
 ## [0.50.5] - 2022-08-14
 ### Added
 - Added continuous_damage_effect.
@@ -15,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - Set maximum count of unit camera track references to 2.
 - Made some flags read-only in model_animations.
+- invader-build: Fixed some empty sequences being put in maps for sprites
 
 ## [0.50.4] - 2022-06-01
 ### Fixed
