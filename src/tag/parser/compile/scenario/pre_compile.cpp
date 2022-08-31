@@ -732,7 +732,7 @@ namespace Invader::Parser {
                             case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_EXCEPT_CTF:
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_RACE, add_for_type);
                                 // fallthrough
-                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_EXCEPT_RACE_CTF:
+                            case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_EXCEPT_RACE_AND_CTF:
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_SLAYER, add_for_type);
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ODDBALL, add_for_type);
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_KING_OF_THE_HILL, add_for_type);

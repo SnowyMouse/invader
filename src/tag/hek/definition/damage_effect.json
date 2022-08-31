@@ -66,7 +66,12 @@
             "skips shields",
             "only hurts one infection form",
             "can cause multiplayer headshots",
-            "infection form pop"
+            "infection form pop",
+            "ignore seat scale for dir dmg",
+            "forces hard ping",
+            "does not hurt players",
+            "use 3d instantaneous acceleration",
+            "allow any non-zero acceleration value"
         ],
         "width": 32
     },
@@ -431,11 +436,7 @@
             },
             {
                 "name": "damage instantaneous acceleration",
-                "type": "float"
-            },
-            {
-                "type": "pad",
-                "size": 8
+                "type": "Vector3D"
             },
             {
                 "name": "dirt",

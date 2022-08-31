@@ -141,7 +141,9 @@
         "name": "GrenadeType",
         "options": [
             "human fragmentation",
-            "covenant plasma"
+            "covenant plasma",
+            "grenade type 2",
+            "grenade type 3"
         ],
         "type": "enum"
     },

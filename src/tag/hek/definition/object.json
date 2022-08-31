@@ -98,7 +98,10 @@
             "does not cast shadow",
             "transparent self occlusion",
             "brighter than it should be",
-            "not a pathfinding obstacle"
+            "not a pathfinding obstacle",
+            "extension of parent",
+            "cast shadow by default",
+            "does not have anniversary geometry"
         ],
         "width": 16
     },
