@@ -3128,7 +3128,8 @@
             {
                 "name": "parameters",
                 "type": "TagReflexive",
-                "struct": "ScenarioScriptParameter"
+                "struct": "ScenarioScriptParameter",
+                "maximum": 16
             }
         ],
         "title": "name",
