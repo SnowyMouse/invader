@@ -48,7 +48,7 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
 # Fix any dependencies needed to be fixed
 else()
     set(DEP_SQUISH_LIBRARIES squish gomp)
-    set(SDL2_LIBRARIES ${SDL2_LIBRARIES} -lsetupapi -limm32 -lversion -lwinmm)
+    set(SDL2_LIBRARIES ${SDL2_STATIC_LIBRARIES} -lsetupapi -limm32 -lversion -lwinmm)
     set(TIFF_LIBRARIES ${TIFF_LIBRARIES} jpeg lzma)
     set(LibArchive_LIBRARIES ${LibArchive_LIBRARIES} lzma zstd bz2 iconv)
     set(FREETYPE_LIBRARIES freetype png brotlidec-static brotlicommon-static bz2 harfbuzz graphite2 freetype)
