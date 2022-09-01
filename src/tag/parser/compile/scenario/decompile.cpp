@@ -256,14 +256,32 @@ namespace Invader::Parser {
                         
                             // Is it the top level block? We can include the first few things
                             if(i == 0) {
-                                if(tokens[i + 1] == "global" || (tokens[i + 2] != "static" && tokens[i + 2] != "stub")) { // static/stub has 1 more token than other script types
-                                    append_range(0, 4);
-                                    i = 4;
+                                std::size_t range_end;
+                                if(tokens[i + 1] == "script") {
+                                    if(tokens[i + 2] != "static" && tokens[i + 2] != "stub") { // static/stub has 1 more token than other script types
+                                        range_end = 4;
+                                    }
+                                    else {
+                                        range_end = 5;
+                                    }
+                                    if(tokens[range_end - 1] == "(") { // is the name the beginning of a block (thus parameters?)
+                                        std::size_t name_depth = 1;
+                                        while(name_depth > 0) {
+                                            if(tokens[range_end] == "(") {
+                                                name_depth++;
+                                            }
+                                            if(tokens[range_end] == ")") {
+                                                name_depth--;
+                                            }
+                                            range_end++;
+                                        }
+                                    }
                                 }
                                 else {
-                                    append_range(0, 5);
-                                    i = 5;
+                                    range_end = 4;
                                 }
+                                append_range(0, range_end);
+                                i = range_end;
                                 continue;
                             }
                             
@@ -338,7 +356,22 @@ namespace Invader::Parser {
                             break;
                         default: break;
                     }
+                    
+                    if(!s.parameters.empty()) {
+                        tokens.emplace_back("(");
+                    }
+                    
                     tokens.emplace_back(s.name.string);
+                    
+                    if(!s.parameters.empty()) {
+                        for(auto p : s.parameters) {
+                            tokens.emplace_back("(");
+                            tokens.emplace_back(type_to_type_str(p.return_type));
+                            tokens.emplace_back(p.name.string);
+                            tokens.emplace_back(")");
+                        }
+                        tokens.emplace_back(")");
+                    }
                     
                     auto first_function_call = tokens.size();
                     if(!decompile_node(s.root_expression_index, tokens, decompile_node)) {
