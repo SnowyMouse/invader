@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.51.0] - 2022-09-01
+### Added
+- Added support for CEA's new definitions in the August 2022 Update.
+- Added support for compiling and decompiling scenarios with script parameters
+  for Halo: Combat Evolved Anniversary.
+
 ## [0.50.5] - 2022-08-14
 ### Added
 - Added continuous_damage_effect.
