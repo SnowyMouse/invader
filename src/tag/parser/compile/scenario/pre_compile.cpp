@@ -207,14 +207,19 @@ namespace Invader::Parser {
             new_node.index_union = n.index_union;
             
             // Set this stuff
-            bool is_primitive = n.node_type == RIATNodeTypeC::RIAT_Primitive || n.node_type == RIATNodeTypeC::RIAT_Global;
-            bool is_global = n.node_type == RIATNodeTypeC::RIAT_Global;
+            bool is_primitive = n.node_type == RIATNodeTypeC::RIAT_LocalVariable || n.node_type == RIATNodeTypeC::RIAT_GlobalVariable || n.node_type == RIATNodeTypeC::RIAT_StaticValue;
+            bool is_variable = n.node_type == RIATNodeTypeC::RIAT_LocalVariable || n.node_type == RIATNodeTypeC::RIAT_GlobalVariable;
+            bool is_local = n.node_type == RIATNodeTypeC::RIAT_LocalVariable;
             bool is_script_call = n.node_type == RIATNodeTypeC::RIAT_ScriptCall;
             if(is_primitive) {
                 new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE;
-                if(is_global) {
+                if(is_variable) {
                     new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL;
                     new_node.data.long_int = n.node_data.long_int;
+                    
+                    if(is_local) {
+                        new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_LOCAL_VARIABLE;
+                    }
                 }
                 else {
                     new_node.data.long_int = 0xFFFFFFFF;
@@ -304,7 +309,7 @@ namespace Invader::Parser {
             
             // Make sure the thing it refers to exists. If so, save the index.
             try {
-                if(n.node_type == RIATNodeTypeC::RIAT_Primitive) {
+                if(n.node_type == RIATNodeTypeC::RIAT_StaticValue) {
                     switch(new_node.type) {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_RECORDING:
                             new_node.data.short_int = find_thing(scenario.recorded_animations, n.string_data);
@@ -520,7 +525,7 @@ namespace Invader::Parser {
             auto &node = nodes[n];
             
             // Skip non-primitives/globals
-            if(node.node_type != RIATNodeTypeC::RIAT_Primitive) {
+            if(node.node_type != RIATNodeTypeC::RIAT_StaticValue) {
                 continue;
             }
             
