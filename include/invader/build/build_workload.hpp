@@ -421,6 +421,9 @@ namespace Invader {
         /** Are we building a stock map? */
         bool building_stock_map = false;
         
+        /** Do we apply singleplayer tag patches to the pistol, plasma rifle, etc. */
+        bool jason_jones = false;
+        
         /** Scenario index? */
         std::size_t scenario_index;
         

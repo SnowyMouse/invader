@@ -56,8 +56,10 @@ namespace Invader {
         std::deque<std::size_t> all_tags_to_extract;
         auto &workload = *this;
         auto engine = map->get_cache_version();
+        
+        bool jason_jones = (map->get_tag(map->get_scenario_tag_id()).get_base_struct<HEK::Scenario>().flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_DO_NOT_APPLY_BUNGIE_CAMPAIGN_TAG_PATCHES) == 0;
 
-        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload, &engine](std::size_t tag_index) -> bool {
+        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload, &engine, &jason_jones](std::size_t tag_index) -> bool {
             // Do it
             extracted_tags[tag_index] = true;
 
@@ -121,7 +123,7 @@ namespace Invader {
             }
 
             // Jason Jones the tag
-            if(type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
+            if(jason_jones && type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
                 bool changed = false;
                 switch(tfp.fourcc) {
                     case Invader::TagFourCC::TAG_FOURCC_WEAPON: {

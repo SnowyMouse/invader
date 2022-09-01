@@ -667,8 +667,10 @@ namespace Invader::Parser {
     }
     
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        workload.jason_jones = (this->flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_DO_NOT_APPLY_BUNGIE_CAMPAIGN_TAG_PATCHES) == 0;
+        
         merge_child_scenarios(workload, tag_index, *this);
-
+        
         if(!workload.cache_file_type.has_value()) {
             workload.cache_file_type = this->type;
             workload.demo_ui = this->flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_USE_DEMO_UI;
