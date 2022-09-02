@@ -4,7 +4,8 @@
         "fields": [
             {
                 "name": "string",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 32768
             }
         ],
         "type": "struct",

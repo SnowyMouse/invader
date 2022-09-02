@@ -143,7 +143,8 @@
             },
             {
                 "name": "pixels",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 8388608
             }
         ],
         "type": "struct",

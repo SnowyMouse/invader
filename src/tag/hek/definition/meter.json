@@ -108,7 +108,8 @@
             {
                 "name": "encoded stencil",
                 "type": "TagDataOffset",
-                "cache_only": true
+                "cache_only": true,
+                "maximum": 65536
             }
         ],
         "type": "struct",

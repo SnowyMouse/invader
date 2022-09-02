@@ -228,17 +228,20 @@
                 "file_offset": true,
                 "external_file_offset": "sounds.map",
                 "compile_ignore": true,
-                "read_only": true
+                "read_only": true,
+                "maximum": 4194304
             },
             {
                 "name": "mouth data",
                 "type": "TagDataOffset",
-                "read_only": true
+                "read_only": true,
+                "maximum": 8192
             },
             {
                 "name": "subtitle data",
                 "type": "TagDataOffset",
-                "read_only": true
+                "read_only": true,
+                "maximum": 512
             }
         ],
         "type": "struct",

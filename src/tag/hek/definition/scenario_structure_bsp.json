@@ -375,12 +375,14 @@
             {
                 "name": "uncompressed vertices",
                 "type": "TagDataOffset",
-                "ignore_cached": true
+                "ignore_cached": true,
+                "maximum": 4864000
             },
             {
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
-                "ignore_cached": true
+                "ignore_cached": true,
+                "maximum": 2560000
             }
         ],
         "type": "struct",
@@ -496,7 +498,8 @@
             {
                 "name": "surface indices",
                 "type": "TagReflexive",
-                "struct": "ScenarioStructureBSPSubclusterSurfaceIndex"
+                "struct": "ScenarioStructureBSPSubclusterSurfaceIndex",
+                "maximum": 128
             }
         ],
         "type": "struct",
@@ -772,7 +775,7 @@
                 "name": "vertices",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlaneVertex",
-                "maximum": 2048
+                "maximum": 4096
             }
         ],
         "type": "struct",
@@ -1311,7 +1314,8 @@
             {
                 "name": "vertices",
                 "type": "TagReflexive",
-                "struct": "ScenarioStructureBSPLeafPortalVertex"
+                "struct": "ScenarioStructureBSPLeafPortalVertex",
+                "maximum": 64
             }
         ],
         "type": "struct",
@@ -1478,7 +1482,8 @@
             },
             {
                 "name": "cluster data",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 65536
             },
             {
                 "name": "cluster portals",
@@ -1564,7 +1569,8 @@
             },
             {
                 "name": "sound pas data",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 131072
             },
             {
                 "type": "pad",

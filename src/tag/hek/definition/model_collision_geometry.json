@@ -721,8 +721,9 @@
                 "name": "pathfinding spheres",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometrySphere",
-                "maximum": 32,
-                "volatile": true
+                "maximum": 256,
+                "volatile": true,
+                "legacy_maximum": 32
             },
             {
                 "name": "nodes",

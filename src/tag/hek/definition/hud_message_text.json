@@ -59,7 +59,8 @@
         "fields": [
             {
                 "name": "text data",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 65536
             },
             {
                 "name": "message elements",

@@ -782,7 +782,8 @@
             },
             {
                 "name": "frame info",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 32768
             },
             {
                 "name": "node transform flag data",
@@ -824,11 +825,13 @@
             },
             {
                 "name": "default data",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 16384
             },
             {
                 "name": "frame data",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 1048576
             }
         ],
         "type": "struct",
@@ -886,7 +889,8 @@
                 "name": "sound references",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphSoundReference",
-                "maximum": 513
+                "maximum": 513,
+                "legacy_maximum": 257
             },
             {
                 "name": "limp body node radius",
@@ -913,7 +917,8 @@
                 "struct": "ModelAnimationsAnimation",
                 "read_only": true,
                 "maximum": 512,
-                "extended_maximum": 2048
+                "extended_maximum": 2048,
+                "legacy_maximum": 256
             }
         ],
         "type": "struct",

@@ -400,13 +400,17 @@
                 "type": "TagDataOffset",
                 "non_cached": true,
                 "read_only": true,
-                "volatile": true
+                "volatile": true,
+                "maximum": 1073741824,
+                "legacy_maximum": 16777216
             },
             {
                 "name": "processed pixel data",
                 "type": "TagDataOffset",
                 "non_cached": true,
-                "read_only": true
+                "read_only": true,
+                "maximum": 1073741824,
+                "legacy_maximum": 16777216
             },
             {
                 "name": "blur filter size",
@@ -451,7 +455,7 @@
                 "name": "bitmap data",
                 "type": "TagReflexive",
                 "struct": "BitmapData",
-                "maximum": 65534,
+                "maximum": 65536,
                 "read_only": true,
                 "legacy_maximum": 2048
             }

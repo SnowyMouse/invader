@@ -581,7 +581,8 @@
                     "mcc"
                 ],
                 "struct": "HUDGlobalsAnniversaryRemap",
-                "maximum": 32
+                "maximum": 32,
+                "legacy_maximum": 0
             },
             {
                 "type": "pad",

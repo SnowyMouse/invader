@@ -1651,7 +1651,8 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsGrenade",
                 "minimum": 2,
-                "maximum": 4
+                "maximum": 4,
+                "legacy_maximum": 2
             },
             {
                 "name": "rasterizer data",

@@ -794,7 +794,8 @@
             },
             {
                 "name": "comment",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 16384
             }
         ],
         "size": 48
@@ -1955,7 +1956,8 @@
             },
             {
                 "name": "recorded animation event stream",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 2097152
             }
         ],
         "title": "name",
@@ -3130,7 +3132,8 @@
                 "name": "parameters",
                 "type": "TagReflexive",
                 "struct": "ScenarioScriptParameter",
-                "maximum": 16
+                "maximum": 16,
+                "legacy_maximum": 0
             }
         ],
         "title": "name",
@@ -3202,7 +3205,9 @@
             },
             {
                 "name": "source",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 1048576,
+                "legacy_maximum": 262144
             }
         ],
         "title": "name",
@@ -3554,7 +3559,8 @@
             },
             {
                 "name": "editor scenario data",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 65536
             },
             {
                 "name": "comments",
@@ -3566,7 +3572,8 @@
                 "name": "scavenger hunt objects",
                 "type": "TagReflexive",
                 "struct": "ScenarioScavengerHuntObjects",
-                "maximum": 16
+                "maximum": 16,
+                "legacy_maximum": 0
             },
             {
                 "type": "pad",
@@ -3639,7 +3646,8 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipmentPalette",
                 "maximum": 256,
-                "extended_maximum": 32767
+                "extended_maximum": 32767,
+                "legacy_maximum": 100
             },
             {
                 "name": "weapons",
@@ -3719,7 +3727,8 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundSceneryPalette",
                 "maximum": 256,
-                "extended_maximum": 32767
+                "extended_maximum": 32767,
+                "legacy_maximum": 100
             },
             {
                 "type": "pad",
@@ -3849,11 +3858,15 @@
             {
                 "name": "script syntax data",
                 "type": "TagDataOffset",
-                "compile_ignore": true
+                "compile_ignore": true,
+                "maximum": 655396,
+                "legacy_maximum": 380076
             },
             {
                 "name": "script string data",
-                "type": "TagDataOffset"
+                "type": "TagDataOffset",
+                "maximum": 819200,
+                "legacy_maximum": 262144
             },
             {
                 "name": "scripts",

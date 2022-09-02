@@ -473,7 +473,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
-                "maximum": 8
+                "maximum": 16
             },
             {
                 "name": "particle types",

@@ -99,7 +99,8 @@
             {
                 "name": "vertices",
                 "type": "TagReflexive",
-                "struct": "AntennaVertex"
+                "struct": "AntennaVertex",
+                "maximum": 20
             }
         ],
         "type": "struct",
