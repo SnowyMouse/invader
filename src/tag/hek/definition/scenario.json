@@ -1521,8 +1521,8 @@
             },
             {
                 "name": "custom control name",
-                "type": "Index",
-                "non_null" : true,
+                "type": "int16",
+                "minimum": 0,
                 "comment": "Zero maps to \"none\", higher values map to strings in the referenced \"custom object names\" unicode string list with the first string starting at 1"
             },
             {
