@@ -1520,8 +1520,10 @@
                 "type": "ScenarioControlFlags"
             },
             {
-                "name": "no name",
-                "type": "int16"
+                "name": "custom control name",
+                "type": "Index",
+                "non_null" : true,
+                "comment": "Zero maps to \"none\", higher values map to strings in the referenced \"custom object names\" unicode string list with the first string starting at 1"
             },
             {
                 "type": "pad",
