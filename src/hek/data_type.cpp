@@ -211,41 +211,43 @@ namespace Invader::HEK {
     }
 
     template<unsigned int bits> constexpr std::int32_t compress_float(float f) {
+        constexpr const std::uint32_t SIGNED_BIT = 1 << (bits - 1);
+        constexpr const std::uint32_t MASK = SIGNED_BIT - 1;
+        
         // Clamp to -1 to +1
-        if(f > 1.0F) {
-            f = 1.0F;
-        }
-        else if(f < -1.0F) {
-            f = -1.0F;
-        }
+        f = std::max(std::min(f, 1.0F), -1.0F);
 
         // Compressing a float basically means taking a -1 to 1 (inclusive) value and turning it into a signed integer.
         // So, if a float is 1.0 and we need to compress it to a 16-bit integer, the result is 32767.
-        // If a float is -1.0 and we need to compress it to a 16-bit integer, the result is -1 (or 65535). 0 is always 0.
+        // If a float is -1.0 and we need to compress it to a 16-bit integer, the result is -1 (or 32768). 0 is always 0.
         if(f >= 0.0F) {
-            constexpr int32_t MAX_VALUE = (1 << (bits - 1)) - 1;
-            return static_cast<std::int32_t>(f * MAX_VALUE + 0.5F);
+            return static_cast<std::uint32_t>(f * MASK + 0.5F);
         }
         else {
-            constexpr int32_t MAX_VALUE = (1 << (bits - 1));
-            return static_cast<std::int32_t>((f + 2.0F) * MAX_VALUE + 0.5F);
+            return static_cast<std::uint32_t>((1.0 + f) * MASK + 0.5) | SIGNED_BIT;
         }
     }
 
-    template<unsigned int bits> constexpr float decompress_float(std::int32_t f) {
-        constexpr std::uint32_t MAX_VALUE = (1 << bits) - 1;
-        constexpr std::uint32_t MAX_UNSIGNED = MAX_VALUE >> 1;
-        constexpr std::int32_t MAX_SIGNED = MAX_UNSIGNED + 1;
-
-        std::uint32_t f_unsigned = static_cast<std::uint32_t>(f) & MAX_VALUE;
-        if(f_unsigned > MAX_UNSIGNED) {
-            return static_cast<float>(f_unsigned) / MAX_SIGNED - 2.0F;
+    template<unsigned int bits> constexpr float decompress_float(std::uint32_t f) {
+        constexpr const std::uint32_t SIGNED_BIT = 1 << (bits - 1);
+        constexpr const std::uint32_t MASK = SIGNED_BIT - 1;
+        auto number = static_cast<double>(f & MASK) / MASK;
+        
+        if(f & SIGNED_BIT) {
+            return number - 1.0;
         }
         else {
-            return static_cast<float>(f_unsigned) / MAX_UNSIGNED;
+            return number;
         }
     }
-
+    
+    static_assert(decompress_float<16>(32768) == -1.0);
+    static_assert(compress_float<16>(-1.0) == 32768);
+    static_assert(decompress_float<16>(32767) == 1.0);
+    static_assert(compress_float<16>(1.0) == 32767);
+    static_assert(decompress_float<16>(0) == 0.0);
+    static_assert(compress_float<16>(0) == 0);
+    
     std::uint32_t compress_vector(float i, float j, float k) noexcept {
         return (compress_float<11>(i)) | (compress_float<11>(j) << 11) | (compress_float<10>(k) << 22);
     }
@@ -355,7 +357,7 @@ namespace Invader::HEK {
         r.normal.i = normal_i;
         r.normal.j = normal_j;
         r.normal.k = normal_k;
-        r.normal = r.normal.normalize();
+        //r.normal = r.normal.normalize(); // NOTE: these vectors are not always normalized, and normalizing them may change the apparent intensity of some bumpmaps
 
         r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_x);
         r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_y);
