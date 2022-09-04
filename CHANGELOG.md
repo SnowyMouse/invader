@@ -2,6 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.51.1] - 2022-09-05
+### Changed
+- Implemented the limits for Custom Edition and CEA.
+- Fixed "custom control name" not having a name for scenario tag control spawns
+
+### Fixed
+- Fixed Xbox model compression/decompression normals being off if negative.
+
 ## [0.51.0] - 2022-09-01
 ### Added
 - Added support for CEA's new definitions in the August 2022 Update.
@@ -2393,6 +2401,7 @@ image as one bitmap
 [0.50.3]: https://github.com/SnowyMouse/invader/compare/0.50.2...0.50.3
 [0.50.4]: https://github.com/SnowyMouse/invader/compare/0.50.3...0.50.4
 [0.50.5]: https://github.com/SnowyMouse/invader/compare/0.50.4...0.50.5
-[0.50.5]: https://github.com/SnowyMouse/invader/compare/0.50.5...0.51.0
+[0.51.0]: https://github.com/SnowyMouse/invader/compare/0.50.5...0.51.0
+[0.51.1]: https://github.com/SnowyMouse/invader/compare/0.51.0...0.51.1
 
 [Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.0...master
