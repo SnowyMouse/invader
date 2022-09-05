@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.51.2] - 2022-09-06
 ### Fixed
 - Fixed script parameters not being added to scripts.
 - invader-sound: Fixed 16-bit PCM not having the correct buffer size set on
@@ -2409,5 +2409,6 @@ image as one bitmap
 [0.50.5]: https://github.com/SnowyMouse/invader/compare/0.50.4...0.50.5
 [0.51.0]: https://github.com/SnowyMouse/invader/compare/0.50.5...0.51.0
 [0.51.1]: https://github.com/SnowyMouse/invader/compare/0.51.0...0.51.1
+[0.51.2]: https://github.com/SnowyMouse/invader/compare/0.51.1...0.51.2
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.1...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.2...master
