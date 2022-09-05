@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Fixed
 - Fixed script parameters not being added to scripts.
+- invader-sound: Fixed 16-bit PCM not having the correct buffer size set on
+  creation.
 
 ## [0.51.1] - 2022-09-05
 ### Changed

@@ -624,6 +624,15 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 }
             }
         }
+        
+        // Set the buffer size
+        if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+            for(auto &pr : sound_tag.pitch_ranges) {
+                for(auto &p : pr.permutations) {
+                    p.buffer_size = p.samples.size();
+                }
+            }
+        }
     }
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SOUND, true);
