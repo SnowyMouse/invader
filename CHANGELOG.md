@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- Fixed script parameters not being added to scripts.
+
 ## [0.51.1] - 2022-09-05
 ### Changed
 - Implemented the limits for Custom Edition and CEA.
@@ -2404,4 +2408,4 @@ image as one bitmap
 [0.51.0]: https://github.com/SnowyMouse/invader/compare/0.50.5...0.51.0
 [0.51.1]: https://github.com/SnowyMouse/invader/compare/0.51.0...0.51.1
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.1...master

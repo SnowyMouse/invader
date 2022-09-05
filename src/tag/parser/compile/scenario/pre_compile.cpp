@@ -516,6 +516,13 @@ namespace Invader::Parser {
             new_script.return_type = static_cast<decltype(new_script.return_type)>(cmp_script.return_type);
             new_script.script_type = static_cast<decltype(new_script.script_type)>(cmp_script.script_type);
             new_script.root_expression_index = format_index_to_id(cmp_script.first_node);
+            
+            // Add each script parameter
+            for(auto p : result.get_script_parameters_for_script(cmp_script)) {
+                auto &new_parameter = new_script.parameters.emplace_back();
+                std::strncpy(new_parameter.name.string, p.name, sizeof(new_parameter.name.string) - 1);
+                new_parameter.return_type = static_cast<decltype(new_parameter.return_type)>(p.value_type);
+            }
         }
         
         
