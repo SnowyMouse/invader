@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.51.3] - 2022-10-06
+### Changed
+- RIAT: Updated to silence spammy warning about mixed case tokens.
+
 ## [0.51.2] - 2022-09-06
 ### Fixed
 - Fixed script parameters not being added to scripts.
@@ -2410,5 +2414,6 @@ image as one bitmap
 [0.51.0]: https://github.com/SnowyMouse/invader/compare/0.50.5...0.51.0
 [0.51.1]: https://github.com/SnowyMouse/invader/compare/0.51.0...0.51.1
 [0.51.2]: https://github.com/SnowyMouse/invader/compare/0.51.1...0.51.2
+[0.51.3]: https://github.com/SnowyMouse/invader/compare/0.51.2...0.51.3
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.2...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.3...master

@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.14)
 
 # Project name - You should change this if you're making a fork
 project(Invader
-    VERSION 0.51.2
+    VERSION 0.51.3
     DESCRIPTION "Modding toolkit for Halo Combat Evolved"
     LANGUAGES C CXX
 )
@@ -54,7 +54,7 @@ if(MINGW)
 
     # Windows 10 stuff too
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--major-os-version 10")
-    
+
     # MinGW does this weird globbing thing by default to account for poor shells
     # when we do *not* want it since "*" is used for pattern matching.
     #
