@@ -13,7 +13,7 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return;
         }
-        
+
         if(*workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
             this->unit.path.clear();
             this->unit.tag_id = HEK::TagID::null_tag_id();
@@ -28,7 +28,7 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return;
         }
-        
+
         if(*workload.cache_file_type != HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
             this->multiplayer_information.clear();
             this->cheat_powerups.clear();
@@ -39,7 +39,7 @@ namespace Invader::Parser {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
                 throw InvalidTagDataException();
             }
-            
+
             // Check for this stuff
             auto engine = workload.get_build_parameters()->details.build_cache_file_engine;
             if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
@@ -60,8 +60,8 @@ namespace Invader::Parser {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 falling damage block which is required for the map type", tag_index);
                 throw InvalidTagDataException();
             }
-            if(this->materials.size() != 32) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 32 material blocks which is required for the map type", tag_index);
+            if(this->materials.size() < 32) {
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have at least 32 material blocks which is required for the map type", tag_index);
                 throw InvalidTagDataException();
             }
         }
@@ -72,10 +72,10 @@ namespace Invader::Parser {
         // I have no idea why they thought that their netcode needed this to be optimized down to four bits SIGNED (so effectively three bits can actually be used) for grenades, but it's a massive meme.
         static constexpr const std::size_t max_grenades_mp_gbx = 7;
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
-        
+
         if(
             workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER &&
-            (engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || 
+            (engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
             engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
             engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) &&
             !workload.disable_error_checking
@@ -92,28 +92,28 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return;
         }
-        
+
         const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
         const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
-        
+
         auto target_engine = workload.get_build_parameters()->details.build_cache_file_engine;
         const std::size_t sound_count = globals_multiplayer_information_data.sounds.count;
         std::size_t required_sounds;
-        
+
         // Xbox doesn't have ting (required_sounds is exclusive)
         if(target_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             required_sounds = HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING;
         }
         else {
             required_sounds = HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT;
-            
+
             // See if we have the ting sound. If so, make it louder on custom edition.
             if(sound_count > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
                 const float TING_VOLUME = target_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
                 const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
                 if(!sound_id.is_null()) {
                     auto &random_gain_modifier = reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier;
-                    
+
                     if(random_gain_modifier.read() != TING_VOLUME) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Random gain modifier was set to %.01f for the target engine", TING_VOLUME);
                         random_gain_modifier = TING_VOLUME;
