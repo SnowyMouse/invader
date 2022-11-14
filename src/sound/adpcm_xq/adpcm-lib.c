@@ -62,7 +62,7 @@ void *adpcm_create_context (int num_channels, int lookahead, int noise_shaping, 
     for (ch = 0; ch < num_channels; ++ch)
         for (i = 0; i <= 88; i++)
             if (i == 88 || initial_deltas [ch] < ((int32_t) step_table [i] + step_table [i+1]) / 2) {
-                pcnxt->channels [ch].index = 0;
+                pcnxt->channels [ch].index = i;
                 break;
             }
 
@@ -239,9 +239,9 @@ static void encode_chunks (struct adpcm_context *pcnxt, uint8_t **outbuf, size_t
             pcmbuf = *inbuf + ch;
 
             for (i = 0; i < 4; i++) {
-                **outbuf = encode_sample (pcnxt, ch, pcmbuf, 1);
+                **outbuf = encode_sample (pcnxt, ch, pcmbuf, chunks * 8 + (3 - i) * 2 + 2);
                 pcmbuf += pcnxt->num_channels;
-                **outbuf |= encode_sample (pcnxt, ch, pcmbuf, 1) << 4;
+                **outbuf |= encode_sample (pcnxt, ch, pcmbuf, chunks * 8 + (3 - i) * 2 + 1) << 4;
                 pcmbuf += pcnxt->num_channels;
                 (*outbuf)++;
             }
