@@ -12,15 +12,15 @@ extern "C" {
 
 namespace Invader::SoundEncoder {
     static constexpr std::size_t code_chunks_count = 8;
-    
+
     static std::size_t calculate_samples_per_block() noexcept {
         return code_chunks_count * 8;
     }
-    
+
     std::size_t calculate_adpcm_pcm_block_size(std::size_t channel_count) noexcept {
         return calculate_samples_per_block() * channel_count;
     }
-    
+
     // From the MEK - I have no clue how to do this
     std::vector<std::byte> encode_to_xbox_adpcm(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::size_t channel_count) {
         // Set some parameters

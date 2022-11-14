@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.51.4] - 2022-11-14
+- RIAT: Fixed inequality operator not working on game_difficulty and team
+  parameters.
+
 ## [0.51.3] - 2022-10-06
 ### Changed
 - RIAT: Updated to silence spammy warning about mixed case tokens.
