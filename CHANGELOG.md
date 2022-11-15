@@ -2,9 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.51.4] - 2022-11-14
+## [0.51.4] - 2022-11-15
 - RIAT: Fixed inequality operator not working on game_difficulty and team
   parameters.
+- invader-build: Materials in the globals tag are now checked for having
+  a minimum of 32 blocks rather than exactly 32.
 
 ## [0.51.3] - 2022-10-06
 ### Changed
@@ -2419,5 +2421,6 @@ image as one bitmap
 [0.51.1]: https://github.com/SnowyMouse/invader/compare/0.51.0...0.51.1
 [0.51.2]: https://github.com/SnowyMouse/invader/compare/0.51.1...0.51.2
 [0.51.3]: https://github.com/SnowyMouse/invader/compare/0.51.2...0.51.3
+[0.51.4]: https://github.com/SnowyMouse/invader/compare/0.51.3...0.51.4
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.3...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.4...master

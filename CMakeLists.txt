@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-# Require at least version 3.14
-cmake_minimum_required(VERSION 3.14)
+# Require at least version 3.15
+cmake_minimum_required(VERSION 3.15)
 
 # Project name - You should change this if you're making a fork
 project(Invader
-    VERSION 0.51.3
+    VERSION 0.51.4
     DESCRIPTION "Modding toolkit for Halo Combat Evolved"
     LANGUAGES C CXX
 )
