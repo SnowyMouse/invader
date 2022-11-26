@@ -10,7 +10,7 @@
 namespace Invader {
     static std::vector<File::TagFilePath> get_dependencies(const std::byte *tag_data, std::size_t tag_data_length) {
         std::vector<File::TagFilePath> dependencies;
-        
+
         auto recursively_get_dependencies = [&dependencies](const Parser::ParserStruct &st, auto &recursively_get_dependencies) -> void {
             for(auto &v : st.get_values()) {
                 switch(v.get_type()) {
@@ -32,28 +32,36 @@ namespace Invader {
                 }
             }
         };
-        
+
         recursively_get_dependencies(*Parser::ParserStruct::parse_hek_tag_file(tag_data, tag_data_length), recursively_get_dependencies);
-        
+
         return dependencies;
     }
 
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find, Invader::TagFourCC tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
 
+        // Turn all forward slashes into backslashes if not on Windows
+        std::string tag_path_str = File::halo_path_to_preferred_path(tag_path_to_find);
+
         if(!reverse) {
-            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::TagFourCC tag_int_to_find, auto recursion) -> void {
-                std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
+            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find, Invader::TagFourCC tag_int_to_find, auto recursion) -> void {
+                auto tag_path_str = File::halo_path_to_preferred_path(tag_path_to_find);
 
                 // See if we can open the tag
                 bool found = false;
                 for(auto &tags_directory : tags) {
-                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_fourcc_to_extension(tag_int_to_find));
+                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_str + "." + tag_fourcc_to_extension(tag_int_to_find));
+                    if(!std::filesystem::exists(tag_path)) {
+                        continue;
+                    }
+
                     auto tag_data = File::open_file(tag_path);
                     if(!tag_data.has_value()) {
                         eprintf_error("Failed to read tag %s", tag_path.string().c_str());
-                        continue;
+                        success = false;
+                        return;
                     }
 
                     try {
@@ -96,27 +104,23 @@ namespace Invader {
                     }
                     catch (std::exception &e) {
                         eprintf_error("Failed to compile tag %s: %s", tag_path.string().c_str(), e.what());
-                        success = false;
-                        return;
+                        throw InvalidTagDataException();
                     }
                 }
 
                 if(!found) {
-                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.c_str(), tag_fourcc_to_extension(tag_int_to_find));
+                    eprintf_error("Failed to open tag %s.%s.", tag_path_str.c_str(), tag_fourcc_to_extension(tag_int_to_find));
                     success = false;
                     return;
                 }
             };
 
-            find_dependencies_in_tag(tag_path_to_find_2, tag_int_to_find, find_dependencies_in_tag);
+            find_dependencies_in_tag(tag_path_to_find, tag_int_to_find, find_dependencies_in_tag);
         }
         else {
-            // Turn all forward slashes into backslashes if not on Windows
-            std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
-
             // Iterate
             for(auto &tags_directory : tags) {
-                auto iterate_recursively = [&found_tags, &tag_int_to_find, &tag_path_to_find](const std::string &current_path, const std::filesystem::path &dir, auto &recursion) -> void {
+                auto iterate_recursively = [&found_tags, &tag_int_to_find, &tag_path_str](const std::string &current_path, const std::filesystem::path &dir, auto &recursion) -> void {
                     for(auto file : std::filesystem::directory_iterator(dir)) {
                         if(file.is_directory()) {
                             std::string dir_tag_path = current_path + file.path().filename().string() + "\\";
@@ -150,7 +154,7 @@ namespace Invader {
                             if(skip) {
                                 break;
                             }
-                            
+
                             // Open it
                             auto fp = file.path();
                             auto tag_data = File::open_file(fp);
@@ -163,7 +167,7 @@ namespace Invader {
                             try {
                                 auto dependencies = get_dependencies(tag_data->data(), tag_data->size());
                                 for(auto &dependency : dependencies) {
-                                    if(dependency.path == tag_path_to_find && dependency.fourcc == tag_int_to_find) {
+                                    if(dependency.path == tag_path_str && dependency.fourcc == tag_int_to_find) {
                                         found_tags.emplace_back(dir_tag_path, fourcc, false, file.path());
                                         break;
                                     }

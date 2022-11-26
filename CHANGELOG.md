@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+### Changed
+- invader-dependency now returns status code 197 if it fails to open a tag due
+  to it being invalid
+
 ## [0.51.4] - 2022-11-15
 - RIAT: Fixed inequality operator not working on game_difficulty and team
   parameters.
