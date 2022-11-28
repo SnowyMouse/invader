@@ -17,7 +17,7 @@
 
 namespace Invader {
     using namespace HEK;
-    
+
     BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(const HEK::GameEngineInfo &engine_info) noexcept {
         this->build_maximum_tag_space = engine_info.tag_space_length;
         this->build_tag_data_address = engine_info.base_memory_address;
@@ -25,23 +25,23 @@ namespace Invader {
         this->build_version = engine_info.build_string_is_enforced ? engine_info.get_build_string() : full_version();
         this->build_bsps_occupy_tag_space = engine_info.bsps_occupy_tag_space;
         this->build_scenario_maximum_script_nodes = engine_info.maximum_scenario_script_nodes;
-        
+
         if(engine_info.supports_external_resource_maps()) {
             this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
         }
         else {
             this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
         }
-        
+
         this->build_cache_file_engine = engine_info.cache_version;
         this->build_game_engine = engine_info.engine;
         this->build_maximum_cache_file_size = engine_info.maximum_file_size;
         this->build_required_tags = engine_info.required_tags;
     }
-    
+
     BuildWorkload::BuildParameters::BuildParameters::BuildParameters(HEK::GameEngine engine) noexcept : details(engine) {}
-    
-    BuildWorkload::BuildParameters::BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::GameEngine engine) : 
+
+    BuildWorkload::BuildParameters::BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::GameEngine engine) :
         scenario(scenario),
         tags_directories(tags_directories),
         details(engine) {}
@@ -84,7 +84,7 @@ namespace Invader {
         File::check_working_directory("./toolbeta.map");
         auto cache_version = this->parameters->details.build_cache_file_engine;
         auto engine_target = this->parameters->details.build_game_engine;
-        
+
         // Update scenario name if needed
         auto scenario_name_fixed = File::preferred_path_to_halo_path(this->parameters->scenario);
         this->scenario = scenario_name_fixed.c_str();
@@ -96,7 +96,7 @@ namespace Invader {
         else {
             this->set_scenario_name(scenario_name_fixed.c_str());
         }
-        
+
         // Reserve indexed tags
         if(this->parameters->index.has_value()) {
             auto &index = *this->parameters->index;
@@ -122,7 +122,7 @@ namespace Invader {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
-        
+
         // Check this stuff
         this->check_hud_text_indices();
 
@@ -172,7 +172,7 @@ namespace Invader {
             }
             throw InvalidTagDataException();
         }
-        
+
         // Generate memes on Xbox
         if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             this->generate_compressed_model_tag_array();
@@ -233,7 +233,7 @@ namespace Invader {
         if(this->parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
             oprintf(" done\n");
         }
-        
+
         // Query the maximum file size
         auto &max_size_ref = this->parameters->details.build_maximum_cache_file_size;
         Pointer64 max_size = UINT64_MAX;
@@ -259,7 +259,7 @@ namespace Invader {
 
             // Add header stuff
             final_data.resize(sizeof(HEK::CacheFileHeader));
-            
+
             // Add each BSP data thing
             for(auto &b : workload.bsp_data) {
                 final_data.insert(final_data.end(), b.begin(), b.end());
@@ -277,12 +277,12 @@ namespace Invader {
             final_data.insert(final_data.end(), workload.all_raw_data.begin(), workload.all_raw_data.end());
             auto raw_data_size = workload.all_raw_data.size();
             workload.all_raw_data = std::vector<std::byte>();
-            
+
             std::size_t model_data_size;
             std::size_t vertex_size;
             std::size_t model_offset;
             std::size_t tag_data_offset;
-            
+
             // If we're not on Xbox, we put the model data here
             if(cache_version != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 // Let's get the model data there
@@ -295,11 +295,11 @@ namespace Invader {
                 final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_indices.data()), reinterpret_cast<std::byte *>(workload.model_indices.data() + workload.model_indices.size()));
                 workload.uncompressed_model_vertices = decltype(workload.uncompressed_model_vertices)();
                 workload.model_indices = decltype(workload.model_indices)();
-                
+
                 tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
                 model_data_size = tag_data_offset - model_offset;
             }
-            
+
             // If we ARE on Xbox, then we go straight to the tag data
             else {
                 vertex_size = workload.compressed_model_vertices.size() * sizeof(*workload.compressed_model_vertices.data());
@@ -307,7 +307,7 @@ namespace Invader {
                 model_offset = 0;
                 tag_data_offset = final_data.size() + REQUIRED_PADDING_N_BYTES(final_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
             }
-            
+
             // We're almost there
             final_data.resize(tag_data_offset, std::byte());
 
@@ -360,7 +360,7 @@ namespace Invader {
             if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                 oprintf(" done\n");
             }
-            
+
             // Resize to ye ol' sector
             if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 final_data.insert(final_data.end(), REQUIRED_PADDING_N_BYTES(final_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE), std::byte());
@@ -386,17 +386,17 @@ namespace Invader {
             // Hold this here, of course
             auto &tag_file_checksums = reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->tag_file_checksums;
             tag_file_checksums = workload.tag_file_checksums;
-            
+
             // If we can calculate the CRC32, do it
             std::uint32_t new_crc = 0;
             bool can_calculate_crc = cache_version != CacheFileEngine::CACHE_FILE_XBOX;
-            
+
             if(can_calculate_crc) {
                 if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf("Calculating CRC32...");
                     oflush();
                 }
-                
+
                 // Calculate the CRC32 and/or forge one if we must
                 if(workload.parameters->forge_crc.has_value()) {
                     std::uint32_t checksum_delta = 0;
@@ -406,7 +406,7 @@ namespace Invader {
                 else {
                     new_crc = calculate_map_crc(final_data.data(), final_data.size());
                 }
-                
+
                 header.crc32 = new_crc;
                 if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf(" done\n");
@@ -415,7 +415,7 @@ namespace Invader {
             else {
                 header.crc32 = UINT32_MAX;
             }
-            
+
             // Set the file size
             header.decompressed_file_size = final_data.size();
 
@@ -560,12 +560,12 @@ namespace Invader {
         switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE: {
                 HEK::NativeCacheFileHeader header = {};
-                
+
                 // Store the timestamp
                 std::time_t current_time = std::time(nullptr);
                 auto *gmt = std::gmtime(&current_time);
                 std::snprintf(header.timestamp.string, sizeof(header.timestamp.string), "%04u-%02u-%02uT%02u:%02u:%02uZ", gmt->tm_year + 1900, gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
-                
+
                 // Done
                 return generate_final_data(header);
             }
@@ -595,7 +595,7 @@ namespace Invader {
 
         // Set this in case it's not set yet
         this->tags[tag_index].tag_fourcc = *tag_fourcc;
-        
+
         // Make sure the path isn't bullshit
         bool invalid_path = false;
         bool uppercase = false;
@@ -619,10 +619,10 @@ namespace Invader {
                 }
             }
         }
-        
+
         if(invalid_path) {
             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, tag_index, "Tag path contains invalid characters");
-            
+
             if(uppercase) {
                 eprintf_warn("Tags may not have uppercase characters");
             }
@@ -632,7 +632,7 @@ namespace Invader {
             if(control) {
                 eprintf_warn("Tags may not have control characters");
             }
-            
+
             throw InvalidTagPathException();
         }
 
@@ -640,12 +640,12 @@ namespace Invader {
         HEK::TagFileHeader::validate_header(header, tag_data_size, tag_fourcc);
         HEK::BigEndian<std::uint32_t> expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
         std::uint32_t header_crc = header->crc32;
-        
+
         // Make sure the header's CRC32 matches the calculated CRC32 (but only if the header CRC is not 0xFFFFFFFF since some stock tags have this)
         if(header_crc != 0xFFFFFFFF && expected_crc != header_crc) {
             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, tag_index, "%s.%s's CRC32 is incorrect. Tag may be corrupt.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_fourcc_to_extension(tag_fourcc.value()));
         }
-        
+
         // Calculate checksums. This is to prevent collisions when bitmap/sound data is modified but nothing else, since this data isn't directly factored into the map checksum.
         // Also, unlike tool.exe, we're actually recalculating the CRC32 rather than just taking the CRC32 in the header (in case the tag is improperly modified).
         //
@@ -738,7 +738,7 @@ namespace Invader {
             COMPILE_TAG_CLASS(Weapon, TAG_FOURCC_WEAPON)
             COMPILE_TAG_CLASS(Wind, TAG_FOURCC_WIND)
             COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_FOURCC_WEAPON_HUD_INTERFACE)
-            
+
             case TagFourCC::TAG_FOURCC_OBJECT:
             case TagFourCC::TAG_FOURCC_UNIT:
             case TagFourCC::TAG_FOURCC_SHADER:
@@ -752,7 +752,7 @@ namespace Invader {
                 // First thing's first - parse the tag data
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
                 std::size_t bsp = this->bsp_count++;
-                
+
                 auto cache_version = this->parameters->details.build_cache_file_engine;
 
                 // Next, if we're making a native map, we need to only do this
@@ -780,12 +780,12 @@ namespace Invader {
                     new_ptr.struct_index = new_bsp_struct_index;
                     new_bsp_struct.data.resize(sizeof(Parser::ScenarioStructureBSP::struct_little), std::byte());
                     tag_data_parsed.compile(*this, tag_index, new_ptr.struct_index, bsp);
-                    
+
                     // Populate the vertices/indices index thingy
                     if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         Parser::set_up_xbox_cache_bsp_data(*this, bsp_header_struct_index, new_bsp_struct_index, bsp);
                     }
-                    
+
                     // If it uses CEA memery to store BSP data, then append it
                     if(cache_version == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                         auto *bsp_data_cea = reinterpret_cast<Parser::ScenarioStructureBSPCompiledHeaderCEA::struct_little *>(this->structs[bsp_header_struct_index].data.data());
@@ -803,7 +803,7 @@ namespace Invader {
             case TagFourCC::TAG_FOURCC_SPHEROID:
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_fourcc_to_extension(*tag_fourcc));
                 throw UnimplementedTagClassException();
-                
+
             // And this, of course, we don't know
             default:
                 throw UnknownTagClassException();
@@ -815,7 +815,7 @@ namespace Invader {
         auto fixed_path = Invader::File::remove_duplicate_slashes(tag_path);
         tag_path = fixed_path.c_str();
         std::optional<std::string> renamed_path;
-        
+
         // If it's a scenario tag, rename it
         if(tag_fourcc == TagFourCC::TAG_FOURCC_SCENARIO) {
             std::string full_scenario_path = tag_path;
@@ -844,7 +844,7 @@ namespace Invader {
                 break;
             }
         }
-        
+
         auto &tags_directories = this->parameters->tags_directories;
 
         // Find it
@@ -852,7 +852,7 @@ namespace Invader {
         std::optional<std::filesystem::path> new_path;
         std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_fourcc_to_extension(tag_fourcc));
         Invader::File::halo_path_to_preferred_path_chars(formatted_path);
-        
+
         // Only set the new path if it exists
         if((new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories)).has_value() && !std::filesystem::exists(*new_path)) {
             new_path = std::nullopt;
@@ -865,7 +865,7 @@ namespace Invader {
             tag.tag_fourcc = tag_fourcc;
             this->get_tag_paths().emplace_back(tag_path, tag_fourcc);
         }
-        
+
         // Rename the path
         if(renamed_path.has_value()) {
             this->tags[return_value].path = *renamed_path;
@@ -933,10 +933,10 @@ namespace Invader {
                                    std::strcmp(this->scenario_name.string, "wizard") == 0;
 
         this->scenario_index = this->compile_tag_recursively(this->scenario, TagFourCC::TAG_FOURCC_SCENARIO);
-        
+
         const auto &required_tags = this->parameters->details.build_required_tags;
         auto &workload = *this;
-        
+
         auto import_all = [&workload](auto &what) {
             std::size_t count = what.count;
             auto *arr = what.ptr;
@@ -945,7 +945,7 @@ namespace Invader {
                 workload.compile_tag_recursively(tag.path, tag.fourcc);
             }
         };
-        
+
         // Check if we have a demo UI if one was requested
         if(this->demo_ui && !this->disable_error_checking) {
             switch(*this->cache_file_type) {
@@ -971,7 +971,7 @@ namespace Invader {
                     std::terminate();
             }
         }
-        
+
         // Import all required tags
         import_all(required_tags.all);
         switch(*this->cache_file_type) {
@@ -1035,11 +1035,11 @@ namespace Invader {
         workload.disable_recursion = !recursion;
         workload.disable_error_checking = !error_checking;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
-        
+
         BuildParameters parameters;
         parameters.tags_directories = tags_directories;
         workload.parameters = &parameters;
-        
+
         auto &tag = workload.tags.emplace_back();
         tag.path = "unknown";
         workload.compile_tag_data_recursively(tag_data, tag_data_size, 0);
@@ -1048,11 +1048,11 @@ namespace Invader {
 
     BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagFourCC tag_fourcc, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
         BuildWorkload workload = {};
-        
+
         BuildParameters parameters;
         parameters.tags_directories = tags_directories;
         workload.parameters = &parameters;
-        
+
         workload.set_reporting_level(ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_EVERYTHING);
         workload.disable_recursion = !recursion;
         workload.disable_error_checking = !error_checking;
@@ -1187,7 +1187,7 @@ namespace Invader {
             std::size_t to_struct;
             std::size_t to_offset;
         };
-        
+
         std::vector<PointerInternal> pointers;
         std::vector<PointerInternal> pointers_64_bit;
         auto name_tag_data_pointer = this->parameters->details.build_tag_data_address;
@@ -1300,9 +1300,9 @@ namespace Invader {
                     pointers_64_bit.clear();
                     auto &bsp_data_struct = this->map_data_structs.emplace_back();
                     recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
-                    
+
                     std::size_t bsp_size = bsp_data_struct.size();
-                    
+
                     // Resize the BSP to 2048 bytes alignment if on Xbox
                     if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         bsp_size = bsp_size + REQUIRED_PADDING_N_BYTES(bsp_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE * 4);
@@ -1392,7 +1392,7 @@ namespace Invader {
                 all_raw_data_offset += REQUIRED_PADDING_N_BYTES(all_raw_data_offset, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
                 all_raw_data.resize(all_raw_data_offset);
             }
-            
+
             // Add the new asset
             auto &new_asset = all_assets.emplace_back();
             new_asset.first = all_raw_data_offset;
@@ -1429,7 +1429,7 @@ namespace Invader {
                     else {
                         bitmap_data.pixel_data_offset = all_assets[resource_index].first + file_offset;
                     }
-                    
+
                     // Set this size to be correct
                     if(cache_version == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         bitmap_data.pixel_data_size = bitmap_data.pixel_data_size + REQUIRED_PADDING_N_BYTES(bitmap_data.pixel_data_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY);
@@ -1494,11 +1494,11 @@ namespace Invader {
 
     void BuildWorkload::externalize_tags() noexcept {
         bool always_index_tags = this->parameters->details.build_raw_data_handling == BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
-        
+
         auto &bitmaps = this->parameters->bitmap_data;
         auto &sounds = this->parameters->sound_data;
         auto &loc = this->parameters->loc_data;
-        
+
         bool check_ce_bounds = this->parameters->details.build_check_custom_edition_resource_map_bounds;
 
         switch(this->parameters->details.build_cache_file_engine) {
@@ -1509,7 +1509,7 @@ namespace Invader {
                         if(!resources.has_value()) {
                             return std::nullopt;
                         }
-                        
+
                         std::size_t count = resources->size();
                         std::size_t iterate_count, iterate_start;
                         if(every_other) {
@@ -1536,7 +1536,7 @@ namespace Invader {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
                                     break;
                                 }
-                                
+
                                 if(check_ce_bounds && (*index / 2 > get_default_bitmap_resources_count() || File::split_tag_class_extension_chars(get_default_bitmap_resources()[*index / 2])->path != t.path)) {
                                     break;
                                 }
@@ -1565,7 +1565,7 @@ namespace Invader {
                                     std::size_t bitmap_data_other_count = bitmap_tag_other.bitmap_data.count;
                                     std::size_t sequence_count = bitmap_tag.bitmap_group_sequence.count;
                                     std::size_t sequence_other_count = bitmap_tag_other.bitmap_group_sequence.count;
-                                    
+
                                     // Make sure the bitmap type matches, first off
                                     if(bitmap_tag_other.type == bitmap_tag.type) {
                                         // Make sure our sequences match
@@ -1577,21 +1577,21 @@ namespace Invader {
                                                 match = false;
                                                 break;
                                             }
-                                            
+
                                             // Also get the bitmap sequences we have
                                             auto &sequence_struct = this->structs[*bitmap_tag_struct.resolve_pointer(&bitmap_tag.bitmap_group_sequence.pointer)];
                                             const auto *all_sequence = reinterpret_cast<const Parser::BitmapGroupSequence::struct_little *>(sequence_struct.data.data());
-                                            
+
                                             if(bitmap_tag_other.type == BitmapType::BITMAP_TYPE_SPRITES) {
                                                 for(std::size_t s = 0; s < sequence_count && match; s++) {
                                                     // Get sequence data
                                                     const auto &sequence = all_sequence[s];
                                                     const auto &sequence_other = all_sequence_other[s];
-                                                    
+
                                                     // Make sure the sprites match
                                                     std::size_t sprite_count = sequence.sprites.count;
                                                     std::size_t sprite_count_other = sequence_other.sprites.count;
-                                                    
+
                                                     if(sprite_count > 0 && sprite_count == sprite_count_other) {
                                                         // Make sure it's not out-of-bounds
                                                         const auto *all_sprites_other = reinterpret_cast<const Parser::BitmapGroupSprite::struct_little *>(bitmap_tag_struct_other_data + sequence_other.sprites.pointer);
@@ -1600,11 +1600,11 @@ namespace Invader {
                                                             match = false;
                                                             break;
                                                         }
-                                                        
+
                                                         // And get our sprites, too
                                                         auto &sprites_struct = this->structs[*sequence_struct.resolve_pointer(&sequence.sprites.pointer)];
                                                         const auto *all_sprites = reinterpret_cast<const Parser::BitmapGroupSprite::struct_little *>(sprites_struct.data.data());
-                                                        
+
                                                         // Check individual sprites to make sure they match
                                                         for(std::size_t sp = 0; sp < sprite_count && match; sp++) {
                                                             const auto &sprite = all_sprites[sp];
@@ -1627,7 +1627,7 @@ namespace Invader {
                                                     // Get sequence data
                                                     const auto &sequence = all_sequence[s];
                                                     const auto &sequence_other = all_sequence_other[s];
-                                                    
+
                                                     // Make sure the bitmap range matches
                                                     match = match && sequence.bitmap_count == sequence_other.bitmap_count;
                                                     match = match && sequence.first_bitmap_index == sequence_other.first_bitmap_index;
@@ -1647,7 +1647,7 @@ namespace Invader {
                                                 match = false;
                                                 break;
                                             }
-                                            
+
                                             // Also get the bitmap data we have
                                             auto &bitmap_data_struct = this->structs[*bitmap_tag_struct.resolve_pointer(&bitmap_tag.bitmap_data.pointer)];
                                             const auto *all_bitmap_data = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_data_struct.data.data());
@@ -1667,7 +1667,7 @@ namespace Invader {
                                                     match = false;
                                                     break;
                                                 }
-                                                
+
                                                 // Make sure the formats and dimensions match too
                                                 match = match && bitmap_data_other.width == bitmap_data.width;
                                                 match = match && bitmap_data_other.height == bitmap_data.height;
@@ -1677,7 +1677,7 @@ namespace Invader {
                                                 if(!match) {
                                                     break;
                                                 }
-                                                
+
                                                 auto *raw_data_data = asset_raw_data.data();
                                                 auto *raw_data_other_data = bitmap_tag_struct_other_raw_data + bitmap_data_other.pixel_data_offset - bitmap_tag_struct_raw_data_translation;
 
@@ -1720,7 +1720,7 @@ namespace Invader {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
                                     break;
                                 }
-                                
+
                                 if(check_ce_bounds && (*index / 2 > get_default_sound_resources_count() || File::split_tag_class_extension_chars(get_default_sound_resources()[*index / 2])->path != t.path)) {
                                     break;
                                 }
@@ -1746,7 +1746,7 @@ namespace Invader {
                                     const auto &sound_tag_other = *reinterpret_cast<const Parser::Sound::struct_little *>(sound_tag_struct_other_data);
                                     std::size_t pitch_range_count = sound_tag.pitch_ranges.count;
                                     std::size_t pitch_range_other_count = sound_tag_other.pitch_ranges.count;
-                                    
+
                                     match = sound_tag.format == sound_tag_other.format; // unlike bitmap tags, this matters because the engine checks this
                                     match = sound_tag.channel_count == sound_tag_other.channel_count;
                                     match = sound_tag.sample_rate == sound_tag_other.sample_rate;
@@ -1770,7 +1770,7 @@ namespace Invader {
                                             // Get the bitmap data
                                             const auto &pitch_range = all_pitch_ranges[pr];
                                             const auto &pitch_range_other = all_pitch_ranges_other[pr];
-                                        
+
                                             // Make sure these match
                                             match = match && pitch_range.bend_bounds == pitch_range_other.bend_bounds;
                                             match = match && pitch_range.actual_permutation_count == pitch_range_other.actual_permutation_count;
@@ -1799,20 +1799,20 @@ namespace Invader {
                                                     match = false;
                                                     break;
                                                 }
-                                            
+
                                                 const auto &permutation_struct = this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)];
                                                 const auto *permutations = reinterpret_cast<const Parser::SoundPermutation::struct_little *>(permutation_struct.data.data());
 
                                                 for(std::size_t p = 0; p < permutation_count && match; p++) {
                                                     const auto &permutation = permutations[p];
                                                     const auto &permutation_other = all_permutations_other[p];
-                                                    
+
                                                     // Make sure these match
                                                     match = match && permutation.format == permutation_other.format;
                                                     match = match && permutation.gain == permutation_other.gain;
                                                     match = match && permutation.next_permutation_index == permutation_other.next_permutation_index;
                                                     match = match && permutation.skip_fraction == permutation_other.skip_fraction;
-                                                    
+
                                                     if(!match) {
                                                         break;
                                                     }
@@ -1854,7 +1854,7 @@ namespace Invader {
                                     // Index it. Unlike other indexed tags, the header remains (probably for the promotion sound dependencies?)
                                     t.resource_index = index;
                                     this->indexed_data_amount += (*sounds)[*index].data.size() - sizeof(Sound<LittleEndian>);
-                                    
+
                                     // Strip these values since they'll be replaced on load anyway
                                     auto &sound_tag_struct = this->structs[*t.base_struct];
                                     auto &sound_tag = *reinterpret_cast<Parser::Sound::struct_little *>(sound_tag_struct.data.data());
@@ -1862,10 +1862,10 @@ namespace Invader {
                                     sound_tag.sample_rate = {};
                                     sound_tag.format = {};
                                     sound_tag.longest_permutation_length = {};
-                                    
+
                                     // Clear the pointers so that way we only include this stuff
                                     sound_tag_struct.pointers.clear();
-                                    
+
                                     break;
                                 }
                                 else {
@@ -1880,7 +1880,7 @@ namespace Invader {
                             auto index = find_tag_index(t.path, loc, false);
                             if(index.has_value()) {
                                 bool match = true;
-                                
+
                                 if(check_ce_bounds && (*index > get_default_loc_resources_count() || (t.path + "." + HEK::tag_fourcc_to_extension(t.tag_fourcc)) != get_default_loc_resources()[*index])) {
                                     break;
                                 }
@@ -2147,9 +2147,10 @@ namespace Invader {
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+            case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
                 for(auto &t : this->tags) {
                     switch(t.tag_fourcc) {
-                        // Iterate through each permutation in each pitch range to find the bitmap
+                        // Iterate through bitmap data
                         case TagFourCC::TAG_FOURCC_BITMAP: {
                             if(bitmaps.has_value()) {
                                 auto &bitmap_tag_struct = this->structs[*t.base_struct];
@@ -2242,7 +2243,7 @@ namespace Invader {
         }
         this->raw_data.erase(this->raw_data.begin() + index);
     }
-    
+
     void BuildWorkload::check_hud_text_indices() {
         // This should effectively just get the tag
         auto &globals_tag_struct = this->structs[this->tags[this->compile_tag_recursively("globals\\globals", HEK::TagFourCC::TAG_FOURCC_GLOBALS)].base_struct.value()];
@@ -2258,51 +2259,51 @@ namespace Invader {
         auto &hud_globals_data = *reinterpret_cast<Parser::HUDGlobals::struct_little *>(this->structs[this->tags[hud_globals_id.index].base_struct.value()].data.data());
         auto item_strings_id = hud_globals_data.item_message_text.tag_id.read();
         auto icon_strings_id = hud_globals_data.alternate_icon_text.tag_id.read();
-        
+
         // Get item/icon counts
         std::size_t item_strings;
         std::size_t icon_strings;
-        
+
         if(!item_strings_id.is_null()) {
             item_strings = reinterpret_cast<Parser::UnicodeStringList::struct_little *>(this->structs[this->tags[item_strings_id.index].base_struct.value()].data.data())->strings.count;
         }
         else {
             item_strings = 0;
         }
-        
+
         if(!icon_strings_id.is_null()) {
             icon_strings = reinterpret_cast<Parser::UnicodeStringList::struct_little *>(this->structs[this->tags[icon_strings_id.index].base_struct.value()].data.data())->strings.count;
         }
         else {
             icon_strings = 0;
         }
-        
+
         // Check indices
         if(this->get_reporting_level() >= ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_ALL_WARNINGS) {
             std::size_t tag_count = this->tags.size();
-            
+
             for(std::size_t i = 0; i < tag_count; i++) {
                 auto &tag = this->tags[i];
-                
+
                 // Skip tags we don't have
                 if(!tag.base_struct.has_value()) {
                     continue;
                 }
-                
+
                 switch(tag.tag_fourcc) {
                     case HEK::TagFourCC::TAG_FOURCC_WEAPON:
                     case HEK::TagFourCC::TAG_FOURCC_EQUIPMENT: {
                         auto *s = this->structs[*tag.base_struct].data.data();
-                        
+
                         auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(s)->pickup_text_index);
                         if(index >= item_strings && index != NULL_INDEX) {
                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Pickup text index is not valid (%zu >= %zu) so no text will appear when picked up", index, item_strings);
                         }
-                        
+
                         else if(tag.tag_fourcc == HEK::TagFourCC::TAG_FOURCC_WEAPON && static_cast<std::size_t>(reinterpret_cast<Parser::Weapon::struct_little *>(s)->magazines.count) > 0 && item_strings - 1 <= index) {
                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, i, "Pickup text index is not valid for picking up ammo (%zu + 1 >= %zu) so no text will appear when ammo is picked up", index, item_strings);
                         }
-                        
+
                         break;
                     }
                     case HEK::TagFourCC::TAG_FOURCC_BIPED:
@@ -2331,46 +2332,46 @@ namespace Invader {
             }
         }
     }
-    
+
     void BuildWorkload::generate_compressed_model_tag_array() {
         auto part_count = this->model_parts.size();
         auto struct_count = this->structs.size();
-        
+
         // Add four structs; two for vertices and two for indices
         this->structs.resize(struct_count + 4);
-        
+
         auto indices_array_struct_index = struct_count;
         auto indices_data_struct_index = struct_count + 1;
         auto vertices_array_struct_index = struct_count + 2;
         auto vertices_data_struct_index = struct_count + 3;
-        
+
         auto &indices_array_struct = this->structs[indices_array_struct_index];
         auto &vertices_array_struct = this->structs[vertices_array_struct_index];
         auto &indices_data_struct = this->structs[indices_data_struct_index];
         auto &vertices_data_struct = this->structs[vertices_data_struct_index];
-        
+
         // Add an entry for each part
         auto *indices_array_data = reinterpret_cast<HEK::CacheFileModelPartIndicesXbox *>((indices_array_struct.data = std::vector<std::byte>(part_count * sizeof(HEK::CacheFileModelPartIndicesXbox))).data());
         auto *vertices_array_data = reinterpret_cast<HEK::CacheFileModelPartVerticesXbox *>((vertices_array_struct.data = std::vector<std::byte>(part_count * sizeof(HEK::CacheFileModelPartVerticesXbox))).data());
-        
+
         // Fill it up with the vertices/indices
         auto *indices_data = this->model_indices.data();
         indices_data_struct.data.insert(indices_data_struct.data.end(), reinterpret_cast<const std::byte *>(indices_data), reinterpret_cast<const std::byte *>(indices_data + this->model_indices.size()));
         auto *vertices_data = this->compressed_model_vertices.data();
         vertices_data_struct.data.insert(vertices_data_struct.data.end(), reinterpret_cast<const std::byte *>(vertices_data), reinterpret_cast<const std::byte *>(vertices_data + this->compressed_model_vertices.size()));
-        
+
         auto *header = reinterpret_cast<HEK::CacheFileTagDataHeaderXbox *>(TAG_DATA_HEADER_STRUCT.data.data());
-        
+
         auto &ptr_to_vertices = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
         ptr_to_vertices.offset = reinterpret_cast<std::byte *>(&header->model_part_vertices_address) - reinterpret_cast<std::byte *>(header);
         ptr_to_vertices.limit_to_32_bits = true;
         ptr_to_vertices.struct_index = vertices_array_struct_index;
-        
+
         auto &ptr_to_indices = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
         ptr_to_indices.offset = reinterpret_cast<std::byte *>(&header->model_part_indices_address) - reinterpret_cast<std::byte *>(header);
         ptr_to_indices.limit_to_32_bits = true;
         ptr_to_indices.struct_index = indices_array_struct_index;
-        
+
         // Set up pointers
         for(std::size_t p = 0; p < part_count; p++) {
             auto &indices = indices_array_data[p];
@@ -2379,33 +2380,33 @@ namespace Invader {
             auto &part_struct = this->structs[part.struct_index];
             auto *part_struct_bytes = part_struct.data.data();
             auto &part_data = *reinterpret_cast<Parser::ModelGeometryPart::struct_little *>(part_struct_bytes + part.offset);
-            
+
             // Add three pointers - one for vertices; two for indices
             auto &vertex_ptr = part_struct.pointers.emplace_back();
             vertex_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.vertex_offset) - part_struct_bytes;
             vertex_ptr.struct_index = vertices_array_struct_index;
             vertex_ptr.struct_data_offset = p * sizeof(vertices);
             vertex_ptr.limit_to_32_bits = true;
-            
+
             auto &index_ptr = part_struct.pointers.emplace_back();
             index_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset) - part_struct_bytes;
             index_ptr.struct_index = indices_data_struct_index;
             index_ptr.struct_data_offset = part_data.triangle_offset;
             index_ptr.limit_to_32_bits = true;
-            
+
             auto &index_ptr2 = part_struct.pointers.emplace_back();
             index_ptr2.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset_2) - part_struct_bytes;
             index_ptr2.struct_index = indices_array_struct_index;
             index_ptr2.struct_data_offset = p * sizeof(indices);
             index_ptr2.limit_to_32_bits = true;
-            
+
             // Add two more pointers - one for vertices and one for indices
             auto &part_vertex_ptr = vertices_array_struct.pointers.emplace_back();
             part_vertex_ptr.offset = reinterpret_cast<const std::byte *>(&vertices.vertices) - reinterpret_cast<const std::byte *>(vertices_array_data);
             part_vertex_ptr.struct_index = vertices_data_struct_index;
             part_vertex_ptr.struct_data_offset = part_data.vertex_offset;
             part_vertex_ptr.limit_to_32_bits = true;
-            
+
             auto &part_index_ptr = indices_array_struct.pointers.emplace_back();
             part_index_ptr.offset = reinterpret_cast<const std::byte *>(&indices.indices) - reinterpret_cast<const std::byte *>(indices_array_data);
             part_index_ptr.struct_index = indices_data_struct_index;

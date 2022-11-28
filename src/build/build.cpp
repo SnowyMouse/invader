@@ -21,14 +21,14 @@ static std::uint32_t read_str32(const char *err, const char *s) {
         eprintf_error("%s %s (must be hexadecimal)", err, s);
         std::exit(EXIT_FAILURE);
     }
-    
+
     // Check the string length
     std::size_t given_crc32_length = std::strlen(s);
     if(given_crc32_length > 10 || given_crc32_length < 3) {
         eprintf_error("%s %s (must be 1-8 digits)", err, s);
         std::exit(EXIT_FAILURE);
     }
-    
+
     // Now, make sure it's all valid
     for(std::size_t i = 2; i < given_crc32_length; i++) {
         char c = std::tolower(s[i]);
@@ -37,7 +37,7 @@ static std::uint32_t read_str32(const char *err, const char *s) {
             std::exit(EXIT_FAILURE);
         }
     }
-    
+
     return static_cast<std::uint32_t>(std::strtoul(s + 2, nullptr, 16));
 }
 
@@ -46,7 +46,7 @@ int main(int argc, const char **argv) {
 
     using namespace Invader;
     using namespace Invader::HEK;
-    
+
     using RawDataHandling = BuildWorkload::BuildParameters::BuildParametersDetails::RawDataHandling;
 
     // Parameters
@@ -77,7 +77,7 @@ int main(int argc, const char **argv) {
         bool use_anniverary_mode = false;
         bool use_tags_for_script_source = false;
     } build_options;
-    
+
     const CommandLineOption options[] = {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_MAPS),
@@ -171,7 +171,7 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-                
+
             case 'S':
                 if(std::strcmp(arguments[0], "tags") == 0) {
                     build_options.use_tags_for_script_source = true;
@@ -184,11 +184,11 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-                
+
             case 'A':
                 build_options.auto_forge = true;
                 break;
-                
+
             case 'g': {
                 if(const auto *engine_maybe = HEK::GameEngineInfo::get_game_engine_info(arguments[0])) {
                     build_options.engine = engine_maybe;
@@ -197,7 +197,7 @@ int main(int argc, const char **argv) {
                     eprintf_error("Unknown engine %s. Use -h for more information.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
-                
+
                 break;
             }
             case 'C':
@@ -271,7 +271,7 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
-    
+
     std::string scenario;
 
     // By default, just use tags
@@ -299,15 +299,15 @@ int main(int argc, const char **argv) {
         std::optional<std::vector<File::TagFilePath>> with_index;
         if(build_options.index.size()) {
             with_index = std::vector<File::TagFilePath>();
-            
+
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;
-            
+
             if(!index_file.is_open()) {
                 eprintf_error("Failed to open index file %s", build_options.index.c_str());
                 return EXIT_FAILURE;
             }
-            
+
             while(std::getline(index_file, tag)) {
                 // Check if empty
                 if(tag.size() == 0) {
@@ -346,10 +346,10 @@ int main(int argc, const char **argv) {
             eprintf_error("No engine target specified. Use -h for more information.");
             return EXIT_FAILURE;
         }
-        
+
         const auto &engine_info = *(*build_options.engine);
         BuildWorkload::BuildParameters parameters(engine_info.engine);
-        
+
         parameters.use_tags_for_script_data = build_options.use_tags_for_script_source;
         parameters.tags_directories = build_options.tags;
         parameters.data_directory = build_options.data;
@@ -358,21 +358,21 @@ int main(int argc, const char **argv) {
         parameters.optimize_space = build_options.optimize_space;
         parameters.forge_crc = build_options.forged_crc;
         parameters.index = with_index;
-        
+
         if(build_options.max_tag_space.has_value()) {
             parameters.details.build_maximum_tag_space = *build_options.max_tag_space;
         }
-        
+
         if(build_options.build_version.has_value()) {
             parameters.details.build_version = *build_options.build_version;
         }
-        
+
         if(!build_options.use_anniverary_mode) {
             parameters.details.build_flags_cea = HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_BITMAPS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_USE_SOUNDS_CACHE | HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY;
         }
-        
+
         parameters.details.build_check_custom_edition_resource_map_bounds = build_options.check_custom_edition_resource_bounds;
-        
+
         if(build_options.increased_file_size_limits) {
             if(engine_info.engine != HEK::GameEngine::GAME_ENGINE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = static_cast<std::uint32_t>(INT32_MAX); // 2 GiB minus 1 byte
@@ -381,27 +381,27 @@ int main(int argc, const char **argv) {
         if(build_options.compression_level.has_value()) {
             parameters.details.build_compression_level = build_options.compression_level;
         }
-        
+
         // Do we need resource maps?
         bool require_resource_maps = engine_info.supports_external_resource_maps();
-        
+
         // Don't allow resource maps if we can't use them!
         if(!require_resource_maps && build_options.raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
             eprintf_error("Resource maps are not used for the target engine");
             return EXIT_FAILURE;
         }
-        
+
         // Set this to false
         if(require_resource_maps && build_options.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
             require_resource_maps = false;
         }
-        
+
         parameters.details.build_raw_data_handling = build_options.raw_data_handling;
-        
+
         // Load resource maps
         if(require_resource_maps) {
             bool error = false;
-            
+
             auto try_open = [](const std::filesystem::path &path) {
                 auto file = File::open_file(path);
                 if(!file.has_value()) {
@@ -416,7 +416,7 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
             };
-            
+
             // Where are the memes located?
             std::filesystem::path resource_target_path;
             const char *resource_error_prefix;
@@ -428,20 +428,20 @@ int main(int argc, const char **argv) {
                 resource_target_path = *build_options.resource_map_path;
                 resource_error_prefix = "Resource";
             }
-            
+
             auto bitmaps = resource_target_path / "bitmaps.map";
             auto sounds = resource_target_path / "sounds.map";
             if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 // Use loc for Custom Edition
                 auto loc = resource_target_path / "loc.map";
-                
+
                 // Well, guess that's that
                 if(!std::filesystem::is_regular_file(bitmaps) || !std::filesystem::is_regular_file(sounds) || !std::filesystem::is_regular_file(loc)) {
                     eprintf_error("%s directory is missing either bitmaps.map, sounds.map, OR loc.map", resource_error_prefix);
                     error = true;
                     goto show_me_the_spaghetti_code_error;
                 }
-                
+
                 parameters.bitmap_data = try_open(bitmaps);
                 parameters.sound_data = try_open(sounds);
                 parameters.loc_data = try_open(loc);
@@ -453,22 +453,22 @@ int main(int argc, const char **argv) {
                     error = true;
                     goto show_me_the_spaghetti_code_error;
                 }
-                
+
                 parameters.bitmap_data = try_open(bitmaps);
                 parameters.sound_data = try_open(sounds);
             }
-            
+
             show_me_the_spaghetti_code_error:
             if(error) {
-                eprintf_error("Use -n if no resource maps are required.");
+                eprintf_error("Use --resource-usage none if no resource maps are required.");
                 return EXIT_FAILURE;
             }
         }
-        
+
         if(build_options.hide_pedantic_warnings) {
             parameters.verbosity = BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC;
         }
-        
+
         if(build_options.quiet) {
             parameters.verbosity = BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET;
         }
@@ -481,7 +481,7 @@ int main(int argc, const char **argv) {
         else {
             map_name = File::base_name(scenario.c_str());
         }
-        
+
         // CRC32 spoofing, indexing, etc.
         if(build_options.auto_forge) {
             if(!parameters.index.has_value()) {
@@ -491,7 +491,7 @@ int main(int argc, const char **argv) {
                         break;
                     case HEK::GameEngine::GAME_ENGINE_GEARBOX_CUSTOM_EDITION:
                         parameters.index = custom_edition_indices(map_name.c_str());
-                        
+
                         if(!parameters.forge_crc.has_value()) {
                             if(map_name == "beavercreek") {
                                 parameters.forge_crc = 0x07B3876A;
@@ -551,7 +551,7 @@ int main(int argc, const char **argv) {
                                 parameters.forge_crc = 0xCF3359B1;
                             }
                         }
-                        
+
                         break;
                     case HEK::GameEngine::GAME_ENGINE_GEARBOX_DEMO:
                         parameters.index = demo_indices(map_name.c_str());
@@ -566,8 +566,8 @@ int main(int argc, const char **argv) {
 
         // Build!
         auto map = Invader::BuildWorkload::compile_map(parameters);
-        
-        static const char MAP_EXTENSION[] = ".map"; 
+
+        static const char MAP_EXTENSION[] = ".map";
         auto map_name_with_extension = std::string(map_name) + MAP_EXTENSION;
 
         // Format path to maps/map_name.map if output not specified
@@ -579,17 +579,17 @@ int main(int argc, const char **argv) {
             final_file = *build_options.output;
             auto final_file_name_no_extension = final_file.filename().replace_extension();
             auto final_file_name_no_extension_string = final_file_name_no_extension.string();
-            
+
             // If it's not a .map, warn
             if(final_file.extension() != MAP_EXTENSION) {
                 eprintf_warn("The base file extension is not \"%s\" which is required by the target engine", MAP_EXTENSION);
             }
-            
+
             // If we are not building for MCC and the scenario name is mismatched, warn
             if(final_file_name_no_extension_string != map_name && engine_info.scenario_name_and_file_name_must_be_equal) {
                 eprintf_warn("The base name (%s) does not match the scenario (%s)", final_file_name_no_extension_string.c_str(), map_name.c_str());
                 eprintf_warn("The map will fail to load correctly in the target engine with this file name.");
-                
+
                 bool incorrect_case = false;
                 for(char &c : final_file_name_no_extension_string) {
                     if(std::tolower(c) != c) {
@@ -602,7 +602,7 @@ int main(int argc, const char **argv) {
                 }
             }
         }
-        
+
         // Save the file
         if(!File::save_file(final_file, map)) {
             eprintf_error("Failed to save %s", final_file.string().c_str());

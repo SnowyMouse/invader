@@ -14,7 +14,7 @@
 
 int main(int argc, const char **argv) {
     set_up_color_term();
-    
+
     using namespace Invader;
 
     // Options struct
@@ -22,10 +22,10 @@ int main(int argc, const char **argv) {
         std::optional<std::string> tags_directory;
         std::optional<std::string> maps_directory;
         std::vector<std::string> tags_to_extract;
-        
+
         std::vector<std::string> search_queries;
         std::vector<std::string> search_queries_exclude;
-        
+
         bool recursive = false;
         bool overwrite = false;
         bool non_mp_globals = false;
@@ -117,6 +117,10 @@ int main(int argc, const char **argv) {
     if(extract_options.maps_directory.has_value() && !extract_options.ignore_resource_maps) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
+            auto path = maps_directory / map;
+            if(!std::filesystem::exists(path)) {
+                return std::vector<std::byte>();
+            }
             auto potential_map = Invader::File::open_file(maps_directory / map);
             if(potential_map.has_value()) {
                 return *potential_map;
@@ -142,24 +146,14 @@ int main(int argc, const char **argv) {
 
         // Check if we can do things to it
         if(header.valid()) {
-            switch(header.engine.read()) {
-                case HEK::CACHE_FILE_DEMO:
-                case HEK::CACHE_FILE_RETAIL:
-                    bitmaps = open_map_possibly("bitmaps.map");
-                    sounds = open_map_possibly("sounds.map");
-                    break;
-                case HEK::CACHE_FILE_MCC_CEA:
-                    if(!(reinterpret_cast<const HEK::CacheFileHeaderCEA *>(&header)->flags & HEK::CacheFileHeaderCEAFlags::CACHE_FILE_HEADER_CEA_FLAGS_CLASSIC_ONLY)) {
-                        bitmaps = open_map_possibly("bitmaps.map");
-                    }
-                    break;
-                case HEK::CACHE_FILE_CUSTOM_EDITION:
+            auto cache_version = header.engine.read();
+            if(cache_version != HEK::CACHE_FILE_NATIVE && cache_version != HEK::CACHE_FILE_XBOX) {
+                bitmaps = open_map_possibly("bitmaps.map");
+                sounds = open_map_possibly("sounds.map");
+
+                if(cache_version == HEK::CACHE_FILE_CUSTOM_EDITION) {
                     loc = open_map_possibly("loc.map");
-                    bitmaps = open_map_possibly("bitmaps.map");
-                    sounds = open_map_possibly("sounds.map");
-                    break;
-                default:
-                    break; // nothing else gets resource maps
+                }
             }
         }
         // Maybe it's a demo map?

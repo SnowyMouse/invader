@@ -2,10 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [0.51.5] - 2022-11-29
 ### Changed
 - invader-dependency now returns status code 197 if it fails to open a tag due
   to it being invalid
+
+### Fixed
+- invader-build and invader-extract will now correctly load resource maps for MCC targets.
 
 ## [0.51.4] - 2022-11-15
 - RIAT: Fixed inequality operator not working on game_difficulty and team
@@ -2427,5 +2430,6 @@ image as one bitmap
 [0.51.2]: https://github.com/SnowyMouse/invader/compare/0.51.1...0.51.2
 [0.51.3]: https://github.com/SnowyMouse/invader/compare/0.51.2...0.51.3
 [0.51.4]: https://github.com/SnowyMouse/invader/compare/0.51.3...0.51.4
+[0.51.5]: https://github.com/SnowyMouse/invader/compare/0.51.4...0.51.5
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.4...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.5...master
