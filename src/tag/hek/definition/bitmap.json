@@ -138,7 +138,9 @@
             "disable height map compression",
             "uniform sprite sequences",
             "filthy sprite bug fix",
-            "half hud scale"
+            "half hud scale",
+            "invert detail fade",
+            "use average color for detail fade"
         ],
         "width": 16
     },
