@@ -42,10 +42,10 @@ using namespace Invader::HEK;
 struct BitmapOptions {
     // Data directory
     std::filesystem::path data = "data";
-    
+
     // Tags directory
     std::filesystem::path tags = "tags";
-    
+
     // Allow non-power-of-two bitmaps
     bool allow_non_power_of_two = false;
 
@@ -54,7 +54,7 @@ struct BitmapOptions {
 
     // Format?
     std::optional<BitmapFormat> format;
-    
+
     // Find format automatically
     std::optional<bool> auto_format;
 
@@ -90,7 +90,7 @@ struct BitmapOptions {
 
     // Generate this many mipmaps
     std::optional<std::uint16_t> max_mipmap_count;
-    
+
     // Filthy sprite bug fix?
     std::optional<bool> filthy_sprite_bug_fix;
 
@@ -99,7 +99,7 @@ struct BitmapOptions {
 
     // Use a filesystem path?
     bool filesystem_path = false;
-    
+
     // Regenerate?
     bool regenerate = false;
 };
@@ -115,6 +115,17 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     if(!bitmap_options.ignore_tag_data && std::filesystem::exists(final_path)) {
         auto tag_data = Invader::File::open_file(final_path).value();
         bitmap_tag_data = T::parse_hek_tag_file(tag_data.data(), tag_data.size());
+
+        // We do not support these options in this implementation of invader-bitmap.
+        // These are available in the Rust implementation instead.
+        if(bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_INVERT_DETAIL_FADE) {
+            eprintf_error("The \"invert detail fade\" option is not supported by this implementation of invader-bitmap");
+            std::exit(EXIT_FAILURE);
+        }
+        if(bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_USE_AVERAGE_COLOR_FOR_DETAIL_FADE) {
+            eprintf_error("The \"use average color for detail fade\" option is not supported by this implementation of invader-bitmap");
+            std::exit(EXIT_FAILURE);
+        }
 
         // Set some default values
         if(!bitmap_options.format.has_value() && !bitmap_options.auto_format.value_or(false)) {
@@ -172,7 +183,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(!bitmap_options.alpha_bias.has_value()) {
             bitmap_options.alpha_bias = bitmap_tag_data.alpha_bias;
         }
-        
+
         // Clear existing data
         bitmap_tag_data.bitmap_data.clear();
         bitmap_tag_data.bitmap_group_sequence.clear();
@@ -185,7 +196,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     // If these values weren't set, set them
     #define DEFAULT_VALUE(what, default) if(!what.has_value()) { what = default; }
-    
+
     if(!bitmap_options.auto_format.has_value()) {
         bitmap_options.auto_format = true;
     }
@@ -223,7 +234,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             eprintf_error("Cannot regenerate a bitmap that doesn't have color plate data.");
             return EXIT_FAILURE;
         }
-        
+
         // Get the size of the data we're going to decompress
         auto *data = bitmap_tag_data.compressed_color_plate_data.data();
         image_size = reinterpret_cast<HEK::BigEndian<std::uint32_t> *>(data)->read();
@@ -232,10 +243,10 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             return EXIT_FAILURE;
         }
         image_pixels = std::vector<Pixel>(image_size / sizeof(Pixel));
-        
+
         data += sizeof(std::uint32_t);
         size -= sizeof(std::uint32_t);
-        
+
         z_stream inflate_stream;
         inflate_stream.zalloc = Z_NULL;
         inflate_stream.zfree = Z_NULL;
@@ -250,7 +261,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         inflate(&inflate_stream, Z_FINISH);
         inflateEnd(&inflate_stream);
     }
-    
+
     // Otherwise, find the file
     else {
         // Try to figure out the extension
@@ -361,7 +372,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(*bitmap_options.auto_format) {
             bitmap_options.format = std::nullopt;
         }
-        
+
         write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format, bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dithering.value());
     }
     catch (std::exception &e) {
@@ -373,7 +384,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Add all sequences
     for(auto &sequence : scanned_color_plate.sequences) {
         auto &bgs = bitmap_tag_data.bitmap_group_sequence.emplace_back();
-        
+
         if(bitmap_options.bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
             bgs.bitmap_count = sequence.sprites.size() == 1 ? 1 : 0;
             bgs.first_bitmap_index = NULL_INDEX;
@@ -396,13 +407,13 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bgss.left = static_cast<float>(sprite.left) / bitmap.width;
             bgss.right = static_cast<float>(sprite.right) / bitmap.width;
             bgss.registration_point.x = static_cast<float>(sprite.registration_point_x) / bitmap.width;
-            
+
             // Set the first bitmap index here
             if(bgss.bitmap_index < bgs.first_bitmap_index) {
                 bgs.first_bitmap_index = bgss.bitmap_index;
             }
         }
-        
+
         // If we never set it, set it to 0
         if(bgs.first_bitmap_index == NULL_INDEX) {
             bgs.first_bitmap_index = 0;
@@ -418,9 +429,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
     bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
     bitmap_tag_data.alpha_bias = bitmap_options.alpha_bias.value_or(0.0F);
-    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_ENABLE_DIFFUSION_DITHERING & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) | 
-                            (*bitmap_options.dithering ? HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_ENABLE_DIFFUSION_DITHERING : 0) | 
-                            (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | 
+    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_ENABLE_DIFFUSION_DITHERING & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX) |
+                            (*bitmap_options.dithering ? HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_ENABLE_DIFFUSION_DITHERING : 0) |
+                            (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) |
                             (*bitmap_options.filthy_sprite_bug_fix ? HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_FILTHY_SPRITE_BUG_FIX : 0);
     if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
         bitmap_tag_data.mipmap_count = 0;
@@ -461,7 +472,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Write it all
     std::error_code ec;
     std::filesystem::create_directories(tag_path.parent_path(), ec);
-    
+
     if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(tag_fourcc, true))) {
         eprintf_error("Error: Failed to write to %s.", final_path.string().c_str());
         return EXIT_FAILURE;
@@ -472,7 +483,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
 int main(int argc, char *argv[]) {
     set_up_color_term();
-    
+
     BitmapOptions bitmap_options;
 
     const CommandLineOption options[] {
@@ -508,7 +519,7 @@ int main(int argc, char *argv[]) {
             case 'd':
                 bitmap_options.data = arguments[0];
                 break;
-                
+
             case 'A':
                 bitmap_options.alpha_bias = std::strtof(arguments[0], nullptr);
                 if(bitmap_options.alpha_bias < -1.0F || bitmap_options.alpha_bias > 1.0F) {
@@ -587,7 +598,7 @@ int main(int argc, char *argv[]) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-            
+
             case 'r':
                 if(std::strcmp(arguments[0], "on") == 0) {
                     bitmap_options.filthy_sprite_bug_fix = true;
@@ -665,7 +676,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 break;
-                
+
             case 'S':
                 bitmap_options.force_square_sprite_sheets = true;
                 break;
@@ -688,7 +699,7 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
     }
-    
+
     else {
         bitmap_tag = remaining_arguments[0];
     }

@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.52.0] - 2022-12-13
+### Changed
+- invader: Tag and Script definitions have been updated for the MCC December 2022 update.
+
+### Fixed
+- invader-script and invader-build will nolonger allow sv_maxplayers in gbx-demo scripts as this crashes the game.
+
 ## [0.51.5] - 2022-11-29
 ### Changed
 - invader-dependency now returns status code 197 if it fails to open a tag due
@@ -2431,5 +2438,6 @@ image as one bitmap
 [0.51.3]: https://github.com/SnowyMouse/invader/compare/0.51.2...0.51.3
 [0.51.4]: https://github.com/SnowyMouse/invader/compare/0.51.3...0.51.4
 [0.51.5]: https://github.com/SnowyMouse/invader/compare/0.51.4...0.51.5
+[0.52.0]: https://github.com/SnowyMouse/invader/compare/0.51.5...0.52.0
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.51.5...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.0...master
