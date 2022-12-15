@@ -853,7 +853,8 @@
                 "name": "units",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeat",
-                "maximum": 32
+                "maximum": 32,
+                "extended_maximum": 512
             },
             {
                 "name": "weapons",
