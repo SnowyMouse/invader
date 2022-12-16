@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.52.1] - 2022-12-17
 ### Fixed
 - invader-extract: Fixed extracting model_animations tags that were oddly compiled by tool.exe
 
@@ -2443,5 +2443,6 @@ image as one bitmap
 [0.51.4]: https://github.com/SnowyMouse/invader/compare/0.51.3...0.51.4
 [0.51.5]: https://github.com/SnowyMouse/invader/compare/0.51.4...0.51.5
 [0.52.0]: https://github.com/SnowyMouse/invader/compare/0.51.5...0.52.0
+[0.52.1]: https://github.com/SnowyMouse/invader/compare/0.52.0...0.52.1
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.1...master
