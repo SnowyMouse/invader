@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-extract: Fixed extracting model_animations tags that were oddly compiled by tool.exe
+
 ## [0.52.0] - 2022-12-13
 ### Changed
 - invader: Tag and Script definitions have been updated for the MCC December 2022 update.

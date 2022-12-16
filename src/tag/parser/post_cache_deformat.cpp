@@ -4,6 +4,7 @@
 #include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
+#include <invader/tag/parser/compile/model_animations.hpp>
 
 namespace Invader::Parser {
     void Invader::Parser::ActorVariant::post_cache_deformat() {
@@ -124,65 +125,16 @@ namespace Invader::Parser {
             throw OutOfBoundsException();
         }
 
-        // Count this stuff
-        std::size_t rotation_count = 0;
-        std::size_t scale_count = 0;
-        std::size_t transform_count = 0;
-        std::uint32_t rotation_flag_0 = this->node_rotation_flag_data[0];
-        std::uint32_t rotation_flag_1 = this->node_rotation_flag_data[1];
-        std::uint32_t scale_flag_0 = this->node_scale_flag_data[0];
-        std::uint32_t scale_flag_1 = this->node_scale_flag_data[1];
-        std::uint32_t transform_flag_0 = this->node_transform_flag_data[0];
-        std::uint32_t transform_flag_1 = this->node_transform_flag_data[1];
-        bool rotate[64];
-        bool scale[64];
-        bool transform[64];
-        std::size_t frame_data_size_expected = 0;
-        for(std::size_t i = 0; i < node_count; i++) {
-            bool has_rotation = false;
-            bool has_scale = false;
-            bool has_transform = false;
-
-            if(i > 31) {
-                has_rotation = (rotation_flag_1 >> (i - 32)) & 1;
-                has_scale = (scale_flag_1 >> (i - 32)) & 1;
-                has_transform = (transform_flag_1 >> (i - 32)) & 1;
-            }
-            else {
-                has_rotation = (rotation_flag_0 >> i) & 1;
-                has_scale = (scale_flag_0 >> i) & 1;
-                has_transform = (transform_flag_0 >> i) & 1;
-            }
-
-            if(has_rotation) {
-                frame_data_size_expected += sizeof(ModelAnimationsRotation::struct_little) * frame_count;
-            }
-            if(has_transform) {
-                frame_data_size_expected += sizeof(ModelAnimationsTransform::struct_little) * frame_count;
-            }
-            if(has_scale) {
-                frame_data_size_expected += sizeof(ModelAnimationscale::struct_little) * frame_count;
-            }
-
-            rotation_count += has_rotation;
-            scale_count += has_scale;
-            transform_count += has_transform;
-
-            rotate[i] = has_rotation;
-            scale[i] = has_scale;
-            transform[i] = has_transform;
-        }
-
         // Make sure frame and default size is correct
-        std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::struct_big) + scale_count * sizeof(ModelAnimationscale::struct_big) + transform_count * sizeof(ModelAnimationsTransform::struct_big);
+        std::size_t frame_data_size_expected = expected_uncompressed_frame_size_for_animation(*this);
         std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::struct_big) + sizeof(ModelAnimationscale::struct_big) + sizeof(ModelAnimationsTransform::struct_big));
-        if(frame_size != total_frame_size) {
-            eprintf_error("Frame size is invalid (%zu != %zu)", static_cast<std::size_t>(frame_size), total_frame_size);
+        if(frame_data_size_expected != this->frame_size) {
+            eprintf_error("Frame size is invalid (%zu != %zu)", static_cast<std::size_t>(frame_data_size_expected), static_cast<std::size_t>(this->frame_size));
             throw InvalidTagDataException();
         }
 
         // Do default data
-        std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
+        std::size_t expected_default_data_size = (max_frame_size - frame_data_size_expected);
         if(!compressed) {
             std::size_t default_data_size = default_data.size();
             if(default_data_size > 0) {
@@ -196,21 +148,21 @@ namespace Invader::Parser {
                     auto *default_data_little = default_data.data();
 
                     for(std::size_t node = 0; node < this->node_count; node++) {
-                        if(!rotate[node]) {
+                        if(!read_bit_from_bitfield(node, this->node_rotation_flag_data)) {
                             auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_big *>(default_data_big);
                             const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_little *>(default_data_little);
                             rotation_big = rotation_little;
                             default_data_big += sizeof(rotation_big);
                             default_data_little += sizeof(rotation_big);
                         }
-                        if(!transform[node]) {
+                        if(!read_bit_from_bitfield(node, this->node_transform_flag_data)) {
                             auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_big *>(default_data_big);
                             const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_little *>(default_data_little);
                             transform_big = transform_little;
                             default_data_big += sizeof(transform_big);
                             default_data_little += sizeof(transform_big);
                         }
-                        if(!scale[node]) {
+                        if(!read_bit_from_bitfield(node, this->node_scale_flag_data)) {
                             auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_big *>(default_data_big);
                             const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_little *>(default_data_little);
                             scale_big = scale_little;
@@ -227,13 +179,20 @@ namespace Invader::Parser {
             this->default_data.resize(expected_default_data_size, std::byte());
         }
 
+        auto total_uncompressed_frame_size = frame_data_size_expected * this->frame_count;
+
         if(compressed) {
-            this->offset_to_compressed_data = static_cast<std::uint32_t>(frame_data_size_expected);
-            this->frame_data.insert(this->frame_data.begin(), frame_data_size_expected, std::byte());
+            if(this->offset_to_compressed_data > frame_data.size()) {
+                eprintf_error("Offset to compressed data offset is invalid (%zu > %zu)", static_cast<std::size_t>(this->offset_to_compressed_data), this->frame_data.size());
+                throw InvalidTagDataException();
+            }
+            this->frame_data = std::vector<std::byte>(this->frame_data.begin() + this->offset_to_compressed_data, this->frame_data.end());
+            this->frame_data.insert(this->frame_data.begin(), total_uncompressed_frame_size, std::byte());
+            this->offset_to_compressed_data = total_uncompressed_frame_size;
         }
         else {
-            if(frame_data.size() != frame_data_size_expected) {
-                eprintf_error("Frame data size is invalid (%zu != %zu)", frame_data.size(), frame_data_size_expected);
+            if(this->frame_data.size() != total_uncompressed_frame_size) {
+                eprintf_error("Frame data size is invalid (%zu != %zu)", total_uncompressed_frame_size, this->frame_data.size());
                 throw InvalidTagDataException();
             }
 
@@ -242,21 +201,21 @@ namespace Invader::Parser {
                 auto *frame_data_little = frame_data.data();
                 for(std::size_t frame = 0; frame < frame_count; frame++) {
                     for(std::size_t node = 0; node < this->node_count; node++) {
-                        if(rotate[node]) {
+                        if(read_bit_from_bitfield(node, this->node_rotation_flag_data)) {
                             auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_little *>(frame_data_big);
                             const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_big *>(frame_data_little);
                             rotation_big = rotation_little;
                             frame_data_big += sizeof(rotation_big);
                             frame_data_little += sizeof(rotation_big);
                         }
-                        if(transform[node]) {
+                        if(read_bit_from_bitfield(node, this->node_transform_flag_data)) {
                             auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_little *>(frame_data_big);
                             const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_big *>(frame_data_little);
                             transform_big = transform_little;
                             frame_data_big += sizeof(transform_big);
                             frame_data_little += sizeof(transform_big);
                         }
-                        if(scale[node]) {
+                        if(read_bit_from_bitfield(node, this->node_scale_flag_data)) {
                             auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_little *>(frame_data_big);
                             const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_big *>(frame_data_little);
                             scale_big = scale_little;
