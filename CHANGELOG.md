@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.52.2] - 2022-12-20
+### Fixed
+- invader-build: Fixed bounds check that was preventing maps with compressed model_animations from compiling.
+
 ## [0.52.1] - 2022-12-17
 ### Fixed
 - invader-extract: Fixed extracting model_animations tags that were oddly compiled by tool.exe
@@ -2444,5 +2448,6 @@ image as one bitmap
 [0.51.5]: https://github.com/SnowyMouse/invader/compare/0.51.4...0.51.5
 [0.52.0]: https://github.com/SnowyMouse/invader/compare/0.51.5...0.52.0
 [0.52.1]: https://github.com/SnowyMouse/invader/compare/0.52.0...0.52.1
+[0.52.2]: https://github.com/SnowyMouse/invader/compare/0.52.1...0.52.2
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.1...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.2...master
