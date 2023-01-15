@@ -8,7 +8,9 @@
             },
             {
                 "name": "weight",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 32768.0
             },
             {
                 "name": "item",
@@ -52,6 +54,7 @@
         ],
         "type": "struct",
         "size": 92,
+        "pre_compile": true,
         "class": "item_collection"
     }
 ]

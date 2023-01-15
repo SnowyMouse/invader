@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Changed
+- invader-build: Now errors if item_collection tags have no items or has too high of a weight, as this can crash
+  the game.
+
 ## [0.52.2] - 2022-12-20
 ### Fixed
 - invader-build: Fixed bounds check that was preventing maps with compressed model_animations from compiling.
