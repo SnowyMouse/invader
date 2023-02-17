@@ -14,8 +14,8 @@ namespace Invader::Parser {
     static void check_palettes(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
-    
-    static constexpr const HEK::TagFourCC OBJECT_FOURCCS[] = { TagFourCC::TAG_FOURCC_BIPED, 
+
+    static constexpr const HEK::TagFourCC OBJECT_FOURCCS[] = { TagFourCC::TAG_FOURCC_BIPED,
                                                                TagFourCC::TAG_FOURCC_VEHICLE,
                                                                TagFourCC::TAG_FOURCC_WEAPON,
                                                                TagFourCC::TAG_FOURCC_PROJECTILE,
@@ -27,7 +27,7 @@ namespace Invader::Parser {
                                                                TagFourCC::TAG_FOURCC_DEVICE_CONTROL,
                                                                TagFourCC::TAG_FOURCC_DEVICE_MACHINE,
                                                                TagFourCC::TAG_FOURCC_DEVICE_LIGHT_FIXTURE };
-    
+
     static std::optional<HEK::TagFourCC> script_value_type_to_fourcc(HEK::ScenarioScriptValueType type) {
         switch(type) {
             case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
@@ -58,11 +58,11 @@ namespace Invader::Parser {
                 return std::nullopt;
         }
     }
-    
+
     void compile_scripts(Scenario &scenario, const HEK::GameEngineInfo &info, std::vector<std::string> &warnings, const std::vector<std::filesystem::path> &tags_directories, const std::optional<std::vector<std::pair<std::string, std::vector<std::byte>>>> &script_source) {
         // Instantiate it
         RIAT::Compiler instance(static_cast<RIATCompileTarget>(info.scenario_script_compile_target));
-        
+
         // Open the hud message text
         Parser::HUDMessageText hmt;
         bool hmt_exists = !scenario.hud_messages.path.empty();
@@ -77,7 +77,7 @@ namespace Invader::Parser {
                 hmt = Parser::HUDMessageText::parse_hek_tag_file(hud_message_text_data->data(), hud_message_text_data->size());
             }
         }
-        
+
         // Eventually get the HUD globals tag
         Parser::HUDGlobals hud_globals;
         auto globals_file_path = File::tag_path_to_file_path(File::halo_path_to_preferred_path("globals\\globals.globals"), tags_directories);
@@ -89,7 +89,7 @@ namespace Invader::Parser {
                 eprintf_error("Failed to open %s\n", globals_file_path->string().c_str());
                 throw std::exception();
             }
-            
+
             auto globals = Globals::parse_hek_tag_file(globals_data->data(), globals_data->size());
             if(!globals.interface_bitmaps.empty()) {
                 auto &interface_bitmaps = globals.interface_bitmaps[0];
@@ -107,13 +107,13 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         // Load the input from script_source
         decltype(scenario.source_files) source_files;
         if(script_source.has_value()) {
             for(auto &source : *script_source) {
                 auto &file = source_files.emplace_back();
-                
+
                 // Check if it's too long. If not, copy. Otherwise, error
                 if(source.first.size() > sizeof(file.name.string) - 1) {
                     eprintf_error("Script file name '%s' is too long", source.first.c_str());
@@ -125,12 +125,12 @@ namespace Invader::Parser {
                 file.source = source.second;
             };
         }
-        
+
         // Use the scenario tag's source data
         else {
             source_files = scenario.source_files;
         }
-        
+
         // Load the scripts
         RIAT::CompilerScriptResult result;
         try {
@@ -143,48 +143,48 @@ namespace Invader::Parser {
             eprintf_error("Script compilation error: %s", e.what());
             throw InvalidTagDataException();
         }
-        
+
         // Check warnings
         for(auto &e : result.get_warnings()) {
             char fmt_message[512];
             std::snprintf(fmt_message, sizeof(fmt_message), "%s:%zu:%zu: warning: %s", e.get_file(), e.get_line(), e.get_column(), e.get_reason());
             warnings.emplace_back(fmt_message);
         }
-        
+
         std::size_t node_limit = info.maximum_scenario_script_nodes;
-        
+
         auto scripts = result.get_scripts();
         auto globals = result.get_globals();
         auto nodes = result.get_nodes();
-        
+
         std::size_t node_count = nodes.size();
-        
+
         if(nodes.size() > node_limit) {
             eprintf_error("Node limit exceeded for the target engine (%zu > %zu)", node_count, node_limit);
             throw InvalidTagDataException();
         }
-        
+
         std::vector<Invader::Parser::ScenarioScriptNode> into_nodes;
-        
+
         auto format_index_to_id = [](std::size_t index) -> std::uint32_t {
             auto index_16_bit = static_cast<std::uint16_t>(index);
             return static_cast<std::uint32_t>(((index_16_bit + 0x6373) | 0x8000) << 16) | index_16_bit;
         };
-        
+
         std::map<std::string, std::size_t> string_index;
         std::vector<std::byte> string_data;
-        
+
         for(std::size_t node_index = 0; node_index < node_count; node_index++) {
             auto &n = nodes[node_index];
             auto &new_node = into_nodes.emplace_back();
             new_node = {};
-            
+
             // Set the salt
             new_node.salt = format_index_to_id(node_index) >> 16;
-            
+
             // Set to 0xFFFFFFFF
             new_node.data.long_int = -1;
-            
+
             // If we have string data, add it
             if(n.string_data != NULL) {
                 std::string str = n.string_data;
@@ -196,16 +196,16 @@ namespace Invader::Parser {
                 }
                 new_node.string_offset = string_index[str];
             }
-            
+
             // All nodes are marked with this...?
             new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GARBAGE_COLLECTABLE;
-            
+
             // Here's the type
             new_node.type = static_cast<Invader::HEK::ScenarioScriptValueType>(n.value_type);
-            
+
             // Set this. It's sometimes important
             new_node.index_union = n.index_union;
-            
+
             // Set this stuff
             bool is_primitive = n.node_type == RIATNodeTypeC::RIAT_LocalVariable || n.node_type == RIATNodeTypeC::RIAT_GlobalVariable || n.node_type == RIATNodeTypeC::RIAT_StaticValue;
             bool is_variable = n.node_type == RIATNodeTypeC::RIAT_LocalVariable || n.node_type == RIATNodeTypeC::RIAT_GlobalVariable;
@@ -216,14 +216,14 @@ namespace Invader::Parser {
                 if(is_variable) {
                     new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL;
                     new_node.data.long_int = n.node_data.long_int;
-                    
+
                     if(is_local) {
                         new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_LOCAL_VARIABLE;
                     }
                 }
                 else {
                     new_node.data.long_int = 0xFFFFFFFF;
-                    
+
                     switch(new_node.type) {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_BOOLEAN:
                             new_node.data.bool_int = n.node_data.boolean;
@@ -248,12 +248,12 @@ namespace Invader::Parser {
             }
             else {
                 new_node.data.tag_id.id = format_index_to_id(n.node_data.offset);
-                
+
                 if(is_script_call) {
                     new_node.flags |= Invader::HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL;
                 }
             }
-            
+
             // Set the next node?
             if(n.next_node == SIZE_MAX) {
                 new_node.next_node = UINT32_MAX;
@@ -261,52 +261,52 @@ namespace Invader::Parser {
             else {
                 new_node.next_node = format_index_to_id(n.next_node);
             }
-            
+
             // Get the index of the thing
             auto find_thing = [&n, &warnings, &new_node](auto &array, const char *name) -> std::size_t {
                 if(std::strcmp(name, "none") == 0) {
                     return SIZE_MAX;
                 }
-                
+
                 auto len = array.size();
                 bool exists = false;
                 bool multiple_instances = false;
                 std::size_t first_instance = 0;
-                
+
                 // See if it exists and then find the first multiple instance if it does
                 for(std::size_t i = 0; i < len && !multiple_instances; i++) {
                     const char *c = name;
                     const char *d = array[i].name.string;
-                    
+
                     while(*c != 0 && *d != 0 && std::tolower(*c) == std::tolower(*d)) {
                         c++;
                         d++;
                     }
-                    
+
                     if(std::tolower(*c) == std::tolower(*d)) {
                         if(exists) {
                             multiple_instances = true;
                             break;
                         }
-                        
+
                         first_instance = i;
                         exists = true;
                     }
                 }
-                
+
                 if(!exists) {
                     throw std::exception();
                 }
-                
+
                 if(multiple_instances) {
                     char warning[512];
                     std::snprintf(warning, sizeof(warning), "%s:%zu:%zu: warning: multiple instances of %s '%s' found (first instance is %zu)", n.file, n.line, n.column, HEK::ScenarioScriptValueType_to_string_pretty(new_node.type), name, first_instance);
                     warnings.emplace_back(warning);
                 }
-                
+
                 return first_instance;
             };
-            
+
             // Make sure the thing it refers to exists. If so, save the index.
             try {
                 if(n.node_type == RIATNodeTypeC::RIAT_StaticValue) {
@@ -314,26 +314,26 @@ namespace Invader::Parser {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_RECORDING:
                             new_node.data.short_int = find_thing(scenario.recorded_animations, n.string_data);
                             break;
-                            
+
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_AI_COMMAND_LIST:
                             new_node.data.short_int = find_thing(scenario.command_lists, n.string_data);
                             break;
-                            
+
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CONVERSATION:
                             new_node.data.short_int = find_thing(scenario.ai_conversations, n.string_data);
                             break;
-                            
+
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_DEVICE_GROUP:
                             new_node.data.short_int = find_thing(scenario.device_groups, n.string_data);
                             break;
-                            
+
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_TRIGGER_VOLUME:
                             new_node.data.short_int = find_thing(scenario.trigger_volumes, n.string_data);
                             break;
-                            
+
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_AI: {
                             const char *sub_encounter = nullptr;
-                            
+
                             // AI can be a encounter/squad or encounter/platoon or just encounter
                             for(const char *c = n.string_data; *c != 0; c++) {
                                 if(*c == '/') {
@@ -341,7 +341,7 @@ namespace Invader::Parser {
                                     break;
                                 }
                             }
-                            
+
                             /*
                              * XX XX XXXX
                              * ^  ^  ^
@@ -351,13 +351,13 @@ namespace Invader::Parser {
                              */
                             if(sub_encounter != nullptr) {
                                 std::string encounter_name(n.string_data, sub_encounter - 1 - n.string_data);
-                                
+
                                 std::size_t encounter_index = find_thing(scenario.encounters, encounter_name.c_str());
                                 auto &encounter = scenario.encounters[encounter_index];
-                                
+
                                 std::size_t sub_index;
                                 std::uint32_t bitfield_base;
-                                
+
                                 try {
                                     sub_index = find_thing(encounter.squads, sub_encounter);
                                     bitfield_base = 0x80000000;
@@ -371,16 +371,16 @@ namespace Invader::Parser {
                                         throw;
                                     }
                                 }
-                                
+
                                 new_node.data.long_int = static_cast<std::int32_t>(bitfield_base | ((sub_index & 0xFF) << 16) | (encounter_index & 0xFFFF));
                             }
                             else {
                                 new_node.data.long_int = find_thing(scenario.encounters, n.string_data);
                             }
-                            
+
                             break;
                         }
-                            
+
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_CUTSCENE_TITLE:
                             new_node.data.short_int = find_thing(scenario.cutscene_titles, n.string_data);
                             break;
@@ -405,7 +405,7 @@ namespace Invader::Parser {
                             }
                             new_node.data.short_int = find_thing(hud_globals.waypoint_arrows, n.string_data);
                             break;
-                            
+
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_NAME:
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_LIST:
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT:
@@ -421,10 +421,10 @@ namespace Invader::Parser {
                         case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SCENERY_NAME: {
                             auto index = find_thing(scenario.object_names, n.string_data);
                             new_node.data.short_int = index;
-                            
+
                             if(index != SIZE_MAX) {
                                 bool something_corresponds_to_this = false;
-                                
+
                                 auto check_thing = [&something_corresponds_to_this, &index](auto &what) {
                                     if(something_corresponds_to_this) {
                                         return;
@@ -435,7 +435,7 @@ namespace Invader::Parser {
                                         }
                                     }
                                 };
-                                
+
                                 check_thing(scenario.bipeds);
                                 check_thing(scenario.vehicles);
                                 check_thing(scenario.scenery);
@@ -445,7 +445,7 @@ namespace Invader::Parser {
                                 check_thing(scenario.controls);
                                 check_thing(scenario.light_fixtures);
                                 check_thing(scenario.sound_scenery);
-                                
+
                                 if(!something_corresponds_to_this) {
                                     for(auto &c : scenario.ai_conversations) {
                                         for(auto &p : c.participants) {
@@ -456,17 +456,17 @@ namespace Invader::Parser {
                                         }
                                     }
                                 }
-                                
+
                                 do_object_index_check_now:
                                 if(!something_corresponds_to_this) {
                                     eprintf_error("%s:%zu:%zu: error: '%s' is an object name that does not correspond to any object or AI conversation and is thus invalid for use in scripts", n.file, n.line, n.column, n.string_data);
                                     throw InvalidTagDataException();
                                 }
                             }
-                            
+
                             break;
                         }
-                        
+
                         default:
                             break;
                     }
@@ -480,10 +480,10 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
         }
-        
+
         using node_table_header_tag_fmt = Invader::Parser::ScenarioScriptNodeTable::struct_big;
         using node_tag_fmt = std::remove_reference<decltype(*into_nodes.data())>::type::struct_big;
-        
+
         // Initialize the syntax data and write to it
         std::vector<std::byte> syntax_data(sizeof(node_table_header_tag_fmt) + node_limit * sizeof(node_tag_fmt));
         auto &table_output = *reinterpret_cast<node_table_header_tag_fmt *>(syntax_data.data());
@@ -501,10 +501,10 @@ namespace Invader::Parser {
             assert(sizeof(node_output[node_index]) == output.size());
             std::memcpy(&node_output[node_index], output.data(), output.size());
         }
-        
+
         std::size_t script_count = scripts.size();
         std::size_t global_count = globals.size();
-        
+
         // Set up scripts
         decltype(scenario.scripts) new_scripts;
         new_scripts.resize(script_count);
@@ -512,11 +512,11 @@ namespace Invader::Parser {
             auto &new_script = new_scripts[s];
             const auto &cmp_script = scripts[s];
             std::strncpy(new_script.name.string, cmp_script.name, sizeof(new_script.name.string) - 1);
-            
+
             new_script.return_type = static_cast<decltype(new_script.return_type)>(cmp_script.return_type);
             new_script.script_type = static_cast<decltype(new_script.script_type)>(cmp_script.script_type);
             new_script.root_expression_index = format_index_to_id(cmp_script.first_node);
-            
+
             // Add each script parameter
             for(auto p : result.get_script_parameters_for_script(cmp_script)) {
                 auto &new_parameter = new_script.parameters.emplace_back();
@@ -524,24 +524,24 @@ namespace Invader::Parser {
                 new_parameter.return_type = static_cast<decltype(new_parameter.return_type)>(p.value_type);
             }
         }
-        
-        
+
+
         // Set up references
         std::list<std::pair<File::TagFilePath, std::size_t>> new_references_array;
         for(std::size_t n = 0; n < node_count; n++) {
             auto &node = nodes[n];
-            
+
             // Skip non-primitives/globals
             if(node.node_type != RIATNodeTypeC::RIAT_StaticValue) {
                 continue;
             }
-            
+
             // Check if we know the group
             auto group = script_value_type_to_fourcc(static_cast<HEK::ScenarioScriptValueType>(node.value_type));
             if(!group.has_value()) {
                 continue;
             }
-            
+
             // Add it if we don't have it
             auto new_path = File::TagFilePath(File::halo_path_to_preferred_path(node.string_data), *group);
             bool is_found = false;
@@ -555,16 +555,16 @@ namespace Invader::Parser {
                 new_references_array.emplace_back(new_path, n);
             }
         }
-        
+
         // Resolve object references
         decltype(scenario.references) new_references;
         new_references.reserve(new_references_array.size());
         for(auto &r : new_references_array) {
             auto &[path, node_index] = r;
             auto &n = nodes[node_index];
-            
+
             bool resolved = false;
-            
+
             if(!resolved) {
                 try {
                     auto resolve_maybe = [&tags_directories, &r]() -> bool {
@@ -574,7 +574,7 @@ namespace Invader::Parser {
                         r.first.fourcc = fourcc;
                         return resolve_maybe();
                     };
-                    
+
                     if(path.fourcc == HEK::TAG_FOURCC_OBJECT) {
                         for(auto &g : OBJECT_FOURCCS) {
                             if((resolved = resolve_with_fourcc_maybe(g))) {
@@ -591,13 +591,13 @@ namespace Invader::Parser {
                 }
                 catch(std::exception &) {}
             }
-            
+
             // See if it has the tag group explicitly mentioned
             if(!resolved) {
                 auto tfp_maybe = File::split_tag_class_extension(r.first.path);
                 if(tfp_maybe.has_value()) {
                     auto &tfp = *tfp_maybe;
-                    
+
                     // Make sure the extension makes sense
                     bool fourcc_matches = false;
                     if(tfp.fourcc != path.fourcc) {
@@ -612,7 +612,7 @@ namespace Invader::Parser {
                     else {
                         fourcc_matches = true;
                     }
-                    
+
                     // Warn if so, but add it
                     if(fourcc_matches) {
                         if((resolved = File::tag_path_to_file_path(tfp, tags_directories).has_value())) {
@@ -624,10 +624,10 @@ namespace Invader::Parser {
                     }
                 }
             }
-            
+
             // Is it "none"?
             bool skip_adding = false;
-            
+
             if(!resolved && r.first.path == "none") {
                 resolved = true;
                 char w[1024];
@@ -636,12 +636,12 @@ namespace Invader::Parser {
                 path = r.first;
                 skip_adding = true;
             }
-            
+
             if(!resolved) {
                 eprintf_error("%s:%zu:%zu: error: can't find %s tag \"%s\"", n.file, n.line, n.column, HEK::tag_fourcc_to_extension(path.fourcc), path.path.c_str());
                 throw InvalidTagDataException();
             }
-            
+
             // Add it
             if(!skip_adding) {
                 auto &ref = new_references.emplace_back();
@@ -649,7 +649,7 @@ namespace Invader::Parser {
                 ref.reference.tag_fourcc = path.fourcc;
             }
         }
-        
+
         // Set up globals
         decltype(scenario.globals) new_globals;
         new_globals.resize(global_count);
@@ -657,13 +657,13 @@ namespace Invader::Parser {
             auto &new_global = new_globals[g];
             const auto &cmp_global = globals[g];
             std::strncpy(new_global.name.string, cmp_global.name, sizeof(new_global.name.string) - 1);
-            
+
             new_global.type = static_cast<decltype(new_global.type)>(cmp_global.value_type);
             new_global.initialization_expression_index = format_index_to_id(cmp_global.first_node);
         }
-        
+
         string_data.resize(string_data.size() + 1024);
-        
+
         // Clear out the script data
         scenario.scripts = std::move(new_scripts);
         scenario.globals = std::move(new_globals);
@@ -672,12 +672,12 @@ namespace Invader::Parser {
         scenario.script_syntax_data = std::move(syntax_data);
         scenario.references = std::move(new_references);
     }
-    
+
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         workload.jason_jones = (this->flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_DO_NOT_APPLY_BUNGIE_CAMPAIGN_TAG_PATCHES) == 0;
-        
+
         merge_child_scenarios(workload, tag_index, *this);
-        
+
         if(!workload.cache_file_type.has_value()) {
             workload.cache_file_type = this->type;
             workload.demo_ui = this->flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_USE_DEMO_UI;
@@ -687,7 +687,7 @@ namespace Invader::Parser {
         check_palettes(workload, tag_index, *this);
         fix_script_data(workload, tag_index, struct_index, *this);
         fix_bsp_transitions(workload, tag_index, *this);
-        
+
         // Ensure we have the necessary things for singleplayer/multiplayer
         switch(this->type) {
             case HEK::ScenarioType::SCENARIO_TYPE_SINGLEPLAYER: {
@@ -712,12 +712,12 @@ namespace Invader::Parser {
                     std::list<std::size_t> race;
                     std::list<std::size_t> oddball;
                 } all_spawns;
-                
+
                 auto player_starting_location_count = this->player_starting_locations.size();
-                
+
                 for(std::size_t i = 0; i < player_starting_location_count; i++) {
                     auto &s = this->player_starting_locations[i];
-                    
+
                     auto add_for_type = [&s, &i, &all_spawns](auto t, auto add_for_type) -> void {
                         switch(t) {
                             case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_SLAYER:
@@ -742,10 +742,10 @@ namespace Invader::Parser {
                                 break;
                             case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_GAMES:
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_CTF, add_for_type);
-                                // fallthrough
+                                [[fallthrough]];
                             case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_EXCEPT_CTF:
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_RACE, add_for_type);
-                                // fallthrough
+                                [[fallthrough]];
                             case HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ALL_EXCEPT_RACE_AND_CTF:
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_SLAYER, add_for_type);
                                 add_for_type(HEK::ScenarioSpawnType::SCENARIO_SPAWN_TYPE_ODDBALL, add_for_type);
@@ -755,13 +755,13 @@ namespace Invader::Parser {
                                 break;
                         };
                     };
-                    
+
                     add_for_type(s.type_0, add_for_type);
                     add_for_type(s.type_1, add_for_type);
                     add_for_type(s.type_2, add_for_type);
                     add_for_type(s.type_3, add_for_type);
                 }
-                
+
                 all_spawns.ctf_red.sort();
                 all_spawns.ctf_blue.sort();
                 all_spawns.slayer.sort();
@@ -775,31 +775,31 @@ namespace Invader::Parser {
                 all_spawns.king.unique();
                 all_spawns.race.unique();
                 all_spawns.oddball.unique();
-                
+
                 #define COMPLAIN_IF_NOT_ENOUGH(what, name) if(all_spawns.what.empty()) { \
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "There are no " name " spawns."); \
                 } \
                 else if(all_spawns.what.size() < 16) { \
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "There are %zu/16 " name " spawns. This gametype may have spawning issues.", all_spawns.what.size()); \
                 }
-                
+
                 COMPLAIN_IF_NOT_ENOUGH(ctf_red, "red CTF")
                 COMPLAIN_IF_NOT_ENOUGH(ctf_blue, "blue CTF")
                 COMPLAIN_IF_NOT_ENOUGH(slayer, "Slayer")
                 COMPLAIN_IF_NOT_ENOUGH(king, "King of the Hill")
                 COMPLAIN_IF_NOT_ENOUGH(race, "Race")
                 COMPLAIN_IF_NOT_ENOUGH(oddball, "Oddball")
-                
+
                 #undef COMPLAIN_IF_NOT_ENOUGH
-                
+
                 // TODO: Complain about gametype flags
-                
+
                 break;
             }
             default: break;
         }
     }
-    
+
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
         // BSP transitions
         std::size_t trigger_volume_count = scenario.trigger_volumes.size();
@@ -833,13 +833,13 @@ namespace Invader::Parser {
             }
         }
     }
-    
+
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
         auto &build_parameters = *workload.get_build_parameters();
-            
+
         if(!build_parameters.use_tags_for_script_data) {
             scenario.source_files.clear();
-            
+
             // Data directory?
             const auto &data_directory = build_parameters.data_directory;
             std::error_code ec;
@@ -847,15 +847,15 @@ namespace Invader::Parser {
                 eprintf_error("Data directory \"%s\" does not exist", data_directory.string().c_str());
                 throw FailedToOpenFileException();
             }
-            
+
             std::vector<std::filesystem::path> all_scripts_to_compile;
-            
+
             // Add global_scripts if present
             auto global_scripts = data_directory / "global_scripts.hsc";
             if(std::filesystem::exists(global_scripts, ec)) {
                 all_scripts_to_compile.emplace_back(std::move(global_scripts));
             }
-            
+
             // Add all scripts if present
             auto scenario_script_directory = (data_directory / File::halo_path_to_preferred_path(build_parameters.scenario)).parent_path() / "scripts";
             if(std::filesystem::is_directory(scenario_script_directory, ec)) {
@@ -868,7 +868,7 @@ namespace Invader::Parser {
                     }
                 }
             }
-            
+
             // Add all the things
             for(const auto &i : all_scripts_to_compile) {
                 auto p = i.filename().replace_extension().string();
@@ -878,7 +878,7 @@ namespace Invader::Parser {
                     throw InvalidTagDataException();
                 }
                 std::strncpy(source_file.name.string, p.c_str(), sizeof(source_file.name.string) - 1);
-                
+
                 // Open it?
                 auto script_data = File::open_file(i);
                 if(script_data.has_value()) {
@@ -892,7 +892,7 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         // If we have scripts, do stuff
         if((scenario.scripts.size() > 0 || scenario.globals.size() > 0) && scenario.source_files.size() == 0) {
             if(!workload.disable_error_checking) {
@@ -901,11 +901,11 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
         }
-        
+
         // Recompile scripts
         try {
             std::vector<std::string> warnings;
-            
+
             compile_scripts(scenario, HEK::GameEngineInfo::get_game_engine_info(build_parameters.details.build_game_engine), warnings, build_parameters.tags_directories);
             for(auto &w : warnings) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script compilation warning: %s", w.c_str());
@@ -915,22 +915,22 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to compile scripts: %s", e.what());
             throw;
         }
-        
+
         // Check for stubs and warn
         for(auto &script : scenario.scripts) {
             if(script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Script '%s' is a stub script but has not been replaced by a static script. It will function as a static script, instead.", script.name.string);
             }
         }
-        
+
         // Flip the endianness
         auto t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
         *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
         t.first_element_ptr = 0;
-        
+
         auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
         auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
-        
+
         // And now flip the endianness of the nodes
         std::size_t max_element_count = t.maximum_count;
         for(std::size_t i = 0; i < max_element_count; i++) {
@@ -942,12 +942,12 @@ namespace Invader::Parser {
         script_data_struct.data = std::move(scenario.script_syntax_data);
         scenario.script_syntax_data.clear();
         const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
-        
+
         auto *syntax_data = script_data_struct.data.data();
         auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
         std::uint16_t element_count = table_header.size.read();
         auto *nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(&table_header + 1);
-        
+
         // Get all references
         for(auto &r : scenario.references) {
             try {
@@ -970,23 +970,23 @@ namespace Invader::Parser {
             if(!group.has_value()) {
                 continue;
             }
-            
+
             auto *path = string_data + node.string_offset.read();
-            
+
             std::optional<std::size_t> node_object_index;
-            
+
             // Look for it
             for(auto &r : scenario.references) {
                 if(r.reference.path == path) {
                     if(*group == HEK::TagFourCC::TAG_FOURCC_OBJECT) {
                         bool should_continue = true;
-                        
+
                         for(auto &n : OBJECT_FOURCCS) {
                             if(!(should_continue = (r.reference.tag_fourcc == n))) {
                                 break;
                             }
                         }
-                        
+
                         if(should_continue) {
                             continue;
                         }
@@ -998,7 +998,7 @@ namespace Invader::Parser {
                     break;
                 }
             }
-            
+
             // Explicit?
             if(!node_object_index.has_value()) {
                 auto path_split = File::split_tag_class_extension(path);
@@ -1006,12 +1006,12 @@ namespace Invader::Parser {
                     for(auto &r : scenario.references) {
                         if(r.reference.tag_fourcc == path_split->fourcc && r.reference.path == path_split->path) {
                             node_object_index = r.reference.tag_id.index;
-                            break; 
+                            break;
                         }
                     }
                 }
             }
-            
+
             // Did we do it?
             if(node_object_index.has_value()) {
                 // If we found it, set it
@@ -1021,12 +1021,12 @@ namespace Invader::Parser {
                 new_dep.tag_id_only = true;
                 new_dep.tag_index = *node_object_index;
             }
-            
+
             // None?
             else if(std::strcmp(path, "none") == 0) {
                 node.data = HEK::TagID::null_tag_id();
             }
-            
+
             // Error!
             else {
                 eprintf_error("Couldn't find \"%s.%s\" in the references array. This is a bug. Please report it!\n", path, HEK::tag_fourcc_to_extension(*group));
@@ -1042,7 +1042,7 @@ namespace Invader::Parser {
         new_ptr.struct_index = workload.structs.size();
         workload.structs.emplace_back(std::move(script_data_struct));
     }
-    
+
     static void check_palettes(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
         // Check for unused stuff
         std::size_t name_count = scenario.object_names.size();
@@ -1114,7 +1114,7 @@ namespace Invader::Parser {
         CHECK_PALETTE_AND_SPAWNS("Sound scenery", sound_scenery, sound_scenery_palette, OBJECT_TYPE_SOUND_SCENERY);
 
         #undef CHECK_PALETTE_AND_SPAWNS
-        
+
         // Next, let's make sure "set new name" is used
         for(auto &c : scenario.ai_conversations) {
             for(auto &p : c.participants) {
@@ -1140,11 +1140,11 @@ namespace Invader::Parser {
             }
             else if(used > 1 && !workload.disable_error_checking) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
-                
+
                 // Put together a list to help the user track everything down
                 char found[1024] = {};
                 std::size_t p = 0;
-                
+
                 std::size_t f = 0;
                 for(auto &u : used_arr) {
                     // Don't show more than 3 elements
@@ -1159,14 +1159,14 @@ namespace Invader::Parser {
                         }
                     }
                 }
-                
+
                 // List everything off
                 eprintf_warn_lesser("    - objects with this name: [%s]", found);
                 throw InvalidTagDataException();
             }
         }
     }
-    
+
     static void merge_child_scenario(Scenario &base_scenario, const Scenario &scenario_to_merge, BuildWorkload &workload, std::size_t tag_index, const char *child_scenario_path) {
         #define MERGE_ARRAY(what, condition) for(auto &merge : scenario_to_merge.what) { \
             bool can_merge = true; \
@@ -1180,7 +1180,7 @@ namespace Invader::Parser {
                 base_scenario.what.emplace_back(merge); \
             } \
         }
-        
+
         MERGE_ARRAY(child_scenarios, true);
         MERGE_ARRAY(functions, true);
         MERGE_ARRAY(comments, true);
@@ -1202,10 +1202,10 @@ namespace Invader::Parser {
         MERGE_ARRAY(cutscene_titles, merge.name != base.name);
         MERGE_ARRAY(source_files, merge.name != base.name);
         MERGE_ARRAY(decal_palette, merge.reference.path != base.reference.path || merge.reference.tag_fourcc != base.reference.tag_fourcc);
-        
+
         // Merge palettes
         #define MERGE_PALETTE(what) MERGE_ARRAY(what, merge.name.path != base.name.path || merge.name.tag_fourcc != base.name.tag_fourcc)
-        
+
         MERGE_PALETTE(scenery_palette);
         MERGE_PALETTE(biped_palette);
         MERGE_PALETTE(vehicle_palette);
@@ -1215,7 +1215,7 @@ namespace Invader::Parser {
         MERGE_PALETTE(control_palette);
         MERGE_PALETTE(light_fixture_palette);
         MERGE_PALETTE(sound_scenery_palette);
-        
+
         // Make some lambdas for finding stuff quickly
         #define TRANSLATE_PALETTE(what, match_comparison) [&base_scenario, &scenario_to_merge, &workload, &tag_index, &child_scenario_path](HEK::Index old_index) -> HEK::Index { \
             /* If we're null, return null */ \
@@ -1257,7 +1257,7 @@ namespace Invader::Parser {
         }
         auto translate_object_name = TRANSLATE_PALETTE(object_names, (merge.name == base.name));
         auto translate_device_group = TRANSLATE_PALETTE(device_groups, (merge.name == base.name));
-        
+
         // Merge AI conversations
         for(auto &aic : scenario_to_merge.ai_conversations) {
             auto &new_aic = base_scenario.ai_conversations.emplace_back(aic);
@@ -1269,7 +1269,7 @@ namespace Invader::Parser {
 
         #undef MERGE_PALETTE
         #undef MERGE_ARRAY
-        
+
         #define MERGE_OBJECTS_ALL(what, what_palette, ...) { \
             auto object_count = scenario_to_merge.what.size(); \
             auto translate_palette = TRANSLATE_PALETTE(what_palette, (merge.name.path == base.name.path && merge.name.tag_fourcc == base.name.tag_fourcc)); \
@@ -1280,13 +1280,13 @@ namespace Invader::Parser {
                 __VA_ARGS__ \
             } \
         }
-        
+
         #define MERGE_OBJECTS(what, what_palette) MERGE_OBJECTS_ALL(what, what_palette, {})
         #define MERGE_DEVICES(what, what_palette) MERGE_OBJECTS_ALL(what, what_palette, { \
             new_element.power_group = translate_device_group(new_element.power_group); \
             new_element.position_group = translate_device_group(new_element.position_group); \
         })
-        
+
         MERGE_OBJECTS(scenery,scenery_palette);
         MERGE_OBJECTS(bipeds,biped_palette);
         MERGE_OBJECTS(vehicles,vehicle_palette);
@@ -1296,10 +1296,10 @@ namespace Invader::Parser {
         MERGE_DEVICES(controls,control_palette);
         MERGE_DEVICES(light_fixtures,light_fixture_palette);
         MERGE_OBJECTS(sound_scenery,sound_scenery_palette);
-        
+
         #undef MERGE_OBJECTS
         #undef MERGE_OBJECTS_ALL
-        
+
         // Decals
         auto translate_decal_palette = TRANSLATE_PALETTE(decal_palette, merge.reference.tag_fourcc == base.reference.tag_fourcc && merge.reference.path == base.reference.path);
         for(auto &decal : scenario_to_merge.decals) {
@@ -1307,14 +1307,14 @@ namespace Invader::Parser {
             auto &new_decal = base_scenario.decals.emplace_back(decal);
             new_decal.decal_type = translate_decal_palette(new_decal.decal_type);
         }
-        
+
         // AI stuff
         auto translate_actor_palette = TRANSLATE_PALETTE(actor_palette, (merge.reference.tag_fourcc == base.reference.tag_fourcc && merge.reference.path == base.reference.path));
         auto translate_animation_palette = TRANSLATE_PALETTE(ai_animation_references, merge.animation_name == base.animation_name);
         auto translate_command_list = TRANSLATE_PALETTE(command_lists, merge.name == base.name);
         auto translate_recording = TRANSLATE_PALETTE(ai_recording_references, merge.recording_name == base.recording_name);
         auto translate_script_reference = TRANSLATE_PALETTE(ai_script_references, merge.script_name == base.script_name);
-        
+
         // Merge command lists
         for(auto &command_list : scenario_to_merge.command_lists) {
             // First, make sure we don't have this in here already
@@ -1329,7 +1329,7 @@ namespace Invader::Parser {
             if(exists) {
                 continue;
             }
-            
+
             // Add our new list
             auto &new_command_list = base_scenario.command_lists.emplace_back(command_list);
             for(auto &command : new_command_list.commands) {
@@ -1339,7 +1339,7 @@ namespace Invader::Parser {
                 command.script = translate_script_reference(command.script);
             }
         }
-        
+
         // Merge encounters
         for(auto &encounter : scenario_to_merge.encounters) {
             // First, make sure we don't have this in here already
@@ -1354,7 +1354,7 @@ namespace Invader::Parser {
             if(exists) {
                 continue;
             }
-            
+
             // Add our new encounter
             auto &new_encounter = base_scenario.encounters.emplace_back(encounter);
             for(auto &squad : new_encounter.squads) {
@@ -1368,7 +1368,7 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         #undef TRANSLATE_PALETTE
     }
 
@@ -1378,12 +1378,12 @@ namespace Invader::Parser {
             // Let's begin by adding this scenario to the list (in case we reference ourself)
             std::vector<std::string> merged_scenarios;
             merged_scenarios.emplace_back(workload.tags[tag_index].path);
-            
+
             // Take the scenario off the top
             while(scenario.child_scenarios.size()) {
                 // Get the scenario
                 auto first_scenario = scenario.child_scenarios[0].child_scenario;
-                
+
                 if(!first_scenario.path.empty()) {
                     // If this isn't even a scenario tag... what
                     if(first_scenario.tag_fourcc != TagFourCC::TAG_FOURCC_SCENARIO) {
@@ -1391,7 +1391,7 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
                         throw InvalidTagDataException();
                     }
-                    
+
                     // Make sure we haven't done it already
                     for(auto &m : merged_scenarios) {
                         // This should fail even if we aren't checking for errors because this is invalid
@@ -1401,10 +1401,10 @@ namespace Invader::Parser {
                             throw InvalidTagDataException();
                         }
                     }
-                    
+
                     // Add it to the list
                     merged_scenarios.emplace_back(first_scenario.path);
-                    
+
                     // Find it
                     char file_path_cstr[1024];
                     std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_fourcc_to_extension(first_scenario.tag_fourcc));
@@ -1413,14 +1413,14 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Child scenario %s not found", file_path_cstr);
                         throw InvalidTagDataException();
                     }
-                    
+
                     // Open it
                     auto data = File::open_file(*file_path);
                     if(!data.has_value()) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to open %s", file_path->string().c_str());
                         throw InvalidTagDataException();
                     }
-                    
+
                     // Parse and merge it
                     try {
                         auto child = Scenario::parse_hek_tag_file(data->data(), data->size());
@@ -1437,7 +1437,7 @@ namespace Invader::Parser {
                         throw;
                     }
                 }
-                
+
                 // Delete the scenario
                 scenario.child_scenarios.erase(scenario.child_scenarios.begin());
             }
@@ -1450,7 +1450,7 @@ namespace Invader::Parser {
         this->up_time *= TICK_RATE;
         this->up_time += this->fade_in_time;
     }
-    
+
     void ScenarioFiringPosition::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->cluster_index = NULL_INDEX;
         this->surface_index = NULL_INDEX;

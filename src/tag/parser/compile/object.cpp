@@ -8,8 +8,8 @@
 #include "hud_interface.hpp"
 
 namespace Invader::Parser {
-    
-    
+
+
     template <typename T> static void fix_render_bounding_radius(T &tag) {
         tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
@@ -161,14 +161,14 @@ namespace Invader::Parser {
         compile_object(*this, workload, tag_index);
         compile_unit(*this);
         this->cosine_stationary_turning_threshold = std::cos(this->stationary_turning_threshold);
-        
+
         if(this->crouch_transition_time == 0.0F) {
             this->crouch_camera_velocity = 1.0F;
         }
         else {
             this->crouch_camera_velocity = TICK_RATE_RECIPROCOL / this->crouch_transition_time;
         }
-        
+
         this->cosine_maximum_slope_angle = static_cast<float>(std::cos(this->maximum_slope_angle));
         this->negative_sine_downhill_falloff_angle = static_cast<float>(-std::sin(this->downhill_falloff_angle));
         this->negative_sine_downhill_cutoff_angle = static_cast<float>(-std::sin(this->downhill_cutoff_angle));
@@ -266,7 +266,7 @@ namespace Invader::Parser {
 
         this->error_acceleration_rate = this->error_acceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->error_acceleration_time);
         this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : (TICK_RATE_RECIPROCOL / this->error_deceleration_time);
-        
+
         this->flags |= 0x10000;
 
         // Jason Jones the accuracy of the weapon
@@ -330,7 +330,7 @@ namespace Invader::Parser {
                     if(ignore_shader_resources) {
                         break;
                     }
-                    // fallthrough
+                    [[fallthrough]];
                 case TagFourCC::TAG_FOURCC_GBXMODEL:
                     recursively_get_all_predicted_resources_from_struct(workload, *dt.base_struct, resources, false);
                     break;
@@ -720,7 +720,7 @@ namespace Invader::Parser {
         validate_model_animation_checksum(workload, tag_index, this->model.tag_id, this->animation_graph.tag_id);
         validate_collision_model_regions(workload, tag_index, this->model.tag_id, this->collision_model.tag_id);
     }
-    
+
     template<typename From, typename To> static void convert_object(const From &from, To &to) {
         to.flags = from.flags;
         to.bounding_radius = from.bounding_radius;
@@ -746,7 +746,7 @@ namespace Invader::Parser {
         to.functions = from.functions;
         to.change_colors = from.change_colors;
     }
-    
+
     template<typename From, typename To> static void convert_unit(const From &from, To &to) {
         convert_object(from, to);
         to.unit_flags = from.unit_flags;
@@ -803,7 +803,7 @@ namespace Invader::Parser {
         to.weapons = from.weapons;
         to.seats = from.seats;
     }
-    
+
     void convert_object(const ParserStruct &from, ParserStruct &to) {
         auto convert_unit_maybe = [](auto *a, auto *b) -> bool {
             if(a && b) {
@@ -823,7 +823,7 @@ namespace Invader::Parser {
                 return false;
             }
         };
-        
+
 #define ATTEMPT_CONVERT_TYPE(FROM) (\
                                    convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Biped *>(&to)) ||\
                                    convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Vehicle *>(&to)) ||\
@@ -838,8 +838,8 @@ namespace Invader::Parser {
                                    convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::Placeholder *>(&to)) ||\
                                    convert_object_maybe(dynamic_cast<const FROM *>(&from), dynamic_cast<Parser::SoundScenery *>(&to))\
                                    )
-        
-        
+
+
         if(convert_unit_maybe(dynamic_cast<const Parser::Biped *>(&from), dynamic_cast<Parser::Vehicle *>(&to)) ||
            convert_unit_maybe(dynamic_cast<const Parser::Vehicle *>(&from), dynamic_cast<Parser::Biped *>(&to)) ||
            ATTEMPT_CONVERT_TYPE(Parser::Biped) ||
@@ -856,7 +856,7 @@ namespace Invader::Parser {
            ATTEMPT_CONVERT_TYPE(Parser::SoundScenery)) {
             return;
         }
-        
+
         eprintf_error("convert_object(): Conversion error between %s and %s! This is a bug!", from.struct_name(), to.struct_name());
         std::terminate();
     }

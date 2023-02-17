@@ -29,7 +29,7 @@ struct Input {
     std::optional<std::filesystem::path> maps;
     std::vector<std::filesystem::path> tags;
     bool ignore_resource_maps = false;
-    
+
     std::vector<File::TagFilePath> tag_paths;
     std::vector<File::TagFile> virtual_directory;
     std::unique_ptr<Map> map_data;
@@ -53,7 +53,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
 
 int main(int argc, const char **argv) {
     set_up_color_term();
-    
+
     using namespace Invader::HEK;
 
     struct CompareOptions {
@@ -88,27 +88,27 @@ int main(int argc, const char **argv) {
         CommandLineOption("all", 'a', 0, "Only match if tags are in all inputs."),
         CommandLineOption("threads", 'j', 1, "Set the number of threads to use for comparison. Default: 1")
     };
-    
+
     static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
     static constexpr char USAGE[] = "[options] <-I <opts>> <-I <opts>> [<-I <opts>> ...]";
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CompareOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, compare_options, [](char opt, const auto &args, CompareOptions &compare_options) {
         static const char *CAN_ONLY_BE_USED_WITH_TAG_INPUT = "This option can only be used with a tag input.";
         static const char *CAN_ONLY_BE_USED_WITH_MAP_INPUT = "This option can only be used with a map input.";
-        
+
         bool top_option_is_tag_input = false;
         bool top_option_is_map_input = false;
-        
+
         if(compare_options.top_input) {
             top_option_is_tag_input = !compare_options.top_input->maps.has_value() && !compare_options.top_input->map.has_value();
             top_option_is_map_input = !compare_options.top_input->tags.size();
         }
-        
+
         switch(opt) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
-                
+
             case 'G':
                 if(!top_option_is_map_input) {
                     eprintf_error("%s", CAN_ONLY_BE_USED_WITH_MAP_INPUT);
@@ -126,7 +126,7 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-                
+
             case 'B':
                 if(std::strcmp(args[0], "any") == 0) {
                     compare_options.by_path = ByPath::BY_PATH_ANY;
@@ -142,16 +142,16 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-                
+
             case 'I':
                 close_input(compare_options);
                 compare_options.top_input = &compare_options.inputs.emplace_back();
                 break;
-                
+
             case 'v':
                 compare_options.verbose = true;
                 break;
-                
+
             case 'm':
                 if(!compare_options.top_input) {
                     eprintf_error("An input is required before setting a maps directory.");
@@ -167,19 +167,19 @@ int main(int argc, const char **argv) {
                 }
                 compare_options.top_input->maps = args[0];
                 break;
-                
+
             case 'f':
                 compare_options.functional = true;
                 break;
-                
+
             case 's':
                 compare_options.search.emplace_back(File::preferred_path_to_halo_path(args[0]));
                 break;
-                
+
             case 'e':
                 compare_options.search_exclude.emplace_back(File::preferred_path_to_halo_path(args[0]));
                 break;
-                
+
             case 'M':
                 if(!compare_options.top_input) {
                     eprintf_error("An input is required before setting a maps directory.");
@@ -195,7 +195,7 @@ int main(int argc, const char **argv) {
                 }
                 compare_options.top_input->map = args[0];
                 break;
-                
+
             case 't':
                 if(!compare_options.top_input) {
                     eprintf_error("An input is required before setting a tags directory.");
@@ -207,15 +207,15 @@ int main(int argc, const char **argv) {
                 }
                 compare_options.top_input->tags.emplace_back(args[0]);
                 break;
-                
+
             case 'p':
                 compare_options.precision = true;
                 break;
-                
+
             case 'a':
                 compare_options.match_all = true;
                 break;
-                
+
             case 'S':
                 if(std::strcmp(args[0], "all") == 0) {
                     compare_options.show = Show::SHOW_ALL;
@@ -233,21 +233,21 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
-    
+
     // Make sure everything's valid
     if(compare_options.inputs.size() < 2) {
         eprintf_error("At least two inputs are required. Use -h for more information.");
         return EXIT_FAILURE;
     }
-    
+
     // Default 0 to 1
     if(!compare_options.job_count.has_value()) {
         compare_options.job_count = 1;
     }
-    
+
     // Can we close it?
     close_input(compare_options);
-    
+
     // Automatically make up maps directories for any map when necessary, then open their respective resources
     for(auto &i : compare_options.inputs) {
         // Check if it matches our filters
@@ -256,11 +256,11 @@ int main(int argc, const char **argv) {
                 i.tag_paths.emplace_back(std::move(path));
             }
         };
-            
+
         if(i.map.has_value()) {
             // If we don't have a maps directory explicitly set, use the current directory of the map
             auto maps = i.maps.value_or(std::filesystem::absolute(*i.map).parent_path());
-            
+
             // Load resource maps
             std::vector<std::byte> loc, bitmaps, sounds;
             if(i.maps.has_value() && !i.ignore_resource_maps) {
@@ -276,15 +276,15 @@ int main(int argc, const char **argv) {
                 bitmaps = open_if_present(*i.maps / "bitmaps.map");
                 sounds = open_if_present(*i.maps / "sounds.map");
             }
-        
+
             auto data = File::open_file(*i.map);
             if(!data.has_value()) {
                 eprintf_error("Failed to read %s", i.map->string().c_str());
                 return EXIT_FAILURE;
             }
-            
+
             auto &map = *(i.map_data = std::make_unique<Map>(Map::map_with_move(*std::move(data),std::move(bitmaps),std::move(loc),std::move(sounds))));
-            
+
             // Warn if we failed to open some resource maps
             if(!i.ignore_resource_maps) {
                 switch(map.get_cache_version()) {
@@ -292,7 +292,7 @@ int main(int argc, const char **argv) {
                         if(map.get_data_length(Invader::Map::DATA_MAP_LOC) == 0) {
                             eprintf_warn("Failed to find or read a loc.map");
                         }
-                        // fallthrough
+                        [[fallthrough]];
                     case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                     case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
                     case HEK::CacheFileEngine::CACHE_FILE_MCC_CEA:
@@ -307,7 +307,7 @@ int main(int argc, const char **argv) {
                         break;
                 }
             }
-            
+
             // Go through each tag and add them if we want to do the thing
             auto tag_count = map.get_tag_count();
             i.tag_paths.reserve(tag_count);
@@ -335,7 +335,7 @@ int main(int argc, const char **argv) {
         }
         i.tag_paths.shrink_to_fit();
     }
-    
+
     regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path, compare_options.verbose, *compare_options.job_count);
 }
 
@@ -343,9 +343,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
     // Find all tags we have in common first
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
-    
+
     #define CAN_COMPARE(by_path, path1, path2) ((by_path == ByPath::BY_PATH_SAME && path1 == path2) || (by_path == ByPath::BY_PATH_DIFFERENT && path1 != path2) || (by_path == ByPath::BY_PATH_ANY))
-    
+
     // Do this thing
     if(match_all) {
         auto &first_input = inputs[0];
@@ -392,7 +392,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     if(found) {
                         continue;
                     }
-                    
+
                     // Add it if it's present!
                     for(auto &tag2 : input2.tag_paths) {
                         if(tag2.fourcc != tag.fourcc) {
@@ -409,18 +409,18 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         }
     }
     tags.shrink_to_fit();
-    
+
     // Hold this for when we start outputting stuff
     bool show_all = (show & Show::SHOW_ALL) == Show::SHOW_ALL;
-    
+
     // Next, compare each tag
     std::size_t matched_count = 0;
     std::size_t mismatched_count = 0;
-    
+
     std::mutex tag_mutex;
     std::mutex log_mutex;
     std::size_t tag_index = 0;
-    
+
     std::vector<std::thread> threads;
     threads.reserve(job_count);
     for(std::size_t t = 0; t < job_count; t++) {
@@ -434,15 +434,15 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 auto &tag = (*tags)[*tag_index];
                 (*tag_index)++;
                 tag_mutex->unlock();
-                
+
                 std::vector<std::unique_ptr<Parser::ParserStruct>> structs;
                 std::vector<std::string> struct_paths;
                 std::vector<const Input *> struct_inputs;
-                
+
                 bool first_input = true;
                 bool only_finding_same_tag = true;
                 auto path_unsplit = File::halo_path_to_preferred_path(tag.path + "." + HEK::tag_fourcc_to_extension(tag.fourcc)); // combine this
-                
+
                 try {
                     // Go through each input
                     for(auto &i : *inputs) {
@@ -453,9 +453,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                             first_input = false; // set to false
                             by_path_copy = ByPath::BY_PATH_SAME;
                         }
-                        
+
                         only_finding_same_tag = by_path_copy == ByPath::BY_PATH_SAME;
-                        
+
                         // If it's a map, do this
                         if(i.map.has_value()) {
                             // First, extract it
@@ -466,7 +466,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                                 if(map_tag.get_tag_fourcc() == tag.fourcc && CAN_COMPARE(by_path_copy, tag.path, map_tag_path)) {
                                     // Lock the lock mutex in case issues arise when extracting the tag. This may slow down throughput a bit, but it's better than clobbering standard error while other stuff is logging.
                                     log_mutex->lock();
-                                    
+
                                     bool successful = false;
                                     try {
                                         auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
@@ -479,22 +479,22 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                                         eprintf_error("Cannot compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.fourcc), e.what());
                                         successful = false;
                                     }
-                                    
+
                                     // We can now unlock the mutex
                                     log_mutex->unlock();
-                                    
+
                                     // And if we failed, restart the whole loop
                                     if(!successful) {
                                         goto reset_loop;
                                     }
-                                            
+
                                     if(only_finding_same_tag) {
                                         break;
                                     }
                                 }
                             }
                         }
-                        
+
                         // If it's a tag, do this
                         else {
                             for(auto &vd : i.virtual_directory) {
@@ -502,16 +502,16 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                                 if(vd.tag_fourcc != tag.fourcc) {
                                     continue;
                                 }
-                                
+
                                 if(CAN_COMPARE(by_path_copy, path_unsplit, vd.tag_path)) {
                                     // Open it
                                     auto file = Invader::File::open_file(vd.full_path).value();
-                                    
+
                                     // Parse it
                                     structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
                                     struct_paths.emplace_back(File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path);
                                     struct_inputs.emplace_back(&i);
-                                    
+
                                     if(only_finding_same_tag) {
                                         break;
                                     }
@@ -526,25 +526,25 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     log_mutex->unlock();
                     continue;
                 }
-                
+
                 auto found_count = structs.size();
                 if(found_count < 2) {
                     continue;
                 }
-                
+
                 #define MATCHED(type) "%s%s.%s", show_all ? type ": " : ""
                 #define MATCHED_TO(type) "%s%s.%s, %s.%s", show_all ? type ": " : ""
                 #define MATCHED_TO_DIFFERENT_INPUT(type) "%s%s.%s, %s.%s (%zu)", show_all ? type ": " : ""
-                
+
                 auto &first_struct = structs[0];
-                
+
                 // Just for setting counter/debugging
                 auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs, &log_mutex](bool did_match, std::size_t i, const std::list<std::string> &other_messages = {}) {
                     auto *extension = HEK::tag_fourcc_to_extension(tag.fourcc);
                     auto other_path = File::halo_path_to_preferred_path(struct_paths[i]);
                     bool show_different_input = inputs->size() > 2; // only need to show differing inputs if we have more than two inputs
                     std::size_t input_of_other = 1;
-                    
+
                     // If we're using multiple inputs, get the input of the other thing
                     if(show_different_input) {
                         auto *other_input = struct_inputs[i];
@@ -555,7 +555,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                             }
                         }
                     }
-                    
+
                     if(did_match) {
                         if(show & Show::SHOW_MATCHED) {
                             log_mutex->lock();
@@ -595,28 +595,28 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         (*mismatched_count)++;
                     }
                 };
-                
+
                 if(functional) {
                     try {
                         auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
                             auto hdata = struct_v.generate_hek_tag_data(tag.fourcc);
                             std::vector<std::uint8_t> meme_data;
-                            
+
                             // Compile it
                             auto compiled = BuildWorkload::compile_single_tag(hdata.data(), hdata.size());
-                            
+
                             // Process each struct
                             for(auto &s : compiled.structs) {
                                 // Process struct data
                                 meme_data.insert(meme_data.end(), reinterpret_cast<const std::uint8_t *>(s.data.data()), reinterpret_cast<const std::uint8_t *>(s.data.data() + s.data.size()));
-                                
+
                                 // Process each dependency
                                 for(auto &d : s.dependencies) {
                                     char o[1024] = {};
                                     auto len = std::snprintf(o, sizeof(o), "D:%08zX->%08zX!", d.offset, d.tag_index);
                                     meme_data.insert(meme_data.end(), o, o + len);
                                 }
-                                
+
                                 // Process each pointer
                                 for(auto &p : s.pointers) {
                                     char o[1024] = {};
@@ -624,33 +624,33 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                                     meme_data.insert(meme_data.end(), o, o + len);
                                 }
                             }
-                            
+
                             // Process each tag
                             for(auto &t : compiled.tags) {
                                 char o[1024] = {};
                                 auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_fourcc_to_extension(t.tag_fourcc));
                                 meme_data.insert(meme_data.end(), o, o + len);
-                                
+
                                 // Raw data pointers
                                 for(auto &ad : t.asset_data) {
                                     std::snprintf(o, sizeof(o), "AD:%zu!", ad);
                                     meme_data.insert(meme_data.end(), o, o + len);
                                 }
                             }
-                            
+
                             // And of course we need the raw data and model data
                             for(auto &rd : compiled.raw_data) {
                                 meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*rd.begin()), reinterpret_cast<std::uint8_t *>(&*rd.end()));
                             }
-                            
+
                             // Lastly, model data
                             meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*compiled.uncompressed_model_vertices.begin()), reinterpret_cast<std::uint8_t *>(&*compiled.uncompressed_model_vertices.end()));
                             meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*compiled.compressed_model_vertices.begin()), reinterpret_cast<std::uint8_t *>(&*compiled.compressed_model_vertices.end()));
                             meme_data.insert(meme_data.end(), reinterpret_cast<std::uint8_t *>(&*compiled.model_indices.begin()), reinterpret_cast<std::uint8_t *>(&*compiled.model_indices.end()));
-                            
+
                             return meme_data;
                         };
-                        
+
                         auto first_meme = meme_up_struct(*first_struct);
                         for(std::size_t i = 1; i < found_count; i++) {
                             auto mms = meme_up_struct(*structs[i]);
@@ -668,7 +668,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         std::list<std::string> differences;
                         bool matched = false;
                         bool match_successful;
-                        
+
                         try {
                             matched = first_struct->compare(structs[i].get(), precision, true, verbose ? &differences : nullptr);
                             match_successful = true;
@@ -679,7 +679,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                             log_mutex->unlock();
                             match_successful = false;
                         }
-                        
+
                         if(match_successful) {
                             if(!show_all && verbose) {
                                 differences.emplace_back();
@@ -690,15 +690,15 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 }
             }
         };
-        
+
         threads.emplace_back(perform_comparison_thread, &inputs, &tags, by_path, show_all, show, &matched_count, &mismatched_count, functional, precision, verbose, &tag_mutex, &tag_index, &log_mutex);
     }
-    
+
     // Wait for threads to finish
     for(auto &t : threads) {
         t.join();
     }
-    
+
     // Show the total matched if we are showing both
     if(show_all) {
         auto total = matched_count + mismatched_count;
