@@ -4,23 +4,35 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Changed
-- invader-build: Now errors if item_collection tags have no items or has too high of a weight, as this can crash
-  the game.
+- invader-build: Now errors if item_collection tags have no items or has too
+  high of a weight, as this can crash the game.
+- invader-build: Now errors if compressed bitmaps have dimensions that are not
+  divisible by 4 and the target engine does not support it.
+
+### Fixed
+- invader-bitmap: Fixed the format being set incorrectly creating
+  non-power of two bitmaps that are compressed.
+- invader-compare: Fix resource maps not being loaded when comparing cache
+  files.
 
 ## [0.52.2] - 2022-12-20
 ### Fixed
-- invader-build: Fixed bounds check that was preventing maps with compressed model_animations from compiling.
+- invader-build: Fixed bounds check that was preventing maps with compressed
+  model_animations from compiling.
 
 ## [0.52.1] - 2022-12-17
 ### Fixed
-- invader-extract: Fixed extracting model_animations tags that were oddly compiled by tool.exe
+- invader-extract: Fixed extracting model_animations tags that were oddly
+  compiled by tool.exe
 
 ## [0.52.0] - 2022-12-13
 ### Changed
-- invader: Tag and Script definitions have been updated for the MCC December 2022 update.
+- invader: Tag and Script definitions have been updated for the MCC
+  December 2022 update.
 
 ### Fixed
-- invader-script and invader-build will nolonger allow sv_maxplayers in gbx-demo scripts as this crashes the game.
+- invader-script and invader-build will nolonger allow sv_maxplayers in
+  gbx-demo scripts as this crashes the game.
 
 ## [0.51.5] - 2022-11-29
 ### Changed
@@ -28,7 +40,8 @@ This is used for recording Invader's changes. This changelog is based on
   to it being invalid
 
 ### Fixed
-- invader-build and invader-extract will now correctly load resource maps for MCC targets.
+- invader-build and invader-extract will now correctly load resource maps for
+  MCC targets.
 
 ## [0.51.4] - 2022-11-15
 - RIAT: Fixed inequality operator not working on game_difficulty and team

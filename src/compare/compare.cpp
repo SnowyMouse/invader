@@ -260,10 +260,9 @@ int main(int argc, const char **argv) {
         if(i.map.has_value()) {
             // If we don't have a maps directory explicitly set, use the current directory of the map
             auto maps = i.maps.value_or(std::filesystem::absolute(*i.map).parent_path());
-
             // Load resource maps
             std::vector<std::byte> loc, bitmaps, sounds;
-            if(i.maps.has_value() && !i.ignore_resource_maps) {
+            if(!i.ignore_resource_maps) {
                 auto open_if_present = [](const std::filesystem::path &path) -> std::vector<std::byte> {
                     if(std::filesystem::exists(path)) {
                         return File::open_file(path).value_or(std::vector<std::byte>());
@@ -272,9 +271,9 @@ int main(int argc, const char **argv) {
                         return {};
                     }
                 };
-                loc = open_if_present(*i.maps / "loc.map");
-                bitmaps = open_if_present(*i.maps / "bitmaps.map");
-                sounds = open_if_present(*i.maps / "sounds.map");
+                loc = open_if_present(maps / "loc.map");
+                bitmaps = open_if_present(maps / "bitmaps.map");
+                sounds = open_if_present(maps / "sounds.map");
             }
 
             auto data = File::open_file(*i.map);
