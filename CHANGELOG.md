@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.52.3] - 2023-03-03
 ### Changed
 - invader-build: Now errors if item_collection tags have no items or has too
   high of a weight, as this can crash the game.
@@ -2467,5 +2467,6 @@ image as one bitmap
 [0.52.0]: https://github.com/SnowyMouse/invader/compare/0.51.5...0.52.0
 [0.52.1]: https://github.com/SnowyMouse/invader/compare/0.52.0...0.52.1
 [0.52.2]: https://github.com/SnowyMouse/invader/compare/0.52.1...0.52.2
+[0.52.3]: https://github.com/SnowyMouse/invader/compare/0.52.2...0.52.3
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.2...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.3...master
