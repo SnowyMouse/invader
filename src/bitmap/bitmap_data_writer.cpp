@@ -11,7 +11,7 @@ namespace Invader {
         using namespace Invader::HEK;
 
         auto bitmap_count = scanned_color_plate.bitmaps.size();
-        
+
         // If format is nullopt, automatically determine a format
         bool automatically_determined_format = !format.has_value();
         if(automatically_determined_format) {
@@ -34,13 +34,13 @@ namespace Invader {
                         is_a4r4g4b4 = is_a4r4g4b4 && (pixel == Pixel::convert_from_16_bit<4,4,4,4>(pixel.convert_to_16_bit<4,4,4,4>()));
                     }
                     is_16_bit = is_16_bit && (is_a0r5g6b5 || is_a1r5g5b5 || is_a4r4g4b4);
-                    
+
                     // If we don't fit into the 16-bit or monochrome color space, bail!
                     if(!is_16_bit && !is_monochrome) {
                         break;
                     }
                 }
-                
+
                 if(is_monochrome) {
                     format = BitmapFormat::BITMAP_FORMAT_MONOCHROME;
                 }
@@ -51,7 +51,7 @@ namespace Invader {
                     format = BitmapFormat::BITMAP_FORMAT_32_BIT;
                 }
             }
-            
+
             switch(*format) {
                 case BitmapFormat::BITMAP_FORMAT_32_BIT:
                     oprintf("Automatically determined format as 32-bit\n");
@@ -66,12 +66,12 @@ namespace Invader {
                     std::terminate();
             }
         }
-        
+
         oprintf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
-        
+
         bool warn_on_semi_transparent_1_bit_alpha = false;
         bool warn_on_lost_color = false;
-        
+
         for(std::size_t i = 0; i < bitmap_count; i++) {
             // Write all of the fields here
             auto &bitmap = bitmap_data.emplace_back();
@@ -104,12 +104,6 @@ namespace Invader {
             // Set the format
             bool compressed = (format == BitmapFormat::BITMAP_FORMAT_DXT1 || format == BitmapFormat::BITMAP_FORMAT_DXT3 || format == BitmapFormat::BITMAP_FORMAT_DXT5);
 
-            // If the bitmap length or height isn't divisible by 4, use 32-bit color
-            if(compressed && ((bitmap.height % 4) != 0 || (bitmap.width % 4) != 0)) {
-                format = BitmapFormat::BITMAP_FORMAT_32_BIT;
-                compressed = false;
-            }
-
             // Set palettized
             bool palettized = false;
 
@@ -119,7 +113,7 @@ namespace Invader {
                 compressed = false;
                 bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP;
             }
-            
+
             // Warn on 1-bit alpha being memed away
             if(should_p8 || format == BitmapFormat::BITMAP_FORMAT_DXT1) {
                 for(auto &p : bitmap_color_plate.pixels) {
@@ -131,7 +125,7 @@ namespace Invader {
                     }
                 }
             }
-            
+
             // Go through each mipmap; compress
             bitmap.mipmap_count = mipmap_count;
             auto encoded_pixels = BitmapEncode::encode_bitmap(reinterpret_cast<const std::byte *>(first_pixel), BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, bitmap.format, bitmap.width, bitmap.height, bitmap.depth, bitmap.type, bitmap.mipmap_count, dither);
@@ -141,14 +135,14 @@ namespace Invader {
             if(compressed) {
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
             }
-            
+
             if(bitmap_type == BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
             }
             else /* if(is_power_of_two(bitmap.width) && is_power_of_two(bitmap.height)) */ { // this flag does not actually mean "power-of-two" but rather "not an interface bitmap"
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
             }
-            
+
             if(palettized) {
                 flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_PALETTIZED;
             }
@@ -161,11 +155,11 @@ namespace Invader {
 
             oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(encoded_pixels.size()));
         }
-        
+
         if(warn_on_semi_transparent_1_bit_alpha) {
             eprintf_warn("Compressing semi-transparent pixels to 1-bit alpha.");
         }
-        
+
         if(warn_on_lost_color) {
             eprintf_warn("Compressing transparent non-black pixels. Color may be lost.");
         }
