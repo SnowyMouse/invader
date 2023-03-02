@@ -10,22 +10,22 @@ namespace Invader::Parser {
         if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
             return;
         }
-        
+
         auto &base_struct = workload.structs[*workload.tags[tag_index].base_struct];
         auto &bitmap_base = *reinterpret_cast<Parser::Bitmap::struct_little *>(base_struct.data.data());
-        
+
         auto bitmap_data_count = static_cast<std::size_t>(bitmap_base.bitmap_data.count);
         if(bitmap_data_count == 0) {
             return;
         }
         auto *bitmap_data = reinterpret_cast<Parser::BitmapData::struct_little *>(workload.structs[*base_struct.resolve_pointer(&bitmap_base.bitmap_data.pointer)].data.data());
-        
+
         for(std::size_t b = 0; b < bitmap_data_count; b++) {
             auto &flags = bitmap_data[b].flags;
             flags = flags.read() | HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_ENVIRONMENT;
         }
     }
-    
+
     void BitmapData::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &s = workload.structs[struct_index];
         auto *data = s.data.data();
@@ -44,7 +44,7 @@ namespace Invader::Parser {
         auto erase_last_sequence = [&bitmap]() {
             bitmap->bitmap_group_sequence.erase(bitmap->bitmap_group_sequence.begin() + (bitmap->bitmap_group_sequence.size() - 1));
         };
-        
+
         // Delete empty sequences at the end
         if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             while(!bitmap->bitmap_group_sequence.empty() && bitmap->bitmap_group_sequence[bitmap->bitmap_group_sequence.size() - 1].sprites.empty()) {
@@ -56,7 +56,7 @@ namespace Invader::Parser {
                 erase_last_sequence();
             }
         }
-        
+
         // Zero out these if we're sprites (this is completely *insane* but that's what tool.exe does)
         if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             for(auto &sequence : bitmap->bitmap_group_sequence) {
@@ -64,10 +64,10 @@ namespace Invader::Parser {
                 sequence.bitmap_count = 0;
             }
         }
-        
+
         // Get the bitmap count
         auto bitmap_data_count = bitmap->bitmap_data.size();
-        
+
         // Loop through again, but make sure sprites are present when needed and not present when not needed
         bool has_sprites = false;
         for(auto &sequence : bitmap->bitmap_group_sequence) {
@@ -83,18 +83,18 @@ namespace Invader::Parser {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap with bitmap data is marked as sprites, but no sprites are present", tag_index);
             throw InvalidTagDataException();
         }
-        
+
         // We need bitmap sequences
         if(bitmap->bitmap_group_sequence.empty()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap has no sequences", tag_index);
             throw InvalidTagDataException();
         }
-        
+
         // Validate the sequence ranges
         if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             std::vector<bool> mapped_out(bitmap_data_count, false);
             auto sequence_count = bitmap->bitmap_group_sequence.size();
-            
+
             // Go through each sequence and check if each bitmap in each sequence is in-range and mapped out
             for(std::size_t si = 0; si < sequence_count; si++) {
                 auto &s = bitmap->bitmap_group_sequence[si];
@@ -103,7 +103,7 @@ namespace Invader::Parser {
                 }
                 auto start = static_cast<std::size_t>(s.first_bitmap_index);
                 auto end = start + s.bitmap_count;
-                
+
                 for(std::size_t i = start; i < end; i++) {
                     if(i < bitmap_data_count) {
                         mapped_out[i] = true;
@@ -114,7 +114,7 @@ namespace Invader::Parser {
                     }
                 }
             }
-            
+
             // Make sure each bitmap is accounted for
             std::size_t unaccounted_bitmaps = 0;
             for(std::size_t bi = 0; bi < bitmap_data_count; bi++) {
@@ -128,21 +128,21 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
         }
-        
+
         auto max_size = bitmap->processed_pixel_data.size();
         auto *pixel_data = bitmap->processed_pixel_data.data();
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
         auto xbox = engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX;
-        
+
         for(std::size_t b = 0; b < bitmap_data_count; b++) {
             auto &data = bitmap->bitmap_data[b];
             bool compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
-            
+
             if(data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as swizzled which is invalid for bitmap tag files", b);
                 throw InvalidTagDataException();
             }
-            
+
             if(
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
@@ -176,11 +176,20 @@ namespace Invader::Parser {
             // Warn for stuff
             bool exceeded = false;
             bool non_power_of_two = (!HEK::is_power_of_two(height) || !HEK::is_power_of_two(width) || !HEK::is_power_of_two(depth));
-            
+
+            // Most engines require compressed bitmap dimensions to be divisible by four
+            if(compressed && non_power_of_two) {
+                bool divisible_by_four = (height % 4) == 0 && (width % 4) == 0;
+                if(!divisible_by_four && engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Dimensions of compressed bitmap data #%zu are not divisible by 4 (%zux%zu). This is required by the target engine.", data_index, width, height);
+                    throw InvalidTagDataException();
+                }
+            }
+
             if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
                 char message[256];
                 std::snprintf(message, sizeof(message), "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
-                
+
                 // Yes the Xbox can do non-power-of-two textures, but swizzling is required if it's marked as 2D Textures and, yeah...
                 if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s. This is invalid for the target engine.", message);
@@ -190,7 +199,7 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s", message);
                 }
             }
-            
+
             if(
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
                 engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
@@ -221,7 +230,7 @@ namespace Invader::Parser {
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_ENUM_COUNT:
                         break;
                 }
-                
+
                 // On Xbox, it's an error. Otherwise, it's a warning.
                 if(exceeded) {
                     if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
@@ -261,16 +270,16 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu range (0x%08zX - 0x%08zX) exceeds the processed pixel data size (0x%08zX)", data_index, start, end, max_size);
                 throw InvalidTagDataException();
             }
-            
+
             // If we're compiling for Xbox, we have to do this in a fun way (swizzling, cubemap memes, etc.). Otherwise, it's a straight copy
             if(xbox) {
                 bool needs_swizzled = !compressed && bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
-                
+
                 // We're going to be doing naughty things to this bitmap ;-;
                 if(needs_swizzled) {
                     data.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
                 }
-                
+
                 // The Xbox version, in compressed bitmaps, for some reason, discards all mipmaps where the width and height are less than 4 (i.e. 2x2, 1x2, 2x1, and 1x1 are discarded, so 4x2 is fine).
                 std::size_t copied_mipmap_count = data.mipmap_count;
                 if(compressed) {
@@ -279,27 +288,27 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is DXT compressed and is less than 4 pixels in both width and height, which is unsupported by the target engine", data_index);
                         throw InvalidTagDataException();
                     }
-                    
+
                     std::size_t mipmap_width = width;
                     std::size_t mipmap_height = height;
                     std::size_t minimum_dimension = 1;
-                    
+
                     for(copied_mipmap_count = 0; copied_mipmap_count < data.mipmap_count; copied_mipmap_count++) {
                         mipmap_width = std::max(mipmap_width / 2, minimum_dimension);
                         mipmap_height = std::max(mipmap_height / 2, minimum_dimension);
-                        
+
                         if(mipmap_width < 4 && mipmap_height < 4) {
                             break;
                         }
                     }
                 }
-                
+
                 // First, add our raw data entry
                 std::size_t raw_data_index = workload.raw_data.size();
                 auto &raw_data = workload.raw_data.emplace_back();
                 workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
                 auto bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
-                
+
                 // Next, write it
                 auto write_bitmap = [&raw_data, &needs_swizzled, &copied_mipmap_count, &width, &depth, &height, &compressed, &pixel_data, &start, &bits_per_pixel](std::optional<std::size_t> input_cubemap_face = std::nullopt) {
                     std::size_t mipmap_width = width;
@@ -307,7 +316,7 @@ namespace Invader::Parser {
                     std::size_t mipmap_depth = depth;
                     std::size_t bytes_per_block;
                     std::size_t minimum_dimension = 1;
-                    
+
                     // If DXT, convert to blocks
                     if(compressed) {
                         // Resolution it's stored as
@@ -317,7 +326,7 @@ namespace Invader::Parser {
                         if(mipmap_width % 4) {
                             mipmap_width += 4 - (mipmap_width % 4);
                         }
-                    
+
                         mipmap_width = std::max(mipmap_width / 4, minimum_dimension);
                         mipmap_height = std::max(mipmap_height / 4, minimum_dimension);
                         bytes_per_block = bits_per_pixel * 4 * 4 / 8;
@@ -325,18 +334,18 @@ namespace Invader::Parser {
                     else {
                         bytes_per_block = bits_per_pixel / 8;
                     }
-                    
+
                     auto *input_start = pixel_data + start;
                     auto *input = input_start;
-                    
+
                     for(std::size_t i = 0; i <= copied_mipmap_count; i++) {
                         auto mipmap_size = mipmap_width * mipmap_height * mipmap_depth * bytes_per_block;
-                        
+
                         // Skip to this cubemap face if needed
                         if(input_cubemap_face.has_value()) {
                             input += (*input_cubemap_face) * mipmap_size;
                         }
-                        
+
                         // Insert it
                         if(needs_swizzled) {
                             auto swizzled = Invader::Swizzle::swizzle(input, bits_per_pixel, mipmap_width, mipmap_height, mipmap_depth, false);
@@ -345,20 +354,20 @@ namespace Invader::Parser {
                         else {
                             raw_data.insert(raw_data.end(), input, input + mipmap_size);
                         }
-                        
+
                         // Next one
                         input += (input_cubemap_face.has_value() ? (6 - *input_cubemap_face) : 1) * mipmap_width * mipmap_depth * mipmap_height * bytes_per_block;
-                        
+
                         // Halve dimensions
                         mipmap_height = std::max(mipmap_height / 2, minimum_dimension);
                         mipmap_width = std::max(mipmap_width / 2, minimum_dimension);
                         mipmap_depth = std::max(mipmap_depth / 2, minimum_dimension);
                     }
-                    
+
                     // Align to 128 bytes
                     raw_data.insert(raw_data.end(), REQUIRED_PADDING_N_BYTES(raw_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY), std::byte());
                 };
-                
+
                 switch(type) {
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
@@ -378,7 +387,7 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu has an invalid data type", data_index);
                         throw InvalidTagDataException();
                 };
-                
+
                 // Lastly, set the size
                 data.pixel_data_size = static_cast<std::uint32_t>(raw_data.size());
             }
@@ -397,7 +406,7 @@ namespace Invader::Parser {
             bitmap->color_plate_height = 0;
             bitmap->color_plate_width = 0;
         }
-        
+
         for(auto &i : bitmap->bitmap_data) {
             if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
                 i.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
