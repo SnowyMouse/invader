@@ -787,16 +787,14 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "non_null": true
+                ]
             },
             {
                 "name": "test 1",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ],
-                "non_null": true
+                ]
             },
             {
                 "name": "test 2",
