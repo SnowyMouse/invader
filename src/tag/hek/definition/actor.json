@@ -679,9 +679,7 @@
             {
                 "name": "melee leap velocity",
                 "type": "float",
-                "unit": "world units per tick",
-                "minimum": 0.0,
-                "maximum": 1.0
+                "unit": "world units per tick"
             },
             {
                 "name": "melee leap chance",
