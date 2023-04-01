@@ -63,6 +63,9 @@ if(MINGW)
         src/mingw_crt_noglob.cpp
     )
     set(INVADER_CRT_NOGLOB "invader-crt-noglob")
+
+    # Workaround a stack overflow in some build configurations on some scripts
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,8388608")
 endif()
 
 # Turn on console messages
