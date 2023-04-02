@@ -1,7 +1,5 @@
 #include "expression.hpp"
 
-#undef NDEBUG
-
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -56,8 +54,14 @@ template <typename Number, Number number_from_value(const std::string &what)> st
 
         std::vector<ParsedToken> group;
         Number number = 1.0; // multiplier if group/input. number if number
+
+        // These next four lines somehow make GCC not scream at me for use-after-free warnings
+        ParsedToken() = default;
+        ParsedToken(ParsedToken &&moving) = default;
+        ParsedToken(const ParsedToken &moving) = default;
+        ParsedToken &operator=(const ParsedToken &moving) = default;
     };
-    
+
     // Get tokens
     std::vector<std::string> tokens;
     const char *current_offset = nullptr;
@@ -154,7 +158,7 @@ template <typename Number, Number number_from_value(const std::string &what)> st
         token_index++;
         return new_token;
     };
-    
+
 
     ParsedToken main_group;
     main_group.type = ParsedToken::Type::GROUP;
@@ -272,7 +276,7 @@ template <typename Number, Number number_from_value(const std::string &what)> st
             }
             break;
         }
-        
+
 
         // Next, if it's just one thing in a group, we can move the thing up a level
         while(group.group.size() == 1) {
@@ -284,7 +288,7 @@ template <typename Number, Number number_from_value(const std::string &what)> st
             }
         }
     };
-    
+
     recursively_sort_group(main_group, recursively_sort_group);
 
     // Now we can evaluate it!
