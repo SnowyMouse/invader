@@ -22,22 +22,22 @@ struct BludgeonAction {
     // Simple counter that increments every time it's initialized
     struct FixBit {
         std::uint64_t value;
-        
+
         operator std::uint64_t() const noexcept {
             return this->value;
         }
-        
+
         FixBit() {
             static std::uint64_t fix_bit_current = 1;
             this->value = fix_bit_current;
             fix_bit_current <<= 1;
         }
-        
+
         FixBit(std::uint64_t value) {
             this->value = value;
         }
     };
-    
+
     const char *name;
     std::optional<bool (*)(Parser::ParserStruct *s, bool fix)> fix_fn = std::nullopt;
     FixBit fix_bit = FixBit();
@@ -46,30 +46,30 @@ struct BludgeonAction {
 static BludgeonAction all_fixes[] = {
     /** Fix broken rotation function scales (caused by extracting maps made with older tools that broke this value, even the original HEK) */
     { .name = "broken-lens-flare-function-scale", .fix_fn = broken_lens_flare_function_scale },
-    
+
     /** Fix an incorrect sound buffer size */
     { .name = "incorrect-sound-buffer", .fix_fn = sound_buffer },
 
     /** Fix invalid enums being used (this is present in stock tags, and in some cases with HEK+ extracted tags,
         this has led to the game crashing) */
     { .name = "invalid-enums", .fix_fn = broken_enums },
-    
+
     /** Fix indices that are out of bounds */
     { .name = "invalid-indices", .fix_fn = broken_indices_fix },
 
     /** Fix strings not being null terminated or being the wrong length */
     { .name = "invalid-strings", .fix_fn = broken_strings },
-    
+
     /** Fix model markers not being put in the right place (not having this results in undefined behavior when built by
         tool.exe) */
     { .name = "invalid-model-markers", .fix_fn = invalid_model_markers },
-    
+
     /** Fix bullshit tag references being used (e.g. light tags being referenced in models) */
     { .name = "invalid-reference-classes", .fix_fn = broken_references },
-    
+
     /** Fix uppercase references */
     { .name = "invalid-uppercase-references", .fix_fn = uppercase_references },
-    
+
     /** Fix mismatched sound enums */
     { .name = "mismatched-sound-enums", .fix_fn = mismatched_sound_enums },
 
@@ -81,13 +81,13 @@ static BludgeonAction all_fixes[] = {
 
     /** Fix normals (broken normals crashes tool.exe and sapien when generating lightmaps) */
     { .name = "nonnormal-vectors", .fix_fn = broken_normals },
-    
+
     /** Fix invalid values that are out of bounds for their ranges */
     { .name = "out-of-range", .fix_fn = broken_range_fix },
-    
+
     /** Fix sequences being missing in bitmaps */
     { .name = "missing-bitmap-sequences", .fix_fn = missing_bitmap_sequences_fix },
-    
+
     /** Fix everything */
     { .name = "everything", .fix_bit = static_cast<std::uint64_t>(~0) }
 };
@@ -146,7 +146,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, const std::strin
         if(!issues_present) {
             return EXIT_SUCCESS;
         }
-        
+
         bludgeoned = true;
 
         // Exit out of here
@@ -171,7 +171,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, const std::strin
 
 int main(int argc, char * const *argv) {
     set_up_color_term();
-    
+
     std::string issues_list;
     for(auto &i : all_fixes) {
         if(!issues_list.empty()) {
@@ -180,14 +180,14 @@ int main(int argc, char * const *argv) {
         issues_list += i.name;
     }
     issues_list = std::string("Type of bludgeoning. Can be: ") + issues_list;
-    
+
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_BATCH_EXCLUDE),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
-        CommandLineOption("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count"),
+        CommandLineOption("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --batch. Default: CPU thread count"),
         CommandLineOption("type", 'T', 1, issues_list.c_str())
     };
 
@@ -212,19 +212,19 @@ int main(int argc, char * const *argv) {
             case 'i':
                 show_version_info();
                 std::exit(EXIT_SUCCESS);
-                
+
             case 'b':
                 bludgeon_options.search.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
                 break;
-                
+
             case 'e':
                 bludgeon_options.search_exclude.emplace_back(File::preferred_path_to_halo_path(arguments[0]));
                 break;
-                
+
             case 'P':
                 bludgeon_options.fs_path = true;
                 break;
-                
+
             case 'j':
                 try {
                     bludgeon_options.max_threads = std::stoi(arguments[0]);
@@ -249,7 +249,7 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
-    
+
     std::optional<File::TagFilePath> single_tag;
     if(bludgeon_options.search.empty() && bludgeon_options.search_exclude.empty()) {
         if(remaining_arguments.size() == 1) {
@@ -270,13 +270,13 @@ int main(int argc, char * const *argv) {
         eprintf_error("Can't use an extra tag path and -b. Use -h for more information.");
         return EXIT_FAILURE;
     }
-    
+
 
     auto &fixes = bludgeon_options.fixes;
 
     std::size_t success = 0;
     std::vector<File::TagFile> all_tags;
-    
+
     if(single_tag.has_value()) {
         auto tf = File::tag_path_to_file_path(*single_tag, std::vector<std::filesystem::path> { bludgeon_options.tags });
         if(tf.has_value()) {
@@ -300,12 +300,12 @@ int main(int argc, char * const *argv) {
             }
         }
     }
-    
+
     std::mutex thread_mutex;
     std::vector<std::thread> threads;
     std::size_t tag_index = 0;
     threads.reserve(bludgeon_options.max_threads);
-    
+
     auto bludgeon_worker = [](auto *all_tags, std::size_t *tag_index, std::mutex *thread_mutex, std::size_t *success, auto *fixes) {
         while(true) {
             thread_mutex->lock();
@@ -316,24 +316,24 @@ int main(int argc, char * const *argv) {
             }
             (*tag_index)++;
             thread_mutex->unlock();
-            
+
             // Bludgeon
             bool bludgeoned;
             auto &tag = all_tags->data()[this_index];
             bludgeon_tag(tag.full_path, tag.tag_path, *fixes, bludgeoned);
-            
+
             // Increment
             thread_mutex->lock();
             (*success) += bludgeoned;
             thread_mutex->unlock();
         }
     };
-    
+
     // Go through each tag
     for(std::size_t i = 0; i < bludgeon_options.max_threads; i++) {
         threads.emplace_back(bludgeon_worker, &all_tags, &tag_index, &thread_mutex, &success, &fixes);
     }
-    
+
     // Wait for all threads to end
     for(auto &i : threads) {
         i.join();

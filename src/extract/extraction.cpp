@@ -12,17 +12,17 @@ namespace Invader {
         if(queries.size() == 0) {
             recursive = false;
         }
-        
+
         ExtractionWorkload workload(map, reporting_level);
         auto start = std::chrono::steady_clock::now();
         auto success = workload.perform_extraction(queries, queries_exclude, tags, recursive, overwrite, non_mp_globals);
         auto matched = workload.matched_tags.size();
         auto warnings = workload.get_warnings();
         auto errors = workload.get_errors();
-        
+
         char initial_message[256] = {};
         std::snprintf(initial_message, sizeof(initial_message), "Extracted %zu out of %zu matched tag%s", success, matched, matched == 1 ? "" : "s");
-        
+
         char warnings_message[256] = {};
         char errors_message[256] = {};
         if(warnings) {
@@ -31,11 +31,11 @@ namespace Invader {
         if(errors) {
             std::snprintf(errors_message, sizeof(errors_message), "%s %zu error%s", warnings ? " and" : " with", errors, errors == 1 ? "" : "s");
         }
-        
+
         char timer[256] = {};
         auto end = std::chrono::steady_clock::now();
         std::snprintf(timer, sizeof(timer), " in %zu ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
-        
+
         if(errors) {
             oprintf_success_warn("%s%s%s%s", initial_message, warnings_message, errors_message, timer);
         }
@@ -46,7 +46,7 @@ namespace Invader {
             oprintf_success("%s%s", initial_message, timer);
         }
     }
-    
+
     std::size_t ExtractionWorkload::perform_extraction(const std::vector<std::string> &queries, const std::vector<std::string> &queries_exclude, const std::filesystem::path &tags, bool recursive, bool overwrite, bool non_mp_globals) {
         // Set these variables up
         auto *map = &this->map;
@@ -56,7 +56,7 @@ namespace Invader {
         std::deque<std::size_t> all_tags_to_extract;
         auto &workload = *this;
         auto engine = map->get_cache_version();
-        
+
         bool jason_jones = (map->get_tag(map->get_scenario_tag_id()).get_base_struct<HEK::Scenario>().flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_DO_NOT_APPLY_BUNGIE_CAMPAIGN_TAG_PATCHES) == 0;
 
         auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload, &engine, &jason_jones](std::size_t tag_index) -> bool {
@@ -77,7 +77,7 @@ namespace Invader {
                 workload.report_error(ErrorType::ERROR_TYPE_ERROR, "Tag path is invalid", tag_index);
                 return false;
             }
-            
+
             // Let's do this
             auto tfp = File::TagFilePath(Invader::File::halo_path_to_preferred_path(tag_path), tag.get_tag_fourcc());
 
@@ -127,7 +127,7 @@ namespace Invader {
                 bool changed = false;
                 switch(tfp.fourcc) {
                     case Invader::TagFourCC::TAG_FOURCC_WEAPON: {
-                        #define ALTER_TAG_DATA(from, to) if(from != to) { from = to; changed = true; } 
+                        #define ALTER_TAG_DATA(from, to) if(from != to) { from = to; changed = true; }
                         if(tag_path == "weapons\\pistol\\pistol") {
                             auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
                             if(parsed.triggers.size() >= 1) {
@@ -158,10 +158,10 @@ namespace Invader {
                         break;
                     default:
                         break;
-                        
+
                         #undef ALTER_TAG_DATA
                 }
-                
+
                 if(changed) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Weapon tag was changed due to being altered in singleplayer");
                 }
@@ -175,23 +175,23 @@ namespace Invader {
                     if(!(data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED)) {
                         continue;
                     }
-                    
+
                     std::size_t height = data.height;
                     std::size_t width = data.width;
                     std::size_t depth = data.depth;
                     std::size_t mipmap_count = data.mipmap_count;
                     std::size_t min_dimension = 1;
-                    
+
                     while(mipmap_count > 0) {
                         if(height < 4 && width < 4) {
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap was missing mipmaps which had to be generated");
                             break;
                         }
-                        
+
                         height = std::max(height / 2, min_dimension);
                         width = std::max(width / 2, min_dimension);
                         depth = std::max(depth / 2, min_dimension);
-                        
+
                         mipmap_count--;
                     }
                 }
@@ -223,11 +223,11 @@ namespace Invader {
                 // Get the full path
                 const auto &tag = map->get_tag(t);
                 auto full_tag_path = tag.get_path() + "." + HEK::tag_fourcc_to_extension(tag.get_tag_fourcc());
-                
+
                 // Match it
                 if(File::path_matches(full_tag_path.c_str(), queries, queries_exclude)) {
                     all_tags_to_extract.emplace_back(t);
-                }    
+                }
             }
 
             if(all_tags_to_extract.empty()) {
@@ -247,7 +247,7 @@ namespace Invader {
             }
             const auto &tag_map = map->get_tag(tag);
             auto path_dot = File::TagFilePath(File::halo_path_to_preferred_path(tag_map.get_path()), tag_map.get_tag_fourcc());
-            
+
             // Do it!
             bool result;
             try {
@@ -265,17 +265,17 @@ namespace Invader {
                 oprintf("Skipped %s\n", path_dot.join().c_str());
             }
         }
-        
+
         this->matched_tags.reserve(total);
         for(std::size_t i = 0; i < tag_count; i++) {
             if(extracted_tags[i]) {
                 this->matched_tags.push_back(i);
             }
         }
-        
+
         return extracted;
     }
-    
+
     ExtractionWorkload::ExtractionWorkload(const Map &map, ReportingLevel reporting_level) : ErrorHandler(reporting_level), map(map) {
         auto &paths = this->get_tag_paths();
         auto tag_count = map.get_tag_count();
@@ -285,7 +285,7 @@ namespace Invader {
             paths.emplace_back(tag.get_path(), tag.get_tag_fourcc());
         }
     }
-    
+
     std::vector<std::byte> ExtractionWorkload::extract_single_tag(const Tag &tag, ReportingLevel reporting_level) {
         ExtractionWorkload workload(tag.get_map(), reporting_level);
         auto result = workload.extract_tag(tag.get_tag_index());
@@ -296,7 +296,7 @@ namespace Invader {
             throw InvalidTagDataException();
         }
     }
-    
+
     std::optional<std::unique_ptr<Parser::ParserStruct>> ExtractionWorkload::extract_tag(std::size_t tag_index) {
         auto &tag = this->map.get_tag(tag_index);
         auto tag_fourcc = tag.get_tag_fourcc();
@@ -407,7 +407,7 @@ namespace Invader {
                 break;
         }
 
-        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, tag_index, "Tag class %s is unsupported", tag_fourcc_to_extension(tag_fourcc));
+        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, tag_index, "Tag group %s is unsupported", tag_fourcc_to_extension(tag_fourcc));
         return std::nullopt;
     }
 }
