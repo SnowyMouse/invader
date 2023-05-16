@@ -49,7 +49,7 @@ namespace Invader::HEK {
     using Angle = float;
     using Fraction = float;
     using Index = std::uint16_t;
-    
+
     /**
      * Check if the number is power-of-two
      * @param value value to check
@@ -64,7 +64,7 @@ namespace Invader::HEK {
         }
         return value & 1;
     }
-    
+
     /**
      * Get the base-2 logarithm of an integer
      * @param value input value
@@ -111,18 +111,18 @@ namespace Invader::HEK {
         static TagID null_tag_id() {
             return { NULL_ID };
         }
-        
+
         bool operator==(const TagID &other) const noexcept {
             return other.index == this->index && other.is_null() == this->is_null();
         }
-        
+
         bool operator!=(const TagID &other) const noexcept {
             return other.index != this->index || other.is_null() != this->is_null();
         }
     };
 
     /**
-     * Single 20 character string
+     * Single 32 character string
      */
     struct TagString {
         char string[0x20] = {};
@@ -378,13 +378,13 @@ namespace Invader::HEK {
             COPY_THIS(w);
             return copy;
         }
-        
+
         static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
-        
+
         float calculate_scale() const noexcept {
             return std::sqrt(i*i + j*j + k*k + w*w);
         }
-        
+
         bool is_normalized() const noexcept {
             return std::fabs(1.0 - this->calculate_scale()) < NONNORMAL_THRESHOLD;
         }
@@ -409,11 +409,11 @@ namespace Invader::HEK {
             copy.w = w * m_distance;
             return copy;
         }
-        
+
         bool operator ==(const Quaternion<EndianType> &other) const noexcept {
             return this->i == other.i && this->j == other.j && this->k == other.k && this->w == other.w;
         };
-        
+
         bool operator !=(const Quaternion<EndianType> &other) const noexcept {
             return !(*this == other);
         };
@@ -561,13 +561,13 @@ namespace Invader::HEK {
         bool operator!=(const Vector3D<EndianType> &other) const {
             return !(*this == other);
         }
-        
+
         static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
-        
+
         float calculate_scale() const noexcept {
             return std::sqrt(i*i + j*j + k*k);
         }
-        
+
         bool is_normalized() const noexcept {
             return std::fabs(1.0 - this->calculate_scale()) < NONNORMAL_THRESHOLD;
         }
@@ -622,13 +622,13 @@ namespace Invader::HEK {
         bool operator!=(const Vector2D<EndianType> &other) const {
             return !(*this == other);
         }
-        
+
         static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
-        
+
         float calculate_scale() const noexcept {
             return std::sqrt(i*i + j*j);
         }
-        
+
         bool is_normalized() const noexcept {
             return std::fabs(1.0 - this->calculate_scale()) < NONNORMAL_THRESHOLD;
         }
@@ -734,11 +734,11 @@ namespace Invader::HEK {
             copy.y = this->y / divide;
             return copy;
         }
-        
+
         bool operator==(const Point2D<EndianType> &other) const {
             return other.x == this->x && other.y == this->y;
         }
-        
+
         bool operator!=(const Point2D<EndianType> &other) const {
             return !(*this == other);
         }
@@ -821,7 +821,7 @@ namespace Invader::HEK {
         bool operator ==(const Point3D<EndianType> &other) const {
             return this->x == other.x && this->y == other.y && this->z == other.z;
         }
-        
+
         bool operator !=(const Point3D<EndianType> &other) const {
             return !(*this == other);
         }
@@ -913,7 +913,7 @@ namespace Invader::HEK {
             COPY_THIS(to);
             return copy;
         }
-        
+
         bool operator ==(const Bounds<BoundsType> &other) const {
             return this->from == other.from && this->to == other.to;
         }
@@ -1010,11 +1010,11 @@ namespace Invader::HEK {
         void operator=(TagID v) {
             this->tag_id = v;
         }
-        
+
         bool operator==(const ScenarioScriptNodeValue &other) const noexcept {
             return this->long_int == other.long_int;
         }
-        
+
         bool operator!=(const ScenarioScriptNodeValue &other) const noexcept {
             return this->long_int != other.long_int;
         }
@@ -1047,7 +1047,7 @@ namespace Invader::HEK {
 
     ModelVertexCompressed<NativeEndian> compress_model_vertex(const ModelVertexUncompressed<NativeEndian> &vertex) noexcept;
     ModelVertexUncompressed<NativeEndian> decompress_model_vertex(const ModelVertexCompressed<NativeEndian> &vertex) noexcept;
-    
+
     std::uint32_t compress_vector(float i, float j, float k) noexcept;
 
     ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> compress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> &vertex) noexcept;
