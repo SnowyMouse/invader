@@ -122,7 +122,7 @@ namespace Invader::HEK {
     };
 
     /**
-     * Single 20 character string
+     * Single 32 character string
      */
     struct TagString {
         char string[0x20] = {};
