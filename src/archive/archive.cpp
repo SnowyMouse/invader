@@ -41,9 +41,9 @@ static std::string list_formats() {
 
 int main(int argc, const char **argv) {
     set_up_color_term();
-    
+
     using namespace Invader;
-    
+
     struct ArchiveOptions {
         bool single_tag = false;
         std::vector<std::filesystem::path> tags;
@@ -60,9 +60,9 @@ int main(int argc, const char **argv) {
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
     static constexpr char USAGE[] = "[options] <-g <engine> <scenario> | -s tag.class>";
-    
+
     std::string formats_argument = std::string("Specify format. Valid formats are: ") + list_formats() + ". Default format is 7z";
-    
+
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
@@ -130,7 +130,7 @@ int main(int argc, const char **argv) {
                     eprintf_error("Unknown engine %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
-                
+
                 break;
             }
             case 'C':
@@ -250,7 +250,7 @@ int main(int argc, const char **argv) {
 
         // Go through each tag and see if we can find everything.
         archive_list.reserve(tag_count + 64);
-        
+
         auto archive_it = [&archive_options, &archive_list](const std::string &path, TagFourCC fourcc) {
             std::string full_tag_path = File::halo_path_to_preferred_path(path) + "." + tag_fourcc_to_extension(fourcc);
 
@@ -270,13 +270,13 @@ int main(int argc, const char **argv) {
                 std::exit(EXIT_FAILURE);
             }
         };
-        
+
         for(std::size_t i = 0; i < tag_count; i++) {
             // Get the tag path information
             auto &tag = parsed_map->get_tag(i);
             archive_it(tag.get_path(), tag.get_tag_fourcc());
         }
-        
+
         // Archive child scenarios
         try {
             auto path = Invader::File::tag_path_to_file_path(base_tag + ".scenario", archive_options.tags);
@@ -353,16 +353,16 @@ int main(int argc, const char **argv) {
             }
         }
     }
-    
+
     for(auto &i : archive_options.tags_excluded_same) {
         for(std::size_t t = 0; t < archive_list.size(); t++) {
             // First check if it exists
             auto path_to_test = i / File::halo_path_to_preferred_path(archive_list[t].second);
-            
+
             if(std::filesystem::exists(path_to_test)) {
                 // Okay it exists. Open both then
                 std::list<std::string> differences;
-                    
+
                 try {
                     auto tag_archive_data = File::open_file(archive_list[t].first).value();
                     auto tag_archive = Parser::ParserStruct::parse_hek_tag_file(tag_archive_data.data(), tag_archive_data.size(), true);
@@ -379,21 +379,21 @@ int main(int argc, const char **argv) {
                     eprintf_error("Failed to do a functional comparison of %s and %s\n", archive_list[t].first.string().c_str(), path_to_test.string().c_str());
                     std::exit(EXIT_FAILURE);
                 }
-                
+
                 if(archive_options.verbose) {
                     std::printf("Omitting %s\n", archive_list[t].second.c_str());
-                    
+
                     for(auto &i : differences) {
                         eprintf("%s\n", i.c_str());
                     }
                 }
-                
+
                 archive_list.erase(archive_list.begin() + t);
                 t--;
             }
         }
     }
-    
+
     // If we eliminate all tags, don't bother archiving anything
     if(archive_list.size() == 0) {
         oprintf_success_warn("There were no tags to archive");
@@ -507,7 +507,17 @@ int main(int argc, const char **argv) {
 
                 // Now copy
                 try {
+                    // std::filesystem::copy_options::overwrite_existing is broken on mingw-w64
+                    // See https://sourceforge.net/p/mingw-w64/bugs/852/
+                    // TODO: Remove this if they fix it
+                    #ifdef __MINGW32__
+                    if(std::filesystem::exists(new_path)) {
+                        std::filesystem::remove(new_path);
+                    }
+                    std::filesystem::copy_file(old_path, new_path);
+                    #else
                     std::filesystem::copy_file(old_path, new_path, std::filesystem::copy_options::overwrite_existing);
+                    #endif
                 }
                 catch(std::exception &e) {
                     eprintf_error("Failed to create copy %s to %s: %s", old_path.string().c_str(), new_path.string().c_str(), e.what());
