@@ -489,7 +489,8 @@ int main(int argc, const char **argv) {
             // Copy function
             auto place_if_possible = [&new_path, &old_path, &archive_options]() -> bool {
                 // If it exists, continue
-                if(!archive_options.overwrite && std::filesystem::exists(new_path)) {
+                bool tag_exists = std::filesystem::exists(new_path);
+                if(!archive_options.overwrite && tag_exists) {
                     return false;
                 }
 
@@ -511,7 +512,7 @@ int main(int argc, const char **argv) {
                     // See https://sourceforge.net/p/mingw-w64/bugs/852/
                     // TODO: Remove this if they fix it
                     #ifdef __MINGW32__
-                    if(std::filesystem::exists(new_path)) {
+                    if(tag_exists) {
                         std::filesystem::remove(new_path);
                     }
                     std::filesystem::copy_file(old_path, new_path);
