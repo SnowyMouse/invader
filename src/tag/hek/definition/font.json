@@ -1,5 +1,13 @@
 [
     {
+        "name": "FontFlags",
+        "type": "bitfield",
+        "fields": [
+            "disable mcc font override"
+        ],
+        "width": 32
+    },
+    {
         "name": "FontCharacterIndex",
         "fields": [
             {
@@ -75,7 +83,7 @@
         "fields": [
             {
                 "name": "flags",
-                "type": "int32"
+                "type": "FontFlags"
             },
             {
                 "name": "ascending height",

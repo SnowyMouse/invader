@@ -29,7 +29,8 @@
             "dxt1",
             "dxt3",
             "dxt5",
-            "p8 bump"
+            "p8 bump",
+            "bc7"
         ],
         "exclude": [
             {
@@ -69,7 +70,8 @@
             "dxt5",
             "16-bit",
             "32-bit",
-            "monochrome"
+            "monochrome",
+            "bc7"
         ],
         "type": "enum"
     },
@@ -317,7 +319,7 @@
             {
                 "name": "encoding format",
                 "first": "encoding format",
-                "description": "Encoding format determines the maximum format of the bitmap. If \"disable height map compression\" is not set and usage is set to \"height map\" or \"vector map\", then this will be ignored.\n\n\"dxt1\" (4 bits per pixel) compression encodes pixels into 4x4 blocks interpolated between two colors. Alpha from the color plate is reduced to 1-bit alpha, though using alpha may result in even worse quality.\n\n\"dxt3\" (8 bits per pixel) compression uses dxt1 for the color and explicit alpha from the color plate, reduced to 4 bits per pixel. This can cause banding for alpha gradients, but it may be better for noise and shapes. If alpha isn't used, dxt1 is used automatically.\n\n\"dxt5\" (8 bits per pixel) compression uses dxt1 for the color while also compressing and interpolating the alpha similar. This is better than dxt3 for alpha gradients, but not as good for noisy alpha or definite shapes. If alpha isn't used, dxt1 is used automatically.\n\n\"16-bit\" (16 bits per pixel) reduces pixels to 16-bits per pixel. Alpha can optionally be present, but depending on the depth of the alpha, the depth of the colors is affected (no alpha = 5-bit red/blue and 6-bit green; 1-bit alpha = 5-bit red/green/blue, 4-bit alpha = 4-bit red/green/blue). This may cause heavy banding, but dithering can somewhat mitigate this at the cost of added noise.\n\n\"32-bit\" (32 bits per pixel) outputs the original color from the color plate with no loss in quality. Alpha may or may not be used, but it does not affect the size of the bitmap.\n\n\"monochrome\" (8 or 16 bits per pixel) signficantly reduces the size of the bitmap data losslessly if the original input is monochrome/grayscale. This can be especially useful for monochrome HUDs and noise maps. However, monochrome bitmaps do not work on the Gearbox version of Halo without a mod."
+                "description": "Encoding format determines the maximum format of the bitmap. If \"disable height map compression\" is not set and usage is set to \"height map\" or \"vector map\", then this will be ignored.\n\n\"dxt1\" (4 bits per pixel) compression encodes pixels into 4x4 blocks interpolated between two colors. Alpha from the color plate is reduced to 1-bit alpha, though using alpha may result in even worse quality.\n\n\"dxt3\" (8 bits per pixel) compression uses dxt1 for the color and explicit alpha from the color plate, reduced to 4 bits per pixel. This can cause banding for alpha gradients, but it may be better for noise and shapes. If alpha isn't used, dxt1 is used automatically.\n\n\"dxt5\" (8 bits per pixel) compression uses dxt1 for the color while also compressing and interpolating the alpha similar. This is better than dxt3 for alpha gradients, but not as good for noisy alpha or definite shapes. If alpha isn't used, dxt1 is used automatically.\n\n\"16-bit\" (16 bits per pixel) reduces pixels to 16-bits per pixel. Alpha can optionally be present, but depending on the depth of the alpha, the depth of the colors is affected (no alpha = 5-bit red/blue and 6-bit green; 1-bit alpha = 5-bit red/green/blue, 4-bit alpha = 4-bit red/green/blue). This may cause heavy banding, but dithering can somewhat mitigate this at the cost of added noise.\n\n\"32-bit\" (32 bits per pixel) outputs the original color from the color plate with no loss in quality. Alpha may or may not be used, but it does not affect the size of the bitmap.\n\n\"monochrome\" (8 or 16 bits per pixel) signficantly reduces the size of the bitmap data losslessly if the original input is monochrome/grayscale. This can be especially useful for monochrome HUDs and noise maps. However, monochrome bitmaps do not work on the Gearbox version of Halo without a mod.\n\n\"bc7\" (8 bits per pixel) compression encodes pixels to 4x4 blocks where bits are dynamically allocated between RGB color and Alpha. This is higher quality than the old DXT formats, however quality will degrade where complex alpha and complex color occupy the same space. This format is unsupported on Halo releases prior to MCC CEA."
             },
             {
                 "name": "usage",

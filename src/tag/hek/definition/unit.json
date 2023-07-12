@@ -91,6 +91,11 @@
             "not valid without driver",
             "allow ai noncombatants"
         ],
+        "exclude": [
+            {
+                "field": "locked"
+            }
+        ],
         "width": 32
     },
     {

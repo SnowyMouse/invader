@@ -67,7 +67,11 @@
             "top right",
             "bottom left",
             "bottom right",
-            "center"
+            "center",
+            "top center",
+            "bottom center",
+            "left center",
+            "right center"
         ],
         "type": "enum"
     },
@@ -79,7 +83,11 @@
             "top right",
             "bottom left",
             "bottom right",
-            "center"
+            "center",
+            "top center",
+            "bottom center",
+            "left center",
+            "right center"
         ],
         "type": "enum"
     },

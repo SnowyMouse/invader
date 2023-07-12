@@ -166,7 +166,7 @@ namespace Invader::Parser {
             std::size_t data_index = &data - bitmap->bitmap_data.data();
             auto format = data.format;
             auto type = data.type;
-            bool should_be_compressed = (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5);
+            bool should_be_compressed = (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_BC7);
 
             std::size_t depth = data.depth;
             std::size_t start = data.pixel_data_offset;

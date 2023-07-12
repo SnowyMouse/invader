@@ -68,6 +68,7 @@ set(INVADER_SOURCE_FILES
     src/file/file.cpp
     src/build/build_workload.cpp
     src/build/build_workload_dedupe.cpp
+    src/bitmap/bcdec/bcdec.c
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
     src/bitmap/color_plate_scanner.cpp

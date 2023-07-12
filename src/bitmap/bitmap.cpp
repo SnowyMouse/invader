@@ -126,6 +126,10 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             eprintf_error("The \"use average color for detail fade\" option is not supported by this implementation of invader-bitmap");
             std::exit(EXIT_FAILURE);
         }
+        if((bitmap_tag_data.encoding_format == HEK::BitmapFormat::BITMAP_FORMAT_BC7 && !bitmap_options.format.has_value()) || bitmap_options.format == HEK::BitmapFormat::BITMAP_FORMAT_BC7) {
+            eprintf_error("BC7 bitmap encoding is not supported by this implementation of invader-bitmap");
+            std::exit(EXIT_FAILURE);
+        }
 
         // Set some default values
         if(!bitmap_options.format.has_value() && !bitmap_options.auto_format.value_or(false)) {

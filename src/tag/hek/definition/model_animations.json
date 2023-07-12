@@ -327,13 +327,15 @@
                 "name": "ik point",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeatikPoint",
-                "maximum": 4
+                "legacy_maximum": 4,
+                "maximum": 8
             },
             {
                 "name": "weapon types",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeaponType",
-                "maximum": 16
+                "legacy_maximum": 16,
+                "maximum": 64
             }
         ],
         "type": "struct",
@@ -394,13 +396,15 @@
                 "name": "ik points",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeatikPoint",
-                "maximum": 4
+                "legacy_maximum": 4,
+                "maximum": 8
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeapon",
-                "maximum": 16
+                "legacy_maximum": 16,
+                "maximum": 64
             }
         ],
         "type": "struct",
@@ -527,7 +531,8 @@
                 "name": "suspension animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationSuspensionAnimation",
-                "maximum": 8
+                "legacy_maximum": 8,
+                "maximum": 32
             }
         ],
         "type": "struct",
@@ -600,7 +605,8 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsFirstPersonWeapon",
-                "maximum": 28
+                "legacy_maximum": 28,
+                "maximum": 30
             }
         ],
         "type": "struct",
@@ -853,8 +859,8 @@
                 "name": "units",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeat",
-                "maximum": 32,
-                "extended_maximum": 512
+                "legacy_maximum": 32,
+                "maximum": 2048
             },
             {
                 "name": "weapons",
@@ -890,8 +896,9 @@
                 "name": "sound references",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphSoundReference",
-                "maximum": 513,
-                "legacy_maximum": 257
+                "legacy_maximum": 257,
+                "maximum": 512,
+                "extended_maximum": 2048
             },
             {
                 "name": "limp body node radius",
@@ -917,9 +924,8 @@
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimation",
                 "read_only": true,
-                "maximum": 512,
-                "extended_maximum": 2048,
-                "legacy_maximum": 256
+                "legacy_maximum": 256,
+                "maximum": 2048
             }
         ],
         "type": "struct",
