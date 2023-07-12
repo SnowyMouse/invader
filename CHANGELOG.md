@@ -2,10 +2,16 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.53.0] - 2023-07-12
+### Changed
+- invader: Tag and Script definitions have been updated for the MCC
+  July 2023 update.
+- invader-edit-qt: Support viewing BC7 bitmap tags.
+
 ## [0.52.4] - 2023-05-19
 ### Changed
- - invader-build: Do not require the globals rasterizer test fields to have
-   a bitmap referenced.
+- invader-build: Do not require the globals rasterizer test fields to have
+  a bitmap referenced.
 
 ### Fixed
 - invader: Fix world units per tick limit in the actor tag.
@@ -2478,5 +2484,6 @@ image as one bitmap
 [0.52.2]: https://github.com/SnowyMouse/invader/compare/0.52.1...0.52.2
 [0.52.3]: https://github.com/SnowyMouse/invader/compare/0.52.2...0.52.3
 [0.52.4]: https://github.com/SnowyMouse/invader/compare/0.52.3...0.52.4
+[0.53.0]: https://github.com/SnowyMouse/invader/compare/0.52.4...0.53.0
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.52.4...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.0...master
