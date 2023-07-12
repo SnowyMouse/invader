@@ -24,7 +24,7 @@
             "alpha tested",
             "bump map is specular mask",
             "true atmospheric fog",
-            "use variant 2 for calculation bump attention"
+            "use alternate bump attenuation"
         ],
         "width": 16
     },
