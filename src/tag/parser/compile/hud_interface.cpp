@@ -30,12 +30,14 @@
         } \
     } \
 }
-        
-#define CHECK_HIGH_RES_SCALING(flags, name) \
-if((flags & HEK::HUDInterfaceScalingFlagsFlag::HUD_INTERFACE_SCALING_FLAGS_FLAG_USE_HIGH_RES_SCALE) && workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) { \
-    std::string name_copy = name; \
-    name_copy[0] = std::toupper(name_copy[0]); \
-    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "%s has high resolution scaling enabled, but this does not exist on the target engine", name_copy.c_str()); \
+
+#define CHECK_HIGH_RES_SCALING(flags, name) { \
+    auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine; \
+    if((flags & HEK::HUDInterfaceScalingFlagsFlag::HUD_INTERFACE_SCALING_FLAGS_FLAG_USE_HIGH_RES_SCALE) && (engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX || engine_target == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA)) { \
+        std::string name_copy = name; \
+        name_copy[0] = std::toupper(name_copy[0]); \
+        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s has high resolution scaling enabled, but this will not be applied by the target engine", name_copy.c_str()); \
+    } \
 }
 
 namespace Invader::Parser {
@@ -49,11 +51,11 @@ namespace Invader::Parser {
         }
         this->crosshair_types = crosshair_types.flaggy;
 
-        // Check for zoom flags if we don't have any zoom crosshairs
+        // Check for zoom flags if we don't have any zoom overlay crosshairs
         if(!(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM_OVERLAY)) {
             auto &crosshair_types = this->crosshair_types;
-            
-            // If any zoom flags are set, pretend we do have zoom crosshairs
+
+            // If any zoom flags are set, pretend we do have zoom overlay crosshairs
             for(auto &c : this->crosshairs) {
                 auto set_hud_for_zoom_flags = [&c, &crosshair_types]() {
                     for(auto &o : c.crosshair_overlays) {
@@ -68,7 +70,7 @@ namespace Invader::Parser {
                     }
                     return false;
                 };
-                
+
                 if(set_hud_for_zoom_flags()) {
                     break;
                 }
@@ -98,7 +100,7 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return;
         }
-        
+
         // Figure out what we're getting into
         std::size_t sequence_count;
         const BitmapGroupSequence::struct_little *sequences;
@@ -170,7 +172,7 @@ namespace Invader::Parser {
             CHECK_HIGH_RES_SCALING(overlay.scaling_flags, name.c_str());
         }
     }
-    
+
     void UnitHUDInterface::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Bounds check these values
         CHECK_INTERFACE_BITMAP_SEQ(this->hud_background_interface_bitmap, this->hud_background_sequence_index, "HUD background");
@@ -180,7 +182,7 @@ namespace Invader::Parser {
         CHECK_INTERFACE_BITMAP_SEQ(this->health_panel_meter_meter_bitmap, this->health_panel_meter_sequence_index, "health panel meter");
         CHECK_INTERFACE_BITMAP_SEQ(this->motion_sensor_background_interface_bitmap, this->motion_sensor_background_sequence_index, "motion sensor background");
         CHECK_INTERFACE_BITMAP_SEQ(this->motion_sensor_foreground_interface_bitmap, this->motion_sensor_foreground_sequence_index, "motion sensor foreground");
-        
+
         // Check these memes
         CHECK_HIGH_RES_SCALING(this->hud_background_scaling_flags, "HUD background");
         CHECK_HIGH_RES_SCALING(this->shield_panel_background_scaling_flags, "shield panel background");
@@ -189,7 +191,7 @@ namespace Invader::Parser {
         CHECK_HIGH_RES_SCALING(this->health_panel_meter_scaling_flags, "health panel meter");
         CHECK_HIGH_RES_SCALING(this->motion_sensor_background_scaling_flags, "motion sensor background");
         CHECK_HIGH_RES_SCALING(this->motion_sensor_foreground_scaling_flags, "motion sensor foreground");
-        
+
         // Bounds check the overlays
         auto overlay_count = this->overlays.size();
         for(std::size_t i = 0; i < overlay_count; i++) {
@@ -199,7 +201,7 @@ namespace Invader::Parser {
             CHECK_INTERFACE_BITMAP_SEQ(overlay.interface_bitmap, overlay.sequence_index, overlay_name);
             CHECK_HIGH_RES_SCALING(overlay.scaling_flags, overlay_name);
         }
-        
+
         // Bounds check the meters
         auto meter_count = this->meters.size();
         for(std::size_t i = 0; i < meter_count; i++) {
@@ -207,7 +209,7 @@ namespace Invader::Parser {
             std::snprintf(meter_name, sizeof(meter_name), "meter #%zu", i);
             auto meter_bg_name = std::string(meter_name) + " background";
             auto meter_fg_name = std::string(meter_name) + " meter";
-            
+
             auto &meter = this->meters[i];
             CHECK_INTERFACE_BITMAP_SEQ(meter.background_interface_bitmap, meter.background_sequence_index, meter_bg_name.c_str());
             CHECK_INTERFACE_BITMAP_SEQ(meter.meter_meter_bitmap, meter.meter_sequence_index, meter_fg_name.c_str());
