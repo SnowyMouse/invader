@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.53.1] - 2023-07-19
+### Changed
+- invader: rename `use variant 2 for calculation bump attention` flag to `use alternate bump attenuation`
+- invader-build: Do not compile BC7 bitmap tags into cache files for older engines.
+- invader-build: Warn when using `use highres scale` flag in HUD tags on MCC as the scale change does not seem to be applied by the game.
+
 ## [0.53.0] - 2023-07-12
 ### Changed
 - invader: Tag and Script definitions have been updated for the MCC
@@ -2485,5 +2491,6 @@ image as one bitmap
 [0.52.3]: https://github.com/SnowyMouse/invader/compare/0.52.2...0.52.3
 [0.52.4]: https://github.com/SnowyMouse/invader/compare/0.52.3...0.52.4
 [0.53.0]: https://github.com/SnowyMouse/invader/compare/0.52.4...0.53.0
+[0.53.1]: https://github.com/SnowyMouse/invader/compare/0.53.0...0.53.1
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.1...master
