@@ -20,7 +20,7 @@ namespace Invader::Parser {
             else {
                 for(auto &p : geometries[what_index].parts) {
                     bool use_local_nodes = what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES && sizeof(typename std::remove_reference<decltype(p)>::type::struct_little) == sizeof(GBXModelGeometryPart::struct_little);
-                
+
                     for(auto &v : p.uncompressed_vertices) {
                         std::uint16_t node0 = v.node0_index;
                         std::uint16_t node1 = v.node1_index;
@@ -55,20 +55,20 @@ namespace Invader::Parser {
             }
         }
     }
-    
+
     void GBXModel::postprocess_hek_data() {
         postprocess_hek_data_model(*this);
     }
-    
+
     void Model::postprocess_hek_data() {
         postprocess_hek_data_model(*this);
     }
-    
+
     template <class M> static void model_post_compile(M &what, BuildWorkload &workload, std::size_t struct_index, std::size_t offset, std::size_t) {
         // Put all of the markers in the marker array
         auto &markers = what.markers;
         auto region_count = what.regions.size();
-        
+
         for(std::size_t ri = 0; ri < region_count; ri++) {
             auto &r = what.regions[ri];
             std::size_t permutation_count = r.permutations.size();
@@ -199,17 +199,17 @@ namespace Invader::Parser {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Non-Gearbox models are not allowed to have \"parts have local nodes\" set but this model does", tag_index);
             throw InvalidTagDataException();
         }
-        
+
         model_post_compile(*this, workload, struct_index, offset, tag_index);
     }
-    
+
     template <class P, class M> static bool regenerate_missing_model_vertices_part(P &part, M &model, bool fix) {
         // If we have no uncompressed vertices, try to regenerate those
         if(part.uncompressed_vertices.size() == 0 && part.compressed_vertices.size() > 0) {
             if(!fix) {
                 return true;
             }
-            
+
             part.uncompressed_vertices.reserve(part.compressed_vertices.size());
             for(auto &v : part.compressed_vertices) {
                 auto before_data = v.generate_hek_tag_data();
@@ -232,12 +232,12 @@ namespace Invader::Parser {
                 if((sizeof(typename P::struct_little) != sizeof(GBXModelGeometryPart::struct_little)) || !(model.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES)) {
                     return local_index;
                 }
-                
+
                 // And if the local node passed is null, just return it
                 if(local_index == NULL_INDEX) {
                     return NULL_INDEX;
                 }
-                
+
                 // Do it
                 auto *part_gbx = reinterpret_cast<GBXModelGeometryPart *>(&part);
                 if(local_index >= part_gbx->local_node_count) {
@@ -246,7 +246,7 @@ namespace Invader::Parser {
                 }
                 return part_gbx->local_node_indices[local_index];
             };
-            
+
             // Can we even do this?
             for(auto &v : part.uncompressed_vertices) {
                 auto n0 = resolve_local_node(v.node0_index);
@@ -255,19 +255,19 @@ namespace Invader::Parser {
                     return false;
                 }
             }
-            
+
             if(!fix) {
                 return true;
             }
-            
+
             part.compressed_vertices.reserve(part.uncompressed_vertices.size());
-            
+
             for(auto &v : part.uncompressed_vertices) {
                 // Resolve local nodes before throwing them into the compressor
                 auto before_data_copy = *reinterpret_cast<ModelVertexUncompressed::struct_big *>(v.generate_hek_tag_data().data());
                 before_data_copy.node0_index = resolve_local_node(before_data_copy.node0_index);
                 before_data_copy.node1_index = resolve_local_node(before_data_copy.node1_index);
-                
+
                 // Done
                 auto after_data = HEK::compress_model_vertex(before_data_copy);
                 auto &after_data_write = part.compressed_vertices.emplace_back();
@@ -307,7 +307,7 @@ namespace Invader::Parser {
                 result = regenerate_missing_model_vertices(p, model, fix) || result;
             }
         }
-        
+
         return result;
     }
 
@@ -318,7 +318,7 @@ namespace Invader::Parser {
     bool regenerate_missing_model_vertices(Model &model, bool fix) {
         return regenerate_missing_model_vertices_model(model, fix);
     }
-    
+
     template <class P, typename PS> static void post_cache_parse_model_part(P &what, const PS &part, const Invader::Tag &tag) {
         const auto &map = tag.get_map();
 
@@ -393,18 +393,18 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         post_lod_cutoff_check:
         std::size_t region_count = what.regions.size();
         std::size_t geometries_count = what.geometries.size();
         std::size_t node_count = what.nodes.size();
-        
+
         // Make sure we HAVE nodes
         if(node_count == 0) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Model has no nodes");
             throw InvalidTagDataException();
         }
-        
+
         for(std::size_t ri = 0; ri < region_count; ri++) {
             auto &r = what.regions[ri];
             std::size_t permutation_count = r.permutations.size();
@@ -424,11 +424,11 @@ namespace Invader::Parser {
                 #undef DO_GEO_CHECK
             }
         }
-        
+
         // Handle blended normals
         if(what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS) {
             std::vector<HEK::Point3D<HEK::NativeEndian>> positions;
-            
+
             // Get all of the possible vertex positions
             for(auto &g : what.geometries) {
                 for(auto &p : g.parts) {
@@ -444,10 +444,10 @@ namespace Invader::Parser {
                             positions.emplace_back(v.position);
                         }
                     }
-                    
+
                 }
             }
-            
+
             // Do we have anything?
             if(positions.size() == 0) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Unable to blend shared normals due to missing uncompressed vertices");
@@ -467,16 +467,16 @@ namespace Invader::Parser {
                             }
                         }
                     }
-                    
+
                     // Account for memed stuff
                     if(vectors.i == 0.0F && vectors.j == 0.0F && vectors.k == 0.0F) {
                         vectors.i = 1.0F;
                     }
-                    
+
                     // Normalize
                     auto normalized = vectors.normalize();
                     auto normalized_compressed = compress_vector(normalized.i, normalized.j, normalized.k);
-                    
+
                     // Store the stuff
                     for(auto &g : what.geometries) {
                         for(auto &p : g.parts) {
@@ -503,7 +503,7 @@ namespace Invader::Parser {
             std::size_t parts_count = g.parts.size();
             for(std::size_t pi = 0; pi < parts_count; pi++) {
                 auto &p = g.parts[pi];
-                
+
                 // Check this stuff!
                 std::size_t compressed_vertex_count = p.compressed_vertices.size();
                 std::size_t uncompressed_vertex_count = p.uncompressed_vertices.size();
@@ -518,7 +518,7 @@ namespace Invader::Parser {
                 p.centroid_secondary_node = 0;
                 p.centroid_primary_weight = 1.0F;
                 p.centroid_secondary_weight = 0.0F;
-                
+
                 // CAN we use local part nodes
                 if(uses_local_part_nodes && sizeof(typename std::remove_reference<decltype(p)>::type::struct_little) != sizeof(GBXModelGeometryPart::struct_little)) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of geometry #%zu uses local part nodes, but they aren't supported for non-gbxmodels", pi, gi);
@@ -534,7 +534,7 @@ namespace Invader::Parser {
                     auto &v = p.uncompressed_vertices[vi];
                     std::size_t node0_index = static_cast<std::size_t>(v.node0_index);
                     std::size_t node1_index = static_cast<std::size_t>(v.node1_index);
-                    
+
                     if(uses_local_part_nodes) {
                         // using reinterpret cast here because we don't want the compiler to complain about ModelPart not having local nodes
                         auto &p_gbx = *reinterpret_cast<GBXModelGeometryPart *>(&p);
@@ -601,12 +601,12 @@ namespace Invader::Parser {
                     std::size_t second_highest_local = second_highest;
                     float first_highest_weight = node_weight[first_highest];
                     float second_highest_weight = node_weight[second_highest];
-                    
+
                     // Use the local node indices if needed
                     if(uses_local_part_nodes) {
                         auto &p_gbx = *reinterpret_cast<GBXModelGeometryPart *>(&p);
                         auto index_count = p_gbx.local_node_count;
-                        
+
                         for(std::size_t i = 0; i < index_count; i++) {
                             auto li = p_gbx.local_node_indices[i];
                             if(li == first_highest) {
@@ -721,14 +721,14 @@ namespace Invader::Parser {
 
         for(std::size_t gi = 0; gi < geometries_count; gi++) {
             auto &g = what.geometries[gi];
-            
+
             auto part_count = g.parts.size();
-            
+
             std::size_t part_index_limit = part_count > INT_MAX ? INT_MAX : part_count;
-            
+
             for(std::size_t pi = 0; pi < part_count; pi++) {
                 auto &p = g.parts[pi];
-                
+
                 // Validate each part index
                 if(p.next_filthy_part_index != 255 && p.next_filthy_part_index >= part_index_limit) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of geometry #%zu has an invalid next filthy part index (%zu >= %zu)", pi, gi, static_cast<std::size_t>(p.next_filthy_part_index), part_index_limit);
@@ -738,17 +738,9 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of geometry #%zu has an invalid previous filthy part index (%zu >= %zu)", pi, gi, static_cast<std::size_t>(p.prev_filthy_part_index), part_index_limit);
                     throw InvalidTagDataException();
                 }
-                
-                if(p.next_filthy_part_index != p.prev_filthy_part_index && (p.next_filthy_part_index == 0 || p.prev_filthy_part_index == 0)) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Part #%zu of geometry #%zu has exactly one filthy part index set to 0. While this is a valid index, this will be defaulted to none due to tool.exe behavior. If you intended to use none, set it to 255. Otherwise, you need to rearrange the geometry parts (or ask 343 Industries to fix this behavior).", pi, gi);
-                }
-                
                 // Default
-                if(p.next_filthy_part_index == 0) {
+                if(p.next_filthy_part_index == 0 && p.prev_filthy_part_index == 0) {
                     p.next_filthy_part_index = UINT8_MAX;
-                }
-                
-                if(p.prev_filthy_part_index == 0) {
                     p.prev_filthy_part_index = UINT8_MAX;
                 }
             }
@@ -760,7 +752,7 @@ namespace Invader::Parser {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Gearbox model tags do not exist on the target engine", tag_index);
             throw InvalidTagDataException();
         }
-        
+
         pre_compile_model(*this, workload, tag_index);
     }
 
@@ -774,13 +766,13 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             default: break;
         }
-        
+
         pre_compile_model(*this, workload, tag_index);
     }
-    
+
     template<class P, class PartVertex, class CacheVertex> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset, const std::vector<PartVertex> &part_vertices, std::vector<CacheVertex> &workload_vertices) {
         auto uncompressed_vertices = sizeof(CacheVertex) == sizeof(Parser::ModelVertexUncompressed::struct_little);
-        
+
         std::vector<HEK::Index> triangle_indices;
 
         // Add it all
@@ -860,7 +852,7 @@ namespace Invader::Parser {
         what.vertex_count = part_vertices.size();
         std::vector<CacheVertex> vertices_of_fun;
         vertices_of_fun.reserve(what.vertex_count);
-        
+
         for(auto &v : part_vertices) {
             auto &mv = vertices_of_fun.emplace_back();
             mv.binormal = v.binormal;
@@ -875,7 +867,7 @@ namespace Invader::Parser {
             mv.normal = v.normal;
             mv.position = v.position;
             mv.tangent = v.tangent;
-            
+
             if(uncompressed_vertices) {
                 auto &uncompressed_cache_vertex = *reinterpret_cast<Parser::ModelVertexUncompressed::struct_little *>(&mv);
                 const auto &uncompressed_parser_vertex = *reinterpret_cast<const Parser::ModelVertexUncompressed *>(&v);
@@ -889,7 +881,7 @@ namespace Invader::Parser {
                 compressed_cache_vertex.texture_coordinate_v = compressed_parser_vertex.texture_coordinate_v;
             }
         }
-        
+
         // Part thingy
         workload.model_parts.emplace_back(BuildWorkload::BuildWorkloadModelPart { struct_index, struct_offset });
 
@@ -959,7 +951,7 @@ namespace Invader::Parser {
             }
         }
     }
-    
+
     template <typename M> static void post_cache_deformat_model(M &what) {
         what.flags &= ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS; // prevent generational loss
 
@@ -976,7 +968,7 @@ namespace Invader::Parser {
         what.super_high_detail_cutoff = super_low;
 
         regenerate_missing_model_vertices(what, true); // regenerate if needed
-        
+
         what.postprocess_hek_data();
     }
 
@@ -987,7 +979,7 @@ namespace Invader::Parser {
     void Invader::Parser::Model::post_cache_deformat() {
         post_cache_deformat_model(*this);
     }
-    
+
     template<typename M> static bool uncache_model_markers_model(M &model, bool fix) {
         if(model.markers.size() == 0) {
             return false;
@@ -1058,38 +1050,38 @@ namespace Invader::Parser {
     bool uncache_model_markers(Model &model, bool fix) {
         return uncache_model_markers_model(model, fix);
     }
-    
+
     template <class MFrom, class MTo> static MTo begin_converting_model(const MFrom &model) {
         MTo output = {};
-        
+
         output.flags = model.flags;
         output.node_list_checksum = model.node_list_checksum;
-        
+
         output.super_high_detail_cutoff = model.super_high_detail_cutoff;
         output.high_detail_cutoff = model.high_detail_cutoff;
         output.medium_detail_cutoff = model.medium_detail_cutoff;
         output.low_detail_cutoff = model.low_detail_cutoff;
         output.super_low_detail_cutoff = model.super_low_detail_cutoff;
-        
+
         output.super_high_detail_node_count = model.super_high_detail_node_count;
         output.high_detail_node_count = model.high_detail_node_count;
         output.medium_detail_node_count = model.medium_detail_node_count;
         output.low_detail_node_count = model.low_detail_node_count;
         output.super_low_detail_node_count = model.super_low_detail_node_count;
-        
+
         output.base_map_u_scale = model.base_map_u_scale;
         output.base_map_v_scale = model.base_map_v_scale;
         output.markers = model.markers;
         output.nodes = model.nodes;
         output.regions = model.regions;
         output.shaders = model.shaders;
-        
+
         return output;
     }
-    
+
     template <class PFrom, class PTo> static PTo begin_converting_part(const PFrom &part) {
         PTo output = {};
-        
+
         output.flags = part.flags;
         output.shader_index = part.shader_index;
         output.prev_filthy_part_index = part.prev_filthy_part_index;
@@ -1098,13 +1090,13 @@ namespace Invader::Parser {
         output.uncompressed_vertices = part.uncompressed_vertices;
         output.compressed_vertices = part.compressed_vertices;
         output.triangles = part.triangles;
-        
+
         return output;
     }
-    
+
     GBXModel convert_model_to_gbxmodel(const Model &model) {
         auto output = begin_converting_model<Model, GBXModel>(model);
-        
+
         for(auto &gi : model.geometries) {
             auto &go = output.geometries.emplace_back();
             go.flags = gi.flags;
@@ -1112,29 +1104,29 @@ namespace Invader::Parser {
                 go.parts.emplace_back(begin_converting_part<ModelGeometryPart, GBXModelGeometryPart>(pi));
             }
         }
-        
+
         return output;
     }
-    
+
     Model convert_gbxmodel_to_model(const GBXModel &model) {
         auto output = begin_converting_model<GBXModel, Model>(model);
-        
+
         // Check if we have local nodes
         auto local_nodes = model.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
         if(local_nodes) {
             // Local nodes don't exist on model tags
             output.flags = output.flags & ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
         }
-        
+
         // Do this
         for(auto &gi : model.geometries) {
             auto &go = output.geometries.emplace_back();
             go.flags = gi.flags;
             for(auto &pi : gi.parts) {
                 auto &po = go.parts.emplace_back(begin_converting_part<GBXModelGeometryPart, ModelGeometryPart>(pi));
-                
+
                 auto node_count = sizeof(pi.local_node_indices) / sizeof(*pi.local_node_indices);
-                
+
                 if(local_nodes) {
                     for(auto &v : po.uncompressed_vertices) {
                         if(v.node0_index != NULL_INDEX) {
@@ -1147,7 +1139,7 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         return output;
     }
 }
