@@ -194,6 +194,7 @@
             {
                 "name": "name",
                 "type": "TagString",
+                "read_only": false,
                 "endian": null
             },
             {
