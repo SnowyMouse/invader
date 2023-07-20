@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.53.2] - 2023-07-20
+### Fixed
+- invader-resource: Fix creating resource maps for MCC CEA with BC7 bitmap tags in them.
+
 ## [0.53.1] - 2023-07-19
 ### Changed
 - invader: rename `use variant 2 for calculation bump attention` flag to `use alternate bump attenuation`
@@ -2492,5 +2496,6 @@ image as one bitmap
 [0.52.4]: https://github.com/SnowyMouse/invader/compare/0.52.3...0.52.4
 [0.53.0]: https://github.com/SnowyMouse/invader/compare/0.52.4...0.53.0
 [0.53.1]: https://github.com/SnowyMouse/invader/compare/0.53.0...0.53.1
+[0.53.1]: https://github.com/SnowyMouse/invader/compare/0.53.1...0.53.2
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.1...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.2...master

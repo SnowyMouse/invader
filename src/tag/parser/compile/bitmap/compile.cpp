@@ -163,7 +163,7 @@ namespace Invader::Parser {
                 }
             }
 
-            if(engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA && data.format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_BC7) {
+            if((engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA && engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) && data.format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_BC7) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu is BC7 which is not implemented by the target engine", b);
                 throw InvalidTagDataException();
             }
