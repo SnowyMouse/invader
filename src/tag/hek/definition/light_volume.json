@@ -187,6 +187,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 332,
         "class": "light_volume"
     }

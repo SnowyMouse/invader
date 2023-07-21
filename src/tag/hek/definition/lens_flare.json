@@ -277,6 +277,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "post_compile": true,
         "size": 240,
         "class": "lens_flare"
     }

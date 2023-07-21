@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/parser/parser.hpp>
+#include <invader/build/build_workload.hpp>
+
+#include "hud_interface.hpp"
 
 namespace Invader::Parser {
     void Antenna::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
@@ -22,4 +25,14 @@ namespace Invader::Parser {
 
         this->length = length;
     }
+
+    void Antenna::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+       auto vertex_count = this->vertices.size();
+       for(std::size_t i = 0; i < vertex_count; i++) {
+           auto &vertex = this->vertices[i];
+           char str[256];
+           std::snprintf(str, sizeof(str), "antenna vertex #%zu", i);
+           CHECK_BITMAP_SEQUENCE(workload, this->bitmaps, vertex.sequence_index, str);
+       }
+   }
 }
