@@ -6,12 +6,19 @@
 
 #include "hud_interface.hpp"
 
+// "use highres scale" does not work the same way on MCC as it did on Halo PC. Instead of halving the rendered bitmap size it doubles the offset from the anchor.
 #define CHECK_HIGH_RES_SCALING(flags, name) { \
     auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine; \
     if((flags & HEK::HUDInterfaceScalingFlagsFlag::HUD_INTERFACE_SCALING_FLAGS_FLAG_USE_HIGH_RES_SCALE) && (engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX || engine_target == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA)) { \
         std::string name_copy = name; \
         name_copy[0] = std::toupper(name_copy[0]); \
-        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s has high resolution scaling enabled, but this will not be applied by the target engine", name_copy.c_str()); \
+        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) { \
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s has high resolution scaling enabled, but on the target engine this modifies offset instead of scale.", name_copy.c_str()); \
+        } \
+        else { \
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "%s has high resolution scaling enabled, but this does not exist on the target engine.", name_copy.c_str()); \
+            throw InvalidTagDataException(); \
+        } \
     } \
 }
 
@@ -195,11 +202,11 @@ namespace Invader::Parser {
 
     void GrenadeHUDInterface::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Bounds check these
-        CHECK_BITMAP_SEQUENCE(workload, this->background_interface_bitmap, this->background_sequence_index, "grenades background");
+        CHECK_BITMAP_SEQUENCE(workload, this->background_interface_bitmap, this->background_sequence_index, "grenade HUD background");
         CHECK_BITMAP_SEQUENCE(workload, this->total_grenades_background_interface_bitmap, this->total_grenades_background_sequence_index, "total grenades background");
 
         // Check scale flags
-        CHECK_HIGH_RES_SCALING(this->background_scaling_flags, "background");
+        CHECK_HIGH_RES_SCALING(this->background_scaling_flags, "grenade HUD background");
         CHECK_HIGH_RES_SCALING(this->total_grenades_background_scaling_flags, "total grenades background");
 
         // Check the overlays
