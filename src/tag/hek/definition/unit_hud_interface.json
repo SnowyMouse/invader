@@ -119,7 +119,7 @@
                 "size": 2
             },
             {
-                "name": "multitex overlay",
+                "name": "multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "maximum": 30
@@ -291,10 +291,10 @@
                 "size": 2
             },
             {
-                "name": "background multitex overlay",
+                "name": "background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay",
+                "display_name": "multitexture overlays",
                 "maximum": 30
             },
             {
@@ -586,10 +586,10 @@
                 "size": 2
             },
             {
-                "name": "hud background multitex overlay",
+                "name": "hud background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay",
+                "display_name": "multitexture overlays",
                 "maximum": 30
             },
             {
@@ -688,10 +688,10 @@
                 "size": 2
             },
             {
-                "name": "shield panel background multitex overlay",
+                "name": "shield panel background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay",
+                "display_name": "multitexture overlays",
                 "maximum": 30
             },
             {
@@ -929,10 +929,10 @@
                 "size": 2
             },
             {
-                "name": "health panel background multitex overlay",
+                "name": "health panel background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
-                "display_name": "multitex overlay",
+                "display_name": "multitexture overlays",
                 "maximum": 30
             },
             {
@@ -1162,9 +1162,10 @@
                 "size": 2
             },
             {
-                "name": "motion sensor background multitex overlays",
+                "name": "motion sensor background multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
+                "display_name": "multitexture overlays",
                 "maximum": 30
             },
             {
@@ -1263,9 +1264,10 @@
                 "size": 2
             },
             {
-                "name": "motion sensor foreground multitex overlays",
+                "name": "motion sensor foreground multitexture overlays",
                 "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
+                "display_name": "multitexture overlays",
                 "maximum": 30
             },
             {

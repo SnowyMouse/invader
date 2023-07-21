@@ -912,6 +912,13 @@
     },
     {
         "name": "WeaponHUDInterface",
+        "groups": [
+            {
+                "name": "messaging information",
+                "description": "This defines HUD information such as the pickup icon and text.",
+                "first": "messaging information sequence index"
+            }
+        ],
         "fields": [
             {
                 "name": "child hud",
@@ -1011,34 +1018,41 @@
                 "size": 132
             },
             {
-                "name": "sequence index",
-                "type": "Index"
+                "name": "messaging information sequence index",
+                "type": "Index",
+                "display_name": "sequence index"
             },
             {
-                "name": "width offset",
-                "type": "int16"
+                "name": "messaging information width offset",
+                "type": "int16",
+                "display_name": "width offset"
             },
             {
-                "name": "offset from reference corner",
-                "type": "Point2DInt"
+                "name": "messaging information offset from reference corner",
+                "type": "Point2DInt",
+                "display_name": "offset from reference corner"
             },
             {
-                "name": "override icon color",
-                "type": "ColorARGBInt"
+                "name": "messaging information override icon color",
+                "type": "ColorARGBInt",
+                "display_name": "override icon color"
             },
             {
-                "name": "frame rate",
+                "name": "messaging information frame rate",
                 "type": "int8",
+                "display_name": "frame rate",
                 "endian": null
             },
             {
-                "name": "more flags",
+                "name": "messaging information flags",
                 "type": "HUDInterfaceMessagingFlags",
+                "display_name": "flags",
                 "endian": null
             },
             {
-                "name": "text index",
-                "type": "Index"
+                "name": "messaging information text index",
+                "type": "Index",
+                "display_name": "text index"
             },
             {
                 "type": "pad",

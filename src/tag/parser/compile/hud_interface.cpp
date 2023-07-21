@@ -192,4 +192,24 @@ namespace Invader::Parser {
             CHECK_HIGH_RES_SCALING(meter.meter_scaling_flags, meter_fg_name.c_str());
         }
     }
+
+    void GrenadeHUDInterface::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        // Bounds check these
+        CHECK_BITMAP_SEQUENCE(workload, this->background_interface_bitmap, this->background_sequence_index, "grenades background");
+        CHECK_BITMAP_SEQUENCE(workload, this->total_grenades_background_interface_bitmap, this->total_grenades_background_sequence_index, "total grenades background");
+
+        // Check scale flags
+        CHECK_HIGH_RES_SCALING(this->background_scaling_flags, "background");
+        CHECK_HIGH_RES_SCALING(this->total_grenades_background_scaling_flags, "total grenades background");
+
+        // Check the overlays
+        auto overlay_count = this->total_grenades_overlays.size();
+        for(std::size_t i = 0; i < overlay_count; i++) {
+            char name[256];
+            std::snprintf(name, sizeof(name), "total grenades overlay #%zu", i);
+            auto &overlay = this->total_grenades_overlays[i];
+            CHECK_BITMAP_SEQUENCE(workload, this->total_grenades_overlay_bitmap, overlay.sequence_index, name);
+            CHECK_HIGH_RES_SCALING(overlay.scaling_flags, name);
+        }
+    }
 }

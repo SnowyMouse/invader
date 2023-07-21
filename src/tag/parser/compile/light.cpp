@@ -47,7 +47,7 @@ namespace Invader::Parser {
         }
     }
 
-    void LightVolume::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
+    void LightVolume::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         CHECK_BITMAP_SEQUENCE(workload, this->map, this->sequence_index, "light volume");
     }
 }

@@ -17,7 +17,7 @@ namespace Invader::Parser {
         }
     }
 
-    void ItemCollection::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
+    void ItemCollection::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::uint64_t total_weight = 0;
         for(auto &p : this->permutations) {
             if(p.weight >= 0.0 && p.weight <= 32768.0) {
