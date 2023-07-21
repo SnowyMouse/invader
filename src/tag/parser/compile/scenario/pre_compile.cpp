@@ -630,9 +630,6 @@ namespace Invader::Parser {
 
             if(!resolved && r.first.path == "none") {
                 resolved = true;
-                char w[1024];
-                std::snprintf(w, sizeof(w), "%s:%zu:%zu: warning: using null tag paths is a Halo 3 extension and may not work with stock tools or any future release of Invader", n.file, n.line, n.column);
-                warnings.emplace_back(w);
                 path = r.first;
                 skip_adding = true;
             }
