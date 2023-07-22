@@ -400,7 +400,7 @@ namespace Invader::Parser {
 
         // If it's 0, don't bother checking. This is a complete hack, but the official tools do this. And if you're lucky and make a tag that just so happens to have a checksum of 0, you win a free warning!
         if(model_checksum == 0) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s.%s has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(model_tag.path).c_str(), HEK::tag_fourcc_to_extension(model_tag.tag_fourcc));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(model_tag.path).c_str(), HEK::tag_fourcc_to_extension(model_tag.tag_fourcc));
             return;
         }
 
