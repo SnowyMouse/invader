@@ -32,8 +32,7 @@ namespace Invader::Parser {
                 }
             }
             else if(reflection_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Lens flare has %zu reflections, but no bitmap is referenced", reflection_count);
-                throw InvalidTagDataException();
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Lens flare has %zu reflection%s, but no bitmap is referenced", reflection_count, reflection_count == 1 ? "" : "s");
             }
         }
     }
