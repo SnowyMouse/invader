@@ -416,7 +416,7 @@ namespace Invader::Parser {
 
                 // Same hack as before. And again, if your lucky lotto number is 0, congratulations!
                 if(animation_checksum == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%s.%s animation #%zu has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(animation_tag.path).c_str(), HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc), a);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s animation #%zu has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(animation_tag.path).c_str(), HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc), a);
                     continue;
                 }
 
