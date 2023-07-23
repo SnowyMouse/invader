@@ -169,7 +169,8 @@
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
-                ]
+                ],
+                "non_null": true
             },
             {
                 "name": "sequence index",
@@ -436,6 +437,7 @@
         ],
         "type": "struct",
         "title": "name",
+        "post_compile": true,
         "size": 128
     },
     {
