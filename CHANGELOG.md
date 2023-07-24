@@ -2,15 +2,29 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.53.3] - 2023-07-25
+### Fixed
+- invader-build: Fix defaulting model filthy part indices.
+
+### Changed
+- invader-build: bitmap sequence index is now checked in more places.
+- invader-build: particle system tags are now checked to make sure an extra
+  bitmap sequece is available after the one referenced when using the "rotational"
+  complex sprite render mode.
+- invader-edit-qt: grenade_hud_interface field naming has been made clearer.
+
 ## [0.53.2] - 2023-07-20
 ### Fixed
-- invader-resource: Fix creating resource maps for MCC CEA with BC7 bitmap tags in them.
+- invader-resource: Fix creating resource maps for MCC CEA with BC7 bitmap tags
+  in them.
 
 ## [0.53.1] - 2023-07-19
 ### Changed
-- invader: rename `use variant 2 for calculation bump attention` flag to `use alternate bump attenuation`
+- invader: rename `use variant 2 for calculation bump attention` flag to
+  `use alternate bump attenuation`
 - invader-build: Do not compile BC7 bitmap tags into cache files for older engines.
-- invader-build: Warn when using `use highres scale` flag in HUD tags on MCC as the scale change does not seem to be applied by the game.
+- invader-build: Warn when using `use highres scale` flag in HUD tags on MCC as
+  the scale change does not seem to be applied by the game.
 
 ## [0.53.0] - 2023-07-12
 ### Changed
@@ -2496,6 +2510,7 @@ image as one bitmap
 [0.52.4]: https://github.com/SnowyMouse/invader/compare/0.52.3...0.52.4
 [0.53.0]: https://github.com/SnowyMouse/invader/compare/0.52.4...0.53.0
 [0.53.1]: https://github.com/SnowyMouse/invader/compare/0.53.0...0.53.1
-[0.53.1]: https://github.com/SnowyMouse/invader/compare/0.53.1...0.53.2
+[0.53.2]: https://github.com/SnowyMouse/invader/compare/0.53.1...0.53.2
+[0.53.3]: https://github.com/SnowyMouse/invader/compare/0.53.2...0.53.3
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.2...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.3...master
