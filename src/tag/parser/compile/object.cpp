@@ -400,7 +400,7 @@ namespace Invader::Parser {
 
         // If it's 0, don't bother checking. This is a complete hack, but the official tools do this. And if you're lucky and make a tag that just so happens to have a checksum of 0, you win a free warning!
         if(model_checksum == 0) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(model_tag.path).c_str(), HEK::tag_fourcc_to_extension(model_tag.tag_fourcc));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "'%s.%s' has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(model_tag.path).c_str(), HEK::tag_fourcc_to_extension(model_tag.tag_fourcc));
             return;
         }
 
@@ -416,13 +416,13 @@ namespace Invader::Parser {
 
                 // Same hack as before. And again, if your lucky lotto number is 0, congratulations!
                 if(animation_checksum == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s animation #%zu has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(animation_tag.path).c_str(), HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc), a);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "'%s.%s' animation #%zu has a node list checksum of 0, so its checksum will not be checked", File::halo_path_to_preferred_path(animation_tag.path).c_str(), HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc), a);
                     continue;
                 }
 
                 // Check it
                 if(model_checksum != animation_checksum) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s animation #%zu node list checksums are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "'%s.%s' and '%s.%s' animation #%zu node list checksums are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
                                                                                                                                                           HEK::tag_fourcc_to_extension(model_tag.tag_fourcc),
                                                                                                                                                           File::halo_path_to_preferred_path(animation_tag.path).c_str(),
                                                                                                                                                           HEK::tag_fourcc_to_extension(animation_tag.tag_fourcc),
@@ -450,7 +450,7 @@ namespace Invader::Parser {
 
         // Error if they are different
         if(model_struct.regions.count.read() != collision_struct.regions.count.read()) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s.%s and %s.%s's region counts are mismatched", File::halo_path_to_preferred_path(model_tag.path).c_str(),
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "'%s.%s' and '%s.%s' have mismatched region counts", File::halo_path_to_preferred_path(model_tag.path).c_str(),
                                                                                                                                HEK::tag_fourcc_to_extension(model_tag.tag_fourcc),
                                                                                                                                File::halo_path_to_preferred_path(collision_tag.path).c_str(),
                                                                                                                                HEK::tag_fourcc_to_extension(collision_tag.tag_fourcc));

@@ -87,7 +87,7 @@ namespace Invader::Parser {
     }
 
     static void complain_about_non_square_sheets(BuildWorkload &workload, std::size_t tag_index, const BuildWorkload::BuildWorkloadTag &tag) {
-        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap %s.%s uses non-square sprite sheets. The particle will be distorted.", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.tag_fourcc));
+        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap '%s.%s' uses non-square sprite sheets. The particle will be distorted.", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_fourcc_to_extension(tag.tag_fourcc));
     }
 
     void Particle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
@@ -129,7 +129,7 @@ namespace Invader::Parser {
     }
 
     void ParticleSystemType::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
-        if(workload.disable_recursion) {
+        if(workload.disable_recursion && !workload.disable_error_checking) {
             return;
         }
 
@@ -138,8 +138,6 @@ namespace Invader::Parser {
         if(particle_state_count == 0) {
             return;
         }
-
-        bool rotational = this->complex_sprite_render_mode == HEK::ParticleSystemComplexSpriteRenderMode::PARTICLE_SYSTEM_COMPLEX_SPRITE_RENDER_MODE_ROTATIONAL;
 
         auto &particle_system_type_struct = workload.structs[struct_index];
         auto &particle_system_type_struct_c = *reinterpret_cast<struct_little *>(particle_system_type_struct.data.data() + struct_offset);
@@ -155,20 +153,20 @@ namespace Invader::Parser {
             auto &bitmap_tag_data = *reinterpret_cast<Bitmap::struct_little *>(bitmap_tag_struct.data.data());
 
             if(bitmap_tag_data.type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap %s.%s referenced in particle state #%zu of particle type #%zu is not of type sprites. Particle states only accept sprites.", File::halo_path_to_preferred_path(bitmap_tag.path).c_str(), HEK::tag_fourcc_to_extension(bitmap_tag.tag_fourcc), i, struct_offset / sizeof(ParticleSystemType::struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap '%s.%s' referenced in particle state #%zu of particle type #%zu is not of type sprites. Particle states only accept sprites.", File::halo_path_to_preferred_path(bitmap_tag.path).c_str(), HEK::tag_fourcc_to_extension(bitmap_tag.tag_fourcc), i, struct_offset / sizeof(ParticleSystemType::struct_little));
                 throw InvalidTagDataException();
             }
 
             auto sequence_index = static_cast<std::size_t>(state.sequence_index);
             auto sequence_count = static_cast<std::size_t>(bitmap_tag_data.bitmap_group_sequence.count);
             if(sequence_index >= sequence_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s.%s referenced in particle state #%zu of particle type #%zu is out of bounds (>= %zu)", sequence_index, File::halo_path_to_preferred_path(bitmap_tag.path).c_str(), HEK::tag_fourcc_to_extension(bitmap_tag.tag_fourcc), i, struct_offset / sizeof(ParticleSystemType::struct_little), sequence_count);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in '%s.%s' referenced in particle state #%zu of particle type #%zu is out of bounds (>= %zu)", sequence_index, File::halo_path_to_preferred_path(bitmap_tag.path).c_str(), HEK::tag_fourcc_to_extension(bitmap_tag.tag_fourcc), i, struct_offset / sizeof(ParticleSystemType::struct_little), sequence_count);
                 throw InvalidTagDataException();
             }
-            if(rotational) {
+            if(this->complex_sprite_render_mode == HEK::ParticleSystemComplexSpriteRenderMode::PARTICLE_SYSTEM_COMPLEX_SPRITE_RENDER_MODE_ROTATIONAL) {
                 auto extra_sequence_index = sequence_index + 1;
                 if(extra_sequence_index >= sequence_count) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Particle type #%zu uses complex sprite render mode \'rotational\' that requires extra sequence #%zu in bitmap %s.%s referenced in particle state #%zu, but this is out of bounds (>= %zu)", struct_offset / sizeof(ParticleSystemType::struct_little), extra_sequence_index, File::halo_path_to_preferred_path(bitmap_tag.path).c_str(), HEK::tag_fourcc_to_extension(bitmap_tag.tag_fourcc), i, sequence_count);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Particle type #%zu uses complex sprite render mode 'rotational' that requires extra sequence #%zu in '%s.%s' referenced in particle state #%zu, but this is out of bounds (>= %zu)", struct_offset / sizeof(ParticleSystemType::struct_little), extra_sequence_index, File::halo_path_to_preferred_path(bitmap_tag.path).c_str(), HEK::tag_fourcc_to_extension(bitmap_tag.tag_fourcc), i, sequence_count);
                     throw InvalidTagDataException();
                 }
             }

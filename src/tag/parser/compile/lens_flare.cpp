@@ -26,7 +26,7 @@ namespace Invader::Parser {
                     if(reflection.bitmap_index >= bitmap_count) {
                         char bitmap_path[256];
                         std::snprintf(bitmap_path, sizeof(bitmap_path), "%s.%s", this->bitmap.path.c_str(), HEK::tag_fourcc_to_extension(this->bitmap.tag_fourcc));
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap #%zu in %s referenced in reflection #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(reflection.bitmap_index), bitmap_path, i, bitmap_count);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap #%zu in '%s' referenced in reflection #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(reflection.bitmap_index), bitmap_path, i, bitmap_count);
                         throw InvalidTagDataException();
                     }
                 }

@@ -14,17 +14,17 @@
         HEK::BitmapType bitmap_type; \
         get_sequence_data(workload, bitmap_tag.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type); \
         if(sequence_index >= sequence_count) { \
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced by %s is out of bounds (>= %zu)", static_cast<std::size_t>(sequence_index), bitmap_tag_path, name, sequence_count); \
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in '%s' referenced by %s is out of bounds (>= %zu)", static_cast<std::size_t>(sequence_index), bitmap_tag_path, name, sequence_count); \
             throw InvalidTagDataException(); \
         } \
         else { \
             auto &sequence = sequences[sequence_index]; \
             if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) { \
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in %s has 0 sprites", static_cast<std::size_t>(sequence_index), name, bitmap_tag_path); \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in '%s' referenced in %s has 0 sprites", static_cast<std::size_t>(sequence_index), name, bitmap_tag_path); \
                 throw InvalidTagDataException(); \
             } \
             else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) { \
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in %s referenced in %s has 0 bitmaps", static_cast<std::size_t>(sequence_index), name, bitmap_tag_path); \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sequence #%zu in '%s' referenced in %s has 0 bitmaps", static_cast<std::size_t>(sequence_index), name, bitmap_tag_path); \
                 throw InvalidTagDataException(); \
             } \
         } \
