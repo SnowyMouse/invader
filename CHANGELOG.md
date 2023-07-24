@@ -9,7 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-build: bitmap sequence index is now checked in more places.
 - invader-build: particle system tags are now checked to make sure an extra
-  bitmap sequece is available after the one referenced when using the "rotational"
+  bitmap sequence is available after the one referenced when using the "rotational"
   complex sprite render mode.
 - invader-edit-qt: grenade_hud_interface field naming has been made clearer.
 
