@@ -30,6 +30,7 @@
                 "name": "control points",
                 "type": "TagReflexive",
                 "struct": "CameraTrackControlPoint",
+                "minimum": 4,
                 "maximum": 16
             },
             {
