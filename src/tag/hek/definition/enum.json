@@ -158,5 +158,13 @@
             "model compressed"
         ],
         "type": "enum"
+    },
+    {
+        "name": "TriangleBufferType",
+        "options": [
+            "triangle list",
+            "triangle strip"
+        ],
+        "type": "enum"
     }
 ]

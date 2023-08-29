@@ -907,7 +907,7 @@ namespace Invader::Parser {
         }
 
         // Don't forget to set these memes
-        what.do_not_crash_the_game = 1;
+        what.triangle_buffer_type = HEK::TriangleBufferType::TRIANGLE_BUFFER_TYPE_TRIANGLE_STRIP;
         what.vertex_type = uncompressed_vertices ? HEK::VertexType::VERTEX_TYPE_MODEL_UNCOMPRESSED : HEK::VertexType::VERTEX_TYPE_MODEL_COMPRESSED;
     }
 
