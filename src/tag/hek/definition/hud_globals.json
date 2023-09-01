@@ -210,15 +210,17 @@
                 "size": 20
             },
             {
-                "name": "single player font",
+                "name": "fullscreen font",
                 "type": "TagDependency",
+                "non_null": true,
                 "classes": [
                     "font"
                 ]
             },
             {
-                "name": "multi player font",
+                "name": "splitscreen font",
                 "type": "TagDependency",
+                "non_null": true,
                 "classes": [
                     "font"
                 ]
