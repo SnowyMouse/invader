@@ -27,3 +27,4 @@ BEGIN
     END
 END
 IDI_ICON1 ICON DISCARDABLE "../../../icon/invader-edit-qt.ico"
+1 24 "qt.manifest"
