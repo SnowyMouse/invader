@@ -66,17 +66,15 @@ if(MINGW)
 
     # Workaround a stack overflow in some build configurations on some scripts
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,8388608")
+
+    # Define this if on Windows so %zu works
+    add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
 endif()
 
 # Turn on console messages
 option(INVADER_NO_OUTPUT "don't show most console messages including most errors" OFF)
 if(INVADER_NO_OUTPUT)
     add_definitions(-DNO_OUTPUT)
-endif()
-
-# Define this if on Windows so %zu works
-if(WIN32)
-    add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
 endif()
 
 function(do_windows_rc target file_name description)

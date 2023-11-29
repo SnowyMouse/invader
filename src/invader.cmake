@@ -184,24 +184,28 @@ add_custom_command(
 )
 
 # Include version getters
+file(GLOB INVADER_RETAIL_TAG_INDICES "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/retail/*.txt")
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp" "retail" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/retail/*"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp" "retail" ${INVADER_RETAIL_TAG_INDICES}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
 )
+file(GLOB INVADER_DEMO_TAG_INDICES "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/demo/*.txt")
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp" "demo" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/demo/*"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp" "demo" ${INVADER_DEMO_TAG_INDICES}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
 )
+file(GLOB INVADER_CUSTOM_EDITION_TAG_INDICES "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/custom_edition/*.txt")
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp" "custom_edition" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/custom_edition/*"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp" "custom_edition" ${INVADER_CUSTOM_EDITION_TAG_INDICES}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
 )
+file(GLOB INVADER_MCC_CEA_TAG_INDICES "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/mcc_cea/*.txt")
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcc-cea-getter.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/mcc-cea-getter.cpp" "mcc_cea" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/mcc_cea/*"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/mcc-cea-getter.cpp" "mcc_cea" ${INVADER_MCC_CEA_TAG_INDICES}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
 )
 
@@ -222,9 +226,10 @@ else()
 endif()
 
 # Make the language.cpp file
+file(GLOB INVADER_LOCALIZED_RESOURCE_DATA_OFFSETS "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/json/*.json")
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/language.py" "${CMAKE_CURRENT_BINARY_DIR}/language.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/json/*"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/language.py" "${CMAKE_CURRENT_BINARY_DIR}/language.cpp" ${INVADER_LOCALIZED_RESOURCE_DATA_OFFSETS}
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/language.py"
 )
 

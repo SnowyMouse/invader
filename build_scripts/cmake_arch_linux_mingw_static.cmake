@@ -27,7 +27,7 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
     set(HARFBUZZ_DEPENDENCIES "-lglib-2.0;${GLIB2_DEPENDENCIES};-lintl;-lm;-lfreetype;-lgraphite2" CACHE INTERNAL "dependencies of static HarfBuzz library")
     set(DBUS1_DEPENDENCIES "-lws2_32;-liphlpapi;-ldbghelp" CACHE INTERNAL "dependencies of static D-Bus1 library")
 
-    # Replace .lib.a with .a
+    # Replace .dll.a with .a
     set(FREETYPE_LIBRARY_RELEASE        "${INVADER_MINGW_PREFIX}/lib/libfreetype.a")
     set(HARFBUZZ_LIBRARIES              "${INVADER_MINGW_PREFIX}/lib/libharfbuzz.a")
     set(JPEG_LIBRARY_RELEASE            "${INVADER_MINGW_PREFIX}/lib/libjpeg.a")

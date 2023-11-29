@@ -9,7 +9,7 @@
 CMAKE=/usr/bin/x86_64-w64-mingw32-cmake
 if [[ ! -f "${CMAKE}" ]]; then
     echo "No cmake found at ${CMAKE}"
-    echo "This script is intended to be used on Arch Linux with MinGW-w64 installed"
+    echo "This script is intended to be used on Arch Linux with MinGW-w64 and CMake installed"
     exit 2
 fi
 
@@ -38,4 +38,7 @@ function run_arguments_and_say_what_i_ran() {
     exit $?
 }
 
-run_arguments_and_say_what_i_ran "${CMAKE}" "${SOURCE_DIR}" "${@}" "-DINVADER_BUILD_DEPENDENCY_SCRIPT=${BUILD_DEP_PATH}" "-DINVADER_MINGW_PREFIX=/usr/x86_64-w64-mingw32" "-DCMAKE_DISABLE_FIND_PACKAGE_harfbuzz=TRUE"
+run_arguments_and_say_what_i_ran "${CMAKE}" "${SOURCE_DIR}" "${@}" \
+                                 "-DINVADER_BUILD_DEPENDENCY_SCRIPT=${BUILD_DEP_PATH}" \
+                                 "-DINVADER_MINGW_PREFIX=/usr/x86_64-w64-mingw32" \
+                                 "-DCMAKE_DISABLE_FIND_PACKAGE_harfbuzz=TRUE"

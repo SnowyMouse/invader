@@ -21,7 +21,19 @@ find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 find_package(SDL2 REQUIRED)
 
 # Load Rat In a Tube
-find_package(Corrosion REQUIRED)
+option(INVADER_USE_SYSTEM_CORROSION "Use system installed corrosion package" ON)
+if(INVADER_USE_SYSTEM_CORROSION)
+    find_package(Corrosion REQUIRED)
+else()
+    include(FetchContent)
+    FetchContent_Declare(
+        Corrosion
+        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+        GIT_TAG v0.4.4
+    )
+    FetchContent_MakeAvailable(Corrosion)
+endif()
+
 corrosion_import_crate(MANIFEST_PATH ext/riat/riatc/Cargo.toml)
 
 # Audio things
