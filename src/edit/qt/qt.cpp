@@ -6,10 +6,6 @@
 #include <QPushButton>
 #include <QApplication>
 #include <QMessageBox>
-#include "../../command_line_option.hpp"
-#include <invader/version.hpp>
-#include <invader/printf.hpp>
-#include "tree/tag_tree_window.hpp"
 
 #ifdef _WIN32
 #include <QtPlugin>
@@ -17,11 +13,16 @@ Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
 #endif
 
+#include "../../command_line_option.hpp"
+#include <invader/version.hpp>
+#include <invader/printf.hpp>
+#include "tree/tag_tree_window.hpp"
+
 int main(int argc, char **argv) {
     set_up_color_term();
-    
+
     using namespace Invader;
-    
+
     const CommandLineOption options[] {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_INFO),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
@@ -77,7 +78,7 @@ int main(int argc, char **argv) {
     if(edit_qt_options.tags.size() == 0) {
         edit_qt_options.tags.push_back("tags");
     }
-    
+
     // Instantiate the application
     QApplication a(argc, argv);
     a.setWindowIcon(QIcon(":icon/invader-edit-qt.ico"));
@@ -93,12 +94,12 @@ int main(int argc, char **argv) {
             should_exit = true;
         }
     }
-    
+
     // If we should exit, then exit!
     if(should_exit) {
         return EXIT_FAILURE;
     }
-    
+
     File::check_working_directory("./guerillabeta.map");
 
     // Enable SDL audio
@@ -106,7 +107,7 @@ int main(int argc, char **argv) {
     if(r != 0) {
         eprintf_error("SDL_Init error: %s", SDL_GetError());
     }
-    
+
     QTimer timer;
     auto handle_events = []() {
         SDL_Event event;
@@ -126,11 +127,11 @@ int main(int argc, char **argv) {
     // Instantiate the window
     Invader::EditQt::TagTreeWindow w;
     w.set_tag_directories(edit_qt_options.tags);
-    
+
     if(edit_qt_options.fast_listing) {
         w.set_fast_listing_mode(true);
     }
-    
+
     // Give a spiel
     if(edit_qt_options.disable_safeguards) {
         QMessageBox message(QMessageBox::Warning, "You think you want this, but you actually don't.", "WARNING: Safeguards have been disabled.\n\nManually editing data that is normally read-only will likely break your tags.\n\nRemember: If something is normally read-only, then there is a much better program for modifying it than a tag editor.", QMessageBox::Cancel);
@@ -142,7 +143,7 @@ int main(int argc, char **argv) {
         }
         w.set_safeguards(false);
     }
-    
+
     // Show it!
     w.show();
 
@@ -152,10 +153,10 @@ int main(int argc, char **argv) {
         tags.emplace_back(i);
     }
     w.open_tags_when_ready(tags, edit_qt_options.fs_path);
-    
+
     // Get the result?
     int result = a.exec();
-    
+
     // Exit SDL
     SDL_Quit();
 
