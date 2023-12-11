@@ -6,6 +6,9 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
     # Invader should obviously not build with shared libs
     set(BUILD_SHARED_LIBS NO)
 
+    # We are pretty sure this never works as intended because ".a" also matches ".dll.a", however the AUR Qt static package explicitly checks for this being set.
+    set(CMAKE_FIND_LIBRARY_SUFFIXES_OVERRIDE ".a;.lib")
+
     # Set these
     set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -lwinpthread")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFLAC__NO_DLL")
