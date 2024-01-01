@@ -10,6 +10,13 @@
         "width": 32
     },
     {
+        "name": "ItemFunctionIn",
+        "type": "enum",
+        "options": [
+            "none"
+        ]
+    },
+    {
         "name": "Item",
         "groups": [
             {
@@ -49,19 +56,23 @@
             },
             {
                 "name": "item a in",
-                "type": "ObjectFunctionIn"
+                "type": "ItemFunctionIn",
+                "unused": true
             },
             {
                 "name": "item b in",
-                "type": "ObjectFunctionIn"
+                "type": "ItemFunctionIn",
+                "unused": true
             },
             {
                 "name": "item c in",
-                "type": "ObjectFunctionIn"
+                "type": "ItemFunctionIn",
+                "unused": true
             },
             {
                 "name": "item d in",
-                "type": "ObjectFunctionIn"
+                "type": "ItemFunctionIn",
+                "unused": true
             },
             {
                 "type": "pad",
