@@ -1,7 +1,8 @@
 # Pre-run
 if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
-    # For Qt6
-    set(CMAKE_FIND_ROOT_PATH "${INVADER_MINGW_PREFIX}/static;${CMAKE_FIND_ROOT_PATH}")
+    # For Qt6 and brotli
+    set(CMAKE_STATIC_PREFIX "${INVADER_MINGW_PREFIX}/static")
+    set(CMAKE_FIND_ROOT_PATH "${CMAKE_STATIC_PREFIX};${CMAKE_FIND_ROOT_PATH}")
 
     # Invader should obviously not build with shared libs
     set(BUILD_SHARED_LIBS NO)
@@ -15,9 +16,9 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFLAC__NO_DLL")
 
     # From https://github.com/Martchus/PKGBUILDs/blob/master/cmake/mingw-w64-static/toolchain-mingw-static.cmake
-    set(pkgcfg_lib_libbrotlicommon_brotlicommon "${INVADER_MINGW_PREFIX}/lib/libbrotlicommon-static.a" CACHE INTERNAL "static libbrotlicommon")
-    set(pkgcfg_lib_libbrotlienc_brotlienc "${INVADER_MINGW_PREFIX}/lib/libbrotlienc-static.a;${INVADER_MINGW_PREFIX}/lib/libbrotlicommon-static.a" CACHE INTERNAL "static libbrotliend")
-    set(pkgcfg_lib_libbrotlidec_brotlidec "${INVADER_MINGW_PREFIX}/lib/libbrotlidec-static.a;${INVADER_MINGW_PREFIX}/lib/libbrotlicommon-static.a" CACHE INTERNAL "static libbrotlidec")
+    set(pkgcfg_lib_libbrotlicommon_brotlicommon "${CMAKE_STATIC_PREFIX}/lib/libbrotlicommon.a" CACHE INTERNAL "static libbrotlicommon")
+    set(pkgcfg_lib_libbrotlienc_brotlienc "${CMAKE_STATIC_PREFIX}/lib/libbrotlienc.a;${CMAKE_STATIC_PREFIX}/lib/libbrotlicommon.a" CACHE INTERNAL "static libbrotliend")
+    set(pkgcfg_lib_libbrotlidec_brotlidec "${CMAKE_STATIC_PREFIX}/lib/libbrotlidec.a;${CMAKE_STATIC_PREFIX}/lib/libbrotlicommon.a" CACHE INTERNAL "static libbrotlidec")
     set(libbrotlicommon_STATIC_LDFLAGS "${pkgcfg_lib_libbrotlicommon_brotlicommon}" CACHE INTERNAL "static libbrotlicommon")
     set(libbrotlienc_STATIC_LDFLAGS "${pkgcfg_lib_libbrotlienc_brotlienc}" CACHE INTERNAL "static libbrotliend")
     set(libbrotlidec_STATIC_LDFLAGS "${pkgcfg_lib_libbrotlidec_brotlidec}" CACHE INTERNAL "static libbrotlidec")
@@ -26,7 +27,7 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
     set(MYSQL_DEPENDENCIES "-lssl;-lcrypto;-lshlwapi;-lgdi32;-lws2_32;-lpthread;-lz;-lm" CACHE INTERNAL "dependencies of static MySQL/MariaDB libraries")
     set(LIBPNG_DEPENDENCIES "-lz" CACHE INTERNAL "dependencies of static libpng")
     set(GLIB2_DEPENDENCIES "-lintl;-lws2_32;-lole32;-lwinmm;-lshlwapi;-lm" CACHE INTERNAL "dependencies of static Glib2")
-    set(FREETYPE_DEPENDENCIES "-lbz2;-lharfbuzz;-lfreetype;-lbrotlidec-static;-lbrotlicommon-static" CACHE INTERNAL "dependencies of static FreeType2 library")
+    set(FREETYPE_DEPENDENCIES "-lbz2;-lharfbuzz;-lfreetype;-lbrotlidec;-lbrotlicommon" CACHE INTERNAL "dependencies of static FreeType2 library")
     set(HARFBUZZ_DEPENDENCIES "-lglib-2.0;${GLIB2_DEPENDENCIES};-lintl;-lm;-lfreetype;-lgraphite2" CACHE INTERNAL "dependencies of static HarfBuzz library")
     set(DBUS1_DEPENDENCIES "-lws2_32;-liphlpapi;-ldbghelp" CACHE INTERNAL "dependencies of static D-Bus1 library")
 
@@ -54,5 +55,5 @@ else()
     set(SDL2_LIBRARIES ${SDL2_STATIC_LIBRARIES} -lsetupapi -limm32 -lversion -lwinmm)
     set(TIFF_LIBRARIES ${TIFF_LIBRARIES} jpeg lzma)
     set(LibArchive_LIBRARIES ${LibArchive_LIBRARIES} lzma zstd bz2 iconv crypto crypt32)
-    set(FREETYPE_LIBRARIES freetype png brotlidec-static brotlicommon-static bz2 harfbuzz graphite2 freetype)
+    set(FREETYPE_LIBRARIES freetype png brotlidec brotlicommon bz2 harfbuzz graphite2 freetype)
 endif()
