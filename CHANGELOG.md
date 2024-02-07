@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.53.4] - 2024-02-08
+### Fixed
+- invader: Add extra bounds checks to tag definitions.
+- invader: Enable long file paths in the Windows executable manifest.
+
 ## [0.53.3] - 2023-07-25
 ### Fixed
 - invader-build: Fix defaulting model filthy part indices.
@@ -2512,5 +2517,6 @@ image as one bitmap
 [0.53.1]: https://github.com/SnowyMouse/invader/compare/0.53.0...0.53.1
 [0.53.2]: https://github.com/SnowyMouse/invader/compare/0.53.1...0.53.2
 [0.53.3]: https://github.com/SnowyMouse/invader/compare/0.53.2...0.53.3
+[0.53.4]: https://github.com/SnowyMouse/invader/compare/0.53.3...0.53.4
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.3...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.4...master
