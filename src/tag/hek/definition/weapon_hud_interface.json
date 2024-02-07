@@ -375,11 +375,16 @@
             },
             {
                 "name": "opacity",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
+
             },
             {
                 "name": "translucency",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "disabled color",
@@ -387,7 +392,9 @@
             },
             {
                 "name": "min alpha",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "type": "pad",

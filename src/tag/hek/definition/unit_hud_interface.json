@@ -394,11 +394,15 @@
             {
                 "name": "meter opacity",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "opacity"
             },
             {
                 "name": "meter translucency",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "translucency"
             },
             {
@@ -409,6 +413,8 @@
             {
                 "name": "meter min alpha",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "min alpha"
             },
             {
@@ -792,11 +798,15 @@
             {
                 "name": "shield panel meter opacity",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "opacity"
             },
             {
                 "name": "shield panel meter translucency",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "translucency"
             },
             {
@@ -807,6 +817,8 @@
             {
                 "name": "shield panel meter min alpha",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "min alpha"
             },
             {
@@ -1033,11 +1045,15 @@
             {
                 "name": "health panel meter opacity",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "opacity"
             },
             {
                 "name": "health panel meter translucency",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "translucency"
             },
             {
@@ -1048,6 +1064,8 @@
             {
                 "name": "health panel meter min alpha",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "display_name": "min alpha"
             },
             {
