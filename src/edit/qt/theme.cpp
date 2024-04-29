@@ -52,6 +52,9 @@ namespace SixShooter {
 
             qApp->setPalette(dark_palette);
         }
+        else {
+            qApp->setStyle(QStyleFactory::create("windowsvista"));
+        }
     }
     #else
     void Theme::set_win32_theme() {}
