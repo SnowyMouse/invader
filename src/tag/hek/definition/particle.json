@@ -148,14 +148,12 @@
             {
                 "name": "fade start size",
                 "unit": "pixels",
-                "type": "float",
-                "default": 5.0
+                "type": "float"
             },
             {
                 "name": "fade end size",
                 "unit": "pixels",
-                "type": "float",
-                "default": 4.0
+                "type": "float"
             },
             {
                 "type": "pad",

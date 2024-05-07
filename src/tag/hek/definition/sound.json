@@ -355,10 +355,6 @@
                 "name": "random pitch bounds",
                 "bounds": true,
                 "type": "float",
-                "default": [
-                    1.0,
-                    1.0
-                ],
                 "comment": "This is the base playback rate of the sound, affecting tempo and pitch."
             },
             {

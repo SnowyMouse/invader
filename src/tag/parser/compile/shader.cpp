@@ -83,6 +83,17 @@ namespace Invader::Parser {
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_MODEL);
         this->unknown = 1.0F;
 
+        if(this->map_u_scale == 0.0F && this->map_v_scale == 0.0F) {
+            this->map_u_scale = 1.0F;
+            this->map_v_scale = 1.0F;
+        }
+        else if(this->map_u_scale == 0.0F) {
+            this->map_u_scale = this->map_v_scale;
+        }
+        else if(this->map_v_scale == 0.0F) {
+            this->map_v_scale = this->map_u_scale;
+        }
+
         if(this->reflection_falloff_distance >= this->reflection_cutoff_distance && (this->reflection_cutoff_distance != 0.0F && this->reflection_falloff_distance != 0.0F)) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Reflection falloff is greater than or equal to cutoff, so both of these values were set to 0 (%f >= %f)", this->reflection_falloff_distance, this->reflection_cutoff_distance);
             this->reflection_cutoff_distance = 0.0F;

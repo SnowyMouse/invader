@@ -84,6 +84,11 @@ namespace Invader::Parser {
         if(this->radius_animation.to == 0.0F) {
             this->radius_animation.to = 1.0F;
         }
+
+        if(this->fade_start_size == 0.0F || this->fade_end_size == 0.0F) {
+            this->fade_start_size = 5.0F;
+            this->fade_end_size = 4.0F;
+        }
     }
 
     static void complain_about_non_square_sheets(BuildWorkload &workload, std::size_t tag_index, const BuildWorkload::BuildWorkloadTag &tag) {

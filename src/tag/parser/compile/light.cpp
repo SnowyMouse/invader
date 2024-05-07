@@ -38,6 +38,13 @@ namespace Invader::Parser {
         }
     }
 
+    void LightVolume::postprocess_hek_data() {
+        if(this->perpendicular_brightness_scale == 0.0F && this->parallel_brightness_scale == 0.0F) {
+            this->parallel_brightness_scale = 1.0F;
+            this->perpendicular_brightness_scale = 1.0F;
+        }
+    }
+
     void LightVolumeFrame::postprocess_hek_data() {
         if(this->offset_exponent <= 0.0F) {
             this->offset_exponent = 1.0F;

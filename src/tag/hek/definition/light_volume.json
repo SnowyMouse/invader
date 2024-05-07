@@ -116,15 +116,13 @@
                 "name": "perpendicular brightness scale",
                 "type": "Fraction",
                 "minimum": 0.0,
-                "maximum": 1.0,
-                "default": 1.0
+                "maximum": 1.0
             },
             {
                 "name": "parallel brightness scale",
                 "type": "Fraction",
                 "minimum": 0.0,
-                "maximum": 1.0,
-                "default": 1.0
+                "maximum": 1.0
             },
             {
                 "name": "brightness scale source",
@@ -188,6 +186,7 @@
         ],
         "type": "struct",
         "post_compile": true,
+        "postprocess_hek_data": true,
         "size": 332,
         "class": "light_volume"
     }

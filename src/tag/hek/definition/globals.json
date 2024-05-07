@@ -1582,23 +1582,19 @@
             },
             {
                 "name": "maximum experience",
-                "type": "int32",
-                "default": 10
+                "type": "int32"
             },
             {
                 "name": "minimum player count",
-                "type": "int32",
-                "default": 1
+                "type": "int32"
             },
             {
                 "name": "maximum player count",
-                "type": "int32",
-                "default": 16
+                "type": "int32"
             },
             {
                 "name": "rating",
-                "type": "int32",
-                "default": 100
+                "type": "int32"
             },
             {
                 "type": "pad",
