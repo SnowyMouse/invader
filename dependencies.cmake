@@ -18,6 +18,11 @@ find_package(SDL2)
 
 # Qt6
 find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+
+if(Qt6_VERSION VERSION_LESS "6.7")
+    add_definitions(-DINVADER_USING_OLD_QT6)
+endif()
+
 find_package(SDL2 REQUIRED)
 
 # Load Rat In a Tube

@@ -10,7 +10,11 @@
 #ifdef _WIN32
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#ifdef INVADER_USING_OLD_QT6
+Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
+#else
 Q_IMPORT_PLUGIN(QModernWindowsStylePlugin)
+#endif
 #endif
 
 #include "../../command_line_option.hpp"
