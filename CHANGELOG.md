@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.53.5] - 2024-05-12
+### Fixed
+- invader-build: Change field default behavior to better match tool.exe.
+
 ## [0.53.4] - 2024-02-08
 ### Fixed
 - invader: Add extra bounds checks to tag definitions.
@@ -2518,5 +2522,6 @@ image as one bitmap
 [0.53.2]: https://github.com/SnowyMouse/invader/compare/0.53.1...0.53.2
 [0.53.3]: https://github.com/SnowyMouse/invader/compare/0.53.2...0.53.3
 [0.53.4]: https://github.com/SnowyMouse/invader/compare/0.53.3...0.53.4
+[0.53.5]: https://github.com/SnowyMouse/invader/compare/0.53.4...0.53.5
 
 [Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.4...master
