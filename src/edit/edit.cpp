@@ -11,7 +11,7 @@
 
 #include "expression.hpp"
 
-#ifdef __linux__
+#ifdef USES_NIX_COLORS
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
@@ -668,7 +668,7 @@ static void list_everything(Parser::ParserStruct &ps, std::vector<std::string> &
     std::size_t terminal_width = 80;
     
     // Resize based on console width
-    #ifdef __linux__
+    #ifdef USES_NIX_COLORS
     struct winsize w = {};
     if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1) {
         std::size_t new_width = static_cast<std::size_t>(w.ws_col);

@@ -31,7 +31,7 @@ void set_up_color_term() noexcept {
         }
     }
     
-    #ifdef __linux__
+    #ifdef USES_NIX_COLORS
     on_color_term = isatty(fileno(stdout) && isatty(fileno(stderr)) && std::getenv("TERM") && ((std::strcmp(std::getenv("TERM"), "xterm-256color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-16color") == 0)));
     #elif (defined(_WIN32))
     

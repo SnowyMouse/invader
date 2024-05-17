@@ -120,7 +120,7 @@ namespace Invader::File {
             malicious_maybe = true;
         }
         else {
-            for(auto &c : p) {
+            for(auto c : p) {
                 auto str = c.string();
                 if(str == "." || str == "..") {
                     malicious_maybe = true;

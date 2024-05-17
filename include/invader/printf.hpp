@@ -3,6 +3,10 @@
 #ifndef INVADER__PRINTF_HPP
 #define INVADER__PRINTF_HPP
 
+#if defined(__linux__) || defined(__APPLE__)
+#define USES_NIX_COLORS
+#endif
+
 #define ON_COLOR_TERM(fd) (is_on_color_term())
 
 void set_up_color_term() noexcept;
