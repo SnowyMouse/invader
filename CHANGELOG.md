@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-edit-qt: Recursive mode is now the default mode. Use -L to use fast mode.
+- invader-edit-qt: Fixed dark theme support on macOS.
 
 ## [0.53.5] - 2024-05-12
 ### Fixed

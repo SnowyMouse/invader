@@ -32,7 +32,7 @@ namespace Invader::EditQt {
 
         auto add_widget = [&alternate, &vbox_layout, &widgets](QWidget *widget) {
             if(alternate) {
-                widget->setBackgroundRole(QPalette::Midlight);
+                widget->setBackgroundRole(QPalette::Light);
             }
             else {
                 widget->setBackgroundRole(QPalette::Window);
