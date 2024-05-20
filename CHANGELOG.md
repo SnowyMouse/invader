@@ -2,9 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.53.6] - 2024-05-20
 ### Fixed
 - invader: Fixed color issues on macOS terminals.
+- invader-build: Fix defaulting decal values.
 
 ### Changed
 - invader-edit-qt: Recursive mode is now the default mode. Use -L to use fast mode.
@@ -2531,5 +2532,6 @@ image as one bitmap
 [0.53.3]: https://github.com/SnowyMouse/invader/compare/0.53.2...0.53.3
 [0.53.4]: https://github.com/SnowyMouse/invader/compare/0.53.3...0.53.4
 [0.53.5]: https://github.com/SnowyMouse/invader/compare/0.53.4...0.53.5
+[0.53.5]: https://github.com/SnowyMouse/invader/compare/0.53.5...0.53.6
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.5...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.6...master
