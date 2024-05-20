@@ -90,21 +90,11 @@
             },
             {
                 "name": "color lower bounds",
-                "type": "ColorRGB",
-                "default": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
+                "type": "ColorRGB"
             },
             {
                 "name": "color upper bounds",
-                "type": "ColorRGB",
-                "default": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
+                "type": "ColorRGB"
             },
             {
                 "type": "pad",
