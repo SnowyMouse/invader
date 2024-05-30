@@ -85,6 +85,19 @@ namespace Invader::Parser {
             this->radius_animation.to = 1.0F;
         }
 
+        if(this->animation_rate.from < 0.0F) {
+            this->animation_rate.from = 0.0F;
+        }
+        if(this->animation_rate.to < 0.0F) {
+            this->animation_rate.to = 0.0F;
+        }
+        if(this->animation_rate.from > 90.0F) {
+            this->animation_rate.from = 90.0F;
+        }
+        if(this->animation_rate.to > 90.0F) {
+            this->animation_rate.to = 90.0F;
+        }
+
         if(this->fade_start_size == 0.0F || this->fade_end_size == 0.0F) {
             this->fade_start_size = 5.0F;
             this->fade_end_size = 4.0F;

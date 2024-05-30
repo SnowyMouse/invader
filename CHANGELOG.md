@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-build: Clamp particle animation rate the same way as tool.exe
+
 ## [0.53.6] - 2024-05-20
 ### Fixed
 - invader: Fixed color issues on macOS terminals.

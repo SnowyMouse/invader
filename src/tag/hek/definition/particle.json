@@ -122,11 +122,7 @@
             {
                 "name": "radius animation",
                 "bounds": true,
-                "type": "float",
-                "default": [
-                    1.0,
-                    1.0
-                ]
+                "type": "float"
             },
             {
                 "type": "pad",
