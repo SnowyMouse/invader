@@ -2225,6 +2225,7 @@
             {
                 "name": "reference",
                 "type": "TagDependency",
+                "non_null": true,
                 "classes": [
                     "detail_object_collection"
                 ]

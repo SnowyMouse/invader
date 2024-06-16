@@ -74,6 +74,36 @@ namespace Invader::Parser {
         if(this->detail_objects.empty()) {
             this->detail_objects.emplace_back();
         }
+
+        auto &detail_objects = this->detail_objects[0];
+        for(auto &cell : detail_objects.cells) {
+            auto start_index = static_cast<std::size_t>(cell.start_index);
+            auto count_index = static_cast<std::size_t>(cell.count_index);
+            for(std::uint32_t q = cell.valid_layers_flags; q != 0; q >>= 1) {
+                if(!(q & 1)) {
+                    continue;
+                }
+                
+                if(detail_objects.counts.size() <= count_index) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Detail object count index (%zu) is out of bounds\n", count_index);
+                    continue;
+                }
+                if(detail_objects.z_reference_vectors.size() <= count_index) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Detail object count index (%zu) is out of bounds\n", count_index);
+                    continue;
+                }
+
+                auto count = detail_objects.counts[count_index].count;
+                auto new_start_index = start_index + count;
+                if(new_start_index > detail_objects.instances.size()) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Instance index (%zu) is out of bounds\n", count_index);
+                    continue;
+                }
+                start_index = new_start_index;
+
+                count_index++;
+            }
+        }
         
         // If there are no pathfinding surfaces, generate them
         // TODODILE: Match tool.exe output? This is pretty close but not exact.
@@ -396,7 +426,7 @@ namespace Invader::Parser {
         }
     }
     
-    void ScenarioStructureBSPDetailObjectData::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void ScenarioStructureBSPDetailObjectData::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
         this->bullshit = this->instances.size() != 0;
     }
 

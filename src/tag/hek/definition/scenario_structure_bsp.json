@@ -1062,15 +1062,15 @@
             },
             {
                 "name": "valid layers flags",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "start index",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "count index",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "type": "pad",
@@ -1118,7 +1118,7 @@
         "fields": [
             {
                 "name": "count",
-                "type": "int16"
+                "type": "uint16"
             }
         ],
         "type": "struct",

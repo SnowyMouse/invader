@@ -17,7 +17,7 @@ namespace Invader::Parser {
     static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload);
     static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
     static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
-    static void find_decals(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data);
+    static void fix_bsp_referenced_data(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data);
     static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data);
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
@@ -97,7 +97,7 @@ namespace Invader::Parser {
         std::size_t bsp_find_warnings = 0;
         find_encounters(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings, show_warnings);
         find_command_lists(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings, show_warnings);
-        find_decals(*this, workload, bsp_data);
+        fix_bsp_referenced_data(*this, workload, bsp_data, scenario_struct, scenario_data);
         find_conversations(*this, workload, tag_index, scenario_struct, scenario_data);
         
         if(bsp_find_warnings && workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BUILD_VERBOSITY_HIDE_WARNINGS) {
@@ -658,22 +658,25 @@ namespace Invader::Parser {
         }
     }
     
-    static void find_decals(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data) {
-        std::size_t decal_count = scenario.decals.size();
-        if(decal_count > 0) {
-            for(std::size_t bsp = 0; bsp < scenario.structure_bsps.size(); bsp++) {
-                auto &b = scenario.structure_bsps[bsp];
-                auto &bsp_id = b.structure_bsp.tag_id;
-                if(!bsp_id.is_null()) {
-                    // Figure out the base tag struct thing
-                    auto *bsp_tag_struct = &workload.structs[workload.tags[bsp_id.index].base_struct.value()];
-                    
-                    // If we're not on native, we need to read the pointer at the beginning of the struct
-                    if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                        bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
-                    }
-                    
-                    auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::struct_little *>(bsp_tag_struct->data.data());
+    static void fix_bsp_referenced_data(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data) {
+        for(std::size_t bsp = 0; bsp < scenario.structure_bsps.size(); bsp++) {
+            auto &b = scenario.structure_bsps[bsp];
+            auto &bsp_id = b.structure_bsp.tag_id;
+
+            // Figure out the base tag struct thing
+            auto *bsp_tag_struct_ptr = &workload.structs[workload.tags[bsp_id.index].base_struct.value()];
+            
+            // If we're not on native, we need to read the pointer at the beginning of the struct
+            if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                bsp_tag_struct_ptr = &workload.structs[bsp_tag_struct_ptr->resolve_pointer(static_cast<std::size_t>(0)).value()];
+            }
+
+            auto &bsp_tag_struct = *bsp_tag_struct_ptr;
+            auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
+
+            if(!bsp_id.is_null()) {
+                auto decal_count = scenario.decals.size();
+                if(decal_count > 0) {
                     std::size_t bsp_cluster_count = bsp_tag_data.clusters.count.read();
 
                     if(bsp_cluster_count == 0) {
@@ -684,7 +687,7 @@ namespace Invader::Parser {
                     std::vector<bool> used(decal_count, false);
 
                     // Now let's go do stuff
-                    auto &bsp_cluster_struct = workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.clusters.pointer)];
+                    auto &bsp_cluster_struct = workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.clusters.pointer)];
                     auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster::struct_little *>(bsp_cluster_struct.data.data());
 
                     // Go through each decal; see what we can come up with
@@ -734,12 +737,60 @@ namespace Invader::Parser {
                     bsp_tag_data.runtime_decals.count = static_cast<std::uint32_t>(runtime_decals.size());
 
                     if(runtime_decals.size() != 0) {
-                        auto &new_struct_ptr = bsp_tag_struct->pointers.emplace_back();
+                        auto &new_struct_ptr = bsp_tag_struct.pointers.emplace_back();
                         new_struct_ptr.offset = reinterpret_cast<const std::byte *>(&bsp_tag_data.runtime_decals.pointer) - reinterpret_cast<const std::byte *>(&bsp_tag_data);
                         new_struct_ptr.struct_index = workload.structs.size();
                         auto &new_struct = workload.structs.emplace_back();
                         new_struct.bsp = workload.structs[*workload.tags[bsp_id.index].base_struct].bsp;
                         new_struct.data = std::vector<std::byte>(reinterpret_cast<std::byte *>(runtime_decals.data()), reinterpret_cast<std::byte *>(runtime_decals.data() + runtime_decals.size()));
+                    }
+                }
+            }
+
+            // Handle detail objects. All of this should already be checked.
+            auto &detail_objects_struct = workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.detail_objects.pointer)];
+            auto &detail_objects_data = *reinterpret_cast<const Parser::ScenarioStructureBSPDetailObjectData::struct_little *>(detail_objects_struct.data.data());
+            auto cell_count = static_cast<std::size_t>(detail_objects_data.cells.count);
+
+            if(cell_count > 0) {
+                auto &cells_struct = workload.structs[*detail_objects_struct.resolve_pointer(&detail_objects_data.cells.pointer)];
+                auto *cells = reinterpret_cast<const Parser::ScenarioStructureBSPGlobalDetailObjectCell::struct_little *>(cells_struct.data.data());
+
+                auto z_reference_vectors_count = static_cast<std::size_t>(detail_objects_data.z_reference_vectors.count);
+                Parser::ScenarioStructureBSPGlobalZReferenceVector::struct_little *z_reference_vectors = nullptr;
+                if(z_reference_vectors_count > 0) {
+                    auto &s = workload.structs[*detail_objects_struct.resolve_pointer(&detail_objects_data.z_reference_vectors.pointer)];
+                    z_reference_vectors = reinterpret_cast<Parser::ScenarioStructureBSPGlobalZReferenceVector::struct_little *>(s.data.data());
+                }
+
+                std::vector<float> modifiers;
+                auto detail_object_palette_size = static_cast<std::size_t>(scenario_data.detail_object_collection_palette.count);
+                if(detail_object_palette_size != 0) {
+                    const auto *detail_objects_reflexives = reinterpret_cast<const Parser::ScenarioDetailObjectCollectionPalette::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.detail_object_collection_palette.pointer)].data.data());
+                    for(std::size_t dobby = 0; dobby < detail_object_palette_size; dobby++) {
+                        auto id = detail_objects_reflexives[dobby].reference.tag_id.read();
+                        if(id.is_null()) {
+                            std::terminate();
+                        }
+
+                        auto &dobbys_sock = workload.tags[id.index];    
+                        auto &dobbys_struct = workload.structs[dobbys_sock.base_struct.value()];
+                        auto &dobbys_best_friend_harry_potter = *reinterpret_cast<const Parser::DetailObjectCollection::struct_little *>(dobbys_struct.data.data());
+
+                        modifiers.emplace_back(dobbys_best_friend_harry_potter.global_z_offset * 0.125);
+                    }
+                }
+
+                for(std::size_t c = 0; c < cell_count; c++) {
+                    auto &cell = cells[c];
+                    auto count_index = static_cast<std::size_t>(cell.count_index);
+                    for(std::uint32_t q = cell.valid_layers_flags, bitfield_index = 0; q != 0; q >>= 1, bitfield_index++) {
+                        if(!(q & 1)) {
+                            continue;
+                        }
+                        auto &reference = z_reference_vectors[count_index].z_reference_l;
+                        reference = reference.read() + modifiers[bitfield_index];
+                        count_index++;
                     }
                 }
             }
