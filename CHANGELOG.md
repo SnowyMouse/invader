@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.53.7] - 2024-06-16
 ### Fixed
 - invader-build: Clamp particle animation rate the same way as tool.exe
 - invader-build: Fixed detail_object_collection's global z offset being ignored 
@@ -2544,5 +2544,6 @@ image as one bitmap
 [0.53.4]: https://github.com/SnowyMouse/invader/compare/0.53.3...0.53.4
 [0.53.5]: https://github.com/SnowyMouse/invader/compare/0.53.4...0.53.5
 [0.53.6]: https://github.com/SnowyMouse/invader/compare/0.53.5...0.53.6
+[0.53.7]: https://github.com/SnowyMouse/invader/compare/0.53.6...0.53.7
 
 [Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.6...master
