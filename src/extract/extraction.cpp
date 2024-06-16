@@ -57,9 +57,27 @@ namespace Invader {
         auto &workload = *this;
         auto engine = map->get_cache_version();
 
-        bool jason_jones = (map->get_tag(map->get_scenario_tag_id()).get_base_struct<HEK::Scenario>().flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_DO_NOT_APPLY_BUNGIE_CAMPAIGN_TAG_PATCHES) == 0;
+        auto &scenario_tag = map->get_tag(map->get_scenario_tag_id()).get_base_struct<HEK::Scenario>();
+        bool jason_jones = (scenario_tag.flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_DO_NOT_APPLY_BUNGIE_CAMPAIGN_TAG_PATCHES) == 0;
 
-        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload, &engine, &jason_jones](std::size_t tag_index) -> bool {
+        std::vector<float> detail_object_modifiers;
+        auto detail_object_palette_size = static_cast<std::size_t>(scenario_tag.detail_object_collection_palette.count);
+        if(detail_object_palette_size > 0) {
+            auto *detail_object_collections = reinterpret_cast<const Parser::ScenarioDetailObjectCollectionPalette::struct_little *>(
+                map->resolve_tag_data_pointer(scenario_tag.detail_object_collection_palette.pointer)
+            );
+            for(std::size_t dobby = 0; dobby < detail_object_palette_size; dobby++) {
+                auto id = detail_object_collections[dobby].reference.tag_id.read();
+                if(id.is_null()) {
+                    detail_object_modifiers.emplace_back(0.0);
+                    continue;
+                }
+                auto &dobby_destroyer_of_worlds = map->get_tag(id.index).get_base_struct<HEK::DetailObjectCollection>();
+                detail_object_modifiers.emplace_back(dobby_destroyer_of_worlds.global_z_offset * 0.125);
+            }
+        }
+        
+        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload, &engine, &jason_jones, &detail_object_modifiers](std::size_t tag_index) -> bool {
             // Do it
             extracted_tags[tag_index] = true;
 
@@ -164,6 +182,35 @@ namespace Invader {
 
                 if(changed) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Weapon tag was changed due to being altered in singleplayer");
+                }
+            }
+
+            // Fix detail object stuff
+            if(tfp.fourcc == Invader::HEK::TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP) {
+                auto bsp = Invader::Parser::ScenarioStructureBSP::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                if(!bsp.detail_objects.empty()) {
+                    auto &detail_objects = bsp.detail_objects[0];
+                    for(auto &cell : detail_objects.cells) {
+                        std::printf("%i!\n", __LINE__);
+                        auto count_index = static_cast<std::size_t>(cell.count_index);
+                        for(std::uint32_t q = cell.valid_layers_flags, bitfield_index = 0; q != 0; q >>= 1, bitfield_index++) {
+                            if(!(q & 1)) {
+                                continue;
+                            }
+
+                            if(detail_object_modifiers.size() <= bitfield_index) {
+                                continue; // this is bullshit and would've crashed the game upon loading the BSP, but tool.exe doesn't catch it and just ignores it
+                            }
+
+                            if(count_index >= detail_objects.z_reference_vectors.size()) {
+                                continue; // also bullshit; wow
+                            }
+                            
+                            detail_objects.z_reference_vectors[count_index].z_reference_l -= detail_object_modifiers[bitfield_index];
+                            count_index++;
+                        }
+                    }
+                    new_tag = bsp.generate_hek_tag_data(TagFourCC::TAG_FOURCC_SCENARIO_STRUCTURE_BSP);
                 }
             }
 

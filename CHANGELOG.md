@@ -5,6 +5,10 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Untagged]
 ### Fixed
 - invader-build: Clamp particle animation rate the same way as tool.exe
+- invader-build: Fixed detail_object_collection's global z offset being ignored 
+  (it is highly recommended you update)
+- invader-extract: Fixed detail_object_collection's global z offset being ignored
+  (it is highly recommended you update)
 
 ## [0.53.6] - 2024-05-20
 ### Fixed
