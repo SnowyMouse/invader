@@ -426,7 +426,7 @@ namespace Invader::Parser {
         }
     }
     
-    void ScenarioStructureBSPDetailObjectData::pre_compile(BuildWorkload &workload, std::size_t, std::size_t, std::size_t) {
+    void ScenarioStructureBSPDetailObjectData::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->bullshit = this->instances.size() != 0;
     }
 
