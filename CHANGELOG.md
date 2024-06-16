@@ -10,6 +10,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-extract: Fixed detail_object_collection's global z offset being ignored
   (it is highly recommended you update)
 
+### Changed
+- invader-edit-qt: Fast mode is now the default mode again. Use -L to use recursive mode.
+
 ## [0.53.6] - 2024-05-20
 ### Fixed
 - invader: Fixed color issues on macOS terminals.
@@ -2540,6 +2543,6 @@ image as one bitmap
 [0.53.3]: https://github.com/SnowyMouse/invader/compare/0.53.2...0.53.3
 [0.53.4]: https://github.com/SnowyMouse/invader/compare/0.53.3...0.53.4
 [0.53.5]: https://github.com/SnowyMouse/invader/compare/0.53.4...0.53.5
-[0.53.5]: https://github.com/SnowyMouse/invader/compare/0.53.5...0.53.6
+[0.53.6]: https://github.com/SnowyMouse/invader/compare/0.53.5...0.53.6
 
 [Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.6...master

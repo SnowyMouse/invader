@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)"),
-        CommandLineOption("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: recursive)")
+        CommandLineOption("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: fast)")
     };
 
     static constexpr char DESCRIPTION[] = "Edit tag files.";
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
         bool void_warranty = false;
         bool disable_safeguards = false;
         bool fs_path = false;
-        bool fast_listing = false;
+        bool fast_listing = true;
     } edit_qt_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<EditQtOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 65535, edit_qt_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_qt_options) {
