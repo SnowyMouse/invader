@@ -166,7 +166,7 @@ namespace Invader::EditQt {
                         case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
                         case Parser::ParserStructValue::VALUE_TYPE_EULER2D:
                         case Parser::ParserStructValue::VALUE_TYPE_EULER3D:
-                            float_to_use = std::get<double>(current_value);
+                            float_to_use = RADIANS_TO_DEGREES(std::get<double>(current_value));
                             break;
                         default:
                             float_to_use = std::get<double>(current_value);
