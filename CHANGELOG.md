@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader: Physics tags' center of mass and mass point density/mass are now calculated on
   build and are cache-only.
+- invader-edit-qt: Text fields where the text would overflow now have the start of the
+  text appearing instead of the end
 
 ## [0.53.7] - 2024-06-16
 ### Fixed

@@ -174,6 +174,8 @@ namespace Invader::EditQt {
                     textbox->setText(QString::number(std::get<std::int64_t>(current_value)));
                 }
 
+                textbox->cursorBackward(false, 32767);
+
                 value_index++;
                 return textbox;
             };
