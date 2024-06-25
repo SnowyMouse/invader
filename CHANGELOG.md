@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.53.8] - 2024-06-25
 ### Added
 - invader-edit-qt: Added --high-precision-floats
 
@@ -2555,5 +2555,6 @@ image as one bitmap
 [0.53.5]: https://github.com/SnowyMouse/invader/compare/0.53.4...0.53.5
 [0.53.6]: https://github.com/SnowyMouse/invader/compare/0.53.5...0.53.6
 [0.53.7]: https://github.com/SnowyMouse/invader/compare/0.53.6...0.53.7
+[0.53.8]: https://github.com/SnowyMouse/invader/compare/0.53.7...0.53.8
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.7...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.8...master
