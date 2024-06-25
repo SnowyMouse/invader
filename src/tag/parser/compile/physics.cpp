@@ -4,37 +4,47 @@
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void Physics::post_cache_deformat() {
-        this->postprocess_hek_data(); // do this to mitigate precision issues
-    }
-
     void Physics::postprocess_hek_data() {
         // Some of these calculations are from MosesofEgypt's reclaimer source. You can get it at https://bitbucket.org/Moses_of_Egypt/reclaimer/src/5d710221979fecbb8e71fa57c768f17f42f0010d/hek/defs/objs/phys.py?at=default&fileviewer=file-view-default
         // I added this stuff because it is actually recalculated when the physics tag is run through tool.exe when building a cache file.
-        float total_relative_mass = 0.0f;
+        double total_relative_mass = 0.0f;
+        HEK::Point3D<HEK::NativeEndian> com = {};
+
         for(auto &mp : this->mass_points) {
             total_relative_mass += mp.relative_mass;
         }
 
+        double comx = 0.0, comy = 0.0, comz = 0.0;
+
+        for(auto &mp : this->mass_points) {
+            comx += mp.position.x;
+            comy += mp.position.y;
+            comz += mp.position.z;
+        }
+
+        double total_relative_mass_inverse = 1.0 / total_relative_mass;
+
+        com.x = comx * total_relative_mass_inverse;
+        com.y = comy * total_relative_mass_inverse;
+        com.z = comz * total_relative_mass_inverse;
+        
+        this->center_of_mass = com;
+
         std::size_t mass_points_count = this->mass_points.size();
-        float average_relative_mass = total_relative_mass / mass_points_count;
-        float density_scale = this->density / mass_points_count;
-        float density_scale_co = 0.0f;
-
-        float xx = 0.0f;
-        float yy = 0.0f;
-        float zz = 0.0f;
-
-        float neg_zx = 0.0f;
-        float neg_xy = 0.0f;
-        float neg_yz = 0.0f;
-
-        HEK::Point3D<HEK::NativeEndian> com = this->center_of_mass;
+        double average_relative_mass = total_relative_mass / mass_points_count;
+        double density_scale = this->density / mass_points_count;
+        double density_scale_co = 0.0f;
+        double xx = 0.0f;
+        double yy = 0.0f;
+        double zz = 0.0f;
+        double neg_zx = 0.0f;
+        double neg_xy = 0.0f;
+        double neg_yz = 0.0f;
 
         // Iterate once to get density and masses as well as to get inertial stuff.
         for(auto &mp : this->mass_points) {
-            float mass_percent = mp.relative_mass / total_relative_mass;
-            float mass = mass_percent * this->mass;
+            double mass_percent = mp.relative_mass * total_relative_mass_inverse;
+            double mass = mass_percent * this->mass;
             mp.mass = mass;
 
             if(mp.relative_density != 0.0f) {
@@ -43,15 +53,13 @@ namespace Invader::Parser {
 
             HEK::Point3D<HEK::NativeEndian> pos = mp.position;
 
-            float dist_xx = std::pow(com.y - pos.y, 2.0f) + std::pow(com.z - pos.z, 2.0f);
-            float dist_yy = std::pow(com.x - pos.x, 2.0f) + std::pow(com.z - pos.z, 2.0f);
-            float dist_zz = std::pow(com.x - pos.x, 2.0f) + std::pow(com.y - pos.y, 2.0f);
-
-            float dist_zx = (com.x - pos.x) * (com.z - pos.z);
-            float dist_xy = (com.x - pos.x) * (com.y - pos.y);
-            float dist_yz = (com.y - pos.y) * (com.z - pos.z);
-
-            float radius_term = 0.0f;
+            double dist_xx = std::pow(com.y - pos.y, 2.0f) + std::pow(com.z - pos.z, 2.0f);
+            double dist_yy = std::pow(com.x - pos.x, 2.0f) + std::pow(com.z - pos.z, 2.0f);
+            double dist_zz = std::pow(com.x - pos.x, 2.0f) + std::pow(com.y - pos.y, 2.0f);
+            double dist_zx = (com.x - pos.x) * (com.z - pos.z);
+            double dist_xy = (com.x - pos.x) * (com.y - pos.y);
+            double dist_yz = (com.y - pos.y) * (com.z - pos.z);
+            double radius_term = 0.0f;
             if(mp.radius > 0.0f) {
                 radius_term = 4 * std::pow(10.0f, (2 * std::log10(mp.radius) - 1.0f));
             }
@@ -66,7 +74,7 @@ namespace Invader::Parser {
         }
         density_scale *= density_scale_co;
 
-        float moment_scale = this->moment_scale;
+        double moment_scale = this->moment_scale;
         xx *= moment_scale;
         yy *= moment_scale;
         zz *= moment_scale;
@@ -75,7 +83,7 @@ namespace Invader::Parser {
         neg_yz *= moment_scale;
 
         // Finally write down density
-        float mass_scale = 1.0f / average_relative_mass;
+        double mass_scale = 1.0F / average_relative_mass;
         for(std::size_t i = 0; i < mass_points_count; i++) {
             mass_points[i].density = density_scale * mass_scale * mass_points[i].relative_density;
         }

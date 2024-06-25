@@ -115,7 +115,7 @@
             {
                 "name": "mass",
                 "type": "float",
-                "read_only": true
+                "cache_only": true
             },
             {
                 "name": "relative density",
@@ -124,7 +124,7 @@
             {
                 "name": "density",
                 "type": "float",
-                "read_only": true
+                "cache_only": true
             },
             {
                 "name": "position",
@@ -277,7 +277,6 @@
         ],
         "type": "struct",
         "postprocess_hek_data": true,
-        "post_cache_deformat": true,
         "size": 128,
         "class": "physics"
     }
