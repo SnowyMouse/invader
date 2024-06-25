@@ -184,7 +184,7 @@
             {
                 "name": "center of mass",
                 "type": "Point3D",
-                "read_only": true
+                "cache_only": true
             },
             {
                 "name": "density",
