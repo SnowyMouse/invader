@@ -17,9 +17,9 @@ namespace Invader::Parser {
         double comx = 0.0, comy = 0.0, comz = 0.0;
 
         for(auto &mp : this->mass_points) {
-            comx += mp.position.x;
-            comy += mp.position.y;
-            comz += mp.position.z;
+            comx += mp.position.x * mp.relative_mass;
+            comy += mp.position.y * mp.relative_mass;
+            comz += mp.position.z * mp.relative_mass;
         }
 
         double total_relative_mass_inverse = 1.0 / total_relative_mass;
