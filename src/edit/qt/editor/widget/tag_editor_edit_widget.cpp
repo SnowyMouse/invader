@@ -82,6 +82,7 @@ namespace Invader::EditQt {
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget) :
         TagEditorWidget(parent, value, editor_window), array_widget(array_widget) {
 
+        auto high_precision_floats = editor_window->get_parent_window()->uses_high_precision_floats();
         auto *this_widget = this;
         this->setToolTip(QString(value->get_comment()).replace("\n","\n\n"));
         this->read_only = value->is_read_only() && editor_window->get_parent_window()->safeguards();
@@ -104,7 +105,7 @@ namespace Invader::EditQt {
         auto &auxiliary_checkbox = this->auxiliary_checkbox;
         auxiliary_widget = nullptr;
 
-        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox, &this_widget]() {
+        auto add_widget = [&high_precision_floats, &value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox, &this_widget]() {
             auto add_simple_textbox = [&widgets_array, &standard_width, &textbox_widgets, &read_only](int size, QLayout *layout) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
@@ -121,7 +122,7 @@ namespace Invader::EditQt {
                 return textbox;
             };
             
-            auto add_single_textbox = [&value, &value_index, &widgets_array, &values, &label_width, &prefix_label_width, &add_simple_textbox](int size, QLayout *layout, const char *prefix = nullptr) -> QLineEdit * {
+            auto add_single_textbox = [&high_precision_floats, &value, &value_index, &widgets_array, &values, &label_width, &prefix_label_width, &add_simple_textbox](int size, QLayout *layout, const char *prefix = nullptr) -> QLineEdit * {
                 // If we've got a prefix, set it
                 if(prefix) {
                     auto *label = reinterpret_cast<QLabel *>(widgets_array.emplace_back(new QLabel()));
@@ -158,16 +159,45 @@ namespace Invader::EditQt {
                     textbox->setPlaceholderText("NULL");
                 }
                 else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
+                    double float_to_use;
+
                     // Radians get converted to degrees
                     switch(value_type) {
                         case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
                         case Parser::ParserStructValue::VALUE_TYPE_EULER2D:
                         case Parser::ParserStructValue::VALUE_TYPE_EULER3D:
-                            textbox->setText(QString::number(RADIANS_TO_DEGREES(std::get<double>(current_value))));
+                            float_to_use = std::get<double>(current_value);
                             break;
                         default:
-                            textbox->setText(QString::number(std::get<double>(current_value)));
+                            float_to_use = std::get<double>(current_value);
                             break;
+                    }
+
+                    if(high_precision_floats) {
+                        char float_data[256] = {};
+                        std::snprintf(float_data, sizeof(float_data), "%.099f", float_to_use);
+
+                        // Remove trailing zeroes
+                        for(std::size_t i = 255; i > 0; i--) {
+                            if(float_data[i] == '0') {
+                                float_data[i] = 0;
+                            }
+                            else if(float_data[i] == 0) {
+                                continue;
+                            }
+                            else if(float_data[i] == '.') {
+                                float_data[i] = 0;
+                                break;
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        textbox->setText(float_data);
+                    }
+                    else {
+                        textbox->setText(QString::number(float_to_use));
                     }
                 }
                 else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {

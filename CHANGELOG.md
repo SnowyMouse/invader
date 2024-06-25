@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Untagged]
+### Added
+- invader-edit-qt: Added --high-precision-floats
+
 ### Fixed
 - invader: Physics tags' center of mass and mass point density/mass are now calculated on
   build and are cache-only.

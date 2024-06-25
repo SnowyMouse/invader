@@ -70,6 +70,22 @@ namespace Invader::EditQt {
         }
 
         /**
+         * Set whether or not to show high precision floats.
+         * @param setting enabled
+         */
+        void set_use_high_precision_floats(bool setting) {
+            this->high_precision_floats = setting;
+        }
+
+        /**
+         * Set whether or not to show high precision floats.
+         * @param setting enabled
+         */
+        bool uses_high_precision_floats() const noexcept {
+            return this->high_precision_floats;
+        }
+
+        /**
          * Set all the tag directories
          * @param directories tag directories
          */
@@ -203,6 +219,7 @@ namespace Invader::EditQt {
 
         bool initial_load = false;
         bool tags_reloading_queued = false;
+        bool high_precision_floats = false;
 
         bool safeguards_set = true;
 

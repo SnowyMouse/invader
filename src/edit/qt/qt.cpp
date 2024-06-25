@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_FS_PATH),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS_MULTIPLE),
         CommandLineOption("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)"),
+        CommandLineOption("high-precision-floats", 'F', 0, "Display all floats with maximum precision."),
         CommandLineOption("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: fast)")
     };
 
@@ -42,6 +43,7 @@ int main(int argc, char **argv) {
         std::vector<std::filesystem::path> tags;
         bool void_warranty = false;
         bool disable_safeguards = false;
+        bool high_precision_floats = false;
         bool fs_path = false;
         bool fast_listing = true;
     } edit_qt_options;
@@ -58,6 +60,10 @@ int main(int argc, char **argv) {
 
             case 'n':
                 edit_qt_options.disable_safeguards = true;
+                break;
+
+            case 'F':
+                edit_qt_options.high_precision_floats = true;
                 break;
 
             case 'P':
@@ -131,6 +137,7 @@ int main(int argc, char **argv) {
     // Instantiate the window
     Invader::EditQt::TagTreeWindow w;
     w.set_tag_directories(edit_qt_options.tags);
+    w.set_use_high_precision_floats(edit_qt_options.high_precision_floats);
 
     if(edit_qt_options.fast_listing) {
         w.set_fast_listing_mode(true);
