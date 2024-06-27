@@ -97,11 +97,13 @@
             },
             {
                 "name": "powered mass point",
-                "type": "int16"
+                "type": "Index",
+                "reflexive": "powered mass points",
+                "struct": "Physics"
             },
             {
                 "name": "model node",
-                "type": "int16",
+                "type": "Index",
                 "read_only": true
             },
             {
@@ -244,23 +246,24 @@
             },
             {
                 "name": "xx moment",
-                "type": "float"
+                "type": "float",
+                "cache_only": true
             },
             {
                 "name": "yy moment",
-                "type": "float"
+                "type": "float",
+                "cache_only": true
             },
             {
                 "name": "zz moment",
-                "type": "float"
+                "type": "float",
+                "cache_only": true
             },
             {
                 "name": "inertial matrix and inverse",
                 "type": "TagReflexive",
                 "struct": "PhysicsInertialMatrix",
-                "minimum": 2,
-                "maximum": 2,
-                "volatile": true
+                "cache_only": true
             },
             {
                 "name": "powered mass points",

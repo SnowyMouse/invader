@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Untagged]
+### Fixed
+- invader-build: Physics tag compilation now accounts for the "old physics" calculation that
+  is enabled by setting the base `radius` field to anything above zero.
+
 ## [0.53.8] - 2024-06-25
 ### Added
 - invader-edit-qt: Added --high-precision-floats

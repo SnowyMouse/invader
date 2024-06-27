@@ -5,7 +5,7 @@
 
 namespace Invader::Parser {
     void Physics::postprocess_hek_data() {
-        // Some of these calculations are from MosesofEgypt's reclaimer source. You can get it at https://bitbucket.org/Moses_of_Egypt/reclaimer/src/5d710221979fecbb8e71fa57c768f17f42f0010d/hek/defs/objs/phys.py?at=default&fileviewer=file-view-default
+        // Some of these calculations are from MosesofEgypt's reclaimer source. You can get it at https://github.com/Sigmmma/reclaimer/blob/master/reclaimer/hek/defs/objs/phys.py
         // I added this stuff because it is actually recalculated when the physics tag is run through tool.exe when building a cache file.
         double total_relative_mass = 0.0f;
         HEK::Point3D<HEK::NativeEndian> com = {};
@@ -27,7 +27,7 @@ namespace Invader::Parser {
         com.x = comx * total_relative_mass_inverse;
         com.y = comy * total_relative_mass_inverse;
         com.z = comz * total_relative_mass_inverse;
-        
+
         this->center_of_mass = com;
 
         std::size_t mass_points_count = this->mass_points.size();
@@ -37,6 +37,9 @@ namespace Invader::Parser {
         double xx = 0.0f;
         double yy = 0.0f;
         double zz = 0.0f;
+        double old_xx = 0.0f;
+        double old_yy = 0.0f;
+        double old_zz = 0.0f;
         double neg_zx = 0.0f;
         double neg_xy = 0.0f;
         double neg_yz = 0.0f;
@@ -68,6 +71,10 @@ namespace Invader::Parser {
             yy += (dist_yy + radius_term) * mass;
             zz += (dist_zz + radius_term) * mass;
 
+            old_xx += dist_xx * mass;
+            old_yy += dist_yy * mass;
+            old_zz += dist_zz * mass;
+
             neg_zx -= dist_zx * mass;
             neg_xy -= dist_xy * mass;
             neg_yz -= dist_yz * mass;
@@ -78,9 +85,24 @@ namespace Invader::Parser {
         xx *= moment_scale;
         yy *= moment_scale;
         zz *= moment_scale;
+        old_xx *= moment_scale;
+        old_yy *= moment_scale;
+        old_zz *= moment_scale;
         neg_zx *= moment_scale;
         neg_xy *= moment_scale;
         neg_yz *= moment_scale;
+
+        // Set base moments. If the base radius is anything above 0 then we use values that do not account for local mass point radius.
+        if(this->radius > 0.0f) {
+            this->xx_moment = old_xx;
+            this->yy_moment = old_yy;
+            this->zz_moment = old_zz;
+        }
+        else {
+            this->xx_moment = xx;
+            this->yy_moment = yy;
+            this->zz_moment = zz;
+        }
 
         // Finally write down density
         double mass_scale = 1.0F / average_relative_mass;
@@ -99,9 +121,6 @@ namespace Invader::Parser {
         m.matrix[2][0] = neg_zx;
         m.matrix[2][1] = neg_yz;
         m.matrix[2][2] = zz;
-        this->xx_moment = m.matrix[0][0];
-        this->yy_moment = m.matrix[1][1];
-        this->zz_moment = m.matrix[2][2];
         this->inertial_matrix_and_inverse.resize(2);
         this->inertial_matrix_and_inverse[0].matrix = m;
         this->inertial_matrix_and_inverse[1].matrix = invert_matrix(m);
