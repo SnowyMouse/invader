@@ -2,10 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.54.0] - 2024-06-28
 ### Fixed
 - invader-build: Physics tag compilation now accounts for the "old physics" calculation that
   is enabled by setting the base `radius` field to anything above zero.
+- invader-build: Physics tags now have a check to make sure `moment scale` is non-zero.
+- invader-build: Fixed checking the wrong sequence index for the health panel background
+  in `unit_hud_interface` tags.
 
 ## [0.53.8] - 2024-06-25
 ### Added
@@ -2561,5 +2564,6 @@ image as one bitmap
 [0.53.6]: https://github.com/SnowyMouse/invader/compare/0.53.5...0.53.6
 [0.53.7]: https://github.com/SnowyMouse/invader/compare/0.53.6...0.53.7
 [0.53.8]: https://github.com/SnowyMouse/invader/compare/0.53.7...0.53.8
+[0.54.0]: https://github.com/SnowyMouse/invader/compare/0.53.8...0.54.0
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.53.8...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.54.0...master
