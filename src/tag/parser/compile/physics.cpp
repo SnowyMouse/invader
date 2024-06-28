@@ -4,9 +4,17 @@
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void Physics::postprocess_hek_data() {
+    void Physics::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Some of these calculations are from MosesofEgypt's reclaimer source. You can get it at https://github.com/Sigmmma/reclaimer/blob/master/reclaimer/hek/defs/objs/phys.py
         // I added this stuff because it is actually recalculated when the physics tag is run through tool.exe when building a cache file.
+
+        // Check moment scale. Gearbox tool.exe will exception if this is 0, MCC tool.exe will make a map with NaNs in the inertial matrices.
+        // This *should* be a 0->1 default, but sapien and friends blow up as well so this can help find the tag that does it.
+        if(this->moment_scale == 0.0f) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Physics moment scale is exactly 0. This is invalid as moment scale must be non-zero.");
+            throw InvalidTagDataException();
+        }
+
         double total_relative_mass = 0.0f;
         HEK::Point3D<HEK::NativeEndian> com = {};
 
