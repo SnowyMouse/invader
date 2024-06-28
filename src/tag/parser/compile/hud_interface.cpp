@@ -160,7 +160,7 @@ namespace Invader::Parser {
         CHECK_BITMAP_SEQUENCE(workload, this->hud_background_interface_bitmap, this->hud_background_sequence_index, "HUD background");
         CHECK_BITMAP_SEQUENCE(workload, this->shield_panel_background_interface_bitmap, this->shield_panel_background_sequence_index, "shield panel background");
         CHECK_BITMAP_SEQUENCE(workload, this->shield_panel_meter_meter_bitmap, this->shield_panel_meter_sequence_index, "shield panel meter");
-        CHECK_BITMAP_SEQUENCE(workload, this->health_panel_background_interface_bitmap, this->shield_panel_background_sequence_index, "health panel background");
+        CHECK_BITMAP_SEQUENCE(workload, this->health_panel_background_interface_bitmap, this->health_panel_background_sequence_index, "health panel background");
         CHECK_BITMAP_SEQUENCE(workload, this->health_panel_meter_meter_bitmap, this->health_panel_meter_sequence_index, "health panel meter");
         CHECK_BITMAP_SEQUENCE(workload, this->motion_sensor_background_interface_bitmap, this->motion_sensor_background_sequence_index, "motion sensor background");
         CHECK_BITMAP_SEQUENCE(workload, this->motion_sensor_foreground_interface_bitmap, this->motion_sensor_foreground_sequence_index, "motion sensor foreground");
