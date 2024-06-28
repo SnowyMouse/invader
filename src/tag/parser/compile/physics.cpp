@@ -10,12 +10,13 @@ namespace Invader::Parser {
 
         // Check moment scale. Gearbox tool.exe will exception if this is 0, MCC tool.exe will make a map with NaNs in the inertial matrices.
         // This *should* be a 0->1 default, but sapien and friends blow up as well so this can help find the tag that does it.
-        if(this->moment_scale == 0.0f) {
+        double moment_scale = this->moment_scale;
+        if(moment_scale == 0.0F) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Physics moment scale is exactly 0. This is invalid as moment scale must be non-zero.");
             throw InvalidTagDataException();
         }
 
-        double total_relative_mass = 0.0f;
+        double total_relative_mass = 0.0F;
         HEK::Point3D<HEK::NativeEndian> com = {};
 
         for(auto &mp : this->mass_points) {
@@ -41,16 +42,14 @@ namespace Invader::Parser {
         std::size_t mass_points_count = this->mass_points.size();
         double average_relative_mass = total_relative_mass / mass_points_count;
         double density_scale = this->density / mass_points_count;
-        double density_scale_co = 0.0f;
-        double xx = 0.0f;
-        double yy = 0.0f;
-        double zz = 0.0f;
-        double old_xx = 0.0f;
-        double old_yy = 0.0f;
-        double old_zz = 0.0f;
-        double neg_zx = 0.0f;
-        double neg_xy = 0.0f;
-        double neg_yz = 0.0f;
+        double density_scale_co = 0.0F;
+        double xx = 0.0F;
+        double yy = 0.0F;
+        double zz = 0.0F;
+        double neg_zx = 0.0F;
+        double neg_xy = 0.0F;
+        double neg_yz = 0.0F;
+        double radius_modifier = 0.0F;
 
         // Iterate once to get density and masses as well as to get inertial stuff.
         for(auto &mp : this->mass_points) {
@@ -58,30 +57,28 @@ namespace Invader::Parser {
             double mass = mass_percent * this->mass;
             mp.mass = mass;
 
-            if(mp.relative_density != 0.0f) {
+            if(mp.relative_density != 0.0F) {
                 density_scale_co += mp.relative_mass / mp.relative_density;
             }
 
             HEK::Point3D<HEK::NativeEndian> pos = mp.position;
 
-            double dist_xx = std::pow(com.y - pos.y, 2.0f) + std::pow(com.z - pos.z, 2.0f);
-            double dist_yy = std::pow(com.x - pos.x, 2.0f) + std::pow(com.z - pos.z, 2.0f);
-            double dist_zz = std::pow(com.x - pos.x, 2.0f) + std::pow(com.y - pos.y, 2.0f);
+            double dist_xx = std::pow(com.y - pos.y, 2.0F) + std::pow(com.z - pos.z, 2.0F);
+            double dist_yy = std::pow(com.x - pos.x, 2.0F) + std::pow(com.z - pos.z, 2.0F);
+            double dist_zz = std::pow(com.x - pos.x, 2.0F) + std::pow(com.y - pos.y, 2.0F);
             double dist_zx = (com.x - pos.x) * (com.z - pos.z);
             double dist_xy = (com.x - pos.x) * (com.y - pos.y);
             double dist_yz = (com.y - pos.y) * (com.z - pos.z);
-            double radius_term = 0.0f;
-            if(mp.radius > 0.0f) {
-                radius_term = 4 * std::pow(10.0f, (2 * std::log10(mp.radius) - 1.0f));
+            double radius_term = 0.0F;
+            if(mp.radius > 0.0F) {
+                radius_term = 4 * std::pow(10.0F, (2 * std::log10(mp.radius) - 1.0F));
             }
 
-            xx += (dist_xx + radius_term) * mass;
-            yy += (dist_yy + radius_term) * mass;
-            zz += (dist_zz + radius_term) * mass;
+            radius_modifier += radius_term * mass;
 
-            old_xx += dist_xx * mass;
-            old_yy += dist_yy * mass;
-            old_zz += dist_zz * mass;
+            xx += dist_xx * mass;
+            yy += dist_yy * mass;
+            zz += dist_zz * mass;
 
             neg_zx -= dist_zx * mass;
             neg_xy -= dist_xy * mass;
@@ -89,27 +86,24 @@ namespace Invader::Parser {
         }
         density_scale *= density_scale_co;
 
-        double moment_scale = this->moment_scale;
         xx *= moment_scale;
         yy *= moment_scale;
         zz *= moment_scale;
-        old_xx *= moment_scale;
-        old_yy *= moment_scale;
-        old_zz *= moment_scale;
         neg_zx *= moment_scale;
         neg_xy *= moment_scale;
         neg_yz *= moment_scale;
+        radius_modifier *= moment_scale;
 
         // Set base moments. If the base radius is anything above 0 then we use values that do not account for local mass point radius.
-        if(this->radius > 0.0f) {
-            this->xx_moment = old_xx;
-            this->yy_moment = old_yy;
-            this->zz_moment = old_zz;
-        }
-        else {
+        if(this->radius > 0.0F) {
             this->xx_moment = xx;
             this->yy_moment = yy;
             this->zz_moment = zz;
+        }
+        else {
+            this->xx_moment = xx + radius_modifier;
+            this->yy_moment = yy + radius_modifier;
+            this->zz_moment = zz + radius_modifier;
         }
 
         // Finally write down density
@@ -120,15 +114,15 @@ namespace Invader::Parser {
 
         // ...And matrix stuff
         HEK::Matrix<HEK::LittleEndian> m;
-        m.matrix[0][0] = xx;
+        m.matrix[0][0] = xx + radius_modifier;
         m.matrix[0][1] = neg_xy;
         m.matrix[0][2] = neg_zx;
         m.matrix[1][0] = neg_xy;
-        m.matrix[1][1] = yy;
+        m.matrix[1][1] = yy + radius_modifier;
         m.matrix[1][2] = neg_yz;
         m.matrix[2][0] = neg_zx;
         m.matrix[2][1] = neg_yz;
-        m.matrix[2][2] = zz;
+        m.matrix[2][2] = zz + radius_modifier;
         this->inertial_matrix_and_inverse.resize(2);
         this->inertial_matrix_and_inverse[0].matrix = m;
         this->inertial_matrix_and_inverse[1].matrix = invert_matrix(m);
