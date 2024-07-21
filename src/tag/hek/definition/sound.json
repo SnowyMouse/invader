@@ -375,6 +375,8 @@
             {
                 "name": "random gain modifier",
                 "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "default": 1.0
             },
             {
@@ -391,7 +393,9 @@
             },
             {
                 "name": "zero gain modifier",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "zero pitch modifier",
@@ -407,7 +411,9 @@
             },
             {
                 "name": "one gain modifier",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "one pitch modifier",
