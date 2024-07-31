@@ -66,9 +66,6 @@ if(MINGW)
 
     # Workaround a stack overflow in some build configurations on some scripts
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--stack,8388608")
-
-    # Define this if on Windows so %zu works
-    add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
 endif()
 
 # Turn on console messages
