@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.54.1] - 2024-07-31
+### Fixed
+- invader-font: Raised the 16k character limit to 65536 and fixed unused characters being
+  rendered, drastically lowering font sizes
+
 ## [0.54.0] - 2024-06-28
 ### Fixed
 - invader-build: Physics tag compilation now accounts for the "old physics" calculation that
@@ -2565,5 +2570,6 @@ image as one bitmap
 [0.53.7]: https://github.com/SnowyMouse/invader/compare/0.53.6...0.53.7
 [0.53.8]: https://github.com/SnowyMouse/invader/compare/0.53.7...0.53.8
 [0.54.0]: https://github.com/SnowyMouse/invader/compare/0.53.8...0.54.0
+[0.54.0]: https://github.com/SnowyMouse/invader/compare/0.54.0...0.54.1
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.54.0...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.54.1...master

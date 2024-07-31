@@ -172,17 +172,14 @@ int main(int argc, char *argv[]) {
 
     // Render the characters in a range
     std::vector<RenderedCharacter> characters;
-    int characters_to_add = font_options.use_latin1 ? 256 : 16384;
+    int characters_to_add = font_options.use_latin1 ? 256 : 65536;
     for(int i = 0; i < characters_to_add; i++) {
         auto index = FT_Get_Char_Index(face, i);
         if(FT_Load_Glyph(face, index, FT_LOAD_DEFAULT)) {
             eprintf_error("Failed to load glyph %i", i);
             return EXIT_FAILURE;
         }
-        if(FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL)) {
-            eprintf_error("Failed to render glyph %i", i);
-            return EXIT_FAILURE;
-        }
+
         RenderedCharacter c;
         c.left = face->glyph->bitmap_left;
         c.top = face->glyph->bitmap_top;
@@ -192,8 +189,16 @@ int main(int argc, char *argv[]) {
         c.height = face->glyph->bitmap.rows;
         c.hori_advance = face->glyph->metrics.horiAdvance / 64;
 
-        auto *buffer = reinterpret_cast<std::byte *>(face->glyph->bitmap.buffer);
-        c.data.insert(c.data.begin(), buffer, buffer + c.width * c.height);
+        if(index != 0) {
+            if(FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL)) {
+                eprintf_error("Failed to render glyph %i", i);
+                return EXIT_FAILURE;
+            }
+
+            auto *buffer = reinterpret_cast<std::byte *>(face->glyph->bitmap.buffer);
+            c.data.insert(c.data.begin(), buffer, buffer + c.width * c.height);
+        }
+
         characters.emplace_back(c);
     }
 
