@@ -20,7 +20,7 @@
                 "type": "PointPhysicsFlags"
             },
             {
-                "name": "unknown constant",
+                "name": "mass scale",
                 "type": "float",
                 "endian": "little",
                 "cache_only": true
