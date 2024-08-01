@@ -14,15 +14,11 @@ find_package(LibArchive)
 find_package(TIFF)
 find_package(Freetype)
 find_package(Git)
-find_package(SDL2)
 
 # Qt6
 find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 
-if(Qt6_VERSION VERSION_LESS "6.7")
-    add_definitions(-DINVADER_USING_OLD_QT6)
-endif()
-
+# SDL2
 find_package(SDL2 REQUIRED)
 
 # Load Rat In a Tube

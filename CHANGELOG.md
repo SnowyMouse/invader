@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.54.1] - 2024-07-31
+## [0.54.1] - 2024-08-01
 ### Fixed
 - invader-font: Raised the 16k character limit to 65536 and fixed unused characters being
   rendered, drastically lowering font sizes
