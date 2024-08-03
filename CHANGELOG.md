@@ -7,6 +7,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed misleading error message when a model part is missing the correct
   vertex type
 - invader-font: Fixed unrendered font characters being added as characters if character < 32
+- invader-font: Fixed some whitespace characters not being rendered correctly
 
 ### Changed
 - invader-build: Changed extended limit of font characters from 32000 to 32767

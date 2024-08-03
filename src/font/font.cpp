@@ -19,6 +19,7 @@
 
 struct RenderedCharacter {
     std::vector<std::byte> data;
+    std::uint16_t character_index;
     std::int16_t left;
     std::int16_t top;
     std::int16_t x;
@@ -173,7 +174,7 @@ int main(int argc, char *argv[]) {
     // Render the characters in a range
     std::vector<RenderedCharacter> characters;
     int characters_to_add = font_options.use_latin1 ? 256 : 65536;
-    for(int i = 0; i < characters_to_add; i++) {
+    for(int i = 1; i < characters_to_add; i++) {
         auto index = FT_Get_Char_Index(face, i);
         if(FT_Load_Glyph(face, index, FT_LOAD_DEFAULT)) {
             eprintf_error("Failed to load glyph %i", i);
@@ -181,6 +182,7 @@ int main(int argc, char *argv[]) {
         }
 
         RenderedCharacter c;
+        c.character_index = static_cast<std::size_t>(i);
         c.left = face->glyph->bitmap_left;
         c.top = face->glyph->bitmap_top;
         c.x = face->glyph->advance.x >> 6;
@@ -199,7 +201,7 @@ int main(int argc, char *argv[]) {
             c.data.insert(c.data.begin(), buffer, buffer + c.width * c.height);
         }
 
-        if(index != 0 || i <= 0x20) {
+        if(index != 0 || i == 127) {
             characters.emplace_back(c);
         }
     }
@@ -209,7 +211,7 @@ int main(int argc, char *argv[]) {
     FT_Done_FreeType(library);
 
     // Create
-    Parser::Font font= {};
+    Parser::Font font = {};
     std::vector<HEK::FontCharacter<HEK::BigEndian>> tag_characters;
     auto &pixels = font.pixels;
 
@@ -217,12 +219,12 @@ int main(int argc, char *argv[]) {
     int max_descending_height = 1;
     int max_ascending_height = 1;
     std::size_t character_count = characters.size();
-    for(std::size_t i = ' '; i < character_count; i++) {
+    for(std::size_t i = 0; i < character_count; i++) {
         auto &character = characters[i];
         auto &tag_character = font.characters.emplace_back();
 
         // Dot
-        if(i == 127) {
+        if(character.character_index == 127) {
             std::vector<unsigned char> data(font_options.pixel_size * font_options.pixel_size);
             float radius_inner = font_options.pixel_size / 5.0F;
             float radius_inner_distance = radius_inner * radius_inner;
@@ -250,7 +252,7 @@ int main(int argc, char *argv[]) {
 
             // Same as the width of the X character
             int width = characters['X'].x;
-            tag_character.character = static_cast<std::uint16_t>(i);
+            tag_character.character = character.character_index;
             tag_character.bitmap_height = font_options.pixel_size;
             tag_character.bitmap_width = font_options.pixel_size;
             tag_character.character_width = width;
@@ -260,8 +262,8 @@ int main(int argc, char *argv[]) {
             tag_character.bitmap_origin_y = center + radius_inner * 2;
             pixels.insert(pixels.end(), reinterpret_cast<std::byte *>(data.data()), reinterpret_cast<std::byte *>(data.data()) + data.size());
         }
-        else if(i == 32 || character.data.size() != 0) {
-            tag_character.character = static_cast<std::uint16_t>(i);
+        else {
+            tag_character.character = character.character_index;
             tag_character.bitmap_height = character.height;
             tag_character.bitmap_width = character.width;
             tag_character.character_width = character.x;
@@ -280,9 +282,6 @@ int main(int argc, char *argv[]) {
             if(descending_height > max_descending_height) {
                 max_descending_height = descending_height;
             }
-        }
-        else {
-            continue;
         }
     }
 
