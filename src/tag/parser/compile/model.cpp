@@ -811,6 +811,9 @@ namespace Invader::Parser {
         for(auto &t : triangle_indices) {
             if(t >= part_vertices_count) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index #%zu in triangle indices is invalid (%zu >= %zu)", &t - triangle_indices.data(), static_cast<std::size_t>(t), part_vertices_count);
+                if(part_vertices.empty()) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "...this is because there are no %s vertices. The tag needs fixed!", uncompressed_vertices ? "uncompressed" : "compressed");
+                }
                 throw InvalidTagDataException();
             }
         }

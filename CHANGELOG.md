@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Untagged]
 ### Fixed
+- invader-build: Fixed misleading error message when a model part is missing the correct
+  vertex type
 - invader-font: Fixed unrendered font characters being added as characters if character < 32
 
 ### Changed
