@@ -6,7 +6,7 @@
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
 
 namespace Invader::HEK {
-    class IntersectionCheck {
+    struct IntersectionCheck {
     public:
         static bool check_for_intersection(
             const Point3D<LittleEndian> &point_a,
@@ -32,7 +32,6 @@ namespace Invader::HEK {
             std::uint32_t &leaf_index
         );
 
-    private:
         const Point3D<LittleEndian> &original_point_a;
         const Point3D<LittleEndian> &original_point_b;
         const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes;

@@ -561,15 +561,12 @@ namespace Invader::Parser {
                 for(std::size_t b = start; b < bsp_count; b++) {
                     auto &bsp = bsp_data[b];
                     std::size_t hits = 0;
-                    std::size_t total_hits = 0;
                     std::vector<std::optional<std::uint32_t>> surface_indices;
                     surface_indices.reserve(point_count);
 
                     // Basically, add 1 for every time we find it in here
                     // We need to check if there is a surface that is half a world unit or less below the position
                     for(auto &p : command_list.points) {
-                        total_hits++;
-                        
                         std::uint32_t surface_index = 0;
                         if(bsp.check_for_intersection(p.position, 0.5F, nullptr, &surface_index, nullptr)) {
                             hits++;

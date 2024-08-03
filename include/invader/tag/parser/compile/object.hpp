@@ -4,7 +4,7 @@
 #define INVADER__TAG__PARSER__COMPILE__OBJECT_HPP
 
 namespace Invader::Parser {
-    class ParserStruct;
+    struct ParserStruct;
     
     /**
      * Convert an object from one type to another

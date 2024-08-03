@@ -290,7 +290,7 @@ namespace Invader::EditQt {
         else {
             this->make_dirty(false);
             auto end = std::chrono::steady_clock::now();
-            std::printf("Saved %s in %zu ms\n", this->get_file().full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+            std::printf("Saved %s in %lu ms\n", this->get_file().full_path.string().c_str(), static_cast<unsigned long>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
         }
         return result;
     }

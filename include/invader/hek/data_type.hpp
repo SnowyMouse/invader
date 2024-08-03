@@ -255,7 +255,7 @@ namespace Invader::HEK {
             return this->int_value();
         }
 
-        bool operator ==(const FlaggedInt<T> &other) {
+        bool operator ==(const FlaggedInt<T> &other) const noexcept {
             return this->value == other.value;
         }
     };
@@ -878,9 +878,10 @@ namespace Invader::HEK {
             return std::sqrt(this->distance_from_point_squared(point));
         }
 
-        Point3D(const Vector3D<EndianType> &copy) : x(copy.i), y(copy.j), z(copy.k) {}
-        Point3D(const Point3D<EndianType> &copy) = default;
         Point3D() = default;
+        Point3D &operator=(const Point3D &) = default;
+        Point3D(const Point3D<EndianType> &copy) = default;
+        Point3D(const Vector3D<EndianType> &copy) : x(copy.i), y(copy.j), z(copy.k) {}
     };
     static_assert(sizeof(Point3D<BigEndian>) == 0xC);
 
@@ -968,6 +969,7 @@ namespace Invader::HEK {
 
         ScenarioScriptNodeValue() = default;
         ScenarioScriptNodeValue(const ScenarioScriptNodeValue &copy) = default;
+        ScenarioScriptNodeValue &operator =(const ScenarioScriptNodeValue &copy) = default;
 
         ScenarioScriptNodeValue(std::uint8_t v) {
             this->bool_int = v;
