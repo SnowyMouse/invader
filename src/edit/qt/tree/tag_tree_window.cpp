@@ -568,7 +568,7 @@ namespace Invader::EditQt {
             
         this->open_documents.emplace_back(std::move(document));
         auto end = std::chrono::steady_clock::now();
-        std::printf("Opened %s in %zu ms\n", tag.full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+        std::printf("Opened %s in %lu ms\n", tag.full_path.string().c_str(), static_cast<unsigned long>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
         return window;
     }
 
@@ -600,7 +600,7 @@ namespace Invader::EditQt {
             window->show();
             this->open_documents.emplace_back(std::move(document));
             auto end = std::chrono::steady_clock::now();
-            std::printf("Created %s in %zu ms\n", dialog.textValue().toLatin1().data(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+            std::printf("Created %s in %lu ms\n", dialog.textValue().toLatin1().data(), static_cast<unsigned long>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
 
             return true;
         }

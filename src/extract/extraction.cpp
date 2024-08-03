@@ -34,7 +34,7 @@ namespace Invader {
 
         char timer[256] = {};
         auto end = std::chrono::steady_clock::now();
-        std::snprintf(timer, sizeof(timer), " in %zu ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+        std::snprintf(timer, sizeof(timer), " in %lu ms", static_cast<unsigned long>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()));
 
         if(errors) {
             oprintf_success_warn("%s%s%s%s", initial_message, warnings_message, errors_message, timer);
