@@ -147,7 +147,8 @@
                 "type": "TagReflexive",
                 "struct": "FontCharacter",
                 "read_only": true,
-                "maximum": 32000
+                "maximum": 32000,
+                "extended_maximum": 32767
             },
             {
                 "name": "pixels",

@@ -232,6 +232,10 @@ namespace Invader {
                     }
                 };
 
+                for(char letter = '0'; letter <= '9'; letter++) {
+                    print_help_for_option_letter(letter);
+                }
+
                 for(char letter = 'a'; letter <= 'z'; letter++) {
                     print_help_for_option_letter(letter);
                     print_help_for_option_letter(std::toupper(letter));

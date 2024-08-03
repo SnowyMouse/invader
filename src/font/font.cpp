@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_DATA),
         CommandLineOption::from_preset(CommandLineOption::PRESET_COMMAND_LINE_OPTION_TAGS),
         CommandLineOption("font-size", 's', 1, "Set the font size in pixels.", "<px>"),
-        CommandLineOption("latin1", 'l', 0, "Use 256 characters only (smaller)")
+        CommandLineOption("8-bit", '8', 0, "Use the first 256 characters only.")
     };
 
     static constexpr char DESCRIPTION[] = "Create font tags from OTF/TTF files.";
@@ -199,7 +199,9 @@ int main(int argc, char *argv[]) {
             c.data.insert(c.data.begin(), buffer, buffer + c.width * c.height);
         }
 
-        characters.emplace_back(c);
+        if(index != 0 || i <= 0x20) {
+            characters.emplace_back(c);
+        }
     }
 
     // Done
@@ -214,7 +216,8 @@ int main(int argc, char *argv[]) {
     // Set up the character stuff
     int max_descending_height = 1;
     int max_ascending_height = 1;
-    for(std::size_t i = ' '; i < characters.size(); i++) {
+    std::size_t character_count = characters.size();
+    for(std::size_t i = ' '; i < character_count; i++) {
         auto &character = characters[i];
         auto &tag_character = font.characters.emplace_back();
 
