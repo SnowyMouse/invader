@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Untagged]
+## [0.54.2] - 2024-08-05
 ### Fixed
 - invader-build: Fixed misleading error message when a model part is missing the correct
   vertex type
@@ -2582,5 +2582,6 @@ image as one bitmap
 [0.53.8]: https://github.com/SnowyMouse/invader/compare/0.53.7...0.53.8
 [0.54.0]: https://github.com/SnowyMouse/invader/compare/0.53.8...0.54.0
 [0.54.1]: https://github.com/SnowyMouse/invader/compare/0.54.0...0.54.1
+[0.54.2]: https://github.com/SnowyMouse/invader/compare/0.54.1...0.54.2
 
-[Untagged]: https://github.com/SnowyMouse/invader/compare/0.54.1...master
+[Untagged]: https://github.com/SnowyMouse/invader/compare/0.54.2...master
