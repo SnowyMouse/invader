@@ -34,6 +34,14 @@
         "size": 12
     },
     {
+        "name": "FontEncodingType",
+        "options": [
+            "ucs-2",
+            "extended"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "FontCharacter",
         "fields": [
             {
@@ -104,8 +112,20 @@
                 "cache_only": true
             },
             {
+                "name": "encoding type",
+                "type": "FontEncodingType",
+                "comment": "unsure if tool.exe put it in the map like this",
+                "cache_only": true
+            },
+            {
+                "name": "character offset",
+                "type": "uint16",
+                "comment": "= characters reflexive count + 161",
+                "cache_only": true
+            },
+            {
                 "type": "pad",
-                "size": 36
+                "size": 32
             },
             {
                 "name": "character tables",
