@@ -16,15 +16,30 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFLAC__NO_DLL")
 
     # From https://github.com/Martchus/PKGBUILDs/blob/master/cmake/mingw-w64-static/toolchain-mingw-static.cmake
+
+    # prefer static libraries
+    set(OPENSSL_USE_STATIC_LIBS ON)
+    set(BOOST_USE_STATIC_LIBS ON)
+
+    # force-use the shared Vulkan library because there's no static one
+    # note: The library is not used anyways but required for Vulkan to be considered installed and enabled.
+    set(Vulkan_LIBRARY "${INVADER_MINGW_PREFIX}/lib/libvulkan.dll.a" CACHE FILEPATH "shared Vulkan IDC library")
+
+    # workaround limitations in upstream pkg-config files and CMake find modules
     set(pkgcfg_lib_libbrotlicommon_brotlicommon "${CMAKE_STATIC_PREFIX}/lib/libbrotlicommon.a" CACHE INTERNAL "static libbrotlicommon")
     set(pkgcfg_lib_libbrotlienc_brotlienc "${CMAKE_STATIC_PREFIX}/lib/libbrotlienc.a;${CMAKE_STATIC_PREFIX}/lib/libbrotlicommon.a" CACHE INTERNAL "static libbrotliend")
     set(pkgcfg_lib_libbrotlidec_brotlidec "${CMAKE_STATIC_PREFIX}/lib/libbrotlidec.a;${CMAKE_STATIC_PREFIX}/lib/libbrotlicommon.a" CACHE INTERNAL "static libbrotlidec")
     set(libbrotlicommon_STATIC_LDFLAGS "${pkgcfg_lib_libbrotlicommon_brotlicommon}" CACHE INTERNAL "static libbrotlicommon")
     set(libbrotlienc_STATIC_LDFLAGS "${pkgcfg_lib_libbrotlienc_brotlienc}" CACHE INTERNAL "static libbrotliend")
     set(libbrotlidec_STATIC_LDFLAGS "${pkgcfg_lib_libbrotlidec_brotlidec}" CACHE INTERNAL "static libbrotlidec")
+
+    # disable use of find modules that don't work for static libraries
+    set(CMAKE_DISABLE_FIND_PACKAGE_harfbuzz TRUE)
+
+    # define dependencies of various static libraries as CMake doesn't pull them reliably automatically
     set(OPENSSL_DEPENDENCIES "-lws2_32;-lgdi32;-lcrypt32" CACHE INTERNAL "dependencies of static OpenSSL libraries")
     set(POSTGRESQL_DEPENDENCIES "-lpgcommon;-lpgport;-lintl;-lssl;-lcrypto;-lshell32;-lws2_32;-lsecur32;-liconv" CACHE INTERNAL "dependencies of static PostgreSQL libraries")
-    set(MYSQL_DEPENDENCIES "-lssl;-lcrypto;-lshlwapi;-lgdi32;-lws2_32;-lpthread;-lz;-lm" CACHE INTERNAL "dependencies of static MySQL/MariaDB libraries")
+    set(MYSQL_DEPENDENCIES "-lzstd;-lshlwapi;-lgdi32;-lws2_32;-lbcrypt;-lcrypt32;-lsecur32;-ladvapi32;-lpthread;-lz;-lm" CACHE INTERNAL "dependencies of static MySQL/MariaDB libraries")
     set(LIBPNG_DEPENDENCIES "-lz" CACHE INTERNAL "dependencies of static libpng")
     set(GLIB2_DEPENDENCIES "-lintl;-lws2_32;-lole32;-lwinmm;-lshlwapi;-lm" CACHE INTERNAL "dependencies of static Glib2")
     set(FREETYPE_DEPENDENCIES "-lbz2;-lharfbuzz;-lfreetype;-lbrotlidec;-lbrotlicommon" CACHE INTERNAL "dependencies of static FreeType2 library")
@@ -45,9 +60,6 @@ if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
     set(ZLIB_LIBRARY_RELEASE            "${INVADER_MINGW_PREFIX}/lib/libz.a")
     set(pkgcfg_lib_PC_HARFBUZZ_harfbuzz "${INVADER_MINGW_PREFIX}/lib/libharfbuzz.a")
     set(pkgcfg_lib_PC_PCRE2_pcre2-16    "${INVADER_MINGW_PREFIX}/lib/libpcre2-16.a")
-
-    set(OPENSSL_USE_STATIC_LIBS ON)
-    set(BOOST_USE_STATIC_LIBS ON)
 
 # Fix any dependencies needed to be fixed
 else()

@@ -40,5 +40,4 @@ function run_arguments_and_say_what_i_ran() {
 
 run_arguments_and_say_what_i_ran "${CMAKE}" "${SOURCE_DIR}" "${@}" \
                                  "-DINVADER_BUILD_DEPENDENCY_SCRIPT=${BUILD_DEP_PATH}" \
-                                 "-DINVADER_MINGW_PREFIX=/usr/x86_64-w64-mingw32" \
-                                 "-DCMAKE_DISABLE_FIND_PACKAGE_harfbuzz=TRUE"
+                                 "-DINVADER_MINGW_PREFIX=/usr/x86_64-w64-mingw32"
