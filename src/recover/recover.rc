@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-recover"
+#define INVADER_BINARY_FILE_NAME "invader-recover.exe"
+#define INVADER_BINARY_DESCRIPTION "Tag source data recovery tool"
+
+#include "../windows.rc"

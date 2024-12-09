@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-strip"
+#define INVADER_BINARY_FILE_NAME "invader-strip.exe"
+#define INVADER_BINARY_DESCRIPTION "Tag stripping tool"
+
+#include "../windows.rc"

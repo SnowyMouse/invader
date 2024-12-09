@@ -13,5 +13,7 @@ if(${INVADER_BUILD})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-build)
 
-    do_windows_rc(invader-build invader-build.exe "Invader map compilation tool")
+    if(WIN32)
+        target_sources(invader-build PRIVATE src/build/build.rc)
+    endif()
 endif()

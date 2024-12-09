@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-collection"
+#define INVADER_BINARY_FILE_NAME "invader-collection.exe"
+#define INVADER_BINARY_DESCRIPTION "tag_collection tag generation tool"
+
+#include "../windows.rc"

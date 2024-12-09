@@ -224,11 +224,11 @@ namespace Invader::EditQt {
         icon_hbox_layout->addSpacing(1);
         icon_label_widget->setLayout(icon_hbox_layout);
         icon_label->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
-        icon_label->setPixmap(QPixmap(":icon/invader-edit-qt.png"));
+        icon_label->setPixmap(QPixmap(":res/invader-edit-qt.png"));
 
         // Show the version
         QLabel *label = new QLabel(full_version_and_credits());
-        int id = QFontDatabase::addApplicationFont(":icon/roboto-mono.ttf");
+        int id = QFontDatabase::addApplicationFont(":res/roboto-mono.ttf");
         QString family = QFontDatabase::applicationFontFamilies(id).at(0);
         QFont monospace(family);
         label->setFont(monospace);

@@ -13,5 +13,7 @@ if(${INVADER_SOUND})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-sound)
 
-    do_windows_rc(invader-sound invader-sound.exe "Invader sound tag generation tool")
+    if(WIN32)
+        target_sources(invader-sound PRIVATE src/sound/sound.rc)
+    endif()
 endif()

@@ -14,5 +14,7 @@ if(${INVADER_INFO})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-info)
 
-    do_windows_rc(invader-info invader-info.exe "Invader map information tool")
+    if(WIN32)
+        target_sources(invader-info PRIVATE src/info/info.rc)
+    endif()
 endif()

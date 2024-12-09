@@ -12,5 +12,8 @@ if(${INVADER_REFACTOR})
     target_link_libraries(invader-refactor invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-refactor)
-    do_windows_rc(invader-refactor invader-refactor.exe "Invader tag refactor tool")
+
+    if(WIN32)
+        target_sources(invader-refactor PRIVATE src/refactor/refactor.rc)
+    endif()
 endif()

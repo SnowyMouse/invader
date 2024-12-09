@@ -29,5 +29,7 @@ if(${INVADER_FONT})
         )
     endif()
 
-    do_windows_rc(invader-font invader-font.exe "Invader font tag generation tool")
+    if(WIN32)
+        target_sources(invader-font PRIVATE src/font/font.rc)
+    endif()
 endif()

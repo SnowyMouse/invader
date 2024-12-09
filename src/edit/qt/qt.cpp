@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     // Instantiate the application
     QApplication a(argc, argv);
-    a.setWindowIcon(QIcon(":icon/invader-edit-qt.ico"));
+    a.setWindowIcon(QIcon(":res/invader-edit-qt.ico"));
 
     // Check if some directories are missing
     bool should_exit = false;

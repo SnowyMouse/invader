@@ -12,5 +12,8 @@ if(${INVADER_RESOURCE})
     target_link_libraries(invader-resource invader ${INVADER_CRT_NOGLOB})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-resource)
-    do_windows_rc(invader-resource invader-resource.exe "Invader resource map generation tool")
+
+    if(WIN32)
+        target_sources(invader-resource PRIVATE src/resource/resource.rc)
+    endif()
 endif()

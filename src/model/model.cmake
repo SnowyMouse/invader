@@ -13,6 +13,8 @@ if(${INVADER_MODEL})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-model)
 
-    do_windows_rc(invader-model invader-model.exe "Model tag compiler")
+    if(WIN32)
+        target_sources(invader-model PRIVATE src/model/model.rc)
+    endif()
 endif()
 

@@ -13,5 +13,7 @@ if(${INVADER_SCAN})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-scan)
 
-    do_windows_rc(invader-scan invader-scan.exe "Scan cache files for unknown tag fields")
+    if(WIN32)
+        target_sources(invader-scan PRIVATE src/scan/scan.rc)
+    endif()
 endif()

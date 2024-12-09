@@ -10,9 +10,9 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "Comments",         "Invader tag editing tool"
+            VALUE "Comments",         "GUI Tag editing tool"
             VALUE "CompanyName",      "Snowy Mouse"
-            VALUE "FileDescription",  "Invader tag editing tool"
+            VALUE "FileDescription",  "GUI Tag editing tool"
             VALUE "FileVersion",      INVADER_FULL_VERSION_STRING
             VALUE "InternalName",     "invader-edit-qt"
             VALUE "OriginalFilename", "invader-edit-qt.exe"
@@ -26,5 +26,5 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
-IDI_ICON1 ICON DISCARDABLE "../../../icon/invader-edit-qt.ico"
+IDI_ICON1 ICON "../../../res/invader-edit-qt.ico"
 1 24 "qt.manifest"

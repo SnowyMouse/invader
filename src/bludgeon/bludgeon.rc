@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-bludgeon"
+#define INVADER_BINARY_FILE_NAME "invader-bludgeon.exe"
+#define INVADER_BINARY_DESCRIPTION "Tag bludgeoning tool"
+
+#include "../windows.rc"

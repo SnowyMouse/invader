@@ -13,5 +13,7 @@ if(${INVADER_STRIP})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-strip)
 
-    do_windows_rc(invader-strip invader-strip.exe "Invader tag stripping tool")
+    if(WIN32)
+        target_sources(invader-strip PRIVATE src/strip/strip.rc)
+    endif()
 endif()

@@ -13,5 +13,7 @@ if(${INVADER_INDEX})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-index)
 
-    do_windows_rc(invader-index invader-index "Cache file indexing tool")
+    if(WIN32)
+        target_sources(invader-index PRIVATE src/index/index.rc)
+    endif()
 endif()

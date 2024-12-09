@@ -14,5 +14,7 @@ if(${INVADER_EDIT})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-edit)
 
-    do_windows_rc(invader-edit invader-edit.exe "Invader command-line tag editor")
+    if(WIN32)
+        target_sources(invader-edit PRIVATE src/edit/edit.rc)
+    endif()
 endif()

@@ -1,8 +1,8 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
 <qresource>
-    <file alias="icon/invader-edit-qt.ico">../../../icon/invader-edit-qt.ico</file>
-    <file alias="icon/invader-edit-qt.png">../../../icon/invader-edit-qt.png</file>
-    <file alias="icon/roboto-mono.ttf">../../../icon/roboto-mono.ttf</file>
+    <file alias="res/invader-edit-qt.ico">../../../res/invader-edit-qt.ico</file>
+    <file alias="res/invader-edit-qt.png">../../../res/invader-edit-qt.png</file>
+    <file alias="res/roboto-mono.ttf">../../../res/roboto-mono.ttf</file>
 </qresource>
 </RCC>

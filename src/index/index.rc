@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-index"
+#define INVADER_BINARY_FILE_NAME "invader-index.exe"
+#define INVADER_BINARY_DESCRIPTION "Cache file indexing tool"
+
+#include "../windows.rc"

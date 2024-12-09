@@ -132,7 +132,9 @@ add_library(invader
 
 # If dynamic, have the .dll have the windowsrc thing too
 if(${BUILD_SHARED_LIBS})
-    do_windows_rc(invader libinvader.dll "Invader library")
+    if(WIN32)
+        target_sources(invader PRIVATE src/invader.rc)
+    endif()
 endif()
 
 # Do this

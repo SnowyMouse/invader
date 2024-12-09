@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader"
+#define INVADER_BINARY_FILE_NAME "libinvader.dll"
+#define INVADER_BINARY_DESCRIPTION "Invader library"
+
+#include "windows.rc"

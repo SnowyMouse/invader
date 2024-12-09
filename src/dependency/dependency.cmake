@@ -13,5 +13,7 @@ if(${INVADER_DEPENDENCY})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-dependency)
 
-    do_windows_rc(invader-dependency invader-dependency.exe "Invader tag dependency query tool")
+    if(WIN32)
+        target_sources(invader-dependency PRIVATE src/dependency/dependency.rc)
+    endif()
 endif()

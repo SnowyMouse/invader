@@ -13,5 +13,7 @@ if(${INVADER_EXTRACT})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-extract)
 
-    do_windows_rc(invader-extract invader-extract.exe "Invader tag extraction tool")
+    if(WIN32)
+        target_sources(invader-extract PRIVATE src/extract/extract.rc)
+    endif()
 endif()

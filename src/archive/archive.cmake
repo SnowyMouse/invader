@@ -20,5 +20,7 @@ if(${INVADER_ARCHIVE})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-archive)
 
-    do_windows_rc(invader-archive invader-archive.exe "Invader tag archival tool")
+    if(WIN32)
+        target_sources(invader-archive PRIVATE src/archive/archive.rc)
+    endif()
 endif()

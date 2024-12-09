@@ -26,5 +26,7 @@ if(${INVADER_BITMAP})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-bitmap)
 
-    do_windows_rc(invader-bitmap invader-bitmap.exe "Invader bitmap tag generation tool")
+    if(WIN32)
+        target_sources(invader-bitmap PRIVATE src/bitmap/bitmap.rc)
+    endif()
 endif()

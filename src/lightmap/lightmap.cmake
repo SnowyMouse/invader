@@ -14,6 +14,8 @@ if(${INVADER_LIGHTMAP})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-lightmap)
 
-    do_windows_rc(invader-lightmap invader-lightmap "Invader lightmap compilation tool")
+    if(WIN32)
+        target_sources(invader-lightmap PRIVATE src/lightmap/lightmap.rc)
+    endif()
 endif()
 

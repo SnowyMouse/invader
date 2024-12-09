@@ -13,5 +13,7 @@ if(${INVADER_COLLECTION})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-collection)
 
-    do_windows_rc(invader-collection invader-collection.exe "Invader tag_collection tag generation tool")
+    if(WIN32)
+        target_sources(invader-collection PRIVATE src/collection/collection.rc)
+    endif()
 endif()

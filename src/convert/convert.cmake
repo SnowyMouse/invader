@@ -13,5 +13,7 @@ if(${INVADER_CONVERT})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-convert)
 
-    do_windows_rc(invader-convert invader-convert.exe "Invader tag conversion tool")
+    if(WIN32)
+        target_sources(invader-convert PRIVATE src/convert/convert.rc)
+    endif()
 endif()

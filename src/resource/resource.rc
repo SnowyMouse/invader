@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-resource"
+#define INVADER_BINARY_FILE_NAME "invader-resource.exe"
+#define INVADER_BINARY_DESCRIPTION "Resource map generation tool"
+
+#include "../windows.rc"

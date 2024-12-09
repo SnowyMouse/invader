@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-extract"
+#define INVADER_BINARY_FILE_NAME "invader-extract.exe"
+#define INVADER_BINARY_DESCRIPTION "Cache-file tag extraction tool"
+
+#include "../windows.rc"

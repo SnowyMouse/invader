@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-scan"
+#define INVADER_BINARY_FILE_NAME "invader-scan.exe"
+#define INVADER_BINARY_DESCRIPTION "Scan cache-files for unknown tag fields"
+
+#include "../windows.rc"

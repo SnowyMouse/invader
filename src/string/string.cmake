@@ -13,5 +13,7 @@ if(${INVADER_STRING})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-string)
 
-    do_windows_rc(invader-string invader-string.exe "Invader string tag generation tool")
+    if(WIN32)
+        target_sources(invader-string PRIVATE src/string/string.rc)
+    endif()
 endif()

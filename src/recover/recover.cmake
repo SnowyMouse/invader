@@ -23,6 +23,7 @@ if(${INVADER_RECOVER})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-recover)
 
-    do_windows_rc(invader-recover invader-recover.exe "Tag source data recovery tool")
+    if(WIN32)
+        target_sources(invader-recover PRIVATE src/recover/recover.rc)
+    endif()
 endif()
-

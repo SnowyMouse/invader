@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-edit"
+#define INVADER_BINARY_FILE_NAME "invader-edit.exe"
+#define INVADER_BINARY_DESCRIPTION "Command-line tag editor"
+
+#include "../windows.rc"

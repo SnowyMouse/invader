@@ -13,5 +13,7 @@ if(${INVADER_SCRIPT})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-script)
 
-    do_windows_rc(invader-script invader-script.exe "Script compiler")
+    if(WIN32)
+        target_sources(invader-script PRIVATE src/script/script.rc)
+    endif()
 endif()

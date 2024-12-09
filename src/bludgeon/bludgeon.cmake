@@ -14,5 +14,7 @@ if(${INVADER_BLUDGEON})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-bludgeon)
 
-    do_windows_rc(invader-bludgeon invader-bludgeon.exe "Invader tag bludgeoning tool")
+    if(WIN32)
+        target_sources(invader-bludgeon PRIVATE src/bludgeon/bludgeon.rc)
+    endif()
 endif()

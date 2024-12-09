@@ -13,5 +13,7 @@ if(${INVADER_COMPARE})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-compare)
 
-    do_windows_rc(invader-compare invader-compare.exe "Invader tag comparison tool")
+    if(WIN32)
+        target_sources(invader-compare PRIVATE src/compare/compare.rc)
+    endif()
 endif()
