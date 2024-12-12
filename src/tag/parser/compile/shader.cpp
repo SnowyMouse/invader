@@ -168,6 +168,11 @@ namespace Invader::Parser {
                 break;
             default: break;
         }
+
+        if(this->maps.size() == 0 && this->stages.size() == 0) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "shader_transparent_generic tags must contain at least either one map or one stage", tag_index);
+        }
+
         default_maps(this->maps);
 
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC);

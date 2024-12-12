@@ -61,6 +61,7 @@
                 "name": "maps 4 stage",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
+                "minimum": 1,
                 "maximum": 4
             },
             {
@@ -68,6 +69,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
                 "comment": "The original definitions have these set to 4, but issues occur when you do this as these are 2-stage maps, not 4-stage maps!\nUse the 4 stage maps (or just shader_transparent_chicago) for 4-stage maps.",
+                "minimum": 1,
                 "maximum": 2
             },
             {
