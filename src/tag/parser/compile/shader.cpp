@@ -171,6 +171,7 @@ namespace Invader::Parser {
 
         if(this->maps.size() == 0 && this->stages.size() == 0) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "shader_transparent_generic tags must contain at least either one map or one stage", tag_index);
+            throw InvalidTagDataException();
         }
 
         default_maps(this->maps);
