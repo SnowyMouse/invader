@@ -29,6 +29,12 @@ namespace Invader::Parser {
         auto sprite_plate_struct = workload.structs[*sprite_plate_tag.base_struct];
         auto &sprite_plate_data = *reinterpret_cast<HEK::Bitmap<HEK::LittleEndian> *>(sprite_plate_struct.data.data());
 
+        // Ensure bitmap type is sprites.
+        if(sprite_plate_data.type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sprite plate bitmap '%s.%s' is not of type 'sprites'. This is invalid.", File::halo_path_to_preferred_path(sprite_plate_tag.path).c_str(), HEK::tag_fourcc_to_extension(sprite_plate_tag.tag_fourcc));
+            throw InvalidTagDataException();
+        }
+
         // Get sequence information
         std::size_t sequence_count = sprite_plate_data.bitmap_group_sequence.count.read();
         auto sequences_struct_index = sprite_plate_struct.resolve_pointer(&sprite_plate_data.bitmap_group_sequence.pointer);
