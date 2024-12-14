@@ -410,7 +410,7 @@ namespace Invader::Parser {
             this->one_detail_sound_period = 1.0f;
         }
 
-        this->unknown_int = 0xFFFFFFFF; // this is probably a pointer, but we should check to make sure it isn't something important
+        this->runtime_scripting_sound = HEK::TagID::null_tag_id();
 
         std::fill(this->one_detail_unknown_floats, this->one_detail_unknown_floats + 2, 1.0F);
         std::fill(this->zero_detail_unknown_floats, this->zero_detail_unknown_floats + 2, 1.0F);

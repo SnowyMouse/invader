@@ -188,8 +188,8 @@
                 "count": 2
             },
             {
-                "name": "unknown int",
-                "type": "uint32",
+                "name": "runtime scripting sound",
+                "type": "TagID",
                 "endian": "little",
                 "cache_only": true
             },

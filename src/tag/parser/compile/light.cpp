@@ -23,7 +23,7 @@ namespace Invader::Parser {
         this->cos_cutoff_angle = std::cos(this->cutoff_angle);
         this->cos_falloff_angle = std::cos(this->falloff_angle);
         this->sin_cutoff_angle = std::sin(this->cutoff_angle);
-        this->unknown_two = 2.0F;
+        this->specular_radius_multiplier = 2.0F;
         this->duration *= TICK_RATE;
 
         // If RGB values are 0 for both lower and upper, default to 1 (alpha isn't read or modified here)

@@ -60,7 +60,7 @@
                 "endian": "little"
             },
             {
-                "name": "unknown two",
+                "name": "specular radius multiplier",
                 "type": "float",
                 "cache_only": true,
                 "endian": "little",
