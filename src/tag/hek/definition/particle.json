@@ -215,7 +215,7 @@
                 "type": "FramebufferFadeMode"
             },
             {
-                "name": "map flags",
+                "name": "bitmap flags",
                 "type": "IsUnfilteredFlag"
             },
             {
@@ -234,7 +234,7 @@
                 "type": "ParticleAnchor"
             },
             {
-                "name": "secondary map flags",
+                "name": "secondary bitmap flags",
                 "type": "IsUnfilteredFlag"
             },
             {

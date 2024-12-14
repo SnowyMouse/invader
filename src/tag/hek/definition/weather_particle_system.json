@@ -189,7 +189,7 @@
                 "type": "FramebufferFadeMode"
             },
             {
-                "name": "map flags",
+                "name": "bitmap flags",
                 "type": "IsUnfilteredFlag"
             },
             {
@@ -197,7 +197,7 @@
                 "size": 28
             },
             {
-                "name": "bitmap",
+                "name": "secondary bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
@@ -208,7 +208,7 @@
                 "type": "ParticleAnchor"
             },
             {
-                "name": "flags 1",
+                "name": "secondary bitmap flags",
                 "type": "IsUnfilteredFlag"
             },
             {

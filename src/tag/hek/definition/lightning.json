@@ -91,7 +91,7 @@
                 "type": "FramebufferFadeMode"
             },
             {
-                "name": "map flags",
+                "name": "bitmap flags",
                 "type": "IsUnfilteredFlag"
             },
             {
@@ -99,30 +99,101 @@
                 "size": 28
             },
             {
-                "type": "pad",
-                "size": 12
+                "name": "secondary bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ]
             },
             {
-                "name": "some more stuff that should be set for some reason",
-                "type": "uint32",
-                "endian": "little",
-                "cache_only": true
+                "name": "anchor",
+                "type": "ParticleAnchor"
+            },
+            {
+                "name": "secondary bitmap flags",
+                "type": "IsUnfilteredFlag"
+            },
+            {
+                "name": "u animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "u animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "unit": "seconds",
+                "name": "u animation period",
+                "type": "float"
+            },
+            {
+                "name": "u animation phase",
+                "type": "float"
+            },
+            {
+                "name": "u animation scale",
+                "unit": "repeats",
+                "type": "float"
+            },
+            {
+                "name": "v animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "v animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "v animation period",
+                "unit": "seconds",
+                "type": "float"
+            },
+            {
+                "name": "v animation phase",
+                "type": "float"
+            },
+            {
+                "name": "v animation scale",
+                "unit": "repeats",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "rotation animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "rotation animation period",
+                "unit": "seconds",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation phase",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation scale",
+                "unit": "degrees",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation center",
+                "type": "Point2D"
             },
             {
                 "type": "pad",
-                "size": 2
+                "size": 4
+            },
+            {
+                "name": "zsprite radius scale",
+                "type": "float"
             },
             {
                 "type": "pad",
-                "size": 2
-            },
-            {
-                "type": "pad",
-                "size": 56
-            },
-            {
-                "type": "pad",
-                "size": 28
+                "size": 20
             }
         ],
         "type": "struct",
