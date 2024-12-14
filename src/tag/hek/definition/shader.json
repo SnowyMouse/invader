@@ -41,18 +41,18 @@
     {
         "name": "ShaderType",
         "options": [
-            "unused",
-            "unused1",
-            "unused2",
-            "shader environment",
-            "shader model",
-            "shader transparent generic",
-            "shader transparent chicago",
-            "shader transparent chicago extended",
-            "shader transparent water",
-            "shader transparent glass",
-            "shader transparent meter",
-            "shader transparent plasma"
+            "screen",
+            "effect",
+            "decal",
+            "environment",
+            "model",
+            "transparent generic",
+            "transparent chicago",
+            "transparent chicago extended",
+            "transparent water",
+            "transparent glass",
+            "transparent meter",
+            "transparent plasma"
         ],
         "type": "enum"
     },

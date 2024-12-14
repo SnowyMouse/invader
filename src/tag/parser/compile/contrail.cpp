@@ -7,7 +7,7 @@
 
 namespace Invader::Parser {
     void Contrail::pre_compile(BuildWorkload &, std::size_t , std::size_t, std::size_t) {
-        this->unknown_int = 1;
+        this->shader_type = HEK::ShaderType::SHADER_TYPE_EFFECT;
     }
 
     void Contrail::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {

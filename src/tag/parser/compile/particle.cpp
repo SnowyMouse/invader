@@ -114,7 +114,7 @@ namespace Invader::Parser {
         auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->bitmap.tag_id.index, this->first_sequence_index, static_cast<std::size_t>(this->initial_sequence_count) + static_cast<std::size_t>(this->looping_sequence_count) + static_cast<std::size_t>(this->final_sequence_count), warn);
         particle.sprite_size = this->sprite_size;
-        particle.make_it_actually_work = 1;
+        particle.shader_type = HEK::ShaderType::SHADER_TYPE_EFFECT;
 
         if(warn) {
             complain_about_non_square_sheets(workload, tag_index, workload.tags[this->bitmap.tag_id.index]);
@@ -126,7 +126,7 @@ namespace Invader::Parser {
         auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->sprite_bitmap.tag_id.index, 0, 1, warn);
         particle.sprite_size = this->sprite_size;
-        particle.not_broken = 1;
+        particle.shader_type = HEK::ShaderType::SHADER_TYPE_EFFECT;
 
         if(warn) {
             complain_about_non_square_sheets(workload, tag_index, workload.tags[this->sprite_bitmap.tag_id.index]);
@@ -143,7 +143,7 @@ namespace Invader::Parser {
     }
 
     void ParticleSystemTypeParticleState::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
-        this->unknown_int = 1;
+        this->shader_type = HEK::ShaderType::SHADER_TYPE_EFFECT;
     }
 
     void ParticleSystemType::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {

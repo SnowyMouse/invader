@@ -189,9 +189,13 @@
                 "size": 36
             },
             {
-                "name": "unknown int",
-                "type": "uint32",
+                "name": "shader type",
+                "type": "ShaderType",
                 "cache_only": true
+            },
+            {
+                "type": "pad",
+                "size": 2
             },
             {
                 "name": "shader flags",

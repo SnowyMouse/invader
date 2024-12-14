@@ -70,10 +70,13 @@
                 "size": 36
             },
             {
-                "name": "make it work",
-                "type": "uint32",
-                "endian": "little",
+                "name": "shader type",
+                "type": "ShaderType",
                 "cache_only": true
+            },
+            {
+                "type": "pad",
+                "size": 2
             },
             {
                 "name": "shader flags",
