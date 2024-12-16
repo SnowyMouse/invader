@@ -327,6 +327,14 @@
         "type": "enum"
     },
     {
+        "name": "ScenarioTriggerVolumeType",
+        "options": [
+            "fixed",
+            "rotational"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "ScenarioTextFlags",
         "type": "bitfield",
         "fields": [
@@ -1871,8 +1879,8 @@
         "type": "struct",
         "fields": [
             {
-                "name": "unknown",
-                "type": "uint16",
+                "name": "type",
+                "type": "ScenarioTriggerVolumeType",
                 "endian": "little"
             },
             {
@@ -1892,12 +1900,12 @@
                 "hidden": true
             },
             {
-                "name": "rotation vector a",
+                "name": "rotation vector forward",
                 "type": "Vector3D",
                 "compound": true
             },
             {
-                "name": "rotation vector b",
+                "name": "rotation vector up",
                 "type": "Vector3D",
                 "compound": true
             },
