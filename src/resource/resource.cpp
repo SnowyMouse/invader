@@ -28,7 +28,8 @@ int main(int argc, const char **argv) {
         CommandLineOption("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates).", "<file>"),
         CommandLineOption("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>"),
         CommandLineOption("concatenate", 'c', 1, "Concatenate against the resource map at a path. This cannot be used with -T loc", "<file>"),
-        CommandLineOption("show-matched", 'S', 0, "Print the paths of any matched tags found when using --concatenate.")
+        CommandLineOption("show-matched", 'S', 0, "Print the paths of any matched tags found when using --concatenate."),
+        CommandLineOption("no-stock", 'N', 0, "Do not include stock tags when making Custom Edition resource maps.")
     };
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
@@ -54,6 +55,9 @@ int main(int argc, const char **argv) {
 
         // Spam console?
         bool show_matched = false;
+
+        // Breaking the world?
+        bool no_stock = false;
     } resource_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
@@ -68,6 +72,10 @@ int main(int argc, const char **argv) {
 
             case 'c':
                 resource_options.concatenate_against = arguments[0];
+                break;
+
+            case 'N':
+                resource_options.no_stock = true;
                 break;
 
             case 'S':
@@ -150,7 +158,7 @@ int main(int argc, const char **argv) {
     std::vector<File::TagFilePath> tags_list;
 
     // First, add all default indices if we're Custom Edition
-    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION && !resource_options.no_stock) {
         for(const char * const *i = resource_options.default_fn(); *i; i++) {
             tags_list.emplace_back(File::split_tag_class_extension(*i).value());
         }
