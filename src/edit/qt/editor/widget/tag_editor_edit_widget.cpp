@@ -271,9 +271,9 @@ namespace Invader::EditQt {
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_RECTANGLE2D:
                     add_single_textbox(2, layout, "t:");
-                    add_single_textbox(2, layout, "r:");
-                    add_single_textbox(2, layout, "b:");
                     add_single_textbox(2, layout, "l:");
+                    add_single_textbox(2, layout, "b:");
+                    add_single_textbox(2, layout, "r:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGB:
                     add_single_textbox(3, layout, "a:");
