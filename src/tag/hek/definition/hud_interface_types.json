@@ -92,6 +92,14 @@
         "type": "enum"
     },
     {
+        "name": "HUDInterfaceCanvasSize",
+        "options": [
+            "480p",
+            "960p"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "HUDInterfaceMeterFlags",
         "type": "bitfield",
         "fields": [
