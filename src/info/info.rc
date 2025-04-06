@@ -2,6 +2,6 @@
 
 #define INVADER_BINARY_NAME "invader-info"
 #define INVADER_BINARY_FILE_NAME "invader-info.exe"
-#define INVADER_BINARY_DESCRIPTION "Cache-file information tool"
+#define INVADER_BINARY_DESCRIPTION "Cache file information tool"
 
 #include "../windows.rc"

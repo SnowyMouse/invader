@@ -2,6 +2,6 @@
 
 #define INVADER_BINARY_NAME "invader-crc"
 #define INVADER_BINARY_FILE_NAME "invader-crc.exe"
-#define INVADER_BINARY_DESCRIPTION "Changes a cache-file CRC32"
+#define INVADER_BINARY_DESCRIPTION "Inspect or forge the CRC32 of a cache file"
 
 #include "../windows.rc"
