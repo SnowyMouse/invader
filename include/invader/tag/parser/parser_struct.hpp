@@ -96,6 +96,8 @@ namespace Invader::File {
                                 DO_TAG_CLASS(UnicodeStringList, TAG_FOURCC_UNICODE_STRING_LIST) \
                                 DO_TAG_CLASS(UnitHUDInterface, TAG_FOURCC_UNIT_HUD_INTERFACE) \
                                 DO_TAG_CLASS(Unit, TAG_FOURCC_UNIT) \
+                                DO_TAG_CLASS(VectorFont, TAG_FOURCC_VECTOR_FONT) \
+                                DO_TAG_CLASS(VectorFontData, TAG_FOURCC_VECTOR_FONT_DATA) \
                                 DO_TAG_CLASS(Vehicle, TAG_FOURCC_VEHICLE) \
                                 DO_TAG_CLASS(VirtualKeyboard, TAG_FOURCC_VIRTUAL_KEYBOARD) \
                                 DO_TAG_CLASS(Weapon, TAG_FOURCC_WEAPON) \

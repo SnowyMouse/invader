@@ -1,0 +1,69 @@
+[
+    {
+        "name": "VectorFont",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "font size",
+                "type": "float"
+            },
+            {
+                "name": "offset x",
+                "type": "float"
+            },
+            {
+                "name": "offset y",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "regular",
+                "type": "TagDependency",
+                "classes": [
+                    "vector_font_data"
+                ]
+            },
+            {
+                "name": "bold",
+                "type": "TagDependency",
+                "classes": [
+                    "vector_font_data"
+                ]
+            },
+            {
+                "name": "italic",
+                "type": "TagDependency",
+                "classes": [
+                    "vector_font_data"
+                ]
+            },
+             {
+                "name": "condensed",
+                "type": "TagDependency",
+                "classes": [
+                    "vector_font_data"
+                ]
+            },
+            {
+                "name": "underline",
+                "type": "TagDependency",
+                "classes": [
+                    "vector_font_data"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 128
+            }
+        ],
+        "type": "struct",
+        "size": 240,
+        "class": "vector_font"
+    }
+]

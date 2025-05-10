@@ -654,7 +654,8 @@
                 "name": "text font",
                 "type": "TagDependency",
                 "classes": [
-                    "font"
+                    "font",
+                    "vector_font"
                 ]
             },
             {
