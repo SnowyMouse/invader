@@ -880,14 +880,16 @@
                 "name": "font system",
                 "type": "TagDependency",
                 "classes": [
-                    "font"
+                    "font",
+                    "vector_font"
                 ]
             },
             {
                 "name": "font terminal",
                 "type": "TagDependency",
                 "classes": [
-                    "font"
+                    "font",
+                    "vector_font"
                 ]
             },
             {

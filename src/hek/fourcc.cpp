@@ -97,6 +97,8 @@ namespace Invader::HEK {
         MATCH_TAG_CLASS("unit", TAG_FOURCC_UNIT)
         MATCH_TAG_CLASS("unicode_string_list", TAG_FOURCC_UNICODE_STRING_LIST)
         MATCH_TAG_CLASS("virtual_keyboard", TAG_FOURCC_VIRTUAL_KEYBOARD)
+        MATCH_TAG_CLASS("vector_font", TAG_FOURCC_VECTOR_FONT)
+        MATCH_TAG_CLASS("vector_font_data", TAG_FOURCC_VECTOR_FONT_DATA)
         MATCH_TAG_CLASS("vehicle", TAG_FOURCC_VEHICLE)
         MATCH_TAG_CLASS("weapon", TAG_FOURCC_WEAPON)
         MATCH_TAG_CLASS("wind", TAG_FOURCC_WIND)

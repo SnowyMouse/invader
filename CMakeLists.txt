@@ -100,6 +100,7 @@ include(src/edit/edit.cmake)
 include(src/model/model.cmake)
 include(src/recover/recover.cmake)
 include(src/lightmap/lightmap.cmake)
+include(src/vector-font/vector-font.cmake)
 
 # Qt stuff
 include(src/edit/qt/qt.cmake)

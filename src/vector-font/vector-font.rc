@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#define INVADER_BINARY_NAME "invader-vector-font"
+#define INVADER_BINARY_FILE_NAME "invader-vector-font.exe"
+#define INVADER_BINARY_DESCRIPTION "Pack .ttf or .otf fonts into vector_font_data tags."
+
+#include "../windows.rc"

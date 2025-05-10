@@ -88,6 +88,8 @@ namespace Invader::HEK {
         TAG_FOURCC_UNIT = 0x756E6974,
         TAG_FOURCC_UNICODE_STRING_LIST = 0x75737472,
         TAG_FOURCC_VIRTUAL_KEYBOARD = 0x76636B79,
+        TAG_FOURCC_VECTOR_FONT = 0x76666E74,
+        TAG_FOURCC_VECTOR_FONT_DATA = 0x76666E64,
         TAG_FOURCC_VEHICLE = 0x76656869,
         TAG_FOURCC_WEAPON = 0x77656170,
         TAG_FOURCC_WIND = 0x77696E64,
@@ -298,6 +300,10 @@ namespace Invader::HEK {
              return "unicode_string_list";
          case TagFourCC::TAG_FOURCC_VIRTUAL_KEYBOARD:
              return "virtual_keyboard";
+         case TagFourCC::TAG_FOURCC_VECTOR_FONT:
+             return "vector_font";
+         case TagFourCC::TAG_FOURCC_VECTOR_FONT_DATA:
+             return "vector_font_data";
          case TagFourCC::TAG_FOURCC_VEHICLE:
              return "vehicle";
          case TagFourCC::TAG_FOURCC_WEAPON:

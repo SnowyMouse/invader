@@ -214,7 +214,8 @@
                 "type": "TagDependency",
                 "non_null": true,
                 "classes": [
-                    "font"
+                    "font",
+                    "vector_font"
                 ]
             },
             {
@@ -222,7 +223,8 @@
                 "type": "TagDependency",
                 "non_null": true,
                 "classes": [
-                    "font"
+                    "font",
+                    "vector_font"
                 ]
             },
             {
