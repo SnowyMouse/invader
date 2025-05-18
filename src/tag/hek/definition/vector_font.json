@@ -30,11 +30,35 @@
                 ]
             },
             {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
                 "name": "bold",
                 "type": "TagDependency",
                 "classes": [
                     "vector_font_data"
                 ]
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 8
             },
             {
                 "name": "italic",
@@ -43,12 +67,36 @@
                     "vector_font_data"
                 ]
             },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
              {
                 "name": "condensed",
                 "type": "TagDependency",
                 "classes": [
                     "vector_font_data"
                 ]
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 8
             },
             {
                 "name": "underline",
@@ -59,11 +107,23 @@
             },
             {
                 "type": "pad",
-                "size": 128
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 32
             }
         ],
         "type": "struct",
-        "size": 240,
+        "size": 224,
         "class": "vector_font"
     }
 ]
