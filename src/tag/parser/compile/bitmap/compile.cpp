@@ -132,7 +132,10 @@ namespace Invader::Parser {
         auto max_size = bitmap->processed_pixel_data.size();
         auto *pixel_data = bitmap->processed_pixel_data.data();
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
-        auto xbox = engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+        bool xbox = engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+        bool gearbox = engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
+                       engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
+                       engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO;
 
         for(std::size_t b = 0; b < bitmap_data_count; b++) {
             auto &data = bitmap->bitmap_data[b];
@@ -143,17 +146,19 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
 
-            if(
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
-            ) {
+            if(gearbox) {
                 switch(data.format) {
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+                        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu is A8 or AY8 monochrome which is not supported by D3D9 as used by the target engine", b);
+                        }
+                        [[fallthrough]];
+                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu is monochrome which is not supported by the target engine", b);
+                        if(engine_target != HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu is monochrome which is not supported by the target engine", b);
+                        }
                         break;
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu uses height map compression which is not supported by the target engine", b);
@@ -171,7 +176,10 @@ namespace Invader::Parser {
             std::size_t data_index = &data - bitmap->bitmap_data.data();
             auto format = data.format;
             auto type = data.type;
-            bool should_be_compressed = (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_BC7);
+            bool should_be_compressed = format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 ||
+                                        format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3 ||
+                                        format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5 ||
+                                        format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_BC7;
 
             std::size_t depth = data.depth;
             std::size_t start = data.pixel_data_offset;
@@ -196,7 +204,7 @@ namespace Invader::Parser {
                 std::snprintf(message, sizeof(message), "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
 
                 // Yes the Xbox can do non-power-of-two textures, but swizzling is required if it's marked as 2D Textures and, yeah...
-                if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                if(xbox) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "%s. This is invalid for the target engine.", message);
                     throw InvalidTagDataException();
                 }
@@ -205,12 +213,7 @@ namespace Invader::Parser {
                 }
             }
 
-            if(
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX
-            ) {
+            if(gearbox || xbox) {
                 // Check if stock limits are exceeded
                 switch(type) {
                     case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
@@ -238,7 +241,7 @@ namespace Invader::Parser {
 
                 // On Xbox, it's an error. Otherwise, it's a warning.
                 if(exceeded) {
-                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                    if(xbox) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Target engine runs on a system that does not support these bitmaps");
                         throw InvalidTagDataException();
                     }
