@@ -23,7 +23,7 @@
                 "size": 12
             },
             {
-                "name": "regular",
+                "name": "plain",
                 "type": "TagDependency",
                 "classes": [
                     "vector_font_data"
@@ -80,7 +80,7 @@
                 "size": 8
             },
              {
-                "name": "condensed",
+                "name": "condense",
                 "type": "TagDependency",
                 "classes": [
                     "vector_font_data"
