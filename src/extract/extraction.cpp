@@ -76,7 +76,7 @@ namespace Invader {
                 detail_object_modifiers.emplace_back(dobby_destroyer_of_worlds.global_z_offset * 0.125);
             }
         }
-        
+
         auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload, &engine, &jason_jones, &detail_object_modifiers](std::size_t tag_index) -> bool {
             // Do it
             extracted_tags[tag_index] = true;
@@ -191,7 +191,6 @@ namespace Invader {
                 if(!bsp.detail_objects.empty()) {
                     auto &detail_objects = bsp.detail_objects[0];
                     for(auto &cell : detail_objects.cells) {
-                        std::printf("%i!\n", __LINE__);
                         auto count_index = static_cast<std::size_t>(cell.count_index);
                         for(std::uint32_t q = cell.valid_layers_flags, bitfield_index = 0; q != 0; q >>= 1, bitfield_index++) {
                             if(!(q & 1)) {
@@ -205,7 +204,7 @@ namespace Invader {
                             if(count_index >= detail_objects.z_reference_vectors.size()) {
                                 continue; // also bullshit; wow
                             }
-                            
+
                             detail_objects.z_reference_vectors[count_index].z_reference_l -= detail_object_modifiers[bitfield_index];
                             count_index++;
                         }
