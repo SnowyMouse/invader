@@ -968,7 +968,8 @@
             },
             {
                 "name": "canvas size",
-                "type": "HUDInterfaceCanvasSize"
+                "type": "HUDInterfaceCanvasSize",
+                "unused": true
             },
             {
                 "type": "pad",
