@@ -142,7 +142,8 @@
             "filthy sprite bug fix",
             "half hud scale",
             "invert detail fade",
-            "use average color for detail fade"
+            "use average color for detail fade",
+            "force hud use highres scale"
         ],
         "width": 16
     },
