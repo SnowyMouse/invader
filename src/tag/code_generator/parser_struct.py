@@ -12,7 +12,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
         if "hidden" in struct and struct["hidden"]:
             continue
 
-        if ("cache_only" in struct and struct["cache_only"]) or ("endian" in struct and struct["endian"] == "little") or ("unused" in struct and struct["unused"]):
+        if ("cache_only" in struct and struct["cache_only"]) or ("unused" in struct and struct["unused"]):
             continue
 
         def make_cpp_string(what):
