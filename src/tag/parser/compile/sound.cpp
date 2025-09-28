@@ -131,9 +131,7 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM which does not exist on the target engine.", permutation_index);
                 throw InvalidTagDataException();
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu uses 16-bit PCM. The target engine will not play this without a mod.", permutation_index);
-                }
+                // Works with mods. No point spamming warnings over it.
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
                 // Xbox ADPCM works on everything

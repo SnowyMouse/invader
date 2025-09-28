@@ -33,7 +33,7 @@ namespace Invader::Parser {
         this->pointer = 0xFFFFFFFF;
         this->flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_MAKE_IT_ACTUALLY_WORK;
 
-        // Add itself as a dependency. I don't know why but apparently we need to remind ourselves that we're still ourselves.
+        // Add itself as a dependency.
         auto &d = s.dependencies.emplace_back();
         d.tag_index = tag_index;
         d.offset = bitmap_data_offset;
@@ -150,10 +150,8 @@ namespace Invader::Parser {
             ) {
                 switch(data.format) {
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu is monochrome which is not supported by the target engine", b);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu is monochrome format A8 or AY8 which is not supported by the target engine", b);
                         break;
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu uses height map compression which is not supported by the target engine", b);

@@ -156,18 +156,6 @@ namespace Invader::Parser {
     }
 
     void ShaderTransparentGeneric::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        // Warn if the target engine can't render it
-        switch(workload.get_build_parameters()->details.build_cache_file_engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "shader_transparent_generic tags will not render on the original release of Halo: Combat Evolved", tag_index);
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "shader_transparent_generic tags will not render on the original release of Halo Custom Edition (but may work in MCC)", tag_index);
-                break;
-            default: break;
-        }
-
         if(this->maps.size() == 0 && this->stages.size() == 0) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "shader_transparent_generic tags must contain at least either one map or one stage", tag_index);
             throw InvalidTagDataException();
