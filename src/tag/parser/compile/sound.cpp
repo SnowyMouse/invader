@@ -410,8 +410,9 @@ namespace Invader::Parser {
 
         this->runtime_scripting_sound = HEK::TagID::null_tag_id();
 
-        std::fill(this->one_detail_unknown_floats, this->one_detail_unknown_floats + 2, 1.0F);
-        std::fill(this->zero_detail_unknown_floats, this->zero_detail_unknown_floats + 2, 1.0F);
+        // tool does this, but they are unused.
+        std::fill(this->one_detail_unused, this->one_detail_unused + 2, 1.0F);
+        std::fill(this->zero_detail_unused, this->zero_detail_unused + 2, 1.0F);
     }
 
     void SoundLooping::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {

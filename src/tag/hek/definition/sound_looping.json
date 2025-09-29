@@ -172,20 +172,22 @@
                 "type": "float"
             },
             {
-                "name": "zero detail unknown floats",
+                "name": "zero detail unused",
                 "type": "float",
                 "endian": "little",
-                "count": 2
+                "count": 2,
+                "cache_only": true
             },
             {
                 "name": "one detail sound period",
                 "type": "float"
             },
             {
-                "name": "one detail unknown floats",
+                "name": "one detail unused",
                 "type": "float",
                 "endian": "little",
-                "count": 2
+                "count": 2,
+                "cache_only": true
             },
             {
                 "name": "runtime scripting sound",

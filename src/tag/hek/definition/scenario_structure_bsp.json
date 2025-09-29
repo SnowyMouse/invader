@@ -48,10 +48,22 @@
         "name": "ScenarioStructureBSPNode",
         "fields": [
             {
-                "name": "node stuff",
-                "type": "uint16",
-                "endian": "little",
-                "count": 3
+                "name": "bounds x",
+                "type": "uint8",
+                "bounds": true,
+                "endian": null
+            },
+            {
+                "name": "bounds y",
+                "type": "uint8",
+                "bounds": true,
+                "endian": null
+            },
+            {
+                "name": "bounds z",
+                "type": "uint8",
+                "bounds": true,
+                "endian": null
             }
         ],
         "type": "struct",
@@ -62,10 +74,22 @@
         "name": "ScenarioStructureBSPLeaf",
         "fields": [
             {
-                "name": "vertices",
-                "type": "uint16",
-                "endian": "little",
-                "count": 3
+                "name": "bounds x",
+                "type": "uint8",
+                "bounds": true,
+                "endian": null
+            },
+            {
+                "name": "bounds y",
+                "type": "uint8",
+                "bounds": true,
+                "endian": null
+            },
+            {
+                "name": "bounds z",
+                "type": "uint8",
+                "bounds": true,
+                "endian": null
             },
             {
                 "type": "pad",
