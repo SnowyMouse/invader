@@ -2,6 +2,19 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.55.0] - 2025-09-29
+### Fixed
+- invader-build: Fixed scenario script check when building ui_widget_definition tags
+- invader-build: Check that transparent shaders have the correct number of maps and stages
+- invader-edit-qt: Fixed rectangle2d field names
+
+### Changed
+- invader: Added support for Chimera's `force hud use highres scale` flag.
+- invader: added CJK font fields from the jp/tw/kr Xbox version.
+- invader-build: No longer warns when using features that do not work without mods on Halo PC.
+- invader-crc: Readded this tool. Can now also fix the map header crc without changing it using --fix-header.
+- invader-resource: add --no-stock to allow making Custom Edition resource maps with no stock tags
+
 ## [0.54.2] - 2024-08-05
 ### Fixed
 - invader-build: Fixed misleading error message when a model part is missing the correct
@@ -39,7 +52,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [0.53.7] - 2024-06-16
 ### Fixed
 - invader-build: Clamp particle animation rate the same way as tool.exe
-- invader-build: Fixed detail_object_collection's global z offset being ignored 
+- invader-build: Fixed detail_object_collection's global z offset being ignored
   (it is highly recommended you update)
 - invader-extract: Fixed detail_object_collection's global z offset being ignored
   (it is highly recommended you update)
@@ -2583,5 +2596,6 @@ image as one bitmap
 [0.54.0]: https://github.com/SnowyMouse/invader/compare/0.53.8...0.54.0
 [0.54.1]: https://github.com/SnowyMouse/invader/compare/0.54.0...0.54.1
 [0.54.2]: https://github.com/SnowyMouse/invader/compare/0.54.1...0.54.2
+[0.55.0]: https://github.com/SnowyMouse/invader/compare/0.54.2...0.55.0
 
 [Untagged]: https://github.com/SnowyMouse/invader/compare/0.54.2...master
