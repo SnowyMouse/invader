@@ -36,8 +36,8 @@
     {
         "name": "FontEncodingType",
         "options": [
-            "ucs-2",
-            "extended"
+            "unicode",
+            "cjk"
         ],
         "type": "enum"
     },
@@ -114,14 +114,16 @@
             {
                 "name": "encoding type",
                 "type": "FontEncodingType",
-                "comment": "unsure if tool.exe put it in the map like this",
-                "cache_only": true
+                "endian": "little",
+                "comment": "only used in the jp/kr/tw xbox versions",
+                "read_only": true
             },
             {
-                "name": "character offset",
+                "name": "cjk character codes",
                 "type": "uint16",
-                "comment": "= characters reflexive count + 161",
-                "cache_only": true
+                "endian": "little",
+                "comment": "only set if encoding type is cjk. equal to 256 + the number of font characters with a character > 256",
+                "read_only": true
             },
             {
                 "type": "pad",
