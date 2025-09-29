@@ -116,14 +116,14 @@
                 "type": "FontEncodingType",
                 "endian": "little",
                 "comment": "only used in the jp/kr/tw xbox versions",
-                "read_only": true
+                "cache_only": true
             },
             {
                 "name": "cjk character codes",
                 "type": "uint16",
                 "endian": "little",
                 "comment": "only set if encoding type is cjk. equal to 256 + the number of font characters with a character > 256",
-                "read_only": true
+                "cache_only": true
             },
             {
                 "type": "pad",
