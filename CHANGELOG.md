@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed scenario script check when building ui_widget_definition tags
 - invader-build: Check that transparent shaders have the correct number of maps and stages
+- invader-build: light tags are processed more accurately
 - invader-edit-qt: Fixed rectangle2d field names
 
 ### Changed

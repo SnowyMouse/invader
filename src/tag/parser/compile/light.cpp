@@ -11,18 +11,29 @@ namespace Invader::Parser {
         this->cutoff_angle = std::min(static_cast<double>(this->cutoff_angle), HALO_PI);
         this->falloff_angle = std::min(static_cast<double>(this->falloff_angle), HALO_PI);
 
-        // If cutoff angle is less than 0, set both to 180 degrees
-        if(this->cutoff_angle < 0.0) {
+        // If cutoff angle is less than FLOAT_EPSILON, set both to 180 degrees
+        if(this->cutoff_angle < FLOAT_EPSILON) {
             this->cutoff_angle = HALO_PI;
             this->falloff_angle = HALO_PI;
         }
 
-        // Set falloff angle to cutoff angle if it's greater than it
-        this->falloff_angle = std::min(this->falloff_angle, this->cutoff_angle);
+        // Set falloff angle to zero if greater than cutoff angle
+        if(this->falloff_angle > this->cutoff_angle) {
+            this->falloff_angle = 0.0F;
+        }
 
-        this->cos_cutoff_angle = std::cos(this->cutoff_angle);
-        this->cos_falloff_angle = std::cos(this->falloff_angle);
-        this->sin_cutoff_angle = std::sin(this->cutoff_angle);
+        // Tool does it this way
+        if(this->falloff_angle < HALO_PI) {
+            this->cos_cutoff_angle = std::cos(this->cutoff_angle);
+            this->cos_falloff_angle = std::cos(this->falloff_angle);
+            this->sin_cutoff_angle = std::sin(this->cutoff_angle);
+        }
+        else {
+            this->cos_cutoff_angle = -1.0F;
+            this->cos_falloff_angle = -1.0F;
+            this->sin_cutoff_angle = 0.0F;
+        }
+
         this->specular_radius_multiplier = 2.0F;
         this->duration *= TICK_RATE;
 

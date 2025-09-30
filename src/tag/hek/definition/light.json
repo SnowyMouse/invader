@@ -35,13 +35,11 @@
             },
             {
                 "name": "falloff angle",
-                "type": "Angle",
-                "default": 3.14159274101257
+                "type": "Angle"
             },
             {
                 "name": "cutoff angle",
-                "type": "Angle",
-                "default": 3.14159274101257
+                "type": "Angle"
             },
             {
                 "name": "lens flare only radius",

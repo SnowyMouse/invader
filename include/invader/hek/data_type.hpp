@@ -1058,7 +1058,7 @@ namespace Invader::HEK {
     ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> compress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> &vertex) noexcept;
     ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> decompress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> &vertex) noexcept;
 
-    bool intersect_plane_with_points(const Plane3D<NativeEndian> &plane, const Point3D<NativeEndian> &point_a, const Point3D<NativeEndian> &point_b, Point3D<NativeEndian> *intersection = nullptr, float epsilon = 0.0001);
+    bool intersect_plane_with_points(const Plane3D<NativeEndian> &plane, const Point3D<NativeEndian> &point_a, const Point3D<NativeEndian> &point_b, Point3D<NativeEndian> *intersection = nullptr, float epsilon = FLOAT_EPSILON);
 
     inline float dot3(const Vector3D<NativeEndian> &vector_a, const Vector3D<NativeEndian> &vector_b) {
         return (vector_a.i * vector_b.i) + (vector_a.j * vector_b.j) + (vector_a.k * vector_b.k);

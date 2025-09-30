@@ -24,12 +24,12 @@ namespace Invader::Parser {
         allowed_classes(allowed_classes, allowed_classes + count),
         read_only(read_only) {}
 
-    
+
     ParserStructValue::ParserStructValue(
         const char *name,
         const char *comment
     ) : name(name), comment(comment), type(ValueType::VALUE_TYPE_GROUP_START) {}
-            
+
     ParserStructValue::ParserStructValue(
         const char *          name,
         const char *          member_name,
@@ -748,11 +748,11 @@ namespace Invader::Parser {
     const char *ParserStruct::title() const {
         return nullptr;
     }
-    
+
     std::size_t ParserStruct::refactor_reference(const File::TagFilePath &from, const File::TagFilePath &to) {
         return this->refactor_reference(from.path.c_str(), from.fourcc, to.path.c_str(), to.fourcc);
     }
-    
+
     std::size_t ParserStruct::refactor_references(const std::vector<std::pair<File::TagFilePath, File::TagFilePath>> &replacements) {
         std::size_t total = 0;
         for(auto &i : replacements) {
@@ -760,7 +760,7 @@ namespace Invader::Parser {
         }
         return total;
     }
-    
+
     bool ParserStruct::check_for_invalid_references(bool null_references) {
         auto &values = this->get_values();
         bool result = false;
@@ -797,7 +797,7 @@ namespace Invader::Parser {
                 default:
                     break;
             }
-            
+
             // If we're done, stop
             if(!null_references && result) {
                 break;
@@ -805,35 +805,35 @@ namespace Invader::Parser {
         }
         return result;
     }
-    
+
     bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, std::list<std::string> *differences) const {
         return this->compare(what, precision, ignore_volatile, differences, 1);
     }
-    
+
     static constexpr bool too_different(double a, double b) noexcept {
-        double delta = 0.0001;
-        
+        double delta = FLOAT_EPSILON;
+
         auto max_discrepency = a * delta;
         if(max_discrepency < 0.0) {
             max_discrepency *= -1.0;
         }
-        
+
         auto difference = (a - b);
         if(difference < 0.0) {
             difference *= -1.0;
         }
-        
+
         // (a-b) > delta && b is not in [a - dA, a + dA]
         return difference > delta && ((b > a + max_discrepency) || (b < a - max_discrepency));
     }
-    
+
     static_assert(too_different(1, 1) == false);
     static_assert(too_different(1.000025, 1) == false);
     static_assert(too_different(1.01, 1) == true);
     static_assert(too_different(-1, 1) == true);
     static_assert(too_different(-0.000025, 0.000025) == false);
     static_assert(too_different(0.000025, -0.000025) == false);
-    
+
     bool ParserStruct::compare(const ParserStruct *what, bool precision, bool ignore_volatile, std::list<std::string> *differences_array, std::size_t depth) const {
         // Different struct name
         if(typeid(this) != typeid(what)) {
@@ -842,26 +842,26 @@ namespace Invader::Parser {
             }
             return false;
         }
-        
+
         auto &this_value = *this;
-        
+
         // Make sure these are the same
         auto &v_this = this->get_values();
         auto &v_other = what->get_values();
-        
+
         auto vt_size = v_this.size();
         auto vo_size = v_other.size();
-        
+
         if(vt_size != vo_size) {
             eprintf_error("Value count is different for the same struct type");
             std::terminate();
         }
-        
+
         bool should_continue = true;
         bool is_different = false;
-        
+
         static constexpr const std::size_t depth_spacing_amount = 4;
-        
+
         auto generate_depth_spacing = [](std::size_t depth) {
             char depth_spacing[512] = {};
             for(std::size_t d = 0; d < sizeof(depth_spacing) && d < depth * depth_spacing_amount; d++) {
@@ -869,28 +869,28 @@ namespace Invader::Parser {
             }
             return std::string(depth_spacing);
         };
-        
+
         for(std::size_t v = 0; v < vt_size && should_continue; v++) {
             auto &vt = v_this[v];
             auto &vo = v_other[v];
-            
+
             auto vt_type = vt.get_type();
             auto vo_type = vo.get_type();
-                
+
             char difference_text[512] = {};
-        
+
             auto complain = [&is_different, &should_continue, &differences_array, &vt, &this_value, &difference_text, &depth](std::optional<std::size_t> index = std::nullopt) {
                 is_different = true;
-                
+
                 if(differences_array != nullptr) {
                     const char *lp = difference_text[0] == 0 ? "" : " (";
                     const char *rp = difference_text[0] == 0 ? "" : ")";
-                    
+
                     char depth_spacing[512] = {};
                     for(std::size_t d = 0; d < sizeof(depth_spacing) - 1 && d < depth * depth_spacing_amount; d++) {
                         depth_spacing[d] = ' ';
                     }
-                    
+
                     char message[512];
                     if(index.has_value()) {
                         std::snprintf(message, sizeof(message), "%s%s::%s#%zu is different%s%s%s", depth_spacing, this_value.struct_name(), vt.get_member_name(), *index, lp, difference_text, rp);
@@ -904,38 +904,38 @@ namespace Invader::Parser {
                     should_continue = false;
                 }
             };
-            
+
             // Check the type
             if(vt_type != vo_type) {
                 eprintf_error("Type is different for the same struct type's values");
                 std::terminate();
             }
-            
+
             // Ignore volatile values
             if(ignore_volatile && vt.is_volatile()) {
                 continue;
             }
-            
+
             switch(vt_type) {
                 case ParserStructValue::ValueType::VALUE_TYPE_GROUP_START:
                     break;
                 case ParserStructValue::ValueType::VALUE_TYPE_TAGDATAOFFSET: {
                     auto &vt_data = vt.get_data();
                     auto &vo_data = vo.get_data();
-                    
+
                     // Check if the data is different
                     if(vt_data != vo_data) {
                         complain();
-                        
+
                         if(differences_array != nullptr) {
                             auto indent = generate_depth_spacing(depth + 1);
                             bool size_different = vt_data.size() != vo_data.size();
-                            
+
                             if(size_different) {
                                 std::snprintf(difference_text, sizeof(difference_text), "%ssize: %zu != %zu", indent.c_str(), vt_data.size(), vo_data.size());
                                 differences_array->emplace_back(difference_text);
                             }
-                            
+
                             auto vt_crc32 = ~crc32(0, vt_data.data(), vt_data.size());
                             auto vo_crc32 = ~crc32(0, vo_data.data(), vo_data.size());
                             bool crc32_different = vt_crc32 != vo_crc32;
@@ -969,13 +969,13 @@ namespace Invader::Parser {
                 case ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
                     auto vt_values = vt.get_values();
                     auto vo_values = vo.get_values();
-                    
+
                     assert(vt_values.size() == vo_values.size() && vt_values.size() == 1);
-                    
+
                     const char *a, *b;
                     auto a_value = static_cast<int>(std::get<std::int64_t>(vt_values[0]));
                     auto b_value = static_cast<int>(std::get<std::int64_t>(vo_values[0]));
-                    
+
                     if(a_value != b_value) {
                         try {
                             a = vt.read_enum();
@@ -983,14 +983,14 @@ namespace Invader::Parser {
                         catch(std::exception &) {
                             a = "unknown_enum_value?";
                         }
-                        
+
                         try {
                             b = vo.read_enum();
                         }
                         catch(std::exception &) {
                             b = "unknown_enum_value?";
                         }
-                        
+
                         if(std::strcmp(a, b) != 0) {
                             std::snprintf(difference_text, sizeof(difference_text), "'%s' [%i] != '%s' [%i]", a, a_value, b, b_value);
                             complain();
@@ -1007,24 +1007,24 @@ namespace Invader::Parser {
                     }
                     else {
                         bool complained = false;
-                        
+
                         // Hold onto this for now so we can move stuff around
                         std::size_t current_difference_index = differences_array == nullptr ? 0 : differences_array->size();
-                        
+
                         depth++;
-                        
+
                         for(std::size_t i = 0; i < vt_count && should_continue; i++) {
                             const auto &vt_struct = vt.get_object_in_array(i);
                             const auto &vo_struct = vo.get_object_in_array(i);
-                            
+
                             // This will be filled if we're doing a verbose check
                             std::list<std::string> differences_this;
-                            
+
                             bool same = vt_struct.compare(&vo_struct, precision, ignore_volatile, differences_array == nullptr ? nullptr : &differences_this, depth + 1);
                             if(!same) {
                                 complain(i);
                                 complained = true;
-                            
+
                                 if(differences_array != nullptr) {
                                     for(auto &i : differences_this) {
                                         differences_array->emplace_back(std::move(i));
@@ -1032,20 +1032,20 @@ namespace Invader::Parser {
                                 }
                             }
                         }
-                        
+
                         depth--;
-                        
+
                         // Complain some more.
                         if(complained) {
                             complain();
-                            
+
                             // If we have differences and we're doing verbose output, move the last element to where the bottom was before comparison
                             if(differences_array && current_difference_index < differences_array->size()) {
                                 auto to_here = differences_array->begin();
                                 for(std::size_t i = 0; i < current_difference_index; i++) {
                                     to_here++;
                                 }
-                                
+
                                 auto length = differences_array->size();
                                 auto end = to_here;
                                 for(std::size_t i = current_difference_index; i + 1 < length; i++) {
@@ -1063,12 +1063,12 @@ namespace Invader::Parser {
                     auto enums = vt.list_enum();
                     bool same = true;
                     std::list<std::string> differences;
-                    
+
                     for(auto &i : enums) {
                         // Append if different
                         auto a = vt.read_bitfield(i);
                         auto b = vo.read_bitfield(i);
-                        
+
                         if(a != b) {
                             std::snprintf(difference_text, sizeof(difference_text), "%s: %i != %i", i, a, b);
                             same = false;
@@ -1077,11 +1077,11 @@ namespace Invader::Parser {
                             }
                         }
                     }
-                    
+
                     if(!same) {
                         difference_text[0] = 0;
                         complain();
-                        
+
                         if(differences_array != nullptr) {
                             auto spacing = generate_depth_spacing(depth + 1);
                             for(auto &i : differences) {
@@ -1089,24 +1089,24 @@ namespace Invader::Parser {
                             }
                         }
                     }
-                    
+
                     break;
                 }
                 default: {
                     auto vt_v = vt.get_values();
                     auto vo_v = vo.get_values();
-                    
+
                     // Go through each value to find a difference
                     auto value_count = vt_v.size();
                     auto fmt = vt.get_number_format();
-                    
+
                     std::list<std::string> differences_this_value;
-                    
+
                     bool differences_found = false;
-                    
+
                     for(std::size_t i = 0; i < value_count; i++) {
                         const char *prefix = "";
-                        
+
                         // TODO: Refactor this???
                         if(value_count > 1) {
                             if(vt.is_bounds()) {
@@ -1294,48 +1294,48 @@ namespace Invader::Parser {
                                     break;
                             }
                         }
-                        
+
                         // Append if different
                         if(vt_v[i] != vo_v[i]) {
                             if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
                                 double multiplier = (vt_type == ParserStructValue::ValueType::VALUE_TYPE_ANGLE || vt_type == ParserStructValue::ValueType::VALUE_TYPE_EULER2D || vt_type == ParserStructValue::ValueType::VALUE_TYPE_EULER3D) ? (180.0 / HALO_PI) : 1.0;
-                                
+
                                 union float_type_punner_9000 {
                                     float f;
                                     std::uint32_t u;
                                 };
-                                
+
                                 float_type_punner_9000 t_float = { static_cast<float>(std::get<double>(vt_v[i])) };
                                 float_type_punner_9000 v_float = { static_cast<float>(std::get<double>(vo_v[i])) };
-                                
+
                                 // If accounting for slight precision errors, skip
                                 if(precision && !too_different(t_float.f, v_float.f)) {
                                     continue;
                                 }
-                                
+
                                 std::snprintf(difference_text, sizeof(difference_text), "%s%f [0x%08X] != %f [0x%08X]", prefix, t_float.f * multiplier, t_float.u, v_float.f * multiplier, v_float.u);
                             }
                             else if(fmt == ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
                                 std::snprintf(difference_text, sizeof(difference_text), "%s%lli != %lli", prefix, static_cast<long long>(std::get<std::int64_t>(vt_v[i])), static_cast<long long>(std::get<std::int64_t>(vo_v[i])));
                             }
-                            
+
                             differences_found = true;
-                            
+
                             if(value_count > 1) {
                                 differences_this_value.emplace_back(difference_text);
                             }
                         }
                     }
-                    
+
                     // Set the first byte to 0, making it an empty string
                     if(value_count > 1) {
                         difference_text[0] = 0;
                     }
-                    
+
                     // Did we find a difference?
                     if(differences_found) {
                         complain();
-                        
+
                         // Append everything
                         if(value_count > 1 && differences_array != nullptr) {
                             std::string depth_spacing_str = generate_depth_spacing(depth + 1);
@@ -1348,10 +1348,10 @@ namespace Invader::Parser {
                 }
             }
         }
-        
+
         return !is_different;
     }
-    
+
     bool ParserStruct::check_for_broken_enums(bool reset_enums) {
         auto &values = this->get_values();
         bool result = false;
@@ -1361,14 +1361,14 @@ namespace Invader::Parser {
                     try {
                         auto *enum_val = i.read_enum();
                         bool inside = false;
-                        
+
                         for(auto &k : i.list_enum()) {
                             if(std::strcmp(k, enum_val) == 0) {
                                 inside = true;
                                 break;
                             }
                         }
-                        
+
                         if(!inside) {
                             throw std::exception(); // throw - it's not valid
                         }
@@ -1391,7 +1391,7 @@ namespace Invader::Parser {
                 default:
                     break;
             }
-            
+
             // If we're done, stop
             if(!reset_enums && result) {
                 break;
@@ -1399,14 +1399,14 @@ namespace Invader::Parser {
         }
         return result;
     }
-    
+
     std::vector<ParserStructValue> &ParserStruct::get_values() {
         if(!this->values.has_value()) {
             this->values = this->get_values_internal();
         }
         return *this->values;
     }
-    
+
     ParserStruct::ParserStruct(const ParserStruct &copy) noexcept : cache_formatted(copy.cache_formatted) {}
     ParserStruct::ParserStruct(ParserStruct &&move) noexcept : cache_formatted(move.cache_formatted) {}
     ParserStruct &ParserStruct::operator=(const ParserStruct &copy) noexcept {

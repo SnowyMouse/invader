@@ -5,7 +5,7 @@
 
 /**
  * Number of times the game performs most of its logic (physics, etc.). This applies to everything (INCLUDING PAL - see comment*).
- * 
+ *
  * *While the game runs at 25 Hz on PAL, Bungie never changed tool.exe to account for this when building cache files. Instead, they changed a few select values and a few animations.
  */
 #define TICK_RATE 30.0F
@@ -32,5 +32,10 @@
  * Pi to 100 digits
  */
 #define HALO_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
+
+/**
+ * Small number near zero, often used by Halo
+ */
+#define FLOAT_EPSILON 0.0001F
 
 #endif
