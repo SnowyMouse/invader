@@ -32,6 +32,13 @@ if(${INVADER_EDIT_QT})
             PRIVATE src/edit/qt/theme.cpp
             PRIVATE src/edit/qt/qt.rc
         )
+        # We don't need these and it makes static linking on MSYS2 less painful
+        qt_import_plugins(invader-edit-qt EXCLUDE_BY_TYPE bearer imageformats sqldrivers)
+
+        # Make sure this is set
+        if(MINGW)
+            target_link_options(invader-edit-qt PRIVATE "-mwindows")
+        endif()
     endif()
 
     target_link_libraries(invader-edit-qt invader Qt6::Widgets ${SDL2_LIBRARIES} ${INVADER_CRT_NOGLOB})

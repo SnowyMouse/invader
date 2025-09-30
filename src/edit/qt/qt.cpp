@@ -7,7 +7,7 @@
 #include <QApplication>
 #include <QMessageBox>
 
-#ifdef _WIN32
+#ifdef INVADER_STATIC_QT
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 Q_IMPORT_PLUGIN(QModernWindowsStylePlugin)

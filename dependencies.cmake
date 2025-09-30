@@ -16,6 +16,11 @@ find_package(Freetype)
 find_package(Git)
 
 # Qt6
+option(INVADER_USING_WIN32_STATIC_QT "Enable when static linking Qt6" OFF)
+if(INVADER_USING_WIN32_STATIC_QT)
+    add_compile_definitions(INVADER_WIN32_STATIC_QT)
+endif()
+
 find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 
 # SDL2

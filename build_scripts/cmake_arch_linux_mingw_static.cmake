@@ -1,11 +1,12 @@
 # Pre-run
 if(INVADER_BUILD_DEPENDENCY_SCRIPT_PRE_RUN)
     # For Qt6 and brotli
+    set(INVADER_USING_WIN32_STATIC_QT ON)
     set(CMAKE_STATIC_PREFIX "${INVADER_MINGW_PREFIX}/static")
     set(CMAKE_FIND_ROOT_PATH "${CMAKE_STATIC_PREFIX};${CMAKE_FIND_ROOT_PATH}")
 
     # Invader should obviously not build with shared libs
-    set(BUILD_SHARED_LIBS NO)
+    set(BUILD_SHARED_LIBS OFF)
 
     # We are pretty sure this never works as intended because ".a" also matches ".dll.a", however the AUR Qt static package explicitly checks for this being set.
     set(CMAKE_FIND_LIBRARY_SUFFIXES_OVERRIDE ".a;.lib")

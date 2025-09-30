@@ -290,7 +290,7 @@ namespace Invader::HEK {
     };
 
     /**
-     * Reflexives reference other tag blocks
+     * Reflexives reference other tag blocks. In Invader the 32-bit tag definition pointer is reused as part of the 64-bit pointer.
      */
     template <template<typename> class EndianType, template<template<typename> typename> typename StructType> struct TagReflexive {
         /** Number of chunks */
@@ -331,7 +331,6 @@ namespace Invader::HEK {
             TagReflexive<LittleEndian, StructType> copy;
             COPY_THIS(count);
             copy.pointer = 0;
-            copy.unknown = 0;
             return copy;
         }
 
@@ -339,7 +338,6 @@ namespace Invader::HEK {
             TagReflexive<OtherEndian, StructType> copy;
             COPY_THIS(count);
             COPY_THIS(pointer);
-            COPY_THIS(unknown);
             return copy;
         }
     };
