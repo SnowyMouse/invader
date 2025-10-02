@@ -520,7 +520,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 // Set the default stuff
                 mutex->lock();
                 auto &p = sound_tag->pitch_ranges[pitch_range].permutations[pitch_range_permutation];
-                p.gain = 1.0F;
                 p.samples = samples;
                 p.buffer_size = buffer_size;
                 p.samples.shrink_to_fit();
@@ -624,13 +623,25 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 }
             }
         }
-        
+
         // Set the buffer size
         if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             for(auto &pr : sound_tag.pitch_ranges) {
                 for(auto &p : pr.permutations) {
                     p.buffer_size = p.samples.size();
                 }
+            }
+        }
+    }
+
+    // Clean these up if they got carried through.
+    for(auto &pr : sound_tag.pitch_ranges) {
+        auto pc = pr.permutations.size();
+        if(pc > pr.actual_permutation_count) {
+            for(std::size_t p = pr.actual_permutation_count; p < pc; p++) {
+                auto &permutation = pr.permutations[p];
+                permutation.skip_fraction = 0.0F;
+                permutation.gain = 0.0F;
             }
         }
     }
@@ -644,7 +655,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
 int main(int argc, const char **argv) {
     set_up_color_term();
-    
+
     SoundOptions sound_options;
 
     const CommandLineOption options[] = {

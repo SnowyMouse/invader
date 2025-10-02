@@ -84,6 +84,15 @@ namespace Invader::Parser {
                     throw InvalidTagDataException();
                 }
 
+                // Check that compressed bitmaps are modulo block size on Xbox
+                if(xbox && compressed) {
+                    bool valid = bitmap_data.width % 4 == 0 && bitmap_data.height % 4 == 0;
+                    if(!valid) {
+                        eprintf_error("Compressed bitmap data %zu dimensions (%ux%u) are not modulo block size; tag is corrupt", bd, bitmap_data.width, bitmap_data.height);
+                        throw InvalidTagDataException();
+                    }
+                }
+
                 // Get it!
                 const std::byte *bitmap_data_ptr;
                 if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
@@ -97,6 +106,16 @@ namespace Invader::Parser {
                 std::vector<std::byte> xbox_to_pc_buffer;
 
                 if(xbox) {
+                    if(compressed) {
+                        // On Xbox compressed mipmaps smaller than 4px in any dimension are garbage.
+                        std::uint16_t real_mipmap_count = bitmap_data.mipmap_count;
+                        while(((bitmap_data.height >> real_mipmap_count) < 4 || (bitmap_data.width >> real_mipmap_count) < 4) && real_mipmap_count > 0) {
+                            real_mipmap_count--;
+                        }
+
+                        bitmap_data.mipmap_count = real_mipmap_count;
+                    }
+
                     // Set flag as unswizzled
                     bitmap_data.flags = bitmap_data.flags & ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
 
@@ -107,11 +126,6 @@ namespace Invader::Parser {
 
                     auto copy_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data, &bitmap](std::optional<std::size_t> input_offset = std::nullopt, std::optional<std::size_t> output_cubemap_face = std::nullopt) -> std::size_t {
                         std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
-                        std::size_t real_mipmap_count = bitmap_data.mipmap_count;
-                        std::size_t height = bitmap_data.height;
-                        std::size_t width = bitmap_data.width;
-                        std::size_t depth = bitmap_data.depth;
-
                         auto *base_input = bitmap_data_ptr + input_offset.value_or(0);
                         auto *input = base_input;
 
@@ -119,38 +133,15 @@ namespace Invader::Parser {
 
                         // Offset the output
                         if(output_cubemap_face.has_value()) {
-                            output += (height * width * depth * bits_per_pixel) / 8 * *output_cubemap_face;
+                            output += (bitmap_data.height * bitmap_data.width * bitmap_data.depth * bits_per_pixel) / 8 * *output_cubemap_face;
                         }
 
-                        std::size_t minimum_dimension;
-                        std::size_t minimum_dimension_depth = 1;
-
-                        if(compressed) {
-                            // Resolution the bitmap is stored as
-                            if(height % 4) {
-                                height += 4 - (height % 4);
-                            }
-                            if(width % 4) {
-                                width += 4 - (width % 4);
-                            }
-
-                            // Mipmaps less than 4x4 don't exist in Xbox maps
-                            while((height >> real_mipmap_count) < 4 && (width >> real_mipmap_count) < 4 && real_mipmap_count > 0) {
-                                real_mipmap_count--;
-                            }
-
-                            minimum_dimension = 4;
-                        }
-                        else {
-                            minimum_dimension = 1;
-                        }
-
-                        std::size_t mipmap_width = width;
-                        std::size_t mipmap_height = height;
-                        std::size_t mipmap_depth = depth;
+                        std::size_t mipmap_width = bitmap_data.width;
+                        std::size_t mipmap_height = bitmap_data.height;
+                        std::size_t mipmap_depth = bitmap_data.depth;
 
                         // Copy this stuff
-                        for(std::size_t m = 0; m <= real_mipmap_count; m++) {
+                        for(std::size_t m = 0; m <=  bitmap_data.mipmap_count; m++) {
                             std::size_t mipmap_size = mipmap_width * mipmap_height * mipmap_depth * bits_per_pixel / 8;
 
                             // Bitmap data is out of bounds?
@@ -173,87 +164,15 @@ namespace Invader::Parser {
                             input += mipmap_size;
 
                             // Halve the dimensions
+                            std::size_t minimum_dimension = 1;
                             mipmap_width = std::max(mipmap_width / 2, minimum_dimension);
                             mipmap_height = std::max(mipmap_height / 2, minimum_dimension);
-                            mipmap_depth = std::max(mipmap_depth / 2, minimum_dimension_depth);
+                            mipmap_depth = std::max(mipmap_depth / 2, minimum_dimension);
 
                             // Skip that data, too
                             if(output_cubemap_face.has_value()) {
                                 mipmap_size = mipmap_width * mipmap_height * mipmap_depth * bits_per_pixel / 8;
                                 output += *output_cubemap_face * mipmap_size;
-                            }
-                        }
-
-                        if(compressed) {
-                            // Get the block size
-                            auto block_size = (minimum_dimension * minimum_dimension * bits_per_pixel) / 8;
-
-                            // Copy the block
-                            std::byte dxt_block[16] = {};
-                            std::byte *color_data = dxt_block + ((block_size == 16) ? 8 : 0);
-
-                            auto &first_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data);
-                            auto &second_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data + sizeof(std::uint16_t));
-                            auto &color_interpolate = *reinterpret_cast<HEK::LittleEndian<std::uint32_t> *>(color_data + 4);
-
-                            std::memcpy(dxt_block, input - block_size, block_size);
-
-                            // Lastly, create mipmaps linearly
-                            for(std::size_t m = real_mipmap_count; m < bitmap_data.mipmap_count; m++) {
-                                // Make the mipmap
-                                //
-                                //     0 1 2 3
-                                //     4 5 6 7  -->  0 2
-                                //     8 9 A B  -->  8 A
-                                //     C D E F
-                                //
-                                std::uint32_t color = color_interpolate.read();
-                                color = (color & 0b11) | ((color & 0b110000) >> 2) | ((color & 0b110000000000000000) >> 8) | ((color & 0b1100000000000000000000) >> 10);
-                                color_interpolate = color;
-
-                                // If usage is detail map, do fade-to-gray (copied from color_plate_scanner.cpp)
-                                // TODODILE: refactor this maybe?
-                                if(bitmap->usage == HEK::BitmapUsage::BITMAP_USAGE_DETAIL_MAP && bitmap->detail_fade_factor > 0.0F) {
-                                    auto color_a = Pixel::convert_from_16_bit<0,5,6,5>(first_color);
-                                    auto color_b = Pixel::convert_from_16_bit<0,5,6,5>(second_color);
-
-                                    auto mipmap_count_plus_one = bitmap_data.mipmap_count + 1;
-                                    float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(bitmap->detail_fade_factor) * (mipmap_count_plus_one - 1.0F + (1.0F - bitmap->detail_fade_factor));
-
-                                    std::uint8_t alpha_delta;
-
-                                    // If we're fading to gray instantly, do that so we don't divide by 0
-                                    if(bitmap->detail_fade_factor >= 1.0F) {
-                                        alpha_delta = UINT8_MAX;
-                                    }
-                                    else {
-                                        // Basically, a higher mipmap fade factor scales faster
-                                        float gray_multiplier = static_cast<float>(m + 1) / overall_fade_factor;
-
-                                        // If we go over 1, go to 1
-                                        if(gray_multiplier > 1.0F) {
-                                            gray_multiplier = 1.0F;
-                                        }
-
-                                        // Round
-                                        float gray_multiplied = std::floor(UINT8_MAX * gray_multiplier + 0.5F);
-                                        auto new_gray = static_cast<std::uint32_t>(gray_multiplied);
-                                        if(new_gray > UINT8_MAX) {
-                                            alpha_delta = UINT8_MAX;
-                                        }
-                                        else {
-                                            alpha_delta = static_cast<std::uint8_t>(new_gray);
-                                        }
-                                    }
-
-                                    Pixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
-                                    first_color = color_a.alpha_blend(FADE_TO_GRAY).convert_to_16_bit<0,5,6,5>();
-                                    second_color = color_b.alpha_blend(FADE_TO_GRAY).convert_to_16_bit<0,5,6,5>();
-                                }
-
-                                std::memcpy(output, dxt_block, block_size);
-                                std::size_t stride_count = output_cubemap_face.has_value() ? 6 : 1; // since all mipmaps from here on out are the same in size, we just need to add this once this time
-                                output += stride_count * block_size;
                             }
                         }
 
@@ -299,7 +218,6 @@ namespace Invader::Parser {
                             throw std::exception();
                             break;
                     }
-
 
                     bitmap_data_ptr = xbox_to_pc_buffer.data();
                     size = xbox_to_pc_buffer.size();

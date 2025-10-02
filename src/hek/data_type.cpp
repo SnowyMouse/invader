@@ -79,7 +79,7 @@ namespace Invader::HEK {
 
         return returned_matrix;
     }
-    
+
     Matrix<NativeEndian> euler_to_matrix(const Euler3D<NativeEndian> &rotation) noexcept {
         return quaternion_to_matrix(euler_to_quaternion(rotation));
     }
@@ -125,39 +125,24 @@ namespace Invader::HEK {
     }
 
     Matrix<NativeEndian> invert_matrix(const Matrix<NativeEndian> &rotation) noexcept {
-        // Find minor
-        Matrix<NativeEndian> minor;
-        for(int x = 0; x < 3; x++) {
-            for(int y = 0; y < 3; y++) {
-                float m[4];
-                int m_i = 0;
+        float determinant = rotation.matrix[0][0] * rotation.matrix[1][1] * rotation.matrix[2][2] +
+                            rotation.matrix[0][1] * rotation.matrix[1][2] * rotation.matrix[2][0] +
+                            rotation.matrix[0][2] * rotation.matrix[1][0] * rotation.matrix[2][1] -
+                            rotation.matrix[0][0] * rotation.matrix[1][2] * rotation.matrix[2][1] -
+                            rotation.matrix[0][1] * rotation.matrix[1][0] * rotation.matrix[2][2] -
+                            rotation.matrix[0][2] * rotation.matrix[1][1] * rotation.matrix[2][0];
 
-                for(int xa = 0; xa < 3; xa++) {
-                    for(int ya = 0; ya < 3; ya++) {
-                        if(xa == x || ya == y) {
-                            continue;
-                        }
-                        m[m_i++] = rotation.matrix[xa][ya];
-                    }
-                }
-
-                minor.matrix[x][y] = (m[0] * m[3]) - (m[1] * m[2]);
-            }
-        }
-
-        // Get determinant
-        float determinant = rotation.matrix[0][0] * minor.matrix[0][0] - rotation.matrix[0][1] * minor.matrix[0][1] + rotation.matrix[0][2] * minor.matrix[0][2];
-
-        // Cofactor, adjugate, and divide by determinant
+        float ood = 1.0F / determinant;
         Matrix<NativeEndian> inverse;
-        int sign = 1;
-        for(int x = 0; x < 3; x++) {
-            for(int y = 0; y < 3; y++) {
-                inverse.matrix[x][y] = minor.matrix[y][x] * sign / determinant;
-                sign = -sign;
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                int ip = i < 2 ? i + 1 : 0;
+                int im = i > 0 ? i - 1 : 2;
+                int jp = j < 2 ? j + 1 : 0;
+                int jm = j > 0 ? j - 1 : 2;
+                inverse.matrix[j][i] = ood * (rotation.matrix[ip][jp] * rotation.matrix[im][jm] - rotation.matrix[ip][jm] * rotation.matrix[im][jp]);
             }
         }
-
         return inverse;
     }
 
@@ -213,7 +198,7 @@ namespace Invader::HEK {
     template<unsigned int bits> constexpr std::int32_t compress_float(float f) {
         constexpr const std::uint32_t SIGNED_BIT = 1 << (bits - 1);
         constexpr const std::uint32_t MASK = SIGNED_BIT - 1;
-        
+
         // Clamp to -1 to +1
         f = std::max(std::min(f, 1.0F), -1.0F);
 
@@ -232,7 +217,7 @@ namespace Invader::HEK {
         constexpr const std::uint32_t SIGNED_BIT = 1 << (bits - 1);
         constexpr const std::uint32_t MASK = SIGNED_BIT - 1;
         auto number = static_cast<double>(f & MASK) / MASK;
-        
+
         if(f & SIGNED_BIT) {
             return number - 1.0;
         }
@@ -240,14 +225,14 @@ namespace Invader::HEK {
             return number;
         }
     }
-    
+
     static_assert(decompress_float<16>(32768) == -1.0);
     static_assert(compress_float<16>(-1.0) == 32768);
     static_assert(decompress_float<16>(32767) == 1.0);
     static_assert(compress_float<16>(1.0) == 32767);
     static_assert(decompress_float<16>(0) == 0.0);
     static_assert(compress_float<16>(0) == 0);
-    
+
     std::uint32_t compress_vector(float i, float j, float k) noexcept {
         return (compress_float<11>(i)) | (compress_float<11>(j) << 11) | (compress_float<10>(k) << 22);
     }

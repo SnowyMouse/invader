@@ -7,13 +7,17 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed scenario script check when building ui_widget_definition tags
 - invader-build: Check that transparent shaders have the correct number of maps and stages
 - invader-build: light tags are processed more accurately
+- invader-build: Physics calculation is now closer to tool output
+- invader-build: Decal water effect flag is now set based on layer type. this flag is now "cache only"
 - invader-edit-qt: Fixed rectangle2d field names
 
 ### Changed
 - invader: Added support for Chimera's `force hud use highres scale` flag.
 - invader: added CJK font fields from the jp/tw/kr Xbox version.
+- invader-build: Default script source location is now from scenario tags again.
 - invader-build: No longer warns when using features that do not work without mods on Halo PC.
 - invader-crc: Readded this tool. Can now also fix the map header crc without changing it using --fix-header.
+- invader-extract: Compressed mipmaps from Xbox maps that are below 4px in any dimension are now removed instead of being generated.
 - invader-resource: add --no-stock to allow making Custom Edition resource maps with no stock tags
 
 ## [0.54.2] - 2024-08-05

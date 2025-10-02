@@ -296,14 +296,20 @@
                 "cache_only": true
             },
             {
-                "name": "unknown ffffffff 0",
+                "name": "permutation flags",
                 "type": "uint32",
                 "endian": "little",
                 "cache_only": true
             },
             {
-                "name": "unknown ffffffff 1",
-                "type": "uint32",
+                "name": "last permutation index",
+                "type": "Index",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "discarded permutation index",
+                "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },
@@ -450,24 +456,31 @@
             },
             {
                 "name": "longest permutation length",
-                "comment": "natural pitch * seconds * 1100; not set if pitch modifier is set to anything besides 1; not accurate since increasing natural pitch decreases the length\nuses the 'buffer size' value for 16-bit PCM and Ogg Vorbis (divide by 2 * channel count to get sample count);\nuses entire size of samples for ADPCM (multiply by 130 / 36 * channel count to get sample count)",
-                "type": "uint32",
-                "hidden": true,
-                "cache_only": true
-            },
-            {
-                "type": "pad",
-                "size": 8
-            },
-            {
-                "name": "unknown ffffffff 0",
                 "type": "uint32",
                 "endian": "little",
                 "cache_only": true
             },
             {
-                "name": "unknown ffffffff 1",
+                "name": "promotion counter",
                 "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "promotion time",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "scripting time",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "scripting sound",
+                "type": "TagID",
                 "endian": "little",
                 "cache_only": true
             },

@@ -17,7 +17,7 @@ namespace Invader::Parser {
             case HEK::SoundClass::SOUND_CLASS_MUSIC:
             case HEK::SoundClass::SOUND_CLASS_DEVICE_NATURE:
                 return {0.9F, 5.0F};
-                
+
             case HEK::SoundClass::SOUND_CLASS_WEAPON_EMPTY:
             case HEK::SoundClass::SOUND_CLASS_WEAPON_IDLE:
             case HEK::SoundClass::SOUND_CLASS_WEAPON_READY:
@@ -25,14 +25,14 @@ namespace Invader::Parser {
             case HEK::SoundClass::SOUND_CLASS_WEAPON_CHARGE:
             case HEK::SoundClass::SOUND_CLASS_WEAPON_OVERHEAT:
                 return {1.0F, 9.0F};
-                
+
             case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
             case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
             case HEK::SoundClass::SOUND_CLASS_GAME_EVENT:
             case HEK::SoundClass::SOUND_CLASS_UNIT_DIALOG:
             case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
                 return {3.0F, 20.0F};
-                
+
             case HEK::SoundClass::SOUND_CLASS_FIRST_PERSON_DAMAGE:
             case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
             case HEK::SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
@@ -40,12 +40,12 @@ namespace Invader::Parser {
             case HEK::SoundClass::SOUND_CLASS_DEVICE_COMPUTERS:
             case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
                 return {0.5F, 3.0F};
-                
+
             case HEK::SoundClass::SOUND_CLASS_VEHICLE_ENGINE:
             case HEK::SoundClass::SOUND_CLASS_PROJECTILE_IMPACT:
             case HEK::SoundClass::SOUND_CLASS_VEHICLE_COLLISION:
                 return {1.4F, 8.0F};
-                
+
             case HEK::SoundClass::SOUND_CLASS_WEAPON_FIRE:
                 return {4.0F, 70.0F};
             case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
@@ -54,15 +54,15 @@ namespace Invader::Parser {
                 return {8.0F, 120.0F};
             case HEK::SoundClass::SOUND_CLASS_UNIT_FOOTSTEPS:
                 return {0.9F, 10.0F};
-                
+
             default:
                 return {};
         }
     }
-    
+
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto permutation_index = offset / sizeof(struct_little);
-        
+
         // Make sure the modulus is correct
         auto sample_size = this->samples.size();
         bool sample_size_invalid = false;
@@ -70,15 +70,15 @@ namespace Invader::Parser {
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                 sample_size_invalid = (sample_size % sizeof(HEK::LittleEndian<std::uint16_t>)) != 0;
                 break;
-            
+
             case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
                 sample_size_invalid = (sample_size % 36) != 0;
                 break;
-                
+
             default:
                 break;
         }
-        
+
         if(sample_size_invalid) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size.", permutation_index);
             throw InvalidTagDataException();
@@ -100,7 +100,7 @@ namespace Invader::Parser {
             if(this->buffer_size != this->samples.size()) {
                 incorrect_buffer = true;
             }
-            
+
         }
         else if(this->format ==  HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS) {
             auto expected_buffer_size = SoundReader::ogg_vorbis_sample_count(this->samples.data(), this->samples.size()) * sizeof(std::uint16_t);
@@ -163,10 +163,11 @@ namespace Invader::Parser {
         workload.tags[tag_index].asset_data.emplace_back(&r - workload.raw_data.data());
         this->samples_pointer = 0xFFFFFFFF;
     }
-        
+
     void SoundPitchRange::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
-        this->unknown_ffffffff_0 = 0xFFFFFFFF;
-        this->unknown_ffffffff_1 = 0xFFFFFFFF;
+        this->permutation_flags = 0xFFFFFFFF;
+        this->last_permutation_index = NULL_INDEX;
+        this->discarded_permutation_index = NULL_INDEX;
         auto actual_natural_pitch = this->natural_pitch <= 0.0F ? 1.0F : this->natural_pitch;
         this->playback_rate = 1.0f / actual_natural_pitch;
 
@@ -237,8 +238,8 @@ namespace Invader::Parser {
 
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, TICK_RATE_RECIPROCOL);
-        this->unknown_ffffffff_0 = 0xFFFFFFFF;
-        this->unknown_ffffffff_1 = 0xFFFFFFFF;
+        this->scripting_time = 0xFFFFFFFF;
+        this->scripting_sound = HEK::TagID::null_tag_id();
 
         std::size_t errors = 0;
         for(auto &pr : this->pitch_ranges) {
@@ -263,14 +264,14 @@ namespace Invader::Parser {
                 pr.actual_permutation_count = static_cast<std::uint16_t>(pr.permutations.size());
                 for(auto &p : pr.permutations) {
                     p.next_permutation_index = NULL_INDEX;
-                    
+
                     if(p.gain == 0.0F) {
                         p.gain = 1.0F;
                     }
                 }
             }
         }
-        
+
         // Otherwise, fix gains
         else {
             for(auto &pr : this->pitch_ranges) {
@@ -280,13 +281,15 @@ namespace Invader::Parser {
                     if(p.gain == 0.0F) {
                         p.gain = 1.0F;
                     }
-                    
+
                     std::size_t loop_count = 0;
                     std::size_t n = p.next_permutation_index;
-                    
+
                     // This will not report errors, instead breaking. Wait until SoundPitchRange to report errors.
                     while(loop_count < p_count && n < p_count) {
                         pr.permutations[n].gain = p.gain;
+                        // Clear skip fraction. This should not be set here, but could have been due to the field always being editable or set by older sound encoders.
+                        pr.permutations[n].skip_fraction = 0.0F;
                         n = pr.permutations[n].next_permutation_index;
                         loop_count++;
                     }
@@ -298,7 +301,7 @@ namespace Invader::Parser {
             this->one_skip_fraction_modifier = 1.0f;
             this->zero_skip_fraction_modifier = 1.0f;
         }
-        
+
         if(this->random_pitch_bounds.from == 0.0F) {
             this->random_pitch_bounds.from = 1.0F;
         }
@@ -336,7 +339,7 @@ namespace Invader::Parser {
             this->one_pitch_modifier = 1.0f;
             this->zero_pitch_modifier = 1.0f;
         }
-        
+
         // Set distances
         auto default_distance = default_min_max_distance_sounds(this->sound_class);
         if(this->minimum_distance == 0.0F) {
@@ -351,32 +354,44 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Minimum distance is greater than maximum distance (%f > %f)", this->maximum_distance, this->minimum_distance);
         }
 
-        // Find the song length
-        if(this->zero_pitch_modifier == 1.0F && this->one_pitch_modifier == 1.0F) {
-            double seconds = 0.0F;
-            for(auto &pr : this->pitch_ranges) {
-                for(auto &p : pr.permutations) {
-                    std::size_t sample_count = 0;
-                    switch(p.format) {
-                        case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
-                            sample_count = (p.samples.size() / 36 * 130) / sizeof(std::uint16_t);
-                            break;
-                        default:
-                            sample_count = p.buffer_size / 2;
-                            break;
-                    }
-
-                    double potential_seconds = sample_count / (this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1.0 : 2.0) / (this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ ? 44100.0 : 22050.0) * pr.natural_pitch;
-
-                    if(potential_seconds > seconds) {
-                        seconds = potential_seconds;
-                    }
+        // Find the longest permutation length
+        float channel_modifier = this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1.0F : 0.5F;
+        for(auto &pr : this->pitch_ranges) {
+            for(auto &p : pr.permutations) {
+                float samples_size;
+                float format_modifier;
+                switch(p.format) {
+                    case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+                        samples_size = p.samples.size();
+                        format_modifier = 0.5F;
+                        break;
+                    case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                    case HEK::SoundFormat::SOUND_FORMAT_IMA_ADPCM:
+                        samples_size = p.samples.size();
+                        format_modifier = 2.0F;
+                        break;
+                    case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
+                        samples_size = p.buffer_size / 4.0F;
+                        format_modifier = 2.2F; // Custom Edition tool.exe does this. Why?
+                        break;
+                    default:
+                        // Nope
+                        throw std::exception();
+                        break;
                 }
+
+                float sample_rate = this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ ? 44100.0F : 22050.0F;
+                uint32_t permutation_length = (samples_size *
+                                                1000.0F *
+                                                channel_modifier *
+                                                format_modifier *
+                                                pr.natural_pitch) /
+                                                (sample_rate *
+                                                std::min(this->random_pitch_bounds.from, this->random_pitch_bounds.to) *
+                                                std::min(this->zero_pitch_modifier, this->one_pitch_modifier));
+                this->longest_permutation_length = std::max(this->longest_permutation_length, permutation_length);
             }
-            this->longest_permutation_length = seconds * 1100;
         }
-        
-        
     }
 
     void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
