@@ -35,6 +35,9 @@
             "preserve aspect",
             "disabled in anniversary by blood setting"
         ],
+        "cache_only": [
+            "water effect"
+        ],
         "width": 16
     },
     {

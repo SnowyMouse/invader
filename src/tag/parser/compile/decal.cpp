@@ -4,6 +4,13 @@
 
 namespace Invader::Parser {
     void Decal::postprocess_hek_data() {
+        if(this->layer == HEK::DecalLayer::DECAL_LAYER_WATER) {
+            flags |= HEK::DecalFlagsFlag::DECAL_FLAGS_FLAG_WATER_EFFECT;
+        }
+        else {
+            flags &= ~HEK::DecalFlagsFlag::DECAL_FLAGS_FLAG_WATER_EFFECT;
+        }
+
         this->radius.to = std::max(this->radius.from, this->radius.to);
         this->maximum_sprite_extent = 16.0F;
 

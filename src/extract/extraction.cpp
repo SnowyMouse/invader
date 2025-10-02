@@ -213,36 +213,6 @@ namespace Invader {
                 }
             }
 
-            // Warn if we had to generate mipmaps
-            if(engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX && tfp.fourcc == Invader::HEK::TagFourCC::TAG_FOURCC_BITMAP) {
-                auto bitmap_tag = Invader::Parser::Bitmap::parse_hek_tag_file(new_tag.data(), new_tag.size());
-                for(auto &data : bitmap_tag.bitmap_data) {
-                    // Skip uncompressed bitmaps
-                    if(!(data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED)) {
-                        continue;
-                    }
-
-                    std::size_t height = data.height;
-                    std::size_t width = data.width;
-                    std::size_t depth = data.depth;
-                    std::size_t mipmap_count = data.mipmap_count;
-                    std::size_t min_dimension = 1;
-
-                    while(mipmap_count > 0) {
-                        if(height < 4 && width < 4) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap was missing mipmaps which had to be generated");
-                            break;
-                        }
-
-                        height = std::max(height / 2, min_dimension);
-                        width = std::max(width / 2, min_dimension);
-                        depth = std::max(depth / 2, min_dimension);
-
-                        mipmap_count--;
-                    }
-                }
-            }
-
             // Create directories along the way
             std::error_code ec;
             std::filesystem::create_directories(tag_path_to_write_to.parent_path(), ec);

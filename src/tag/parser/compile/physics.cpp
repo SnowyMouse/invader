@@ -10,119 +10,89 @@ namespace Invader::Parser {
 
         // Check moment scale. Gearbox tool.exe will exception if this is 0, MCC tool.exe will make a map with NaNs in the inertial matrices.
         // This *should* be a 0->1 default, but sapien and friends blow up as well so this can help find the tag that does it.
-        double moment_scale = this->moment_scale;
-        if(moment_scale == 0.0F) {
+        if(this->moment_scale == 0.0F) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Physics moment scale is exactly 0. This is invalid as moment scale must be non-zero.");
             throw InvalidTagDataException();
         }
 
         double total_relative_mass = 0.0F;
-        HEK::Point3D<HEK::NativeEndian> com = {};
-
+        double density_scale = 0.0F;
         for(auto &mp : this->mass_points) {
             total_relative_mass += mp.relative_mass;
+            if(mp.relative_density != 0.0) {
+                density_scale += mp.relative_mass / mp.relative_density;
+            }
         }
 
         double comx = 0.0, comy = 0.0, comz = 0.0;
-
         for(auto &mp : this->mass_points) {
-            comx += mp.position.x * mp.relative_mass;
-            comy += mp.position.y * mp.relative_mass;
-            comz += mp.position.z * mp.relative_mass;
-        }
-
-        double total_relative_mass_inverse = 1.0 / total_relative_mass;
-
-        com.x = comx * total_relative_mass_inverse;
-        com.y = comy * total_relative_mass_inverse;
-        com.z = comz * total_relative_mass_inverse;
-
-        this->center_of_mass = com;
-
-        std::size_t mass_points_count = this->mass_points.size();
-        double average_relative_mass = total_relative_mass / mass_points_count;
-        double density_scale = this->density / mass_points_count;
-        double density_scale_co = 0.0F;
-        double xx = 0.0F;
-        double yy = 0.0F;
-        double zz = 0.0F;
-        double neg_zx = 0.0F;
-        double neg_xy = 0.0F;
-        double neg_yz = 0.0F;
-        double radius_modifier = 0.0F;
-
-        // Iterate once to get density and masses as well as to get inertial stuff.
-        for(auto &mp : this->mass_points) {
-            double mass_percent = mp.relative_mass * total_relative_mass_inverse;
-            double mass = mass_percent * this->mass;
-            mp.mass = mass;
-
-            if(mp.relative_density != 0.0F) {
-                density_scale_co += mp.relative_mass / mp.relative_density;
+            if(total_relative_mass != 0.0) {
+                mp.mass = this->mass * mp.relative_mass / total_relative_mass;
+                mp.density = this->density * mp.relative_density * density_scale / total_relative_mass;
             }
 
-            HEK::Point3D<HEK::NativeEndian> pos = mp.position;
+            comx += mp.mass * mp.position.x;
+            comy += mp.mass * mp.position.y;
+            comz += mp.mass * mp.position.z;
+        }
 
-            double dist_xx = std::pow(com.y - pos.y, 2.0F) + std::pow(com.z - pos.z, 2.0F);
-            double dist_yy = std::pow(com.x - pos.x, 2.0F) + std::pow(com.z - pos.z, 2.0F);
-            double dist_zz = std::pow(com.x - pos.x, 2.0F) + std::pow(com.y - pos.y, 2.0F);
-            double dist_zx = (com.x - pos.x) * (com.z - pos.z);
-            double dist_xy = (com.x - pos.x) * (com.y - pos.y);
-            double dist_yz = (com.y - pos.y) * (com.z - pos.z);
-            double radius_term = 0.0F;
-            if(mp.radius > 0.0F) {
-                radius_term = 4 * std::pow(10.0F, (2 * std::log10(mp.radius) - 1.0F));
+        if(this->mass != 0.0) {
+            double mass_inverse = 1.0 / this->mass;
+            this->center_of_mass.x = mass_inverse * comx;
+            this->center_of_mass.y = mass_inverse * comy;
+            this->center_of_mass.z = mass_inverse * comz;
+        }
+
+        // Get inertial matrix stuff and set base moments.
+        // 32-bit floats here match tool precision.
+        float mxx = 0.0F;
+        float myy = 0.0F;
+        float mzz = 0.0F;
+        float mxy = 0.0F;
+        float myz = 0.0F;
+        float mzx = 0.0F;
+        for(auto &mp : this->mass_points) {
+            double moment = this->moment_scale * mp.mass; // We checked earlier that moment_scale was non-zero.
+            double x = mp.position.x - this->center_of_mass.x;
+            double y = mp.position.y - this->center_of_mass.y;
+            double z = mp.position.z - this->center_of_mass.z;
+            double xx = x * x;
+            double yy = y * y;
+            double zz = z * z;
+
+            this->xx_moment += moment * (yy + zz);
+            this->yy_moment += moment * (zz + xx);
+            this->zz_moment += moment * (xx + yy);
+
+            double radius_term = 0.4 * moment * mp.radius * mp.radius;
+
+            // If the base radius is anything below 0 then we account for local mass point radius.
+            if(this->radius < 0.0F) {
+                this->xx_moment += radius_term;
+                this->yy_moment += radius_term;
+                this->zz_moment += radius_term;
             }
 
-            radius_modifier += radius_term * mass;
-
-            xx += dist_xx * mass;
-            yy += dist_yy * mass;
-            zz += dist_zz * mass;
-
-            neg_zx -= dist_zx * mass;
-            neg_xy -= dist_xy * mass;
-            neg_yz -= dist_yz * mass;
-        }
-        density_scale *= density_scale_co;
-
-        xx *= moment_scale;
-        yy *= moment_scale;
-        zz *= moment_scale;
-        neg_zx *= moment_scale;
-        neg_xy *= moment_scale;
-        neg_yz *= moment_scale;
-        radius_modifier *= moment_scale;
-
-        // Set base moments. If the base radius is anything above 0 then we use values that do not account for local mass point radius.
-        if(this->radius > 0.0F) {
-            this->xx_moment = xx;
-            this->yy_moment = yy;
-            this->zz_moment = zz;
-        }
-        else {
-            this->xx_moment = xx + radius_modifier;
-            this->yy_moment = yy + radius_modifier;
-            this->zz_moment = zz + radius_modifier;
+            // We always acount for local mass point radius in the inertial matrices. Is this a tool oversight?
+            mxx += radius_term + moment * (yy + zz);
+            myy += radius_term + moment * (zz + xx);
+            mzz += radius_term + moment * (xx + yy);
+            mxy += -moment * x * y;
+            myz += -moment * y * z;
+            mzx += -moment * z * x;
         }
 
-        // Finally write down density
-        double mass_scale = 1.0F / average_relative_mass;
-        for(std::size_t i = 0; i < mass_points_count; i++) {
-            mass_points[i].density = density_scale * mass_scale * mass_points[i].relative_density;
-        }
+        HEK::Matrix<HEK::LittleEndian> m = {};
+        m.matrix[0][0] = mxx;
+        m.matrix[0][1] = mxy;
+        m.matrix[0][2] = mzx;
+        m.matrix[1][0] = mxy;
+        m.matrix[1][1] = myy;
+        m.matrix[1][2] = myz;
+        m.matrix[2][0] = mzx;
+        m.matrix[2][1] = myz;
+        m.matrix[2][2] = mzz;
 
-        // ...And matrix stuff
-        HEK::Matrix<HEK::LittleEndian> m;
-        m.matrix[0][0] = xx + radius_modifier;
-        m.matrix[0][1] = neg_xy;
-        m.matrix[0][2] = neg_zx;
-        m.matrix[1][0] = neg_xy;
-        m.matrix[1][1] = yy + radius_modifier;
-        m.matrix[1][2] = neg_yz;
-        m.matrix[2][0] = neg_zx;
-        m.matrix[2][1] = neg_yz;
-        m.matrix[2][2] = zz + radius_modifier;
         this->inertial_matrix_and_inverse.resize(2);
         this->inertial_matrix_and_inverse[0].matrix = m;
         this->inertial_matrix_and_inverse[1].matrix = invert_matrix(m);
