@@ -1042,12 +1042,6 @@ directory, simply append that. And, of course, if Invader isn't installed
 system-wide, you will need to replace the program names with paths to their
 respective executables.
 
-### What operating systems are supported?
-Invader does not support any one operating system, but Invader is developed on
-Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
-
-[Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
-
 ### Who owns my map when I build it?
 There is a commonly-spread myth that, once you build a map with tool.exe, your
 map belongs to Microsoft. Likewise, people may assume that, if you build a map
