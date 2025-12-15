@@ -1,8 +1,15 @@
 [
     {
-        "name": "UnitHUDInterfacePanelType",
+        "name": "UnitHUDInterfaceMeterPanelType",
         "options": [
             "integrated light"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "UnitHUDInterfaceOverlayPanelType",
+        "options": [
+            "team icon"
         ],
         "type": "enum"
     },
@@ -130,7 +137,7 @@
             },
             {
                 "name": "type",
-                "type": "UnitHUDInterfacePanelType"
+                "type": "UnitHUDInterfaceOverlayPanelType"
             },
             {
                 "name": "flags",
@@ -189,7 +196,7 @@
         "fields": [
             {
                 "name": "type",
-                "type": "UnitHUDInterfacePanelType"
+                "type": "UnitHUDInterfaceMeterPanelType"
             },
             {
                 "type": "pad",
