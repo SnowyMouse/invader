@@ -33,7 +33,8 @@
             "sapien incremental counter",
             "animation loop",
             "preserve aspect",
-            "disabled in anniversary by blood setting"
+            "disabled by blood setting",
+            "sprite scale bug fix"
         ],
         "cache_only": [
             "water effect"
