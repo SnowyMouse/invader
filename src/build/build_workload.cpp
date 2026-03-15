@@ -638,7 +638,7 @@ namespace Invader {
 
         // Check header and CRC32
         HEK::TagFileHeader::validate_header(header, tag_data_size, tag_fourcc);
-        HEK::BigEndian<std::uint32_t> expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
+        HEK::BigEndian<std::uint32_t> expected_crc = ~crc32_buffer(0, header + 1, tag_data_size - sizeof(*header));
         std::uint32_t header_crc = header->crc32;
 
         // Make sure the header's CRC32 matches the calculated CRC32 (but only if the header CRC is not 0xFFFFFFFF since some stock tags have this)
@@ -650,7 +650,7 @@ namespace Invader {
         // Also, unlike tool.exe, we're actually recalculating the CRC32 rather than just taking the CRC32 in the header (in case the tag is improperly modified).
         //
         // TODO: Although it accomplishes the same task, this is NOT the algorithm tool.exe uses.
-        this->tag_file_checksums = crc32(this->tag_file_checksums, &expected_crc, sizeof(expected_crc));
+        this->tag_file_checksums = crc32_buffer(this->tag_file_checksums, &expected_crc, sizeof(expected_crc));
 
         auto &structs = this->structs;
         auto &tags = this->tags;

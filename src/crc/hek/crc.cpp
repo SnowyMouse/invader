@@ -12,7 +12,7 @@ namespace Invader {
         // Reassign variables if needed
         auto *data = map.get_data();
         auto size = map.get_data_length();
-        
+
         std::vector<std::byte> data_crc;
         std::uint32_t crc = 0;
 
@@ -23,7 +23,7 @@ namespace Invader {
         if(new_crc) {
             data_crc.reserve(size);
         }
-        
+
         auto engine = map.get_cache_version();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             return 0;
@@ -34,7 +34,7 @@ namespace Invader {
                 data_crc.insert(data_crc.end(), data + data_start, data + data_end); \
             } \
             else { \
-                crc = crc32(crc, data + data_start, data_end - data_start); \
+                crc = crc32_buffer(crc, data + data_start, data_end - data_start); \
             }
 
         auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
@@ -52,19 +52,19 @@ namespace Invader {
                 if(start >= size || end > size) {
                     throw OutOfBoundsException();
                 }
-                
+
                 // If it's MCC, CRC32 the vertex data
                 if(engine == HEK::CacheFileEngine::CACHE_FILE_MCC_CEA) {
                     const auto *header = reinterpret_cast<const HEK::ScenarioStructureBSPCompiledHeaderCEA<HEK::LittleEndian> *>(map.get_data() + start);
                     if(start >= size || start + sizeof(header) > size) {
                         throw OutOfBoundsException();
                     }
-                    
+
                     if(header->lightmap_vertex_size.read() > 0) {
                         CRC_DATA(header->lightmap_vertices, header->lightmap_vertices + header->lightmap_vertex_size);
                     }
                 }
-                
+
                 // Add it
                 CRC_DATA(start, end);
             }
@@ -104,7 +104,7 @@ namespace Invader {
                 *check_dirty = false;
             }
 
-            return ~crc32(0, data_crc.data(), data_crc.size());
+            return ~crc32_buffer(0, data_crc.data(), data_crc.size());
         }
         else {
             std::uint32_t crc_value = ~crc;
@@ -114,7 +114,7 @@ namespace Invader {
             return crc_value;
         }
     }
-    
+
     std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
         return calculate_map_crc(Map::map_with_copy(data, size), new_crc, new_random, check_dirty);
     }
