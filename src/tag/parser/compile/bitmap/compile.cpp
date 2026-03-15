@@ -143,25 +143,7 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
 
-            if(
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-                engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
-            ) {
-                switch(data.format) {
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu is monochrome format A8 or AY8 which is not supported by the target engine", b);
-                        break;
-                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Bitmap data #%zu uses height map compression which is not supported by the target engine", b);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if((engine_target != HEK::CacheFileEngine::CACHE_FILE_MCC_CEA && engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) && data.format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_BC7) {
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX && data.format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_BC7) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu is BC7 which is not implemented by the target engine", b);
                 throw InvalidTagDataException();
             }
