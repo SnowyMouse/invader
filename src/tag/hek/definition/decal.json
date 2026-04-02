@@ -186,6 +186,7 @@
         ],
         "type": "struct",
         "postprocess_hek_data": true,
+        "pre_compile": true,
         "size": 268,
         "class": "decal"
     }
