@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <climits>
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/model.hpp>
