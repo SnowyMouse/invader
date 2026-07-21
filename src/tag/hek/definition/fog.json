@@ -81,7 +81,9 @@
             },
             {
                 "name": "layer count",
-                "type": "int16"
+                "type": "int16",
+                "minimum": 0,
+                "maximum": 4
             },
             {
                 "name": "distance gradient",
