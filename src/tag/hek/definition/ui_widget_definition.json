@@ -410,7 +410,8 @@
             "always use tag controller index",
             "always use nifty render fx",
             "don't push history",
-            "force handle mouse"
+            "force handle mouse",
+            "don't expand 640 width to screen width"
         ],
         "width": 32
     },
