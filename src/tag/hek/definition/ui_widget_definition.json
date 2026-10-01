@@ -411,7 +411,7 @@
             "always use nifty render fx",
             "don't push history",
             "force handle mouse",
-            "don't expand 640 width to screen width"
+            "disable widescreen auto fill"
         ],
         "width": 32
     },
