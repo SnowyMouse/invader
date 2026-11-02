@@ -341,6 +341,7 @@ int main(int argc, const char **argv) {
                 for(auto &s : compiled_tag.structs) {
                     structs.push_back(data.size());
                     data.insert(data.end(), s.data.begin(), s.data.end());
+                    data.insert(data.end(), REQUIRED_PADDING_32_BIT(data.size()), std::byte());
                 }
 
                 std::size_t offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
