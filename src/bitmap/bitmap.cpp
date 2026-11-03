@@ -468,6 +468,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         case 1024:
             bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_1024X1024;
             break;
+        case 2048:
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_2048X2048;
+            break;
         default:
             bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
             break;
