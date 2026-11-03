@@ -141,27 +141,29 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
         }
 
+        // Set this
+        this->cache_block_index = 0xFFFFFFFF;
+
         // Add the two lone IDs and set the sample size
         auto *data = workload.structs[struct_index].data.data();
         auto &this_struct = *reinterpret_cast<struct_little *>(data + offset);
         this_struct.samples.size = static_cast<std::uint32_t>(this->samples.size());
 
         // Who am I??
-        auto &new_id_1 = workload.structs[struct_index].dependencies.emplace_back();
-        new_id_1.tag_index = tag_index;
-        new_id_1.offset = reinterpret_cast<std::byte *>(&this_struct.tag_id_0) - data;
-        new_id_1.tag_id_only = true;
+        auto &ct = workload.structs[struct_index].dependencies.emplace_back();
+        ct.tag_index = tag_index;
+        ct.offset = reinterpret_cast<std::byte *>(&this_struct.cache_tag_index) - data;
+        ct.tag_id_only = true;
 
         // 24601!!!!!!!
-        auto &new_id_2 = workload.structs[struct_index].dependencies.emplace_back();
-        new_id_2.tag_index = tag_index;
-        new_id_2.offset = reinterpret_cast<std::byte *>(&this_struct.tag_id_1) - data;
-        new_id_2.tag_id_only = true;
+        auto &rt = workload.structs[struct_index].dependencies.emplace_back();
+        rt.tag_index = tag_index;
+        rt.offset = reinterpret_cast<std::byte *>(&this_struct.runtime_tag_index) - data;
+        rt.tag_id_only = true;
 
         // Add samples
         auto &r = workload.raw_data.emplace_back(this->samples);
         workload.tags[tag_index].asset_data.emplace_back(&r - workload.raw_data.data());
-        this->samples_pointer = 0xFFFFFFFF;
     }
 
     void SoundPitchRange::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {

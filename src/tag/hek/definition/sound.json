@@ -192,17 +192,19 @@
                 "struct": "SoundPitchRange"
             },
             {
-                "name": "samples pointer",
+                "name": "cache block index",
                 "type": "uint32",
                 "endian": "little",
                 "cache_only": true
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "cache base address",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
             },
             {
-                "name": "tag id 0",
+                "name": "cache tag index",
                 "comment": "Set to the sound tag's tag ID",
                 "type": "TagID",
                 "cache_only": true,
@@ -216,7 +218,7 @@
                 "read_only": true
             },
             {
-                "name": "tag id 1",
+                "name": "runtime tag index",
                 "comment": "Set to the sound tag's tag ID",
                 "type": "TagID",
                 "cache_only": true,
